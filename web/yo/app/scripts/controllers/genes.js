@@ -4,59 +4,42 @@ angular.module('oncokbApp')
     .controller('GenesCtrl', ['$window', '$scope', '$rootScope', '$location', '$timeout',
         '$routeParams', '_', 'config',
         'DTColumnDefBuilder', 'DTOptionsBuilder', 'DatabaseConnector',
-        'OncoKB', 'stringUtils', 'S', 'mainUtils', 'gapi', 'UUIDjs', 'dialogs', 'loadFiles', '$firebaseObject', '$firebaseArray', 'FirebaseModel', 'user',
+        'OncoKB', 'stringUtils', 'S', 'mainUtils', 'UUIDjs', 'dialogs', 'loadFiles', '$firebaseObject', '$firebaseArray', 'FirebaseModel', 'user',
         function($window, $scope, $rootScope, $location, $timeout, $routeParams, _,
                  config,
                  DTColumnDefBuilder, DTOptionsBuilder, DatabaseConnector,
-                 OncoKB, stringUtils, S, MainUtils, gapi, UUIDjs, dialogs, loadFiles, $firebaseObject, $firebaseArray, FirebaseModel, user) {
-            function saveGene(docs, docIndex, callback) {
-                if (docIndex < docs.length) {
-                    var fileId = docs[docIndex].id;
-                    storage.getRealtimeDocument(fileId).then(function(realtime) {
-                        if (realtime && realtime.error) {
-                            console.log('did not get realtime document.');
-                        } else {
-                            console.log(docs[docIndex].title, '\t\t', docIndex);
-                            console.log('\t copying');
-                            var gene = realtime.getModel().getRoot().get('gene');
-                            var vus = realtime.getModel().getRoot().get('vus');
-                            if (gene) {
-                                var geneData = stringUtils.getGeneData(gene, true, true);
-                                var vusData = stringUtils.getVUSFullData(vus, true);
-                                var params = {};
-
-                                if (geneData) {
-                                    params.gene = JSON.stringify(geneData);
-                                }
-                                if (vusData) {
-                                    params.vus = JSON.stringify(vusData);
-                                }
-                                DatabaseConnector.updateGene(params,
-                                    function(result) {
-                                        console.log('\t success', result);
-                                        $timeout(function() {
-                                            saveGene(docs, ++docIndex, callback);
-                                        }, 200, false);
-                                    },
-                                    function(result) {
-                                        console.log('\t failed', result);
-                                        $timeout(function() {
-                                            saveGene(docs, ++docIndex, callback);
-                                        }, 200, false);
-                                    }
-                                );
-                            } else {
-                                console.log('\t\tNo gene model.');
-                                $timeout(function() {
-                                    saveGene(docs, ++docIndex, callback);
-                                }, 200, false);
-                            }
-                        }
-                    });
-                } else {
-                    if (callback) {
-                        callback();
+                 OncoKB, stringUtils, S, MainUtils, UUIDjs, dialogs, loadFiles, $firebaseObject, $firebaseArray, FirebaseModel, user) {
+            function saveGene(docIndex) {
+                if (docIndex < $scope.hugoSymbols.length) {
+                    var hugoSymbol = $scope.hugoSymbols[docIndex];
+                    console.log(docIndex, hugoSymbol);
+                    var params = {};
+                    var gene = $scope.allFiles.gene[hugoSymbol];
+                    var vus = $scope.allFiles.vus[hugoSymbol];
+                    if (gene) {
+                        var geneData = stringUtils.getGeneData(gene, true, true);
+                        params.gene = JSON.stringify(geneData);
                     }
+                    if (vus) {
+                        var vusData = stringUtils.getVUSFullData(vus, true);
+                        params.vus = JSON.stringify(vusData);
+                    }
+                    if (!_.isEmpty(params)) {
+                        DatabaseConnector.updateGene(params,
+                            function(result) {
+                                console.log('\t success', result);
+                                saveGene(++docIndex);
+                            },
+                            function(result) {
+                                console.log('\t failed', result);
+                                saveGene(++docIndex);
+                            }
+                        );
+                    } else {
+                        saveGene(++docIndex);
+                    }
+                } else {
+                    $scope.status.saveAllGenes = true;
                     console.log('finished.');
                 }
             }
@@ -66,10 +49,9 @@ angular.module('oncokbApp')
             // }
             function processMeta() {
                 loadFiles.load(['meta', 'queues']).then(function(result) {
-                    var hugoSymbols = _.keys($rootScope.metaData);
-                    hugoSymbols = _.without(hugoSymbols, 'collaborators');
-                    user.setFileeditable(hugoSymbols).then(function(editableData) {
-                        _.each(hugoSymbols, function(hugoSymbol) {
+                    $scope.hugoSymbols = _.without(_.keys($rootScope.metaData), 'collaborators');
+                    user.setFileeditable($scope.hugoSymbols).then(function(editableData) {
+                        _.each($scope.hugoSymbols, function(hugoSymbol) {
                             $scope.metaFlags[hugoSymbol] = {
                                 hugoSymbol: hugoSymbol,
                                 lastModifiedBy: $rootScope.metaData[hugoSymbol].lastModifiedBy,
@@ -99,20 +81,25 @@ angular.module('oncokbApp')
                 
             }
             processMeta();
-            var dueDay = angular.element(document.querySelector('#genesdatepicker'));
-            dueDay.datepicker();
             $scope.redirect = function(path) {
                 $location.path(path);
             };
-
-            $scope.checkError = function() {
-                console.log($rootScope.errors);
+            $scope.allFiles = {
+                gene: '',
+                vus: ''
             };
-
             $scope.saveAllGenes = function() {
                 $scope.status.saveAllGenes = false;
-                saveGene($scope.documents, 0, function() {
-                    $scope.status.saveAllGenes = true;
+                firebase.database().ref('Genes').on('value', function(geneFiles) {
+                    $scope.allFiles.gene = geneFiles.val();
+                    firebase.database().ref('VUS').on('value', function(vusFiles) {
+                        $scope.allFiles.vus = vusFiles.val();
+                        saveGene(0);
+                    }, function() {
+                        console.log('fail to get vus data');
+                    });
+                }, function() {
+                    console.log('fail to get genes data');
                 });
             };
 
@@ -160,23 +147,6 @@ angular.module('oncokbApp')
                 });
             };
 
-            $scope.convertData = function() {
-                console.info('Converting tumor types to OncoTree tumor types...');
-
-                convertData(0, function() {
-                    console.info('Finished.');
-                });
-            };
-
-            $scope.findRelevantVariants = function() {
-                console.info('Finding relevant variants...');
-                var list = [];
-
-                findRelevantVariants(list, 0, function() {
-                    console.info('Finished.');
-                });
-            };
-
             $scope.changeCacheStatus = function() {
                 if ($scope.status.cache === 'enabled') {
                     DatabaseConnector.disableCache()
@@ -202,14 +172,6 @@ angular.module('oncokbApp')
                     }, function() {
                         console.log('failed.');
                     });
-            };
-
-            $scope.showValidationResult = function() {
-                console.info('Gene\tVariant\tCategory');
-
-                showValidationResult(0, function() {
-                    console.info('Finished.');
-                });
             };
 
             $scope.developerCheck = function() {
@@ -245,33 +207,6 @@ angular.module('oncokbApp')
                 }, function(result) {
                     $scope.status.cache = 'unknown';
                 });
-            }
-
-            function isExist(array, string) {
-                var mark = false;
-                _.each(array, function(item) {
-                    if (item.toString().toLowerCase() === string.toString().toLowerCase()) {
-                        mark = true;
-                    }
-                });
-                return mark;
-            }
-
-            function findIndexIgnorecase(array, string) {
-                var index = -1;
-                _.each(array, function(item, ind) {
-                    if (item.toString().toLowerCase() === string.toString().toLowerCase()) {
-                        index = ind;
-                    }
-                });
-                return index;
-            }
-
-            function isUndefinedOrEmpty(str) {
-                if (_.isUndefined(str)) {
-                    return true;
-                }
-                return str.toString().trim() === '';
             }
         }]
     );
