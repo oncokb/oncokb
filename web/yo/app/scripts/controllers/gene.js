@@ -1563,8 +1563,8 @@ angular.module('oncokbApp')
             };
             $scope.updateGene = function () {
                 $scope.status.savedGene = false;
-                var gene = stringUtils.getGeneData(this.gene, true, true);
-                var vus = stringUtils.getVUSFullData(this.vus, true);
+                var gene = stringUtils.getGeneData($scope.gene, true, true);
+                var vus = stringUtils.getVUSData($scope.vusItems, true);
                 var params = {};
 
                 if (gene) {
@@ -1573,7 +1573,6 @@ angular.module('oncokbApp')
                 if (vus) {
                     params.vus = JSON.stringify(vus);
                 }
-
                 DatabaseConnector.updateGene(params, function (result) {
                     $scope.status.savedGene = true;
                     mainUtils.updateLastSavedToDB();

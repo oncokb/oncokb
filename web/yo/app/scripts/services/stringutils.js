@@ -817,34 +817,14 @@ angular.module('oncokbApp')
             return query;
         }
 
-        // Return all info
-        function getVUSFullData(vus, excludeComments) {
-            var vusData = [];
-
+        function getVUSData(vus, excludeComments) {
+            var vusData = vus;
             excludeComments = _.isBoolean(excludeComments) ? excludeComments : false;
-
-            if (vus) {
-                vus.asArray().forEach(function(vusItem) {
-                    var datum = {};
-                    datum.name = vusItem.name.getText();
-                    datum.time = [];
-                    vusItem.time.asArray().forEach(function(time) {
-                        var _time = {};
-                        _time.value = time.value.getText();
-                        _time.by = {};
-                        _time.by.name = time.by.name.getText();
-                        _time.by.email = time.by.email.getText();
-                        datum.time.push(_time);
-                    });
-                    if (vusItem.time && vusItem.time.length > 0) {
-                        datum.lastEdit = vusItem.time.get(vusItem.time.length - 1).value.getText();
-                    }
-                    if (!excludeComments) {
-                        datum.nameComments = getComments(vusItem.name_comments);
-                    }
-                    vusData.push(datum);
-                });
-            }
+            _.each(vusData, function(vusItem) {
+                if (excludeComments) {
+                    delete vusItem.name_comments;
+                }
+            });
             return vusData;
         }
 
@@ -861,22 +841,6 @@ angular.module('oncokbApp')
                 });
             }
             return result;
-        }
-
-        // Only return last edit info
-        function getVUSData(vus) {
-            var vusData = [];
-            if (vus) {
-                vus.asArray().forEach(function(vusItem) {
-                    var datum = {};
-                    datum.name = vusItem.name.getText();
-                    if (vusItem.time && vusItem.time.length > 0) {
-                        datum.lastEdit = vusItem.time.get(vusItem.time.length - 1).value.getText();
-                    }
-                    vusData.push(datum);
-                });
-            }
-            return vusData;
         }
         function processData(data, keys, excludeComments, onlyReviewedContent) {
             _.each(keys, function(key) {
@@ -929,29 +893,6 @@ angular.module('oncokbApp')
             return gene;
         }
 
-        function getEvidenceStatus(model) {
-            var keys = model.keys();
-            var status = {};
-
-            keys.forEach(function(e) {
-                status[e] = model.get(e);
-            });
-            return status;
-        }
-
-        function getTimeStamp(model) {
-            var keys = model.keys();
-            var status = {};
-
-            keys.forEach(function(e) {
-                status[e] = {
-                    value: model.get(e).value.text,
-                    by: model.get(e).by.text
-                };
-            });
-            return status;
-        }
-
         function isUndefinedOrEmpty(str) {
             if (_.isUndefined(str)) {
                 return true;
@@ -969,19 +910,6 @@ angular.module('oncokbApp')
             return result.join('\t');
         }
 
-        function validUUID(obj) {
-            if (!obj.getText()) {
-                var tempString = '';
-                while (!tempString) {
-                    tempString = UUIDjs.create(4).toString();
-                }
-                obj.setText(tempString);
-                return tempString;
-            } else {
-                return obj.getText();
-            }
-        }
-
         function mostRecentItem(reviewObjs, include) {
             var mostRecent = -1;
             for (var i = 0; i < reviewObjs.length; i++) {
@@ -995,35 +923,6 @@ angular.module('oncokbApp')
                 if (reviewObjs[i] && reviewObjs[i].updateTime) {
                     currentItemTime = new Date(reviewObjs[i].updateTime);
                 }
-                // we only continue to check if current item time is valid
-                if (currentItemTime instanceof Date && !isNaN(currentItemTime.getTime())) {
-                    if (mostRecent < 0) {
-                        mostRecent = i;
-                    } else {
-                        // reset mostRect time when current item time is closer
-                        var mostRecentTime = new Date(reviewObjs[mostRecent].updateTime);
-                        if(mostRecentTime < currentItemTime) {
-                            mostRecent = i;
-                        }
-                    }
-                }
-            }
-            if (mostRecent < 0) {
-                return 0;
-            }
-            return mostRecent;
-        }
-
-        function mostRecentItemFire(reviewObjs, include) {
-            var mostRecent = -1;
-            for (var i = 0; i < reviewObjs.length; i++) {
-                if (!include) {
-                    // This is designed to handle the reviewObj with systematically set updatetime
-                    // when 'include' equals true, it will use all reviewObj in the list
-                    // otherwise, we will only use the reviewObj with updatedBy info.
-                    if (!reviewObjs[i].updatedBy) continue;
-                }
-                var currentItemTime = new Date(reviewObjs[i].updateTime);
                 // we only continue to check if current item time is valid
                 if (currentItemTime instanceof Date && !isNaN(currentItemTime.getTime())) {
                     if (mostRecent < 0) {
@@ -1069,10 +968,8 @@ angular.module('oncokbApp')
             getVUSData: getVUSData,
             isUndefinedOrEmpty: isUndefinedOrEmpty,
             stringObject: stringObject,
-            getVUSFullData: getVUSFullData,
             getTextString: OncoKB.utils.getString,
             mostRecentItem: mostRecentItem,
-            getHistoryData: getHistoryData,
-            mostRecentItemFire: mostRecentItemFire
+            getHistoryData: getHistoryData
         };
     });
