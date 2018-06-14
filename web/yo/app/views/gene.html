@@ -434,13 +434,10 @@
 </div>
 <div ng-hide="status.rendering" class="floatToolBox btn-group btn-group-sm" role="group">
   <span class="btn btn-default" style="opacity: 1" disabled>APC</span>
-  <!-- <button type="button" class="btn btn-default" ng-click="generatePDF()">Download PDF</button>
-    <button type="button" class="btn btn-default" ng-if="::(userRole === 8 && developerCheck())" ng-click="updateGene()"><span ng-show="!!!docStatus.savedGene"><i class="fa fa-spinner fa-spin"></i></span><span ng-show="!!docStatus.savedGene">Update gene</span></button>-->
-  <!-- <span class="btn btn-default" disabled>
-    <span ng-show="savingGene">Saving
-      <i class="fa fa-spinner fa-spin"></i>
-    </span>
-    <span ng-show="!savingGene">All changes saved</span>
-  </span> -->
+  <button type="button" class="btn btn-default" ng-click="generatePDF()">Download PDF</button>
+  <button type="button" class="btn btn-default" ng-if="developerCheck()" ng-click="updateGene()">
+    <span ng-show="!status.savedGene"><i class="fa fa-spinner fa-spin"></i></span>
+    <span ng-show="status.savedGene">Update gene</span>
+  </button>
 </div>
 <loading ng-model="status.rendering" content="Please wait, we are loading gene information."></loading>
