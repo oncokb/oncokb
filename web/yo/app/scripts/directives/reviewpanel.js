@@ -197,48 +197,40 @@ angular.module('oncokbApp')
                             operationName: 'update',
                             uuids: $scope.uuid
                         }];
-                        if ($rootScope.isDesiredGene) {
-                            ReviewResource.loading.push($scope.uuid);
-                            DatabaseConnector.updateGeneType($scope.obj.name, params, historyData, function(result) {
-                                $scope.modelUpdate($scope.adjustedEvidenceType);
-                                ReviewResource.loading = _.without(ReviewResource.loading, $scope.uuid);
-                            }, function(error) {
-                                console.log('fail to update to database', error);
-                                dialogs.error('Error', 'Failed to update to database! Please contact the developer.');
-                                ReviewResource.loading = _.without(ReviewResource.loading, $scope.uuid);
-                            });
-                        } else {
-                            $scope.modelUpdate($scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment);
-                        }
+                        ReviewResource.loading.push($scope.uuid);
+                        DatabaseConnector.updateGeneType($scope.obj.name, params, historyData, function(result) {
+                            $scope.modelUpdate($scope.adjustedEvidenceType);
+                            ReviewResource.loading = _.without(ReviewResource.loading, $scope.uuid);
+                        }, function(error) {
+                            console.log('fail to update to database', error);
+                            dialogs.error('Error', 'Failed to update to database! Please contact the developer.');
+                            ReviewResource.loading = _.without(ReviewResource.loading, $scope.uuid);
+                        });
                     } else {
-                        if($rootScope.isDesiredGene) {
-                            ReviewResource.loading.push($scope.uuid);
-                            var getEvidenceResult = $scope.getEvidence($scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment);
-                            var evidences = getEvidenceResult.evidences;
-                            var historyData = [getEvidenceResult.historyData];
-                            DatabaseConnector.updateEvidenceBatch(evidences, historyData, function(result) {
-                                $scope.modelUpdate($scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment);
-                                if ($scope.adjustedEvidenceType === 'TREATMENT_NAME_CHANGE' && _.isFunction($scope.updatePriorityInGene)) {
-                                    $scope.updatePriorityInGene({
-                                        treatments: $scope.therapyCategory.treatments
-                                    }).then(function() {
-
-                                    }, function() {
-
-                                    }).finally(function() {
-                                        ReviewResource.loading = _.without(ReviewResource.loading, $scope.uuid);
-                                    });
-                                } else {
-                                    ReviewResource.loading = _.without(ReviewResource.loading, $scope.uuid);
-                                }
-                            }, function(error) {
-                                console.log('fail to update to database', error);
-                                dialogs.error('Error', 'Failed to update to database! Please contact the developer.');
-                                ReviewResource.loading = _.without(ReviewResource.loading, $scope.uuid);
-                            });
-                        } else {
+                        ReviewResource.loading.push($scope.uuid);
+                        var getEvidenceResult = $scope.getEvidence($scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment);
+                        var evidences = getEvidenceResult.evidences;
+                        var historyData = [getEvidenceResult.historyData];
+                        DatabaseConnector.updateEvidenceBatch(evidences, historyData, function(result) {
                             $scope.modelUpdate($scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment);
-                        }
+                            if ($scope.adjustedEvidenceType === 'TREATMENT_NAME_CHANGE' && _.isFunction($scope.updatePriorityInGene)) {
+                                $scope.updatePriorityInGene({
+                                    treatments: $scope.therapyCategory.treatments
+                                }).then(function() {
+
+                                }, function() {
+
+                                }).finally(function() {
+                                    ReviewResource.loading = _.without(ReviewResource.loading, $scope.uuid);
+                                });
+                            } else {
+                                ReviewResource.loading = _.without(ReviewResource.loading, $scope.uuid);
+                            }
+                        }, function(error) {
+                            console.log('fail to update to database', error);
+                            dialogs.error('Error', 'Failed to update to database! Please contact the developer.');
+                            ReviewResource.loading = _.without(ReviewResource.loading, $scope.uuid);
+                        });
                     }
                 };
                 function setRejectedUUIDs(uuids) {
@@ -278,22 +270,20 @@ angular.module('oncokbApp')
                             if(oncogenicChange && effectChange) {
                                 uuids = [oncogenicUUID, effectUUID, descriptionUUID];
                                 $scope.bothChanged = true;
-                                if ($rootScope.isDesiredGene) {
-                                    DatabaseConnector.getEvidencesByUUIDs([oncogenicUUID, effectUUID], function(result) {
-                                        if (result && result.status) {
-                                            var resultJSON = JSON.parse(result.status);
-                                            if (_.isArray(resultJSON)) {
-                                                _.each(resultJSON, function(eviFromDB) {
-                                                    if(eviFromDB) {
-                                                        setUpdateTimeEffectSection(eviFromDB, oncogenicUUID, effectUUID);
-                                                    }
-                                                });
-                                            }
+                                DatabaseConnector.getEvidencesByUUIDs([oncogenicUUID, effectUUID], function(result) {
+                                    if (result && result.status) {
+                                        var resultJSON = JSON.parse(result.status);
+                                        if (_.isArray(resultJSON)) {
+                                            _.each(resultJSON, function(eviFromDB) {
+                                                if(eviFromDB) {
+                                                    setUpdateTimeEffectSection(eviFromDB, oncogenicUUID, effectUUID);
+                                                }
+                                            });
                                         }
-                                    }, function(error) {
-                                        console.log('Failed to fetch evidence based on uuid', error);
-                                    });
-                                }
+                                    }
+                                }, function(error) {
+                                    console.log('Failed to fetch evidence based on uuid', error);
+                                });
                             } else {
                                 if(oncogenicChange) uuids.push(oncogenicUUID);
                                 if(effectChange) uuids.push(effectUUID);
@@ -334,7 +324,7 @@ angular.module('oncokbApp')
                             break;
                         }
                         setRejectedUUIDs(uuids);
-                        if ($rootScope.isDesiredGene && $scope.adjustedEvidenceType !== 'GENE_TYPE') {
+                        if ($scope.adjustedEvidenceType !== 'GENE_TYPE') {
                             DatabaseConnector.getEvidencesByUUID(uuid, function(result) {
                                 if (result && result.status) {
                                     var resultJSON = JSON.parse(result.status);

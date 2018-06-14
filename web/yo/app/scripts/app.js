@@ -185,8 +185,6 @@ angular.module('oncokbApp').run(
             $rootScope.errors = [];
             $rootScope.internal = true;
 
-            $rootScope.isDesiredGene = true;
-
             $rootScope.user = {
                 role: config.userRoles.public
             };

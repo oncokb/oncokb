@@ -245,18 +245,16 @@ angular.module('oncokbApp')
                 console.log($scope.comments);
             };
             $scope.vusUpdate = function () {
-                if ($scope.status.isDesiredGene) {
-                    if ($scope.status.vusUpdateTimeout) {
-                        $timeout.cancel($scope.status.vusUpdateTimeout);
-                    }
-                    $scope.status.vusUpdateTimeout = $timeout(function () {
-                        // DatabaseConnector.updateVUS($scope.fileTitle, JSON.stringify($scope.vusFire), function(result) {
-                        //     console.log('success saving vus to database');
-                        // }, function(error) {
-                        //     console.log('error happened when saving VUS to DB', error);
-                        // });
-                    }, 2000);
+                if ($scope.status.vusUpdateTimeout) {
+                    $timeout.cancel($scope.status.vusUpdateTimeout);
                 }
+                $scope.status.vusUpdateTimeout = $timeout(function () {
+                    // DatabaseConnector.updateVUS($scope.fileTitle, JSON.stringify($scope.vusFire), function(result) {
+                    //     console.log('success saving vus to database');
+                    // }, function(error) {
+                    //     console.log('error happened when saving VUS to DB', error);
+                    // });
+                }, 2000);
                 // update the meta track
                 // mainUtils.updateLastModified();
             };
@@ -675,9 +673,7 @@ angular.module('oncokbApp')
                     dialogs.error('Error', 'Can not accept changes from invalid user name. Please contact the developer.');
                     return false;
                 }
-                if ($scope.status.isDesiredGene) {
-                    $scope.status[userName].savingAll = true;
-                }
+                $scope.status[userName].savingAll = true;
                 collectChangesByPerson(userName);
                 var apiCalls = [];
                 if (!_.isEmpty(evidencesAllUsers[userName].geneTypeEvidence)) {
@@ -834,71 +830,50 @@ angular.module('oncokbApp')
             }
             function geneTypeUpdate(userName) {
                 var deferred = $q.defer();
-                if ($scope.status.isDesiredGene) {
-                    var geneTypeEvidence = evidencesAllUsers[userName].geneTypeEvidence;
-                    var historyData = evidencesAllUsers[userName].historyData.geneType;
-                    DatabaseConnector.updateGeneType($scope.gene.name, geneTypeEvidence, historyData, function (result) {
-                        $scope.modelUpdate('GENE_TYPE', null, null, null, null);
-                        deferred.resolve();
-                    }, function (error) {
-                        deferred.reject(error);
-                    });
-                } else {
+                var geneTypeEvidence = evidencesAllUsers[userName].geneTypeEvidence;
+                var historyData = evidencesAllUsers[userName].historyData.geneType;
+                DatabaseConnector.updateGeneType($scope.gene.name, geneTypeEvidence, historyData, function (result) {
                     $scope.modelUpdate('GENE_TYPE', null, null, null, null);
                     deferred.resolve();
-                }
+                }, function (error) {
+                    deferred.reject(error);
+                });
                 return deferred.promise;
             }
 
             function evidenceBatchUpdate(userName) {
                 var deferred = $q.defer();
                 var updatedEvidenceModels = evidencesAllUsers[userName].updatedEvidenceModels;
-                if ($scope.status.isDesiredGene) {
-                    var updatedEvidences = evidencesAllUsers[userName].updatedEvidences;
-                    var historyData = evidencesAllUsers[userName].historyData.update;
-                    _.each(_.keys(updatedEvidences), function (uuid) {
-                        delete $rootScope.geneMeta.review[uuid];    
-                    });
-                    DatabaseConnector.updateEvidenceBatch(updatedEvidences, historyData, function (result) {
-                        for (var i = 0; i < updatedEvidenceModels.length; i++) {
-                            $scope.modelUpdate(updatedEvidenceModels[i][0], updatedEvidenceModels[i][1], updatedEvidenceModels[i][2], updatedEvidenceModels[i][3], updatedEvidenceModels[i][4]);
-                        }
-                        deferred.resolve();
-                    }, function (error) {
-                        deferred.reject(error);
-                    });
-                } else {
+                var updatedEvidences = evidencesAllUsers[userName].updatedEvidences;
+                var historyData = evidencesAllUsers[userName].historyData.update;
+                _.each(_.keys(updatedEvidences), function (uuid) {
+                    delete $rootScope.geneMeta.review[uuid];    
+                });
+                DatabaseConnector.updateEvidenceBatch(updatedEvidences, historyData, function (result) {
                     for (var i = 0; i < updatedEvidenceModels.length; i++) {
                         $scope.modelUpdate(updatedEvidenceModels[i][0], updatedEvidenceModels[i][1], updatedEvidenceModels[i][2], updatedEvidenceModels[i][3], updatedEvidenceModels[i][4]);
                     }
                     deferred.resolve();
-                }
+                }, function (error) {
+                    deferred.reject(error);
+                });
                 return deferred.promise;
             }
             function evidenceDeleteUpdate(userName) {
                 var deferred = $q.defer();
                 var deletedEvidenceModels = evidencesAllUsers[userName].deletedEvidenceModels;
                 var deletedEvidences = evidencesAllUsers[userName].deletedEvidences;
-                if ($scope.status.isDesiredGene) {
-                    var historyData = evidencesAllUsers[userName].historyData.deletion;
-                    DatabaseConnector.deleteEvidences(deletedEvidences, historyData, function (result) {
-                        _.each(deletedEvidenceModels, function (item) {
-                            var data = getDataByLayers(item.mutation, item.tumor, item.ti, item.treatment);
-                            var indicies = [data.mutationIndex, data.tumorIndex, data.tiIndex, data.treatmentIndex];             
-                            removeModel({indicies: indicies, uuids: deletedEvidences, type: item.type});
-                        });
-                        deferred.resolve();
-                    }, function (error) {
-                        deferred.reject(error);
-                    });
-                } else {
+                var historyData = evidencesAllUsers[userName].historyData.deletion;
+                DatabaseConnector.deleteEvidences(deletedEvidences, historyData, function (result) {
                     _.each(deletedEvidenceModels, function (item) {
                         var data = getDataByLayers(item.mutation, item.tumor, item.ti, item.treatment);
                         var indicies = [data.mutationIndex, data.tumorIndex, data.tiIndex, data.treatmentIndex];             
                         removeModel({indicies: indicies, uuids: deletedEvidences, type: item.type});
                     });
                     deferred.resolve();
-                }
+                }, function (error) {
+                    deferred.reject(error);
+                });
                 return deferred.promise;
             }
             function historyStr(mutation, tumor) {
@@ -1547,10 +1522,6 @@ angular.module('oncokbApp')
                 var tumor = data.tumor;
                 var ti = data.ti;
                 var treatment = data.treatment;
-                if (!$scope.status.isDesiredGene) {
-                    acceptSection(type, mutation, tumor, ti, treatment);
-                    return;
-                }
                 var tempEvidences = formSectionEvidencesByType(type, mutation, tumor, ti, treatment);
                 var evidences = tempEvidences.evidences;
                 var historyData = [tempEvidences.historyData];
@@ -1590,36 +1561,8 @@ angular.module('oncokbApp')
                     removeModel({type: type, uuids: tempUUIDs, indicies: indicies});
                 });
             };
-            function clearRollbackLastReview(reviewObjs) {
-                _.each(reviewObjs, function (reviewObj) {
-                    if (reviewObj.rollback === true) {
-                        delete reviewObj.lastReviewed;
-                    }
-                });
-            }
-            function clearUnnecessartLastReviewed() {
-                clearRollbackLastReview([$scope.gene.summary_review, $scope.gene.type_review, $scope.gene.background_review]);
-                for (var i = 0; i < $scope.gene.mutations.length; i++) {
-                    var mutation = $scope.gene.mutations.get(i);
-                    clearRollbackLastReview([mutation.name_review, mutation.mutation_effect.oncogenic_review, mutation.mutation_effect.effect_review, mutation.mutation_effect.description_review]);
-                    for (var j = 0; j < mutation.tumors.length; j++) {
-                        var tumor = mutation.tumors.get(j);
-                        clearRollbackLastReview([tumor.summary_review, tumor.diagnostic_review, tumor.prognostic_review]);
-                        for (var k = 0; k < tumor.TIs.length; k++) {
-                            var ti = tumor.TIs.get(k);
-                            clearRollbackLastReview([ti.description_review]);
-                            for (var m = 0; m < ti.treatments.length; m++) {
-                                var treatment = ti.treatments.get(m);
-                                clearRollbackLastReview([treatment.name_review, treatment.level_review, treatment.indication_review, treatment.description_review]);
-
-                            }
-                        }
-                    }
-                }
-            }
             $scope.updateGene = function () {
-                $scope.docStatus.savedGene = false;
-                clearUnnecessartLastReviewed();
+                $scope.status.savedGene = false;
                 var gene = stringUtils.getGeneData(this.gene, true, true);
                 var vus = stringUtils.getVUSFullData(this.vus, true);
                 var params = {};
@@ -1632,21 +1575,12 @@ angular.module('oncokbApp')
                 }
 
                 DatabaseConnector.updateGene(params, function (result) {
-                    $scope.docStatus.savedGene = true;
+                    $scope.status.savedGene = true;
                     mainUtils.updateLastSavedToDB();
-                }, function (result) {
-                    $scope.docStatus.savedGene = true;
-                    var errorMessage = 'An error has occurred when saving ' +
-                        'data, please contact the developer.';
-
-                    // dialogs.error('Error', errorMessage);
-                    $rootScope.$emit('oncokbError',
-                        {
-                            message: 'An error has occurred when saving data. ' +
-                                'Gene: ' + $scope.gene.name,
-                            reason: JSON.stringify(result)
-                        });
-                    mainUtils.updateLastSavedToDB();
+                }, function (error) {
+                    $scope.status.savedGene = true;
+                    var errorMessage = 'An error has occurred when saving data.' + error;
+                    dialogs.error('Error', errorMessage);
                 });
             };
             $scope.validateTumor = function (mutation, tumor) {
@@ -2020,28 +1954,24 @@ angular.module('oncokbApp')
                 var data = getDataByLayers(mutation, tumor, ti, treatment);
                 var indicies = [data.mutationIndex, data.tumorIndex, data.tiIndex, data.treatmentIndex];
                 var uuids = collectUUIDs(type, obj, [], false, false);
-                if ($scope.status.isDesiredGene) {
-                    var historyData = [{ operation: 'delete', lastEditBy: (type === 'tumor' ? obj.cancerTypes_review : obj.name_review).updatedBy, location: location }];
-                    // make the api call to delete evidences
-                    var loadingUUID = (type === 'tumor' ? obj.cancerTypes_uuid : obj.name_uuid);
-                    if (loadingUUID) {
-                        ReviewResource.loading.push(loadingUUID);
-                    }
-                    DatabaseConnector.deleteEvidences(uuids, historyData, function (result) {
-                        removeModel({ type: type, indicies: indicies, uuids: uuids });
-
-                        // Update all priority if one of treatments is deleted.
-                        if (type && type === 'treatment') {
-                            $scope.updatePriority(ti.treatments);
-                        }
-                        ReviewResource.loading = _.without(ReviewResource.loading, loadingUUID);
-                    }, function (error) {
-                        dialogs.error('Error', 'Failed to update to database! Please contact the developer.');
-                        ReviewResource.loading = _.without(ReviewResource.loading, loadingUUID);
-                    });
-                } else {
-                    removeModel({ type: type, indicies: indicies, uuids: uuids });
+                var historyData = [{ operation: 'delete', lastEditBy: (type === 'tumor' ? obj.cancerTypes_review : obj.name_review).updatedBy, location: location }];
+                // make the api call to delete evidences
+                var loadingUUID = (type === 'tumor' ? obj.cancerTypes_uuid : obj.name_uuid);
+                if (loadingUUID) {
+                    ReviewResource.loading.push(loadingUUID);
                 }
+                DatabaseConnector.deleteEvidences(uuids, historyData, function (result) {
+                    removeModel({ type: type, indicies: indicies, uuids: uuids });
+
+                    // Update all priority if one of treatments is deleted.
+                    if (type && type === 'treatment') {
+                        $scope.updatePriority(ti.treatments);
+                    }
+                    ReviewResource.loading = _.without(ReviewResource.loading, loadingUUID);
+                }, function (error) {
+                    dialogs.error('Error', 'Failed to update to database! Please contact the developer.');
+                    ReviewResource.loading = _.without(ReviewResource.loading, loadingUUID);
+                });
             };
             function removeModel(data) {
                 var indices = [];
@@ -2468,7 +2398,7 @@ angular.module('oncokbApp')
                     postData = priorities;
                 }
 
-                if ($scope.status.isDesiredGene && Object.keys(postData).length > 0) {
+                if (Object.keys(postData).length > 0) {
                     DatabaseConnector
                         .updateEvidenceTreatmentPriorityBatch(
                             postData
@@ -2631,18 +2561,6 @@ angular.module('oncokbApp')
                 $scope.vus = vus;
             }
 
-            function isDesiredGene() {
-                var _geneName = $scope.gene.name;
-                for (var i = 0; i < OncoKB.global.genes.length; i++) {
-                    if (OncoKB.global.genes[i].hugoSymbol === _geneName) {
-                        $scope.status.isDesiredGene = true;
-                        $scope.meta.gene = OncoKB.global.genes[i];
-                        break;
-                    }
-                }
-                $rootScope.isDesiredGene = $scope.status.isDesiredGene;
-            }
-
             $scope.fileTitle = $routeParams.geneName;
             $scope.gene = '';
             $scope.vus = '';
@@ -2728,12 +2646,12 @@ angular.module('oncokbApp')
                 expandAll: false,
                 rendering: true,
                 numAccordion: 0,
-                isDesiredGene: true,
                 hasReviewContent: false, // indicate if any changes need to be reviewed
                 mutationChanged: false, // indicate there are changes in mutation section
                 processing: false,
                 preMoving: true,
-                fileEditable : false
+                fileEditable : false,
+                savedGene: true
             };
 
             $scope.$watch('meta.newCancerTypes', function (n) {
