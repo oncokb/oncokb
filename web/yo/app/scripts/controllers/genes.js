@@ -15,13 +15,13 @@ angular.module('oncokbApp')
                     console.log(docIndex, hugoSymbol);
                     var params = {};
                     var gene = $scope.allFiles.gene[hugoSymbol];
-                    var vus = $scope.allFiles.vus[hugoSymbol];
+                    var vus = $scope.allFiles.vus[hugoSymbol].vus;
                     if (gene) {
                         var geneData = stringUtils.getGeneData(gene, true, true);
                         params.gene = JSON.stringify(geneData);
                     }
                     if (vus) {
-                        var vusData = stringUtils.getVUSFullData(vus, true);
+                        var vusData = stringUtils.getVUSData(vus, true);
                         params.vus = JSON.stringify(vusData);
                     }
                     if (!_.isEmpty(params)) {
