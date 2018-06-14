@@ -107,38 +107,6 @@ angular.module('oncokbApp').config(function($httpProvider) {
     };
 }]);
 
-angular.module('oncokbApp').factory('GenerateDoc', ['$http', 'OncoKB', function($http, OncoKB) {
-    'use strict';
-    var transform = function(data) {
-        return $.param(data);
-    };
-
-    function getDoc(params) {
-        return $http.post(
-            OncoKB.config.apiLink + 'generateGoogleDoc',
-            {reportParams: JSON.stringify(params)},
-            {
-                headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
-                transformRequest: transform
-            });
-    }
-
-    function createFolder(params) {
-        return $http.post(
-            OncoKB.config.apiLink + 'createGoogleFolder',
-            params,
-            {
-                headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
-                transformRequest: transform
-            });
-    }
-
-    return {
-        getDoc: getDoc,
-        createFolder: createFolder
-    };
-}]);
-
 angular.module('oncokbApp').factory('SendEmail', ['$http', 'OncoKB', function($http, OncoKB) {
     'use strict';
     var transform = function(data) {
