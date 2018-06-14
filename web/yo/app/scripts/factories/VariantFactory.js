@@ -7,13 +7,8 @@ angular.module('oncokbApp').factory('TumorType', ['$http', 'OncoKB', function($h
         return $http.get(OncoKB.config.apiLink + 'tumorType.json');
     }
 
-    function getFromFile() {
-        return $http.get('data/tumorType.json');
-    }
-
     return {
-        getFromServer: getFromServer,
-        getFromFile: getFromFile
+        getFromServer: getFromServer
     };
 }]);
 
@@ -24,13 +19,8 @@ angular.module('oncokbApp').factory('Gene', ['$http', 'OncoKB', function($http, 
         return $http.get(OncoKB.config.curationLink + 'gene.json');
     }
 
-    function getFromFile() {
-        return $http.get('data/gene.json');
-    }
-
     return {
-        getFromServer: getFromServer,
-        getFromFile: getFromFile
+        getFromServer: getFromServer
     };
 }]);
 
@@ -38,10 +28,6 @@ angular.module('oncokbApp').factory('DataSummary', ['$http', function($http) {
     'use strict';
 
     function getFromServer() {
-        return $http.get('data/summary.json');
-    }
-
-    function getFromFile() {
         return $http.get('data/summary.json');
     }
     function getGeneType() {
@@ -52,7 +38,6 @@ angular.module('oncokbApp').factory('DataSummary', ['$http', function($http) {
     }
     return {
         getFromServer: getFromServer,
-        getFromFile: getFromFile,
         getGeneType: getGeneType,
         getEvidenceByType: getEvidenceByType
     };
@@ -65,13 +50,8 @@ angular.module('oncokbApp').factory('Alteration', ['$http', 'OncoKB', function($
         return $http.get(OncoKB.config.apiLink + 'alteration.json');
     }
 
-    function getFromFile() {
-        return $http.get('data/alteration.json');
-    }
-
     return {
-        getFromServer: getFromServer,
-        getFromFile: getFromFile
+        getFromServer: getFromServer
     };
 }]);
 
@@ -82,13 +62,8 @@ angular.module('oncokbApp').factory('DriveOncokbInfo', ['$http', 'OncoKB', funct
         return $http.get(OncoKB.config.curationLink + 'oncokbInfo.json');
     }
 
-    function getFromFile() {
-        return $http.get('data/oncokbInfo.json');
-    }
-
     return {
-        getFromServer: getFromServer,
-        getFromFile: getFromFile
+        getFromServer: getFromServer
     };
 }]);
 
