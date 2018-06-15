@@ -264,14 +264,6 @@
                       <span ng-if="!reviewMode"><comments-dict key="'name'" path="path"></comments-dict></span>
                     </div>
                     <div class="panelContent" ng-if="initialOpen[ti.name_uuid]" id="{{ti.name_uuid}}" ng-init="bindTreatments({uuid: ti.name_uuid, path: path})">
-                      <div ng-if="displayPrecisely(ti.description_uuid)">
-                        <h5>
-                          <b>General Summary (Optional): </b>
-                          <review-panel uuid="ti.description_uuid" review-obj="ti.description_review" evidence-type="ti.name" mutation="mutation" tumor="tumor" therapy-category="ti" get-evidence="getEvidence(type, mutation, tumor, ti)" model-update="modelUpdate(type, mutation, tumor, ti)"></review-panel>
-                        </h5>
-                        <realtime-string t="'p'" key="'description'" path="path" uuid="getUUID({type: 'ti', key: 'description', path: path})"></realtime-string>
-                      </div>
-                      <br/>
                       <div ng-repeat="treatment in treatmentsByII[ti.name_uuid]" ng-init="path=getObservePath({type: 'treatment', path: path, index: $index});" ng-show="displayCheck(treatment.name_uuid, treatment.name_review)">
                         <div class="sectionStyle">
                           <div class="headerLevel4">
