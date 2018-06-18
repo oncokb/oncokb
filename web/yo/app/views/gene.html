@@ -102,7 +102,7 @@
           <div ng-click="toggleSection(mutation.name_uuid); setSectionOpenStatus('open', [mutation.mutation_effect_uuid])">
             <i ng-class="getAngleClass(mutation.name_uuid)"></i> Mutation:</div>
           <div style="margin-top:-42px;margin-left:100px">
-            <div style="float:left"><realtime-string t="'MUTATION_NAME'" key="'name'" path="path" uuid="getUUID({type: 'mutation', key: 'name', path: path})"></realtime-string></div>
+            <div ng-style="getNameStyle('mutation')"><realtime-string t="'MUTATION_NAME'" key="'name'" path="path" uuid="getUUID({type: 'mutation', key: 'name', path: path})"></realtime-string></div>
             <div style="float:left;margin-left:10px" ng-show="!reviewMode">
               <comments-dict key="'name'" path="path"></comments-dict>
               <span style="margin-right:10px" ng-bind-html="mutationContent[mutation.name_uuid].result"></span>
@@ -269,9 +269,9 @@
                       <div ng-repeat="treatment in treatmentsByII[ti.name_uuid]" ng-init="path=getObservePath({type: 'treatment', path: path, index: $index});" ng-show="displayCheck(treatment.name_uuid, treatment.name_review)">
                         <div class="sectionStyle">
                           <div class="headerLevel4">
-                            <span ng-click="toggleSection(treatment.name_uuid)"><i ng-class="getAngleClass(treatment.name_uuid)"></i> Therapy:</span>
+                            <div ng-click="toggleSection(treatment.name_uuid)"><i ng-class="getAngleClass(treatment.name_uuid)"></i> Therapy:</div>
                             <div style="margin-left:90px;margin-top:-22px">
-                              <div style="float:left"><realtime-string t="'TREATMENT_NAME'" key="'name'" path="path" uuid="getUUID({type: 'treatment', key: 'name', path: path})"></realtime-string></div>
+                              <div ng-style="getNameStyle()"><realtime-string t="'TREATMENT_NAME'" key="'name'" path="path" uuid="getUUID({type: 'treatment', key: 'name', path: path})"></realtime-string></div>
                               <div style="float:left;margin-left:10px;" ng-if="!reviewMode">
                                 <comments-dict key="'name'" path="path"></comments-dict>
                                 <span class="curationNoEntry" ng-if="isEmptySection(treatment, 'treatment')">No Entry</span>
@@ -285,7 +285,7 @@
                                   <span><i ng-click="remove('treatment', path)" class="fa fa-trash-o"></i></span>
                               </span>
                             </div>
-                            <div style="margin-top:-45px;">
+                            <div style="margin-top:-45px;margin-bottom:45px;">
                                   <review-panel uuid="treatment.name_uuid" review-obj="treatment.name_review" evidence-type="ti.name" mutation="mutation"
                                     tumor="tumor" therapy-category="ti" treatment="treatment" get-evidence="getEvidence(type, mutation, tumor, ti, treatment)"
                                     model-update="modelUpdate(type, mutation, tumor, ti, treatment)" confirm-delete="confirmDelete(type, mutation, tumor, ti, treatment)"
@@ -295,9 +295,8 @@
                             </div>
                           </div>
                           <div class="panelContent" ng-if="initialOpen[treatment.name_uuid]" id="{{treatment.name_uuid}}">
-                            <p ng-if="displayPrecisely(treatment.level_uuid)">
+                            <div ng-if="displayPrecisely(treatment.level_uuid) || displayPrecisely(treatment.propagation_uuid)">
                               <strong>Highest level of evidence:</strong>
-                              <br/>
                               <div ng-switch on="ti.type">
                                 <div ng-switch-when="SS">
                                   <realtime-string key="'level'" path="path" t="'treatment-select'" o="levels.SS" uuid="getUUID({type: 'treatment', key: 'level', path: path})"></realtime-string>
@@ -314,7 +313,7 @@
                                   <div ng-if="!reviewMode" style="float:right;margin-right:180px;margin-top:-25px"><i class="fa fa-question-circle" style="color: grey;" uib-tooltip-html="levelExps.IR"></i></div>
                                 </div>
                               </div>
-                            </p>
+                            </div>
                             <div ng-if="displayPrecisely(treatment.indication_uuid)">
                               <strong>FDA approved indications:</strong>
                               <br/>
@@ -378,7 +377,7 @@
         </div>
       </div>
     </div>
-    <div class="input-group input-group-sm accordionMarginTop" ng-if="!reviewMode && fileEditable">
+    <div class="input-group input-group-sm accordionMarginTop" style="float:left" ng-if="!reviewMode && fileEditable">
       <input type="text" class="form-control" ng-model="newMutationName" placeholder="{{::addMutationPlaceholder}}" uib-typeahead="suggestedMutation for suggestedMutation in suggestedMutations | filter:$viewValue:stateComparator"
         empty-typeahead ng-click="opened=!opened" focus-me="opened" ng-focus="onFocus($event)" />
       <span class="input-group-btn">

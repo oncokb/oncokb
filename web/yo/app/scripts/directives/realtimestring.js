@@ -239,6 +239,8 @@ angular.module('oncokbApp')
                         return !mainUtils.processedInReview('accept', $scope.uuid) && !mainUtils.processedInReview('reject', $scope.uuid) && !mainUtils.processedInReview('inside', $scope.uuid);
                     } else if (type === 'name') {
                         return mainUtils.processedInReview('name', $scope.uuid) && !mainUtils.processedInReview('accept', $scope.uuid) && !mainUtils.processedInReview('reject', $scope.uuid) && !mainUtils.processedInReview('add', $scope.uuid) && !mainUtils.processedInReview('inside', $scope.uuid);
+                    } else if (type === 'inside') {
+                        return mainUtils.processedInReview('inside', $scope.uuid);
                     }
                 };
                 $scope.rejectedAction = function () {
