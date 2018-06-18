@@ -536,8 +536,6 @@ angular.module('oncokbApp')
             this.type = '';
             this.treatments = [];
             this.treatments_uuid = getUUID();
-            this.description = '';
-            this.description_uuid = getUUID();
         }
         function Treatment(name) {
             this.name = name;

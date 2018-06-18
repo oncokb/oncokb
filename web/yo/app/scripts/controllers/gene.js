@@ -606,11 +606,6 @@ angular.module('oncokbApp')
                                 }
                                 treatmentChanged = false;
                             });
-                            if (isChangedSection([ti.description_uuid])) {
-                                ReviewResource.updated.push(ti.description_uuid);
-                                userNames.push(ti.description_review.updatedBy);
-                                tiChanged = true;
-                            }
                             if (tiChanged) {
                                 $scope.sectionUUIDs.push(ti.name_uuid);
                                 tumorChanged = true;
@@ -825,9 +820,6 @@ angular.module('oncokbApp')
                                     formEvidencesPerUser(userName, ti.name, mutation, tumor, ti, treatment);
                                 }
                             });
-                            if (isChangedBy('precise', ti.description_uuid, userName, ti.description_review)) {
-                                formEvidencesPerUser(userName, ti.name, mutation, tumor, ti, null);
-                            }
                         });
                         if (isChangedBy('precise', tumor.summary_uuid, userName, tumor.summary_review)) {
                             formEvidencesPerUser(userName, 'TUMOR_TYPE_SUMMARY', mutation, tumor, null, null);
@@ -1074,45 +1066,35 @@ angular.module('oncokbApp')
                     }
                 }
                 if (TI) {
-                    if (!treatment) {
-                        if ($rootScope.geneMeta.review[TI.description_uuid]) {
-                            data.description = TI.description;
-                            dataUUID = TI.description_uuid;
-                            data.lastEdit = TI.description_review.updateTime;
-                            historyData.location = historyStr(mutation, tumor) + ', ' + data.evidenceType + ', Description';
-                            reviewObj = TI.description_review;
-                        }
-                    } else {
-                        dataUUID = treatment.name_uuid;
-                        if (!ReviewResource.mostRecent[dataUUID]) {
-                            setUpdatedSignature([treatment.name_review, treatment.level_review, treatment.indication_review, treatment.description_review], treatment.name_uuid);
-                        }
-                        data.lastEdit = ReviewResource.mostRecent[dataUUID].updateTime;
-                        data.levelOfEvidence = levelMapping[treatment.level];
-                        data.description = treatment.description;
-                        data.propagation = levelMapping[treatment.propagation];
-                        data.treatments = [];
-                        var treatments = treatment.name.split(',');
-                        var priorities = getNewPriorities(TI.treatments, [dataUUID]);
-                        for (i = 0; i < treatments.length; i++) {
-                            var drugs = treatments[i].split('+');
-                            var drugList = [];
-                            for (var j = 0; j < drugs.length; j++) {
-                                drugList.push({
-                                    drugName: drugs[j].trim(),
-                                    priority: j + 1
-                                });
-                            }
-                            data.treatments.push({
-                                approvedIndications: [treatment.indication],
-                                drugs: drugList,
-                                priority: priorities[dataUUID][drugList.map(function (drug) {
-                                    return drug.drugName;
-                                }).join(' + ')]
+                    dataUUID = treatment.name_uuid;
+                    if (!ReviewResource.mostRecent[dataUUID]) {
+                        setUpdatedSignature([treatment.name_review, treatment.level_review, treatment.indication_review, treatment.description_review], treatment.name_uuid);
+                    }
+                    data.lastEdit = ReviewResource.mostRecent[dataUUID].updateTime;
+                    data.levelOfEvidence = levelMapping[treatment.level];
+                    data.description = treatment.description;
+                    data.propagation = levelMapping[treatment.propagation];
+                    data.treatments = [];
+                    var treatments = treatment.name.split(',');
+                    var priorities = getNewPriorities(TI.treatments, [dataUUID]);
+                    for (i = 0; i < treatments.length; i++) {
+                        var drugs = treatments[i].split('+');
+                        var drugList = [];
+                        for (var j = 0; j < drugs.length; j++) {
+                            drugList.push({
+                                drugName: drugs[j].trim(),
+                                priority: j + 1
                             });
                         }
-                        historyData.location = historyStr(mutation, tumor) + ', ' + data.evidenceType + ', ' + treatment.name;
+                        data.treatments.push({
+                            approvedIndications: [treatment.indication],
+                            drugs: drugList,
+                            priority: priorities[dataUUID][drugList.map(function (drug) {
+                                return drug.drugName;
+                            }).join(' + ')]
+                        });
                     }
+                    historyData.location = historyStr(mutation, tumor) + ', ' + data.evidenceType + ', ' + treatment.name;
                 }
                 if (mutation && ['TUMOR_NAME_CHANGE', 'TREATMENT_NAME_CHANGE'].indexOf(type) === -1) {
                     var mutationStr;
@@ -1276,15 +1258,11 @@ angular.module('oncokbApp')
                     case 'Standard implications for resistance to therapy':
                     case 'Investigational implications for sensitivity to therapy':
                     case 'Investigational implications for resistance to therapy':
-                        if (!treatment) {
-                            acceptItem([{ reviewObj: ti.description_review, uuid: ti.description_uuid }], ti.description_uuid);
-                        } else {
-                            acceptItem([{ reviewObj: treatment.name_review, uuid: treatment.name_uuid },
+                        acceptItem([{ reviewObj: treatment.name_review, uuid: treatment.name_uuid },
                             { reviewObj: treatment.level_review, uuid: treatment.level_uuid },
                             { reviewObj: treatment.propagation_review, uuid: treatment.propagation_uuid },
                             { reviewObj: treatment.indication_review, uuid: treatment.indication_uuid },
                             { reviewObj: treatment.description_review, uuid: treatment.description_uuid }], treatment.name_uuid);
-                        }
                         break;
                     case 'MUTATION_NAME_CHANGE':
                         acceptItem([{ reviewObj: mutation.name_review, uuid: mutation.name_uuid }], mutation.name_uuid);
@@ -1448,7 +1426,6 @@ angular.module('oncokbApp')
                         delete tumor.cancerTypes_review.added;
                         clearReview([tumor.cancerTypes_review, tumor.summary_review, tumor.prognostic.level_review, tumor.prognostic.description_review, tumor.diagnostic.level_review, tumor.diagnostic.description_review]);
                         _.each(tumor.TIs, function (ti) {
-                            clearReview([ti.description_review]);
                             _.each(ti.treatments, function (treatment) {
                                 acceptSectionItems('treatment', mutation, tumor, ti, treatment);
                             });
