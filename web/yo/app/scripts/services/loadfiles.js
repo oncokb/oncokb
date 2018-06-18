@@ -24,14 +24,18 @@ angular.module('oncokbApp')
                 });
                 return metaDefer.promise;
             }
-            function loadMetaRealtime() {
-                var metaRelatimeDefer = $q.defer();
-                $firebaseObject(firebase.database().ref('Meta')).$bindTo($rootScope, "metaRealtime").then(function () {
-                    metaRelatimeDefer.resolve('success');
-                }, function (error) {
-                    metaRelatimeDefer.reject('Failed to bind meta firebase object');
-                });
-                return metaRelatimeDefer.promise;
+            function loadCollaborators() {
+                var collaboratorsDefer = $q.defer();
+                if ($rootScope.collaboratorsMeta) {
+                    collaboratorsDefer.resolve('success');
+                } else {
+                    $firebaseObject(firebase.database().ref('Meta/collaborators')).$bindTo($rootScope, "collaboratorsMeta").then(function () {
+                        collaboratorsDefer.resolve('success');
+                    }, function (error) {
+                        collaboratorsDefer.reject('Failed to bind meta firebase object');
+                    });
+                }                
+                return collaboratorsDefer.promise;
             }
             function loadQueues() {
                 var queuesDefer = $q.defer();
@@ -88,8 +92,8 @@ angular.module('oncokbApp')
             if (types.indexOf('meta') !== -1) {
                 apiCalls.push(loadMeta());
             }
-            if (types.indexOf('metaRealtime') !== -1) {
-                apiCalls.push(loadMetaRealtime());
+            if (types.indexOf('collaborators') !== -1) {
+                apiCalls.push(loadCollaborators());
             }
             if (types.indexOf('queues') !== -1) {
                 apiCalls.push(loadQueues());

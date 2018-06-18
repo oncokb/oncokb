@@ -26,23 +26,22 @@
                     <!-- <br/> -->
                 </div>
                 <div ng-switch-when="treatment-select" class="chosen-full-width">
-                    <div>
+                    <div style="margin-top:10px;margin-bottom:10px">
                         <select ng-disabled="!fe"
-                                chosen allow-single-deselect="true"
-                                ng-model="data[key]"
-                                ng-options="opt.value as opt.label for opt in o">
+                            chosen allow-single-deselect="true"
+                            ng-model="data[key]"
+                            ng-options="opt.value as opt.label for opt in o">
                             <option value="NA"></option>
                         </select>
-                        <div class="propagation" ng-if="content.propagationOpts.length > 0">
-                            <br/>
-                            <span>Level of Evidence in other tumor types: </span>
-                            <select ng-disabled="!fe"
-                                    chosen allow-single-deselect="true"
-                                    ng-model="data.propagation"
-                                    ng-options="opt.value as opt.name for opt in content.propagationOpts">
-                                <option value="NA"></option>
-                            </select>
-                        </div>
+                    </div>
+                    <div ng-if="content.propagationOpts.length > 0" style="margin-bottom:10px">
+                        <span>Level of Evidence in other tumor types: </span>
+                        <select ng-disabled="!fe"
+                            chosen allow-single-deselect="true"
+                            ng-model="data.propagation"
+                            ng-options="opt.value as opt.name for opt in content.propagationOpts">
+                            <option value="NA"></option>
+                        </select>
                     </div>
                 </div>
                 <div ng-switch-when="implication" class="chosen-full-width">
@@ -102,14 +101,73 @@
                           ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 2000, 'blur': 0 } }"
                           class="editEmpty">
                     </p>
-                    <br/>
                     <div ng-if="reviewLayout('name')">
                         <h4>Old Content:</h4>
                         <p ng-class="unEditableBox" contenteditable="false">{{::data[key+'_review'].lastReviewed}}</p>
                     </div>
                 </div>
                 <div ng-switch-when="treatment-select" class="chosen-full-width">
-                    <div>
+                    <div ng-if="reviewLayout('inside')" class="chosen-full-width">
+                        <div style="margin-top:10px;margin-bottom:10px">
+                            <select ng-disabled="!fe"
+                                chosen allow-single-deselect="true"
+                                ng-model="data[key]"
+                                ng-options="opt.value as opt.label for opt in o">
+                                <option value="NA"></option>
+                            </select>
+                        </div>
+                        <div ng-if="content.propagationOpts.length > 0" style="margin-bottom:10px">
+                            <span>Level of Evidence in other tumor types: </span>
+                            <select ng-disabled="!fe"
+                                chosen allow-single-deselect="true"
+                                ng-model="data.propagation"
+                                ng-options="opt.value as opt.name for opt in content.propagationOpts">
+                                <option value="NA"></option>
+                            </select>
+                        </div>
+                    </div>
+                    <div ng-if="::data[key+'_review'].lastReviewed">
+                        <h4 ng-if="reviewLayout('regular')">New Content:</h4>
+                        <select ng-disabled="!reviewContentEditable('regular')"
+                                chosen allow-single-deselect="true"
+                                ng-model="data[key]"
+                                ng-options="opt.value as opt.label for opt in o">
+                            <option value="NA"></option>
+                        </select>
+                        <div ng-if="reviewLayout('regular')">
+                            <h4>Old Content:</h4>
+                            <select ng-disabled="true"
+                                    chosen 
+                                    ng-model="data[key+'_review'].lastReviewed"
+                                    ng-options="opt.value as opt.label for opt in o">
+                                <option value="NA"></option>
+                            </select>
+                        </div>
+                    </div>
+                    <div ng-if="::data.propagation_review.lastReviewed" style="margin-top:10px;">
+                        <strong>Level of Evidence in other tumor types: </strong>
+                        <h4 ng-if="reviewLayout('regular')">New Content:</h4>
+                        <div>
+                            <select ng-disabled="!reviewContentEditable('regular')"
+                                    chosen allow-single-deselect="true"
+                                    ng-model="content.propagation"
+                                    ng-options="opt.value as opt.name for opt in content.propagationOpts">
+                                <option value="NA"></option>
+                            </select>
+                        </div>
+                        <div ng-if="reviewLayout('regular')">
+                            <h4>Old Content:</h4>
+                            <div>
+                                <select ng-disabled="true"
+                                        chosen
+                                        ng-model="data.propagation_review.lastReviewed"
+                                        ng-options="opt.value as opt.name for opt in content.propagationOpts">
+                                    <option value="NA"></option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- <div>
                         <h4 ng-if="reviewLayout('regular')">New Content:</h4>
                         <div>
                             <select ng-disabled="!reviewContentEditable('regular')"
@@ -128,30 +186,26 @@
                                     <option value="NA"></option>
                                 </select>
                             </div>
-                            <!--
-                                when level change is rejected, last reviewed propagation(if exist), will be set to treatment.name_eStatus. And it won't be updated to content.propagation before refresh page.
-                                Since we want to avoid adding more watcher, we will print out propagation from eStatus directly
-                            -->
-                            <div ng-if="rejectedAction() && es.get('propagation')">
-                                <span>Level of Evidence in other tumor types: </span>
-                                <p>{{es.get('propagation')}}</p>
-                            </div>
                         </div>
                         <div ng-if="reviewLayout('regular')">
                             <h4>Old Content:</h4>
-                            <select ng-disabled="true"
+                            <select ng-if="data[key+'_review'].lastReviewed" ng-disabled="true"
                                     chosen 
                                     ng-model="data[key+'_review'].lastReviewed"
                                     ng-options="opt.value as opt.label for opt in o">
                                 <option value="NA"></option>
                             </select>
-                            <!-- <p ng-class="unEditableBox" contenteditable="false">{{!_.isUndefined(reviewObj.lastReviewed) ? reviewObj.lastReviewed : data[key]}}</p> -->
-                            <div class="propagation" ng-if="reviewObj.has('lastReviewedPropagation')">
+                            <div class="propagation" ng-if="data.propagation_review.lastReviewed">
                                 <span>Level of Evidence in other tumor types: </span>
-                                <p ng-class="unEditableBox" contenteditable="false">{{::reviewObj.get('lastReviewedPropagation')}}</p>
+                                <select ng-disabled="true"
+                                        chosen
+                                        ng-model="data.propagation_review.lastReviewed"
+                                        ng-options="opt.value as opt.name for opt in content.propagationOpts">
+                                    <option value="NA"></option>
+                                </select>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
                 <div ng-switch-when="implication" class="chosen-full-width">
                     <div>

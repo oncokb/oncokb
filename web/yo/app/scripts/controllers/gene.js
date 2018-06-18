@@ -5,7 +5,7 @@ angular.module('oncokbApp')
         function (_, S, $resource, $interval, $timeout, $scope, $rootScope, $location, $route, $routeParams, $window, $q, dialogs, OncoKB, DatabaseConnector, SecretEmptyKey, $sce, jspdf, FindRegex, stringUtils, mainUtils, ReviewResource, loadFiles, $firebaseObject, $firebaseArray, FirebaseModel, user) {
             $window.onbeforeunload = function (event) {
                 var myName = $rootScope.me.name.toLowerCase();
-                var genesOpened = _.without($rootScope.meta.collaborators[myName], $scope.fileTitle);
+                var genesOpened = _.without($scope.collaboratorsMeta[myName], $scope.fileTitle);
                 firebase.database().ref('Meta/collaborators/' + myName).set(genesOpened).then(function (result) {
                     console.log('success');
                 }).catch(function (error) {
@@ -267,6 +267,9 @@ angular.module('oncokbApp')
             };
 
             $scope.getData = function (data) {
+                var myName = $rootScope.me.name.toLowerCase();
+                var genesOpened = _.without($scope.collaboratorsMeta[myName], $scope.fileTitle);
+                console.log(genesOpened);
             };
             function parseMutationString(mutationStr) {
                 mutationStr = mutationStr.replace(/\([^\)]+\)/g, '');
@@ -349,7 +352,9 @@ angular.module('oncokbApp')
                             ReviewResource.precise.push(uuid);
                         }
                         return true;
-                    } else return mainUtils.processedInReview('precise', uuid);
+                    } else {
+                        return mainUtils.processedInReview('precise', uuid);
+                    } 
                 }
             };
             $scope.review = function () {
@@ -399,6 +404,13 @@ angular.module('oncokbApp')
             };
             $scope.geneMainDivStyle = {
                 opacity: '1'
+            };
+            $scope.getNameStyle = function(type) {
+                if (!$scope.reviewMode) {
+                    return {float: 'left'};
+                } else if (type === 'mutation') {
+                    return {'margin-top': '20px'};
+                }
             };
             function setReview(uuid, flag) {
                 uuid = uuid;
@@ -2264,7 +2276,7 @@ angular.module('oncokbApp')
                     }
                 }
                 if (type === 'treatment') {
-                    // $scope.updatePriority(dataList, index, moveIndex);
+                    $scope.updatePriority(dataList);
                 }
                 $scope.status.preMoving = true;   
                 $scope.movingInfo.style.color = 'gray';  
@@ -2354,38 +2366,14 @@ angular.module('oncokbApp')
              * @param integer moveIndex Index is about move before that index
              * @return Promise
              */
-            $scope.updatePriority = function (list, index, moveIndex) {
+            $scope.updatePriority = function (list) {
                 var deferred = $q.defer();
-
-                // if treatment is only moved one position,
-                // only two sections will be affected.
-                // Otherwise, all treatments should be updated.
-                // Update priorities
-                var priorities = getNewPriorities(list);
-                var postData = {};
-
-                index = Number.isInteger(index) ? index : -1;
-                moveIndex = Number.isInteger(moveIndex) ? moveIndex : -1;
-
-                if (Math.abs(index - moveIndex) === 1) {
-                    var indexUUid = list[index].name_uuid;
-                    var moveIndexUUid = list[moveIndex].name_uuid;
-
-                    // If one of the section is not approved yet,
-                    // no need to trigger update.
-                    if (priorities[indexUUid] && priorities[moveIndexUUid]) {
-                        postData[indexUUid] = priorities[indexUUid];
-                        postData[moveIndexUUid] = priorities[moveIndexUUid];
-                    }
-                } else {
-                    postData = priorities;
-                }
-
+                var postData = getNewPriorities(list);
+                console.log(postData);
                 if (Object.keys(postData).length > 0) {
                     DatabaseConnector
                         .updateEvidenceTreatmentPriorityBatch(
-                            postData
-                            , function () {
+                            postData, function () {
                                 // Nothing needs to be done here
                                 console.log('Succeed to update priority.');
                                 deferred.resolve();
@@ -2424,8 +2412,8 @@ angular.module('oncokbApp')
                 var defaultPlaceHolder = 'No suggestion found. Please curate according to literature.';
                 DatabaseConnector.getSuggestedVariants()
                     .then(function (resp) {
-                        if (_.isArray(resp) && resp.length > 0) {
-                            $scope.suggestedMutations = resp;
+                        if (_.isArray(resp.data) && resp.data.length > 0) {
+                            $scope.suggestedMutations = resp.data;
                         } else {
                             $scope.suggestedMutations = [];
                         }
@@ -2438,6 +2426,7 @@ angular.module('oncokbApp')
                         }
                     });
             }
+            getSuggestedMutations();
             function getTumorSubtypes() {
                 var tempRes = [];
                 DatabaseConnector.getTumorSubtypes().then(function (result) {
@@ -2779,6 +2768,7 @@ angular.module('oncokbApp')
                 user.getAllUsers().then(function (allUsersInfo) {
                     firebase.database().ref('Meta/collaborators').on('value', function (collaborators) {
                         var allColl = collaborators.val();
+                        $scope.collaboratorsMeta = allColl;
                         var tempCollaborators = {};
                         _.each(_.keys(allColl), function (key) {
                             if (allColl[key].indexOf($scope.fileTitle) !== -1) {
@@ -2913,7 +2903,7 @@ angular.module('oncokbApp')
                     });
             }
             function watchCurrentReviewer() {
-                var ref = firebase.database().ref('Meta/APC/currentReviewer');
+                var ref = firebase.database().ref('Meta/' + $scope.fileTitle + '/currentReviewer');
                 ref.on('value', function(doc) {
                     if (!doc.val()) {
                         if ($scope.status.fileEditable === true && $scope.fileEditable === false) {
@@ -2925,7 +2915,7 @@ angular.module('oncokbApp')
                     } else if (doc.val() !== $rootScope.me.name) {
                         if ($scope.fileEditable) {
                             dialogs.notify('Warning',
-                                doc.val() + ' started to review the document, you can not change anything at this moment. We will notify you once the review is finished. Sorry for any inconvinience.');
+                                doc.val() + ' started to review the document, you can not edit at this moment. We will notify you once the review is finished. Sorry for any inconvinience.');
                                 $scope.fileEditable = false;
                         }
                         $rootScope.fileEditable = false;
