@@ -59,12 +59,10 @@
            <h3 ng-if="reviewMode">Gene Type:
                <review-panel uuid="gene.type_uuid" review-obj="gene.type_review" evidence-type="'GENE_TYPE'" obj="gene" get-evidence="getEvidence(type)" model-update="modelUpdate(type)"></review-panel>
            </h3>
-           <span style="float:left">
-              <realtime-string key="'tsg'" path="getObservePath({type: 'geneType'})" review-obj="gene.type_review" uuid="::gene.type.tsg_uuid" fe="geneEditable" t="'checkbox'" object="gene.type" objecttype="'object'" objectkey="'TSG'" checkboxes="checkboxes['TSG']" checkboxid="'TSG'"></realtime-string>
-           </span>
-           <span style="float:left">
+           <realtime-string key="'tsg'" path="getObservePath({type: 'geneType'})" review-obj="gene.type_review" uuid="::gene.type.tsg_uuid" fe="geneEditable" t="'checkbox'" object="gene.type" objecttype="'object'" objectkey="'TSG'" checkboxes="checkboxes['TSG']" checkboxid="'TSG'"></realtime-string>
+           <div style="margin-top:-25px;margin-left:150px">
               <realtime-string key="'ocg'" path="getObservePath({type: 'geneType'})" review-obj="gene.type_review" uuid="::gene.type.ocg_uuid" fe="geneEditable" t="'checkbox'" object="gene.type" objecttype="'object'" objectkey="'OCG'" checkboxes="checkboxes['OCG']" checkboxid="'OCG'"></realtime-string>
-           </span>
+           </div>
       </div>
     <div ng-if="displayPrecisely(gene.background_uuid)">
       <br/>
@@ -192,7 +190,7 @@
                     </span>
                 <div style="margin-top:-20px;margin-bottom:20px">
                     <review-panel uuid="tumor.cancerTypes_uuid" review-obj="tumor.cancerTypes_review" evidence-type="'tumor'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)"
-                                  confirm-delete="confirmDelete(type, mutation, tumor, ti, treatment)" cancel-delete="cancelDelete(type, mutation, tumor, ti, treatment)"
+                                  confirm-delete="confirmDelete(type, mutation, tumor, ti, treatment)" cancel-delete="cancelDelete(type, mutation, tumor, ti, treatment)" get-refs="getRefs(mutation, tumor, ti, treatment)"
                                   accept-added="acceptAdded(type, mutation, tumor, ti, treatment)" reject-added="rejectAdded(type, mutation, tumor, ti, treatment)"></review-panel>
                 </div>
               </div>

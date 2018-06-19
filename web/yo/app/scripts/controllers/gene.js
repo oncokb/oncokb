@@ -877,7 +877,7 @@ angular.module('oncokbApp')
                 var historyData = evidencesAllUsers[userName].historyData.deletion;
                 DatabaseConnector.deleteEvidences(deletedEvidences, historyData, function (result) {
                     _.each(deletedEvidenceModels, function (item) {
-                        var data = getDataByLayers(item.mutation, item.tumor, item.ti, item.treatment);
+                        var data = $scope.getRefs(item.mutation, item.tumor, item.ti, item.treatment);
                         var indicies = [data.mutationIndex, data.tumorIndex, data.tiIndex, data.treatmentIndex];             
                         removeModel({indicies: indicies, uuids: deletedEvidences, type: item.type});
                     });
@@ -1235,7 +1235,7 @@ angular.module('oncokbApp')
                 }
             }
             $scope.modelUpdate = function (type, mutationCopy, tumorCopy, tiCopy, treatmentCopy) {
-                var data = getDataByLayers(mutationCopy, tumorCopy, tiCopy, treatmentCopy);
+                var data = $scope.getRefs(mutationCopy, tumorCopy, tiCopy, treatmentCopy);
                 var mutation = data.mutation;
                 var tumor = data.tumor;
                 var ti = data.ti;
@@ -1453,7 +1453,8 @@ angular.module('oncokbApp')
                         break;
                 }
             }
-            function getDataByLayers(mutationCopy, tumorCopy, tiCopy, treatmentCopy) {
+
+            $scope.getRefs = function(mutationCopy, tumorCopy, tiCopy, treatmentCopy) {
                 if (!mutationCopy) {
                     // this is the gene level update such as gene summary, background and gene type
                     return true;
@@ -1513,7 +1514,7 @@ angular.module('oncokbApp')
             }
 
             $scope.acceptAdded = function (type, mutationCopy, tumorCopy, tiCopy, treatmentCopy) {
-                var data = getDataByLayers(mutationCopy, tumorCopy, tiCopy, treatmentCopy);
+                var data = $scope.getRefs(mutationCopy, tumorCopy, tiCopy, treatmentCopy);
                 var mutation = data.mutation;
                 var tumor = data.tumor;
                 var ti = data.ti;
@@ -1551,7 +1552,7 @@ angular.module('oncokbApp')
             $scope.rejectAdded = function (type, mutation, tumor, ti, treatment) {
                 var dlg = dialogs.confirm('Reminder', 'Are you sure you want to reject this change?');
                 dlg.result.then(function () {
-                    var data = getDataByLayers(mutation, tumor, ti, treatment);
+                    var data = $scope.getRefs(mutation, tumor, ti, treatment);
                     var indicies = [data.mutationIndex, data.tumorIndex, data.tiIndex, data.treatmentIndex];    
                     var tempUUIDs = getUUIDsByType(type, mutation, tumor, ti, treatment);
                     removeModel({type: type, uuids: tempUUIDs, indicies: indicies});
@@ -1946,7 +1947,7 @@ angular.module('oncokbApp')
                         location = historyStr(mutation, tumor) + ', ' + ti.name + ', ' + treatment.name;
                         break;
                 }
-                var data = getDataByLayers(mutation, tumor, ti, treatment);
+                var data = $scope.getRefs(mutation, tumor, ti, treatment);
                 var indicies = [data.mutationIndex, data.tumorIndex, data.tiIndex, data.treatmentIndex];
                 var uuids = collectUUIDs(type, obj, [], false, false);
                 var historyData = [{ operation: 'delete', lastEditBy: (type === 'tumor' ? obj.cancerTypes_review : obj.name_review).updatedBy, location: location }];
@@ -2019,7 +2020,7 @@ angular.module('oncokbApp')
                 });
             };
             function cancelDelteSection(type, mutationCopy, tumorCopy, tiCopy, treatmentCopy) {
-                var data = getDataByLayers(mutationCopy, tumorCopy, tiCopy, treatmentCopy);
+                var data = $scope.getRefs(mutationCopy, tumorCopy, tiCopy, treatmentCopy);
                 var mutation = data.mutation;
                 var tumor = data.tumor;
                 var ti = data.ti;
@@ -3051,7 +3052,6 @@ angular.module('oncokbApp')
             data.tumorRef.cancerTypes = cancerTypes;
             $modalInstance.close();
         };
-
         $scope.$watch('meta.newCancerTypes', function (n) {
             if (n.length > 0 && (n[n.length - 1].mainType || n[n.length - 1].subtype)) {
                 $scope.meta.newCancerTypes.push({

@@ -167,45 +167,6 @@
                             </div>
                         </div>
                     </div>
-                    <!-- <div>
-                        <h4 ng-if="reviewLayout('regular')">New Content:</h4>
-                        <div>
-                            <select ng-disabled="!reviewContentEditable('regular')"
-                                    chosen allow-single-deselect="true"
-                                    ng-model="data[key]"
-                                    ng-options="opt.value as opt.label for opt in o">
-                                <option value="NA"></option>
-                            </select>
-                            <div class="propagation" ng-if="!rejectedAction() && content.propagationOpts.length > 0">
-                                <span>Level of Evidence in other tumor types: </span>
-                                <select style="width:100px"
-                                        ng-disabled="!reviewContentEditable('regular')"
-                                        chosen allow-single-deselect="true"
-                                        ng-model="content.propagation"
-                                        ng-options="opt.value as opt.name for opt in content.propagationOpts">
-                                    <option value="NA"></option>
-                                </select>
-                            </div>
-                        </div>
-                        <div ng-if="reviewLayout('regular')">
-                            <h4>Old Content:</h4>
-                            <select ng-if="data[key+'_review'].lastReviewed" ng-disabled="true"
-                                    chosen 
-                                    ng-model="data[key+'_review'].lastReviewed"
-                                    ng-options="opt.value as opt.label for opt in o">
-                                <option value="NA"></option>
-                            </select>
-                            <div class="propagation" ng-if="data.propagation_review.lastReviewed">
-                                <span>Level of Evidence in other tumor types: </span>
-                                <select ng-disabled="true"
-                                        chosen
-                                        ng-model="data.propagation_review.lastReviewed"
-                                        ng-options="opt.value as opt.name for opt in content.propagationOpts">
-                                    <option value="NA"></option>
-                                </select>
-                            </div>
-                        </div>
-                    </div> -->
                 </div>
                 <div ng-switch-when="implication" class="chosen-full-width">
                     <div>
@@ -246,10 +207,8 @@
                 </div>
                 <div ng-switch-when="checkbox">
                     <div>
-                        <br/>
-                        <h4 ng-if="key !== 'ocg' && reviewLayout('regular')">New Content:</h4>
-                        <div ng-if="key === 'ocg' && reviewLayout('regular')" style="height:40px;"></div>
-                        <div>
+                        <div ng-if="key !== 'ocg' && reviewLayout('regular')"><br/><h4>New Content:</h4></div>
+                        <div ng-style="getInputStyle('new')">
                             <span ng-repeat="checkbox in checkboxes">
                               <input id="::{{uuid+$index}}"
                                       type="radio"
@@ -261,15 +220,13 @@
                             </span>
                         </div>
                     </div>
-
                     <div ng-if="reviewLayout('regular')">
                         <h4 ng-if="key !== 'ocg'">Old Content:</h4>
-                        <div ng-if="key === 'ocg'" style="height:40px;"></div>
-                        <div>
+                        <div ng-style="getInputStyle('old')">
                             <span ng-repeat="checkbox in checkboxes" class="reviewedBG">
                               <input id="::{{uuid+$index+'_review'}}"
                                       type="radio"
-                                      ng-checked="data[key+'_review'].lastReviewed === checkbox ? true : false"
+                                      ng-checked="getOldcontentChecked(checkbox)"
                                       ng-disabled="true">
                               <label for="::{{uuid+$index+'_review'}}">{{checkbox}}</label>
                             </span>
