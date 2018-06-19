@@ -43,12 +43,12 @@ angular.module('oncokbApp')
                     scope.$watch('data[key]', function (n, o) {
                         if (scope.t === 'treatment-select' && scope.key === 'level') {
                             scope.$watch('data.propagation', function(newPro, oldPro) {
-                                if (newPro !== oldPro) {
+                                if (newPro !== oldPro && (!ReviewResource.reviewMode || ReviewResource.rejected.indexOf(scope.data.propagation_uuid) === -1)) {
                                     scope.setReviewRelatedContent(newPro, oldPro, true);
                                 }
                             });
                         }
-                        if (n !== o) {     
+                        if (n !== o && (!ReviewResource.reviewMode || ReviewResource.rejected.indexOf(scope.uuid) === -1)) {     
                             $rootScope.geneMeta.lastModifiedAt = new Date().getTime();
                             $rootScope.geneMeta.lastModifiedBy = $rootScope.me.name;
                             scope.data[scope.key] = OncoKB.utils.getString(scope.data[scope.key]);                  
@@ -56,31 +56,54 @@ angular.module('oncokbApp')
                             if (scope.t === 'treatment-select' && scope.key === 'level') {
                                 scope.changePropagation();
                             }
-                            $timeout.cancel(scope.timeoutRef);
-                            if (scope.fe === true && !scope.data[scope.key+'_editing']) {
-                                scope.data[scope.key+'_editing'] = $rootScope.me.name;
-                            }
-                            if (scope.data[scope.key+'_editing'] !== $rootScope.me.name) {
-                                scope.initializeFE();
-                            }
                             if (scope.key !== 'short' && (scope.key !== 'name' || !$rootScope.moving)) {
                                 scope.setReviewRelatedContent(n, o, false);
                             }
-                            scope.timeoutRef = $timeout(function() {
-                                delete scope.data[scope.key+'_editing'];
-                                scope.initializeFE();
-                            }, 30*1000);
+                            if (scope.t === 'p' || scope.t === 'short') {
+                                $timeout.cancel(scope.timeoutRef);
+                                if (scope.fe === true && !scope.data[scope.key+'_editing']) {
+                                    scope.data[scope.key+'_editing'] = $rootScope.me.name;
+                                }
+                                if (scope.data[scope.key+'_editing'] !== $rootScope.me.name) {
+                                    scope.initializeFE();
+                                }
+                                scope.timeoutRef = $timeout(function() {
+                                    delete scope.data[scope.key+'_editing'];
+                                    scope.initializeFE();
+                                }, 10*1000);
+                            }
                         }  
                     });
                     $rootScope.$watch('rejectedUUIDs["'+scope.uuid+'"]', function(n, o) {
                         if (n !== o && n === true) {
-                            if (scope.data[scope.key+'_review']) {
-                                scope.data[scope.key] = _.clone(scope.data[scope.key+'_review'].lastReviewed);
-                                delete scope.data[scope.key+'_review'].lastReviewed;
+                            var uuid = '';
+                            var keys = [];
+                            switch(scope.key) {
+                                case 'tsg':
+                                    keys = ['tsg', 'ocg'];
+                                    break;
+                                case 'oncogenic':
+                                    keys = ['oncogenic', 'effect', 'description'];        
+                                    break;
+                                case 'level':
+                                    keys = ['level', 'description'];
+                                case 'indication':
+                                    keys = ['name', 'level', 'propagation', 'indication', 'description'];
+                                    break;     
+                                default: 
+                                    keys = [scope.key];
+                                    break;
                             }
-                            delete $rootScope.geneMeta.review[scope.uuid];                          
-                            delete $rootScope.rejectedUUIDs[scope.uuid];
-                            ReviewResource.rejected.push(scope.uuid);
+                            _.each(keys, function(keyItem) {
+                                uuid = scope.data[keyItem+'_uuid'];
+                                delete $rootScope.geneMeta.review[uuid];  
+                                delete $rootScope.rejectedUUIDs[uuid];
+                                ReviewResource.rejected.push(uuid);
+                                if (scope.data[keyItem+'_review'] && !_.isUndefined(scope.data[keyItem+'_review'].lastReviewed)) {
+                                    scope.data[keyItem] = scope.data[keyItem+'_review'].lastReviewed;
+                                    delete scope.data[keyItem+'_review'].lastReviewed;
+                                }
+                            });                 
                         }
                     });
                     $rootScope.$watch('fileEditable', function(n, o) {
@@ -99,31 +122,29 @@ angular.module('oncokbApp')
                         // 1) we track the change in two conditions:
                         // 2) When editing happens not in review mode
                         // 3) When editing happends in review mode but not from admin's "Reject" action
-                        if (!ReviewResource.reviewMode || ReviewResource.rejected.indexOf(uuid) === -1) {
-                            if (_.isUndefined(scope.data[key + '_review'])) {
-                                scope.data[key + '_review'] = {
-                                    updatedBy: $rootScope.me.name,
-                                    updateTime: new Date().getTime()
-                                };
-                            } else {
-                                if (_.isUndefined(scope.data[key + '_review'].updatedBy)) {
-                                    scope.data[key + '_review'].updatedBy = $rootScope.me.name;
-                                }
-                                if (_.isUndefined(scope.data[key + '_review'].updateTime)) {
-                                    scope.data[key + '_review'].updateTime = new Date().getTime();
-                                }
+                        if (_.isUndefined(scope.data[key + '_review'])) {
+                            scope.data[key + '_review'] = {
+                                updatedBy: $rootScope.me.name,
+                                updateTime: new Date().getTime()
+                            };
+                        } else {
+                            if (_.isUndefined(scope.data[key + '_review'].updatedBy)) {
+                                scope.data[key + '_review'].updatedBy = $rootScope.me.name;
                             }
-                            if ((!$rootScope.geneMeta.review[uuid] || _.isUndefined(scope.data[key + '_review'].lastReviewed)) && !_.isUndefined(o)) {
-                                scope.data[key + '_review'].lastReviewed = o;
-                                $rootScope.geneMeta.review[uuid] = true;                                       
-                                ReviewResource.rollback = _.without(ReviewResource.rollback, uuid);
-                            } else if (n === scope.data[key + '_review'].lastReviewed) {
-                                delete scope.data[key + '_review'].lastReviewed;
-                                delete $rootScope.geneMeta.review[uuid];
-                                // if this kind of change happens inside review mode, we track current section in rollback status to remove the review panel since there is nothing to be approved
-                                if (ReviewResource.reviewMode) {
-                                    ReviewResource.rollback.push(uuid);
-                                }
+                            if (_.isUndefined(scope.data[key + '_review'].updateTime)) {
+                                scope.data[key + '_review'].updateTime = new Date().getTime();
+                            }
+                        }
+                        if ((!$rootScope.geneMeta.review[uuid] || _.isUndefined(scope.data[key + '_review'].lastReviewed)) && !_.isUndefined(o)) {
+                            scope.data[key + '_review'].lastReviewed = o;
+                            $rootScope.geneMeta.review[uuid] = true;                                       
+                            ReviewResource.rollback = _.without(ReviewResource.rollback, uuid);
+                        } else if (n === scope.data[key + '_review'].lastReviewed) {
+                            delete scope.data[key + '_review'].lastReviewed;
+                            delete $rootScope.geneMeta.review[uuid];
+                            // if this kind of change happens inside review mode, we track current section in rollback status to remove the review panel since there is nothing to be approved
+                            if (ReviewResource.reviewMode) {
+                                ReviewResource.rollback.push(uuid);
                             }
                         }
                     }
@@ -233,6 +254,23 @@ angular.module('oncokbApp')
                     }
                     return classResult;
                 };
+                $scope.getInputStyle = function(type) {
+                    if ($scope.key === 'ocg' && $scope.reviewLayout('regular')) {
+                        if (type === 'new') {
+                            return {'margin-top': "-85px"};
+                        } else if (type === 'old') {
+                            return {'margin-top': "35px"};
+                        }
+                    }
+                };
+                $scope.getOldcontentChecked = function(checkbox) {
+                    if ($scope.key === 'tsg' || $scope.key === 'ocg') {
+                        if (_.isUndefined($scope.data[$scope.key+'_review'].lastReviewed)) {
+                            return $scope.data[$scope.key] === checkbox;
+                        }
+                    } 
+                    return $scope.data[$scope.key+'_review'].lastReviewed === checkbox;
+                }
                 $scope.reviewLayout = function (type) {
                     if (type === 'regular') {
                         // display the new header, and difference header and content only when the item is not inside an added/deleted sections, and haven't accepted or rejected yet

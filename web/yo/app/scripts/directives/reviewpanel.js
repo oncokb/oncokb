@@ -28,6 +28,7 @@ angular.module('oncokbApp')
                 modelUpdateInGene: '&modelUpdate',
                 acceptAddedInGene: '&acceptAdded',
                 rejectAddedInGene: '&rejectAdded',
+                getRefsInGene: '&getRefs',
                 uuid: '=',
                 reviewObj: '='
             },
@@ -233,141 +234,61 @@ angular.module('oncokbApp')
                         });
                     }
                 };
-                function setRejectedUUIDs(uuids) {
-                    _.each(uuids, function(uuid) {
-                        if ($rootScope.geneMeta.review[uuid]) {
-                            $rootScope.rejectedUUIDs[uuid] = true;
-                        }
-                    });
-                }
                 $scope.reject = function() {
                     var dlg = dialogs.confirm('Reminder', 'Are you sure you want to reject this change?');
                     dlg.result.then(function() {
-                        var uuid = $scope.uuid; // uuid that is used as evidence identifier in the database
-                        var items = [];
-                        var uuids = [];
-                        $scope.bothChanged = false;
                         ReviewResource.rejected.push($scope.uuid);
+                        var uuid = ''; // uuid is the one tracked in realtime string directive                        
                         switch ($scope.adjustedEvidenceType) {
-                        case 'GENE_SUMMARY':
-                            uuids.push($scope.obj.summary_uuid);
-                            break;
-                        case 'GENE_BACKGROUND':
-                            uuids.push($scope.obj.background_uuid);
-                            break;
-                        case 'GENE_TYPE':
-                            uuids = [$scope.obj.type.tsg_uuid, $scope.obj.type.ocg_uuid];
-                            break;
-                        case 'MUTATION_EFFECT':
-                            var oncogenicUUID = $scope.mutation.mutation_effect.oncogenic_uuid;
-                            var effectUUID = $scope.mutation.mutation_effect.effect_uuid;
-                            var descriptionUUID = $scope.mutation.mutation_effect.description_uuid;
-                            $scope.oncogenicLastUpdateTime = new Date().getTime();
-                            $scope.effectLastUpdateTime = new Date().getTime();
-
-                            var oncogenicChange = $rootScope.geneMeta.review[oncogenicUUID];
-                            var effectChange = $rootScope.geneMeta.review[effectUUID] || $rootScope.geneMeta.review[descriptionUUID];
-                            if(oncogenicChange && effectChange) {
-                                uuids = [oncogenicUUID, effectUUID, descriptionUUID];
-                                $scope.bothChanged = true;
-                                DatabaseConnector.getEvidencesByUUIDs([oncogenicUUID, effectUUID], function(result) {
-                                    if (result && result.status) {
-                                        var resultJSON = JSON.parse(result.status);
-                                        if (_.isArray(resultJSON)) {
-                                            _.each(resultJSON, function(eviFromDB) {
-                                                if(eviFromDB) {
-                                                    setUpdateTimeEffectSection(eviFromDB, oncogenicUUID, effectUUID);
-                                                }
-                                            });
-                                        }
-                                    }
-                                }, function(error) {
-                                    console.log('Failed to fetch evidence based on uuid', error);
-                                });
-                            } else {
-                                if(oncogenicChange) uuids.push(oncogenicUUID);
-                                if(effectChange) uuids.push(effectUUID);
-                            }
-                            break;
-                        case 'TUMOR_TYPE_SUMMARY':
-                            uuids.push($scope.tumor.summary_uuid);
-                            break;
-                        case 'PROGNOSTIC_IMPLICATION':
-                            uuids = [$scope.tumor.prognostic.level_uuid, $scope.tumor.prognostic.description_uuid];
-                            break;
-                        case 'DIAGNOSTIC_IMPLICATION':
-                            uuids = [$scope.tumor.diagnostic.level_uuid, $scope.tumor.diagnostic.description_uuid];
-                        break;
-                        case 'Standard implications for sensitivity to therapy':
-                        case 'Standard implications for resistance to therapy':
-                        case 'Investigational implications for sensitivity to therapy':
-                        case 'Investigational implications for resistance to therapy':
-                            if (!$scope.treatment) {
-                                uuids = [$scope.therapyCategory.description_uuid];
-                            } else {
-                                uuids = [$scope.treatment.level_uuid, $scope.treatment.propagation_uuid, $scope.treatment.indication_uuid, $scope.treatment.description_uuid];
-                            }
-                            break;
-                        case 'MUTATION_NAME_CHANGE':
-                            uuid = '';
-                            items = [{obj: $scope.mutation.name, reviewObj: $scope.mutation.name_review, uuid: $scope.mutation.name_uuid}];
-                            break;
-                        case 'TUMOR_NAME_CHANGE':
-                            uuid = '';
-                            items = [{reviewObj: $scope.tumor.cancerTypes_review, uuid: $scope.tumor.name_uuid, tumorNameReview: $scope.tumor.name_review}];
-                            break;
-                        case 'TREATMENT_NAME_CHANGE':
-                            uuid = '';
-                            items = [{obj: $scope.treatment.name, reviewObj: $scope.treatment.name_review, uuid: $scope.treatment.name_uuid}];
-                            break;
-                        default:
-                            break;
-                        }
-                        setRejectedUUIDs(uuids);
-                        if ($scope.adjustedEvidenceType !== 'GENE_TYPE') {
-                            DatabaseConnector.getEvidencesByUUID(uuid, function(result) {
-                                if (result && result.status) {
-                                    var resultJSON = JSON.parse(result.status);
-                                    if (_.isArray(resultJSON) && resultJSON.length > 0) {
-                                        var eviFromDB = resultJSON[0];
-                                        $scope.lastUpdateTime = eviFromDB.lastEdit;
-                                    }
+                            case 'GENE_SUMMARY':
+                                uuid = $scope.obj.summary_uuid;
+                                break;
+                            case 'GENE_BACKGROUND':
+                                uuid = $scope.obj.background_uuid;
+                                break;
+                            case 'GENE_TYPE':
+                                uuid = $scope.obj.type.tsg_uuid;
+                                break;
+                            case 'MUTATION_EFFECT':
+                                uuid = $scope.mutation.mutation_effect.oncogenic_uuid;
+                                break;
+                            case 'TUMOR_TYPE_SUMMARY':
+                                uuid = $scope.tumor.summary_uuid;
+                                break;
+                            case 'PROGNOSTIC_IMPLICATION':
+                                uuid = $scope.tumor.prognostic.level_uuid;
+                                break;
+                            case 'DIAGNOSTIC_IMPLICATION':
+                                uuid = $scope.tumor.diagnostic.level_uuid;
+                                break;
+                            case 'Standard implications for sensitivity to therapy':
+                            case 'Standard implications for resistance to therapy':
+                            case 'Investigational implications for sensitivity to therapy':
+                            case 'Investigational implications for resistance to therapy':
+                                uuid = $scope.treatment.indication_uuid;
+                                break;
+                            case 'MUTATION_NAME_CHANGE':
+                                uuid = $scope.mutation.name_uuid;
+                                break;
+                            case 'TUMOR_NAME_CHANGE':
+                                var tumorRef = $scope.getRefs($scope.mutation, $scope.tumor, $scope.ti, $scope.treatment).tumor;
+                                if (tumorRef.cancerTypes_review && tumorRef.cancerTypes_review.lastReviewed) {
+                                    tumorRef.cancerTypes = tumorRef.cancerTypes_review.lastReviewed;
+                                    delete tumorRef.cancerTypes_review.lastReviewed;;
                                 }
-                                specialCases();
-                            }, function(error) {
-                                console.log('Failed to fetch evidence based on uuid', error);
-                            });
-                        } else if(!$scope.bothChanged) {
-                            specialCases();
+                                delete $rootScope.geneMeta.review[tumorRef.cancerTypes_uuid];  
+                                break;
+                            case 'TREATMENT_NAME_CHANGE':
+                                uuid = $scope.treatment.name_uuid;
+                                break;
+                            default:
+                                break;
+                        }
+                        if (uuid) {
+                            $rootScope.rejectedUUIDs[uuid] = true;
                         }
                     });
                 };
-                function setUpdateTimeEffectSection(eviFromDB, oncogenicUUID, effectUUID) {
-                    if(eviFromDB.lastEdit) {
-                        if(eviFromDB.uuid === oncogenicUUID) {
-                            $scope.oncogenicLastUpdateTime = eviFromDB.lastEdit;
-                        } else if(eviFromDB.uuid === effectUUID) {
-                            $scope.effectLastUpdateTime = eviFromDB.lastEdit;
-                        }
-                    }
-                }
-                function specialCases() {
-                    switch ($scope.adjustedEvidenceType) {
-                    case 'TUMOR_NAME_CHANGE':
-                        var lastReviewed = $rootScope.model.createList();
-                        _.each($scope.tumor.cancerTypes_review.lastReviewed, function(ct) {
-                            var cancerType = $rootScope.model.create(OncoKB.CancerType);
-                            cancerType.cancerType.setText(ct.cancerType);
-                            cancerType.subtype.setText(ct.subtype);
-                            cancerType.oncoTreeCode.setText(ct.oncoTreeCode);
-                            lastReviewed.push(cancerType);
-                        });
-                        $scope.tumor.cancerTypes = lastReviewed;
-                        break;
-                    default:
-                        break;
-                    }
-                }
                 $scope.confirmDelete = function(type, mutation, tumor, therapyCategory, treatment) {
                     $scope.confirmDeleteInGene({
                         type: type, mutation: mutation, tumor: tumor, therapyCategory: therapyCategory, treatment: treatment
@@ -391,6 +312,11 @@ angular.module('oncokbApp')
                 $scope.modelUpdate = function(type, mutation, tumor, therapyCategory, treatment) {
                     $scope.modelUpdateInGene({
                         type: type, mutation: mutation, tumor: tumor, therapyCategory: therapyCategory, treatment: treatment
+                    });
+                };
+                $scope.getRefs = function(mutation, tumor, therapyCategory, treatment) {
+                    return $scope.getRefsInGene({
+                        mutationCopy: mutation, tumorCopy: tumor, tiCopy: therapyCategory, treatmentCopy: treatment
                     });
                 };
                 $scope.inReviewMode = function () {
