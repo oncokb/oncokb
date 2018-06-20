@@ -491,10 +491,9 @@ angular.module('oncokbApp')
                     });
                 } else {
                     PrivateApiUtils.getSuggestedVariants()
-                        .success(function(data) {
+                        .then(function(data) {
                             deferred.resolve(data);
-                        })
-                        .error(function(result) {
+                        }, function(result) {
                             deferred.reject(result);
                         });
                 }
@@ -510,10 +509,9 @@ angular.module('oncokbApp')
                     });
                 } else {
                     PrivateApiUtils.isHotspot(hugoSymbol, variant)
-                        .success(function(data) {
+                        .then(function(data) {
                             deferred.resolve(data);
-                        })
-                        .error(function(result) {
+                        }, function(result) {
                             deferred.reject(result);
                         });
                 }
