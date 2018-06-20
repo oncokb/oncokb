@@ -91,6 +91,37 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         return new ArrayList<>(result);
     }
 
+    @Override
+    public List<Alteration> findMutationsByConsequenceAndPositionOnSamePosition(Gene gene, VariantConsequence consequence, int start, int end, Collection<Alteration> alterations) {
+        Set<Alteration> result = new HashSet<>();
+
+        if (alterations != null && alterations.size() > 0) {
+            for (Alteration alteration : alterations) {
+                if (alteration.getGene().equals(gene) && alteration.getConsequence() != null
+                    && alteration.getConsequence().equals(consequence)
+                    && alteration.getProteinStart() != null
+                    && alteration.getProteinEnd() != null
+                    && alteration.getProteinStart().equals(alteration.getProteinEnd())
+                    && alteration.getProteinStart() >= start
+                    && alteration.getProteinStart() <= end) {
+                    result.add(alteration);
+                }
+            }
+        } else {
+            Collection<Alteration> queryResult;
+            if (CacheUtils.isEnabled()) {
+                queryResult = CacheUtils.findMutationsByConsequenceAndPositionOnSamePosition(gene, consequence, start, end);
+            } else {
+                queryResult = getDao().findMutationsByConsequenceAndPositionOnSamePosition(gene, consequence, start, end);
+            }
+            if (queryResult != null) {
+                result.addAll(queryResult);
+            }
+        }
+
+        return new ArrayList<>(result);
+    }
+
     /**
      * Find all relevant alterations. The order is important. The list should be generated based on priority.
      *
@@ -210,6 +241,14 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         if (includeAlternativeAllele && alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant"))) {
             alterations.addAll(AlterationUtils.getAlleleAlterations(alteration, fullAlterations));
             List<Alteration> includeRangeAlts = findMutationsByConsequenceAndPosition(alteration.getGene(), alteration.getConsequence(), alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations);
+
+            // For missense mutation, also include positioned
+            VariantConsequence variantConsequence = new VariantConsequence();
+            variantConsequence.setTerm("NA");
+            List<Alteration> positionVariants = findMutationsByConsequenceAndPositionOnSamePosition(alteration.getGene(), variantConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations);
+
+            includeRangeAlts.addAll(positionVariants);
+
             for (Alteration alt : includeRangeAlts) {
                 if (!alterations.contains(alt)) {
                     alterations.add(alt);

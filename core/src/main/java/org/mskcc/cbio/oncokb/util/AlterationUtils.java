@@ -846,6 +846,19 @@ public final class AlterationUtils {
         return variants;
     }
 
+    public static boolean isPositionVariant(Alteration alteration) {
+        boolean isPositionVariant = false;
+        if (alteration != null
+            && alteration.getProteinStart() != null
+            && alteration.getProteinEnd() != null
+            && alteration.getProteinStart().equals(alteration.getProteinEnd())
+            && alteration.getRefResidues() != null && alteration.getRefResidues().length() == 1
+            && alteration.getVariantResidues() == null
+            )
+            isPositionVariant = true;
+        return isPositionVariant;
+    }
+
     private static Set<String> getSpecialVariant() {
         Set<String> variants = new HashSet<>();
         for (SpecialVariant variant : SpecialVariant.values()) {

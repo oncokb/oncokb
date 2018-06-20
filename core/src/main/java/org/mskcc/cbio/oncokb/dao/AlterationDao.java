@@ -15,30 +15,40 @@ import org.mskcc.cbio.oncokb.model.VariantConsequence;
  * @author jgao
  */
 public interface AlterationDao extends GenericDao<Alteration, Integer> {
-    
+
     /**
      * Get set of alterations by entrez gene Id.
      * @param gene
-     * @return 
+     * @return
      */
     List<Alteration> findAlterationsByGene(Gene gene);
-    
+
     /**
-     * 
+     *
      * @param gene
      * @param alterationType
      * @param alteration
-     * @return 
+     * @return
      */
     Alteration findAlteration(Gene gene, AlterationType alterationType, String alteration);
-    
+
     /**
-     * 
+     *
      * @param gene
      * @param consequence
      * @param start
      * @param end
-     * @return 
+     * @return
      */
     List<Alteration> findMutationsByConsequenceAndPosition(Gene gene, VariantConsequence consequence, int start, int end);
+
+    /**
+     *
+     * @param gene
+     * @param consequence
+     * @param start
+     * @param end
+     * @return
+     */
+    List<Alteration> findMutationsByConsequenceAndPositionOnSamePosition(Gene gene, VariantConsequence consequence, int start, int end);
 }

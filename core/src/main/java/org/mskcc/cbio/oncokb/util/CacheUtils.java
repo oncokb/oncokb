@@ -328,6 +328,19 @@ public class CacheUtils {
         return alterations;
     }
 
+    public static Set<Alteration> findMutationsByConsequenceAndPositionOnSamePosition(Gene gene, VariantConsequence consequence, int start, int end) {
+        Set<Alteration> alterations = new HashSet<>();
+        for (Alteration alteration : getAlterations(gene.getEntrezGeneId())) {
+            if (alteration.getConsequence().equals(consequence)
+                && alteration.getProteinStart().equals(alteration.getProteinEnd())
+                && alteration.getProteinStart() >= start
+                && alteration.getProteinStart() <= end) {
+                alterations.add(alteration);
+            }
+        }
+        return alterations;
+    }
+
     public static Boolean containAlterations(Integer entrezGeneId) {
         synAlterations();
         return alterations.containsKey(entrezGeneId) ? true : false;
