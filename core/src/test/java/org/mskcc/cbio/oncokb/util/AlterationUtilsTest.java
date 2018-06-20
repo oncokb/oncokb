@@ -72,6 +72,7 @@ public class AlterationUtilsTest {
                 // NA
                 {"BCR-ABL1 Fusion", "-1", "100000", null, null, "NA"},
                 {"Oncogenic Mutations", "-1", "100000", null, null, "NA"},
+                {"V600", "600", "600", "V", null, "NA"},
 
                 // Splice
                 {"X405_splice", "405", "405", null, null, "splice_region_variant"},

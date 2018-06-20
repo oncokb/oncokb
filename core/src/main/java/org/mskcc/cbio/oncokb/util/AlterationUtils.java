@@ -82,7 +82,7 @@ public final class AlterationUtils {
             } else {
                 end = start + refL - 1;
                 if (refL > 1 || varL > 1) {
-                    // Handle inframe insertion/deletion event. Exp: IK744K
+                    // Handle in-frame insertion/deletion event. Exp: IK744K
                     if (refL > varL) {
                         consequence = "inframe_deletion";
                     } else if (refL < varL) {
@@ -90,8 +90,10 @@ public final class AlterationUtils {
                     } else {
                         consequence = "missense_variant";
                     }
-                } else {
+                } else if (refL == 1 && varL == 1) {
                     consequence = "missense_variant";
+                } else {
+                    consequence = "NA";
                 }
             }
         } else {
