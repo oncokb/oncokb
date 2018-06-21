@@ -123,18 +123,10 @@ angular.module('oncokbApp')
                         // 2) When editing happens not in review mode
                         // 3) When editing happends in review mode but not from admin's "Reject" action
                         if (_.isUndefined(scope.data[key + '_review'])) {
-                            scope.data[key + '_review'] = {
-                                updatedBy: $rootScope.me.name,
-                                updateTime: new Date().getTime()
-                            };
-                        } else {
-                            if (_.isUndefined(scope.data[key + '_review'].updatedBy)) {
-                                scope.data[key + '_review'].updatedBy = $rootScope.me.name;
-                            }
-                            if (_.isUndefined(scope.data[key + '_review'].updateTime)) {
-                                scope.data[key + '_review'].updateTime = new Date().getTime();
-                            }
+                            scope.data[key + '_review'] = {};
                         }
+                        scope.data[key + '_review'].updatedBy = $rootScope.me.name;
+                        scope.data[key + '_review'].updateTime = new Date().getTime();
                         if ((!$rootScope.geneMeta.review[uuid] || _.isUndefined(scope.data[key + '_review'].lastReviewed)) && !_.isUndefined(o)) {
                             scope.data[key + '_review'].lastReviewed = o;
                             $rootScope.geneMeta.review[uuid] = true;                                       

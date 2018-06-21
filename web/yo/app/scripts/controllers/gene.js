@@ -348,9 +348,6 @@ angular.module('oncokbApp')
                     if (mainUtils.processedInReview('inside', uuid)) {
                         return true;
                     } else if ($rootScope.geneMeta.review[uuid]) {
-                        if (!mainUtils.processedInReview('precise', uuid)) {
-                            ReviewResource.precise.push(uuid);
-                        }
                         return true;
                     } else {
                         return mainUtils.processedInReview('precise', uuid);
@@ -396,7 +393,6 @@ angular.module('oncokbApp')
                 ReviewResource.added = [];
                 ReviewResource.removed = [];
                 ReviewResource.mostRecent = {};
-                ReviewResource.precise = [];
                 $scope.setSectionOpenStatus('close', $scope.sectionUUIDs);
             };
             $scope.developerCheck = function () {
@@ -730,10 +726,9 @@ angular.module('oncokbApp')
             function isChangedBy(type, uuid, userName, reviewObj) {
                 if (uuid) {
                     if (type === 'section') {
-                        uuid = uuid;
                         return uuid && $scope.sectionUUIDs.indexOf(uuid) !== -1 && ReviewResource.mostRecent[uuid] && ReviewResource.mostRecent[uuid].updatedBy === userName;
                     } else if (type === 'precise') {
-                        return mainUtils.processedInReview('precise', uuid) && reviewObj && reviewObj.updatedBy === userName;
+                        return $rootScope.geneMeta.review[uuid] && reviewObj && reviewObj.updatedBy === userName;
                     }
                 } else {
                     return false;
@@ -759,14 +754,15 @@ angular.module('oncokbApp')
                 if (isChangedBy('precise', $scope.gene.background_uuid, userName, $scope.gene.background_review)) {
                     formEvidencesPerUser(userName, 'GENE_BACKGROUND', null, null, null, null);
                 }
-                if (isChangedBy('precise', $scope.gene.type_uuid, userName, $scope.gene.type_review)) {
+                if (isChangedBy('precise', $scope.gene.type.tsg_uuid, userName, $scope.gene.type.tsg_review) 
+                    || isChangedBy('precise', $scope.gene.type.ocg_uuid, userName, $scope.gene.type.ocg_review)) {
                     evidencesAllUsers[userName].geneTypeEvidence = {
                         hugoSymbol: $scope.gene.name,
-                        oncogene: $scope.gene.type.get('OCG') ? true : false,
-                        tsg: $scope.gene.type.get('TSG') ? true : false
+                        oncogene: $scope.gene.type.ocg ? true : false,
+                        tsg: $scope.gene.type.tsg ? true : false
                     };
                     evidencesAllUsers[userName].historyData.geneType = [{
-                        lastEditBy: $scope.gene.type_review.updatedBy,
+                        lastEditBy: $scope.gene.type.tsg_review.updatedBy || $scope.gene.type.ocg_review.updatedBy,
                         operation: 'update',
                         uuids: $scope.gene.type_uuid,
                         location: 'Gene Type'
@@ -1372,10 +1368,8 @@ angular.module('oncokbApp')
                     tempType = 'TI';
                 }
                 if (type === 'TI') {
-                    typeArr = [ti.name];
                     dataArr = ti.treatments;
                     tempType = 'treatment';
-                    formEvidencesByType(typeArr, mutation, tumor, ti, null, evidences, historyData);
                 }
                 if (type === 'treatment') {
                     typeArr = [ti.name];
@@ -2370,7 +2364,6 @@ angular.module('oncokbApp')
             $scope.updatePriority = function (list) {
                 var deferred = $q.defer();
                 var postData = getNewPriorities(list);
-                console.log(postData);
                 if (Object.keys(postData).length > 0) {
                     DatabaseConnector
                         .updateEvidenceTreatmentPriorityBatch(
@@ -2549,17 +2542,6 @@ angular.module('oncokbApp')
             };
             $scope.levels = getLevels();
             $scope.fileEditable = false;
-            $scope.docStatus = {
-                saved: true,
-                saving: false,
-                closed: false,
-                savedGene: true,
-                updateGene: false
-            };
-            $scope.metaDocStatus = {
-                saved: true,
-                saving: false
-            };
             $scope.addMutationPlaceholder = 'Mutation Name';
             $scope.userRole = $rootScope.me.role;
             $rootScope.userRole = $rootScope.me.role;
@@ -2748,21 +2730,12 @@ angular.module('oncokbApp')
             $scope.treatmentsByII = {};
             $scope.bindTumors = function (obj) {
                 $scope.tumorsByMutation[obj.uuid] = $firebaseArray(firebase.database().ref(getRefByPath(obj.path)));
-                _.each($scope.tumorsByMutation[obj.uuid], function (tumor) {
-                    $scope.initialOpen[tumor.cancerTypes_uuid] = false;
-                });
             };
             $scope.bindTIs = function (obj) {
                 $scope.TIsByTumor[obj.uuid] = $firebaseArray(firebase.database().ref(getRefByPath(obj.path)));
-                _.each($scope.TIsByTumor[obj.uuid], function (ti) {
-                    $scope.initialOpen[ti.name_uuid] = false;
-                });
             };
             $scope.bindTreatments = function (obj) {
                 $scope.treatmentsByII[obj.uuid] = $firebaseArray(firebase.database().ref(getRefByPath(obj.path)));
-                _.each($scope.treatmentsByII[obj.uuid], function (treatment) {
-                    $scope.initialOpen[treatment.name_uuid] = false;
-                });
             }
             function getAllCollaborators() {
                 var defer = $q.defer();

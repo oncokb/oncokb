@@ -8,7 +8,7 @@
  * Controller of the oncokbApp
  */
 angular.module('oncokbApp')
-    .controller('NavCtrl', function($scope, $location, $rootScope, config, DatabaseConnector, $firebaseAuth, $firebaseObject, user) {
+    .controller('NavCtrl', function($scope, $location, $rootScope, $q, DatabaseConnector, $firebaseAuth, $firebaseObject, user) {
         var tabs = {
             variant: 'Variant Annotation',
             genes: 'Genes',
@@ -16,37 +16,6 @@ angular.module('oncokbApp')
             feedback: 'Feedback',
             queues: 'Curation Queue'
         };
-
-        var accessLevels = config.accessLevels;
-        function loginCallback() {
-            // console.log('In login callback.');
-
-            testInternal(function() {
-                if ($scope.$$phase) {
-                    setParams();
-                } else {
-                    $scope.$apply(setParams);
-                }
-                // $rootScope.$apply(function() {
-                var url = access.getURL();
-                // console.log('Current URL:', url);
-                if (url) {
-                    // console.log('is logged in? ', access.isLoggedIn());
-                    if (access.isLoggedIn()) {
-                        access.setURL('');
-                        $location.path(url);
-                    }
-                } else if (access.isLoggedIn() && access.authorize(config.accessLevels.curator)) {
-                    // console.log('logged in and has authorize.');
-                    $location.path('/genes');
-                } else {
-                    // console.log('is logged in? ', access.isLoggedIn());
-                    // console.log('does not have access? ', access.authorize(config.accessLevels.curator));
-                    $location.path('/');
-                }
-                // });
-            });
-        }
 
         function setParams() {
             var filterTabs = [];
@@ -61,19 +30,16 @@ angular.module('oncokbApp')
             $scope.tabs = filterTabs;
         }
 
-        function testInternal(callback) {
+        function testInternal() {
+            var defer = $q.defer();
             DatabaseConnector.testAccess(function() {
                 $rootScope.internal = true;
-                if (angular.isFunction(callback)) {
-                    callback();
-                }
+                defer.resolve();
             }, function(data, status, headers, config) {
-                console.log(data, status, headers, config);
                 $rootScope.internal = false;
-                if (angular.isFunction(callback)) {
-                    callback();
-                }
+                defer.resolve();
             });
+            return defer.promise;
         }
         $firebaseAuth().$onAuthStateChanged(function(firebaseUser) {
             if (firebaseUser) {
@@ -81,7 +47,10 @@ angular.module('oncokbApp')
                 user.setRole(firebaseUser).then(function() {
                     $scope.user = $rootScope.me;
                     setParams();
-                    $location.url('/genes');
+                    testInternal().then(function() {
+                        $location.url('/genes');
+                        console.log($rootScope.internal);
+                    });                    
                 }, function(error) {
                 });
             } else {
@@ -105,40 +74,6 @@ angular.module('oncokbApp')
                 $location.path('/');
                 $scope.tabs = [];
             });
-        };
-
-        $scope.tabIsActive = function(route) {
-            if (route instanceof Array) {
-                for (var i = route.length - 1; i >= 0; i--) {
-                    if (route[i] === $location.path()) {
-                        return true;
-                    }
-                }
-                return false;
-            }
-            return route === $location.path();
-        };
-
-        // When callback is received, we need to process authentication.
-        $scope.signInCallback = function(authResult) {
-            // Do a check if authentication has been successful.
-            // console.log('In processAuth');
-
-            if (authResult.access_token) {
-                // Successful sign in.
-                // $scope.signedIn = true;
-                //  console.log('access success', authResult);
-                access.login(loginCallback);
-            } else if (authResult.error) {
-                // Error while signing in.
-                // $scope.signedIn = false;
-                console.log('access failed', authResult);
-                loginCallback();
-                // Report error.
-            } else {
-                console.log('access failed and does not have error.', authResult);
-                loginCallback();
-            }
         };
 
         // This flag we use to show or hide the button in our HTML.
