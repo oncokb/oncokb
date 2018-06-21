@@ -59,12 +59,6 @@ function getString(string) {
 OncoKB.utils = {
     getString: getString
 };
-OncoKB.keyMappings = {type: {TSG: '', OCG: ''}};
-
-OncoKB.initialize = function() {
-    firebase.initializeApp(OncoKB.config.firebaseConfig);
-};
-
 var oncokbApp = angular.module('oncokbApp', [
     'ngAnimate',
     'ngCookies',
@@ -98,49 +92,39 @@ var oncokbApp = angular.module('oncokbApp', [
     .constant('Tree', window.Tree)
     .constant('UUIDjs', window.UUIDjs)
     .config(function($provide, $locationProvider, $routeProvider, $sceProvider, dialogsProvider, $animateProvider, x2jsProvider, config) {
-        var access = config.accessLevels;
 
-        // $locationProvider.html5Mode(true);
         $routeProvider
             .when('/', {
                 templateUrl: 'views/welcome.html',
-                access: access.public,
                 internalUse: false
             })
             .when('/variant', {
                 templateUrl: 'views/variant.html',
                 controller: 'VariantCtrl',
                 reloadOnSearch: false,
-                access: access.admin,
                 internalUse: true
             })
             .when('/tools', {
                 templateUrl: 'views/tools.html',
                 controller: 'ToolsCtrl',
-                access: access.admin,
                 internalUse: true
             })
             .when('/genes', {
                 templateUrl: 'views/genes.html',
                 controller: 'GenesCtrl',
-                access: access.curator,
                 internalUse: false
             })
             .when('/gene/:geneName', {
                 templateUrl: 'views/gene.html',
                 controller: 'GeneCtrl',
-                access: access.curator,
                 internalUse: false
             })
             .when('/feedback', {
                 templateUrl: 'views/feedback.html',
-                // controller: 'FeedbackCtrl',
-                access: access.admin,
                 internalUse: true
             })
             .when('/queues', {
-                templateUrl: 'views/queues.html',
-                access: access.curator
+                templateUrl: 'views/queues.html'
             })
             .otherwise({
                 redirectTo: '/'
@@ -302,13 +286,7 @@ angular.module('oncokbApp').run(
         $http.get('data/config.json').then(function(response) {
             if (_.isObject(response.data)) {
                 OncoKB.config = $.extend(true, OncoKB.config, response.data);
-                OncoKB.config.accessLevels = {
-                    public: OncoKB.config.userRoles.public | OncoKB.config.userRoles.user | OncoKB.config.userRoles.curator | OncoKB.config.userRoles.admin,
-                    user: OncoKB.config.accessLevels.public,
-                    curator: OncoKB.config.userRoles.curator | OncoKB.config.userRoles.admin,
-                    admin: OncoKB.config.userRoles.admin
-                };
-                OncoKB.initialize();
+                firebase.initializeApp(OncoKB.config.firebaseConfig);
                 oncokbApp.constant('config', OncoKB.config);
                 bootstrapApplication();
             }

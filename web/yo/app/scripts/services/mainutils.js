@@ -277,8 +277,6 @@ angular.module('oncokbApp')
                 return ReviewResource.removed.indexOf(uuid) !== -1;
             case 'loading':
                 return ReviewResource.loading.indexOf(uuid) !== -1;
-            case 'precise':
-                return ReviewResource.precise.indexOf(uuid) !== -1;
             default:
                 return false;
             }
