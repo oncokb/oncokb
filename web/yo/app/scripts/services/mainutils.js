@@ -392,35 +392,38 @@ angular.module('oncokbApp')
          * **/
         function getOncoTreeMainTypes() {
             var deferred = $q.defer();
-            DatabaseConnector.getOncoTreeMainTypes()
+            DatabaseConnector.getAllOncoTreeMainTypes()
                 .then(function(result) {
                     if (result) {
                         result = result.concat(['All Liquid Tumors', 'All Solid Tumors', 'All Tumors', 'Germline Disposition', 'All Pediatric Tumors', 'Other Tumor Types']);
-                        DatabaseConnector.getOncoTreeTumorTypesByMainTypes(result).then(function(tumorTypesResult) {
-                            if (result.length !== tumorTypesResult.length) {
-                                deferred.reject('The number of returned tumor types is not matched with number of main types.');
-                            } else {
-                                var mainTypesResult = _.map(result, function(item, index) {
-                                    return {
-                                        id: index,
-                                        name: item
+                        DatabaseConnector.getAllOncoTreeSubtypes().then(function(allSubtypes) {
+                            var mainTypesResult = _.map(result, function(item, index) {
+                                return {
+                                    id: index,
+                                    name: item
+                                };
+                            });
+                            mainTypesResult.push({
+                                id: result.length,
+                                name: 'NA'
+                            });
+                            var tumorTypesResult = {};
+                            _.each(allSubtypes, function(subtype) {
+                                var mainTypeName = subtype.mainType ? subtype.mainType.name : 'NA';
+                                if (!tumorTypesResult.hasOwnProperty(mainTypeName)) {
+                                    tumorTypesResult[mainTypeName] = [];
+                                }
+                                if (mainTypeName === 'NA') {
+                                    subtype.mainType = {
+                                        name: mainTypeName
                                     };
-                                });
-                                var tempMap = {};
-                                _.each(tumorTypesResult, function(items, index) {
-                                    _.each(items, function(item) {
-                                        tempMap = {
-                                            name: item.mainType,
-                                            id: index
-                                        };
-                                        item.mainType = tempMap;
-                                    });
-                                });
-                                deferred.resolve({
-                                    mainTypes: mainTypesResult,
-                                    tumorTypes: tumorTypesResult
-                                });
-                            }
+                                }
+                                tumorTypesResult[mainTypeName].push(subtype);
+                            });
+                            deferred.resolve({
+                                mainTypes: mainTypesResult,
+                                tumorTypes: tumorTypesResult
+                            });
                         }, function() {
                             // TODO: if OncoTree server returns error.
                         });
