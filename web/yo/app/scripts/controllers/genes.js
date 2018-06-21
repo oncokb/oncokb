@@ -4,11 +4,11 @@ angular.module('oncokbApp')
     .controller('GenesCtrl', ['$window', '$scope', '$rootScope', '$location', '$timeout',
         '$routeParams', '_', 'config',
         'DTColumnDefBuilder', 'DTOptionsBuilder', 'DatabaseConnector',
-        'OncoKB', 'stringUtils', 'S', 'mainUtils', 'UUIDjs', 'dialogs', 'loadFiles', '$firebaseObject', '$firebaseArray', 'FirebaseModel', 'user',
+        'OncoKB', 'stringUtils', 'S', 'mainUtils', 'UUIDjs', 'dialogs', 'loadFiles', '$firebaseObject', '$firebaseArray', 'FirebaseModel', 'user', '$q',
         function($window, $scope, $rootScope, $location, $timeout, $routeParams, _,
                  config,
                  DTColumnDefBuilder, DTOptionsBuilder, DatabaseConnector,
-                 OncoKB, stringUtils, S, MainUtils, UUIDjs, dialogs, loadFiles, $firebaseObject, $firebaseArray, FirebaseModel, user) {
+                 OncoKB, stringUtils, S, MainUtils, UUIDjs, dialogs, loadFiles, $firebaseObject, $firebaseArray, FirebaseModel, user, $q) {
             function saveGene(docIndex) {
                 if (docIndex < $scope.hugoSymbols.length) {
                     var hugoSymbol = $scope.hugoSymbols[docIndex];
@@ -78,7 +78,6 @@ angular.module('oncokbApp')
                         $scope.status.rendering = false;
                     });
                 });
-                
             }
             processMeta();
             $scope.redirect = function(path) {
@@ -138,12 +137,14 @@ angular.module('oncokbApp')
                 mainTypes: {}
             };
             $scope.mappedTumorTypes = {};
-            var newGenes = [];
 
             $scope.create = function() {
-                newGenes = $scope.newGenes.split(",");
-                _.each(newGenes, function (geneName) {
-                    createGene(geneName.trim());
+                var promises = [];
+                _.each($scope.newGenes.split(","), function (geneName) {
+                    promises.push(createGene(geneName.trim()));
+                });
+                $q.all(promises).then(function() {
+                    processMeta();
                 });
             };
 
@@ -179,26 +180,36 @@ angular.module('oncokbApp')
             };
 
             function createGene(geneName) {
+                var deferred = $q.defer();
                 var allGeneNameList = _.keys($scope.metaFlags);
                 if (allGeneNameList.includes(geneName)) {
                     dialogs.notify('Warning', 'Sorry, gene ' + geneName + ' has been created.');
                 } else {
                     var gene = new FirebaseModel.Gene(geneName);
-                    firebase.database().ref('Genes/' + geneName).set(gene).then(function(result) {
-                        var meta = new FirebaseModel.Meta();
-                        firebase.database().ref('Meta/' + geneName).set(meta).then(function(result) {
-                            processMeta();
+                    MainUtils.setIsoFormAndGeneType(gene).then(function () {
+                        firebase.database().ref('Genes/' + geneName).set(gene).then(function(result) {
+                            var meta = new FirebaseModel.Meta();
+                            firebase.database().ref('Meta/' + geneName).set(meta).then(function(result) {
+                                deferred.resolve();
+                            }, function(error) {
+                                // Delete saved new gene from Genes collection
+                                firebase.database().ref('Genes/' + geneName).remove();
+                                console.log(error);
+                                dialogs.notify('Warning', 'Failed to create a Meta record for the new gene ' + geneName + '!');
+                                deferred.reject(error);
+                            });
                         }, function(error) {
-                            // Delete saved new gene from Genes collection
-                            firebase.database().ref('Genes/' + geneName).remove();
                             console.log(error);
-                            dialogs.notify('Warning', 'Failed to create a Meta record for the new gene ' + geneName + '!');
+                            dialogs.notify('Warning', 'Failed to create the  gene ' + geneName + '!');
+                            deferred.reject(error);
                         });
                     }, function(error) {
                         console.log(error);
                         dialogs.notify('Warning', 'Failed to create the  gene ' + geneName + '!');
+                        deferred.reject(error);
                     });
                 }
+                return deferred.promise;
             }
 
             function getCacheStatus() {

@@ -461,10 +461,9 @@ angular.module('oncokbApp')
             function getIsoforms(type) {
                 var deferred = $q.defer();
                 ApiUtils.getIsoforms(type)
-                    .success(function(data) {
-                        deferred.resolve(data);
-                    })
-                    .error(function(result) {
+                    .then(function(data) {
+                        deferred.resolve(data.data);
+                    }, function(result) {
                         deferred.reject(result);
                     });
                 return deferred.promise;
@@ -473,10 +472,9 @@ angular.module('oncokbApp')
             function getOncogeneTSG() {
                 var deferred = $q.defer();
                 ApiUtils.getOncogeneTSG()
-                    .success(function(data) {
-                        deferred.resolve(data);
-                    })
-                    .error(function(result) {
+                    .then(function(data) {
+                        deferred.resolve(data.data);
+                    }, function(result) {
                         deferred.reject(result);
                     });
                 return deferred.promise;
