@@ -2,7 +2,7 @@
     <div ng-hide="status.rendering">
         <div class="header-buttons">
             <span class="btn-group btn-group-sm pull-left group" role="group">
-                <button type="button" class="btn btn-default" ng-if="developerCheck()" ng-click="saveAllGenes()"><span ng-show="!!!status.saveAllGenes"><i class="fa fa-spinner fa-spin"></i></span><span ng-show="!!status.saveAllGenes">Save All Genes</span></button>
+                <button type="button" class="btn btn-default" ng-if="developerCheck() && internal" ng-click="saveAllGenes()"><span ng-show="!!!status.saveAllGenes"><i class="fa fa-spinner fa-spin"></i></span><span ng-show="!!status.saveAllGenes">Save All Genes</span></button>
             </span>
             <span class="input-group input-group-sm create group" role="group" ng-show="developerCheck()">
                 <input type="text" class="form-control" ng-model="newGenes" placeholder="Comma-separated gene names">

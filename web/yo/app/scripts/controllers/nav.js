@@ -49,7 +49,6 @@ angular.module('oncokbApp')
                     setParams();
                     testInternal().then(function() {
                         $location.url('/genes');
-                        console.log($rootScope.internal);
                     });                    
                 }, function(error) {
                 });

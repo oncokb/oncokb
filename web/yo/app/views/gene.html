@@ -13,7 +13,6 @@
         <button type="button" class="btn btn-default" ng-if="::(userRole === 8 && internal)" ng-disabled="!fileEditable"
           ng-click="review()">{{reviewMode ? 'Review Complete' : 'Review'}}</button>
         <button type="button" class="btn btn-default" ng-if="developerCheck()" ng-click="exitReview()">Exit Review</button>
-        <button type="button" class="btn btn-default" ng-if="developerCheck()" ng-click="getData()">Gene</button>
         <button type="button" class="btn btn-default" ng-click="getAllCitations()">Citations</button>
         <button type="button" class="btn btn-default" ng-click="generatePDF()">Download PDF</button>
       </span>
@@ -388,7 +387,7 @@
     <br/>
     <br/>
     <h3>Variants of Unknown Significance (Investigated and data not found)
-      <button class="btn btn-default btn-sm" ng-click="vusUpdate('click update to database button')" ng-if="developerCheck()">Update to database</button>
+      <button class="btn btn-default btn-sm" ng-click="vusUpdate('click update to database button')" ng-if="developerCheck() && internal">Update to database</button>
     </h3>
     <div ng-repeat="variant in vusItems">
       <vus-item vus="vusFire" index="$index" gene="fileTitle" vus-update="vusUpdate()"></vus-item>
@@ -410,7 +409,7 @@
 <div ng-hide="status.rendering" class="floatToolBox btn-group btn-group-sm" role="group">
   <span class="btn btn-default" style="opacity: 1" disabled>APC</span>
   <button type="button" class="btn btn-default" ng-click="generatePDF()">Download PDF</button>
-  <button type="button" class="btn btn-default" ng-if="developerCheck()" ng-click="updateGene()">
+  <button type="button" class="btn btn-default" ng-if="developerCheck() && internal" ng-click="updateGene()">
     <span ng-show="!status.savedGene"><i class="fa fa-spinner fa-spin"></i></span>
     <span ng-show="status.savedGene">Update gene</span>
   </button>
