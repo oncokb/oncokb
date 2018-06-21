@@ -573,6 +573,9 @@ angular.module('oncokbApp')
         function Meta() {
             this.lastModifiedBy = $rootScope.me.name;
             this.lastModifiedAt = (new Date()).getTime().toString();
+            this.review = {
+                currentReviewer: ''
+            };
         }
         return {
             Gene: Gene,

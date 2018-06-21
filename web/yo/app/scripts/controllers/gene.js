@@ -265,12 +265,6 @@ angular.module('oncokbApp')
                 // update the meta track
                 // mainUtils.updateLastModified();
             };
-
-            $scope.getData = function (data) {
-                var myName = $rootScope.me.name.toLowerCase();
-                var genesOpened = _.without($scope.collaboratorsMeta[myName], $scope.fileTitle);
-                console.log(genesOpened);
-            };
             function parseMutationString(mutationStr) {
                 mutationStr = mutationStr.replace(/\([^\)]+\)/g, '');
                 var parts = _.map(mutationStr.split(','), function (item) {
@@ -2750,6 +2744,11 @@ angular.module('oncokbApp')
                             }
                         });
                         $rootScope.collaborators = tempCollaborators;
+                        if ($rootScope.geneMeta.review.currentReviewer) {
+                            if ($rootScope.geneMeta.review.currentReviewer === $rootScope.me.name || !$rootScope.collaborators[$rootScope.me.name]) {
+                                $rootScope.geneMeta.review.currentReviewer = '';
+                            }
+                        }
                         defer.resolve();
                     }, function (error) {
                         defer.reject(error);
@@ -2849,7 +2848,11 @@ angular.module('oncokbApp')
                         };
                     }
                     $scope.geneStautMessage = 'Last edit was made on ' + new Date($rootScope.geneMeta.lastModifiedAt) + ' by ' + $rootScope.geneMeta.lastModifiedBy;
-                    deferred5.resolve('success');
+                    getAllCollaborators().then(function() {
+                        deferred5.resolve('success');
+                    }, function() {
+                        deferred5.reject('fail to get collaborators info');
+                    });
                 }, function (error) {
                     deferred5.reject('Failed to bind meta by gene');
                 });
@@ -2859,7 +2862,7 @@ angular.module('oncokbApp')
                 }, function (error) {
                     deferred6.reject('Failed to bind history by gene');
                 });
-                var bindingAPI = [deferred1.promise, deferred3.promise, deferred4.promise, deferred5.promise, deferred6.promise, getAllCollaborators()];
+                var bindingAPI = [deferred1.promise, deferred3.promise, deferred4.promise, deferred5.promise, deferred6.promise];
                 $q.all(bindingAPI)
                     .then(function (result) {
                         user.setFileeditable([$scope.fileTitle]).then(function (result) {
