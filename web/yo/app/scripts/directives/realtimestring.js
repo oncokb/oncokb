@@ -7,7 +7,7 @@
  * # driveRealtimeString
  */
 angular.module('oncokbApp')
-    .directive('realtimeString', function ($timeout, _, $rootScope, stringUtils, mainUtils, ReviewResource, $firebaseObject) {
+    .directive('realtimeString', function ($timeout, _, $rootScope, mainUtils, ReviewResource, $firebaseObject) {
         return {
             templateUrl: 'views/realtimeString.html',
             restrict: 'AE',
@@ -219,10 +219,10 @@ angular.module('oncokbApp')
                 $scope.calculateDiff = function() {
                     if (ReviewResource.reviewMode && $scope.t === 'p') {
                         var dmp = new diff_match_patch();
-                        var newContent = stringUtils.getTextString($scope.data[$scope.key]);
+                        var newContent = mainUtils.getTextString($scope.data[$scope.key]);
                         var oldContent = '';
                         if ($scope.data[$scope.key+'_review'] && $scope.data[$scope.key+'_review'].lastReviewed) {
-                            oldContent = stringUtils.getTextString($scope.data[$scope.key+'_review'].lastReviewed);
+                            oldContent = mainUtils.getTextString($scope.data[$scope.key+'_review'].lastReviewed);
                         }
                         var diff = dmp.diff_main(oldContent, newContent);
                         dmp.diff_cleanupSemantic(diff);

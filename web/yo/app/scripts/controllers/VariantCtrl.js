@@ -12,13 +12,12 @@ angular.module('oncokbApp')
         'reportGeneratorParseAnnotation',
         'GenerateReportDataService',
         'reportViewFactory',
-        'DeepMerge',
         'x2js',
         'FindRegex',
         'OncoKB',
-        'stringUtils',
+        'mainUtils',
         '_',
-        function($scope, $filter, $location, $timeout, $rootScope, dialogs, DatabaseConnector, reportGeneratorParseAnnotation, ReportDataService, reportViewFactory, DeepMerge, x2js, FindRegex, OncoKB, stringUtils, _) {
+        function($scope, $filter, $location, $timeout, $rootScope, dialogs, DatabaseConnector, reportGeneratorParseAnnotation, ReportDataService, reportViewFactory, x2js, FindRegex, OncoKB, mainUtils, _) {
             'use strict';
 
             function getUnique(data, attr) {
@@ -43,7 +42,7 @@ angular.module('oncokbApp')
                             $scope.gene = $scope.genes[$filter('getIndexByObjectNameInArray')($scope.genes, urlVars.hugoSymbol || '')];
                         }
                         if (urlVars.hasOwnProperty('alteration')) {
-                            $scope.alteration = stringUtils.trimMutationName(urlVars.alteration);
+                            $scope.alteration = mainUtils.trimMutationName(urlVars.alteration);
                         }
                         if (urlVars.hasOwnProperty('cancerType')) {
                             $scope.view.selectedCancerType = $filter('getCancerTypeByMainType')($scope.view.filteredCancerTypes, urlVars.cancerType);
@@ -351,7 +350,7 @@ angular.module('oncokbApp')
                 $scope.rendering = true;
                 $scope.reportViewActive = hasSelectedCancerType;
                 $scope.regularViewActive = !hasSelectedCancerType;
-                $scope.alteration = stringUtils.trimMutationName($scope.alteration);
+                $scope.alteration = mainUtils.trimMutationName($scope.alteration);
                 var params = {alterationType: 'MUTATION'};
                 var paramsContent = {
                     hugoSymbol: $scope.gene || '',

@@ -160,8 +160,8 @@ var oncokbApp = angular.module('oncokbApp', [
     });
 
 angular.module('oncokbApp').run(
-    ['$window', '$timeout', '$rootScope', '$location', 'loadingScreen', 'config', 'DatabaseConnector', 'dialogs', 'stringUtils', 'mainUtils', 'user', 'loadFiles',
-        function($window, $timeout, $rootScope, $location, loadingScreen, config, DatabaseConnector, dialogs, stringUtils, mainUtils, user, loadFiles) {
+    ['$window', '$timeout', '$rootScope', '$location', 'loadingScreen', 'config', 'DatabaseConnector', 'dialogs', 'mainUtils', 'user', 'loadFiles',
+        function($window, $timeout, $rootScope, $location, loadingScreen, config, DatabaseConnector, dialogs, mainUtils, user, loadFiles) {
             $rootScope.errors = [];
             $rootScope.internal = true;
 
@@ -266,7 +266,7 @@ angular.module('oncokbApp').run(
             });
             // Other unidentify error
             $rootScope.$on('oncokbError', function(event, data) {
-                var subject = 'OncoKB Bug.  Case Number:' + stringUtils.getCaseNumber() + ' ' + data.reason;
+                var subject = 'OncoKB Bug.  Case Number:' + mainUtils.getCaseNumber() + ' ' + data.reason;
                 var content = 'User: ' + JSON.stringify($rootScope.user) + '\n\nError message - reason:\n' + data.message;
                 mainUtils.notifyDeveloper(subject, content);
             });

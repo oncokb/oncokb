@@ -169,14 +169,13 @@ angular.module('oncokbApp')
                 }
             }
             function getPubMedArticle(pubMedIDs, success, fail) {
-                success(data);
-                // DriveAnnotation
-                //     .getPubMedArticle(pubMedIDs)
-                //     .then(function(data) {
-                //         success(data);
-                //     }, function() {
-                //         fail();
-                //     });
+                DriveAnnotation
+                    .getPubMedArticle(pubMedIDs)
+                    .then(function(data) {
+                        success(data.data);
+                    }, function() {
+                        fail();
+                    });
             }
             function deleteEvidences(data, historyData, success, fail) {
                 if (testing) {

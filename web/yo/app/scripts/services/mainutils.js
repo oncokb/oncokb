@@ -8,7 +8,7 @@
  * Service in the oncokbApp.
  */
 angular.module('oncokbApp')
-    .factory('mainUtils', function(OncoKB, _, $q, DatabaseConnector, $rootScope, ReviewResource) {
+    .factory('mainUtils', function(OncoKB, _, $q, DatabaseConnector, $rootScope, ReviewResource, S, UUIDjs) {
         var isoforms = {};
         var oncogeneTSG = {};
 
@@ -325,6 +325,8 @@ angular.module('oncokbApp')
                 return ReviewResource.removed.indexOf(uuid) !== -1;
             case 'loading':
                 return ReviewResource.loading.indexOf(uuid) !== -1;
+            case 'precise':
+                return ReviewResource.precise.indexOf(uuid) !== -1;    
             default:
                 return false;
             }
@@ -336,6 +338,125 @@ angular.module('oncokbApp')
         function updateLastSavedToDB() {
             $rootScope.geneMeta.lastSavedBy = $rootScope.me.name;
             $rootScope.geneMeta.lastSavedAt = new Date().getTime();
+        }
+        function getVUSData(vus, excludeComments) {
+            var vusData = vus;
+            excludeComments = _.isBoolean(excludeComments) ? excludeComments : false;
+            if (excludeComments) {
+                _.each(vusData, function(vusItem) {
+                    delete vusItem.name_comments;
+                });
+            }
+            return vusData;
+        }
+
+        // get history data
+        function getHistoryData(history) {
+            var result = {};
+            if (history && _.isArray(history.keys())) {
+                _.each(history.keys(), function(key) {
+                    if (['api'].indexOf(key) !== -1) {
+                        result[key] = Array.from(history.get(key));
+                    } else {
+                        result[key] = history.get(key);
+                    }
+                });
+            }
+            return result;
+        }
+        function processData(data, keys, excludeComments, onlyReviewedContent) {
+            _.each(keys, function(key) {
+                if (excludeComments) {
+                    delete data[key+'_comments'];
+                }
+                if (onlyReviewedContent && data[key+'_review'] && !_.isUndefined(data[key+'_review'].lastReviewed)) {
+                    data[key] = data[key+'_review'].lastReviewed;
+                }
+                delete data[key+'_review'];
+            });
+        }
+        function shouldExclude(onlyReviewedContent, reviewObj) {
+            return reviewObj && (onlyReviewedContent && reviewObj.added == true || !onlyReviewedContent && reviewObj.removed == true);
+        }
+        function getGeneData(geneData, excludeComments, onlyReviewedContent) {
+            var gene = _.clone(geneData);
+            excludeComments = _.isBoolean(excludeComments) ? excludeComments : false;
+            onlyReviewedContent = _.isBoolean(onlyReviewedContent) ? onlyReviewedContent : false;
+            processData(gene, ['summary', 'background'], excludeComments, onlyReviewedContent);
+            processData(gene.type, ['tsg', 'ocg'], excludeComments, onlyReviewedContent);
+            _.each(gene.mutations, function(mutation, mutationIndex) {
+                if (shouldExclude(onlyReviewedContent, mutation.name_review)) {
+                    gene.mutations.splice(mutationIndex, 1);
+                    return true;
+                }
+                processData(mutation, ['name'], excludeComments, onlyReviewedContent);
+                processData(mutation.mutation_effect, ['oncogenic', 'effect', 'description'], excludeComments, onlyReviewedContent);
+                _.each(mutation.tumors, function(tumor, tumorIndex) {
+                    if (shouldExclude(onlyReviewedContent, tumor.cancerTypes_review)) {
+                        mutation.tumors.splice(tumorIndex, 1);
+                        return true;
+                    }
+                    // process tumor cancerTypes
+                    processData(tumor, ['summary'], excludeComments, onlyReviewedContent);
+                    processData(tumor.diagnostic, ['level', 'description'], excludeComments, onlyReviewedContent);
+                    processData(tumor.prognostic, ['level', 'description'], excludeComments, onlyReviewedContent);
+                    _.each(tumor.TIs, function(ti) {
+                        processData(ti, ['description'], excludeComments, onlyReviewedContent);
+                        _.each(ti.treatments, function(treatment, treatmentIndex) {
+                            if (shouldExclude(onlyReviewedContent, treatment.name_review)) {
+                                ti.treatments.splice(treatmentIndex, 1);
+                                return true;
+                            }
+                            processData(treatment, ['name', 'level', 'propagation', 'indication', 'description'], excludeComments, onlyReviewedContent);
+                        });
+                    });
+                });
+            });
+            return gene;
+        }
+
+        function mostRecentItem(reviewObjs, include) {
+            var mostRecent = -1;
+            for (var i = 0; i < reviewObjs.length; i++) {
+                if (!include) {
+                    // This is designed to handle the reviewObj with systematically set updatetime
+                    // when 'include' equals true, it will use all reviewObj in the list
+                    // otherwise, we will only use the reviewObj with updatedBy info.
+                    if (!reviewObjs[i] || !reviewObjs[i].updatedBy) continue;
+                }
+                var currentItemTime;
+                if (reviewObjs[i] && reviewObjs[i].updateTime) {
+                    currentItemTime = new Date(reviewObjs[i].updateTime);
+                }
+                // we only continue to check if current item time is valid
+                if (currentItemTime instanceof Date && !isNaN(currentItemTime.getTime())) {
+                    if (mostRecent < 0) {
+                        mostRecent = i;
+                    } else {
+                        // reset mostRect time when current item time is closer
+                        var mostRecentTime = new Date(reviewObjs[mostRecent].updateTime);
+                        if(mostRecentTime < currentItemTime) {
+                            mostRecent = i;
+                        }
+                    }
+                }
+            }
+            if (mostRecent < 0) {
+                return 0;
+            }
+            return mostRecent;
+        }
+        function trimMutationName(mutation) {
+            if (typeof mutation === 'string') {
+                if (mutation.indexOf('p.') === 0) {
+                    mutation = mutation.substring(2);
+                }
+            }
+            return mutation;
+        }
+        function getCaseNumber() {
+            var date = new Date();
+            return date.getTime();
         }
         return {
             setIsoFormAndGeneType: setIsoFormAndGeneType,
@@ -352,6 +473,13 @@ angular.module('oncokbApp')
             processedInReview: processedInReview,
             notifyDeveloper: notifyDeveloper,
             updateLastModified: updateLastModified,
-            updateLastSavedToDB: updateLastSavedToDB
+            updateLastSavedToDB: updateLastSavedToDB,
+            trimMutationName: trimMutationName,
+            getCaseNumber: getCaseNumber,
+            getGeneData: getGeneData,
+            getVUSData: getVUSData,
+            getTextString: OncoKB.utils.getString,
+            mostRecentItem: mostRecentItem,
+            getHistoryData: getHistoryData
         };
     });

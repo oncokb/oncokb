@@ -4,11 +4,11 @@ angular.module('oncokbApp')
     .controller('GenesCtrl', ['$window', '$scope', '$rootScope', '$location', '$timeout',
         '$routeParams', '_', 'config',
         'DTColumnDefBuilder', 'DTOptionsBuilder', 'DatabaseConnector',
-        'OncoKB', 'stringUtils', 'S', 'mainUtils', 'UUIDjs', 'dialogs', 'loadFiles', '$firebaseObject', '$firebaseArray', 'FirebaseModel', 'user', '$q',
+        'OncoKB', 'S', 'mainUtils', 'UUIDjs', 'dialogs', 'loadFiles', '$firebaseObject', '$firebaseArray', 'FirebaseModel', 'user', '$q',
         function($window, $scope, $rootScope, $location, $timeout, $routeParams, _,
                  config,
                  DTColumnDefBuilder, DTOptionsBuilder, DatabaseConnector,
-                 OncoKB, stringUtils, S, MainUtils, UUIDjs, dialogs, loadFiles, $firebaseObject, $firebaseArray, FirebaseModel, user, $q) {
+                 OncoKB, S, mainUtils, UUIDjs, dialogs, loadFiles, $firebaseObject, $firebaseArray, FirebaseModel, user, $q) {
             function saveGene(docIndex) {
                 if (docIndex < $scope.hugoSymbols.length) {
                     var hugoSymbol = $scope.hugoSymbols[docIndex];
@@ -17,11 +17,11 @@ angular.module('oncokbApp')
                     var gene = $scope.allFiles.gene[hugoSymbol];
                     var vus = $scope.allFiles.vus[hugoSymbol].vus;
                     if (gene) {
-                        var geneData = stringUtils.getGeneData(gene, true, true);
+                        var geneData = mainUtils.getGeneData(gene, true, true);
                         params.gene = JSON.stringify(geneData);
                     }
                     if (vus) {
-                        var vusData = stringUtils.getVUSData(vus, true);
+                        var vusData = mainUtils.getVUSData(vus, true);
                         params.vus = JSON.stringify(vusData);
                     }
                     if (!_.isEmpty(params)) {
@@ -176,7 +176,7 @@ angular.module('oncokbApp')
             };
 
             $scope.developerCheck = function() {
-                return MainUtils.developerCheck($rootScope.me.name);
+                return mainUtils.developerCheck($rootScope.me.name);
             };
 
             function createGene(geneName) {
@@ -186,7 +186,7 @@ angular.module('oncokbApp')
                     dialogs.notify('Warning', 'Sorry, gene ' + geneName + ' has been created.');
                 } else {
                     var gene = new FirebaseModel.Gene(geneName);
-                    MainUtils.setIsoFormAndGeneType(gene).then(function () {
+                    mainUtils.setIsoFormAndGeneType(gene).then(function () {
                         firebase.database().ref('Genes/' + geneName).set(gene).then(function(result) {
                             var meta = new FirebaseModel.Meta();
                             firebase.database().ref('Meta/' + geneName).set(meta).then(function(result) {

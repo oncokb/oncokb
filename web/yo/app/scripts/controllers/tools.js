@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('oncokbApp')
-    .controller('ToolsCtrl', ['$scope', 'dialogs', 'OncoKB', 'DatabaseConnector', 'stringUtils', '$timeout', '_', 'FindRegex', 'mainUtils', 'loadFiles', '$rootScope',
-        function($scope, dialogs, OncoKB, DatabaseConnector, stringUtils, $timeout, _, FindRegex, mainUtils, loadFiles, $rootScope) {
+    .controller('ToolsCtrl', ['$scope', 'dialogs', 'OncoKB', 'DatabaseConnector', '$timeout', '_', 'FindRegex', 'mainUtils', 'loadFiles', '$rootScope',
+        function($scope, dialogs, OncoKB, DatabaseConnector, $timeout, _, FindRegex, mainUtils, loadFiles, $rootScope) {
             $scope.init = function() {
                 $scope.loading = false;
                 $scope.geneNames =  _.keys($rootScope.metaData);

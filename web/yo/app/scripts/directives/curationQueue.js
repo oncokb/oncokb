@@ -481,7 +481,7 @@ angular.module('oncokbApp')
                         $scope.data.subTypes = tempRes;
                     });
                 }
-                getTumorSubtypes();
+                // getTumorSubtypes();
                 $scope.toggleForm = function() {
                     $scope.data.formExpanded = !$scope.data.formExpanded;
                     $timeout(function() {
