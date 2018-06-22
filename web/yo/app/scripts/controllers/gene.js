@@ -371,7 +371,7 @@ angular.module('oncokbApp')
                 }
             };
             $scope.exitReview = function () {
-                $rootScope.geneMeta.currentReviewer = '';
+                $rootScope.geneMeta.review.currentReviewer = '';
                 $rootScope.reviewMode = false;
                 ReviewResource.reviewMode = false;
                 $scope.fileEditable = true;
@@ -620,20 +620,20 @@ angular.module('oncokbApp')
                     mutationChanged = false;
                 });
                 if ($scope.status.hasReviewContent === false) {
-                    $rootScope.geneMeta.currentReviewer = '';
+                    $rootScope.geneMeta.review.currentReviewer = '';
                     // This is to increase the fault tolerance of the platform. UUIDs are supposed to be cleaned up after acception or rejection. 
                     // If after scaning whole gene document and found nothing need to be reviewed, then we clean up everything in the review EXCEPT currentReviewer
                     if (_.keys($rootScope.geneMeta.review).length > 1) {
                         _.each(_.keys($rootScope.geneMeta.review), function(key) {
                             if (key !== 'currentReviewer') {
-                                delete $rootScope.geneMeta.review;
+                                delete $rootScope.geneMeta.review[key];
                             }
                         });
                     }
                     
                     dialogs.notify('Warning', 'No changes need to be reviewed');
                 } else {
-                    $rootScope.geneMeta.currentReviewer = $rootScope.me.name;
+                    $rootScope.geneMeta.review.currentReviewer = $rootScope.me.name;
                     $rootScope.reviewMode = true;
                     ReviewResource.reviewMode = true;
                     if ($scope.status.mutationChanged) {
