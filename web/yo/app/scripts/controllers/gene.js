@@ -314,7 +314,7 @@ angular.module('oncokbApp')
             /**
              * Check if a section needs to be displayed or not.
              * For instance, would be used to check if Mutation Effect section needs to be displayed.
-             * If it is a section with only one item, we still treat it as section by using displayCheck(), e.g. Prevelance, Clinical Trials
+             * If it is a section with only one item, we still treat it as section by using displayCheck(), e.g. Prevelance
              * However, if it is just a single item without section frame work, we use displayPrecisely(), e.g. Tumor Summary, TI Description
              * ***/
             $scope.displayCheck = function (uuid, reviewObj) {
@@ -401,7 +401,7 @@ angular.module('oncokbApp')
                 }
             };
             /**
-             * This function is used to find the most recent update from a section change. e.g. There are 4 items under NCCN section, and they might get changed at very different time.
+             * This function is used to find the most recent update from a section change. e.g. There are 3 items under Prognostic section, and they might get changed at very different time.
              * And we will find the one changed most recently and store them in ReviewResource.mostRecent mapping, so it could be shared across directives and controllers
              * */
             function setUpdatedSignature(tempArr, uuid) {
