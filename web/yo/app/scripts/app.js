@@ -71,7 +71,6 @@ var oncokbApp = angular.module('oncokbApp', [
     'dialogs.main',
     'dialogs.default-translations',
     'RecursionHelper',
-    'angularFileUpload',
     'xml',
     'contenteditable',
     'datatables',

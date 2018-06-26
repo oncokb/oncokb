@@ -218,7 +218,6 @@ angular.module('oncokbApp')
                     'Treatment Implications',
                     'FDA Approved Drugs in Tumor Type',
                     'FDA Approved Drugs in Other Tumor Type',
-                    'Clinical Trials',
                     'Additional Information'
                 ];
 
@@ -226,15 +225,12 @@ angular.module('oncokbApp')
                     'treatment',
                     'fdaApprovedInTumor',
                     'fdaApprovedInOtherTumor',
-                    'clinicalTrials',
                     'additionalInfo'
                 ];
 
                 $scope.summaryTableTitlesContent = {
                     'Treatment Implications': [
-                        'nccn_guidelines',
                         'standard_therapeutic_implications'],
-                    'Clinical Trials': ['clinical_trial', 'investigational_therapeutic_implications'],
                     'Additional Information': [ 'prognostic_implications'],
                     'FDA Approved Drugs in Tumor Type': [],
                     'FDA Approved Drugs in Other Tumor Type': []
@@ -302,10 +298,6 @@ angular.module('oncokbApp')
                 return false;
             };
 
-            $scope.setCollapsed = function(trial, attr) {
-                $scope.isCollapsed[trial.trial_id][attr] = !$scope.isCollapsed[trial.trial_id][attr];
-            };
-
             $scope.isArray = function(_var) {
                 if (_var instanceof Array) {
                     return true;
@@ -321,7 +313,6 @@ angular.module('oncokbApp')
             };
 
             $scope.displayProcess = function(str) {
-                var specialUpperCasesWords = ['NCCN'];
                 var specialLowerCasesWords = ['of', 'for'];
 
                 str = str.replace(/_/g, ' ');
@@ -330,10 +321,6 @@ angular.module('oncokbApp')
                     function(txt) {
                         var _upperCase = txt.toUpperCase();
                         var _lowerCase = txt.toLowerCase();
-
-                        if (specialUpperCasesWords.indexOf(_upperCase) !== -1) {
-                            return _upperCase;
-                        }
 
                         if (specialLowerCasesWords.indexOf(_lowerCase) !== -1) {
                             return _lowerCase;
