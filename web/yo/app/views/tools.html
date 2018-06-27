@@ -32,7 +32,7 @@
             </thead>
             <tbody>
             <tr ng-repeat="x in historySearchResults">
-                <td><strong><a href="#/gene/{{x.gene}}">{{ x.gene }}</a></strong></td>
+                <td><strong><a href="#!/gene/{{x.gene}}">{{ x.gene }}</a></strong></td>
                 <td>{{x.admin}}</td>
                 <td>{{x.timeStamp | date : 'MMM d, h:mm a yyyy'}}</td>
                 <td>
@@ -90,7 +90,7 @@
                     <td ng-repeat="key in reviewedData[evidenceType].keys">
                         <div ng-switch on="key">
                                 <div ng-switch-when="gene">
-                                    <strong><a href="#/gene/{{item.gene}}">{{ item.gene }}</a></strong>
+                                    <strong><a href="#!/gene/{{item.gene}}">{{ item.gene }}</a></strong>
                                 </div>
                                 <div class="reviewedData" ng-switch-when="mutation">{{item.mutation}}</div>
                                 <div class="reviewedData" ng-switch-when="drugs">{{item.drugs}}</div>
