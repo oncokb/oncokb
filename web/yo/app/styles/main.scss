@@ -965,6 +965,12 @@ input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:b
     height: 24px;
 }
 .longMutationName {
-    height: 80px;
+    height: 100px;
     display:inline-block;
+}
+.levelWithLongName {
+    margin-top: 15px;
+}
+.levelWithoutLongName {
+    margin-left: 10px;
 }
