@@ -968,9 +968,20 @@ input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:b
     height: 100px;
     display:inline-block;
 }
+
+.longMutationNameReview {
+    height: 200px;
+}
+
 .levelWithLongName {
     margin-top: 15px;
 }
 .levelWithoutLongName {
     margin-left: 10px;
+}
+.longContent {
+    height: 40px;
+}
+.longContentDivMargin {
+    margin-top: 30px;
 }

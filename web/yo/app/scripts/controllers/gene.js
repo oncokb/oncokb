@@ -2649,6 +2649,17 @@ angular.module('oncokbApp')
                     }
                 });
             }
+            $scope.getMutationPanelClass = function(name) {
+                var className = 'headerLevel1';
+                if (name.length > 80) {
+                    if ($scope.reviewMode) {
+                        className += ' longMutationNameReview';
+                    } else {
+                        className += ' longMutationName';
+                    }
+                }
+                return className;
+            }
             $scope.getAngleClass = function (uuid) {
                 var result = "fa fa-angle-right";
                 if ($scope.initialOpen[uuid]) {
