@@ -2,11 +2,10 @@
 
 angular.module('oncokbApp')
     .controller('GenesCtrl', ['$window', '$scope', '$rootScope', '$location', '$timeout',
-        '$routeParams', '_', 'config',
+        '$routeParams', '_',
         'DTColumnDefBuilder', 'DTOptionsBuilder', 'DatabaseConnector',
         'OncoKB', 'S', 'mainUtils', 'UUIDjs', 'dialogs', 'loadFiles', '$firebaseObject', '$firebaseArray', 'FirebaseModel', 'user', '$q',
         function($window, $scope, $rootScope, $location, $timeout, $routeParams, _,
-                 config,
                  DTColumnDefBuilder, DTOptionsBuilder, DatabaseConnector,
                  OncoKB, S, mainUtils, UUIDjs, dialogs, loadFiles, $firebaseObject, $firebaseArray, FirebaseModel, user, $q) {
             function saveGene(docIndex) {

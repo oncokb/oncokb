@@ -103,10 +103,10 @@ angular.module('oncokbApp')
 
                     $scope.reportParams.reportContent = ReportDataService.init([params]);
                     $scope.reportParams.requestInfo = {
-                        email: $rootScope.user.email,
+                        email: $rootScope.me.email,
                         folderName: '',
                         fileName: params.geneName + '_' + params.alteration + '_' + params.cancerType + '_' + params.subtype,
-                        userName: $rootScope.user.name
+                        userName: $rootScope.me.name
                     };
 
                     var reportViewParams = {};

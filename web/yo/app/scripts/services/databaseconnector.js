@@ -5,7 +5,6 @@ angular.module('oncokbApp')
         '$timeout',
         '$q',
         '$rootScope',
-        'config',
         'Gene',
         'Alteration',
         'TumorType',
@@ -23,7 +22,6 @@ angular.module('oncokbApp')
         function($timeout,
                  $q,
                  $rootScope,
-                 config,
                  Gene,
                  Alteration,
                  TumorType,
@@ -40,7 +38,7 @@ angular.module('oncokbApp')
                  PrivateApiUtils) {
             var numOfLocks = {};
             var data = {};
-            var testing = config.testing || false;
+            var testing = OncoKB.config.testing || false;
 
             function getAllGene(callback, timestamp) {
                 Gene.getFromServer()
