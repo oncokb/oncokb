@@ -81,7 +81,7 @@
                 <div class="collapse navbar-collapse" ng-class="!navCollapsed && 'in'">
 
                     <ul class="nav navbar-nav">
-                        <li ng-repeat="tab in tabs" ng-class="{active:tabIsActive('/'+tab.key)}"><a ng-href="#!/{{tab.key}}">{{tab.value}}</a></li>
+                        <li ng-repeat="tab in tabs" ng-class="{active:tabIsActive('/'+tab.key)}"><a ng-href="#!/{{tab.key}}" ng-click="setLocalStorage(tab.key)">{{tab.value}}</a></li>
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
                         <li>
@@ -91,7 +91,7 @@
                             <div ng-if="isSignedIn" style="float: left">
                                 <div style="float: left; margin: 5px">
                                     <span>{{user.email | cut:true:20}}</span><br/>
-                                    <span id="signout" style="" ng-click="signOut()">Sign out</span>
+                                    <span id="signout" ng-click="signOut()">Sign out</span>
                                 </div>
                                 <img style="float: left;width:50px" ng-if="user.photoURL !== ''" ng-src="{{user.photoURL}}">
                             </div>

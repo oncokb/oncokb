@@ -29,6 +29,12 @@ angular.module('oncokbApp')
             }
             $scope.tabs = filterTabs;
         }
+        $scope.setLocalStorage = function(key) {
+            if (key !== 'gene') {
+                delete window.localStorage.geneName;
+            }
+            window.localStorage.tab = key;
+        }
 
         function testInternal() {
             var defer = $q.defer();
@@ -48,7 +54,13 @@ angular.module('oncokbApp')
                     $scope.user = $rootScope.me;
                     setParams();
                     testInternal().then(function() {
-                        $location.url('/genes');
+                        if (window.localStorage.geneName) {
+                            $location.url('/gene/' + window.localStorage.geneName);
+                        } else if (window.localStorage.tab){
+                            $location.url('/' + window.localStorage.tab);
+                        } else {
+                            $location.url('/genes');
+                        }
                     });                    
                 }, function(error) {
                 });
