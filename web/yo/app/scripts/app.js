@@ -7,41 +7,11 @@
  *
  * Main module of the application.
  */
-var OncoKB = {};
-// Global variables
-OncoKB.global = {};
-// OncoKB.global.genes
-// OncoKB.global.alterations
-// OncoKB.global.tumorTypes
-// OncoKB.global.treeEvidence
-// OncoKB.global.processedData
-
-// processedData
-
-// OncoKB configurations, reading from config.json
-// All contents here are pointing to few examples files.
-OncoKB.config = {
-    clientId: '', // Your client ID from google developer console
-    scopes: [
-        'https://www.googleapis.com/auth/plus.profile.emails.read',
-        'https://www.googleapis.com/auth/drive.file'
-    ],
-    folderId: '0BzBfo69g8fP6NkgtWGZxd0NjcWs', // Example folder
-    userRoles: {
-        public: 1,
-        user: 2,
-        curator: 4,
-        admin: 8
-    },
-    backupFolderId: '0BzBfo69g8fP6LWozVE56Mk1RYkU',  // Example backup folder
-    users: '', // The google spreadsheet ID which used to manage the user info. Please share this file to the service email address with view permission.
-    apiLink: 'legacy-api/',
-    curationLink: 'legacy-api/',
-    oncoTreeLink: 'http://oncotree.mskcc.org/oncotree/api/',
-    oncoTreeVersion: 'oncotree_2017_06_21',
-    testing: true
+var OncoKB = {
+    global: {},
+    config: {},
+    backingUp: false
 };
-OncoKB.backingUp = false;
 function getString(string) {
     if(!string || !_.isString(string)) {
         return '';
@@ -75,7 +45,6 @@ var oncokbApp = angular.module('oncokbApp', [
     'contenteditable',
     'datatables',
     'datatables.bootstrap',
-    'localytics.directives',
     'ui.sortable',
     'firebase'
 ])
@@ -86,11 +55,9 @@ var oncokbApp = angular.module('oncokbApp', [
     .constant('S', window.S)
     .constant('_', window._)
     .constant('Levenshtein', window.Levenshtein)
-    .constant('XLSX', window.XLSX)
     .constant('PDF', window.jsPDF)
-    .constant('Tree', window.Tree)
     .constant('UUIDjs', window.UUIDjs)
-    .config(function($provide, $locationProvider, $routeProvider, $sceProvider, dialogsProvider, $animateProvider, x2jsProvider, config) {
+    .config(function($provide, $locationProvider, $routeProvider, $sceProvider, dialogsProvider, $animateProvider, x2jsProvider) {
 
         $routeProvider
             .when('/', {
@@ -159,14 +126,10 @@ var oncokbApp = angular.module('oncokbApp', [
     });
 
 angular.module('oncokbApp').run(
-    ['$window', '$timeout', '$rootScope', '$location', 'loadingScreen', 'config', 'DatabaseConnector', 'dialogs', 'mainUtils', 'user', 'loadFiles',
-        function($window, $timeout, $rootScope, $location, loadingScreen, config, DatabaseConnector, dialogs, mainUtils, user, loadFiles) {
+    ['$window', '$timeout', '$rootScope', '$location', 'loadingScreen', 'DatabaseConnector', 'dialogs', 'mainUtils', 'user', 'loadFiles',
+        function($window, $timeout, $rootScope, $location, loadingScreen, DatabaseConnector, dialogs, mainUtils, user, loadFiles) {
             $rootScope.errors = [];
             $rootScope.internal = true;
-
-            $rootScope.user = {
-                role: config.userRoles.public
-            };
             $rootScope.meta = {
                 levelsDesc: {
                     '0': 'FDA-approved drug in this indication irrespective of gene/variant biomarker',
@@ -259,7 +222,7 @@ angular.module('oncokbApp').run(
             // Other unidentify error
             $rootScope.$on('oncokbError', function(event, data) {
                 var subject = 'OncoKB Bug.  Case Number:' + mainUtils.getCaseNumber() + ' ' + data.reason;
-                var content = 'User: ' + JSON.stringify($rootScope.user) + '\n\nError message - reason:\n' + data.message;
+                var content = 'User: ' + JSON.stringify($rootScope.me) + '\n\nError message - reason:\n' + data.message;
                 mainUtils.notifyDeveloper(subject, content);
             });
         }]);
@@ -279,7 +242,6 @@ angular.module('oncokbApp').run(
             if (_.isObject(response.data)) {
                 OncoKB.config = $.extend(true, OncoKB.config, response.data);
                 firebase.initializeApp(OncoKB.config.firebaseConfig);
-                oncokbApp.constant('config', OncoKB.config);
                 bootstrapApplication();
             }
         }, function() {

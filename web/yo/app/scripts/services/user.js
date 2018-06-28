@@ -11,7 +11,7 @@
  * gmail.com will be used as standard email format, googlemail address will be converted to gmail
  */
 angular.module('oncokbApp')
-    .service('user', function user(config, $routeParams, $q, $firebaseAuth, $firebaseObject, $rootScope, $location) {
+    .service('user', function user($routeParams, $q, $firebaseAuth, $firebaseObject, $rootScope, $location) {
         var me = {
             email: '',
             name: '',
