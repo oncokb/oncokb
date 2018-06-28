@@ -101,9 +101,9 @@
                           ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 2000, 'blur': 0 } }"
                           class="editEmpty">
                     </p>
-                    <div ng-if="reviewLayout('name')">
+                    <div ng-if="reviewLayout('name')" ng-class="getOldContentDivClass(data[key])">
                         <h4>Old Content:</h4>
-                        <p ng-class="unEditableBox" contenteditable="false">{{::data[key+'_review'].lastReviewed}}</p>
+                        <p ng-class="getOldContentClass(data[key+'_review'].lastReviewed)" contenteditable="false" >{{::data[key+'_review'].lastReviewed}}</p>
                     </div>
                 </div>
                 <div ng-switch-when="treatment-select" class="chosen-full-width">

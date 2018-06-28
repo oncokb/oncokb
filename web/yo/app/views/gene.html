@@ -95,12 +95,12 @@
   <div id="mutations">
     <div ng-repeat="mutation in mutations" ng-init="path=getObservePath({type: 'mutation', index: $index});" ng-show="displayCheck(mutation.name_uuid, mutation.name_review)">
       <div class="sectionStyle">
-        <div class="headerLevel1">
+        <div ng-class="getMutationPanelClass(mutation.name)">
           <div ng-click="toggleSection(mutation.name_uuid); setSectionOpenStatus('open', [mutation.mutation_effect_uuid])">
             <i ng-class="getAngleClass(mutation.name_uuid)"></i> Mutation:</div>
           <div style="margin-top:-42px;margin-left:100px">
             <div ng-style="getNameStyle('mutation')"><realtime-string t="'MUTATION_NAME'" key="'name'" path="path" uuid="getUUID({type: 'mutation', key: 'name', path: path})"></realtime-string></div>
-            <div style="float:left;margin-left:10px" ng-show="!reviewMode">
+            <div style="float:left;" ng-class="mutation.name.length > 80 ? 'levelWithLongName' : 'levelWithoutLongName'" ng-show="!reviewMode">
               <comments-dict key="'name'" path="path"></comments-dict>
               <span style="margin-right:10px" ng-bind-html="mutationContent[mutation.name_uuid].result"></span>
             </div>
@@ -407,7 +407,7 @@
   </div>
 </div>
 <div ng-hide="status.rendering" class="floatToolBox btn-group btn-group-sm" role="group">
-  <span class="btn btn-default" style="opacity: 1" disabled>APC</span>
+  <span class="btn btn-default" style="opacity: 1" disabled>{{ ::gene.name}}</span>
   <button type="button" class="btn btn-default" ng-click="generatePDF()">Download PDF</button>
   <button type="button" class="btn btn-default" ng-if="developerCheck() && internal" ng-click="updateGene()">
     <span ng-show="!status.savedGene"><i class="fa fa-spinner fa-spin"></i></span>

@@ -2650,6 +2650,17 @@ angular.module('oncokbApp')
                     }
                 });
             }
+            $scope.getMutationPanelClass = function(name) {
+                var className = 'headerLevel1';
+                if (name.length > 80) {
+                    if ($scope.reviewMode) {
+                        className += ' longMutationNameReview';
+                    } else {
+                        className += ' longMutationName';
+                    }
+                }
+                return className;
+            }
             $scope.getAngleClass = function (uuid) {
                 var result = "fa fa-angle-right";
                 if ($scope.initialOpen[uuid]) {
@@ -2729,7 +2740,7 @@ angular.module('oncokbApp')
                     });
             }
             function watchCurrentReviewer() {
-                var ref = firebase.database().ref('Meta/' + $scope.fileTitle + '/currentReviewer');
+                var ref = firebase.database().ref('Meta/' + $scope.fileTitle + '/review/currentReviewer');
                 ref.on('value', function(doc) {
                     if (!doc.val()) {
                         if ($scope.status.fileEditable === true && $scope.fileEditable === false) {

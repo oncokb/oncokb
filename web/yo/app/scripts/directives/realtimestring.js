@@ -292,7 +292,19 @@ angular.module('oncokbApp')
                         $scope.path = tempArr.join('/');
                         console.log($scope.path);
                     }
-                }                
+                }
+                $scope.getOldContentClass = function(content) {
+                    var className = 'unEditableBox';
+                    if (content.length > 80) {
+                        className += ' longContent';
+                    }
+                    return className;
+                }
+                $scope.getOldContentDivClass = function(content) {
+                    if (content.length > 80) {
+                        return 'longContentDivMargin';
+                    }
+                }
             }
         };
     })
