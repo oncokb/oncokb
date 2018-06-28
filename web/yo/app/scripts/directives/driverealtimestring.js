@@ -207,6 +207,14 @@ angular.module('oncokbApp')
                         if (!($scope.content.propagation && initialize)) {
                             $scope.content.propagation = '3B';
                         }
+                    } else if ($scope.content.stringO === '4') {
+                        _propagationOpts = [
+                            $scope.propagationOpts.no,
+                            $scope.propagationOpts['4']
+                        ];
+                        if (!($scope.content.propagation && initialize)) {
+                            $scope.content.propagation = '4';
+                        }
                     } else {
                         $scope.content.propagation = null;
                     }
