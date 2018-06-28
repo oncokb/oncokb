@@ -4,6 +4,7 @@ angular.module('oncokbApp')
     .controller('GeneCtrl', ['_', 'S', '$resource', '$interval', '$timeout', '$scope', '$rootScope', '$location', '$route', '$routeParams', '$window', '$q', 'dialogs', 'OncoKB', 'DatabaseConnector', 'SecretEmptyKey', '$sce', 'jspdf', 'FindRegex', 'mainUtils', 'ReviewResource', 'loadFiles', '$firebaseObject', '$firebaseArray', 'FirebaseModel', 'user',
         function (_, S, $resource, $interval, $timeout, $scope, $rootScope, $location, $route, $routeParams, $window, $q, dialogs, OncoKB, DatabaseConnector, SecretEmptyKey, $sce, jspdf, FindRegex, mainUtils, ReviewResource, loadFiles, $firebaseObject, $firebaseArray, FirebaseModel, user) {
             $window.onbeforeunload = function (event) {
+                delete window.localStorage.geneName;
                 var myName = $rootScope.me.name.toLowerCase();
                 var genesOpened = _.without($scope.collaboratorsMeta[myName], $scope.fileTitle);
                 firebase.database().ref('Meta/collaborators/' + myName).set(genesOpened).then(function (result) {
@@ -12,6 +13,7 @@ angular.module('oncokbApp')
                     console.log(error);
                 });
             }
+            window.localStorage.geneName = $routeParams.geneName;
             function isValidVariant(originalVariantName) {
                 var variantName = originalVariantName.trim().toLowerCase();
                 var validMutation = true;

@@ -126,7 +126,7 @@ var oncokbApp = angular.module('oncokbApp', [
                 templateUrl: 'views/queues.html'
             })
             .otherwise({
-                redirectTo: '/'
+                redirectTo: '/genes'
             });
 
         dialogsProvider.useBackdrop(true);
@@ -167,13 +167,6 @@ angular.module('oncokbApp').run(
             $rootScope.user = {
                 role: config.userRoles.public
             };
-            // $window.onbeforeunload = function() {
-            //     $rootScope.metaFire['helloworld'] = { review: true };
-            //     // var answer = confirm("Are you sure you want to leave this page?")
-            // }
-            // $window.onbeforeunload = function (event) {
-            //     return 'You have made changes, but you did not save them yet.\nLeaving the page will revert all changes.';
-            // }
             $rootScope.meta = {
                 levelsDesc: {
                     '0': 'FDA-approved drug in this indication irrespective of gene/variant biomarker',
