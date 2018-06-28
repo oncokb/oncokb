@@ -125,8 +125,8 @@ angular.module('oncokbApp')
                         $scope.updatedBy = $scope.tumor.cancerTypes_review.updatedBy;
                         $scope.updateTime = $scope.tumor.cancerTypes_review.updateTime;
                     } else {
-                        $scope.updatedBy = $scope.reviewObj.updatedBy ? $scope.reviewObj.updatedBy : '';
-                        $scope.updateTime = $scope.reviewObj.updateTime ? $scope.reviewObj.updateTime : '';
+                        $scope.updatedBy = $scope.reviewObj && $scope.reviewObj.updatedBy ? $scope.reviewObj.updatedBy : '';
+                        $scope.updateTime = $scope.reviewObj && $scope.reviewObj.updateTime ? $scope.reviewObj.updateTime : '';
                     }
                     if (!$scope.updatedBy) {
                         $scope.updatedBy = '';

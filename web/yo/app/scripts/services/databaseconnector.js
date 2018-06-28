@@ -129,16 +129,6 @@ angular.module('oncokbApp')
                 }
             }
 
-            function updateEvidence(uuid, data, success, fail) {
-                DriveAnnotation
-                    .updateEvidence(uuid, data)
-                    .then(function(data) {
-                        success(data);
-                    }, function() {
-                        fail();
-                    });
-            }
-
             function getEvidencesByUUID(uuid, success, fail) {
                 if (testing) {
                     success('');
@@ -555,7 +545,6 @@ angular.module('oncokbApp')
                 searchAnnotation: searchVariant,
                 updateGene: updateGene,
                 updateGeneType: updateGeneType,
-                updateEvidence: updateEvidence,
                 deleteEvidences: deleteEvidences,
                 updateVUS: updateVUS,
                 updateEvidenceBatch: updateEvidenceBatch,

@@ -155,17 +155,6 @@ angular.module('oncokbApp').factory('DriveAnnotation', ['$http', 'OncoKB', '_', 
             });
     }
 
-    function updateEvidence(uuid, data) {
-        return $http.post(
-            OncoKB.config.apiLink + 'evidences/update/' + uuid,
-            data,
-            {
-                transformResponse: function(result) {
-                    return {status: result};
-                }
-            });
-    }
-
     function deleteEvidences(data) {
         return $http.post(
             OncoKB.config.apiLink + 'evidences/delete',
@@ -247,7 +236,6 @@ angular.module('oncokbApp').factory('DriveAnnotation', ['$http', 'OncoKB', '_', 
     return {
         updateGene: updateGene,
         updateGeneType: updateGeneType,
-        updateEvidence: updateEvidence,
         deleteEvidences: deleteEvidences,
         updateVUS: updateVUS,
         updateEvidenceBatch: updateEvidenceBatch,
