@@ -2728,7 +2728,7 @@ angular.module('oncokbApp')
                     });
             }
             function watchCurrentReviewer() {
-                var ref = firebase.database().ref('Meta/' + $scope.fileTitle + '/currentReviewer');
+                var ref = firebase.database().ref('Meta/' + $scope.fileTitle + '/review/currentReviewer');
                 ref.on('value', function(doc) {
                     if (!doc.val()) {
                         if ($scope.status.fileEditable === true && $scope.fileEditable === false) {
