@@ -261,7 +261,7 @@ angular.module('oncokbApp')
                             return $scope.data[$scope.key] === checkbox;
                         }
                     } 
-                    return $scope.data[$scope.key+'_review'].lastReviewed === checkbox;
+                    return $scope.data && $scope.data[$scope.key+'_review'] && $scope.data[$scope.key+'_review'].lastReviewed === checkbox;
                 }
                 $scope.reviewLayout = function (type) {
                     if (type === 'regular') {

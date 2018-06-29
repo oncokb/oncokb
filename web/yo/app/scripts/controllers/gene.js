@@ -693,8 +693,9 @@ angular.module('oncokbApp')
                     evidencesAllUsers[userName].historyData.update.push(historyData);
                     evidencesAllUsers[userName].updatedEvidenceModels.push([type, mutation, tumor, ti, treatment]);
                 } else {
+                    var data = $scope.getRefs(mutation, tumor, ti, treatment);
                     // for empty section
-                    acceptSection(type, mutation, tumor, ti, treatment);
+                    acceptSection(type, data.mutation, data.tumor, data.ti, data.treatment);
                 }
             }
             /*****
@@ -2834,7 +2835,7 @@ angular.module('oncokbApp')
                 }, function(error) {
                 });
             }
-            // getOncoTreeMainTypes();
+            getOncoTreeMainTypes();
         }]
     )
     .controller('ModifyTumorTypeCtrl', function ($scope, $modalInstance, data, _, OncoKB, $rootScope, user, mainUtils, FirebaseModel) {
