@@ -693,8 +693,9 @@ angular.module('oncokbApp')
                     evidencesAllUsers[userName].historyData.update.push(historyData);
                     evidencesAllUsers[userName].updatedEvidenceModels.push([type, mutation, tumor, ti, treatment]);
                 } else {
+                    var data = $scope.getRefs(mutation, tumor, ti, treatment);
                     // for empty section
-                    acceptSection(type, mutation, tumor, ti, treatment);
+                    acceptSection(type, data.mutation, data.tumor, data.ti, data.treatment);
                 }
             }
             /*****
@@ -1036,13 +1037,13 @@ angular.module('oncokbApp')
                     var tempArr2 = [];
                     if ($rootScope.geneMeta.review[tumor.cancerTypes_uuid] && _.isArray(tumor.cancerTypes_review.lastReviewed) && tumor.cancerTypes_review.lastReviewed.length > 0 && type !== 'TUMOR_NAME_CHANGE' && !tumor.cancerTypes_review.added) {
                         _.each(tumor.cancerTypes_review.lastReviewed, function (item) {
-                            tempArr1.push(item.cancerType);
-                            tempArr2.push(item.oncoTreeCode ? item.oncoTreeCode : 'null');
+                            tempArr1.push(item.mainType);
+                            tempArr2.push(item.code ? item.code : 'null');
                         });
                     } else {
                         _.each(tumor.cancerTypes, function (item) {
-                            tempArr1.push(item.cancerType);
-                            tempArr2.push(item.oncoTreeCode ? item.oncoTreeCode : 'null');
+                            tempArr1.push(item.mainType);
+                            tempArr2.push(item.code ? item.code : 'null');
                         });
                     }
                     if (tempArr1.length > 0) {
@@ -2834,7 +2835,7 @@ angular.module('oncokbApp')
                 }, function(error) {
                 });
             }
-            // getOncoTreeMainTypes();
+            getOncoTreeMainTypes();
         }]
     )
     .controller('ModifyTumorTypeCtrl', function ($scope, $modalInstance, data, _, OncoKB, $rootScope, user, mainUtils, FirebaseModel) {
