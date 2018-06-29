@@ -524,7 +524,26 @@ angular.module('oncokbApp')
                     });
                 return deferred.promise;
             }
-
+            function getMainTypes() {
+                var deferred = $q.defer();
+                OncoTree.getMainTypes()
+                    .then(function(data) {
+                        deferred.resolve(data);
+                    }, function(result) {
+                        deferred.reject(result);
+                    });
+                return deferred.promise;
+            }
+            function getSubTypes() {
+                var deferred = $q.defer();
+                OncoTree.getSubTypes()
+                    .then(function(data) {
+                        deferred.resolve(data);
+                    }, function(result) {
+                        deferred.reject(result);
+                    });
+                return deferred.promise;
+            }
             // Public API here
             return {
                 getGeneTumorType: function(callback) {
@@ -577,6 +596,8 @@ angular.module('oncokbApp')
                 getPubMedArticle: getPubMedArticle,
                 getReviewedData: getReviewedData,
                 lookupVariants: lookupVariants,
-                getTumorSubtypes: getTumorSubtypes
+                getTumorSubtypes: getTumorSubtypes,
+                getMainTypes: getMainTypes,
+                getSubTypes: getSubTypes
             };
         }]);

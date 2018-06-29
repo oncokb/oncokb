@@ -354,12 +354,22 @@ angular.module('oncokbApp').factory('OncoTree', ['$http', 'OncoKB', '_', functio
         return $http.get(OncoKB.config.oncoTreeLink + 'tumorTypes?version=' + OncoKB.config.oncoTreeVersion);
     }
 
+    function getMainTypes() {
+        return $http.get(OncoKB.config.oncoTreeLink + '/mainTypes');
+    }
+
+    function getSubTypes() {
+        return $http.get(OncoKB.config.oncoTreeLink + '/subtypes');
+    }
+
     return {
         getMainType: getMainType,
         getTumorTypeByMainType: getTumorTypeByMainType,
         getTumorType: getTumorType,
         getTumorTypesByMainTypes: getTumorTypesByMainTypes,
-        getTumorSubtypes: getTumorSubtypes
+        getTumorSubtypes: getTumorSubtypes,
+        getMainTypes: getMainTypes,
+        getSubTypes: getSubTypes
     };
 }]);
 
