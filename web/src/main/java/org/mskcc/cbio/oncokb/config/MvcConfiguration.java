@@ -92,6 +92,9 @@ public class MvcConfiguration extends WebMvcConfigurerAdapter {
 
                 if (!rootCause.getMessage().contains("Broken pipe")
                     && !rootCause.getMessage().contains("Required request body content is missing")
+                    && !rootCause.getMessage().contains("Required request body is missing")
+                    && !rootCause.getMessage().contains("Failed to convert value of type 'java.lang.String' to required type 'java.lang.Integer'")
+                    && !rootCause.getMessage().contains("Required String parameter ")
                     && !rootCause.getMessage().contains("Could not read document")
                     ) {
                     super.resolveException(request, response, handler, ex);
