@@ -1037,13 +1037,13 @@ angular.module('oncokbApp')
                     var tempArr2 = [];
                     if ($rootScope.geneMeta.review[tumor.cancerTypes_uuid] && _.isArray(tumor.cancerTypes_review.lastReviewed) && tumor.cancerTypes_review.lastReviewed.length > 0 && type !== 'TUMOR_NAME_CHANGE' && !tumor.cancerTypes_review.added) {
                         _.each(tumor.cancerTypes_review.lastReviewed, function (item) {
-                            tempArr1.push(item.mainType);
-                            tempArr2.push(item.code ? item.code : 'null');
+                            tempArr1.push(item.cancerType);
+                            tempArr2.push(item.oncoTreeCode ? item.oncoTreeCode : 'null');
                         });
                     } else {
                         _.each(tumor.cancerTypes, function (item) {
-                            tempArr1.push(item.mainType);
-                            tempArr2.push(item.code ? item.code : 'null');
+                            tempArr1.push(item.cancerType);
+                            tempArr2.push(item.oncoTreeCode ? item.oncoTreeCode : 'null');
                         });
                     }
                     if (tempArr1.length > 0) {
