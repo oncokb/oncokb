@@ -389,7 +389,7 @@
     <h3>Variants of Unknown Significance (Investigated and data not found)
       <button class="btn btn-default btn-sm" ng-click="vusUpdate()" ng-if="developerCheck() && internal">Update to database</button>
     </h3>
-    <div ng-repeat="variant in vusItems">
+    <div ng-repeat="variant in vusFire.vus">
       <vus-item vus="vusFire" index="$index" gene="fileTitle" vus-update="vusUpdate()"></vus-item>
     </div>
 

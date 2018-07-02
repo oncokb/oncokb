@@ -39,14 +39,11 @@
                     <ul class="list-group">
                         <li class="list-group-item" ng-repeat="y in x.records track by $index">
                             <div ng-switch on="y.operation">
-                                <div ng-switch-when="update">
-                                    {{y.location + ' ' + y.operation + 'd' + ' by ' + y.lastEditBy}}
-                                </div>
-                                <div ng-switch-when="delete">
-                                    {{y.location + ' ' + y.operation + 'd' + ' by ' + y.lastEditBy}}
-                                </div>
                                 <div ng-switch-when="add">
                                     {{y.location + ' ' + y.operation + 'ed' + (y.lastEditBy ? ' by ' + y.lastEditBy : '')}}
+                                </div>
+                                <div ng-switch-default>
+                                    {{y.location + ' ' + y.operation + 'd' + ' by ' + y.lastEditBy}}
                                 </div>
                                 <div ng-if="includeUUID">{{y.uuids}}</div>
                             </div>
