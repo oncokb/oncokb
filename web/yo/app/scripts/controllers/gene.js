@@ -132,55 +132,6 @@ angular.module('oncokbApp')
              * The first one is about the tumor name validation result such as duplicated tumor. The result is stored in tumorMessages, and updated in real time as editing.
              * The other one is about the detailed treatment info inside when first open the tumor section, and the result is stored in tumorContent.
              * **/
-            $rootScope.getTumorMessages = function (mutation) {
-                var mutationName = mutation.name.toLowerCase();
-                if (!$scope.tumorMessages) {
-                    $scope.tumorMessages = {};
-                }
-                $scope.tumorMessages[mutationName] = {};
-                $scope.tumorContent = {};
-                var tempNameList = [];
-                for (var j = 0; j < mutation.tumors.length; j++) {
-                    var tumor = mutation.tumors.get(j);
-                    var uuid = tumor.cancerTypes_uuid;
-                    var tumorName = $scope.getCancerTypesName(tumor).toLowerCase();
-                    if (tempNameList.indexOf(tumorName) === -1) {
-                        tempNameList.push(tumorName);
-                        $scope.tumorMessages[mutationName][tumorName] = '';
-                    } else {
-                        $scope.tumorMessages[mutationName][tumorName] = 'Tumor exists';
-                    }
-                    for (var m = 0; m < tumor.TIs.length; m++) {
-                        var ti = tumor.TIs.get(m);
-                        for (var n = 0; n < ti.treatments.length; n++) {
-                            var treatment = ti.treatments.get(n);
-                            if (!treatment.name_review.removed) {
-                                if (!$scope.tumorContent[uuid]) {
-                                    $scope.tumorContent[uuid] = {};
-                                }
-                                var tempLevel = treatment.level;
-                                if ($scope.tumorContent[uuid][tempLevel]) {
-                                    $scope.tumorContent[uuid][tempLevel]++;
-                                } else {
-                                    $scope.tumorContent[uuid][tempLevel] = 1;
-                                }
-                            }
-                        }
-                    }
-                    var levels = _.keys($scope.tumorContent[uuid]);
-                    if (levels.length > 0) {
-                        levels.sort(function (a, b) {
-                            return sortedLevel.indexOf(a) - sortedLevel.indexOf(b);
-                        });
-                        var result = [];
-                        _.each(levels, function (level) {
-                            result.push('<span>' + $scope.tumorContent[uuid][level] + 'x </span><span style="color: ' + $rootScope.meta.colorsByLevel['Level_' + level] + '">Level ' + level + '</span>');
-                        });
-                        $scope.tumorContent[uuid].result = result.join('; ');
-                    }
-                }
-            }
-            // Keep working on this function
             $scope.getTumorContent = function (mutation) {
                 $scope.tumorContent = {};
                 if (!mutation.tumors) {
@@ -189,6 +140,10 @@ angular.module('oncokbApp')
                 for (var j = 0; j < mutation.tumors.length; j++) {
                     var tumor = mutation.tumors[j];
                     var uuid = tumor.cancerTypes_uuid;
+                    $scope.tumorContent[uuid] = {};
+                    if (tumor.summary) {
+                        $scope.tumorContent[uuid].result = '1x TTS';
+                    }  
                     for (var m = 0; m < tumor.TIs.length; m++) {
                         var ti = tumor.TIs[m];
                         if (!ti.treatments) {
@@ -197,9 +152,6 @@ angular.module('oncokbApp')
                         for (var n = 0; n < ti.treatments.length; n++) {
                             var treatment = ti.treatments[n];
                             if (!(treatment.name_review && treatment.name_review.removed)) {
-                                if (!$scope.tumorContent[uuid]) {
-                                    $scope.tumorContent[uuid] = {};
-                                }
                                 var tempLevel = treatment.level;
                                 if ($scope.tumorContent[uuid][tempLevel]) {
                                     $scope.tumorContent[uuid][tempLevel]++;
@@ -208,8 +160,8 @@ angular.module('oncokbApp')
                                 }
                             }
                         }
-                    }
-                    var levels = _.keys($scope.tumorContent[uuid]);
+                    }                    
+                    var levels = _.without(_.keys($scope.tumorContent[uuid]), 'result');
                     if (levels.length > 0) {
                         levels.sort(function (a, b) {
                             return sortedLevel.indexOf(a) - sortedLevel.indexOf(b);
@@ -218,7 +170,10 @@ angular.module('oncokbApp')
                         _.each(levels, function (level) {
                             result.push('<span>' + $scope.tumorContent[uuid][level] + 'x </span><span style="color: ' + $rootScope.meta.colorsByLevel['Level_' + level] + '">Level ' + level + '</span>');
                         });
-                        $scope.tumorContent[uuid].result = result.join('; ');
+                        if ($scope.tumorContent[uuid].result) {
+                            $scope.tumorContent[uuid].result += ', ';
+                        }
+                        $scope.tumorContent[uuid].result += result.join('; ');                   
                     }
                 }
             }
@@ -1603,7 +1558,7 @@ angular.module('oncokbApp')
                 return isValid;
             }
             $scope.addTumorType = function (index) {
-                var newTumorTypesName = mainUtils.getCancerTypesName($scope.meta.newCancerTypes);
+                var newTumorTypesName = mainUtils.getNewCancerTypesName($scope.meta.newCancerTypes);
                 if (isValidTumor(index, newTumorTypesName)) {
                     var cancerTypes = [];
                     _.each($scope.meta.newCancerTypes, function (ct) {
@@ -1631,10 +1586,11 @@ angular.module('oncokbApp')
                 }
             };
 
-            $scope.modifyTumorType = function (tumor, path) {
+            $scope.modifyTumorType = function (mutation, tumor, path) {
                 var indices = getIndexByPath(path);
                 var tumorRef = $scope.gene.mutations[indices[0]].tumors[indices[1]];
                 var dlg = dialogs.create('views/modifyTumorTypes.html', 'ModifyTumorTypeCtrl', {
+                    mutation: mutation,
                     tumor: tumor,
                     tumorRef: tumorRef,
                     oncoTree: $scope.oncoTree
@@ -2303,25 +2259,6 @@ angular.module('oncokbApp')
                     });
             }
             getSuggestedMutations();
-            function getTumorSubtypes() {
-                var tempRes = [];
-                DatabaseConnector.getTumorSubtypes().then(function (result) {
-                    _.each(result, function (item) {
-                        tempRes.push({
-                            name: item.name,
-                            code: item.code
-                        });
-                    });
-                    $scope.oncoTree.allTumorTypes = tempRes;
-                    $scope.meta = {
-                        newCancerTypes: [{
-                            subtype: '',
-                            oncoTreeTumorTypes: tempRes
-                        }]
-                    };
-                });
-            }
-            getTumorSubtypes();
             function getLevels() {
                 var desS = {
                     '': '',
@@ -2844,7 +2781,8 @@ angular.module('oncokbApp')
             newCancerTypes: [],
             cancerTypes_review: data.tumor.cancerTypes_review,
             cancerTypes_uuid: data.tumor.cancerTypes_uuid,
-            oncoTree: data.oncoTree
+            oncoTree: data.oncoTree,
+            mutation: data.mutation
         };
 
         $scope.cancel = function () {
@@ -2973,7 +2911,7 @@ angular.module('oncokbApp')
             _.each($scope.meta.mutation.tumors, function (tumor) {
                 var tempTumorStr = '';
                 _.each(tumor.cancerTypes, function (cancerType) {
-                    var mainType = cancerType.cancerType;
+                    var mainType = cancerType.mainType;
                     var subtype = cancerType.subtype;
                     var nonEmpty = false;
                     if (mainType) {

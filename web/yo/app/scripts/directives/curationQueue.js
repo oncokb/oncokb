@@ -45,6 +45,7 @@ angular.module('oncokbApp')
                         link: '',
                         hugoSymbols: '',
                         variant: '',
+                        mainType: '',
                         subType: '',
                         section: '',
                         curator: '',
@@ -174,6 +175,7 @@ angular.module('oncokbApp')
                     var currentQueues = $scope.getQueuesByGene(hugoSymbol);
                     var item = {
                         link: $scope.input.link,
+                        mainType: $scope.input.mainType ? $scope.input.mainType : '',
                         subType: $scope.input.subType ? $scope.input.subType.name : '',
                         section: $scope.input.section ? $scope.input.section.join() : '',
                         curator: $scope.input.curator ? $scope.input.curator.name : '',
@@ -249,11 +251,20 @@ angular.module('oncokbApp')
                             }
                         }
                     }
+                    $scope.data.modifiedMainType = '';
                     $scope.data.modifiedSubType = {};
-                    if (queueItem.subType) {
-                        for (var i = 0;i < $scope.data.subTypes.length; i++) {
-                            if ($scope.data.subTypes[i].name === queueItem.subType) {
-                                $scope.data.modifiedSubType = $scope.data.subTypes[i];
+                    if (queueItem.mainType) {
+                        for (var i = 0;i < $scope.data.mainTypes.length; i++) {
+                            if ($scope.data.mainTypes[i] === queueItem.mainType) {
+                                $scope.data.modifiedMainType = $scope.data.mainTypes[i];
+                                break;
+                            }
+                        }
+                    }
+                    if ($scope.data.modifiedMainType && queueItem.subType) {
+                        for (var i = 0;i < $scope.data.subTypes[$scope.data.modifiedMainType].length; i++) {
+                            if ($scope.data.subTypes[$scope.data.modifiedMainType][i].name === queueItem.subType) {
+                                $scope.data.modifiedSubType = $scope.data.subTypes[$scope.data.modifiedMainType][i];
                                 break;
                             }
                         }
@@ -268,6 +279,9 @@ angular.module('oncokbApp')
                     };
                     if (!_.isEmpty($scope.data.modifiedCurator)) {
                         $scope.input.curator = $scope.data.modifiedCurator;
+                    }
+                    if ($scope.data.modifiedMainType) {
+                        $scope.input.mainType = $scope.data.modifiedMainType;
                     }
                     if (!_.isEmpty($scope.data.modifiedSubType)) {
                         $scope.input.subType = $scope.data.modifiedSubType;
@@ -466,22 +480,27 @@ angular.module('oncokbApp')
                         return annotationLocation[x.article].join('; ');
                     }
                 };
-                function getTumorSubtypes() {
-                    var tempRes = [];
-                    DatabaseConnector.getTumorSubtypes().then(function(result) {
-                        _.each(result, function(item) {
-                            tempRes.push({
-                                name: item.name,
-                                code: item.code
+                function getOncoTreeMainTypes() {
+                    mainUtils.getOncoTreeMainTypes().then(function(result) {
+                        var mainTypesReturned = result.mainTypes,
+                            tumorTypesReturned = result.tumorTypes;
+                        if (mainTypesReturned) {
+                            $scope.data.mainTypes = _.map(mainTypesReturned, function(item) {
+                                return item.name;
                             });
-                        });
-                        tempRes.sort(function(a, b) {
-                            return a.name.localeCompare(b.name);
-                        });
-                        $scope.data.subTypes = tempRes;
+                            if (_.isArray(tumorTypesReturned)) {
+                                var tumorTypes = {};
+                                var allTumorTypes = [];
+                                _.each(mainTypesReturned, function(mainType, i) {
+                                    tumorTypes[mainType.name] = tumorTypesReturned[i];
+                                });
+                                $scope.data.subTypes = tumorTypes;
+                            }
+                        }
+                    }, function(error) {
                     });
                 }
-                // getTumorSubtypes();
+                getOncoTreeMainTypes();
                 $scope.toggleForm = function() {
                     $scope.data.formExpanded = !$scope.data.formExpanded;
                     $timeout(function() {

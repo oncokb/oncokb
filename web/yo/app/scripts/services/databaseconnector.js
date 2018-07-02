@@ -372,17 +372,6 @@ angular.module('oncokbApp')
                 return deferred.promise;
             }
 
-            function getOncoTreeMainTypes() {
-                var deferred = $q.defer();
-                OncoTree.getMainType()
-                    .then(function(data) {
-                        deferred.resolve(data);
-                    }, function(result) {
-                        deferred.reject(result);
-                    });
-                return deferred.promise;
-            }
-
             function getOncoTreeTumorTypesByMainType(mainType) {
                 var deferred = $q.defer();
                 OncoTree.getTumorTypeByMainType(mainType)
@@ -392,56 +381,6 @@ angular.module('oncokbApp')
                     .error(function(result) {
                         deferred.reject(result);
                     });
-                return deferred.promise;
-            }
-
-            function getOncoTreeTumorTypesByMainTypes(mainTypes) {
-                var deferred = $q.defer();
-                OncoTree.getTumorTypesByMainTypes(mainTypes)
-                    .then(function(data) {
-                        deferred.resolve(data);
-                    }, function(result) {
-                        deferred.reject(result);
-                    });
-                return deferred.promise;
-            }
-
-            function getOncoTreeTumorTypeByName(name, exactMatch) {
-                var deferred = $q.defer();
-                OncoTree.getTumorType('name', name, exactMatch)
-                    .success(function(data) {
-                        deferred.resolve(data);
-                    })
-                    .error(function(result) {
-                        deferred.reject(result);
-                    });
-                return deferred.promise;
-            }
-            function getTumorSubtypes() {
-                var deferred = $q.defer();
-                OncoTree.getTumorSubtypes().then(function(data) {
-                    data.data.push({
-                        name: 'All Liquid Tumors'
-                    });
-                    data.data.push({
-                        name: 'All Solid Tumors'
-                    });
-                    data.data.push({
-                        name: 'All Tumors'
-                    });
-                    data.data.push({
-                        name: 'Germline Disposition'
-                    });
-                    data.data.push({
-                        name: 'All Pediatric Tumors'
-                    });
-                    data.data.push({
-                        name: 'Other Tumor Types'
-                    });
-                    deferred.resolve(data.data);
-                }, function(result) {
-                    deferred.reject(result);
-                });
                 return deferred.promise;
             }
 
@@ -527,40 +466,41 @@ angular.module('oncokbApp')
             function getMainTypes() {
                 var deferred = $q.defer();
                 OncoTree.getMainTypes()
-                    .then(function(data) {
-                        deferred.resolve(data);
-                    }, function(result) {
-                        deferred.reject(result);
+                    .then(function(result) {
+                        deferred.resolve(result.data);
+                    }, function(error) {
+                        deferred.reject(error);
                     });
                 return deferred.promise;
             }
             function getSubTypes() {
                 var deferred = $q.defer();
                 OncoTree.getSubTypes()
-                    .then(function(data) {
-                        deferred.resolve(data);
-                    }, function(result) {
-                        deferred.reject(result);
+                    .then(function(result) {
+                        deferred.resolve(result.data);
+                    }, function(error) {
+                        deferred.reject(error);
                     });
                 return deferred.promise;
             }
+            function getGeneTumorType(callback) {
+                var timestamp = new Date().getTime().toString();
+
+                numOfLocks[timestamp] = 2;
+                data[timestamp] = {};
+
+                getAllGene(function(d) {
+                    data[timestamp].genes = d.data;
+                }, timestamp);
+                getAllTumorType(function(d) {
+                    data[timestamp].tumorTypes = d.data;
+                }, timestamp);
+
+                timeout(callback, timestamp);
+            }
             // Public API here
             return {
-                getGeneTumorType: function(callback) {
-                    var timestamp = new Date().getTime().toString();
-
-                    numOfLocks[timestamp] = 2;
-                    data[timestamp] = {};
-
-                    getAllGene(function(d) {
-                        data[timestamp].genes = d.data;
-                    }, timestamp);
-                    getAllTumorType(function(d) {
-                        data[timestamp].tumorTypes = d.data;
-                    }, timestamp);
-
-                    timeout(callback, timestamp);
-                },
+                getGeneTumorType: getGeneTumorType,
                 searchAnnotation: searchVariant,
                 updateGene: updateGene,
                 updateGeneType: updateGeneType,
@@ -582,10 +522,7 @@ angular.module('oncokbApp')
                 updateGeneCache: function(hugoSymbol) {
                     return updateGeneCache(hugoSymbol);
                 },
-                getOncoTreeMainTypes: getOncoTreeMainTypes,
                 getOncoTreeTumorTypesByMainType: getOncoTreeTumorTypesByMainType,
-                getOncoTreeTumorTypesByMainTypes: getOncoTreeTumorTypesByMainTypes,
-                getOncoTreeTumorTypeByName: getOncoTreeTumorTypeByName,
                 testAccess: testAccess,
                 getIsoforms: getIsoforms,
                 getOncogeneTSG: getOncogeneTSG,
@@ -596,7 +533,6 @@ angular.module('oncokbApp')
                 getPubMedArticle: getPubMedArticle,
                 getReviewedData: getReviewedData,
                 lookupVariants: lookupVariants,
-                getTumorSubtypes: getTumorSubtypes,
                 getMainTypes: getMainTypes,
                 getSubTypes: getSubTypes
             };

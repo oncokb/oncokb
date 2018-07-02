@@ -80,6 +80,20 @@ angular.module('oncokbApp')
             return list.join(', ');
         }
 
+        function getNewCancerTypesName(cancerTypes) {
+            if (!cancerTypes) {
+                return null;
+            }
+            var list = [];
+            _.each(cancerTypes, function(cancerType) {
+                if (cancerType.subtype) {
+                    list.push(cancerType.subtype.name);
+                } else if (cancerType.mainType) {
+                    list.push(cancerType.mainType.name);
+                }
+            });
+            return list.join(', ');
+        }
         /**
          * Check whether searched mainType in cancerTypes
          * @param {array} cancerTypes array of cancer types
@@ -250,42 +264,43 @@ angular.module('oncokbApp')
          * **/
         function getOncoTreeMainTypes() {
             var deferred = $q.defer();
-            DatabaseConnector.getOncoTreeMainTypes()
-                .then(function(result) {
-                    if (result.data) {
-                        var mainTypeList = result.data;
-                        mainTypeList = _.union(mainTypeList, ['All Liquid Tumors', 'All Solid Tumors', 'All Tumors', 'Germline Disposition', 'All Pediatric Tumors', 'Other Tumor Types']);
-                        var mainTypeResult = _.map(mainTypeList, function(item) {
-                            return {
-                                name: item,
-                                id: 0
-                            }
+            if ($rootScope.meta.mainType && $rootScope.meta.tumorTypes) {
+                deferred.resolve({
+                    mainTypes: $rootScope.meta.mainType,
+                    tumorTypes: $rootScope.meta.tumorTypes
+                });
+            } else {
+                DatabaseConnector.getMainTypes().then(function(result1) {
+                    var mainTypeResult = _.map(result1, function(item) {
+                        return {
+                            name: item,
+                            code: 0
+                        };
+                    });
+                    DatabaseConnector.getSubTypes().then(function(result2) {
+                        var subtypeResult = [];
+                        _.each(result1, function(mainTypeName) {
+                            var tempArr = [];
+                            _.each(result2, function(item) {
+                                if (item.mainType && item.mainType.name && item.mainType.name === mainTypeName) {
+                                    tempArr.push(item);                         
+                                }
+                            });
+                            subtypeResult.push(tempArr);
+                        });    
+                        $rootScope.meta.mainType = mainTypeResult;
+                        $rootScope.meta.tumorTypes = subtypeResult;
+                        deferred.resolve({
+                            mainTypes: mainTypeResult,
+                            tumorTypes: subtypeResult
                         });
-                        DatabaseConnector.getOncoTreeTumorTypesByMainTypes(mainTypeList).then(function(tumorTypesResult) {
-                            if (mainTypeList.length !== tumorTypesResult.data.length) {
-                                deferred.reject('The number of returned tumor types is not matched with number of main types.');
-                            } else {
-                                var subtypeResult = [];
-                                _.each(tumorTypesResult.data, function(items) {
-                                    _.each(items, function(item) {
-                                        item.mainType = {
-                                            name: item.mainType
-                                        };
-                                    });
-                                    subtypeResult.push(items);
-                                });
-                                deferred.resolve({
-                                    mainTypes: mainTypeResult,
-                                    tumorTypes: subtypeResult
-                                });
-                            }
-                        }, function() {
-                            // TODO: if OncoTree server returns error.
-                        });
-                    }
+                    }, function(error) {
+                        deferred.reject(error);
+                    });
                 }, function(error) {
                     deferred.reject(error);
                 });
+            }            
             return deferred.promise;
         }
 
@@ -461,6 +476,7 @@ angular.module('oncokbApp')
         return {
             setIsoFormAndGeneType: setIsoFormAndGeneType,
             getCancerTypesName: getCancerTypesName,
+            getNewCancerTypesName: getNewCancerTypesName,
             containMainType: containMainType,
             getIsoform: getIsoform,
             getOncogeneTSG: getOncogeneTSG,
