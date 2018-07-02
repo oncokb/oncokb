@@ -43,9 +43,6 @@ angular.module('oncokbApp')
                 }
             }
             $scope.metaFlags = {};
-            // $window.onbeforeunload = function (event) {
-            //     return 'You have made changes, but you did not save them yet.\nLeaving the page will revert all changes.';
-            // }
             function processMeta() {
                 loadFiles.load(['meta', 'queues']).then(function(result) {
                     $scope.hugoSymbols = _.without(_.keys($rootScope.metaData), 'collaborators');
