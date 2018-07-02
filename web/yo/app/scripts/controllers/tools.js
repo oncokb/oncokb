@@ -5,16 +5,18 @@ angular.module('oncokbApp')
         function($scope, dialogs, OncoKB, DatabaseConnector, $timeout, _, FindRegex, mainUtils, loadFiles, $rootScope) {
             $scope.init = function() {
                 $scope.loading = false;
-                $scope.geneNames =  _.keys($rootScope.metaData);
+                loadFiles.load(['meta']).then(function() {
+                    $scope.geneNames =  _.keys($rootScope.metaData);
+                }, function() {
+                    console.log('fail to load meta file');
+                });
             };
             $scope.dt = {};
             $scope.dt.dtOptions = {
                 paging: false,
                 hasBootstrap: true,
-
                 scrollY: 500,
                 scrollCollapse: true
-
             };
 
             var historyResults;

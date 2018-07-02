@@ -40,13 +40,6 @@
                 <input type="text" class="inputStyle" id="variant" ng-model="input.variant" placeholder="{{location === 'queues' ? 'Gene A: Variant A;Gene B: Variant B' : 'Variant'}}" size="10">
             </div>
             <div class="inputMargin">
-                <!-- <label for="subType" class="labelAlign">Tumor Type:</label> -->
-                <!-- <select chosen
-                        allow-single-deselect="true"
-                        id="subType"
-                        ng-model="input.subType"
-                        ng-options="tt.name for tt in data.subTypes | orderBy: tt.name" class="subTypeSelect">
-                </select> -->
                 <label for="cancerType" class="labelAlign">Cancer Type:</label>
                 <select chosen
                         ng-if="data.mainTypes.length > 0"
