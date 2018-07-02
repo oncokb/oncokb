@@ -14,7 +14,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author jgao
@@ -29,21 +31,28 @@ public class GeneController {
         , @RequestParam(value = "hugoSymbol", required = false) List<String> hugoSymbols
         , @RequestParam(value = "fields", required = false) String fields
     ) {
-
-        GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
-
         if (entrezGeneIds == null && hugoSymbols == null) {
-            return geneBo.findAll();
+            return new ArrayList<>(GeneUtils.getAllGenes());
         }
 
-        List<Gene> genes = new ArrayList<Gene>();
+        Set<Gene> genes = new HashSet<>();
         if (entrezGeneIds != null) {
-            genes.addAll(geneBo.findGenesByEntrezGeneId(entrezGeneIds));
+            for (Integer enterz : entrezGeneIds) {
+                Gene gene = GeneUtils.getGeneByEntrezId(enterz);
+                if (gene != null) {
+                    genes.add(gene);
+                }
+            }
         } else if (hugoSymbols != null) {
-            genes.addAll(geneBo.findGenesByHugoSymbol(hugoSymbols));
+            for (String hugoSymbol : hugoSymbols) {
+                Gene gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
+                if (gene != null) {
+                    genes.add(gene);
+                }
+            }
         }
 
-        return JsonResultFactory.getGene(genes, fields);
+        return JsonResultFactory.getGene(new ArrayList<>(genes), fields);
     }
 
     @RequestMapping(value = "/legacy-api/genes/update/{hugoSymbol}", method = RequestMethod.POST)
@@ -53,12 +62,13 @@ public class GeneController {
         if (!hugoSymbol.equalsIgnoreCase(queryGene.getHugoSymbol())) {
             return "error";
         }
-        GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
         Gene gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
-        gene.setTSG(queryGene.getTSG());
-        gene.setOncogene(queryGene.getOncogene());
-        geneBo.update(gene);
-
+        if (gene != null) {
+            GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
+            gene.setTSG(queryGene.getTSG());
+            gene.setOncogene(queryGene.getOncogene());
+            geneBo.update(gene);
+        }
         return "success";
     }
 }
