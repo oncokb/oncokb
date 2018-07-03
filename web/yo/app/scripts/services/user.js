@@ -28,8 +28,19 @@ angular.module('oncokbApp')
                 me.photoURL = gResp.user.photoURL;
                 $rootScope.isSignedIn = true;
                 setRole(gResp.user).then(function() {
-                    updateUserInfo();
-                    defer.resolve();
+                    if (allUsers[me.name.toLowerCase()].email && allUsers[me.name.toLowerCase()].email !== me.email) {
+                        defer.reject('You do not have access to login. Please contact the OncoKB team.');
+                    } else {
+                        if (!allUsers[me.name.toLowerCase()].email) {
+                            updateUserInfo().then(function() {
+                                defer.resolve();
+                            }, function(error) {
+                                defer.reject('fail to initialize user info ' + error);
+                            });
+                        } else {
+                            defer.resolve();
+                        }                        
+                    }                    
                 }, function(error) {
                     defer.reject(error);
                 });
