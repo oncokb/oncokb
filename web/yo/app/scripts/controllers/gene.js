@@ -82,51 +82,54 @@ angular.module('oncokbApp')
                 var tempNameList = [];
                 for (var i = 0; i < $scope.mutations.length; i++) {
                     var mutation = $scope.mutations[i];
-                    var uuid = mutation.name_uuid;
-                    $scope.mutationContent[uuid] = {
-                        TT: 0,
-                        levels: [],
-                        TTS: 0
-                    };
-                    if (mutation.tumors) {
-                        for (var j = 0; j < mutation.tumors.length; j++) {
-                            var tumor = mutation.tumors[j];
-                            if (!(tumor.cancerTypes_review && tumor.cancerTypes_review.removed)) {
-                                $scope.mutationContent[uuid].TT++;
-                                if (tumor.summary) {
-                                    $scope.mutationContent[uuid].TTS++;
-                                }
-                                for (var m = 0; m < tumor.TIs.length; m++) {
-                                    var ti = tumor.TIs[m];
-                                    if (ti.treatments) {
-                                        for (var n = 0; n < ti.treatments.length; n++) {
-                                            var treatment = ti.treatments[n];
-                                            if (!(treatment.name_review && treatment.name_review.removed)) {
-                                                $scope.mutationContent[uuid].levels.push(treatment.level);
-                                            }
+                    indicateMutationContent(mutation);
+                }
+            };
+            function indicateMutationContent (mutation) {
+                var uuid = mutation.name_uuid;
+                $scope.mutationContent[uuid] = {
+                    TT: 0,
+                    levels: [],
+                    TTS: 0
+                };
+                if (mutation.tumors) {
+                    for (var j = 0; j < mutation.tumors.length; j++) {
+                        var tumor = mutation.tumors[j];
+                        if (!(tumor.cancerTypes_review && tumor.cancerTypes_review.removed)) {
+                            $scope.mutationContent[uuid].TT++;
+                            if (tumor.summary) {
+                                $scope.mutationContent[uuid].TTS++;
+                            }
+                            for (var m = 0; m < tumor.TIs.length; m++) {
+                                var ti = tumor.TIs[m];
+                                if (ti.treatments) {
+                                    for (var n = 0; n < ti.treatments.length; n++) {
+                                        var treatment = ti.treatments[n];
+                                        if (!(treatment.name_review && treatment.name_review.removed)) {
+                                            $scope.mutationContent[uuid].levels.push(treatment.level);
                                         }
                                     }
                                 }
                             }
                         }
                     }
-                    if ($scope.mutationContent[uuid].TT > 0) {
-                        $scope.mutationContent[uuid].levels.sort(function (a, b) {
-                            return sortedLevel.indexOf(a) - sortedLevel.indexOf(b);
+                }
+                if ($scope.mutationContent[uuid].TT > 0) {
+                    $scope.mutationContent[uuid].levels.sort(function (a, b) {
+                        return sortedLevel.indexOf(a) - sortedLevel.indexOf(b);
+                    });
+                    $scope.mutationContent[uuid].result = $scope.mutationContent[uuid].TT + 'x TT';
+                    if ($scope.mutationContent[uuid].TTS > 0) {
+                        $scope.mutationContent[uuid].result += ', ' + $scope.mutationContent[uuid].TTS + 'x TTS';
+                    }
+                    if ($scope.mutationContent[uuid].levels.length > 0) {
+                        $scope.mutationContent[uuid].levels = _.map(_.uniq($scope.mutationContent[uuid].levels), function (level) {
+                            return '<span style="color: ' + $rootScope.meta.colorsByLevel['Level_' + level] + '">' + level + '</span>';
                         });
-                        $scope.mutationContent[uuid].result = $scope.mutationContent[uuid].TT + 'x TT';
-                        if ($scope.mutationContent[uuid].TTS > 0) {
-                            $scope.mutationContent[uuid].result += ', ' + $scope.mutationContent[uuid].TTS + 'x TTS';
-                        }
-                        if ($scope.mutationContent[uuid].levels.length > 0) {
-                            $scope.mutationContent[uuid].levels = _.map(_.uniq($scope.mutationContent[uuid].levels), function (level) {
-                                return '<span style="color: ' + $rootScope.meta.colorsByLevel['Level_' + level] + '">' + level + '</span>';
-                            });
-                            $scope.mutationContent[uuid].result += ', Levels: ' + $scope.mutationContent[uuid].levels.join(', ') + '</span>';
-                        }
+                        $scope.mutationContent[uuid].result += ', Levels: ' + $scope.mutationContent[uuid].levels.join(', ') + '</span>';
                     }
                 }
-            };
+            }
             /**
              * This function is used to calculate 2 types of tumor messages we want to indicate in the tumor section header.
              * The first one is about the tumor name validation result such as duplicated tumor. The result is stored in tumorMessages, and updated in real time as editing.
@@ -139,42 +142,45 @@ angular.module('oncokbApp')
                 }
                 for (var j = 0; j < mutation.tumors.length; j++) {
                     var tumor = mutation.tumors[j];
-                    var uuid = tumor.cancerTypes_uuid;
-                    $scope.tumorContent[uuid] = {};
-                    if (tumor.summary) {
-                        $scope.tumorContent[uuid].result = '1x TTS';
-                    }  
-                    for (var m = 0; m < tumor.TIs.length; m++) {
-                        var ti = tumor.TIs[m];
-                        if (!ti.treatments) {
-                            continue;
-                        }
-                        for (var n = 0; n < ti.treatments.length; n++) {
-                            var treatment = ti.treatments[n];
-                            if (!(treatment.name_review && treatment.name_review.removed)) {
-                                var tempLevel = treatment.level;
-                                if ($scope.tumorContent[uuid][tempLevel]) {
-                                    $scope.tumorContent[uuid][tempLevel]++;
-                                } else {
-                                    $scope.tumorContent[uuid][tempLevel] = 1;
-                                }
+                    indicateTumorContent(tumor);
+                }
+            };
+            function indicateTumorContent(tumor) {
+                var uuid = tumor.cancerTypes_uuid;
+                $scope.tumorContent[uuid] = {};
+                if (tumor.summary) {
+                    $scope.tumorContent[uuid].result = '1x TTS';
+                }  
+                for (var m = 0; m < tumor.TIs.length; m++) {
+                    var ti = tumor.TIs[m];
+                    if (!ti.treatments) {
+                        continue;
+                    }
+                    for (var n = 0; n < ti.treatments.length; n++) {
+                        var treatment = ti.treatments[n];
+                        if (!(treatment.name_review && treatment.name_review.removed)) {
+                            var tempLevel = treatment.level;
+                            if ($scope.tumorContent[uuid][tempLevel]) {
+                                $scope.tumorContent[uuid][tempLevel]++;
+                            } else {
+                                $scope.tumorContent[uuid][tempLevel] = 1;
                             }
                         }
-                    }                    
-                    var levels = _.without(_.keys($scope.tumorContent[uuid]), 'result');
-                    if (levels.length > 0) {
-                        levels.sort(function (a, b) {
-                            return sortedLevel.indexOf(a) - sortedLevel.indexOf(b);
-                        });
-                        var result = [];
-                        _.each(levels, function (level) {
-                            result.push('<span>' + $scope.tumorContent[uuid][level] + 'x </span><span style="color: ' + $rootScope.meta.colorsByLevel['Level_' + level] + '">Level ' + level + '</span>');
-                        });
-                        if ($scope.tumorContent[uuid].result) {
-                            $scope.tumorContent[uuid].result += ', ';
-                        }
-                        $scope.tumorContent[uuid].result += result.join('; ');                   
                     }
+                }                    
+                var levels = _.without(_.keys($scope.tumorContent[uuid]), 'result');
+                if (levels.length > 0) {
+                    levels.sort(function (a, b) {
+                        return sortedLevel.indexOf(a) - sortedLevel.indexOf(b);
+                    });
+                    var result = [];
+                    _.each(levels, function (level) {
+                        result.push('<span>' + $scope.tumorContent[uuid][level] + 'x </span><span style="color: ' + $rootScope.meta.colorsByLevel['Level_' + level] + '">Level ' + level + '</span>');
+                    });
+                    if ($scope.tumorContent[uuid].result) {
+                        $scope.tumorContent[uuid].result += ', ';
+                    }
+                    $scope.tumorContent[uuid].result += result.join('; ');                   
                 }
             }
             $scope.getTreatmentMessages = function (mutation, tumor, ti) {
@@ -1583,6 +1589,7 @@ angular.module('oncokbApp')
                         subtype: '',
                         oncoTreeTumorTypes: angular.copy($scope.oncoTree.allTumorTypes)
                     }];
+                    indicateMutationContent($scope.gene.mutations[index]);
                 }
             };
 
@@ -1632,6 +1639,7 @@ angular.module('oncokbApp')
                 }
                 if (isValidTreatment(indices, newTreatmentName)) {
                     $scope.gene.mutations[indices[0]].tumors[indices[1]].TIs[indices[2]].treatments.push(treatment);
+                    indicateTumorContent($scope.gene.mutations[indices[0]].tumors[indices[1]]);
                 }
             };
 
@@ -1719,6 +1727,11 @@ angular.module('oncokbApp')
                             }
                         }
                         $rootScope.geneMeta.review[uuid] = true;
+                    }
+                    if (type === 'tumor') {
+                        indicateMutationContent($scope.gene.mutations[indices[0]]);
+                    } else if (type === 'treatment') {
+                        indicateTumorContent($scope.gene.mutations[indices[0]].tumors[indices[1]]);
                     }
                 }, function () {
                 });
