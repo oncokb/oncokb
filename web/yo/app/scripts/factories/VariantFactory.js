@@ -321,11 +321,11 @@ angular.module('oncokbApp').factory('OncoTree', ['$http', 'OncoKB', '_', functio
     }
 
     function getMainTypes() {
-        return $http.get(OncoKB.config.privateApiLink + 'utils/oncotree/mainTypes');
+        return $http.get(OncoKB.config.tempPrivateApiLink + 'utils/oncotree/mainTypes');
     }
 
     function getSubTypes() {
-        return $http.get(OncoKB.config.privateApiLink + 'utils/oncotree/subtypes');
+        return $http.get(OncoKB.config.tempPrivateApiLink + 'utils/oncotree/subtypes');
     }
 
     return {
@@ -382,7 +382,6 @@ angular.module('oncokbApp')
     .factory('ReviewResource', ['$http', 'OncoKB', function() {
         'use strict';
         return {
-            reviewMode: false, // reviewMode is tracked in the factory to avoid watchers in directives
             mostRecent: {}, // uuid string is the key, and value is an object with updateTime and updatedBy
             // the following attributes will be arrays with uuids as content
             accepted: [], // accepted section

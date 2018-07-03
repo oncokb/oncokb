@@ -147,7 +147,9 @@ angular.module('oncokbApp')
             };
             function indicateTumorContent(tumor) {
                 var uuid = tumor.cancerTypes_uuid;
-                $scope.tumorContent[uuid] = {};
+                $scope.tumorContent[uuid] = {
+                    result: ''
+                };
                 if (tumor.summary) {
                     $scope.tumorContent[uuid].result = '1x TTS';
                 }  
@@ -335,7 +337,6 @@ angular.module('oncokbApp')
             $scope.exitReview = function () {
                 $rootScope.geneMeta.review.currentReviewer = '';
                 $rootScope.reviewMode = false;
-                ReviewResource.reviewMode = false;
                 $scope.fileEditable = true;
                 evidencesAllUsers = {};
                 // close all mutations
@@ -597,7 +598,6 @@ angular.module('oncokbApp')
                 } else {
                     $rootScope.geneMeta.review.currentReviewer = $rootScope.me.name;
                     $rootScope.reviewMode = true;
-                    ReviewResource.reviewMode = true;
                     if ($scope.status.mutationChanged) {
                         $scope.setSectionOpenStatus('open', $scope.sectionUUIDs);
                     }
@@ -2544,10 +2544,9 @@ angular.module('oncokbApp')
                             }
                         });
                         $rootScope.collaborators = tempCollaborators;
-                        if ($rootScope.geneMeta.review.currentReviewer) {
-                            if ($rootScope.geneMeta.review.currentReviewer === $rootScope.me.name || !$rootScope.collaborators[$rootScope.me.name]) {
-                                $rootScope.geneMeta.review.currentReviewer = '';
-                            }
+                        //If an admin enter the review mode and left gene page directly without click Review Complete button, we need to reset the currentReviewer
+                        if (!$rootScope.collaborators[$rootScope.me.name.toLowerCase()] && $rootScope.reviewMode && $rootScope.geneMeta.review.currentReviewer === $rootScope.me.name) {
+                            $rootScope.geneMeta.review.currentReviewer = '';
                         }
                         defer.resolve();
                     }, function (error) {
@@ -2693,21 +2692,23 @@ angular.module('oncokbApp')
             function watchCurrentReviewer() {
                 var ref = firebase.database().ref('Meta/' + $scope.fileTitle + '/review/currentReviewer');
                 ref.on('value', function(doc) {
-                    if (!doc.val()) {
-                        if ($scope.status.fileEditable === true && $scope.fileEditable === false) {
-                            dialogs.notify('Notification',
-                            'You can now continue editing the document. Thanks!');
-                            $scope.fileEditable = $scope.status.fileEditable;
-                            $rootScope.fileEditable = $scope.status.fileEditable;
-                        }                        
-                    } else if (doc.val() !== $rootScope.me.name) {
-                        if ($scope.fileEditable) {
-                            dialogs.notify('Warning',
-                                doc.val() + ' started to review the document, you can not edit at this moment. We will notify you once the review is finished. Sorry for any inconvinience.');
-                                $scope.fileEditable = false;
+                    if ($rootScope.collaborators && $rootScope.collaborators[$rootScope.me.name.toLowerCase()]) {
+                        if (!doc.val()) {
+                            if ($scope.status.fileEditable === true && $scope.fileEditable === false) {
+                                dialogs.notify('Notification',
+                                'You can now continue editing the document. Thanks!');
+                                $scope.fileEditable = $scope.status.fileEditable;
+                                $rootScope.fileEditable = $scope.status.fileEditable;
+                            }                        
+                        } else if (doc.val() !== $rootScope.me.name) {
+                            if ($scope.fileEditable) {
+                                dialogs.notify('Warning',
+                                    doc.val() + ' started to review the document, you can not edit at this moment. We will notify you once the review is finished. Sorry for any inconvinience.');
+                                    $scope.fileEditable = false;
+                            }
+                            $rootScope.fileEditable = false;
                         }
-                        $rootScope.fileEditable = false;
-                    }
+                    }                    
                 }, function(error) {
                     console.log('failed to get current reviewer data');
                 });

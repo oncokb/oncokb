@@ -320,7 +320,7 @@ angular.module('oncokbApp')
                     });
                 };
                 $scope.inReviewMode = function () {
-                    return ReviewResource.reviewMode;
+                    return $rootScope.reviewMode;
                 };
             }
         };
