@@ -37,18 +37,17 @@ angular.module('oncokbApp')
                     });
                 },
                 post: function postLink(scope) {
-                    scope.reviewMode = ReviewResource.reviewMode;
                     scope.timeoutRef = '';
                     scope.pContent = '';
                     scope.$watch('data[key]', function (n, o) {
                         if (scope.t === 'treatment-select' && scope.key === 'level') {
                             scope.$watch('data.propagation', function(newPro, oldPro) {
-                                if (newPro !== oldPro && (!ReviewResource.reviewMode || ReviewResource.rejected.indexOf(scope.data.propagation_uuid) === -1)) {
+                                if (newPro !== oldPro && (!$rootScope.reviewMode || ReviewResource.rejected.indexOf(scope.data.propagation_uuid) === -1)) {
                                     scope.setReviewRelatedContent(newPro, oldPro, true);
                                 }
                             });
                         }
-                        if (n !== o && (!ReviewResource.reviewMode || ReviewResource.rejected.indexOf(scope.uuid) === -1)) {     
+                        if (n !== o && (!$rootScope.reviewMode || ReviewResource.rejected.indexOf(scope.uuid) === -1)) {     
                             $rootScope.geneMeta.lastModifiedAt = new Date().getTime();
                             $rootScope.geneMeta.lastModifiedBy = $rootScope.me.name;
                             scope.data[scope.key] = OncoKB.utils.getString(scope.data[scope.key]);                  
@@ -135,7 +134,7 @@ angular.module('oncokbApp')
                             delete scope.data[key + '_review'].lastReviewed;
                             delete $rootScope.geneMeta.review[uuid];
                             // if this kind of change happens inside review mode, we track current section in rollback status to remove the review panel since there is nothing to be approved
-                            if (ReviewResource.reviewMode) {
+                            if ($rootScope.reviewMode) {
                                 ReviewResource.rollback.push(uuid);
                             }
                         }
@@ -184,7 +183,7 @@ angular.module('oncokbApp')
                         $scope.data[$scope.key+'_editing'] = '';
                     }
                 }
-                $scope.changePropagation = function (initialize) {
+                $scope.changePropagation = function (initial) {
                     if ($scope.data.propagation_review) {
                         delete $scope.data.propagation_review.lastReviewed;
                     }
@@ -196,8 +195,8 @@ angular.module('oncokbApp')
                             $scope.propagationOpts['2B'],
                             $scope.propagationOpts['4']
                         ];
-                        if (!($scope.content.propagation && initialize)) {
-                            $scope.content.propagation = '2B';
+                        if (!initial && !$scope.data.propagation) {
+                            $scope.data.propagation = '2B';
                         }
                     } else if ($scope.data[$scope.key] === '3A') {
                         _propagationOpts = [
@@ -205,19 +204,27 @@ angular.module('oncokbApp')
                             $scope.propagationOpts['3B'],
                             $scope.propagationOpts['4']
                         ];
-                        if (!($scope.content.propagation && initialize)) {
-                            $scope.content.propagation = '3B';
+                        if (!initial && !$scope.data.propagation) {
+                            $scope.data.propagation = '3B';
+                        }
+                    } else if ($scope.data[$scope.key] === '4') {
+                        _propagationOpts = [
+                            $scope.propagationOpts.no,
+                            $scope.propagationOpts['4']
+                        ];
+                        if (!initial && !$scope.data.propagation) {
+                            $scope.data.propagation = '4';
                         }
                     } else {
-                        $scope.content.propagation = null;
+                        $scope.data.propagation = null;
                     }
                     $scope.content.propagationOpts = _propagationOpts;
                 };
                 $scope.inReviewMode = function () {
-                    return ReviewResource.reviewMode;
+                    return $rootScope.reviewMode;
                 };
                 $scope.calculateDiff = function() {
-                    if (ReviewResource.reviewMode && $scope.t === 'p') {
+                    if ($rootScope.reviewMode && $scope.t === 'p') {
                         var dmp = new diff_match_patch();
                         var newContent = mainUtils.getTextString($scope.data[$scope.key]);
                         var oldContent = '';
@@ -236,7 +243,7 @@ angular.module('oncokbApp')
                     $scope.preStringO = $scope.data[$scope.key];
                 };
                 $scope.getInputClass = function () {
-                    var contentEditable = ReviewResource.reviewMode ? (!mainUtils.processedInReview('accept', $scope.uuid) && !mainUtils.processedInReview('reject', $scope.uuid)) : $scope.fe;
+                    var contentEditable = $rootScope.reviewMode ? (!mainUtils.processedInReview('accept', $scope.uuid) && !mainUtils.processedInReview('reject', $scope.uuid)) : $scope.fe;
                     var classResult = '' ;
                     if (['MUTATION_NAME', 'TREATMENT_NAME'].indexOf($scope.t) === -1) {
                         classResult = contentEditable ? 'editableBox' : 'unEditableBox';
