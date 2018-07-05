@@ -2055,51 +2055,67 @@ angular.module('oncokbApp')
                     });
                 });
             }
-            var sectionToMoveUUID = '';
-            var startIndex = -1;
-            $scope.displayMoveIcon = function(type, uuid, index) {
-                if (type === 'initial') {
-                    if (uuid === sectionToMoveUUID) {
-                        return true;
-                    } else {
-                        return $scope.status.preMoving;
-                    }
-                } else {
-                    if ($scope.status.preMoving === true) {
-                        return false;
-                    } else {
-                        if (uuid === sectionToMoveUUID) {
-                            return false;
-                        }
-                        if (type === 'up') {
-                            return index === 0;
-                        } else if (type === 'down') {
-                            return true;
-                        }
-                    }
-                }
-            };
             $scope.movingInfo = {
                 style: {
                     color: 'gray'
                 },
-                message: 'Click to move'
+                message: 'Click to move',
+                uuid: '',
+                type: '',
+                startIndex: -1,
+                preMoving: true
             };
-            $scope.startMoving = function(path, uuid, index) {
-                $scope.status.preMoving = !$scope.status.preMoving;
-                sectionToMoveUUID = uuid;
-                startIndex = index;
-                if ($scope.status.preMoving) {
+            $scope.displayMoveIcon = function(sectionType, type, uuid, index) {
+                if (type === 'initial') {
+                    if (uuid === $scope.movingInfo.uuid) {
+                        return true;
+                    } else {
+                        return $scope.movingInfo.preMoving;
+                    }
+                } else {
+                    if ($scope.movingInfo.preMoving === true) {
+                        return false;
+                    } else {
+                        if (uuid === $scope.movingInfo.uuid) {
+                            return false;
+                        }
+                        if (sectionType !== $scope.movingInfo.type) {
+                            return false;
+                        } else {
+                            if (type === 'up') {
+                                return index === 0;
+                            } else if (type === 'down') {
+                                return true;
+                            }
+                        }                        
+                    }
+                }
+            };
+            $scope.startMoving = function(sectionType, path, uuid, index) {
+                $scope.movingInfo.preMoving = !$scope.movingInfo.preMoving;
+                if ($scope.movingInfo.uuid) {
+                    delete $scope.movingInfo[$scope.movingInfo.uuid];
+                }
+                $scope.movingInfo.uuid = uuid;
+                $scope.movingInfo.type = sectionType;
+                $scope.movingInfo.startIndex = index;
+                if ($scope.movingInfo.preMoving) {
                     $scope.movingInfo.style.color = 'gray';
                     $scope.movingInfo.message = 'Click to move';                        
                 } else {
                     $scope.movingInfo.style.color = 'orange';
                     $scope.movingInfo.message = 'Click again to cancel';    
                 }
+                if (!$scope.movingInfo.preMoving) {
+                    $scope.movingInfo[$scope.movingInfo.uuid] = {
+                        'border-left-style':'solid',
+                        'border-left-color':'red'
+                    };
+                }                
             };
             $rootScope.moving = false;
             $scope.endMoving = function(path, moveType) {
-                if (startIndex === -1) {
+                if ($scope.movingInfo.startIndex === -1) {
                     return false;
                 }
                 $rootScope.moving = true;
@@ -2121,9 +2137,9 @@ angular.module('oncokbApp')
                     endIndex = indicies[3];
                     type = 'treatment';
                 }
-                var movingSectionCopy = _.clone(dataList[startIndex]);
-                if (startIndex > endIndex) {
-                    for (var i = startIndex-1; i >= endIndex+1; i--) {
+                var movingSectionCopy = _.clone(dataList[$scope.movingInfo.startIndex]);
+                if ($scope.movingInfo.startIndex > endIndex) {
+                    for (var i = $scope.movingInfo.startIndex-1; i >= endIndex+1; i--) {
                         dataList[i+1] = _.clone(dataList[i]); 
                     }
                     if (moveType === 'up') {
@@ -2132,8 +2148,8 @@ angular.module('oncokbApp')
                     } else if (moveType === 'down') {
                         dataList[endIndex+1] = movingSectionCopy;
                     }
-                } else if (startIndex < endIndex) {
-                    for (var i = startIndex+1; i <= endIndex-1; i++) {
+                } else if ($scope.movingInfo.startIndex < endIndex) {
+                    for (var i = $scope.movingInfo.startIndex+1; i <= endIndex-1; i++) {
                         dataList[i-1] = _.clone(dataList[i]);
                     }
                     if (moveType === 'up') {
@@ -2146,9 +2162,13 @@ angular.module('oncokbApp')
                 if (type === 'treatment') {
                     $scope.updatePriority(dataList);
                 }
-                $scope.status.preMoving = true;   
+                $scope.movingInfo.preMoving = true;   
                 $scope.movingInfo.style.color = 'gray';  
                 $scope.movingInfo.message = 'Click to move';
+                $scope.movingInfo[$scope.movingInfo.uuid] = {
+                    'border-left-style':'solid',
+                    'border-left-color':'red'
+                };
             };
             $scope.generatePDF = function () {
                 jspdf.create(mainUtils.getGeneData(this.gene, true, false));
@@ -2398,7 +2418,6 @@ angular.module('oncokbApp')
                 hasReviewContent: false, // indicate if any changes need to be reviewed
                 mutationChanged: false, // indicate there are changes in mutation section
                 processing: false,
-                preMoving: true,
                 fileEditable : false,
                 savedGene: true
             };
