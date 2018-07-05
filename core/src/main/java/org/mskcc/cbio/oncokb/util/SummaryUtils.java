@@ -562,7 +562,7 @@ public class SummaryUtils {
             String cancerHotspotsLink = "";
             try {
                 cancerHotspotsLink = PropertiesUtils.getProperties("cancerhotspots.website.link");
-            } catch (IOException e) {
+            } catch (Exception e) {
                 cancerHotspotsLink = "";
                 e.printStackTrace();
             }
