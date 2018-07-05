@@ -95,7 +95,7 @@
   <div id="mutations">
     <div ng-repeat="mutation in mutations" ng-init="path=getObservePath({type: 'mutation', index: $index});" ng-show="displayCheck(mutation.name_uuid, mutation.name_review)">
       <div class="sectionStyle">
-        <div ng-class="getMutationPanelClass(mutation.name)">
+        <div ng-style="movingInfo[mutation.name_uuid]" ng-class="getMutationPanelClass(mutation.name)">
           <div ng-click="toggleSection(mutation.name_uuid); setSectionOpenStatus('open', [mutation.mutation_effect_uuid])">
             <i ng-class="getAngleClass(mutation.name_uuid)"></i> Mutation:</div>
           <div style="margin-top:-42px;margin-left:100px">
@@ -107,9 +107,10 @@
             <div ng-show="!reviewMode" style="margin-top:-30px">
               <span style="float:right">
                   <span ng-show="!reviewMode && userRole === 8 && fileEditable">
-                      <i class="fa fa-arrows" uib-tooltip-placement="top" uib-tooltip="{{movingInfo.message}}" ng-if="displayMoveIcon('initial', mutation.name_uuid)" style="margin-right:10px;" ng-style="movingInfo.style" ng-click="startMoving(path, mutation.name_uuid, $index)"></i>
-                      <i class="fa fa-arrow-up" uib-tooltip-placement="top" uib-tooltip="Click to put above this mutation" ng-if="displayMoveIcon('up', mutation.name_uuid, $index)" style="margin-right:10px;color:green" ng-click="endMoving(path, 'up')"></i>
-                      <i class="fa fa-arrow-down" uib-tooltip-placement="top" uib-tooltip="Click to put below this mutation" ng-if="displayMoveIcon('down', mutation.name_uuid)" style="margin-right:10px;color:green" ng-click="endMoving(path, 'down')"></i>
+                      <i class="fa fa-arrows" uib-tooltip-placement="top" uib-tooltip="{{movingInfo.message}}" ng-if="displayMoveIcon('mutation', 'initial', mutation.name_uuid)" style="margin-right:10px;" ng-style="movingInfo.style" ng-click="startMoving('mutation', path, mutation.name_uuid, $index)"></i>
+                      <i class="fa fa-arrows" uib-tooltip-placement="top" uib-tooltip="Click to put below this mutation" ng-if="displayMoveIcon('mutation', 'down', mutation.name_uuid, $index)" style="margin-right:10px;color:green" ng-click="endMoving(path, 'down')"></i>
+                      <!-- <i class="fa fa-arrow-up" uib-tooltip-placement="top" uib-tooltip="Click to put above this mutation" ng-if="displayMoveIcon('up', mutation.name_uuid, $index)" style="margin-right:10px;color:green" ng-click="endMoving(path, 'up')"></i>
+                      <i class="fa fa-arrow-down" uib-tooltip-placement="top" uib-tooltip="Click to put below this mutation" ng-if="displayMoveIcon('down', mutation.name_uuid)" style="margin-right:10px;color:green" ng-click="endMoving(path, 'down')"></i> -->
                   </span>
                   <span ng-show="!reviewMode && fileEditable">
                       <i ng-click="remove('mutation', path)" class="fa fa-trash-o"></i>      
@@ -158,7 +159,7 @@
           </div>
           <div ng-repeat="tumor in tumorsByMutation[mutation.name_uuid]" class="accordionMarginTop" ng-init="path=getObservePath({path: path, type: 'tumor', index: $index});" ng-show="displayCheck(tumor.cancerTypes_uuid, tumor.cancerTypes_review)">
             <div class="sectionStyle">
-              <div class="headerLevel2">
+              <div ng-style="movingInfo[tumor.cancerTypes_uuid]" class="headerLevel2">
                 <span ng-click="toggleSection(tumor.cancerTypes_uuid)">
                   <i ng-class="getAngleClass(tumor.cancerTypes_uuid)"></i>
                     <span>Tumor type: </span>
@@ -174,9 +175,10 @@
                     <span style="margin-left:5px" ng-bind-html="tumorContent[tumor.cancerTypes_uuid].result"></span>
                     <span style="float:right" ng-if="fileEditable">
                         <span ng-if="userRole === 8">
-                          <i class="fa fa-arrows" uib-tooltip-placement="top" uib-tooltip="{{movingInfo.message}}" ng-if="displayMoveIcon('initial', tumor.cancerTypes_uuid)" style="margin-right:10px;" ng-style="movingInfo.style" ng-click="startMoving(path, tumor.cancerTypes_uuid, $index)"></i>
-                          <i class="fa fa-arrow-up" uib-tooltip-placement="top" uib-tooltip="Click to put above this mutation"  ng-if="displayMoveIcon('up', tumor.cancerTypes_uuid, $index)" style="margin-right:10px;color:green" ng-click="endMoving(path, 'up')"></i>
-                          <i class="fa fa-arrow-down" uib-tooltip-placement="top" uib-tooltip="Click to put below this mutation" ng-if="displayMoveIcon('down', tumor.cancerTypes_uuid)" style="margin-right:10px;color:green" ng-click="endMoving(path, 'down')"></i>
+                          <i class="fa fa-arrows" uib-tooltip-placement="top" uib-tooltip="{{movingInfo.message}}" ng-if="displayMoveIcon('tumor', 'initial', tumor.cancerTypes_uuid)" style="margin-right:10px;" ng-style="movingInfo.style" ng-click="startMoving('tumor', path, tumor.cancerTypes_uuid, $index)"></i>
+                          <i class="fa fa-arrows" uib-tooltip-placement="top" uib-tooltip="Click to put below this mutation" ng-if="displayMoveIcon('tumor', 'down', tumor.cancerTypes_uuid, $index)" style="margin-right:10px;color:green" ng-click="endMoving(path, 'down')"></i>
+                          <!-- <i class="fa fa-arrow-up" uib-tooltip-placement="top" uib-tooltip="Click to put above this mutation"  ng-if="displayMoveIcon('up', tumor.cancerTypes_uuid, $index)" style="margin-right:10px;color:green" ng-click="endMoving(path, 'up')"></i>
+                          <i class="fa fa-arrow-down" uib-tooltip-placement="top" uib-tooltip="Click to put below this mutation" ng-if="displayMoveIcon('down', tumor.cancerTypes_uuid)" style="margin-right:10px;color:green" ng-click="endMoving(path, 'down')"></i> -->
                         </span>
                         <span>
                             <i ng-click="remove('tumor', path)" class="fa fa-trash-o"></i>
@@ -265,7 +267,7 @@
                     <div class="panelContent" ng-if="initialOpen[ti.name_uuid]" id="{{ti.name_uuid}}" ng-init="bindTreatments({uuid: ti.name_uuid, path: path})">
                       <div ng-repeat="treatment in treatmentsByII[ti.name_uuid]" ng-init="path=getObservePath({type: 'treatment', path: path, index: $index});" ng-show="displayCheck(treatment.name_uuid, treatment.name_review)">
                         <div class="sectionStyle">
-                          <div class="headerLevel4">
+                          <div ng-style="movingInfo[treatment.name_uuid]" class="headerLevel4">
                             <div ng-click="toggleSection(treatment.name_uuid)"><i ng-class="getAngleClass(treatment.name_uuid)"></i> Therapy:</div>
                             <div style="margin-left:90px;margin-top:-22px">
                               <div ng-style="getNameStyle()"><realtime-string t="'TREATMENT_NAME'" key="'name'" path="path" uuid="getUUID({type: 'treatment', key: 'name', path: path})"></realtime-string></div>
@@ -275,9 +277,10 @@
                               </div>
                               <span style="float:right" ng-if="!reviewMode && fileEditable">
                                   <span ng-if="userRole === 8">
-                                      <i class="fa fa-arrows" uib-tooltip-placement="top" uib-tooltip="{{movingInfo.message}}"  ng-if="displayMoveIcon('initial', treatment.name_uuid)" style="margin-right:10px;" ng-style="movingInfo.style" ng-click="startMoving(path, treatment.name_uuid, $index)"></i>
-                                      <i class="fa fa-arrow-up" uib-tooltip-placement="top" uib-tooltip="Click to put below this treatment"  ng-if="displayMoveIcon('up', treatment.name_uuid, $index)" style="margin-right:10px;color:green" ng-click="endMoving(path, 'up')"></i>
-                                      <i class="fa fa-arrow-down" uib-tooltip-placement="top" uib-tooltip="Click to put below this treatment"  ng-if="displayMoveIcon('down', treatment.name_uuid)" style="margin-right:10px;color:green" ng-click="endMoving(path, 'down')"></i>  
+                                      <i class="fa fa-arrows" uib-tooltip-placement="top" uib-tooltip="{{movingInfo.message}}"  ng-if="displayMoveIcon('treatment', 'initial', treatment.name_uuid)" style="margin-right:10px;" ng-style="movingInfo.style" ng-click="startMoving('treatment', path, treatment.name_uuid, $index)"></i>
+                                      <i class="fa fa-arrows" uib-tooltip-placement="top" uib-tooltip="Click to put below this mutation" ng-if="displayMoveIcon('treatment', 'down', treatment.name_uuid, $index)" style="margin-right:10px;color:green" ng-click="endMoving(path, 'down')"></i>
+                                      <!-- <i class="fa fa-arrow-up" uib-tooltip-placement="top" uib-tooltip="Click to put below this treatment"  ng-if="displayMoveIcon('up', treatment.name_uuid, $index)" style="margin-right:10px;color:green" ng-click="endMoving(path, 'up')"></i>
+                                      <i class="fa fa-arrow-down" uib-tooltip-placement="top" uib-tooltip="Click to put below this treatment"  ng-if="displayMoveIcon('down', treatment.name_uuid)" style="margin-right:10px;color:green" ng-click="endMoving(path, 'down')"></i>   -->
                                   </span>
                                   <span><i ng-click="remove('treatment', path)" class="fa fa-trash-o"></i></span>
                               </span>
