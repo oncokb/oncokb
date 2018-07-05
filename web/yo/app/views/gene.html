@@ -396,7 +396,7 @@
     <div class="input-group input-group-sm vusGroup">
       <input type="text" class="form-control" ng-model="newVUSName" placeholder="Variant Name" />
       <span class="input-group-btn">
-        <button type="button" class="btn btn-default" ng-disabled="!(!!newVUSName)" ng-click="addVUSItem(newVUSName, newVUSTime); newVUSName=''">
+        <button type="button" class="btn btn-default" ng-disabled="!(!!newVUSName)" ng-click="addVUSItem(newVUSName); newVUSName=''">
           <i class="fa fa-plus"></i> Add Variant
         </button>
       </span>

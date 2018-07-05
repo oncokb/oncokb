@@ -1660,7 +1660,7 @@ angular.module('oncokbApp')
                 return result;
             };
 
-            $scope.addVUSItem = function (newVUSName, newVUSTime) {
+            $scope.addVUSItem = function (newVUSName) {
                 if (newVUSName) {
                     if (isValidVariant(newVUSName)) {
                         var vusItem = new FirebaseModel.VUSItem(newVUSName, $rootScope.me.name, $rootScope.me.email);
