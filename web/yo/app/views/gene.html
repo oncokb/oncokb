@@ -298,17 +298,17 @@
                               <strong>Highest level of evidence:</strong>
                               <div ng-switch on="ti.type">
                                 <div ng-switch-when="SS">
-                                  <realtime-string key="'level'" path="path" t="'treatment-select'" o="levels.SS" uuid="getUUID({type: 'treatment', key: 'level', path: path})"></realtime-string>
+                                  <realtime-string key="'level'" path="path" t="'treatment-select'" o="levels.SS" uuid="getUUID({type: 'treatment', key: 'level', path: path})" mutation="mutation" tumor="tumor" indicate-mutation-content="indicateMutationContent(mutation)" indicate-tumor-content="indicateTumorContent(tumor)"></realtime-string>
                                 </div>
                                 <div ng-switch-when="SR">
-                                  <realtime-string key="'level'" path="path" t="'treatment-select'" o="levels.SR" uuid="getUUID({type: 'treatment', key: 'level', path: path})"></realtime-string>
+                                  <realtime-string key="'level'" path="path" t="'treatment-select'" o="levels.SR" uuid="getUUID({type: 'treatment', key: 'level', path: path})" mutation="mutation" tumor="tumor" indicate-mutation-content="indicateMutationContent(mutation)" indicate-tumor-content="indicateTumorContent(tumor)"></realtime-string>
                                   <div ng-if="!reviewMode" style="float:right;margin-right:180px;margin-top:-25px"><i class="fa fa-question-circle" style="color: grey;" uib-tooltip-html="levelExps.SR"></i></div>
                                 </div>
                                 <div ng-switch-when="IS">
-                                  <realtime-string key="'level'" path="path" t="'treatment-select'" o="levels.IS" uuid="getUUID({type: 'treatment', key: 'level', path: path})"></realtime-string>
+                                  <realtime-string key="'level'" path="path" t="'treatment-select'" o="levels.IS" uuid="getUUID({type: 'treatment', key: 'level', path: path})" mutation="mutation" tumor="tumor" indicate-mutation-content="indicateMutationContent(mutation)" indicate-tumor-content="indicateTumorContent(tumor)"></realtime-string>
                                 </div>
                                 <div ng-switch-when="IR">
-                                  <realtime-string key="'level'" path="path" t="'treatment-select'" o="levels.IR" uuid="getUUID({type: 'treatment', key: 'level', path: path})"></realtime-string>
+                                  <realtime-string key="'level'" path="path" t="'treatment-select'" o="levels.IR" uuid="getUUID({type: 'treatment', key: 'level', path: path})" mutation="mutation" tumor="tumor" indicate-mutation-content="indicateMutationContent(mutation)" indicate-tumor-content="indicateTumorContent(tumor)"></realtime-string>
                                   <div ng-if="!reviewMode" style="float:right;margin-right:180px;margin-top:-25px"><i class="fa fa-question-circle" style="color: grey;" uib-tooltip-html="levelExps.IR"></i></div>
                                 </div>
                               </div>

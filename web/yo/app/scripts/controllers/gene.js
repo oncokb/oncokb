@@ -82,10 +82,10 @@ angular.module('oncokbApp')
                 var tempNameList = [];
                 for (var i = 0; i < $scope.mutations.length; i++) {
                     var mutation = $scope.mutations[i];
-                    indicateMutationContent(mutation);
+                    $scope.indicateMutationContent(mutation);
                 }
             };
-            function indicateMutationContent (mutation) {
+            $scope.indicateMutationContent = function(mutation) {
                 var uuid = mutation.name_uuid;
                 $scope.mutationContent[uuid] = {
                     TT: 0,
@@ -142,10 +142,10 @@ angular.module('oncokbApp')
                 }
                 for (var j = 0; j < mutation.tumors.length; j++) {
                     var tumor = mutation.tumors[j];
-                    indicateTumorContent(tumor);
+                    $scope.indicateTumorContent(tumor);
                 }
             };
-            function indicateTumorContent(tumor) {
+            $scope.indicateTumorContent = function(tumor) {
                 var uuid = tumor.cancerTypes_uuid;
                 $scope.tumorContent[uuid] = {
                     result: ''
@@ -1589,7 +1589,7 @@ angular.module('oncokbApp')
                         subtype: '',
                         oncoTreeTumorTypes: angular.copy($scope.oncoTree.allTumorTypes)
                     }];
-                    indicateMutationContent($scope.gene.mutations[index]);
+                    $scope.indicateMutationContent($scope.gene.mutations[index]);
                 }
             };
 
@@ -1634,7 +1634,7 @@ angular.module('oncokbApp')
                 }
                 if (isValidTreatment(indices, newTreatmentName)) {
                     $scope.gene.mutations[indices[0]].tumors[indices[1]].TIs[indices[2]].treatments.push(treatment);
-                    indicateTumorContent($scope.gene.mutations[indices[0]].tumors[indices[1]]);
+                    $scope.indicateTumorContent($scope.gene.mutations[indices[0]].tumors[indices[1]]);
                 }
             };
 
@@ -1724,9 +1724,9 @@ angular.module('oncokbApp')
                         $rootScope.geneMeta.review[uuid] = true;
                     }
                     if (type === 'tumor') {
-                        indicateMutationContent($scope.gene.mutations[indices[0]]);
+                        $scope.indicateMutationContent($scope.gene.mutations[indices[0]]);
                     } else if (type === 'treatment') {
-                        indicateTumorContent($scope.gene.mutations[indices[0]].tumors[indices[1]]);
+                        $scope.indicateTumorContent($scope.gene.mutations[indices[0]].tumors[indices[1]]);
                     }
                 }, function () {
                 });
@@ -1873,14 +1873,16 @@ angular.module('oncokbApp')
                     $scope.gene.mutations.splice(indices[0], 1);
                 } else if (data.type === 'tumor') {
                     $scope.gene.mutations[indices[0]].tumors.splice(indices[1], 1);
+                    $scope.indicateMutationContent($scope.gene.mutations[indices[0]]);
                 } else if (data.type === 'treatment') {
                     $scope.gene.mutations[indices[0]].tumors[indices[1]].TIs[indices[2]].treatments.splice(indices[3], 1);
+                    $scope.indicateTumorContent($scope.gene.mutations[indices[0]].tumors[indices[1]]);
                 }
                 _.each(data.uuids, function (uuid) {
                     if ($rootScope.geneMeta.review[uuid]) {
                         delete $rootScope.geneMeta.review[uuid];
                     }
-                });              
+                }); 
             }
             function removeUUIDs(uuids) {
                 if (uuids && _.isArray(uuids)) {
