@@ -274,6 +274,9 @@ angular.module('oncokbApp')
                 };
                 $scope.getOldcontentChecked = function(checkbox) {
                     if ($scope.key === 'tsg' || $scope.key === 'ocg') {
+                        if (_.isUndefined($scope.data[$scope.key+'_review'])) {
+                            return true;
+                        }
                         if (_.isUndefined($scope.data[$scope.key+'_review'].lastReviewed)) {
                             return $scope.data[$scope.key] === checkbox;
                         }
