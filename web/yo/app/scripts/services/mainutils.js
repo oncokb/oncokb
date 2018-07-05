@@ -77,6 +77,7 @@ angular.module('oncokbApp')
                     list.push(cancerType.mainType);
                 }
             });
+            list = _.uniq(list).sort();
             return list.join(', ');
         }
 
@@ -92,6 +93,7 @@ angular.module('oncokbApp')
                     list.push(cancerType.mainType.name);
                 }
             });
+            list = _.uniq(list).sort();
             return list.join(', ');
         }
         /**
