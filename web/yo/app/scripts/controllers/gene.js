@@ -2673,7 +2673,11 @@ angular.module('oncokbApp')
                     .then(function (result) {
                         user.setFileeditable([$scope.fileTitle]).then(function (result) {
                             $scope.status.fileEditable = result[$scope.fileTitle];
-                            $scope.fileEditable = $scope.status.fileEditable;
+                            if ($rootScope.geneMeta.review.currentReviewer && $rootScope.collaborators[$rootScope.geneMeta.review.currentReviewer.toLowerCase()]) {
+                                $scope.fileEditable = false;
+                            } else {
+                                $scope.fileEditable = $scope.status.fileEditable;
+                            }                            
                             $scope.status.rendering = false;
                             $rootScope.fileEditable = $scope.fileEditable;
                             watchCurrentReviewer();
