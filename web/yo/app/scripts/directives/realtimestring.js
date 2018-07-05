@@ -17,7 +17,11 @@ angular.module('oncokbApp')
                 path: '=',
                 checkboxes: '=',
                 o: '=',
-                uuid: '='
+                uuid: '=',
+                mutation: '=',
+                tumor: '=',
+                indicateMutationContentInGene: '&indicateMutationContent',
+                indicateTumorContentInGene: '&indicateTumorContent'
             },
             replace: true,
             link: {
@@ -70,8 +74,14 @@ angular.module('oncokbApp')
                                     delete scope.data[scope.key+'_editing'];
                                     scope.initializeFE();
                                 }, 10*1000);
-                            }
+                            }   
                         }  
+                        if (n !== o && scope.key === 'level') {
+                            $timeout(function() {
+                                scope.indicateMutationContent(scope.mutation);
+                                scope.indicateTumorContent(scope.tumor);
+                            }, 500);                            
+                        }
                     });
                     $rootScope.$watch('rejectedUUIDs["'+scope.uuid+'"]', function(n, o) {
                         if (n !== o && n === true) {
@@ -311,7 +321,17 @@ angular.module('oncokbApp')
                     if (content.length > 80) {
                         return 'longContentDivMargin';
                     }
-                }
+                };
+                $scope.indicateMutationContent = function(mutation) {
+                    $scope.indicateMutationContentInGene({
+                        mutation: mutation
+                    });
+                };
+                $scope.indicateTumorContent = function(tumor) {
+                    $scope.indicateTumorContentInGene({
+                        tumor: tumor
+                    });
+                };
             }
         };
     })
