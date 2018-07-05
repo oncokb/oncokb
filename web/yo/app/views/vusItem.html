@@ -2,7 +2,7 @@
     <span class="input-group-addon" ng-class="getClass(dt)" qtip type="vusItem" time="dt" by="dtBy">{{::variant.name}}</span>
     <span class="input-group-btn" ng-show="fileEditable">
         <button class="btn btn-default" type="button" style="text-align:left">
-            <comments-dict key="'name'" path="'VUS/'+gene+'/vus/'+index"></comments-dict>
+            <comments-dict key="'name'" index="index"></comments-dict>
         </button>
         <button class="btn btn-default"
                 type="button" ng-click="update()" qtip content="Recheck: set the date to today">

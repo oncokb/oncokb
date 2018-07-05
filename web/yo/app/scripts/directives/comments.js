@@ -14,7 +14,7 @@ angular.module('oncokbApp')
             scope: {
                 key: '=',
                 path: '=',
-                vusObj: '='
+                index: '='
             },
             replace: true,
             link: function postLink(scope, element, attrs) {
@@ -26,17 +26,17 @@ angular.module('oncokbApp')
                     allResolved: false
                 };
                 scope.userRole = $rootScope.me.role;
-                if (!scope.vusObj) {
+                if (_.isNumber(scope.index) && scope.key === 'name') {
+                    scope.obj = $rootScope.vusFire.vus[scope.index];
+                    scope.checkResolvedStatus();
+                    scope.status.rendering = false;
+                } else {
                     $firebaseObject(firebase.database().ref(scope.path)).$bindTo(scope, "obj").then(function (success) {
                         scope.checkResolvedStatus();
                         scope.status.rendering = false;
                     }, function (error) {
                         console.log('error');
                     });
-                } else {
-                    scope.obj = scope.vusObj;
-                    scope.checkResolvedStatus();
-                    scope.status.rendering = false;
                 }
                 element.find('i').off('mouseenter');
                 element.find('i').bind('mouseenter', function() {
@@ -84,12 +84,9 @@ angular.module('oncokbApp')
                     $scope.checkResolvedStatus();
                 };
                 $scope.checkResolvedStatus = function() {
-                    if(!$scope.obj[$scope.key+'_comments']) {
-                        $scope.obj[$scope.key+'_comments'] = [];
-                    }
                     $scope.status.hasComment = false;
                     $scope.status.allResolved = true;
-                    if ($scope.obj[$scope.key+'_comments'].length > 0) {
+                    if ($scope.obj[$scope.key+'_comments'] && $scope.obj[$scope.key+'_comments'].length > 0) {
                         $scope.status.hasComment = true;
                         _.each($scope.obj[$scope.key+'_comments'], function(comment) {
                             if (comment.resolved === 'false') {
