@@ -5,7 +5,7 @@ angular.module('oncokbApp')
         function (_, S, $resource, $interval, $timeout, $scope, $rootScope, $location, $route, $routeParams, $window, $q, dialogs, OncoKB, DatabaseConnector, SecretEmptyKey, $sce, jspdf, FindRegex, mainUtils, ReviewResource, loadFiles, $firebaseObject, $firebaseArray, FirebaseModel, user) {
             $window.onbeforeunload = function (event) {
                 var myName = $rootScope.me.name.toLowerCase();
-                var genesOpened = _.without($scope.collaboratorsMeta[myName], $scope.fileTitle);
+                var genesOpened = _.without($scope.collaboratorsMeta[myName], $routeParams.geneName);
                 firebase.database().ref('Meta/collaborators/' + myName).set(genesOpened).then(function (result) {
                     console.log('success');
                 }).catch(function (error) {
@@ -219,7 +219,7 @@ angular.module('oncokbApp')
                 }
                 $scope.status.vusUpdateTimeout = $timeout(function () {
                     var vusData = JSON.stringify(mainUtils.getVUSData($rootScope.vusFire.vus, true));
-                    DatabaseConnector.updateVUS($scope.fileTitle, vusData, function(result) {
+                    DatabaseConnector.updateVUS($routeParams.geneName, vusData, function(result) {
                         console.log('success saving vus to database');
                         mainUtils.updateLastSavedToDB();
                     }, function(error) {
@@ -2349,7 +2349,6 @@ angular.module('oncokbApp')
                 }];
                 return levels;
             }
-            $scope.fileTitle = $routeParams.geneName;
             $scope.gene = '';
             $rootScope.collaborators = {};
             $scope.checkboxes = {
@@ -2533,7 +2532,7 @@ angular.module('oncokbApp')
                         $scope.collaboratorsMeta = allColl;
                         var tempCollaborators = {};
                         _.each(_.keys(allColl), function (key) {
-                            if (allColl[key].indexOf($scope.fileTitle) !== -1) {
+                            if (allColl[key].indexOf($routeParams.geneName) !== -1) {
                                 tempCollaborators[key] = allUsersInfo[key];
                             }
                         });
@@ -2555,7 +2554,7 @@ angular.module('oncokbApp')
             }
             function getRefByPath(path) {
                 var indicies = getIndexByPath(path);
-                var result = 'Genes/' + $scope.fileTitle + '/mutations/';
+                var result = 'Genes/' + $routeParams.geneName + '/mutations/';
                 if (indicies[0] !== -1) {
                     result += indicies[0] + '/tumors';
                     if (indicies[1] !== -1) {
@@ -2620,20 +2619,20 @@ angular.module('oncokbApp')
             $scope.mutIndexByUUID = {};
             function populateBindings() {
                 var deferred1 = $q.defer();
-                $firebaseObject(firebase.database().ref("Genes/" + $scope.fileTitle)).$bindTo($scope, "gene").then(function () {
+                $firebaseObject(firebase.database().ref("Genes/" + $routeParams.geneName)).$bindTo($scope, "gene").then(function () {
                     deferred1.resolve();
                 }, function (error) {
                     deferred1.reject(error);
                 });
-                $scope.vusItems = $firebaseArray(firebase.database().ref('VUS/' + $scope.fileTitle + '/vus'));
+                $scope.vusItems = $firebaseArray(firebase.database().ref('VUS/' + $routeParams.geneName + '/vus'));
                 var deferred3 = $q.defer();
-                $firebaseObject(firebase.database().ref('VUS/' + $scope.fileTitle)).$bindTo($rootScope, "vusFire").then(function () {
+                $firebaseObject(firebase.database().ref('VUS/' + $routeParams.geneName)).$bindTo($rootScope, "vusFire").then(function () {
                     deferred3.resolve();
                 }, function (error) {
                     deferred3.reject(error);
                 });
                 var deferred4 = $q.defer();
-                $scope.mutations = $firebaseArray(firebase.database().ref('Genes/' + $scope.fileTitle + '/mutations'));
+                $scope.mutations = $firebaseArray(firebase.database().ref('Genes/' + $routeParams.geneName + '/mutations'));
                 $scope.mutations.$loaded().then(function (success) {
                     $scope.getMutationMessages();
                     _.each($scope.mutations, function (mutation, index) {
@@ -2645,7 +2644,7 @@ angular.module('oncokbApp')
                     deferred4.reject(error);
                 });
                 var deferred5 = $q.defer();
-                $firebaseObject(firebase.database().ref('Meta/' + $scope.fileTitle)).$bindTo($rootScope, "geneMeta").then(function () {
+                $firebaseObject(firebase.database().ref('Meta/' + $routeParams.geneName)).$bindTo($rootScope, "geneMeta").then(function () {
                     if (_.isUndefined($rootScope.geneMeta.review)) {
                         $rootScope.geneMeta.review = {
                             currentReviewer: ''
@@ -2661,7 +2660,7 @@ angular.module('oncokbApp')
                     deferred5.reject('Failed to bind meta by gene');
                 });
                 var deferred6 = $q.defer();
-                $firebaseObject(firebase.database().ref('History/' + $scope.fileTitle)).$bindTo($rootScope, "historyRef").then(function () {
+                $firebaseObject(firebase.database().ref('History/' + $routeParams.geneName)).$bindTo($rootScope, "historyRef").then(function () {
                     deferred6.resolve('success');
                 }, function (error) {
                     deferred6.reject('Failed to bind history by gene');
@@ -2669,8 +2668,8 @@ angular.module('oncokbApp')
                 var bindingAPI = [deferred1.promise, deferred3.promise, deferred4.promise, deferred5.promise, deferred6.promise];
                 $q.all(bindingAPI)
                     .then(function (result) {
-                        user.setFileeditable([$scope.fileTitle]).then(function (result) {
-                            $scope.status.fileEditable = result[$scope.fileTitle];
+                        user.setFileeditable([$routeParams.geneName]).then(function (result) {
+                            $scope.status.fileEditable = result[$routeParams.geneName];
                             if ($rootScope.geneMeta.review.currentReviewer && $rootScope.collaborators[$rootScope.geneMeta.review.currentReviewer.toLowerCase()]) {
                                 $scope.fileEditable = false;
                             } else {
@@ -2688,7 +2687,7 @@ angular.module('oncokbApp')
                     });
             }
             function watchCurrentReviewer() {
-                var ref = firebase.database().ref('Meta/' + $scope.fileTitle + '/review/currentReviewer');
+                var ref = firebase.database().ref('Meta/' + $routeParams.geneName + '/review/currentReviewer');
                 ref.on('value', function(doc) {
                     if ($rootScope.collaborators && $rootScope.collaborators[$rootScope.me.name.toLowerCase()]) {
                         if (!doc.val()) {
@@ -2706,11 +2705,11 @@ angular.module('oncokbApp')
             }            
             $scope.getObservePath = function (data) {
                 if (data.type === 'gene') {
-                    return 'Genes/' + $scope.fileTitle;
+                    return 'Genes/' + $routeParams.geneName;
                 } else if (data.type === 'geneType') {
-                    return 'Genes/' + $scope.fileTitle + '/type';
+                    return 'Genes/' + $routeParams.geneName + '/type';
                 } else if (data.type === 'mutation') {
-                    return 'Genes/' + $scope.fileTitle + '/mutations/' + data.index;
+                    return 'Genes/' + $routeParams.geneName + '/mutations/' + data.index;
                 } else if (data.type === 'mutation_effect') {
                     return data.path + '/mutation_effect';
                 } else if (data.type === 'tumor') {
