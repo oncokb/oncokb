@@ -2081,11 +2081,7 @@ angular.module('oncokbApp')
                         if (sectionType !== $scope.movingInfo.type) {
                             return false;
                         } else {
-                            if (type === 'up') {
-                                return index === 0;
-                            } else if (type === 'down') {
-                                return true;
-                            }
+                            return true;
                         }                        
                     }
                 }
@@ -2697,17 +2693,10 @@ angular.module('oncokbApp')
                     if ($rootScope.collaborators && $rootScope.collaborators[$rootScope.me.name.toLowerCase()]) {
                         if (!doc.val()) {
                             if ($scope.status.fileEditable === true && $scope.fileEditable === false) {
-                                dialogs.notify('Notification',
-                                'You can now continue editing the document. Thanks!');
                                 $scope.fileEditable = $scope.status.fileEditable;
                                 $rootScope.fileEditable = $scope.status.fileEditable;
                             }                        
                         } else if (doc.val() !== $rootScope.me.name) {
-                            if ($scope.fileEditable) {
-                                dialogs.notify('Warning',
-                                    doc.val() + ' started to review the document, you can not edit at this moment. We will notify you once the review is finished. Sorry for any inconvinience.');
-                                    $scope.fileEditable = false;
-                            }
                             $rootScope.fileEditable = false;
                         }
                     }                    
