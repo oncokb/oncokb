@@ -1,0 +1,16 @@
+<div ng-repeat="(key, datum) in data">
+    <h5 ng-if="depth===2" ng-bind-html="keyProcess(key)"></h5>
+        <div ng-if="isArray(datum)">
+            <report-view-recursion-cell data="datum" depth="depth"></report-view-recursion-cell>
+        </div>
+        <div ng-if="isObject(datum) && !bottomObject(datum)">
+            <report-view-recursion-cell data="datum" depth="depth"</report-view-recursion-cell>
+        </div>
+        <div ng-if="isObject(datum) && bottomObject(datum)">
+            <span ng-bind-html="show(datum.key, datum.value)"></span>
+        </div>
+        <div ng-if="isString(datum)">
+            <span ng-bind-html="datum"></span>
+        </div>
+    </div>
+</div>
