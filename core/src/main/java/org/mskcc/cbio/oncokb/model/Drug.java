@@ -43,6 +43,9 @@ public class Drug implements java.io.Serializable {
     @Column(name = "drug_name", nullable = false)
     private String drugName;
 
+    @Column(name = "nci_code")
+    private String nciCode;
+
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "drug_synonym", joinColumns = @JoinColumn(name = "drug_id", nullable = false))
     private Set<String> synonyms = new HashSet<String>(0);
@@ -85,6 +88,14 @@ public class Drug implements java.io.Serializable {
 
     public void setDrugName(String drugName) {
         this.drugName = drugName;
+    }
+
+    public String getNciCode() {
+        return nciCode;
+    }
+
+    public void setNciCode(String nciCode) {
+        this.nciCode = nciCode;
     }
 
     public Set<String> getSynonyms() {
