@@ -200,7 +200,7 @@
                     <h5><b>Tumor Type Summary (Optional): </b>
                         <review-panel uuid="tumor.summary_uuid" review-obj="tumor.summary_review" evidence-type="'TUMOR_TYPE_SUMMARY'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)"></review-panel>
                     </h5>
-                    <realtime-string t="'p'" key="'summary'" path="path" uuid="getUUID({type: 'tumor', key: 'summary', path: path})"></realtime-string>
+                    <realtime-string t="'p'" key="'summary'" path="path" uuid="getUUID({type: 'tumor', key: 'summary', path: path})" mutation="mutation" tumor="tumor" indicate-mutation-content="indicateMutationContent(mutation)" indicate-tumor-content="indicateTumorContent(tumor)"></realtime-string>
                   </div>
                 <!-- Diagnostic -->
                 <div class="sectionStyle" ng-init="diagnosticPath=getObservePath({type:'diagnostic', path: path});" ng-show="displayCheck(tumor.diagnostic_uuid)">
