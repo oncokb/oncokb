@@ -312,7 +312,7 @@ angular.module('oncokbApp')
                 }
                 $scope.getOldContentClass = function(content) {
                     var className = 'unEditableBox';
-                    if (content.length > 80) {
+                    if (content && content.length > 80) {
                         className += ' longContent';
                     }
                     return className;
