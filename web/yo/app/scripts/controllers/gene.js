@@ -327,7 +327,9 @@ angular.module('oncokbApp')
                     if (otherCollaborators.length > 0) {
                         var dlg = dialogs.confirm('Reminder', otherCollaborators.join(', ') + ((otherCollaborators.length > 1) ? ' are' : ' is') + ' currently working on this gene document. Entering review mode will disable them from editing.');
                         dlg.result.then(function () {
-                            prepareReviewItems();
+                            if (!$rootScope.geneMeta.review.currentReviewer) {
+                                prepareReviewItems();
+                            }                            
                         });
                     } else {
                         prepareReviewItems();
