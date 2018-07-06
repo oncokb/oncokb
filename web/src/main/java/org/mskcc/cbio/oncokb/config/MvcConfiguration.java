@@ -2,6 +2,7 @@ package org.mskcc.cbio.oncokb.config;
 
 import com.monitorjbl.json.JsonViewSupportFactoryBean;
 import io.sentry.spring.SentryExceptionResolver;
+import org.springframework.boot.web.servlet.ServletContextInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -76,37 +77,36 @@ public class MvcConfiguration extends WebMvcConfigurerAdapter {
     }
 
     @Bean
-    public HandlerExceptionResolver sentryExceptionResolver() {
-        return new io.sentry.spring.SentryExceptionResolver();
+    public ServletContextInitializer sentryServletContextInitializer() {
+        return new io.sentry.spring.SentryServletContextInitializer();
     }
 
-//    @Bean
-//    public HandlerExceptionResolver sentryExceptionResolver() {
-//        // Exclude specific events https://stackoverflow.com/questions/48914391/avoid-reporting-broken-pipe-errors-to-sentry-in-a-spring-boot-application
-//        return new SentryExceptionResolver() {
-//            @Override
-//            public ModelAndView resolveException(HttpServletRequest request,
-//                                                 HttpServletResponse response,
-//                                                 Object handler,
-//                                                 Exception ex) {
-//                Throwable rootCause = ex;
-//
-//                while (rootCause.getCause() != null && rootCause.getCause() != rootCause) {
-//                    rootCause = ex.getCause();
-//                }
-//
-//                if (!rootCause.getMessage().contains("Broken pipe")
-//                    && !rootCause.getMessage().contains("Required request body content is missing")
-//                    && !rootCause.getMessage().contains("Required request body is missing")
-//                    && !rootCause.getMessage().contains("Failed to convert value of type 'java.lang.String' to required type 'java.lang.Integer'")
-//                    && !rootCause.getMessage().contains("Required String parameter ")
-//                    && !rootCause.getMessage().contains("Could not read document")
-//                    ) {
-//                    super.resolveException(request, response, handler, ex);
-//                }
-//                return null;
-//            }
-//
-//        };
-//    }
+    @Bean
+    public HandlerExceptionResolver sentryExceptionResolver() {
+        // Exclude specific events https://stackoverflow.com/questions/48914391/avoid-reporting-broken-pipe-errors-to-sentry-in-a-spring-boot-application
+        return new SentryExceptionResolver() {
+            @Override
+            public ModelAndView resolveException(HttpServletRequest request,
+                                                 HttpServletResponse response,
+                                                 Object handler,
+                                                 Exception ex) {
+                Throwable rootCause = ex;
+
+                while (rootCause.getCause() != null && rootCause.getCause() != rootCause) {
+                    rootCause = rootCause.getCause();
+                }
+
+                if (!rootCause.getMessage().contains("Broken pipe")
+                    && !rootCause.getMessage().contains("Required request body content is missing")
+                    && !rootCause.getMessage().contains("Required request body is missing")
+                    && !rootCause.getMessage().contains("Failed to convert value of type 'java.lang.String' to required type 'java.lang.Integer'")
+                    && !rootCause.getMessage().contains("Required String parameter ")
+                    ) {
+                    super.resolveException(request, response, handler, ex);
+                }
+                return null;
+            }
+
+        };
+    }
 }
