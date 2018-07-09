@@ -2506,11 +2506,6 @@ angular.module('oncokbApp')
                     callback(index, '', 'subtype');
                 }
             }
-            $scope.$watch('fileEditable', function (n, o) {
-                if (n !== o) {
-                    $scope.geneEditable = n;
-                }
-            });
             $scope.tumorsByMutation = {};
             $scope.TIsByTumor = {};
             $scope.treatmentsByII = {};
@@ -2623,6 +2618,12 @@ angular.module('oncokbApp')
                 }, function (error) {
                     deferred1.reject(error);
                 });
+                var deferred2 = $q.defer();
+                $firebaseObject(firebase.database().ref('History/' + $routeParams.geneName)).$bindTo($rootScope, "historyRef").then(function () {
+                    deferred2.resolve('success');
+                }, function (error) {
+                    deferred2.reject('Failed to bind history by gene');
+                });
                 $scope.vusItems = $firebaseArray(firebase.database().ref('VUS/' + $routeParams.geneName + '/vus'));
                 var deferred3 = $q.defer();
                 $firebaseObject(firebase.database().ref('VUS/' + $routeParams.geneName)).$bindTo($rootScope, "vusFire").then(function () {
@@ -2658,13 +2659,7 @@ angular.module('oncokbApp')
                 }, function (error) {
                     deferred5.reject('Failed to bind meta by gene');
                 });
-                var deferred6 = $q.defer();
-                $firebaseObject(firebase.database().ref('History/' + $routeParams.geneName)).$bindTo($rootScope, "historyRef").then(function () {
-                    deferred6.resolve('success');
-                }, function (error) {
-                    deferred6.reject('Failed to bind history by gene');
-                });
-                var bindingAPI = [deferred1.promise, deferred3.promise, deferred4.promise, deferred5.promise, deferred6.promise];
+                var bindingAPI = [deferred1.promise, deferred2.promise, deferred3.promise, deferred4.promise, deferred5.promise];
                 $q.all(bindingAPI)
                     .then(function (result) {
                         user.setFileeditable([$routeParams.geneName]).then(function (result) {
