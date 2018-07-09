@@ -193,14 +193,14 @@ angular.module('oncokbApp')
                             }, function(error) {
                                 var subject = 'VUS update Error for ' + hugoSymbol;
                                 var content = 'The system error returned is ' + JSON.stringify(error);
-                                sendEmail({sendTo: 'dev.oncokb@gmail.com', subject: subject, content: content},
-                                    function(result) {
-                                        console.log('sent old history to oncokb dev account');
-                                    },
-                                    function(error) {
-                                        console.log('fail to send old history to oncokb dev account', error);
-                                    }
-                                );
+                                // sendEmail({sendTo: 'dev.oncokb@gmail.com', subject: subject, content: content},
+                                //     function(result) {
+                                //         console.log('sent old history to oncokb dev account');
+                                //     },
+                                //     function(error) {
+                                //         console.log('fail to send old history to oncokb dev account', error);
+                                //     }
+                                // );
                                 fail(error);
                                 setAPIData('vus', hugoSymbol, data);
                             });
