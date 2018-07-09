@@ -339,7 +339,7 @@ angular.module('oncokbApp')
             $scope.exitReview = function () {
                 $rootScope.geneMeta.review.currentReviewer = '';
                 $rootScope.reviewMode = false;
-                $scope.fileEditable = true;
+                $rootScope.fileEditable = true;
                 evidencesAllUsers = {};
                 // close all mutations
                 ReviewResource.accepted = [];
@@ -2359,7 +2359,7 @@ angular.module('oncokbApp')
                 OCG: ['Oncogene']
             };
             $scope.levels = getLevels();
-            $scope.fileEditable = false;
+            $rootScope.fileEditable = false;
             $scope.addMutationPlaceholder = 'Mutation Name';
             $scope.userRole = $rootScope.me.role;
             $rootScope.userRole = $rootScope.me.role;
@@ -2671,15 +2671,14 @@ angular.module('oncokbApp')
                         user.setFileeditable([$routeParams.geneName]).then(function (result) {
                             $scope.status.fileEditable = result[$routeParams.geneName];
                             if ($rootScope.geneMeta.review.currentReviewer && $rootScope.collaborators[$rootScope.geneMeta.review.currentReviewer.toLowerCase()]) {
-                                $scope.fileEditable = false;
+                                $rootScope.fileEditable = false;
                             } else {
-                                $scope.fileEditable = $scope.status.fileEditable;
+                                $rootScope.fileEditable = $scope.status.fileEditable;
                             }                            
                             $scope.status.rendering = false;
-                            $rootScope.fileEditable = $scope.fileEditable;
                             watchCurrentReviewer();
                         }, function (error) {
-                            $scope.fileEditable = false;
+                            $rootScope.fileEditable = false;
                             $scope.status.rendering = false;
                         });
                     }, function (error) {
@@ -2691,8 +2690,8 @@ angular.module('oncokbApp')
                 ref.on('value', function(doc) {
                     if ($rootScope.collaborators && $rootScope.collaborators[$rootScope.me.name.toLowerCase()]) {
                         if (!doc.val()) {
-                            if ($scope.status.fileEditable === true && $scope.fileEditable === false) {
-                                $scope.fileEditable = $scope.status.fileEditable;
+                            if ($scope.status.fileEditable === true && $rootScope.fileEditable === false) {
+                                $rootScope.fileEditable = $scope.status.fileEditable;
                                 $rootScope.fileEditable = $scope.status.fileEditable;
                             }                        
                         } else if (doc.val() !== $rootScope.me.name) {
