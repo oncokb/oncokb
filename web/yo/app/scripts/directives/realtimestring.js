@@ -83,38 +83,6 @@ angular.module('oncokbApp')
                             }, 500);                            
                         }
                     });
-                    $rootScope.$watch('rejectedUUIDs["'+scope.uuid+'"]', function(n, o) {
-                        if (n !== o && n === true) {
-                            var uuid = '';
-                            var keys = [];
-                            switch(scope.key) {
-                                case 'tsg':
-                                    keys = ['tsg', 'ocg'];
-                                    break;
-                                case 'oncogenic':
-                                    keys = ['oncogenic', 'effect', 'description'];        
-                                    break;
-                                case 'level':
-                                    keys = ['level', 'description'];
-                                case 'indication':
-                                    keys = ['name', 'level', 'propagation', 'indication', 'description'];
-                                    break;     
-                                default: 
-                                    keys = [scope.key];
-                                    break;
-                            }
-                            _.each(keys, function(keyItem) {
-                                uuid = scope.data[keyItem+'_uuid'];
-                                delete $rootScope.geneMeta.review[uuid];  
-                                delete $rootScope.rejectedUUIDs[uuid];
-                                ReviewResource.rejected.push(uuid);
-                                if (scope.data[keyItem+'_review'] && !_.isUndefined(scope.data[keyItem+'_review'].lastReviewed)) {
-                                    scope.data[keyItem] = scope.data[keyItem+'_review'].lastReviewed;
-                                    delete scope.data[keyItem+'_review'].lastReviewed;
-                                }
-                            });                 
-                        }
-                    });
                     $rootScope.$watch('fileEditable', function(n, o) {
                         if (n !== o) {
                             scope.fe = n;

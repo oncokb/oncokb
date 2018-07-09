@@ -274,7 +274,6 @@ angular.module('oncokbApp')
             }
 
             $rootScope.reviewMode = false;
-            $rootScope.rejectedUUIDs = {};
             /**
              * Check if a section needs to be displayed or not.
              * For instance, would be used to check if Mutation Effect section needs to be displayed.
