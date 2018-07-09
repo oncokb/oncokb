@@ -118,7 +118,7 @@
             <div style="margin-top:-20px;margin-bottom:20px">
                 <review-panel uuid="mutation.name_uuid" review-obj="mutation.name_review" evidence-type="'mutation'" mutation="mutation" get-evidence="getEvidence(type, mutation)" model-update="modelUpdate(type, mutation)"
                               accept-added="acceptAdded(type, mutation, tumor, ti, treatment)" reject-added="rejectAdded(type, mutation, tumor, ti, treatment)"
-                              confirm-delete="confirmDelete(type, mutation, tumor, ti, treatment)" cancel-delete="cancelDelete(type, mutation, tumor, ti, treatment)"></review-panel>
+                              confirm-delete="confirmDelete(type, mutation, tumor, ti, treatment)" cancel-delete="cancelDelete(type, mutation, tumor, ti, treatment)" get-refs="getRefs(mutation)"></review-panel>
             </div>
 
           </div>
@@ -129,7 +129,7 @@
               <span ng-click="toggleSection(mutation.mutation_effect_uuid)"><i ng-class="getAngleClass(mutation.mutation_effect_uuid)"></i> Mutation Effect</span>
               <span class="curationNoEntry" ng-if="isEmptySection(mutation.mutation_effect, 'mutation_effect')">No Entry</span>
               <span style="float:right" ng-if="!reviewMode"><comments-dict key="'mutation_effect'" path="path"></comments-dict></span>
-              <review-panel uuid="mutation.mutation_effect_uuid" review-obj="mutation.oncogenic_review" evidence-type="'MUTATION_EFFECT'" mutation="mutation" get-evidence="getEvidence(type, mutation)" model-update="modelUpdate(type, mutation)"></review-panel>
+              <review-panel uuid="mutation.mutation_effect_uuid" review-obj="mutation.oncogenic_review" evidence-type="'MUTATION_EFFECT'" mutation="mutation" get-evidence="getEvidence(type, mutation)" model-update="modelUpdate(type, mutation)" get-refs="getRefs(mutation)"></review-panel>
             </div>
             <div class="panelContent" id="{{mutation.mutation_effect_uuid}}">
               <p ng-if="displayPrecisely(mutation.mutation_effect.oncogenic_uuid)">
@@ -194,7 +194,7 @@
               <div class="panelContent" ng-if="initialOpen[tumor.cancerTypes_uuid]" id="{{tumor.cancerTypes_uuid}}" ng-init="bindTIs({uuid: tumor.cancerTypes_uuid, path: path})">
                   <div ng-if="displayPrecisely(tumor.summary_uuid)">
                     <h5><b>Tumor Type Summary (Optional): </b>
-                        <review-panel uuid="tumor.summary_uuid" review-obj="tumor.summary_review" evidence-type="'TUMOR_TYPE_SUMMARY'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)"></review-panel>
+                        <review-panel uuid="tumor.summary_uuid" review-obj="tumor.summary_review" evidence-type="'TUMOR_TYPE_SUMMARY'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)" get-refs="getRefs(mutation, tumor)"></review-panel>
                     </h5>
                     <realtime-string t="'p'" key="'summary'" path="path" uuid="getUUID({type: 'tumor', key: 'summary', path: path})" mutation="mutation" tumor="tumor" indicate-mutation-content="indicateMutationContent(mutation)" indicate-tumor-content="indicateTumorContent(tumor)"></realtime-string>
                   </div>
@@ -205,7 +205,7 @@
                     <i ng-class="getAngleClass(tumor.diagnostic_uuid)"></i> Diagnostic implications:</span>
                     <span class="curationNoEntry" ng-if="isEmptySection(tumor, 'diagnostic')">No Entry</span>
                     <span ng-if="!reviewMode"><comments-dict key="'diagnostic'" path="path"></comments-dict></span>
-                    <review-panel uuid="tumor.diagnostic_uuid" review-obj="tumor.diagnostic_review" evidence-type="'DIAGNOSTIC_IMPLICATION'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)"></review-panel>
+                    <review-panel uuid="tumor.diagnostic_uuid" review-obj="tumor.diagnostic_review" evidence-type="'DIAGNOSTIC_IMPLICATION'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)" get-refs="getRefs(mutation, tumor)"></review-panel>
                   </div>
                   <div class="panelContent" ng-if="initialOpen[tumor.diagnostic_uuid]" id="{{tumor.diagnostic_uuid}}">
                     <div ng-if="displayPrecisely(tumor.diagnostic.level_uuid)">
@@ -232,7 +232,7 @@
                     <span ng-click="toggleSection(tumor.prognostic_uuid)"><i ng-class="getAngleClass(tumor.prognostic_uuid)"></i> Prognostic implications: </span>
                     <span class="curationNoEntry" ng-if="isEmptySection(tumor, 'prognostic')">No Entry</span>
                     <span ng-if="!reviewMode"><comments-dict key="'prognostic'" path="path"></comments-dict></span>
-                    <review-panel uuid="tumor.prognostic_uuid" review-obj="tumor.prognostic_review" evidence-type="'PROGNOSTIC_IMPLICATION'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)"></review-panel>
+                    <review-panel uuid="tumor.prognostic_uuid" review-obj="tumor.prognostic_review" evidence-type="'PROGNOSTIC_IMPLICATION'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)" get-refs="getRefs(mutation, tumor)"></review-panel>
                   </div>
                   <div class="panelContent" ng-if="initialOpen[tumor.prognostic_uuid]" id="{{tumor.prognostic_uuid}}">
                     <div ng-if="displayPrecisely(tumor.prognostic.level_uuid)">
@@ -284,7 +284,7 @@
                                     tumor="tumor" therapy-category="ti" treatment="treatment" get-evidence="getEvidence(type, mutation, tumor, ti, treatment)"
                                     model-update="modelUpdate(type, mutation, tumor, ti, treatment)" confirm-delete="confirmDelete(type, mutation, tumor, ti, treatment)"
                                     cancel-delete="cancelDelete(type, mutation, tumor, ti, treatment)" accept-added="acceptAdded(type, mutation, tumor, ti, treatment)"
-                                    reject-added="rejectAdded(type, mutation, tumor, ti, treatment)" update-priority="updatePriority(treatments)"></review-panel>
+                                    reject-added="rejectAdded(type, mutation, tumor, ti, treatment)" update-priority="updatePriority(treatments)" get-refs="getRefs(mutation, tumor, ti, treatment)"></review-panel>
                             </div>
                           </div>
                           <div class="panelContent" ng-if="initialOpen[treatment.name_uuid]" id="{{treatment.name_uuid}}">
