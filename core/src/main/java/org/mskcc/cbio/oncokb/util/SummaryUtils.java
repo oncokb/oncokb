@@ -1026,11 +1026,15 @@ public class SummaryUtils {
         } else {
             if (queryAlteration.contains(gene.getHugoSymbol())) {
                 sb.append(queryAlteration);
+            } else if (isAbbreviation(queryAlteration, alteration)) {
+                sb.append(gene.getHugoSymbol() + " " + alteration.getName().toLowerCase() + "(" + alteration.getAlteration() + ") alteration");
             } else {
                 sb.append(gene.getHugoSymbol() + " " + queryAlteration);
             }
-            if (!queryAlteration.endsWith("mutation"))
-                sb.append(" mutation");
+        }
+        String finalStr = sb.toString();
+        if (!finalStr.endsWith("mutation") && !finalStr.endsWith("alteration") && !finalStr.endsWith("fusion")) {
+            sb.append(" mutation");
         }
         return sb.toString();
     }
@@ -1084,6 +1088,9 @@ public class SummaryUtils {
         return sb.toString();
     }
 
+    private static boolean isAbbreviation(String queryName, Alteration matchedAlt) {
+        return matchedAlt != null && StringUtils.isAllUpperCase(queryName) && !matchedAlt.getAlteration().equals(matchedAlt.getName());
+    }
     private static String replaceSpecialCharacterInTumorTypeSummary(String summary, Gene gene, String queryAlteration, String queryTumorType) {
         String altName = getGeneMutationNameInTumorTypeSummary(gene, queryAlteration);
         String alterationName = getGeneMutationNameInVariantSummary(gene, queryAlteration);
