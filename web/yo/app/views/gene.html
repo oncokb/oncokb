@@ -8,7 +8,7 @@
       </span>
       <span class="geneLastModify">Last edit was made on {{geneMeta.lastModifiedAt | date : 'MMM d, h:mm a yyyy'}} by {{geneMeta.lastModifiedBy}}.</span>
       <span ng-if="me.role === 8 && geneMeta.lastSavedAt" class="geneLastModify">Last update to database was made on {{geneMeta.lastSavedAt  | date : 'MMM d, h:mm a'}} by {{geneMeta.lastSavedBy}}</span>
-      <span ng-if="geneMeta.review.currentReviewer" class="geneLastModify" style="color:red">{{geneMeta.review.currentReviewer}} is reviewing this gene</span>
+      <span ng-if="reviewMeta.currentReviewer" class="geneLastModify" style="color:red">{{reviewMeta.currentReviewer}} is reviewing this gene</span>
       <span class="btn-group btn-group-sm pull-right top-tools-menu" uib-dropdown>
         <button type="button" class="btn btn-default" ng-if="::(userRole === 8 && internal)" ng-disabled="!fileEditable"
           ng-click="review()">{{reviewMode ? 'Review Complete' : 'Review'}}</button>

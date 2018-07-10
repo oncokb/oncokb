@@ -12,7 +12,7 @@
  */
 angular.module('oncokbApp')
     .service('loadFiles', function loadFiles($rootScope, $q, mainUtils, dialogs, $timeout, DatabaseConnector, $firebaseObject) {
-        function load(types) {
+        function load(types, data) {
             function loadMeta() {
                 var metaDefer = $q.defer();
                 var ref = firebase.database().ref('Meta');
@@ -36,6 +36,19 @@ angular.module('oncokbApp')
                     });
                 }                
                 return collaboratorsDefer.promise;
+            }
+            function loadGeneMeta(hugoSymbol) {
+                var geneMetaDefer = $q.defer();
+                if ($rootScope.geneMeta) {
+                    geneMetaDefer.resolve('success');
+                } else {
+                    $firebaseObject(firebase.database().ref('Meta/'+hugoSymbol)).$bindTo($rootScope, "geneMeta").then(function () {
+                        geneMetaDefer.resolve('success');
+                    }, function (error) {
+                        geneMetaDefer.reject('Failed to bind meta firebase object');
+                    });
+                }                
+                return geneMetaDefer.promise;
             }
             function loadQueues() {
                 var queuesDefer = $q.defer();
@@ -100,6 +113,9 @@ angular.module('oncokbApp')
             }
             if (types.indexOf('history') !== -1) {
                 apiCalls.push(loadHistory());
+            }
+            if (types.indexOf('geneMeta') !== -1) {
+                apiCalls.push(loadGeneMeta(data));
             }
             if (apiCalls.length > 0) {
                 $q.all(apiCalls)

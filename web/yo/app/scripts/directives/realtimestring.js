@@ -159,7 +159,7 @@ angular.module('oncokbApp')
                     }
                 };
                 $scope.cleanUpEditing = function() {
-                    if ($scope.data[$scope.key+'_editing'] && !$rootScope.collaborators[$scope.data[$scope.key+'_editing']]) {
+                    if ($scope.data[$scope.key+'_editing']) {
                         $scope.data[$scope.key+'_editing'] = '';
                     }
                 }

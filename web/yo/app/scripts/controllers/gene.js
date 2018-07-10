@@ -336,7 +336,7 @@ angular.module('oncokbApp')
                     if (otherCollaborators.length > 0) {
                         var dlg = dialogs.confirm('Reminder', otherCollaborators.join(', ') + ((otherCollaborators.length > 1) ? ' are' : ' is') + ' currently working on this gene document. Entering review mode will disable them from editing.');
                         dlg.result.then(function () {
-                            if (!$rootScope.geneMeta.review.currentReviewer) {
+                            if (!$scope.reviewMeta.currentReviewer) {
                                 prepareReviewItems();
                             }                            
                         });
@@ -346,8 +346,7 @@ angular.module('oncokbApp')
                 }
             };
             $scope.exitReview = function () {
-                $rootScope.geneMeta.review.currentReviewer = '';
-                $rootScope.reviewMode = false;
+                $scope.reviewMeta.currentReviewer = '';
                 $rootScope.fileEditable = true;
                 evidencesAllUsers = {};
                 // close all mutations
@@ -362,7 +361,10 @@ angular.module('oncokbApp')
                 ReviewResource.removed = [];
                 ReviewResource.mostRecent = {};
                 ReviewResource.precise = [];
-                $scope.setSectionOpenStatus('close', $scope.sectionUUIDs);
+                $timeout(function() {
+                    $rootScope.reviewMode = false;
+                    $scope.setSectionOpenStatus('close', $scope.sectionUUIDs);
+                }, 200);
             };
             $scope.developerCheck = function () {
                 return mainUtils.developerCheck($rootScope.me.name);
@@ -594,7 +596,7 @@ angular.module('oncokbApp')
                     mutationChanged = false;
                 });
                 if ($scope.status.hasReviewContent === false) {
-                    $rootScope.geneMeta.review.currentReviewer = '';
+                    $scope.reviewMeta.currentReviewer = '';
                     // This is to increase the fault tolerance of the platform. UUIDs are supposed to be cleaned up after acception or rejection. 
                     // If after scaning whole gene document and found nothing need to be reviewed, then we clean up everything in the review EXCEPT currentReviewer
                     if (_.keys($rootScope.geneMeta.review).length > 1) {
@@ -607,7 +609,7 @@ angular.module('oncokbApp')
                     
                     dialogs.notify('Warning', 'No changes need to be reviewed');
                 } else {
-                    $rootScope.geneMeta.review.currentReviewer = $rootScope.me.name;
+                    $scope.reviewMeta.currentReviewer = $rootScope.me.name;
                     $rootScope.reviewMode = true;
                     if ($scope.status.mutationChanged) {
                         $scope.setSectionOpenStatus('open', $scope.sectionUUIDs);
@@ -2564,8 +2566,8 @@ angular.module('oncokbApp')
                         });
                         $rootScope.collaborators = tempCollaborators;
                         //If an admin enter the review mode and left gene page directly without click Review Complete button, we need to reset the currentReviewer
-                        if (!$rootScope.collaborators[$rootScope.me.name.toLowerCase()] && $rootScope.reviewMode && $rootScope.geneMeta.review.currentReviewer === $rootScope.me.name) {
-                            $rootScope.geneMeta.review.currentReviewer = '';
+                        if (!$rootScope.collaborators[$rootScope.me.name.toLowerCase()] && $rootScope.reviewMode && $scope.reviewMeta.currentReviewer === $rootScope.me.name) {
+                            firebase.database().ref('Meta/' + $routeParams.geneName + '/review').update({currentReviewer: ''}).then(function (result) {}).catch(function (error) {});
                         }
                         defer.resolve();
                     }, function (error) {
@@ -2643,9 +2645,9 @@ angular.module('oncokbApp')
             };
             $scope.getData = function() {
             };
-            $scope.$on('$destroy', function iVeBeenDismissed() {
-                console.log('good bye gene controller');
-              })
+            // $scope.$on('$destroy', function iVeBeenDismissed() {
+            //     console.log('good bye gene controller');
+            // });
             $scope.initialOpen = {};
             $scope.mutIndexByUUID = {};
             function populateBindings() {
@@ -2675,13 +2677,10 @@ angular.module('oncokbApp')
                     deferred4.reject(error);
                 });
                 var deferred5 = $q.defer();
-                $firebaseObject(firebase.database().ref('Meta/' + $routeParams.geneName)).$bindTo($rootScope, "geneMeta").then(function () {
-                    if (_.isUndefined($rootScope.geneMeta.review)) {
-                        $rootScope.geneMeta.review = {
-                            currentReviewer: ''
-                        };
+                $firebaseObject(firebase.database().ref('Meta/' + $routeParams.geneName + '/review')).$bindTo($scope, "reviewMeta").then(function () {
+                    if (_.isUndefined($scope.reviewMeta.currentReviewer)) {
+                        $scope.reviewMeta.currentReviewer = '';
                     }
-                    $scope.geneStautMessage = 'Last edit was made on ' + new Date($rootScope.geneMeta.lastModifiedAt) + ' by ' + $rootScope.geneMeta.lastModifiedBy;
                     getAllCollaborators().then(function() {
                         deferred5.resolve('success');
                     }, function() {
@@ -2690,12 +2689,19 @@ angular.module('oncokbApp')
                 }, function (error) {
                     deferred5.reject('Failed to bind meta by gene');
                 });
-                var bindingAPI = [deferred1.promise, deferred2.promise, deferred4.promise, deferred5.promise];
+                var deferred6 = $q.defer();
+                firebase.database().ref('Meta/' + $routeParams.geneName).on('value', function (doc) {
+                    $scope.geneStautMessage = 'Last edit was made on ' + new Date(doc.val().lastModifiedAt) + ' by ' + doc.val().lastModifiedBy;
+                    deferred6.resolve('success');
+                }, function (error) {
+                    deferred6.reject('Failed to bind meta by gene');
+                });
+                var bindingAPI = [deferred1.promise, deferred2.promise, deferred4.promise, deferred5.promise, deferred6.promise];
                 $q.all(bindingAPI)
                     .then(function (result) {
                         user.setFileeditable([$routeParams.geneName]).then(function (result) {
                             $scope.status.fileEditable = result[$routeParams.geneName];
-                            if ($rootScope.geneMeta.review.currentReviewer && $rootScope.collaborators[$rootScope.geneMeta.review.currentReviewer.toLowerCase()]) {
+                            if ($scope.reviewMeta.currentReviewer && $rootScope.collaborators[$scope.reviewMeta.currentReviewer.toLowerCase()]) {
                                 $rootScope.fileEditable = false;
                             } else {
                                 $rootScope.fileEditable = $scope.status.fileEditable;
@@ -2711,20 +2717,19 @@ angular.module('oncokbApp')
                     });
             }
             function watchCurrentReviewer() {
-                var ref = firebase.database().ref('Meta/' + $routeParams.geneName + '/review/currentReviewer');
-                ref.on('value', function(doc) {
-                    if ($rootScope.collaborators && $rootScope.collaborators[$rootScope.me.name.toLowerCase()]) {
-                        if (!doc.val()) {
-                            if ($scope.status.fileEditable === true && $rootScope.fileEditable === false) {
-                                $rootScope.fileEditable = $scope.status.fileEditable;
-                                $rootScope.fileEditable = $scope.status.fileEditable;
-                            }                        
-                        } else if (doc.val() !== $rootScope.me.name) {
-                            $rootScope.fileEditable = false;
-                        }
-                    }                    
-                }, function(error) {
-                    console.log('failed to get current reviewer data');
+                $scope.$watch('reviewMeta.currentReviewer', function(n, o) {
+                    if (n !== o) {
+                        if ($rootScope.collaborators && $rootScope.collaborators[$rootScope.me.name.toLowerCase()]) {
+                            if (!n) {
+                                if ($scope.status.fileEditable === true && $rootScope.fileEditable === false) {
+                                    $rootScope.fileEditable = $scope.status.fileEditable;
+                                    $rootScope.fileEditable = $scope.status.fileEditable;
+                                }      
+                            } else if (n !== $rootScope.me.name) {
+                                $rootScope.fileEditable = false;
+                            }
+                        }   
+                    }
                 });
             }            
             $scope.getObservePath = function (data) {
