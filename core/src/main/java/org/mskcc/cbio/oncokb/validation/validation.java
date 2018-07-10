@@ -6,6 +6,7 @@
 package org.mskcc.cbio.oncokb.validation;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
@@ -18,8 +19,8 @@ import com.google.gdata.data.spreadsheet.WorksheetFeed;
 import com.google.gdata.util.ServiceException;
 import com.mysql.jdbc.StringUtils;
 import org.mskcc.cbio.oncokb.model.*;
+import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
 import org.mskcc.cbio.oncokb.util.*;
-import org.mskcc.cbio.oncokb.model.oncotree.TumorType;;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -32,6 +33,8 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+;
 
 /**
  * @author jiaojiao
@@ -387,7 +390,8 @@ public class validation {
     private static Set<Evidence> getPublishedEvidencesByLevel(LevelOfEvidence levelOfEvidence) throws IOException {
         String json = FileUtils.readRemote("http://oncokb.org/legacy-api/evidence.json?levels=" + levelOfEvidence.name());
 
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = new ObjectMapper()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         List<List<Evidence>> list = mapper.readValue(json,
             new TypeReference<ArrayList<ArrayList<Evidence>>>() {
             });
