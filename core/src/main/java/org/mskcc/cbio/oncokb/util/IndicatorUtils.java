@@ -79,6 +79,16 @@ public class IndicatorUtils {
                 query.setConsequence("feature_truncation");
 
                 fusionGeneAltsMap = findFusionGeneAndRelevantAlts(query);
+
+                // For single gene deletion event. We should map to Deletion instead of Truncating Mutation
+                if (query.getSvType() != null && query.getSvType().equals(StructuralVariantType.DELETION)) {
+                    Set<Gene> allGenes = (Set<Gene>) fusionGeneAltsMap.get("allGenes");
+                    if (allGenes.size() == 1) {
+                        query.setAlteration("deletion");
+                        fusionGeneAltsMap = findFusionGeneAndRelevantAlts(query);
+                    }
+                }
+
                 gene = (Gene) fusionGeneAltsMap.get("pickedGene");
                 fusionGeneAltsMap = new HashMap<>();
                 // As long as this is a structural variant event, we need to attach the Truncating Mutation
@@ -188,7 +198,7 @@ public class IndicatorUtils {
                 }
 
                 if (hasMutationEffectEvidence) {
-                    IndicatorQueryMutationEffect indicatorQueryMutationEffect = getMutationEffect(alteration, alleles, query, source, geneStatus);
+                    IndicatorQueryMutationEffect indicatorQueryMutationEffect = getMutationEffect(matchedAlt == null ? alteration : matchedAlt, alleles, query, source, geneStatus);
 
                     if (indicatorQueryMutationEffect.getMutationEffectEvidence() != null) {
                         allQueryRelatedEvidences.add(indicatorQueryMutationEffect.getMutationEffectEvidence());

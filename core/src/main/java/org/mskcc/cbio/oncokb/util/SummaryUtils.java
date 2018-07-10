@@ -7,7 +7,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -1033,7 +1032,11 @@ public class SummaryUtils {
             }
         }
         String finalStr = sb.toString();
-        if (!finalStr.endsWith("mutation") && !finalStr.endsWith("alteration") && !finalStr.endsWith("fusion")) {
+        if (!finalStr.endsWith("mutation")
+            && !finalStr.endsWith("alteration")
+            && !finalStr.endsWith("fusion")
+            && !finalStr.endsWith("deletion")
+            ) {
             sb.append(" mutation");
         }
         return sb.toString();
