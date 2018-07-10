@@ -580,7 +580,7 @@ public class IndicatorUtils {
                     }
                 }
             }
-            List<Gene> allGenes = new ArrayList<>();
+            LinkedHashSet<Gene> allGenes = new LinkedHashSet<>();
             for (String subGeneStr : geneStrsSet) {
                 Gene tmpGene = GeneUtils.getGeneByHugoSymbol(subGeneStr);
                 if (tmpGene != null) {

@@ -1026,11 +1026,15 @@ public class SummaryUtils {
         } else {
             if (queryAlteration.contains(gene.getHugoSymbol())) {
                 sb.append(queryAlteration);
+            } else if (NamingUtils.hasAbbreviation(queryAlteration)) {
+                sb.append(gene.getHugoSymbol() + " " + NamingUtils.getFullName(queryAlteration) + " (" + queryAlteration + ") alteration");
             } else {
                 sb.append(gene.getHugoSymbol() + " " + queryAlteration);
             }
-            if (!queryAlteration.endsWith("mutation"))
-                sb.append(" mutation");
+        }
+        String finalStr = sb.toString();
+        if (!finalStr.endsWith("mutation") && !finalStr.endsWith("alteration") && !finalStr.endsWith("fusion")) {
+            sb.append(" mutation");
         }
         return sb.toString();
     }
