@@ -188,6 +188,10 @@ angular.module('oncokbApp').run(
                 if (toIndex !== -1) {
                     //When the curator enter the gene page
                     hugoSymbol = $location.path().substring(toIndex+6);
+                    loadFiles.load(['geneMeta'], hugoSymbol).then(function() {
+                    }, function(error) {
+                        console.log('fail to load gene meta', error);
+                    });
                 }
                 if (fromIndex !== -1 || toIndex !== -1) {
                     loadFiles.load(['collaborators']).then(function() {
