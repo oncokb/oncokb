@@ -26,4 +26,12 @@ public class NamingUtils {
                 abbreviations.put(parts[0], parts[1]);
         }
     }
+
+    public static String getFullName(String abbreviation) {
+        return abbreviation == null ? null : abbreviations.get(abbreviation);
+    }
+
+    public static boolean hasAbbreviation(String abbreviation) {
+        return abbreviation == null ? false : abbreviations.containsKey(abbreviation);
+    }
 }
