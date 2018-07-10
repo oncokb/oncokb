@@ -13,8 +13,7 @@ angular.module('oncokbApp')
             restrict: 'AE',
             scope: {
                 key: '=',
-                path: '=',
-                index: '='
+                path: '='
             },
             replace: true,
             link: function postLink(scope, element, attrs) {
@@ -26,18 +25,12 @@ angular.module('oncokbApp')
                     allResolved: false
                 };
                 scope.userRole = $rootScope.me.role;
-                if (_.isNumber(scope.index) && scope.key === 'name') {
-                    scope.obj = $rootScope.vusFire.vus[scope.index];
+                $firebaseObject(firebase.database().ref(scope.path)).$bindTo(scope, "obj").then(function (success) {
                     scope.checkResolvedStatus();
                     scope.status.rendering = false;
-                } else {
-                    $firebaseObject(firebase.database().ref(scope.path)).$bindTo(scope, "obj").then(function (success) {
-                        scope.checkResolvedStatus();
-                        scope.status.rendering = false;
-                    }, function (error) {
-                        console.log('error');
-                    });
-                }
+                }, function (error) {
+                    console.log('error');
+                });
                 element.find('i').off('mouseenter');
                 element.find('i').bind('mouseenter', function() {
                     if (scope.mouseLeaveTimeout) {

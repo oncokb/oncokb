@@ -518,9 +518,13 @@ angular.module('oncokbApp')
         }
         function VUSItem(name, userName, userEmail) {
             this.name = name;
-            this.time = [
-                new TimeStamp(userName, userEmail)
-            ];
+            this.time = {
+                by: {
+                    name: userName,
+                    email: userEmail
+                },
+                value: new Date().getTime()
+            };
         }
         function TimeStamp(userName, userEmail) {
             this.by = {
