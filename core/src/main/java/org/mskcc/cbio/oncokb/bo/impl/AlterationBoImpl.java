@@ -369,7 +369,8 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
                         add = true;
                     }
                 } else {
-                    for (Alteration alt : relevantAlts) {
+                    // When we look at the oncogenicity, the VUS relevant variants should be excluded.
+                    for (Alteration alt : AlterationUtils.excludeVUS(new ArrayList<>(relevantAlts))) {
                         Boolean isOncogenic = AlterationUtils.isOncogenicAlteration(alt);
 
                         if (isOncogenic != null && isOncogenic && !isKitSpecialVariants(alt)) {

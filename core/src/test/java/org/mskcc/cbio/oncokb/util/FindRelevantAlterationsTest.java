@@ -66,6 +66,10 @@ public class FindRelevantAlterationsTest {
                 {"MED12", "G44D", null, "G44D, G44A, G44C, G44S, G44V, 34_68mut"},
                 {"NOTCH1", "Q2405Rfs*17", null, "Q2405Rfs*17, T2375_K2555trunc, Gain-of-function Mutations"},
 
+                // VUS should get mapped to hotspot VUS, but should not get Oncogenic Mutations from the hotspot VUS.
+                // In this case VUS N109_R113del is covered by VUS I99_R113del, and I99_R113del is a hotpot.
+                {"MAP2K1", "N109_R113del", null, "N109_R113del, I99_R113del"},
+
                 // Range missense variant
                 {"PDGFRA", "D842I", null, "D842I, D842H, D842V, D842Y, D842_I843delinsIM, Oncogenic Mutations"},
 
