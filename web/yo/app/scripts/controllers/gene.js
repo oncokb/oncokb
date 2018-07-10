@@ -43,7 +43,7 @@ angular.module('oncokbApp')
                     });
                 }
                 if (validMutation) {
-                    _.some($rootScope.vusFire.vus, function (vusItem) {
+                    _.some($scope.vusItems, function (vusItem) {
                         if (vusItem.name.toLowerCase() === variantName) {
                             validMutation = false;
                             message += 'has already been added in the VUS section!';
@@ -218,7 +218,7 @@ angular.module('oncokbApp')
                     $timeout.cancel($scope.status.vusUpdateTimeout);
                 }
                 $scope.status.vusUpdateTimeout = $timeout(function () {
-                    var vusData = JSON.stringify(mainUtils.getVUSData($rootScope.vusFire.vus, true));
+                    var vusData = JSON.stringify(mainUtils.getVUSData($scope.vusItems, true));
                     DatabaseConnector.updateVUS($routeParams.geneName, vusData, function(result) {
                         console.log('success saving vus to database');
                         mainUtils.updateLastSavedToDB();
@@ -1660,13 +1660,35 @@ angular.module('oncokbApp')
                 if (newVUSName) {
                     if (isValidVariant(newVUSName)) {
                         var vusItem = new FirebaseModel.VUSItem(newVUSName, $rootScope.me.name, $rootScope.me.email);
-                        if (!$rootScope.vusFire.vus) {
-                            $rootScope.vusFire.vus = [];    
-                        }
-                        $rootScope.vusFire.vus.push(vusItem);
-                        $scope.vusUpdate();
+                        $scope.vusItems.$add(vusItem).then(function(variant) {
+                            $scope.vusUpdate();
+                        });
                     }
                 }
+            };
+            $scope.removeVUS = function(variant) {
+                var dlg = dialogs.confirm('Confirmation', 'Are you sure you want to delete this entry?');
+                dlg.result.then(function() {
+                    $scope.vusItems.$remove(variant).then(function() {
+                        console.log('removed');
+                        $scope.vusUpdate();
+                    });
+                }, function() {
+                });
+            };
+            $scope.refreshVUS = function(variant) {
+                var obj = $firebaseObject(firebase.database().ref('VUS/' + $routeParams.geneName + '/' + variant.$id + '/time'));
+                obj.value = new Date().getTime();
+                obj.by = {
+                    email: $rootScope.me.email,
+                    name: $rootScope.me.name
+                };
+                obj.$save().then(function(ref) {
+                    $scope.vusUpdate();
+                    console.log('data refreshed');
+                }, function(error) {
+                    console.log("Error:", error);
+                });                
             };
 
             $scope.getCancerTypesName = function (tumor) {
@@ -1972,7 +1994,7 @@ angular.module('oncokbApp')
                 var annotationPMIDs = results.PMIDs;
                 var annotationAbstracts = results.abstracts;
 
-                var vusData = JSON.stringify($rootScope.vusFire);
+                var vusData = JSON.stringify($scope.vusItems);
                 results = fetchResults(FindRegex.result(vusData));
                 var vusPMIDs = results.PMIDs;
                 var vusAbstracts = results.abstracts;
@@ -2608,7 +2630,12 @@ angular.module('oncokbApp')
                 }
                 result += " angleIconStyle";
                 return result;
-            }
+            };
+            $scope.getData = function() {
+            };
+            $scope.$on('$destroy', function iVeBeenDismissed() {
+                console.log('good bye gene controller');
+              })
             $scope.initialOpen = {};
             $scope.mutIndexByUUID = {};
             function populateBindings() {
@@ -2624,13 +2651,7 @@ angular.module('oncokbApp')
                 }, function (error) {
                     deferred2.reject('Failed to bind history by gene');
                 });
-                $scope.vusItems = $firebaseArray(firebase.database().ref('VUS/' + $routeParams.geneName + '/vus'));
-                var deferred3 = $q.defer();
-                $firebaseObject(firebase.database().ref('VUS/' + $routeParams.geneName)).$bindTo($rootScope, "vusFire").then(function () {
-                    deferred3.resolve();
-                }, function (error) {
-                    deferred3.reject(error);
-                });
+                $scope.vusItems = $firebaseArray(firebase.database().ref('VUS/' + $routeParams.geneName));
                 var deferred4 = $q.defer();
                 $scope.mutations = $firebaseArray(firebase.database().ref('Genes/' + $routeParams.geneName + '/mutations'));
                 $scope.mutations.$loaded().then(function (success) {
@@ -2659,7 +2680,7 @@ angular.module('oncokbApp')
                 }, function (error) {
                     deferred5.reject('Failed to bind meta by gene');
                 });
-                var bindingAPI = [deferred1.promise, deferred2.promise, deferred3.promise, deferred4.promise, deferred5.promise];
+                var bindingAPI = [deferred1.promise, deferred2.promise, deferred4.promise, deferred5.promise];
                 $q.all(bindingAPI)
                     .then(function (result) {
                         user.setFileeditable([$routeParams.geneName]).then(function (result) {
@@ -2715,6 +2736,8 @@ angular.module('oncokbApp')
                     return data.path + '/TIs/' + data.index;
                 } else if (data.type === 'treatment') {
                     return data.path + '/treatments/' + data.index;
+                } else if (data.type === 'vus') {
+                    return 'VUS/' + $routeParams.geneName + '/' + data.variant.$id;
                 }
             };
             $scope.getUUID = function (data) {

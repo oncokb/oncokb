@@ -14,6 +14,7 @@
           ng-click="review()">{{reviewMode ? 'Review Complete' : 'Review'}}</button>
         <button type="button" class="btn btn-default" ng-if="developerCheck()" ng-click="exitReview()">Exit Review</button>
         <button type="button" class="btn btn-default" ng-click="getAllCitations()">Citations</button>
+        <!-- <button type="button" class="btn btn-default" ng-click="getData()">Get Data</button> -->
         <button type="button" class="btn btn-default" ng-click="generatePDF()">Download PDF</button>
       </span>
     </h2>
@@ -386,8 +387,22 @@
     <h3>Variants of Unknown Significance (Investigated and data not found)
       <button class="btn btn-default btn-sm" ng-click="vusUpdate()" ng-if="developerCheck() && internal">Update to database</button>
     </h3>
-    <div ng-repeat="variant in vusFire.vus">
-      <vus-item index="$index" gene="fileTitle" vus-update="vusUpdate()"></vus-item>
+    <div ng-repeat="variant in vusItems">
+        <div class="input-group  input-group-sm vusGroup">
+            <span class="input-group-addon" ng-class="getClass(dt)" qtip type="vusItem" time="variant.time.value" by="variant.time.by.name">{{::variant.name}}</span>
+            <span class="input-group-btn" ng-show="fileEditable">
+                <button class="btn btn-default" type="button" style="text-align:left">
+                    <comments-dict key="'name'" path="getObservePath({type: 'vus', variant: variant})"></comments-dict>
+                </button>
+                <button class="btn btn-default"
+                        type="button" ng-click="refreshVUS(variant)" qtip content="Recheck: set the date to today">
+                    <i class="fa fa-refresh"></i>
+                </button>
+                <button class="btn btn-default" type="button" ng-click="removeVUS(variant)">
+                    <i class="fa fa-trash-o"></i>
+                </button>
+            </span>
+        </div>
     </div>
 
     <div class="input-group input-group-sm vusGroup">
