@@ -176,32 +176,54 @@ public class IndicatorUtilsTest {
         assertEquals("The highest resistance level of BRAF R462I should be null.", null, indicatorQueryResp.getHighestResistanceLevel());
         assertEquals("The tumor type summary does not match.", "There are no FDA-approved or NCCN-compendium listed treatments specifically for patients with BRAF R462I mutant gastrointestinal stromal tumors.", indicatorQueryResp.getTumorTypeSummary());
 
-        // Check EGFRvIII
+        // Check EGFR vIII vII vIV
         query = new Query(null, null, null, "EGFR", "EGFRvIII", null, null, "Gastrointestinal Stromal Tumor", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true, null);
         assertEquals("The Oncogenicity is not oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
-        assertEquals("The variant summary is not expected.", "The EGFRvIII mutation is known to be oncogenic.", indicatorQueryResp.getVariantSummary());
+        assertEquals("The variant summary is not expected.", "The EGFR vIII alteration is known to be oncogenic.", indicatorQueryResp.getVariantSummary());
+
+        query = new Query(null, null, null, "EGFR", "vIII", null, null, "NSCLC", null, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true, null);
+        assertEquals("The Oncogenicity is not oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The variant summary is not expected.", "The EGFR vIII alteration is known to be oncogenic.", indicatorQueryResp.getVariantSummary());
+
+        query = new Query(null, null, null, "EGFR", "vII", null, null, "NSCLC", null, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true, null);
+        assertEquals("The Oncogenicity is not oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The variant summary is not expected.", "The EGFR vII alteration is known to be oncogenic.", indicatorQueryResp.getVariantSummary());
+
+        query = new Query(null, null, null, "EGFR", "vV", null, null, "NSCLC", null, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true, null);
+        assertEquals("The Oncogenicity is not oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The variant summary is not expected.", "The EGFR vV alteration is known to be oncogenic.", indicatorQueryResp.getVariantSummary());
 
         // Check EGFR CTD
-        query = new Query(null, null, null, "EGFR", "EGFR CTD", null, null, "Gastrointestinal Stromal Tumor", null, null, null, null);
+        query = new Query(null, null, null, "EGFR", "CTD", null, null, "NSCLC", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true, null);
         assertEquals("The Oncogenicity is not oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
-        assertEquals("The variant summary is not expected.", "The EGFR CTD mutation is known to be oncogenic.", indicatorQueryResp.getVariantSummary());
+        assertEquals("The variant summary is not expected.", "The EGFR C-terminal domain (CTD) alteration is known to be oncogenic.", indicatorQueryResp.getVariantSummary());
 
-        query = new Query(null, null, null, "EGFR-EGFR", "EGFRvIII", "structural_variant", StructuralVariantType.DELETION, "Gastrointestinal Stromal Tumor", null, null, null, null);
+        // Check EGFR KDD
+        query = new Query(null, null, null, "EGFR", "KDD", null, null, "NSCLC", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true, null);
         assertEquals("The Oncogenicity is not oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
-        assertEquals("The variant summary is not expected.", "The EGFRvIII mutation is known to be oncogenic.", indicatorQueryResp.getVariantSummary());
+        assertEquals("The variant summary is not expected.", "The EGFR kinase domain duplication (KDD) alteration is known to be oncogenic.", indicatorQueryResp.getVariantSummary());
+        assertEquals("The highest sensitive level should be 1", LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
 
-        query = new Query(null, null, null, "EGFR-EGFR", "EGFRvIII", "structural_variant", StructuralVariantType.DELETION, "Gastrointestinal Stromal Tumor", "", null, null, null);
+        query = new Query(null, null, null, "EGFR-EGFR", "vIII", "structural_variant", StructuralVariantType.DELETION, "NSCLC", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true, null);
         assertEquals("The Oncogenicity is not oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
-        assertEquals("The variant summary is not expected.", "The EGFRvIII mutation is known to be oncogenic.", indicatorQueryResp.getVariantSummary());
+        assertEquals("The variant summary is not expected.", "The EGFR vIII alteration is known to be oncogenic.", indicatorQueryResp.getVariantSummary());
 
-        query = new Query(null, null, null, "EGFR", "EGFRvIII", "structural_variant", StructuralVariantType.DELETION, "Gastrointestinal Stromal Tumor", null, null, null, null);
+        query = new Query(null, null, null, "EGFR-EGFR", "vIII", "structural_variant", StructuralVariantType.DELETION, "NSCLC", "", null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true, null);
         assertEquals("The Oncogenicity is not oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
-        assertEquals("The variant summary is not expected.", "The EGFRvIII mutation is known to be oncogenic.", indicatorQueryResp.getVariantSummary());
+        assertEquals("The variant summary is not expected.", "The EGFR vIII alteration is known to be oncogenic.", indicatorQueryResp.getVariantSummary());
+
+        query = new Query(null, null, null, "EGFR", "vIII", "structural_variant", StructuralVariantType.DELETION, "NSCLC", null, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true, null);
+        assertEquals("The Oncogenicity is not oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The variant summary is not expected.", "The EGFR vIII alteration is known to be oncogenic.", indicatorQueryResp.getVariantSummary());
 
         query = new Query(null, null, null, "EGFR", "", "structural_variant", StructuralVariantType.DELETION, "Gastrointestinal Stromal Tumor", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true, null);
@@ -210,12 +232,6 @@ public class IndicatorUtilsTest {
         query = new Query(null, null, null, "EGFR", "", "structural_variant", StructuralVariantType.DELETION, "Gastrointestinal Stromal Tumor", "fusion", null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true, null);
         assertEquals("The Oncogenicity is not likely oncogenic, but it should be.", Oncogenicity.LIKELY.getOncogenic(), indicatorQueryResp.getOncogenic());
-
-        // Check EGFRvII
-        query = new Query(null, null, null, "EGFR", "EGFRvII", "structural_variant", StructuralVariantType.DELETION, "Gastrointestinal Stromal Tumor", null, null, null, null);
-        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true, null);
-        assertEquals("The Oncogenicity is not oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
-        assertEquals("The variant summary is not expected.", "The EGFRvII mutation is known to be oncogenic.", indicatorQueryResp.getVariantSummary());
 
         // For duplication, proteinStart/proteinEnd in OncoKB annotation should overwrite the input from outside
         // The hotspot range is 65_77indel.
@@ -236,7 +252,7 @@ public class IndicatorUtilsTest {
         query = new Query(null, null, null, "BRCA2", null, "structural_variant", StructuralVariantType.DELETION, "Ovarian Cancer", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true, null);
         assertEquals("The Oncogenicity is not Oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
-        assertTrue("The mutation effect is not expected.", indicatorQueryResp.getMutationEffect().getDescription().startsWith("BRCA2 deletions occur in some patients with breast cancer and are predicted"));
+        assertEquals("The mutation effect is not expected.", "Loss-of-function", indicatorQueryResp.getMutationEffect().getKnownEffect());
         assertEquals("The highest level of sensitive treatment is not level 1, but it should be.", LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
 
         // Oncogenicity of Alternative Allele overwrites Inconclusive

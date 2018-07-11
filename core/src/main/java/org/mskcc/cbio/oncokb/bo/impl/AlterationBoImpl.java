@@ -183,14 +183,14 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         }
 
         if (addEGFRCTD(alteration)) {
-            Alteration alt = findAlteration("EGFR CTD", fullAlterations);
+            Alteration alt = findAlteration("CTD", fullAlterations);
             if (alt != null) {
                 alterations.add(alt);
             }
         }
 
         if (alteration.getGene().getHugoSymbol().equals("EGFR") && alteration.getAlteration().equals("CTD")) {
-            Alteration alt = findAlteration("EGFR CTD", fullAlterations);
+            Alteration alt = findAlteration("CTD", fullAlterations);
             if (alt != null && !alterations.contains(alt)) {
                 alterations.add(alt);
             }
@@ -350,7 +350,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         if (exactAlt != null && exactAlt.getGene() != null
             && exactAlt.getGene().equals(GeneUtils.getGeneByHugoSymbol("EGFR"))
             && !StringUtils.isNullOrEmpty(exactAlt.getAlteration())
-            && exactAlt.getAlteration().trim().matches("^EGFR(\\s)*vIV(a|b|c)?$")) {
+            && exactAlt.getAlteration().trim().matches("^vIV(a|b|c)?$")) {
             add = true;
         }
         return add;

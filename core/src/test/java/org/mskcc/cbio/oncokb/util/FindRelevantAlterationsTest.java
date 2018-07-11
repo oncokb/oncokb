@@ -53,13 +53,12 @@ public class FindRelevantAlterationsTest {
                 {"MAP2K4", "R304*", null, "R304*, Truncating Mutations, Oncogenic Mutations"},
 
                 // EGFR exon deletion
-                {"EGFR", "EGFRvIII", null, "EGFRvIII, Oncogenic Mutations"},
+                {"EGFR", "vIII", null, "vIII, Oncogenic Mutations"},
                 {"EGFR", "CTD", null, "G983_A1210indel, Oncogenic Mutations"},
-                {"EGFR", "EGFR CTD", null, "G983_A1210indel, Oncogenic Mutations"},
-                {"EGFR", "EGFRvIV", null, "G983_A1210indel, Oncogenic Mutations"},
-                {"EGFR", "EGFRvIVa", null, "G983_A1210indel, Oncogenic Mutations"},
-                {"EGFR", "EGFRvIVb", null, "G983_A1210indel, Oncogenic Mutations"},
-                {"EGFR", "EGFRvIVc", null, "G983_A1210indel, Oncogenic Mutations"},
+                {"EGFR", "vIV", null, "G983_A1210indel, Oncogenic Mutations"},
+                {"EGFR", "vIVa", null, "G983_A1210indel, Oncogenic Mutations"},
+                {"EGFR", "vIVb", null, "G983_A1210indel, Oncogenic Mutations"},
+                {"EGFR", "vIVc", null, "G983_A1210indel, Oncogenic Mutations"},
 
                 // Check range
                 {"MED12", "G44S", null, "G44S, G44A, G44C, G44D, G44V, 34_68mut"},

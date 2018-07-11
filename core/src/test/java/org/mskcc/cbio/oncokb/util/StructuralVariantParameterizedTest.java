@@ -48,6 +48,8 @@ public class StructuralVariantParameterizedTest {
 
     @Test
     public void testSummary() throws Exception {
+        String _query = fusionPair + " " + alteration + " " + svClass + " " + tumorType + " " + isFunctionalFusion;
+
         // Testing functional fusion
         if (isFunctionalFusion) {
             Query query1 = new Query();
@@ -63,15 +65,16 @@ public class StructuralVariantParameterizedTest {
             query2.setAlteration(alteration);
             query2.setAlterationType("fusion");
             query2.setTumorType(tumorType);
+            query2.setSvType(StructuralVariantType.valueOf(svClass));
 
             // if it is functional fusion. The result should be the same as passing as fusion
             IndicatorQueryResp resp1 = IndicatorUtils.processQuery(query1, null, null, null, true, null);
             IndicatorQueryResp resp2 = IndicatorUtils.processQuery(query2, null, null, null, false, null);
 
-            assertEquals("Oncogenicities are not matched.", resp1.getOncogenic(), resp2.getOncogenic());
-            assertEquals("Highest sensitive levels are not matched.", resp1.getHighestSensitiveLevel(), resp2.getHighestSensitiveLevel());
-            assertEquals("Highest sensitive levels are not matched.", resp1.getHighestSensitiveLevel(), resp2.getHighestSensitiveLevel());
-            assertEquals("Highest resistance levels are not matched.", resp1.getHighestResistanceLevel(), resp2.getHighestResistanceLevel());
+            assertEquals("Oncogenicities are not matched. Query: " + _query, resp1.getOncogenic(), resp2.getOncogenic());
+            assertEquals("Highest sensitive levels are not matched. Query: " + _query, resp1.getHighestSensitiveLevel(), resp2.getHighestSensitiveLevel());
+            assertEquals("Highest sensitive levels are not matched. Query: " + _query, resp1.getHighestSensitiveLevel(), resp2.getHighestSensitiveLevel());
+            assertEquals("Highest resistance levels are not matched. Query: " + _query, resp1.getHighestResistanceLevel(), resp2.getHighestResistanceLevel());
         }
 
         Query query = new Query();
@@ -83,9 +86,6 @@ public class StructuralVariantParameterizedTest {
         if (isFunctionalFusion) {
             query.setConsequence("fusion");
         }
-
-        String _query = fusionPair + " " + alteration + " " + svClass + " " + tumorType + " " + isFunctionalFusion;
-
         IndicatorQueryResp resp = IndicatorUtils.processQuery(query, null, null, null, true, null);
 
         assertEquals("Oncogenicities are not matched. Query: " + _query, oncogenicity, resp.getOncogenic());

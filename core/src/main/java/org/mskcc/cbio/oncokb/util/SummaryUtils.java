@@ -1017,7 +1017,9 @@ public class SummaryUtils {
             || StringUtils.containsIgnoreCase(queryAlteration, "dup")
             || StringUtils.containsIgnoreCase(queryAlteration, "del")
             || StringUtils.containsIgnoreCase(queryAlteration, "ins")
-            || StringUtils.containsIgnoreCase(queryAlteration, "splice")) {
+            || StringUtils.containsIgnoreCase(queryAlteration, "splice")
+            || MainUtils.isEGFRTruncatingVariants(queryAlteration)
+            ) {
             sb.append(gene.getHugoSymbol() + " " + queryAlteration);
             if (!queryAlteration.endsWith("alteration")) {
                 sb.append(" alteration");
@@ -1030,14 +1032,16 @@ public class SummaryUtils {
             } else {
                 sb.append(gene.getHugoSymbol() + " " + queryAlteration);
             }
-        }
-        String finalStr = sb.toString();
-        if (!finalStr.endsWith("mutation")
-            && !finalStr.endsWith("alteration")
-            && !finalStr.endsWith("fusion")
-            && !finalStr.endsWith("deletion")
-            ) {
-            sb.append(" mutation");
+            String finalStr = sb.toString();
+            if (!finalStr.endsWith("mutation")
+                && !finalStr.endsWith("mutations")
+                && !finalStr.endsWith("alteration")
+                && !finalStr.endsWith("fusion")
+                && !finalStr.endsWith("deletion")
+                && !finalStr.endsWith("amplification")
+                ) {
+                sb.append(" mutation");
+            }
         }
         return sb.toString();
     }
@@ -1082,6 +1086,8 @@ public class SummaryUtils {
                 || StringUtils.containsIgnoreCase(queryAlteration, "del")
                 || StringUtils.containsIgnoreCase(queryAlteration, "ins")
                 || StringUtils.containsIgnoreCase(queryAlteration, "splice")
+                || NamingUtils.hasAbbreviation(queryAlteration)
+                || MainUtils.isEGFRTruncatingVariants(queryAlteration)
                 ) {
                 sb.append(queryAlteration + " altered");
             } else if (!queryAlteration.endsWith("mutation")) {

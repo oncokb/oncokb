@@ -2,9 +2,6 @@ package org.mskcc.cbio.oncokb.util;
 
 import junit.framework.TestCase;
 import org.mskcc.cbio.oncokb.model.MutationEffect;
-import sun.applet.Main;
-
-import static org.junit.Assert.assertEquals;
 
 /**
  * Created by Hongxin Zhang on 3/1/18.
@@ -43,6 +40,20 @@ public class MainUtilsTest extends TestCase {
         indicatorQueryMutationEffect = MainUtils.setToAlternativeAlleleMutationEffect(indicatorQueryMutationEffect);
         assertEquals("The Likely Gain-of-function should be propagated to likely gain-of-function.", MutationEffect.LIKELY_GAIN_OF_FUNCTION, indicatorQueryMutationEffect.getMutationEffect());
 
+    }
+
+    public void testIsEGFRTruncatingVariants() throws Exception {
+        assertTrue(MainUtils.isEGFRTruncatingVariants("vIVa"));
+        assertTrue(MainUtils.isEGFRTruncatingVariants("vIVb"));
+        assertTrue(MainUtils.isEGFRTruncatingVariants("vIVc"));
+        assertTrue(MainUtils.isEGFRTruncatingVariants("vII"));
+        assertTrue(MainUtils.isEGFRTruncatingVariants("vIII"));
+        assertTrue(MainUtils.isEGFRTruncatingVariants("vV"));
+        assertFalse(MainUtils.isEGFRTruncatingVariants("vIIIa"));
+        assertFalse(MainUtils.isEGFRTruncatingVariants("vIVd"));
+        assertFalse(MainUtils.isEGFRTruncatingVariants("vVi"));
+        assertFalse(MainUtils.isEGFRTruncatingVariants("test"));
+        assertFalse(MainUtils.isEGFRTruncatingVariants("EGFRvIVa"));
     }
 
 }
