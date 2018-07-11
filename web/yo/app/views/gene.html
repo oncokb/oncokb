@@ -169,7 +169,7 @@
                   <span>{{getCancerTypesName(tumor)}}</span>
                 </span>
                 <span ng-show="!reviewMode">
-                    <i class="fa fa-edit" ng-click="modifyTumorType(mutation, tumor, path)"></i>
+                    <i class="fa fa-edit" ng-if="fileEditable" ng-click="modifyTumorType(mutation, tumor, path)"></i>
                     <span style="margin-left:5px"><comments-dict key="'cancerTypes'" path="path"></comments-dict></span>
                     <span style="margin-left:5px" ng-bind-html="tumorContent[tumor.cancerTypes_uuid].result"></span>
                     <span style="float:right" ng-if="fileEditable">

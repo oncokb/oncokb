@@ -39,15 +39,11 @@ angular.module('oncokbApp')
             }
             function loadGeneMeta(hugoSymbol) {
                 var geneMetaDefer = $q.defer();
-                if ($rootScope.geneMeta) {
+                $firebaseObject(firebase.database().ref('Meta/'+hugoSymbol)).$bindTo($rootScope, "geneMeta").then(function () {
                     geneMetaDefer.resolve('success');
-                } else {
-                    $firebaseObject(firebase.database().ref('Meta/'+hugoSymbol)).$bindTo($rootScope, "geneMeta").then(function () {
-                        geneMetaDefer.resolve('success');
-                    }, function (error) {
-                        geneMetaDefer.reject('Failed to bind meta firebase object');
-                    });
-                }                
+                }, function (error) {
+                    geneMetaDefer.reject('Failed to bind meta firebase object');
+                });               
                 return geneMetaDefer.promise;
             }
             function loadQueues() {

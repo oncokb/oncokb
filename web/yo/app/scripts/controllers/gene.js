@@ -17,7 +17,6 @@ angular.module('oncokbApp')
                 var myName = $rootScope.me.name.toLowerCase();
                 var genesOpened = _.without($scope.collaboratorsMeta[myName], $routeParams.geneName);
                 firebase.database().ref('Meta/collaborators/' + myName).set(genesOpened).then(function (result) {
-                    console.log('success');
                 }).catch(function (error) {
                     console.log(error);
                 });
@@ -1682,7 +1681,6 @@ angular.module('oncokbApp')
                 var dlg = dialogs.confirm('Confirmation', 'Are you sure you want to delete this entry?');
                 dlg.result.then(function() {
                     $scope.vusItems.$remove(variant).then(function() {
-                        console.log('removed');
                         $scope.vusUpdate();
                     });
                 }, function() {
@@ -2645,9 +2643,12 @@ angular.module('oncokbApp')
             };
             $scope.getData = function() {
             };
-            // $scope.$on('$destroy', function iVeBeenDismissed() {
-            //     console.log('good bye gene controller');
-            // });
+            $scope.$on('$destroy', function iVeBeenDismissed() {
+                $firebaseObject(firebase.database().ref('Meta/' + $routeParams.geneName)).$destroy(function() {
+                    console.log('destroyed firebase object', $routeParams.geneName);
+                });
+                firebase.database().ref('Meta/' + $routeParams.geneName).off();
+            });
             $scope.initialOpen = {};
             $scope.mutIndexByUUID = {};
             function populateBindings() {
