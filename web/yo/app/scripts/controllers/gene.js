@@ -43,7 +43,7 @@ angular.module('oncokbApp')
                             if (mutation.name_review && mutation.name_review.removed === true) {
                                 message += 'just got removed, we will reuse the old one';    
                                 delete mutation.name_review.removed;
-                                delete $scope.geneMeta.review[mutation.name_uuid];
+                                mainUtils.deleteUUID(mutation.name_uuid);
                             } else {
                                 message += 'has already been added in the mutation section!';
                             }
@@ -601,7 +601,7 @@ angular.module('oncokbApp')
                     if (_.keys($scope.geneMeta.review).length > 1) {
                         _.each(_.keys($scope.geneMeta.review), function(key) {
                             if (key !== 'currentReviewer') {
-                                delete $scope.geneMeta.review[key];
+                                mainUtils.deleteUUID(key);
                             }
                         });
                     }
@@ -805,7 +805,7 @@ angular.module('oncokbApp')
                 var updatedEvidences = evidencesAllUsers[userName].updatedEvidences;
                 var historyData = evidencesAllUsers[userName].historyData.update;
                 _.each(_.keys(updatedEvidences), function (uuid) {
-                    delete $scope.geneMeta.review[uuid];    
+                    mainUtils.deleteUUID(uuid);  
                 });
                 DatabaseConnector.updateEvidenceBatch(updatedEvidences, historyData, function (result) {
                     for (var i = 0; i < updatedEvidenceModels.length; i++) {
@@ -1164,7 +1164,7 @@ angular.module('oncokbApp')
                     if (item.reviewObj) {
                         delete item.reviewObj.lastReviewed;
                     }
-                    delete $scope.geneMeta.review[item.uuid];          
+                    mainUtils.deleteUUID(item.uuid);
                     ReviewResource.accepted.push(item.uuid);
                 });
                 if (uuid) {
@@ -1528,7 +1528,7 @@ angular.module('oncokbApp')
                 if (exists) {
                     if (removed) {
                         delete tempTumor.cancerTypes_review.removed;
-                        delete $scope.geneMeta.review[tempTumor.cancerTypes_uuid];
+                        mainUtils.deleteUUID(tempTumor.cancerTypes_uuid);
                         dialogs.notify('Warning', 'This tumor just got removed, we will reuse the old one.');
                     } else {
                         dialogs.notify('Warning', 'Tumor type exists.');
@@ -1913,7 +1913,7 @@ angular.module('oncokbApp')
                 }
                 _.each(data.uuids, function (uuid) {
                     if ($scope.geneMeta.review[uuid]) {
-                        delete $scope.geneMeta.review[uuid];
+                        mainUtils.deleteUUID(uuid);
                     }
                 }); 
             }
@@ -1921,7 +1921,7 @@ angular.module('oncokbApp')
                 if (uuids && _.isArray(uuids)) {
                     _.each(uuids, function (uuid) {
                         if (uuid) {
-                            delete $scope.geneMeta.review[uuid];
+                            mainUtils.deleteUUID(uuid);
                         }
                     });
                 }
@@ -1979,7 +1979,7 @@ angular.module('oncokbApp')
             }
             function cancelDeleteItem(reviewObj, uuid) {
                 delete reviewObj.removed;
-                delete $scope.geneMeta.review[uuid];
+                mainUtils.deleteUUID(uuid);
                 ReviewResource.removed = _.without(ReviewResource.removed, uuid);
             }
             function fetchResults(data) {
@@ -2733,7 +2733,7 @@ angular.module('oncokbApp')
                             if (!n) {
                                 if ($scope.status.fileEditable === true && $rootScope.fileEditable === false) {
                                     $rootScope.fileEditable = $scope.status.fileEditable;
-                                    $rootScope.fileEditable = $scope.status.fileEditable;
+                                    console.log('reset happening');
                                 }      
                             } else if (n !== $rootScope.me.name) {
                                 $rootScope.fileEditable = false;

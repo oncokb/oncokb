@@ -94,23 +94,19 @@ angular.module('oncokbApp')
         }
         function setFileeditable(hugoSymbols) {
             var defer = $q.defer();
-            if (_.isEmpty(editableData)) {
-                getAllUsers().then(function(users) {
-                    var name = me.name.toLowerCase();
-                    _.each(hugoSymbols, function(hugoSymbol) {
-                        if (users[name].admin === true || users[name].genes.indexOf(hugoSymbol) !== -1) {
-                            editableData[hugoSymbol] = true;
-                        } else {
-                            editableData[hugoSymbol] = false;
-                        }
-                    });
-                    defer.resolve(editableData);
-                }, function(error) {
-                    defer.reject(error);
+            getAllUsers().then(function(users) {
+                var name = me.name.toLowerCase();
+                _.each(hugoSymbols, function(hugoSymbol) {
+                    if (users[name].admin === true || users[name].genes.indexOf(hugoSymbol) !== -1) {
+                        editableData[hugoSymbol] = true;
+                    } else {
+                        editableData[hugoSymbol] = false;
+                    }
                 });
-            } else {
                 defer.resolve(editableData);
-            }
+            }, function(error) {
+                defer.reject(error);
+            });
             return defer.promise;
         }
         function isFileEditable(hugoSymbol) {
