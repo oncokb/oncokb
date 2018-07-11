@@ -39,6 +39,10 @@ public class MainUtils {
             MutationEffect.LOSS_OF_FUNCTION)
     );
 
+    public static boolean isEGFRTruncatingVariants(String alteration) {
+        return alteration == null ? false : (alteration.trim().matches("^v(II|III|IV(a|b|c)|V)?$"));
+    }
+
     public static Map<String, Object> GetRequestQueries(
         String entrezGeneId, String hugoSymbol, String alteration, String tumorType,
         String evidenceType, String consequence, String proteinStart, String proteinEnd,

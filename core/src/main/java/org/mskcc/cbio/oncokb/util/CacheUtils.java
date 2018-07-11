@@ -208,6 +208,10 @@ public class CacheUtils {
             System.out.println("Cache all hotspots: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
             current = MainUtils.getCurrentTimestamp();
 
+            NamingUtils.cacheAllAbbreviations();
+            System.out.println("Cache abbreviation ontology: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
+            current = MainUtils.getCurrentTimestamp();
+
             registerOtherServices();
             System.out.println("Register other services: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
             current = MainUtils.getCurrentTimestamp();
