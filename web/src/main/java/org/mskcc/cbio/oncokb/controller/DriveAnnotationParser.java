@@ -24,8 +24,6 @@ import java.util.regex.Pattern;
 
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
-;
-
 /**
  * @author jgao
  */
