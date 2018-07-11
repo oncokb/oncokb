@@ -2195,6 +2195,15 @@ angular.module('oncokbApp')
                     'border-left-style':'solid',
                     'border-left-color':'red'
                 };
+                var tempUUID = '';
+                _.each(dataList, function(item) {
+                    if (type === 'tumor') {
+                        tempUUID = item.cancerTypes_uuid;
+                    } else {
+                        tempUUID = item.name_uuid;
+                    }
+                    $scope.initialOpen[tempUUID] = false;
+                });
             };
             $scope.generatePDF = function () {
                 jspdf.create(mainUtils.getGeneData(this.gene, true, false));

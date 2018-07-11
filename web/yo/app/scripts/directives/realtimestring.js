@@ -63,19 +63,6 @@ angular.module('oncokbApp')
                                 if (scope.key !== 'short' && (scope.key !== 'name' || !$rootScope.moving)) {
                                     scope.setReviewRelatedContent(n, o, false);
                                 }
-                                if (scope.t === 'p' || scope.t === 'short') {
-                                    $timeout.cancel(scope.timeoutRef);
-                                    if (scope.fe === true && !scope.data[scope.key+'_editing']) {
-                                        scope.data[scope.key+'_editing'] = $rootScope.me.name;
-                                    }
-                                    if (scope.data[scope.key+'_editing'] !== $rootScope.me.name) {
-                                        scope.initializeFE();
-                                    }
-                                    scope.timeoutRef = $timeout(function() {
-                                        delete scope.data[scope.key+'_editing'];
-                                        scope.initializeFE();
-                                    }, 10*1000);
-                                }   
                             }  
                             if (n !== o && (scope.key === 'level' || scope.key === 'summary' && scope.mutation && scope.tumor)) {
                                 $timeout(function() {
@@ -83,6 +70,19 @@ angular.module('oncokbApp')
                                     scope.indicateTumorContent(scope.tumor);
                                 }, 500);                            
                             }
+                        }
+                        if (scope.t === 'p' || scope.t === 'short') {
+                            $timeout.cancel(scope.timeoutRef);
+                            if (scope.fe === true && !scope.data[scope.key+'_editing']) {
+                                scope.data[scope.key+'_editing'] = $rootScope.me.name;
+                            }
+                            if (scope.data && (scope.data[scope.key+'_editing'] !== $rootScope.me.name)) {
+                                scope.initializeFE();
+                            }
+                            scope.timeoutRef = $timeout(function() {
+                                delete scope.data[scope.key+'_editing'];
+                                scope.initializeFE();
+                            }, 10*1000);
                         }                       
                     });
                     $rootScope.$watch('fileEditable', function(n, o) {
