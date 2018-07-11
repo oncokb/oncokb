@@ -53,8 +53,7 @@ angular.module('oncokbApp')
                                 });
                             }
                             if (n !== o && (!$rootScope.reviewMode || ReviewResource.rejected.indexOf(scope.uuid) === -1)) {     
-                                $rootScope.geneMeta.lastModifiedAt = new Date().getTime();
-                                $rootScope.geneMeta.lastModifiedBy = $rootScope.me.name;
+                                mainUtils.updateLastModified();
                                 scope.data[scope.key] = OncoKB.utils.getString(scope.data[scope.key]);                  
                                 scope.pContent = scope.data[scope.key];
                                 if (scope.t === 'treatment-select' && scope.key === 'level') {
@@ -106,13 +105,13 @@ angular.module('oncokbApp')
                         }
                         scope.data[key + '_review'].updatedBy = $rootScope.me.name;
                         scope.data[key + '_review'].updateTime = new Date().getTime();
-                        if ((!$rootScope.geneMeta.review[uuid] || _.isUndefined(scope.data[key + '_review'].lastReviewed)) && !_.isUndefined(o)) {
+                        if ((!$rootScope.reviewMeta[uuid] || _.isUndefined(scope.data[key + '_review'].lastReviewed)) && !_.isUndefined(o)) {
                             scope.data[key + '_review'].lastReviewed = o;
-                            $rootScope.geneMeta.review[uuid] = true;                                       
+                            mainUtils.setUUIDInReview(uuid);                                    
                             ReviewResource.rollback = _.without(ReviewResource.rollback, uuid);
                         } else if (n === scope.data[key + '_review'].lastReviewed) {
                             delete scope.data[key + '_review'].lastReviewed;
-                            delete $rootScope.geneMeta.review[uuid];
+                            mainUtils.deleteUUID(uuid);
                             // if this kind of change happens inside review mode, we track current section in rollback status to remove the review panel since there is nothing to be approved
                             if ($rootScope.reviewMode) {
                                 ReviewResource.rollback.push(uuid);
@@ -167,7 +166,7 @@ angular.module('oncokbApp')
                     if ($scope.data.propagation_review) {
                         delete $scope.data.propagation_review.lastReviewed;
                     }
-                    delete $rootScope.geneMeta.review[$scope.data.propagation_uuid];
+                    mainUtils.deleteUUID($scope.data.propagation_uuid);
                     var _propagationOpts = [];
                     if ($scope.data[$scope.key] === '1' || $scope.data[$scope.key] === '2A') {
                         _propagationOpts = [

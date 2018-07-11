@@ -8,7 +8,7 @@
  * Service in the oncokbApp.
  */
 angular.module('oncokbApp')
-    .factory('mainUtils', function(OncoKB, _, $q, DatabaseConnector, $rootScope, ReviewResource, S, UUIDjs) {
+    .factory('mainUtils', function(OncoKB, _, $q, DatabaseConnector, $rootScope, ReviewResource, S, UUIDjs, $routeParams) {
         var isoforms = {};
         var oncogeneTSG = {};
 
@@ -227,19 +227,6 @@ angular.module('oncokbApp')
         function notifyDeveloper(subject, content) {
             sendEmail('dev.oncokb@gmail.com', subject, content);
         }
-        /*
-         *  Check if item needs to be reviewed or not
-         *  @param {collaborative string object} uuid The uuid object for the item needs to be checked
-         * */
-        function needReview(uuid) {
-            if (uuid) {
-                uuid = uuid.getText();
-                if ($rootScope.geneMetaData.get(uuid) && $rootScope.geneMetaData.get(uuid).get('review')) {
-                    return true;
-                }
-            }
-            return false;
-        }
         /**
          * Check whether user is developer
          * @param {string} userName The user name
@@ -349,12 +336,24 @@ angular.module('oncokbApp')
             }
         }
         function updateLastModified() {
-            $rootScope.geneMeta.lastModifiedBy = $rootScope.me.name;
-            $rootScope.geneMeta.lastModifiedAt = new Date().getTime();
+            firebase.database().ref('Meta/' + $routeParams.geneName).update({
+                lastModifiedBy: $rootScope.me.name,
+                lastModifiedAt: new Date().getTime()
+            });
         }
         function updateLastSavedToDB() {
-            $rootScope.geneMeta.lastSavedBy = $rootScope.me.name;
-            $rootScope.geneMeta.lastSavedAt = new Date().getTime();
+            firebase.database().ref('Meta/' + $routeParams.geneName).update({
+                lastSavedBy: $rootScope.me.name,
+                lastSavedAt: new Date().getTime()
+            });
+        }
+        function setUUIDInReview(uuid) {
+            var tempObj = {};
+            tempObj[uuid] = true;
+            firebase.database().ref('Meta/' + $routeParams.geneName + '/review').update(tempObj);
+        }
+        function deleteUUID(uuid) {
+            firebase.database().ref('Meta/' + $routeParams.geneName + '/review/' + uuid).remove();
         }
         function getVUSData(vus, excludeComments) {
             var vusData = vus;
@@ -484,7 +483,6 @@ angular.module('oncokbApp')
             getOncogeneTSG: getOncogeneTSG,
             getLastReviewedCancerTypesName: getLastReviewedCancerTypesName,
             sendEmail: sendEmail,
-            needReview: needReview,
             developerCheck: developerCheck,
             getOncoTreeMainTypes: getOncoTreeMainTypes,
             isExpiredCuration: isExpiredCuration,
@@ -498,6 +496,8 @@ angular.module('oncokbApp')
             getVUSData: getVUSData,
             getTextString: OncoKB.utils.getString,
             mostRecentItem: mostRecentItem,
-            getHistoryData: getHistoryData
+            getHistoryData: getHistoryData,
+            setUUIDInReview: setUUIDInReview,
+            deleteUUID: deleteUUID
         };
     });

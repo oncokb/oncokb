@@ -435,6 +435,7 @@ angular.module('oncokbApp')
             this.summary_uuid = getUUID();
             this.background = '';
             this.background_uuid = getUUID();
+            this.ccds_id = '';
             this.isoform_override = '';
             this.dmp_refseq_id = '';
             this.type = {

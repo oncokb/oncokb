@@ -188,7 +188,7 @@ angular.module('oncokbApp').run(
                 if (toIndex !== -1) {
                     //When the curator enter the gene page
                     hugoSymbol = $location.path().substring(toIndex+6);
-                    loadFiles.load(['geneMeta'], hugoSymbol).then(function() {
+                    loadFiles.load(['reviewMeta'], hugoSymbol).then(function() {
                     }, function(error) {
                         console.log('fail to load gene meta', error);
                     });

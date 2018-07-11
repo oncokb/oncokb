@@ -94,8 +94,7 @@ angular.module('oncokbApp')
         }
         function setFileeditable(hugoSymbols) {
             var defer = $q.defer();
-            defer.resolve(editableData);
-            if (_.isEmpty(editableData) || hugoSymbols.length === 1) {
+            if (_.isEmpty(editableData)) {
                 getAllUsers().then(function(users) {
                     var name = me.name.toLowerCase();
                     _.each(hugoSymbols, function(hugoSymbol) {
