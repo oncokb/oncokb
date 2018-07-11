@@ -1,8 +1,10 @@
 'use strict';
 
 angular.module('oncokbApp')
-    .controller('ToolsCtrl', ['$scope', 'dialogs', 'OncoKB', 'DatabaseConnector', '$timeout', '_', 'FindRegex', 'mainUtils', 'loadFiles', '$rootScope',
-        function($scope, dialogs, OncoKB, DatabaseConnector, $timeout, _, FindRegex, mainUtils, loadFiles, $rootScope) {
+    .controller('ToolsCtrl', ['$scope', 'dialogs', 'OncoKB', 'DatabaseConnector', '$timeout', '_', 'FindRegex',
+        'mainUtils', 'loadFiles', '$rootScope', 'DTColumnDefBuilder', 'DTOptionsBuilder',
+        function($scope, dialogs, OncoKB, DatabaseConnector, $timeout, _, FindRegex, mainUtils, loadFiles, $rootScope,
+                 DTColumnDefBuilder, DTOptionsBuilder) {
             $scope.init = function() {
                 $scope.loading = false;
                 loadFiles.load(['meta']).then(function() {
@@ -11,13 +13,20 @@ angular.module('oncokbApp')
                     console.log('fail to load meta file');
                 });
             };
-            $scope.dt = {};
-            $scope.dt.dtOptions = {
-                paging: false,
-                hasBootstrap: true,
-                scrollY: 500,
-                scrollCollapse: true
-            };
+            var sorting = [[2, 'desc'], [1, 'asc'], [0, 'asc']];
+
+            $scope.dtOptions = DTOptionsBuilder
+                .newOptions()
+                .withDOM('ifrtlp')
+                .withOption('order', sorting)
+                .withBootstrap();
+
+            $scope.dtColumns = [
+                DTColumnDefBuilder.newColumnDef(0),
+                DTColumnDefBuilder.newColumnDef(1),
+                DTColumnDefBuilder.newColumnDef(2).withOption('sType', 'date'),
+                DTColumnDefBuilder.newColumnDef(3)
+            ];
 
             $scope.disableHistoryButton = true;
             $scope.checkHistoryInputStatus = function() {
