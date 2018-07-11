@@ -37,14 +37,15 @@ angular.module('oncokbApp')
                 }                
                 return collaboratorsDefer.promise;
             }
-            function loadGeneMeta(hugoSymbol) {
-                var geneMetaDefer = $q.defer();
-                $firebaseObject(firebase.database().ref('Meta/'+hugoSymbol)).$bindTo($rootScope, "geneMeta").then(function () {
-                    geneMetaDefer.resolve('success');
-                }, function (error) {
-                    geneMetaDefer.reject('Failed to bind meta firebase object');
-                });               
-                return geneMetaDefer.promise;
+            function loadReviewMeta(hugoSymbol) {
+                var reviewMetaDefer = $q.defer();
+                firebase.database().ref('Meta/'+hugoSymbol+'/review').on('value', function(doc) {
+                    $rootScope.reviewMeta = doc.val();
+                    reviewMetaDefer.resolve('success');
+                }, function () {
+                    reviewMetaDefer.reject('Failed to bind meta firebase object');
+                });        
+                return reviewMetaDefer.promise;
             }
             function loadQueues() {
                 var queuesDefer = $q.defer();
@@ -110,8 +111,8 @@ angular.module('oncokbApp')
             if (types.indexOf('history') !== -1) {
                 apiCalls.push(loadHistory());
             }
-            if (types.indexOf('geneMeta') !== -1) {
-                apiCalls.push(loadGeneMeta(data));
+            if (types.indexOf('reviewMeta') !== -1) {
+                apiCalls.push(loadReviewMeta(data));
             }
             if (apiCalls.length > 0) {
                 $q.all(apiCalls)
