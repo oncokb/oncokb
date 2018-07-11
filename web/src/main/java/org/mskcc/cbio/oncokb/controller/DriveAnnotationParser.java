@@ -9,10 +9,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.mskcc.cbio.oncokb.bo.*;
-import org.mskcc.cbio.oncokb.dao.TreatmentDao;
 import org.mskcc.cbio.oncokb.model.*;
+import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
 import org.mskcc.cbio.oncokb.util.*;
-import org.mskcc.cbio.oncokb.model.oncotree.TumorType;;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -24,6 +23,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
+
+;
 
 /**
  * @author jgao
@@ -136,11 +137,8 @@ public class DriveAnnotationParser {
                     System.out.println(spaceStrByNestLevel(nestLevel) + "Gene: " + gene.getHugoSymbol());
                     // Get gene type info
                     JSONObject geneType = geneInfo.has("type") ? geneInfo.getJSONObject("type") : null;
-                    String oncogene = geneType.has("OCG") ? geneType.getString("OCG").trim() : null;
-                    String tsg = geneType.has("TSG") ? geneType.getString("TSG").trim() : null;
-
-                    // Get isoform info
-                    JSONArray transcripts = geneInfo.has("transcripts") ? geneInfo.getJSONArray("transcripts") : null;
+                    String oncogene = geneType.has("ocg") ? geneType.getString("ocg").trim() : null;
+                    String tsg = geneType.has("tsg") ? geneType.getString("tsg").trim() : null;
 
                     if (oncogene != null) {
                         if (oncogene.equals("Oncogene")) {
@@ -157,17 +155,14 @@ public class DriveAnnotationParser {
                         }
                     }
 
-                    if (transcripts != null && transcripts.length() > 0) {
-                        JSONObject transcript = transcripts.getJSONObject(0);
-                        String isoform = transcript.has("isoform_override") ? transcript.getString("isoform_override") : null;
-                        String refSeq = transcript.has("dmp_refseq_id") ? transcript.getString("dmp_refseq_id") : null;
+                    String isoform = geneInfo.has("isoform_override") ? geneInfo.getString("isoform_override") : null;
+                    String refSeq = geneInfo.has("dmp_refseq_id") ? geneInfo.getString("dmp_refseq_id") : null;
 
-                        if (isoform != null) {
-                            gene.setCuratedIsoform(isoform);
-                        }
-                        if (refSeq != null) {
-                            gene.setCuratedRefSeq(refSeq);
-                        }
+                    if (isoform != null) {
+                        gene.setCuratedIsoform(isoform);
+                    }
+                    if (refSeq != null) {
+                        gene.setCuratedRefSeq(refSeq);
                     }
                     geneBo.saveOrUpdate(gene);
 
@@ -281,15 +276,17 @@ public class DriveAnnotationParser {
 
             Set<Alteration> alterations = new HashSet<>();
 
-            Oncogenicity oncogenic = getOncogenicity(mutationObj);
-            String oncogenic_uuid = mutationObj.has("oncogenic_uuid") ? mutationObj.getString("oncogenic_uuid") : "";
-            Date oncogenic_lastEdit = mutationObj.has("oncogenic_review") ? getUpdateTime(mutationObj.get("oncogenic_review")) : null;
+            JSONObject mutationEffect = mutationObj.has("mutation_effect") ? mutationObj.getJSONObject("mutation_effect") : null;
+
+            Oncogenicity oncogenic = getOncogenicity(mutationEffect);
+            String oncogenic_uuid = mutationEffect.has("oncogenic_uuid") ? mutationEffect.getString("oncogenic_uuid") : "";
+            Date oncogenic_lastEdit = mutationEffect.has("oncogenic_review") ? getUpdateTime(mutationEffect.get("oncogenic_review")) : null;
 
             Set<Date> lastEditDatesEffect = new HashSet<>();
 
-            String effect = getMutationEffect(mutationObj);
-            addDateToSetFromObject(lastEditDatesEffect, mutationObj, "effect_review");
-            String effect_uuid = mutationObj.has("effect_uuid") ? mutationObj.getString("effect_uuid") : "";
+            String effect = mutationEffect.has("effect") ? mutationEffect.getString("effect") : null;
+            addDateToSetFromObject(lastEditDatesEffect, mutationEffect, "effect_review");
+            String effect_uuid = mutationEffect.has("effect_uuid") ? mutationEffect.getString("effect_uuid") : "";
             // If both mutation effect and oncogenicity both unknown, ignore variant.
             if (oncogenic != null && oncogenic.equals(Oncogenicity.INCONCLUSIVE)
                 && effect != null && effect.toLowerCase().equals("inconclusive")
@@ -316,13 +313,13 @@ public class DriveAnnotationParser {
             }
 
             // mutation effect
-            String effectDesc = mutationObj.has("description") ?
-                (mutationObj.getString("description").trim().isEmpty() ? null :
-                    mutationObj.getString("description").trim())
+            String effectDesc = mutationEffect.has("description") ?
+                (mutationEffect.getString("description").trim().isEmpty() ? null :
+                    mutationEffect.getString("description").trim())
                 : null;
-            addDateToSetFromObject(lastEditDatesEffect, mutationObj, "description_review");
-//            String additionalME = mutationObj.has("short") ?
-//                (mutationObj.getString("short").trim().isEmpty() ? null : mutationObj.getString("short").trim())
+            addDateToSetFromObject(lastEditDatesEffect, mutationEffect, "description_review");
+//            String additionalME = mutationEffect.has("short") ?
+//                (mutationEffect.getString("short").trim().isEmpty() ? null : mutationEffect.getString("short").trim())
 //                : null;
 
             if (effect != null || effectDesc != null) {
@@ -361,23 +358,14 @@ public class DriveAnnotationParser {
                     for (int j = 0; j < subTumorTypes.length(); j++) {
                         JSONObject subTT = subTumorTypes.getJSONObject(j);
                         parseCancer(gene, alterations, cancers.getJSONObject(i),
-                            subTT.has("cancerType") ? subTT.getString("cancerType") : null,
-                            (subTT.has("oncoTreeCode") && !subTT.getString("oncoTreeCode").equals("")) ? subTT.getString("oncoTreeCode") : null, nestLevel + 1);
+                            subTT.has("mainType") ? subTT.getString("mainType") : null,
+                            (subTT.has("code") && !subTT.getString("code").equals("")) ? subTT.getString("code") : null, nestLevel + 1);
                     }
                 }
             }
         } else {
             System.out.println(spaceStrByNestLevel(nestLevel) + "Mutation does not have name skip...");
         }
-    }
-
-    private static String getMutationEffect(JSONObject mutationObj) throws JSONException {
-        return mutationObj.has("effect") ?
-            (mutationObj.getJSONObject("effect").has("value") ?
-                (mutationObj.getJSONObject("effect").getString("value").trim().isEmpty() ? null :
-                    mutationObj.getJSONObject("effect").getString("value").trim())
-                : null)
-            : null;
     }
 
     protected static Oncogenicity getOncogenicityByString(String oncogenicStr) {
@@ -404,10 +392,10 @@ public class DriveAnnotationParser {
         return oncogenic;
     }
 
-    private static Oncogenicity getOncogenicity(JSONObject mutationObj) throws JSONException {
+    private static Oncogenicity getOncogenicity(JSONObject mutationEffect) throws JSONException {
         Oncogenicity oncogenic = null;
-        if (mutationObj.has("oncogenic") && !mutationObj.getString("oncogenic").isEmpty()) {
-            oncogenic = getOncogenicityByString(mutationObj.getString("oncogenic"));
+        if (mutationEffect.has("oncogenic") && !mutationEffect.getString("oncogenic").isEmpty()) {
+            oncogenic = getOncogenicityByString(mutationEffect.getString("oncogenic"));
         }
         return oncogenic;
     }
@@ -467,8 +455,8 @@ public class DriveAnnotationParser {
         return ret;
     }
 
-    private static void parseCancer(Gene gene, Set<Alteration> alterations, JSONObject cancerObj, String cancerType, String code, Integer nestLevel) throws JSONException {
-        if (cancerType == null || cancerType.equals("")) {
+    private static void parseCancer(Gene gene, Set<Alteration> alterations, JSONObject cancerObj, String mainType, String code, Integer nestLevel) throws JSONException {
+        if (mainType == null || mainType.equals("")) {
             return;
         }
 
@@ -477,15 +465,15 @@ public class DriveAnnotationParser {
         if (code != null && !code.equals("")) {
             oncoTreeType = TumorTypeUtils.getOncoTreeSubtypeByCode(code);
         } else {
-            oncoTreeType = TumorTypeUtils.getOncoTreeCancerType(cancerType);
+            oncoTreeType = TumorTypeUtils.getOncoTreeCancerType(mainType);
         }
 
         if (oncoTreeType == null) {
-            System.out.println(spaceStrByNestLevel(nestLevel) + "WARNING: No mapped TumorType for " + cancerType + " " + code);
+            System.out.println(spaceStrByNestLevel(nestLevel) + "WARNING: No mapped TumorType for " + mainType + " " + code);
             return;
         }
 
-        System.out.println(spaceStrByNestLevel(nestLevel) + "Cancer type: " + cancerType);
+        System.out.println(spaceStrByNestLevel(nestLevel) + "Cancer type: " + mainType);
         System.out.println(spaceStrByNestLevel(nestLevel) + "Subtype code: " + code);
 
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
@@ -527,30 +515,27 @@ public class DriveAnnotationParser {
             cancerObj.has("diagnostic_uuid") ? cancerObj.getString("diagnostic_uuid") : "",
             EvidenceType.DIAGNOSTIC_IMPLICATION, nestLevel + 1);
 
-        JSONArray implications = cancerObj.getJSONArray("TI");
+        JSONArray implications = cancerObj.getJSONArray("TIs");
 
         for (int i = 0; i < implications.length(); i++) {
             JSONObject implication = implications.getJSONObject(i);
             if ((implication.has("description") && !implication.getString("description").trim().isEmpty()) || (implication.has("treatments") && implication.getJSONArray("treatments").length() > 0)) {
                 EvidenceType evidenceType = EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY;
                 String type = "";
-                if (implication.has("status") && implication.has("type")) {
-                    if (implication.getString("status").equals("1")) {
-                        if (implication.getString("type").equals("1")) {
-                            evidenceType = EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY;
-                            type = "Sensitive";
-                        } else if (implication.getString("type").equals("0")) {
-                            evidenceType = EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE;
-                            type = "Resistant";
-                        }
-                    } else if (implication.getString("status").equals("0")) {
-                        if (implication.getString("type").equals("1")) {
-                            evidenceType = EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY;
-                            type = "Sensitive";
-                        } else if (implication.getString("type").equals("0")) {
-                            evidenceType = EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE;
-                            type = "Resistant";
-                        }
+                if (implication.has("type")) {
+                    if (implication.getString("type").equals("SS")) {
+                        evidenceType = EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY;
+                        type = "Sensitive";
+                    } else if (implication.getString("type").equals("SR")) {
+                        evidenceType = EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE;
+                        type = "Resistant";
+                    }
+                    if (implication.getString("type").equals("IS")) {
+                        evidenceType = EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY;
+                        type = "Sensitive";
+                    } else if (implication.getString("type").equals("IR")) {
+                        evidenceType = EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE;
+                        type = "Resistant";
                     }
                     parseTherapeuticImplications(gene, alterations, oncoTreeType, implication, evidenceType, type, nestLevel + 1);
                 }
@@ -591,7 +576,7 @@ public class DriveAnnotationParser {
 
         // specific evidence
         DrugBo drugBo = ApplicationContextSingleton.getDrugBo();
-        JSONArray drugsArray = implicationObj.getJSONArray("treatments");
+        JSONArray drugsArray = implicationObj.has("treatments") ? implicationObj.getJSONArray("treatments") : new JSONArray();
         int priorityCount = 1;
         for (int i = 0; i < drugsArray.length(); i++) {
             JSONObject drugObj = drugsArray.getJSONObject(i);
