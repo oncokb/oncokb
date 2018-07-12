@@ -44,45 +44,47 @@ angular.module('oncokbApp')
                     scope.timeoutRef = '';
                     scope.pContent = '';
                     scope.$watch('data[key]', function (n, o) {
-                        if (!(scope.data && scope.data[scope.key+'_editing'])) {
-                            if (scope.t === 'treatment-select' && scope.key === 'level') {
-                                scope.$watch('data.propagation', function(newPro, oldPro) {
-                                    if (newPro !== oldPro && (!$rootScope.reviewMode || ReviewResource.rejected.indexOf(scope.data.propagation_uuid) === -1)) {
-                                        scope.setReviewRelatedContent(newPro, oldPro, true);
-                                    }
-                                });
-                            }
-                            if (n !== o && (!$rootScope.reviewMode || ReviewResource.rejected.indexOf(scope.uuid) === -1)) {     
-                                mainUtils.updateLastModified();
-                                scope.data[scope.key] = OncoKB.utils.getString(scope.data[scope.key]);                  
-                                scope.pContent = scope.data[scope.key];
+                        if (n !== o && !_.isUndefined(n)) {
+                            if (!(scope.data && scope.data[scope.key+'_editing'])) {
                                 if (scope.t === 'treatment-select' && scope.key === 'level') {
-                                    scope.changePropagation();
+                                    scope.$watch('data.propagation', function(newPro, oldPro) {
+                                        if (newPro !== oldPro && (!$rootScope.reviewMode || ReviewResource.rejected.indexOf(scope.data.propagation_uuid) === -1)) {
+                                            scope.setReviewRelatedContent(newPro, oldPro, true);
+                                        }
+                                    });
                                 }
-                                if (scope.key !== 'short' && !(scope.key === 'name' && $rootScope.movingSection)) {
-                                    scope.setReviewRelatedContent(n, o, false);
+                                if ((!$rootScope.reviewMode || ReviewResource.rejected.indexOf(scope.uuid) === -1)) {     
+                                    mainUtils.updateLastModified();
+                                    scope.data[scope.key] = OncoKB.utils.getString(scope.data[scope.key]);                  
+                                    scope.pContent = scope.data[scope.key];
+                                    if (scope.t === 'treatment-select' && scope.key === 'level') {
+                                        scope.changePropagation();
+                                    }
+                                    if (scope.key !== 'short' && !(scope.key === 'name' && $rootScope.movingSection)) {
+                                        scope.setReviewRelatedContent(n, o, false);
+                                    }
+                                }  
+                                if (n !== o && (scope.key === 'level' || scope.key === 'summary' && scope.mutation && scope.tumor)) {
+                                    $timeout(function() {
+                                        scope.indicateMutationContent(scope.mutation);
+                                        scope.indicateTumorContent(scope.tumor);
+                                    }, 500);                            
                                 }
-                            }  
-                            if (n !== o && (scope.key === 'level' || scope.key === 'summary' && scope.mutation && scope.tumor)) {
-                                $timeout(function() {
-                                    scope.indicateMutationContent(scope.mutation);
-                                    scope.indicateTumorContent(scope.tumor);
-                                }, 500);                            
                             }
-                        }
-                        if (scope.t === 'p' || scope.t === 'short') {
-                            $timeout.cancel(scope.timeoutRef);
-                            if (scope.fe === true && !scope.data[scope.key+'_editing']) {
-                                scope.data[scope.key+'_editing'] = $rootScope.me.name;
+                            if (scope.t === 'p' || scope.t === 'short') {
+                                $timeout.cancel(scope.timeoutRef);
+                                if (scope.fe === true && !scope.data[scope.key+'_editing']) {
+                                    scope.data[scope.key+'_editing'] = $rootScope.me.name;
+                                }
+                                if (scope.data && (scope.data[scope.key+'_editing'] !== $rootScope.me.name)) {
+                                    scope.initializeFE();
+                                }
+                                scope.timeoutRef = $timeout(function() {
+                                    delete scope.data[scope.key+'_editing'];
+                                    scope.initializeFE();
+                                }, 10*1000);
                             }
-                            if (scope.data && (scope.data[scope.key+'_editing'] !== $rootScope.me.name)) {
-                                scope.initializeFE();
-                            }
-                            scope.timeoutRef = $timeout(function() {
-                                delete scope.data[scope.key+'_editing'];
-                                scope.initializeFE();
-                            }, 10*1000);
-                        }                       
+                        }                                               
                     });
                     $rootScope.$watch('fileEditable', function(n, o) {
                         if (n !== o) {
