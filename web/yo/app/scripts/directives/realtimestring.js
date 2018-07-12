@@ -59,7 +59,7 @@ angular.module('oncokbApp')
                                 if (scope.t === 'treatment-select' && scope.key === 'level') {
                                     scope.changePropagation();
                                 }
-                                if (scope.key !== 'short' && (scope.key !== 'name' || !$rootScope.moving)) {
+                                if (scope.key !== 'short' && !(scope.key === 'name' && $rootScope.movingSection)) {
                                     scope.setReviewRelatedContent(n, o, false);
                                 }
                             }  
@@ -142,7 +142,7 @@ angular.module('oncokbApp')
                     }
                 };
                 $scope.setTrackSignal = function() {
-                    $rootScope.moving = false;
+                    mainUtils.updateMovingFlag(false);
                 };
                 $scope.initializeFE = function() {
                     if ($scope.data[$scope.key+'_editing']) {

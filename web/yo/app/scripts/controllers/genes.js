@@ -56,7 +56,8 @@ angular.module('oncokbApp')
                                 review: 'No',
                                 editable: editableData[hugoSymbol]
                             };
-                            if ($rootScope.metaData[hugoSymbol].review) {
+                            // currentReviewer is the key it will always have regardless of having uuid tracked or not.
+                            if ($rootScope.metaData[hugoSymbol].review && _.keys($rootScope.metaData[hugoSymbol].review).length > 1) {
                                 $scope.metaFlags[hugoSymbol].review = 'Yes';
                             }
                             if ($rootScope.firebaseQueues[hugoSymbol]) {

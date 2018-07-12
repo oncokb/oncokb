@@ -347,6 +347,11 @@ angular.module('oncokbApp')
                 lastSavedAt: new Date().getTime()
             });
         }
+        function updateMovingFlag(flag) {
+            firebase.database().ref('Meta/' + $routeParams.geneName).update({
+                movingSection: flag
+            });
+        }
         function setUUIDInReview(uuid) {
             var tempObj = {};
             tempObj[uuid] = true;
@@ -498,6 +503,7 @@ angular.module('oncokbApp')
             mostRecentItem: mostRecentItem,
             getHistoryData: getHistoryData,
             setUUIDInReview: setUUIDInReview,
-            deleteUUID: deleteUUID
+            deleteUUID: deleteUUID,
+            updateMovingFlag: updateMovingFlag
         };
     });

@@ -423,7 +423,7 @@ angular.module('oncokbApp')
             function prepareReviewItems() {
                 $scope.sectionUUIDs = []; // sectionUUIDs is used to store uuid per section.
                 $scope.status.noChanges = false;
-                $scope.status.hasReviewContent = true;
+                $scope.status.hasReviewContent = false;
                 $scope.status.mutationChanged = false;
                 userNames = [];
                 var geneEviKeys = ['summary', 'type', 'background'];
@@ -2118,6 +2118,7 @@ angular.module('oncokbApp')
                 }
             };
             $scope.startMoving = function(sectionType, path, uuid, index) {
+                mainUtils.updateMovingFlag(true);
                 $scope.movingInfo.preMoving = !$scope.movingInfo.preMoving;
                 if ($scope.movingInfo.uuid) {
                     delete $scope.movingInfo[$scope.movingInfo.uuid];
@@ -2673,6 +2674,12 @@ angular.module('oncokbApp')
                 }, function (error) {
                     deferred2.reject('Failed to bind history by gene');
                 });
+                var deferred3 = $q.defer();
+                loadFiles.load(['reviewMeta', 'movingSection'], $routeParams.geneName).then(function() {
+                    deferred3.resolve('success');
+                }, function(error) {
+                    deferred3.reject(error);
+                });
                 $scope.vusItems = $firebaseArray(firebase.database().ref('VUS/' + $routeParams.geneName));
                 var deferred4 = $q.defer();
                 $scope.mutations = $firebaseArray(firebase.database().ref('Genes/' + $routeParams.geneName + '/mutations'));
@@ -2706,7 +2713,7 @@ angular.module('oncokbApp')
                 }, function (error) {
                     deferred6.reject('Failed to bind meta by gene');
                 });
-                var bindingAPI = [deferred1.promise, deferred2.promise, deferred4.promise, deferred5.promise, deferred6.promise];
+                var bindingAPI = [deferred1.promise, deferred2.promise, deferred3.promise, deferred4.promise, deferred5.promise, deferred6.promise];
                 $q.all(bindingAPI)
                     .then(function (result) {
                         user.setFileeditable([$routeParams.geneName]).then(function (result) {
