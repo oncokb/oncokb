@@ -477,14 +477,13 @@ public class EvidenceController {
         for (Evidence evidence : evidences) {
             genes.add(evidence.getGene());
         }
-        for (Gene gene : genes) {
-            CacheUtils.updateGene(gene.getEntrezGeneId(), true);
-        }
+        updateCacheBasedOnGenes(genes);
     }
 
     private void updateCacheBasedOnGenes(Set<Gene> genes) {
         // The sample solution for now is updating all gene related evidences.
         for (Gene gene : genes) {
+            ApplicationContextSingleton.getAlterationBo().deleteMutationsWithoutEvidenceAssociatedByGene(gene);
             CacheUtils.updateGene(gene.getEntrezGeneId(), true);
         }
     }
