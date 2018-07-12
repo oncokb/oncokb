@@ -321,11 +321,11 @@ angular.module('oncokbApp').factory('OncoTree', ['$http', 'OncoKB', '_', functio
     }
 
     function getMainTypes() {
-        return $http.get(OncoKB.config.tempPrivateApiLink + 'utils/oncotree/mainTypes');
+        return $http.get(OncoKB.config.privateApiLink + 'utils/oncotree/mainTypes');
     }
 
     function getSubTypes() {
-        return $http.get(OncoKB.config.tempPrivateApiLink + 'utils/oncotree/subtypes');
+        return $http.get(OncoKB.config.privateApiLink + 'utils/oncotree/subtypes');
     }
 
     return {
