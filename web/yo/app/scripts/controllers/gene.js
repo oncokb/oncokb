@@ -78,6 +78,7 @@ angular.module('oncokbApp')
                     } else {
                         $scope.gene.mutations.push(mutation);
                     }
+                    mainUtils.setUUIDInReview(mutation.name_uuid);  
                 }
             };
             /**
@@ -503,9 +504,9 @@ angular.module('oncokbApp')
                         if (tumorSectionChanged) {
                             mutationChanged = true;
                             userNames.push(tumor.cancerTypes_review.updatedBy);
-                            tempArr = collectUUIDs('tumor', tumor, [], false, false, true);
+                            tempArr = collectUUIDs('tumor', tumor, [], 'sectionOnly');
                             $scope.sectionUUIDs = _.union($scope.sectionUUIDs, tempArr);
-                            tempArr = collectUUIDs('tumor', tumor, [], true, false, false);
+                            tempArr = collectUUIDs('tumor', tumor, [], 'insideOnly');
                             ReviewResource.inside = _.union(ReviewResource.inside, tempArr);
                             return true;
                         }
@@ -546,9 +547,9 @@ angular.module('oncokbApp')
                                     }
                                 }
                                 if (treatmentSectionChanged) {
-                                    tempArr = collectUUIDs('treatment', treatment, [], false, false, true);
+                                    tempArr = collectUUIDs('treatment', treatment, [], 'sectionOnly');
                                     $scope.sectionUUIDs = _.union($scope.sectionUUIDs, tempArr);
-                                    tempArr = collectUUIDs('treatment', treatment, [], true, false, false);
+                                    tempArr = collectUUIDs('treatment', treatment, [], 'insideOnly');
                                     ReviewResource.inside = _.union(ReviewResource.inside, tempArr);
                                     return true;
                                 }
@@ -1606,6 +1607,7 @@ angular.module('oncokbApp')
                         oncoTreeTumorTypes: angular.copy($scope.oncoTree.allTumorTypes)
                     }];
                     $scope.indicateMutationContent($scope.gene.mutations[index]);
+                    mainUtils.setUUIDInReview(tumor.cancerTypes_uuid);  
                 }
             };
 
@@ -1652,6 +1654,7 @@ angular.module('oncokbApp')
                     $scope.gene.mutations[indices[0]].tumors[indices[1]].TIs[indices[2]].treatments.push(treatment);
                     $scope.indicateTumorContent($scope.gene.mutations[indices[0]].tumors[indices[1]]);
                 }
+                mainUtils.setUUIDInReview(treatment.name_uuid);
             };
 
             $scope.onFocus = function (e) {
@@ -1794,6 +1797,7 @@ angular.module('oncokbApp')
                             break;
                         default:
                             uuids.push(obj.name_uuid);
+                            uuids.push(obj.mutation_effect_uuid);
                             uuids.push(obj.mutation_effect.oncogenic_uuid);
                             uuids.push(obj.mutation_effect.effect_uuid);
                             uuids.push(obj.mutation_effect.description_uuid);
