@@ -500,18 +500,7 @@ angular.module('oncokbApp')
                             $scope.data.mainTypes = _.map(mainTypesReturned, function(item) {
                                 return item.name;
                             });
-                            if (_.isArray(tumorTypesReturned)) {
-                                if (tumorTypesReturned.length === mainTypesReturned.length) {
-                                    var tumorTypes = {};
-                                    var allTumorTypes = [];
-                                    _.each(mainTypesReturned, function(mainType, i) {
-                                        tumorTypes[mainType.name] = tumorTypesReturned[i];
-                                    });
-                                    $scope.data.subTypes = tumorTypes;
-                                } else {
-                                    console.error('The number of returned tumor types is not matched with number of main types.');
-                                }
-                            }
+                            $scope.data.subTypes = tumorTypesReturned;
                         }
                     }, function(error) {
                     });

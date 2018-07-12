@@ -22,9 +22,10 @@ import static org.junit.Assert.assertEquals;
  */
 @RunWith(Parameterized.class)
 public class StructuralVariantParameterizedTest {
-    private static String EXAMPLES_PATH = "src/test/resources/test_structural_variants.txt";
+    private static String EXAMPLES_PATH = "src/test/resources/test_structural_variants.tsv";
 
     private String fusionPair;
+    private String alteration;
     private String svClass;
     private String tumorType;
     private Boolean isFunctionalFusion;
@@ -33,8 +34,9 @@ public class StructuralVariantParameterizedTest {
     private String variantSummary;
     private String tumorTypeSummary;
 
-    public StructuralVariantParameterizedTest(String fusionPair, String svClass, String tumorType, String isFunctionalFusion, String oncogenicity, String geneSummary, String variantSummary, String tumorTypeSummary) {
+    public StructuralVariantParameterizedTest(String fusionPair, String alteration, String svClass, String tumorType, String isFunctionalFusion, String oncogenicity, String geneSummary, String variantSummary, String tumorTypeSummary) {
         this.fusionPair = fusionPair;
+        this.alteration = alteration;
         this.svClass = svClass;
         this.tumorType = tumorType;
         this.isFunctionalFusion = Boolean.valueOf(isFunctionalFusion);
@@ -46,10 +48,13 @@ public class StructuralVariantParameterizedTest {
 
     @Test
     public void testSummary() throws Exception {
+        String _query = fusionPair + " " + alteration + " " + svClass + " " + tumorType + " " + isFunctionalFusion;
+
         // Testing functional fusion
         if (isFunctionalFusion) {
             Query query1 = new Query();
             query1.setAlterationType("structural_variant");
+            query1.setAlteration(alteration);
             query1.setConsequence("fusion");
             query1.setSvType(StructuralVariantType.valueOf(svClass));
             query1.setHugoSymbol(fusionPair);
@@ -57,30 +62,30 @@ public class StructuralVariantParameterizedTest {
 
             Query query2 = new Query();
             query2.setHugoSymbol(fusionPair);
+            query2.setAlteration(alteration);
             query2.setAlterationType("fusion");
             query2.setTumorType(tumorType);
+            query2.setSvType(StructuralVariantType.valueOf(svClass));
 
             // if it is functional fusion. The result should be the same as passing as fusion
             IndicatorQueryResp resp1 = IndicatorUtils.processQuery(query1, null, null, null, true, null);
             IndicatorQueryResp resp2 = IndicatorUtils.processQuery(query2, null, null, null, false, null);
 
-            assertEquals("Oncogenicities are not matched.", resp1.getOncogenic(), resp2.getOncogenic());
-            assertEquals("Highest sensitive levels are not matched.", resp1.getHighestSensitiveLevel(), resp2.getHighestSensitiveLevel());
-            assertEquals("Highest sensitive levels are not matched.", resp1.getHighestSensitiveLevel(), resp2.getHighestSensitiveLevel());
-            assertEquals("Highest resistance levels are not matched.", resp1.getHighestResistanceLevel(), resp2.getHighestResistanceLevel());
+            assertEquals("Oncogenicities are not matched. Query: " + _query, resp1.getOncogenic(), resp2.getOncogenic());
+            assertEquals("Highest sensitive levels are not matched. Query: " + _query, resp1.getHighestSensitiveLevel(), resp2.getHighestSensitiveLevel());
+            assertEquals("Highest sensitive levels are not matched. Query: " + _query, resp1.getHighestSensitiveLevel(), resp2.getHighestSensitiveLevel());
+            assertEquals("Highest resistance levels are not matched. Query: " + _query, resp1.getHighestResistanceLevel(), resp2.getHighestResistanceLevel());
         }
 
         Query query = new Query();
         query.setAlterationType("structural_variant");
+        query.setAlteration(alteration);
         query.setSvType(StructuralVariantType.valueOf(svClass));
         query.setHugoSymbol(fusionPair);
         query.setTumorType(tumorType);
         if (isFunctionalFusion) {
             query.setConsequence("fusion");
         }
-
-        String _query = fusionPair + " " + svClass + " " + tumorType + " " + isFunctionalFusion;
-
         IndicatorQueryResp resp = IndicatorUtils.processQuery(query, null, null, null, true, null);
 
         assertEquals("Oncogenicities are not matched. Query: " + _query, oncogenicity, resp.getOncogenic());
@@ -115,14 +120,15 @@ public class StructuralVariantParameterizedTest {
                         throw new IllegalArgumentException("Test case should have at least 8 columns. Current case: " + line);
                     }
                     String fusionPair = parts[0];
-                    String svClass = parts[1];
-                    String tumorType = parts[2];
-                    String isFunctionalFusion = parts[3];
-                    String oncogenicity = parts[4];
-                    String geneSummary = parts[5];
-                    String variantSummary = parts[6];
-                    String tumorTypeSummary = parts[7];
-                    String[] query = {fusionPair, svClass, tumorType, isFunctionalFusion, oncogenicity, geneSummary, variantSummary, tumorTypeSummary};
+                    String alteration = parts[1];
+                    String svClass = parts[2];
+                    String tumorType = parts[3];
+                    String isFunctionalFusion = parts[4];
+                    String oncogenicity = parts[5];
+                    String geneSummary = parts[6];
+                    String variantSummary = parts[7];
+                    String tumorTypeSummary = parts[8];
+                    String[] query = {fusionPair, alteration, svClass, tumorType, isFunctionalFusion, oncogenicity, geneSummary, variantSummary, tumorTypeSummary};
                     queries.add(query);
                     count++;
                 } catch (Exception e) {

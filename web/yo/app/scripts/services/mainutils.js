@@ -392,45 +392,38 @@ angular.module('oncokbApp')
          * **/
         function getOncoTreeMainTypes() {
             var deferred = $q.defer();
-            DatabaseConnector.getOncoTreeMainTypes()
+            DatabaseConnector.getAllOncoTreeMainTypes()
                 .then(function(result) {
-                    if (result.data) {
-                        result.data.push({
-                            id: -1,
-                            name: 'All Liquid Tumors'
-                        });
-                        result.data.push({
-                            id: -2,
-                            name: 'All Solid Tumors'
-                        });
-                        result.data.push({
-                            id: -3,
-                            name: 'All Tumors'
-                        });
-                        result.data.push({
-                            id: -4,
-                            name: 'Germline Disposition'
-                        });
-                        result.data.push({
-                            id: -5,
-                            name: 'All Pediatric Tumors'
-                        });
-                        result.data.push({
-                            id: -6,
-                            name: 'Other Tumor Types'
-                        });
-                        var mainTypeList = _.map(result.data, function(mainType) {
-                            return mainType.name;
-                        });
-                        DatabaseConnector.getOncoTreeTumorTypesByMainTypes(mainTypeList).then(function(tumorTypesResult) {
-                            if (result.data.length !== tumorTypesResult.data.length) {
-                                deferred.reject('The number of returned tumor types is not matched with number of main types.');
-                            } else {
-                                deferred.resolve({
-                                    mainTypes:result.data,
-                                    tumorTypes: tumorTypesResult.data
-                                });
-                            }
+                    if (result) {
+                        result = result.concat(['All Liquid Tumors', 'All Solid Tumors', 'All Tumors', 'Germline Disposition', 'All Pediatric Tumors', 'Other Tumor Types']);
+                        DatabaseConnector.getAllOncoTreeSubtypes().then(function(allSubtypes) {
+                            var mainTypesResult = _.map(result, function(item, index) {
+                                return {
+                                    id: index,
+                                    name: item
+                                };
+                            });
+                            mainTypesResult.push({
+                                id: result.length,
+                                name: 'NA'
+                            });
+                            var tumorTypesResult = {};
+                            _.each(allSubtypes, function(subtype) {
+                                var mainTypeName = subtype.mainType ? subtype.mainType.name : 'NA';
+                                if (!tumorTypesResult.hasOwnProperty(mainTypeName)) {
+                                    tumorTypesResult[mainTypeName] = [];
+                                }
+                                if (mainTypeName === 'NA') {
+                                    subtype.mainType = {
+                                        name: mainTypeName
+                                    };
+                                }
+                                tumorTypesResult[mainTypeName].push(subtype);
+                            });
+                            deferred.resolve({
+                                mainTypes: mainTypesResult,
+                                tumorTypes: tumorTypesResult
+                            });
                         }, function() {
                             // TODO: if OncoTree server returns error.
                         });

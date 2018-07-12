@@ -84,12 +84,16 @@ angular.module('oncokbApp')
                     }
                     $scope.mutationContent[uuid] = {
                         TT: 0,
-                        levels: []
+                        levels: [],
+                        TTS: 0
                     };
                     for (var j = 0; j < mutation.tumors.length; j++) {
                         var tumor = mutation.tumors.get(j);
                         if (!tumor.name_review.get('removed')) {
                             $scope.mutationContent[uuid].TT++;
+                            if (tumor.summary.text) {
+                                $scope.mutationContent[uuid].TTS++;
+                            }
                             for (var m = 0; m < tumor.TI.length; m++) {
                                 var ti = tumor.TI.get(m);
                                 for (var n = 0; n < ti.treatments.length; n++) {
@@ -106,6 +110,9 @@ angular.module('oncokbApp')
                             return sortedLevel.indexOf(a) - sortedLevel.indexOf(b);
                         });
                         $scope.mutationContent[uuid].result = $scope.mutationContent[uuid].TT + 'x TT';
+                        if ($scope.mutationContent[uuid].TTS > 0) {
+                            $scope.mutationContent[uuid].result += ', ' + $scope.mutationContent[uuid].TTS + 'x TTS';
+                        }
                         if ($scope.mutationContent[uuid].levels.length > 0) {
                             $scope.mutationContent[uuid].levels = _.map(_.uniq($scope.mutationContent[uuid].levels), function(level) {
                                 return '<span style="color: ' + $rootScope.meta.colorsByLevel['Level_' + level] + '">' + level + '</span>';
@@ -1033,7 +1040,7 @@ angular.module('oncokbApp')
                         data.knownEffect = mutation.oncogenic.getText();
                         dataUUID = mutation.oncogenic_uuid.getText();
                         data.lastEdit = mutation.oncogenic_review.get('updateTime');
-                        historyData.location = mutation.name.getText() + ', Mutation Effect';
+                        historyData.location = mutation.name.getText() + ', Oncogenicity';
                         reviewObj = mutation.oncogenic_review;
                     }
                     // tempFlag is set to true when MUTATION_EFFECT evidence exists which means either mutation effect or mutation description got changed.
@@ -1051,7 +1058,11 @@ angular.module('oncokbApp')
                         extraData.lastEdit = tempReviewObjArr[tempRecentIndex].get('updateTime');
                         extraData.description = mutation.description.text;
                         extraData.evidenceType = 'MUTATION_EFFECT';
-                        historyData.location = mutation.name.getText() + ', Mutation Effect';
+                        if (historyData.location) {
+                            historyData.location += ', Mutation Effect';
+                        } else {
+                            historyData.location = mutation.name.getText() + ', Mutation Effect';
+                        }
                         if (!reviewObj) {
                             if (mutation.effect_review.has('updatedBy')) {
                                 reviewObj = mutation.effect_review;
@@ -2394,7 +2405,7 @@ angular.module('oncokbApp')
                         return true;
                     }
                 default:
-                    return false;    
+                    return false;
                 }
             }
             $scope.move = function (angleType, event, type, mutation, tumor, ti, treatment) {
@@ -3144,23 +3155,20 @@ angular.module('oncokbApp')
                         tumorTypesReturned = result.tumorTypes;
                     if (mainTypesReturned) {
                         $scope.oncoTree.mainTypes = mainTypesReturned;
-                        if (_.isArray(tumorTypesReturned)) {
-                            var tumorTypes = {};
-                            var allTumorTypes = [];
-                            _.each(mainTypesReturned, function(mainType, i) {
-                                tumorTypes[mainType.name] = tumorTypesReturned[i];
-                                allTumorTypes = _.union(allTumorTypes, tumorTypesReturned[i]);
-                            });
-                            $scope.oncoTree.tumorTypes = tumorTypes;
-                            $scope.oncoTree.allTumorTypes = allTumorTypes;
-                            $scope.meta = {
-                                newCancerTypes: [{
-                                    mainType: '',
-                                    subtype: '',
-                                    oncoTreeTumorTypes: allTumorTypes
-                                }]
-                            };
-                        }
+                        var tumorTypes = {};
+                        var allTumorTypes = [];
+                        _.each(tumorTypesReturned, function(subtypes) {
+                            allTumorTypes = _.union(allTumorTypes, subtypes);
+                        });
+                        $scope.oncoTree.tumorTypes = tumorTypesReturned;
+                        $scope.oncoTree.allTumorTypes = allTumorTypes;
+                        $scope.meta = {
+                            newCancerTypes: [{
+                                mainType: '',
+                                subtype: '',
+                                oncoTreeTumorTypes: allTumorTypes
+                            }]
+                        };
                     }
                 }, function(error) {
                 });
@@ -3409,10 +3417,10 @@ angular.module('oncokbApp')
                     } else {
                         DatabaseConnector.getOncoTreeTumorTypesByMainType(mainType.name)
                             .then(function(result) {
-                                if (result.data) {
-                                    $scope.oncoTree.tumorTypes[mainType.name] = result.data;
+                                if (result) {
+                                    $scope.oncoTree.tumorTypes[mainType.name] = result;
                                     if (_.isFunction(callback)) {
-                                        callback(index, result.data, 'mainType');
+                                        callback(index, result, 'mainType');
                                     }
                                 }
                             }, function() {
@@ -3469,9 +3477,9 @@ angular.module('oncokbApp')
                             locks++;
                             DatabaseConnector.getOncoTreeTumorTypesByMainType(mainType.name)
                                 .then(function(result) {
-                                    if (result.data) {
-                                        $scope.oncoTree.tumorTypes[mainType.name] = result.data;
-                                        _tumorTypes = _.union(_tumorTypes, result.data);
+                                    if (result) {
+                                        $scope.oncoTree.tumorTypes[mainType.name] = result;
+                                        _tumorTypes = _.union(_tumorTypes, result);
                                     }
                                     locks--;
                                 }, function() {
@@ -3726,7 +3734,7 @@ angular.module('oncokbApp')
             if (mainType && mainType.name) {
                 list = $scope.meta.oncoTree.tumorTypes[mainType.name];
             }
-            if (!mainType && subtype) {
+            if (!mainType && subtype && subtype.mainType) {
                 _mainType = findMainType(subtype.mainType.name);
             }
             callback(index, _mainType, subtype, list);

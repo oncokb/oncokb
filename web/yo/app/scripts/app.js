@@ -41,8 +41,6 @@ OncoKB.config = {
     users: '', // The google spreadsheet ID which used to manage the user info. Please share this file to the service email address with view permission.
     apiLink: 'legacy-api/',
     curationLink: 'legacy-api/',
-    oncoTreeLink: 'http://oncotree.mskcc.org/oncotree/api/',
-    oncoTreeVersion: 'oncotree_2017_06_21',
     testing: true
 };
 OncoKB.backingUp = false;

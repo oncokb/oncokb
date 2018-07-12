@@ -7,7 +7,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -562,7 +561,7 @@ public class SummaryUtils {
             String cancerHotspotsLink = "";
             try {
                 cancerHotspotsLink = PropertiesUtils.getProperties("cancerhotspots.website.link");
-            } catch (IOException e) {
+            } catch (Exception e) {
                 cancerHotspotsLink = "";
                 e.printStackTrace();
             }
@@ -1018,7 +1017,9 @@ public class SummaryUtils {
             || StringUtils.containsIgnoreCase(queryAlteration, "dup")
             || StringUtils.containsIgnoreCase(queryAlteration, "del")
             || StringUtils.containsIgnoreCase(queryAlteration, "ins")
-            || StringUtils.containsIgnoreCase(queryAlteration, "splice")) {
+            || StringUtils.containsIgnoreCase(queryAlteration, "splice")
+            || MainUtils.isEGFRTruncatingVariants(queryAlteration)
+            ) {
             sb.append(gene.getHugoSymbol() + " " + queryAlteration);
             if (!queryAlteration.endsWith("alteration")) {
                 sb.append(" alteration");
@@ -1026,11 +1027,21 @@ public class SummaryUtils {
         } else {
             if (queryAlteration.contains(gene.getHugoSymbol())) {
                 sb.append(queryAlteration);
+            } else if (NamingUtils.hasAbbreviation(queryAlteration)) {
+                sb.append(gene.getHugoSymbol() + " " + NamingUtils.getFullName(queryAlteration) + " (" + queryAlteration + ") alteration");
             } else {
                 sb.append(gene.getHugoSymbol() + " " + queryAlteration);
             }
-            if (!queryAlteration.endsWith("mutation"))
+            String finalStr = sb.toString();
+            if (!finalStr.endsWith("mutation")
+                && !finalStr.endsWith("mutations")
+                && !finalStr.endsWith("alteration")
+                && !finalStr.endsWith("fusion")
+                && !finalStr.endsWith("deletion")
+                && !finalStr.endsWith("amplification")
+                ) {
                 sb.append(" mutation");
+            }
         }
         return sb.toString();
     }
@@ -1075,6 +1086,8 @@ public class SummaryUtils {
                 || StringUtils.containsIgnoreCase(queryAlteration, "del")
                 || StringUtils.containsIgnoreCase(queryAlteration, "ins")
                 || StringUtils.containsIgnoreCase(queryAlteration, "splice")
+                || NamingUtils.hasAbbreviation(queryAlteration)
+                || MainUtils.isEGFRTruncatingVariants(queryAlteration)
                 ) {
                 sb.append(queryAlteration + " altered");
             } else if (!queryAlteration.endsWith("mutation")) {

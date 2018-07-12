@@ -7,10 +7,7 @@ package org.mskcc.cbio.oncokb.controller;
 
 import org.apache.commons.collections.map.HashedMap;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.util.AlterationUtils;
-import org.mskcc.cbio.oncokb.util.CacheUtils;
-import org.mskcc.cbio.oncokb.util.EvidenceUtils;
-import org.mskcc.cbio.oncokb.util.GeneUtils;
+import org.mskcc.cbio.oncokb.util.*;
 import org.mskcc.cbio.oncokb.model.oncotree.TumorType;;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Controller;
@@ -110,6 +107,9 @@ public class CacheController {
                     if (gene != null) {
                         CacheUtils.updateGene(gene.getEntrezGeneId(), propagation);
                     }
+                    break;
+                case "updateAbbreviationOntology":
+                    NamingUtils.cacheAllAbbreviations();
                     break;
                 default:
                     break;
