@@ -400,7 +400,7 @@ angular.module('oncokbApp')
             return reviewObj && (onlyReviewedContent && reviewObj.added == true || !onlyReviewedContent && reviewObj.removed == true);
         }
         function getGeneData(geneData, excludeComments, onlyReviewedContent) {
-            var gene = _.clone(geneData);
+            var gene = angular.copy(geneData);
             excludeComments = _.isBoolean(excludeComments) ? excludeComments : false;
             onlyReviewedContent = _.isBoolean(onlyReviewedContent) ? onlyReviewedContent : false;
             processData(gene, ['summary', 'background'], excludeComments, onlyReviewedContent);
