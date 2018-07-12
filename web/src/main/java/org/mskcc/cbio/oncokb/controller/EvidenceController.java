@@ -371,7 +371,7 @@ public class EvidenceController {
         // if passed in evidence is empty, we delete them in the database and return empty list
         if (isEmptyEvidence(queryEvidence)) {
             evidenceBo.deleteAll(evidences);
-            return new ArrayList<Evidence>();
+            return new ArrayList<>(evidences);
         }
         // common cases for evidence update
         // Use controlled vocabulary to update oncogenic knowneffect
