@@ -236,9 +236,9 @@ angular.module('oncokbApp')
                 };
                 function rejectItems(rejectionItems) {
                     _.each(rejectionItems, function(item) {
+                        ReviewResource.rejected.push(item.uuid);
                         if ($rootScope.reviewMeta[item.uuid]) {
                             mainUtils.deleteUUID(item.uuid);
-                            ReviewResource.rejected.push(item.uuid);
                             if (item.obj && item.key && item.obj[item.key + '_review'] && !_.isUndefined(item.obj[item.key + '_review'].lastReviewed)) {
                                 item.obj[item.key] = item.obj[item.key + '_review'].lastReviewed;
                                 delete item.obj[item.key + '_review'].lastReviewed;
