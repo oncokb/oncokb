@@ -8,6 +8,7 @@ import com.mysql.jdbc.StringUtils;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.dao.AlterationDao;
+import org.mskcc.cbio.oncokb.dao.EvidenceDao;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.*;
 
@@ -146,6 +147,22 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             return new LinkedHashSet<>();
         }
         return findRelevantAlterationsSub(alteration, fullAlterations, includeAlternativeAllele);
+    }
+
+    @Override
+    public void deleteMutationsWithoutEvidenceAssociatedByGene(Gene gene) {
+        EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+        Set<Alteration> relatedAlts = new HashSet<>();
+        List<Alteration> noMappingAlts = new ArrayList<>();
+        for(Evidence evidence : evidenceBo.findEvidencesByGeneFromDB(Collections.singleton(gene))) {
+            relatedAlts.addAll(evidence.getAlterations());
+        }
+        for(Alteration alteration : findAlterationsByGene(Collections.singleton(gene))){
+            if(!relatedAlts.contains(alteration)) {
+                noMappingAlts.add(alteration);
+            }
+        }
+        deleteAll(noMappingAlts);
     }
 
     /**
