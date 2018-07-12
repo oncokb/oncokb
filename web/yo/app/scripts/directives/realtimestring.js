@@ -45,7 +45,7 @@ angular.module('oncokbApp')
                     scope.pContent = '';
                     scope.$watch('data[key]', function (n, o) {
                         if (n !== o && !_.isUndefined(n)) {
-                            if (!(scope.data && scope.data[scope.key+'_editing'])) {
+                            if (!scope.data || !scope.data[scope.key+'_editing'] || scope.data[scope.key+'_editing'] === $rootScope.me.name) {
                                 if (scope.t === 'treatment-select' && scope.key === 'level') {
                                     scope.$watch('data.propagation', function(newPro, oldPro) {
                                         if (newPro !== oldPro && (!$rootScope.reviewMode || ReviewResource.rejected.indexOf(scope.data.propagation_uuid) === -1)) {
@@ -53,7 +53,7 @@ angular.module('oncokbApp')
                                         }
                                     });
                                 }
-                                if ((!$rootScope.reviewMode || ReviewResource.rejected.indexOf(scope.uuid) === -1)) {     
+                                if (!$rootScope.reviewMode || ReviewResource.rejected.indexOf(scope.uuid) === -1) {     
                                     mainUtils.updateLastModified();
                                     scope.data[scope.key] = OncoKB.utils.getString(scope.data[scope.key]);                  
                                     scope.pContent = scope.data[scope.key];
