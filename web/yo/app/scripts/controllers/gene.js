@@ -474,9 +474,9 @@ angular.module('oncokbApp')
                     if (mutationSectionChanged) {
                         $scope.status.hasReviewContent = true;
                         userNames.push(mutation.name_review.updatedBy);
-                        tempArr = collectUUIDs('mutation', mutation, [], false, false, true);
+                        tempArr = collectUUIDs('mutation', mutation, [], 'sectionOnly');
                         $scope.sectionUUIDs = _.union($scope.sectionUUIDs, tempArr);
-                        tempArr = collectUUIDs('mutation', mutation, [], true, false, false);
+                        tempArr = collectUUIDs('mutation', mutation, [], 'insideOnly');
                         ReviewResource.inside = _.union(ReviewResource.inside, tempArr);
                         $scope.status.mutationChanged = true;
                         return true;
@@ -726,7 +726,7 @@ angular.module('oncokbApp')
                     // collect changes that happened in mutation level
                     if (mutation.name_review && mutation.name_review.updatedBy === userName) {
                         if (mainUtils.processedInReview('remove', mutation.name_uuid)) {
-                            evidencesAllUsers[userName].deletedEvidences = collectUUIDs('mutation', mutation, evidencesAllUsers[userName].deletedEvidences);
+                            evidencesAllUsers[userName].deletedEvidences = collectUUIDs('mutation', mutation, evidencesAllUsers[userName].deletedEvidences, 'evidenceOnly');
                             evidencesAllUsers[userName].deletedEvidenceModels.push({type: 'mutation', mutation: mutation});
                             evidencesAllUsers[userName].historyData.deletion.push({ operation: 'delete', lastEditBy: mutation.name_review.updatedBy, location: mutation.name });
                             return true;
@@ -745,7 +745,7 @@ angular.module('oncokbApp')
                     _.each(mutation.tumors, function (tumor) {
                         if (tumor.cancerTypes_review && tumor.cancerTypes_review.updatedBy === userName) {
                             if (mainUtils.processedInReview('remove', tumor.cancerTypes_uuid)) {
-                                evidencesAllUsers[userName].deletedEvidences = collectUUIDs('tumor', tumor, evidencesAllUsers[userName].deletedEvidences);
+                                evidencesAllUsers[userName].deletedEvidences = collectUUIDs('tumor', tumor, evidencesAllUsers[userName].deletedEvidences, 'evidenceOnly');
                                 evidencesAllUsers[userName].deletedEvidenceModels.push({type: 'tumor', mutation: mutation, tumor: tumor});
                                 evidencesAllUsers[userName].historyData.deletion.push({ operation: 'delete', lastEditBy: tumor.cancerTypes_review.updatedBy, location: historyStr(mutation, tumor) });
                                 return true;
@@ -767,7 +767,7 @@ angular.module('oncokbApp')
                             _.each(ti.treatments, function (treatment) {
                                 if (treatment.name_review && treatment.name_review.updatedBy === userName) {
                                     if (mainUtils.processedInReview('remove', treatment.name_uuid)) {
-                                        evidencesAllUsers[userName].deletedEvidences = collectUUIDs('treatment', treatment, evidencesAllUsers[userName].deletedEvidences);
+                                        evidencesAllUsers[userName].deletedEvidences = collectUUIDs('treatment', treatment, evidencesAllUsers[userName].deletedEvidences, 'evidenceOnly');
                                         evidencesAllUsers[userName].deletedEvidenceModels.push({type: 'treatment', mutation: mutation, tumor: tumor, ti: ti, treatment: treatment});
                                         evidencesAllUsers[userName].historyData.deletion.push({ operation: 'delete', lastEditBy: treatment.name_review.updatedBy, location: historyStr(mutation, tumor) + ', ' + ti.name + ', ' + treatment.name });
                                         return true;
@@ -914,6 +914,7 @@ angular.module('oncokbApp')
                     case 'MUTATION_EFFECT':
                         var MEObj = mutation.mutation_effect;
                         if ($scope.geneMeta.review[MEObj.oncogenic_uuid]) {
+                            data.evidenceType = 'ONCOGENIC';
                             data.knownEffect = MEObj.oncogenic;
                             dataUUID = MEObj.oncogenic_uuid;
                             data.lastEdit = MEObj.oncogenic_review.updateTime;
@@ -991,17 +992,17 @@ angular.module('oncokbApp')
                         data.knownEffect = 'Resistant';
                         break;
                     case 'MUTATION_NAME_CHANGE':
-                        uuids = collectUUIDs('mutation', mutation, [], true, true);
+                        uuids = collectUUIDs('mutation', mutation, [], 'evidenceOnly');
                         data.evidenceType = null;
                         historyData.location = mutation.name;
                         break;
                     case 'TUMOR_NAME_CHANGE':
-                        uuids = collectUUIDs('tumor', tumor, [], true, true);
+                        uuids = collectUUIDs('tumor', tumor, [], 'evidenceOnly');
                         data.evidenceType = null;
                         historyData.location = historyStr(mutation, tumor);
                         break;
                     case 'TREATMENT_NAME_CHANGE':
-                        uuids = collectUUIDs('treatment', treatment, [], true, true);
+                        uuids = collectUUIDs('treatment', treatment, [], 'evidenceOnly');
                         data.evidenceType = null;
                         historyData.location = historyStr(mutation, tumor) + ', ' + data.evidenceType + ', ' + treatment.name;
                         break;
@@ -1355,7 +1356,12 @@ angular.module('oncokbApp')
                     }
                 });
             }
-            function acceptSectionItems(type, mutation, tumor, ti, treatment, firstLayer) {
+            function acceptSectionItems(type, mutationCopy, tumorCopy, tiCopy, treatmentCopy, firstLayer) {
+                var data = $scope.getRefs(mutationCopy, tumorCopy, tiCopy, treatmentCopy);
+                var mutation = data.mutation;
+                var tumor = data.tumor;
+                var ti = data.ti;
+                var treatment = data.treatment;
                 switch (type) {
                     case 'mutation':
                         ReviewResource.accepted.push(mutation.name_uuid);
@@ -1445,12 +1451,7 @@ angular.module('oncokbApp')
                 }
             }
 
-            $scope.acceptAdded = function (type, mutationCopy, tumorCopy, tiCopy, treatmentCopy) {
-                var data = $scope.getRefs(mutationCopy, tumorCopy, tiCopy, treatmentCopy);
-                var mutation = data.mutation;
-                var tumor = data.tumor;
-                var ti = data.ti;
-                var treatment = data.treatment;
+            $scope.acceptAdded = function (type, mutation, tumor, ti, treatment) {
                 var tempEvidences = formSectionEvidencesByType(type, mutation, tumor, ti, treatment);
                 var evidences = tempEvidences.evidences;
                 var historyData = [tempEvidences.historyData];
@@ -1741,7 +1742,7 @@ angular.module('oncokbApp')
                 var dlg = dialogs.confirm('Confirmation', deletionMessage);
                 dlg.result.then(function () {
                     if (directlyRemove) {
-                        var uuids = collectUUIDs(type, obj, [], false, false);
+                        var uuids = collectUUIDs(type, obj, []);
                         removeModel({ type: type, path: path, uuids: uuids });
                     } else {
                         if (type === 'tumor') {
@@ -1775,86 +1776,102 @@ angular.module('oncokbApp')
              * @param inside: boolean value, set it to true to exclude its own uuid from getting collected. Otherwise this function will collect all of the uuids
              * @param evidenceUUIDsOnly: boolean value, set it to true to indicate only want to collect evidences uuid inside one section. If not specified, will return all UUIDs besides evidences UUIDs
              * */
-            function collectUUIDs(type, obj, uuids, insideOnly, evidenceOnly, sectionOnly) {
+            function collectUUIDs(type, obj, uuids, uuidType) {
                 if (type === 'mutation') {
-                    if (sectionOnly) {
-                        uuids.push(obj.name_uuid);
-                        uuids.push(obj.mutation_effect_uuid);
-                    } else if (insideOnly) {
-                        uuids.push(obj.mutation_effect.oncogenic_uuid);
-                        uuids.push(obj.mutation_effect.effect_uuid);
-                        uuids.push(obj.mutation_effect.description_uuid);
-                    } else if (evidenceOnly) {
-                        uuids.push(obj.mutation_effect.oncogenic_uuid);
-                        uuids.push(obj.mutation_effect.effect_uuid);
-                    } else {
-                        uuids.push(obj.name_uuid);
-                        uuids.push(obj.mutation_effect.oncogenic_uuid);
-                        uuids.push(obj.mutation_effect.effect_uuid);
-                        uuids.push(obj.mutation_effect.description_uuid);
+                    switch(uuidType) {
+                        case 'insideOnly':
+                            uuids.push(obj.mutation_effect.oncogenic_uuid);
+                            uuids.push(obj.mutation_effect.effect_uuid);
+                            uuids.push(obj.mutation_effect.description_uuid);
+                            break;
+                        case 'evidenceOnly':
+                            uuids.push(obj.mutation_effect.oncogenic_uuid);
+                            uuids.push(obj.mutation_effect.effect_uuid);
+                            break;
+                        case 'sectionOnly':
+                            uuids.push(obj.name_uuid);
+                            uuids.push(obj.mutation_effect_uuid);
+                            break;
+                        default:
+                            uuids.push(obj.name_uuid);
+                            uuids.push(obj.mutation_effect.oncogenic_uuid);
+                            uuids.push(obj.mutation_effect.effect_uuid);
+                            uuids.push(obj.mutation_effect.description_uuid);
+                            break;
                     }
                     _.each(obj.tumors, function (tumor) {
-                        collectUUIDs('tumor', tumor, uuids, insideOnly, evidenceOnly, sectionOnly);
+                        collectUUIDs('tumor', tumor, uuids, uuidType);
                     });
                 }
                 if (type === 'tumor') {
-                    if (sectionOnly) {
-                        uuids.push(obj.cancerTypes_uuid);
-                        uuids.push(obj.prognostic_uuid);
-                        uuids.push(obj.diagnostic_uuid);
-                    } else if (insideOnly) {
-                        uuids.push(obj.summary_uuid);
-                        uuids.push(obj.prognostic.level_uuid);
-                        uuids.push(obj.prognostic.description_uuid);
-                        uuids.push(obj.diagnostic.level_uuid);
-                        uuids.push(obj.diagnostic.description_uuid);
-                    } else if (evidenceOnly) {
-                        uuids.push(obj.summary_uuid);
-                        uuids.push(obj.prognostic_uuid);
-                        uuids.push(obj.diagnostic_uuid);
-                    } else {
-                        uuids.push(obj.cancerTypes_uuid);
-                        uuids.push(obj.summary_uuid);
-                        uuids.push(obj.prognostic.level_uuid);
-                        uuids.push(obj.prognostic.description_uuid);
-                        uuids.push(obj.diagnostic.level_uuid);
-                        uuids.push(obj.diagnostic.description_uuid);
+                    switch(uuidType) {
+                        case 'insideOnly':
+                            uuids.push(obj.summary_uuid);
+                            uuids.push(obj.prognostic.level_uuid);
+                            uuids.push(obj.prognostic.description_uuid);
+                            uuids.push(obj.diagnostic.level_uuid);
+                            uuids.push(obj.diagnostic.description_uuid);
+                            break;
+                        case 'evidenceOnly':
+                            uuids.push(obj.summary_uuid);
+                            uuids.push(obj.prognostic_uuid);
+                            uuids.push(obj.diagnostic_uuid);
+                            break;
+                        case 'sectionOnly':
+                            uuids.push(obj.cancerTypes_uuid);
+                            uuids.push(obj.prognostic_uuid);
+                            uuids.push(obj.diagnostic_uuid);
+                            break;
+                        default:
+                            uuids.push(obj.cancerTypes_uuid);
+                            uuids.push(obj.summary_uuid);
+                            uuids.push(obj.prognostic.level_uuid);
+                            uuids.push(obj.prognostic.description_uuid);
+                            uuids.push(obj.diagnostic.level_uuid);
+                            uuids.push(obj.diagnostic.description_uuid);
+                            break;
                     }
                     _.each(obj.TIs, function (ti) {
-                        collectUUIDs('TI', ti, uuids, insideOnly, evidenceOnly, sectionOnly);
+                        collectUUIDs('TI', ti, uuids, uuidType);
                     });
                 }
                 if (type === 'TI') {
-                    if (sectionOnly) {
-                        uuids.push(obj.name_uuid);
-                    } else if (insideOnly) {
-                        uuids.push(obj.description_uuid);
-                    } else if (evidenceOnly) {
-                        uuids.push(obj.description_uuid);
-                    } else {
-                        uuids.push(obj.name_uuid);
-                        uuids.push(obj.description_uuid);
+                    switch(uuidType) {
+                        case 'insideOnly':
+                        case 'evidenceOnly':
+                            break;
+                        case 'sectionOnly':
+                            uuids.push(obj.name_uuid);
+                            break;
+                        default:
+                            uuids.push(obj.name_uuid);
+                            break;
                     }
                     _.each(obj.treatments, function (treatment) {
-                        collectUUIDs('treatment', treatment, uuids, insideOnly, evidenceOnly, sectionOnly);
+                        collectUUIDs('treatment', treatment, uuids, uuidType);
                     });
                 }
                 if (type === 'treatment') {
-                    if (sectionOnly) {
-                        uuids.push(obj.name_uuid);
-                    } else if (insideOnly) {
-                        uuids.push(obj.level_uuid);
-                        uuids.push(obj.propagation_uuid);
-                        uuids.push(obj.indication_uuid);
-                        uuids.push(obj.description_uuid);
-                    } else if (evidenceOnly) {
-                        uuids.push(obj.name_uuid);
-                    } else {
-                        uuids.push(obj.name_uuid);
-                        uuids.push(obj.level_uuid);
-                        uuids.push(obj.propagation_uuid);
-                        uuids.push(obj.indication_uuid);
-                        uuids.push(obj.description_uuid);
+                    switch(uuidType) {
+                        case 'insideOnly':
+                            uuids.push(obj.level_uuid);
+                            uuids.push(obj.propagation_uuid);
+                            uuids.push(obj.indication_uuid);
+                            uuids.push(obj.description_uuid);
+                            break;
+                        case 'evidenceOnly':
+                            uuids.push(obj.name_uuid);
+                            break;
+                        case 'sectionOnly':
+                            uuids.push(obj.name_uuid);
+                            break;
+                        default:
+                            uuids.push(obj.name_uuid);
+                            uuids.push(obj.level_uuid);
+                            uuids.push(obj.propagation_uuid);
+                            uuids.push(obj.indication_uuid);
+                            uuids.push(obj.description_uuid);
+                            break;
                     }
                 }
                 return uuids;
@@ -1878,15 +1895,16 @@ angular.module('oncokbApp')
                 }
                 var data = $scope.getRefs(mutation, tumor, ti, treatment);
                 var indicies = [data.mutationIndex, data.tumorIndex, data.tiIndex, data.treatmentIndex];
-                var uuids = collectUUIDs(type, obj, [], false, false);
+                var allUUIDs = collectUUIDs(type, obj, []);
+                var evidenceUUIDs = collectUUIDs(type, obj, [], 'evidenceOnly');
                 var historyData = [{ operation: 'delete', lastEditBy: (type === 'tumor' ? obj.cancerTypes_review : obj.name_review).updatedBy, location: location }];
                 // make the api call to delete evidences
                 var loadingUUID = (type === 'tumor' ? obj.cancerTypes_uuid : obj.name_uuid);
                 if (loadingUUID) {
                     ReviewResource.loading.push(loadingUUID);
                 }
-                DatabaseConnector.deleteEvidences(uuids, historyData, function (result) {
-                    removeModel({ type: type, indicies: indicies, uuids: uuids });
+                DatabaseConnector.deleteEvidences(evidenceUUIDs, historyData, function (result) {
+                    removeModel({ type: type, indicies: indicies, uuids: allUUIDs });
 
                     // Update all priority if one of treatments is deleted.
                     if (type && type === 'treatment') {
