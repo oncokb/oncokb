@@ -53,6 +53,11 @@ public class IndicatorUtils {
 
         source = source == null ? "oncokb" : source;
 
+        // Temporary forward previous production annotation
+        if (!com.mysql.jdbc.StringUtils.isNullOrEmpty(query.getAlteration()) && query.getAlteration().equals("EGFRvIII")) {
+            query.setAlteration("vIII");
+        }
+
         // Deal with fusion without primary gene, and this is only for legacy fusion event
         // The latest fusion event has been integrated with alteration type. Please see next if-else condition
         // for more info.
@@ -63,6 +68,23 @@ public class IndicatorUtils {
             && alterationType != null &&
             alterationType.equals(AlterationType.FUSION)) {
             fusionGeneAltsMap = findFusionGeneAndRelevantAlts(query);
+
+            // Dup: For single gene deletion event. We should map to Deletion instead of Truncating Mutation when Deletion has been curated
+            if (query.getSvType() != null && query.getSvType().equals(StructuralVariantType.DELETION)) {
+                Set<String> queryFusionGenes = (Set<String>) fusionGeneAltsMap.get("queryFusionGenes");
+                if (queryFusionGenes.size() == 1) {
+                    Gene queryFusionGene = GeneUtils.getGeneByHugoSymbol(queryFusionGenes.iterator().next());
+                    if (queryFusionGene != null) {
+                        Alteration deletion = AlterationUtils.findAlteration(queryFusionGene, "Deletion");
+                        if (deletion != null) {
+                            query.setAlteration("deletion");
+                            query.setConsequence("feature_truncation");
+                            fusionGeneAltsMap = findFusionGeneAndRelevantAlts(query);
+                        }
+                    }
+                }
+            }
+
             gene = (Gene) fusionGeneAltsMap.get("pickedGene");
             relevantAlterations = (List<Alteration>) fusionGeneAltsMap.get("relevantAlts");
             Set<Gene> allGenes = (LinkedHashSet<Gene>) fusionGeneAltsMap.get("allGenes");
@@ -79,6 +101,22 @@ public class IndicatorUtils {
                 query.setConsequence("feature_truncation");
 
                 fusionGeneAltsMap = findFusionGeneAndRelevantAlts(query);
+
+                // For single gene deletion event. We should map to Deletion instead of Truncating Mutation when Deletion has been curated
+                if (query.getSvType() != null && query.getSvType().equals(StructuralVariantType.DELETION)) {
+                    Set<String> queryFusionGenes = (Set<String>) fusionGeneAltsMap.get("queryFusionGenes");
+                    if (queryFusionGenes.size() == 1) {
+                        Gene queryFusionGene = GeneUtils.getGeneByHugoSymbol(queryFusionGenes.iterator().next());
+                        if (queryFusionGene != null) {
+                            Alteration deletion = AlterationUtils.findAlteration(queryFusionGene, "Deletion");
+                            if (deletion != null) {
+                                query.setAlteration("deletion");
+                                fusionGeneAltsMap = findFusionGeneAndRelevantAlts(query);
+                            }
+                        }
+                    }
+                }
+
                 gene = (Gene) fusionGeneAltsMap.get("pickedGene");
                 fusionGeneAltsMap = new HashMap<>();
                 // As long as this is a structural variant event, we need to attach the Truncating Mutation
@@ -175,7 +213,7 @@ public class IndicatorUtils {
 
             if (nonVUSRelevantAlts.size() > 0) {
                 if (hasOncogenicEvidence) {
-                    IndicatorQueryOncogenicity indicatorQueryOncogenicity = getOncogenicity(alteration, alleles, query, source, geneStatus);
+                    IndicatorQueryOncogenicity indicatorQueryOncogenicity = getOncogenicity(matchedAlt == null ? alteration : matchedAlt, alleles, query, source, geneStatus);
 
                     if (indicatorQueryOncogenicity.getOncogenicityEvidence() != null) {
                         allQueryRelatedEvidences.add(indicatorQueryOncogenicity.getOncogenicityEvidence());
@@ -188,7 +226,7 @@ public class IndicatorUtils {
                 }
 
                 if (hasMutationEffectEvidence) {
-                    IndicatorQueryMutationEffect indicatorQueryMutationEffect = getMutationEffect(alteration, alleles, query, source, geneStatus);
+                    IndicatorQueryMutationEffect indicatorQueryMutationEffect = getMutationEffect(matchedAlt == null ? alteration : matchedAlt, alleles, query, source, geneStatus);
 
                     if (indicatorQueryMutationEffect.getMutationEffectEvidence() != null) {
                         allQueryRelatedEvidences.add(indicatorQueryMutationEffect.getMutationEffectEvidence());
@@ -520,6 +558,7 @@ public class IndicatorUtils {
 
         if (geneStrsList != null) {
             geneStrsSet = new HashSet<>(geneStrsList);
+            map.put("queryFusionGenes", geneStrsSet);
         }
 
         // Deal with two different genes fusion event.
@@ -580,7 +619,7 @@ public class IndicatorUtils {
                     }
                 }
             }
-            List<Gene> allGenes = new ArrayList<>();
+            LinkedHashSet<Gene> allGenes = new LinkedHashSet<>();
             for (String subGeneStr : geneStrsSet) {
                 Gene tmpGene = GeneUtils.getGeneByHugoSymbol(subGeneStr);
                 if (tmpGene != null) {

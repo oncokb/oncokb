@@ -53,18 +53,21 @@ public class FindRelevantAlterationsTest {
                 {"MAP2K4", "R304*", null, "R304*, Truncating Mutations, Oncogenic Mutations"},
 
                 // EGFR exon deletion
-                {"EGFR", "EGFRvIII", null, "EGFRvIII, Oncogenic Mutations"},
+                {"EGFR", "vIII", null, "vIII, Oncogenic Mutations"},
                 {"EGFR", "CTD", null, "G983_A1210indel, Oncogenic Mutations"},
-                {"EGFR", "EGFR CTD", null, "G983_A1210indel, Oncogenic Mutations"},
-                {"EGFR", "EGFRvIV", null, "G983_A1210indel, Oncogenic Mutations"},
-                {"EGFR", "EGFRvIVa", null, "G983_A1210indel, Oncogenic Mutations"},
-                {"EGFR", "EGFRvIVb", null, "G983_A1210indel, Oncogenic Mutations"},
-                {"EGFR", "EGFRvIVc", null, "G983_A1210indel, Oncogenic Mutations"},
+                {"EGFR", "vIV", null, "G983_A1210indel, Oncogenic Mutations"},
+                {"EGFR", "vIVa", null, "G983_A1210indel, Oncogenic Mutations"},
+                {"EGFR", "vIVb", null, "G983_A1210indel, Oncogenic Mutations"},
+                {"EGFR", "vIVc", null, "G983_A1210indel, Oncogenic Mutations"},
 
                 // Check range
                 {"MED12", "G44S", null, "G44S, G44A, G44C, G44D, G44V, 34_68mut"},
                 {"MED12", "G44D", null, "G44D, G44A, G44C, G44S, G44V, 34_68mut"},
                 {"NOTCH1", "Q2405Rfs*17", null, "Q2405Rfs*17, T2375_K2555trunc, Gain-of-function Mutations"},
+
+                // VUS should get mapped to hotspot VUS, but should not get Oncogenic Mutations from the hotspot VUS.
+                // In this case VUS N109_R113del is covered by VUS I99_R113del, and I99_R113del is a hotpot.
+                {"MAP2K1", "N109_R113del", null, "N109_R113del, I99_R113del"},
 
                 // Range missense variant
                 {"PDGFRA", "D842I", null, "D842I, D842H, D842V, D842Y, D842_I843delinsIM, Oncogenic Mutations"},

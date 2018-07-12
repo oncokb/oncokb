@@ -22,6 +22,7 @@ angular.module('oncokbApp')
         'ApiUtils',
         'PrivateApiUtils',
         'user',
+        '_',
         function($timeout,
                  $q,
                  $rootScope,
@@ -41,7 +42,8 @@ angular.module('oncokbApp')
                  InternalAccess,
                  ApiUtils,
                  PrivateApiUtils,
-                 user) {
+                 user,
+                 _) {
             var numOfLocks = {};
             var data = {};
 
@@ -609,9 +611,21 @@ angular.module('oncokbApp')
                 return deferred.promise;
             }
 
-            function getOncoTreeMainTypes() {
+            function getAllOncoTreeMainTypes() {
                 var deferred = $q.defer();
-                OncoTree.getMainType()
+                OncoTree.getAllMainTypes()
+                    .success(function(data) {
+                        deferred.resolve(data);
+                    })
+                    .error(function(result) {
+                        deferred.reject(result);
+                    });
+                return deferred.promise;
+            }
+
+            function getAllOncoTreeSubtypes() {
+                var deferred = $q.defer();
+                OncoTree.getAllSubtypes()
                     .success(function(data) {
                         deferred.resolve(data);
                     })
@@ -623,37 +637,19 @@ angular.module('oncokbApp')
 
             function getOncoTreeTumorTypesByMainType(mainType) {
                 var deferred = $q.defer();
-                OncoTree.getTumorTypeByMainType(mainType)
-                    .success(function(data) {
-                        deferred.resolve(data);
-                    })
-                    .error(function(result) {
-                        deferred.reject(result);
-                    });
-                return deferred.promise;
-            }
-
-            function getOncoTreeTumorTypesByMainTypes(mainTypes) {
-                var deferred = $q.defer();
-                OncoTree.getTumorTypesByMainTypes(mainTypes)
-                    .success(function(data) {
-                        deferred.resolve(data);
-                    })
-                    .error(function(result) {
-                        deferred.reject(result);
-                    });
-                return deferred.promise;
-            }
-
-            function getOncoTreeTumorTypeByName(name, exactMatch) {
-                var deferred = $q.defer();
-                OncoTree.getTumorType('name', name, exactMatch)
-                    .success(function(data) {
-                        deferred.resolve(data);
-                    })
-                    .error(function(result) {
-                        deferred.reject(result);
-                    });
+                if (mainType) {
+                    OncoTree.getAllSubtypes()
+                        .success(function(data) {
+                            deferred.resolve(_.filter(data, function(o) {
+                                return o.mainType && o.mainType.name === mainType;
+                            }));
+                        })
+                        .error(function(result) {
+                            deferred.reject(result);
+                        });
+                } else {
+                    deferred.resolve([]);
+                }
                 return deferred.promise;
             }
 
@@ -826,10 +822,9 @@ angular.module('oncokbApp')
                 updateGeneCache: function(hugoSymbol) {
                     return updateGeneCache(hugoSymbol);
                 },
-                getOncoTreeMainTypes: getOncoTreeMainTypes,
+                getAllOncoTreeMainTypes: getAllOncoTreeMainTypes,
+                getAllOncoTreeSubtypes: getAllOncoTreeSubtypes,
                 getOncoTreeTumorTypesByMainType: getOncoTreeTumorTypesByMainType,
-                getOncoTreeTumorTypesByMainTypes: getOncoTreeTumorTypesByMainTypes,
-                getOncoTreeTumorTypeByName: getOncoTreeTumorTypeByName,
                 testAccess: testAccess,
                 getIsoforms: getIsoforms,
                 getOncogeneTSG: getOncogeneTSG,

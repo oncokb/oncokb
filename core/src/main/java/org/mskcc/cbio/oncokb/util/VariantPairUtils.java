@@ -4,7 +4,7 @@ import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.VariantQuery;
-import org.mskcc.cbio.oncokb.model.oncotree.TumorType;;
+import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,14 +48,16 @@ public class VariantPairUtils {
         query.setProteinStart(proteinStartStr);
 
 
-        Alteration alt = AlterationUtils.getAlteration(query.getGene().getHugoSymbol(), query.getQueryAlteration(),
-            null, query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
-        Alteration matchedAlt = alterationBo.findAlteration(alt.getGene(), alt.getAlterationType(), alt.getAlteration());
-        query.setExactMatchAlteration(matchedAlt);
-        query.setAlterations(
-            new ArrayList<>(AlterationUtils.getRelevantAlterations(alt)
-            )
-        );
+        if (gene != null) {
+            Alteration alt = AlterationUtils.getAlteration(query.getGene().getHugoSymbol(), query.getQueryAlteration(),
+                null, query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
+            Alteration matchedAlt = alterationBo.findAlteration(alt.getGene(), alt.getAlterationType(), alt.getAlteration());
+            query.setExactMatchAlteration(matchedAlt);
+            query.setAlterations(
+                new ArrayList<>(AlterationUtils.getRelevantAlterations(alt)
+                )
+            );
+        }
 
         List<TumorType> relevantTumorTypes = new ArrayList<>();
         if (tumorTypeStr != null) {

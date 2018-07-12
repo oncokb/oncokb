@@ -18,8 +18,6 @@
     "curationLink": "legacy-api/",
     "privateApiLink": "api/private/",
     "publicApiLink": "api/v1/",
-    "oncoTreeLink": "http://oncotree.mskcc.org/oncotree/api/",
-    "oncoTreeVersion": "oncotree_2017_06_21",
     "accessLevels": {},
     "testing": false
 }

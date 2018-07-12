@@ -113,6 +113,9 @@ angular.module('oncokbApp')
                 label: 'Tumor Type Summary',
                 value: 'tumorSummary'
             }, {
+                label: 'Tumor Type Summary + Drugs',
+                value: 'ttsDrugs'
+            }, {
                 label: 'Therapeutics (All Levels)',
                 value: 'drugs'
             }];
@@ -137,6 +140,13 @@ angular.module('oncokbApp')
                     keys: ['gene', 'mutation', 'tumorType', 'tumorSummary'],
                     fileName: 'TumorTypeSummary.xls',
                     evidenceTypes: 'TUMOR_TYPE_SUMMARY'
+                },
+                ttsDrugs: {
+                    header: ['Gene', 'Mutation', 'Tumor Type', 'Tumor Summary', 'Drugs', 'Level'],
+                    body: [],
+                    keys: ['gene', 'mutation', 'tumorType', 'tumorSummary', 'drugs', 'level'],
+                    fileName: 'TumorTypeSummaryDrugs.xls',
+                    evidenceTypes: 'TUMOR_TYPE_SUMMARY,STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY,STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE,INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY,INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE'
                 },
                 drugs: {
                     header: ['Gene', 'Mutation', 'Tumor Type', 'Drugs', 'Level', 'Description', 'Citations'],
@@ -281,8 +291,61 @@ angular.module('oncokbApp')
                                         $scope.reviewedData.drugs.body.push(tempObj);
                                     }
                                 });
+                            } else if ($scope.evidenceType === 'ttsDrugs') {
+                                var drugsMapping = {};
+                                _.each(response, function(item) {
+                                    if (item.evidenceType !== 'TUMOR_TYPE_SUMMARY') {
+                                        var tempTT = item.subtype ? subtypeMapping[item.subtype] : item.cancerType;
+                                        var key = item.gene.hugoSymbol + getAlterations(item.alterations) + tempTT;
+                                        var drugs = [];
+                                        _.each(item.treatments, function (treatment) {
+                                            _.each(treatment.drugs, function (drug) {
+                                                drugs.push(drug.drugName);
+                                            });
+                                        });
+                                        if (drugsMapping[key]) {
+                                            drugsMapping[key].push({
+                                                drugs: drugs.join(),
+                                                level: item.levelOfEvidence
+                                            });
+                                        } else {
+                                            drugsMapping[key] = [{
+                                                drugs: drugs.join(),
+                                                level: item.levelOfEvidence
+                                            }];
+                                        }
+                                    }
+                                });
+                                _.each(response, function(item) {
+                                    if (item.evidenceType === 'TUMOR_TYPE_SUMMARY') {
+                                        var tempTT = item.subtype ? subtypeMapping[item.subtype] : item.cancerType;
+                                        var key = item.gene.hugoSymbol + getAlterations(item.alterations) + tempTT;
+                                        var tempObj = {};
+                                        if (drugsMapping[key]) {
+                                            _.each(drugsMapping[key], function(drugItem) {
+                                                tempObj =  {
+                                                    gene: item.gene.hugoSymbol,
+                                                    mutation: getAlterations(item.alterations),
+                                                    tumorType: tempTT,
+                                                    tumorSummary: item.description,
+                                                    drugs: drugItem.drugs,
+                                                    level: drugItem.level
+                                                };
+                                                $scope.reviewedData.ttsDrugs.body.push(tempObj);
+                                            });
+                                        } else {
+                                            tempObj = {
+                                                gene: item.gene.hugoSymbol,
+                                                mutation: getAlterations(item.alterations),
+                                                tumorType: tempTT,
+                                                tumorSummary: item.description
+                                            };
+                                            $scope.reviewedData.ttsDrugs.body.push(tempObj);
+                                        }
+                                    }
+                                });
                             }
-                            finishLoadingReviewedData();
+                            finishLoadingReviewedData();                            
                         });
                     }
                 });

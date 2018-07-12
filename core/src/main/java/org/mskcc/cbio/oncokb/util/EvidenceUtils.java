@@ -375,6 +375,9 @@ public class EvidenceUtils {
                         filtered.add(evidence);
                     } else {
                         boolean hasjointed = !Collections.disjoint(evidence.getAlterations(), evidenceQuery.getAlterations());
+                        if (!hasjointed) {
+                            hasjointed = !Collections.disjoint(evidence.getAlterations(), evidenceQuery.getAlleles());
+                        }
                         if (hasjointed) {
                             if (evidence.getOncoTreeType() == null) {
                                 if (evidence.getEvidenceType().equals(EvidenceType.ONCOGENIC)) {
