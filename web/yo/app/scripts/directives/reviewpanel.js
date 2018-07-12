@@ -260,6 +260,7 @@ angular.module('oncokbApp')
                                 break;
                             case 'GENE_TYPE':
                                 _.each(['tsg', 'ocg'], function(key) {
+                                    ReviewResource.rejected.push($scope.obj.type[key + '_uuid']);
                                     rejectionItems.push({uuid: $scope.obj.type[key + '_uuid'], key: key, obj: $scope.obj.type});
                                 });
                                 break;
