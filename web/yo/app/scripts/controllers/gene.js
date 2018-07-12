@@ -349,6 +349,12 @@ angular.module('oncokbApp')
                 $rootScope.fileEditable = true;
                 evidencesAllUsers = {};
                 // close all mutations
+                $timeout(function() {
+                    $rootScope.reviewMode = false;
+                    $scope.setSectionOpenStatus('close', $scope.sectionUUIDs);
+                }, 200);
+            };
+            function resetReviewResources() {
                 ReviewResource.accepted = [];
                 ReviewResource.rejected = [];
                 ReviewResource.rollback = [];
@@ -360,11 +366,7 @@ angular.module('oncokbApp')
                 ReviewResource.removed = [];
                 ReviewResource.mostRecent = {};
                 ReviewResource.precise = [];
-                $timeout(function() {
-                    $rootScope.reviewMode = false;
-                    $scope.setSectionOpenStatus('close', $scope.sectionUUIDs);
-                }, 200);
-            };
+            }
             $scope.developerCheck = function () {
                 return mainUtils.developerCheck($rootScope.me.name);
             };
@@ -421,6 +423,7 @@ angular.module('oncokbApp')
             }
             var userNames = [];
             function prepareReviewItems() {
+                resetReviewResources();
                 $scope.sectionUUIDs = []; // sectionUUIDs is used to store uuid per section.
                 $scope.status.noChanges = false;
                 $scope.status.hasReviewContent = false;
@@ -2855,8 +2858,8 @@ angular.module('oncokbApp')
                 }
                 if (_.isUndefined(data.tumorRef.cancerTypes_review.lastReviewed)) {
                     data.tumorRef.cancerTypes_review.lastReviewed = $scope.meta.cancerTypes;
-                }   
-                $scope.geneMeta.review[$scope.meta.cancerTypes_uuid] = true;
+                } 
+                mainUtils.setUUIDInReview($scope.meta.cancerTypes_uuid);  
             }
             _.each($scope.meta.newCancerTypes, function (ct) {
                 if (ct.mainType.name) {
