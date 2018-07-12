@@ -58,7 +58,9 @@ public class HotspotUtils {
             VariantConsequence insertion = VariantConsequenceUtils.findVariantConsequenceByTerm("inframe_insertion");
             VariantConsequence deletion = VariantConsequenceUtils.findVariantConsequenceByTerm("inframe_deletion");
 
-            if (proteinStart != null && alteration.getConsequence().equals(missense)) {
+            if (proteinStart != null &&
+                (alteration.getConsequence().equals(missense)
+                    || AlterationUtils.isPositionVariant(alteration))) {
                 if (proteinEnd == null) {
                     proteinEnd = proteinStart;
                 }

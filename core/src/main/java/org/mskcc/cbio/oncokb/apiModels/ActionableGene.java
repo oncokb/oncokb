@@ -11,6 +11,7 @@ public class ActionableGene {
     Integer entrezGeneId;
     String gene;
     String variant;
+    String proteinChange;
     String cancerType;
     String level;
     String drugs;
@@ -57,6 +58,14 @@ public class ActionableGene {
         this.variant = variant;
     }
 
+    public String getProteinChange() {
+        return proteinChange;
+    }
+
+    public void setProteinChange(String proteinChange) {
+        this.proteinChange = proteinChange;
+    }
+
     public String getCancerType() {
         return cancerType;
     }
@@ -97,12 +106,13 @@ public class ActionableGene {
         this.abstracts = abstracts;
     }
 
-    public ActionableGene(String isoform, String refSeq, Integer entrezGeneId, String gene, String variant, String cancerType, String level, String drugs, String pmids, String abstracts) {
+    public ActionableGene(String isoform, String refSeq, Integer entrezGeneId, String gene, String variant, String proteinChange, String cancerType, String level, String drugs, String pmids, String abstracts) {
         this.isoform = isoform;
         this.refSeq = refSeq;
         this.entrezGeneId = entrezGeneId;
         this.gene = gene;
         this.variant = variant;
+        this.proteinChange = proteinChange;
         this.cancerType = cancerType;
         this.level = level;
         this.drugs = drugs;

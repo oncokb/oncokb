@@ -208,6 +208,10 @@ public class CacheUtils {
             System.out.println("Cache all hotspots: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
             current = MainUtils.getCurrentTimestamp();
 
+            NamingUtils.cacheAllAbbreviations();
+            System.out.println("Cache abbreviation ontology: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
+            current = MainUtils.getCurrentTimestamp();
+
             registerOtherServices();
             System.out.println("Register other services: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
             current = MainUtils.getCurrentTimestamp();
@@ -322,6 +326,19 @@ public class CacheUtils {
             if (alteration.getConsequence().equals(consequence)
                 && alteration.getProteinStart() <= start
                 && alteration.getProteinEnd() >= end) {
+                alterations.add(alteration);
+            }
+        }
+        return alterations;
+    }
+
+    public static Set<Alteration> findMutationsByConsequenceAndPositionOnSamePosition(Gene gene, VariantConsequence consequence, int start, int end) {
+        Set<Alteration> alterations = new HashSet<>();
+        for (Alteration alteration : getAlterations(gene.getEntrezGeneId())) {
+            if (alteration.getConsequence().equals(consequence)
+                && alteration.getProteinStart().equals(alteration.getProteinEnd())
+                && alteration.getProteinStart() >= start
+                && alteration.getProteinStart() <= end) {
                 alterations.add(alteration);
             }
         }

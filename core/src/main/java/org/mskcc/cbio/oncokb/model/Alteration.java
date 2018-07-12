@@ -32,6 +32,10 @@ import java.util.Set;
     @NamedQuery(
         name = "findMutationsByConsequenceAndPosition",
         query = "select a from Alteration a where a.gene=? and a.consequence=? and a.proteinStart<=? and a.proteinEnd>=?"
+    ),
+    @NamedQuery(
+        name = "findMutationsByConsequenceAndPositionOnSamePosition",
+        query = "select a from Alteration a where a.gene=? and a.consequence=? and a.proteinStart>=? and a.proteinStart<=? and a.proteinStart=a.proteinEnd"
     )
 })
 

@@ -31,4 +31,9 @@ public class AlterationDaoImpl extends GenericDaoImpl<Alteration, Integer> imple
     public List<Alteration> findMutationsByConsequenceAndPosition(Gene gene, VariantConsequence consequence, int start, int end) {
         return findByNamedQuery("findMutationsByConsequenceAndPosition", gene, consequence, start, end);
     }
+
+    @Override
+    public List<Alteration> findMutationsByConsequenceAndPositionOnSamePosition(Gene gene, VariantConsequence consequence, int start, int end) {
+        return findByNamedQuery("findMutationsByConsequenceAndPositionOnSamePosition", gene, consequence, start, end);
+    }
 }

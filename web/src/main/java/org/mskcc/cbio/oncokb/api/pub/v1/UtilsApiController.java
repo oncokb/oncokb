@@ -40,7 +40,9 @@ public class UtilsApiController implements UtilsApi {
                 }
                 annotatedVariants.add(new AnnotatedVariant(
                     gene.getCuratedIsoform(), gene.getCuratedRefSeq(), gene.getEntrezGeneId(),
-                    gene.getHugoSymbol(), biologicalVariant.getVariant().getName(), biologicalVariant.getOncogenic(),
+                    gene.getHugoSymbol(), biologicalVariant.getVariant().getName(),
+                    biologicalVariant.getVariant().getAlteration(),
+                    biologicalVariant.getOncogenic(),
                     biologicalVariant.getMutationEffect(),
                     MainUtils.listToString(new ArrayList<>(biologicalVariant.getMutationEffectPmids()), ", "),
                     MainUtils.listToString(abstracts, "; ")));
@@ -71,6 +73,7 @@ public class UtilsApiController implements UtilsApi {
         header.add("Entrez Gene ID");
         header.add("Gene");
         header.add("Alteration");
+        header.add("Protein Change");
         header.add("Oncogenicity");
         header.add("Mutation Effect");
         header.add("PMIDs for Mutation Effect");
@@ -87,6 +90,7 @@ public class UtilsApiController implements UtilsApi {
                 row.add(String.valueOf(gene.getEntrezGeneId()));
                 row.add(gene.getHugoSymbol());
                 row.add(biologicalVariant.getVariant().getName());
+                row.add(biologicalVariant.getVariant().getAlteration());
                 row.add(biologicalVariant.getOncogenic());
                 row.add(biologicalVariant.getMutationEffect());
                 row.add(MainUtils.listToString(new ArrayList<>(biologicalVariant.getMutationEffectPmids()), ", "));
@@ -126,7 +130,9 @@ public class UtilsApiController implements UtilsApi {
 
                 actionableGenes.add(new ActionableGene(
                     gene.getCuratedIsoform(), gene.getCuratedRefSeq(), gene.getEntrezGeneId(),
-                    gene.getHugoSymbol(), clinicalVariant.getVariant().getName(),
+                    gene.getHugoSymbol(),
+                    clinicalVariant.getVariant().getName(),
+                    clinicalVariant.getVariant().getAlteration(),
                     getCancerType(clinicalVariant.getOncoTreeType()),
                     clinicalVariant.getLevel(),
                     MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrug()), ", "),
@@ -157,6 +163,7 @@ public class UtilsApiController implements UtilsApi {
         header.add("Entrez Gene ID");
         header.add("Gene");
         header.add("Alteration");
+        header.add("Protein Change");
         header.add("Cancer Type");
         header.add("Level");
         header.add("Drugs(s)");
@@ -174,6 +181,7 @@ public class UtilsApiController implements UtilsApi {
                 row.add(String.valueOf(gene.getEntrezGeneId()));
                 row.add(gene.getHugoSymbol());
                 row.add(clinicalVariant.getVariant().getName());
+                row.add(clinicalVariant.getVariant().getAlteration());
                 row.add(getCancerType(clinicalVariant.getOncoTreeType()));
                 row.add(clinicalVariant.getLevel());
                 row.add(MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrug()), ", "));

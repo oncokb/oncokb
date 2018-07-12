@@ -50,7 +50,7 @@
     <div ng-if="displayPrecisely(gene.summary_uuid)">
       <h3>Summary:
         <span ng-if="!reviewMode"><comments-dict key="'summary'" path="getObservePath({type: 'gene'})"></comments-dict></span>
-        <review-panel evidence-type="'GENE_SUMMARY'" obj="gene" get-evidence="getEvidence(type)" model-update="modelUpdate(type)" 
+        <review-panel evidence-type="'GENE_SUMMARY'" obj="gene" get-evidence="getEvidence(type)" model-update="modelUpdate(type)"
         uuid="getUUID({type: 'gene', key: 'summary'})" review-obj="gene.summary_review"></review-panel>
       </h3>
       <realtime-string t="'p'" key="'summary'" path="getObservePath({type: 'gene'})" uuid="getUUID({type: 'gene', key: 'summary'})"></realtime-string>
@@ -112,7 +112,7 @@
                       <i class="fa fa-arrows" uib-tooltip-placement="top" uib-tooltip="Click to put above this mutation" ng-if="displayMoveIcon('mutation', 'up', mutation.name_uuid, $index)" style="margin-right:10px;color:green" ng-click="endMoving(path, 'up')"></i>
                   </span>
                   <span ng-show="!reviewMode && fileEditable">
-                      <i ng-click="remove('mutation', path)" class="fa fa-trash-o"></i>      
+                      <i ng-click="remove('mutation', path)" class="fa fa-trash-o"></i>
                   </span>
               </span>
             </div>
@@ -181,7 +181,7 @@
                             <i ng-click="remove('tumor', path)" class="fa fa-trash-o"></i>
                         </span>
                     </span>
-                </span>                
+                </span>
                   <span ng-if="reviewContentDisplay(tumor.cancerTypes_uuid, true)">
                         <p style="margin-top:10px;">Old Content: </p>
                         <span>{{getLastReviewedCancerTypesName(tumor)}}</span>

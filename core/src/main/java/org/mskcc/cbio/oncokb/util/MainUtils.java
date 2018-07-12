@@ -39,6 +39,10 @@ public class MainUtils {
             MutationEffect.LOSS_OF_FUNCTION)
     );
 
+    public static boolean isEGFRTruncatingVariants(String alteration) {
+        return alteration == null ? false : (alteration.trim().matches("^v(II|III|IV(a|b|c)|V)?$"));
+    }
+
     public static Map<String, Object> GetRequestQueries(
         String entrezGeneId, String hugoSymbol, String alteration, String tumorType,
         String evidenceType, String consequence, String proteinStart, String proteinEnd,
@@ -196,47 +200,6 @@ public class MainUtils {
         if (o2 == null)
             return asc ? -1 : 1;
         return (PRIORITIZED_ONCOGENICITY.indexOf(o2) - PRIORITIZED_ONCOGENICITY.indexOf(o1)) * (asc ? 1 : -1);
-    }
-
-    public static Oncogenicity idealOncogenicityByMutationEffect(MutationEffect mutationEffect) {
-        if (mutationEffect == null) {
-            return null;
-        }
-
-        Oncogenicity oncogenic;
-
-        switch (mutationEffect) {
-            case GAIN_OF_FUNCTION:
-                oncogenic = Oncogenicity.YES;
-                break;
-            case LIKELY_GAIN_OF_FUNCTION:
-                oncogenic = Oncogenicity.LIKELY;
-                break;
-            case LOSS_OF_FUNCTION:
-                oncogenic = Oncogenicity.YES;
-                break;
-            case LIKELY_LOSS_OF_FUNCTION:
-                oncogenic = Oncogenicity.LIKELY;
-                break;
-            case SWITCH_OF_FUNCTION:
-                oncogenic = Oncogenicity.YES;
-                break;
-            case LIKELY_SWITCH_OF_FUNCTION:
-                oncogenic = Oncogenicity.LIKELY;
-                break;
-            case NEUTRAL:
-                oncogenic = Oncogenicity.LIKELY_NEUTRAL;
-                break;
-            case LIKELY_NEUTRAL:
-                oncogenic = Oncogenicity.LIKELY_NEUTRAL;
-                break;
-            case INCONCLUSIVE:
-                oncogenic = Oncogenicity.INCONCLUSIVE;
-                break;
-            default:
-                oncogenic = null;
-        }
-        return oncogenic;
     }
 
     public static Oncogenicity findHighestOncogenicByEvidences(Set<Evidence> evidences) {
@@ -469,9 +432,6 @@ public class MainUtils {
                 variant.setVariant(alteration);
                 Oncogenicity oncogenicity = EvidenceUtils.getOncogenicityFromEvidence(map.get(EvidenceType.ONCOGENIC));
                 MutationEffect mutationEffect = EvidenceUtils.getMutationEffectFromEvidence(map.get(EvidenceType.MUTATION_EFFECT));
-                if ((oncogenicity == null || oncogenicity.equals(Oncogenicity.INCONCLUSIVE)) && mutationEffect != null) {
-                    oncogenicity = idealOncogenicityByMutationEffect(mutationEffect);
-                }
                 variant.setOncogenic(oncogenicity == null ? null : oncogenicity.getOncogenic());
                 variant.setMutationEffect(mutationEffect == null ? null : mutationEffect.getMutationEffect());
                 variant.setOncogenicPmids(EvidenceUtils.getPmids(map.get(EvidenceType.ONCOGENIC)));

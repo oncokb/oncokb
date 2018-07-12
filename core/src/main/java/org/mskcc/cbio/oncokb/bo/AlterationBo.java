@@ -48,6 +48,16 @@ public interface AlterationBo extends GenericBo<Alteration> {
 
     /**
      *
+     * @param gene
+     * @param consequence
+     * @param start
+     * @param end
+     * @return
+     */
+    List<Alteration> findMutationsByConsequenceAndPositionOnSamePosition(Gene gene, VariantConsequence consequence, int start, int end, Collection<Alteration> alterations);
+
+    /**
+     *
      * @param alteration
      * @return
      */
