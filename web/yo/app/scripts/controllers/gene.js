@@ -1996,9 +1996,12 @@ angular.module('oncokbApp')
                                 }
                             });
                         });
+                        $scope.indicateMutationContent(mutation);
                         break;
                     case 'treatment':
                         cancelDeleteItem(treatment.name_review, treatment.name_uuid);
+                        $scope.indicateMutationContent(mutation);
+                        $scope.indicateTumorContent(tumor);
                         break;
                 }
             }

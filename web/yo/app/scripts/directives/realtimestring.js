@@ -43,16 +43,16 @@ angular.module('oncokbApp')
                 post: function postLink(scope) {
                     scope.timeoutRef = '';
                     scope.pContent = '';
+                    if (scope.t === 'treatment-select' && scope.key === 'level') {
+                        scope.$watch('data.propagation', function(newPro, oldPro) {
+                            if (newPro !== oldPro && (!$rootScope.reviewMode || ReviewResource.rejected.indexOf(scope.data.propagation_uuid) === -1)) {
+                                scope.setReviewRelatedContent(newPro, oldPro, true);
+                            }
+                        });
+                    }
                     scope.$watch('data[key]', function (n, o) {
                         if (n !== o && !_.isUndefined(n)) {
                             if (!scope.data || !scope.data[scope.key+'_editing'] || scope.data[scope.key+'_editing'] === $rootScope.me.name) {
-                                if (scope.t === 'treatment-select' && scope.key === 'level') {
-                                    scope.$watch('data.propagation', function(newPro, oldPro) {
-                                        if (newPro !== oldPro && (!$rootScope.reviewMode || ReviewResource.rejected.indexOf(scope.data.propagation_uuid) === -1)) {
-                                            scope.setReviewRelatedContent(newPro, oldPro, true);
-                                        }
-                                    });
-                                }
                                 if (!$rootScope.reviewMode || ReviewResource.rejected.indexOf(scope.uuid) === -1) {     
                                     mainUtils.updateLastModified();
                                     scope.data[scope.key] = OncoKB.utils.getString(scope.data[scope.key]);                  
@@ -165,10 +165,10 @@ angular.module('oncokbApp')
                     }
                 }
                 $scope.changePropagation = function (initial) {
-                    if ($scope.data.propagation_review) {
+                    if (!initial && $scope.data.propagation_review) {
                         delete $scope.data.propagation_review.lastReviewed;
-                    }
-                    mainUtils.deleteUUID($scope.data.propagation_uuid);
+                        mainUtils.deleteUUID($scope.data.propagation_uuid);
+                    }                    
                     var _propagationOpts = [];
                     if ($scope.data[$scope.key] === '1' || $scope.data[$scope.key] === '2A') {
                         _propagationOpts = [
