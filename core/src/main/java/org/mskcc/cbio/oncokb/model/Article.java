@@ -207,18 +207,28 @@ public class Article implements java.io.Serializable {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final Article other = (Article) obj;
-        if (!Objects.equals(this.pmid, other.pmid)) {
-            return false;
-        }
-        return true;
-    }
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Article)) return false;
 
+        Article article = (Article) o;
+
+        if (getUuid() != null ? !getUuid().equals(article.getUuid()) : article.getUuid() != null) return false;
+        if (getPmid() != null ? !getPmid().equals(article.getPmid()) : article.getPmid() != null) return false;
+        if (getTitle() != null ? !getTitle().equals(article.getTitle()) : article.getTitle() != null) return false;
+        if (getJournal() != null ? !getJournal().equals(article.getJournal()) : article.getJournal() != null)
+            return false;
+        if (getPubDate() != null ? !getPubDate().equals(article.getPubDate()) : article.getPubDate() != null)
+            return false;
+        if (getVolume() != null ? !getVolume().equals(article.getVolume()) : article.getVolume() != null) return false;
+        if (getIssue() != null ? !getIssue().equals(article.getIssue()) : article.getIssue() != null) return false;
+        if (getPages() != null ? !getPages().equals(article.getPages()) : article.getPages() != null) return false;
+        if (getAuthors() != null ? !getAuthors().equals(article.getAuthors()) : article.getAuthors() != null)
+            return false;
+        if (getElocationId() != null ? !getElocationId().equals(article.getElocationId()) : article.getElocationId() != null)
+            return false;
+        if (getAbstractContent() != null ? !getAbstractContent().equals(article.getAbstractContent()) : article.getAbstractContent() != null)
+            return false;
+        return getLink() != null ? getLink().equals(article.getLink()) : article.getLink() == null;
+    }
 }
