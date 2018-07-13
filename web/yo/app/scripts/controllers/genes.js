@@ -110,6 +110,8 @@ angular.module('oncokbApp')
                 .newOptions()
                 .withDOM('ifrtlp')
                 .withOption('order', sorting)
+                .withPaginationType('full_numbers')
+                .withDisplayLength(25)
                 .withBootstrap();
 
             $scope.dtColumns = [
