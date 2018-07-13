@@ -77,7 +77,7 @@ angular.module('oncokbApp')
                 label: 'Tumor Type Summary',
                 value: 'tumorSummary'
             }, {
-                label: 'Tumor Type Summary + Drugs',
+                label: 'Tumor Type Summary + Therapeutics',
                 value: 'ttsDrugs'
             }, {
                 label: 'Therapeutics (All Levels)',
