@@ -66,7 +66,8 @@ KIT	T670C	Gastrointestinal Stromal Tumor	1: Imatinib; 1: Sunitinib; 1: Regorafen
 KIT	T670C	Melanoma	2A: Imatinib; 2B: Sunitinib; 2B: Regorafenib; 2B: Sorafenib;
 KIT	T670C	Colorectal Cancer	2B: Imatinib; 2B: Sunitinib; 2B: Regorafenib; 2B: Sorafenib;
 KIT	T670C	Thymic Tumor	2A: Sunitinib; 2A: Sorafenib; 2B: Imatinib; 2B: Regorafenib;
-KIT	D816A	Gastrointestinal Stromal Tumor	4: Avapritinib; 4: DCC-2618;
-KIT	D816A	Melanoma	2A: Imatinib;
-KIT	D816A	Colorectal Cancer
-KIT	D816A	Thymic Tumor	2A: Sunitinib; 2A: Sorafenib;
+KIT	D816A	Gastrointestinal Stromal Tumor	3B: Avapritinib;
+KIT	D816A	Melanoma	2A: Imatinib; 3B: Avapritinib;
+KIT	D816A	Colorectal Cancer	3B: Avapritinib;
+KIT	D816A	Mastocytosis	3A: Avapritinib;
+KIT	D816A	Thymic Tumor	2A: Sunitinib; 2A: Sorafenib; 3B: Avapritinib;
