@@ -21,7 +21,7 @@ angular.module('oncokbApp')
             var filterTabs = [];
             filterTabs.push({key: 'genes', value: tabs.genes});
             filterTabs.push({key: 'queues', value: tabs.queues});
-            if ($rootScope.me.role === 8) {
+            if ($rootScope.me.admin) {
                 var keys = ['variant', 'tools', 'feedback'];
                 keys.forEach(function(e) {
                     filterTabs.push({key: e, value: tabs[e]});

@@ -18,8 +18,8 @@
                 <th>Last modified</th>
                 <th>Last modified by</th>
                 <th>Edit</th>
-                <th ng-if="userRole === 8">Needs to be reviewed</th>
-                <th ng-if="userRole === 8"># of articles to curate</th>
+                <th ng-if="me.admin">Needs to be reviewed</th>
+                <th ng-if="me.admin"># of articles to curate</th>
             </tr>
             </thead>
             <tbody>
@@ -30,13 +30,13 @@
                     <td>
                         <i class="fa " ng-class="{'fa-pencil': meta.editable, 'fa-eye': !meta.editable}" ng-click="redirect('/gene/' + meta.hugoSymbol)"><span style="display:none">1</span></i>
                     </td>
-                    <td ng-if="userRole === 8">{{ meta.review }}</td>
-                    <td ng-if="userRole === 8">{{ meta.queues }}</td>
+                    <td ng-if="me.admin">{{ meta.review }}</td>
+                    <td ng-if="me.admin">{{ meta.queues }}</td>
                 </tr>
             </tbody>
         </table>
     </div>
-    <div ng-if="userRole === 8">
+    <div ng-if="me.admin">
         <loading ng-model="status.rendering" content="Please wait, we are loading genes information."></loading>
     </div>
 </div>

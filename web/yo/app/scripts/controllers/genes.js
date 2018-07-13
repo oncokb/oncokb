@@ -99,10 +99,8 @@ angular.module('oncokbApp')
                 });
             };
 
-            $scope.userRole = $rootScope.me.role;
-
-            var sorting = [[2, 'asc'], [1, 'desc'], [0, 'asc']];
-            if ($scope.userRole === 8) {
+            var sorting = [[1, 'desc'], [0, 'asc'], [2, 'asc']];
+            if ($rootScope.me.admin) {
                 sorting = [[4, 'desc'], [5, 'desc'], [1, 'desc'], [0, 'asc']];
             }
 
@@ -120,7 +118,7 @@ angular.module('oncokbApp')
                 DTColumnDefBuilder.newColumnDef(2),
                 DTColumnDefBuilder.newColumnDef(3)
             ];
-            if ($scope.userRole === 8) {
+            if ($rootScope.me.admin) {
                 $scope.dtColumns.push(DTColumnDefBuilder.newColumnDef(4));
                 $scope.dtColumns.push(DTColumnDefBuilder.newColumnDef(5));
             }

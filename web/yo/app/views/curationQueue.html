@@ -156,10 +156,10 @@
                                     uib-tooltip-placement="top" uib-tooltip="Complete curation" ng-bind-html="getButtonHtml('complete', x.addedAt)">
                             </button>
                             <button type="button" class="btn btn-warning buttonStyle" ng-click="initialProcess(x, 'edit')"
-                                    ng-show="userRole === 8" uib-tooltip-placement="top" uib-tooltip="Modify curation"><i class="fa fa-edit"></i>
+                                    ng-show="me.admin" uib-tooltip-placement="top" uib-tooltip="Modify curation"><i class="fa fa-edit"></i>
                             </button>
                             <button type="button" class="btn btn-danger buttonStyle" ng-click="initialProcess(x, 'delete')"
-                                    ng-show="userRole === 8" uib-tooltip-placement="top"
+                                    ng-show="me.admin" uib-tooltip-placement="top"
                                     uib-tooltip="Delete curation" ng-bind-html="getButtonHtml('delete', x.addedAt)">
                             </button>
                         </div>

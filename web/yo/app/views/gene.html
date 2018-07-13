@@ -7,10 +7,10 @@
         <img style="height:30px" ng-src="{{collaborator.photoURL}}" uib-tooltip-placement="top" uib-tooltip="{{::collaborator.name}}">
       </span>
       <span class="geneLastModify">Last edit was made on {{geneMeta.lastModifiedAt | date : 'MMM d, h:mm a yyyy'}} by {{geneMeta.lastModifiedBy}}.</span>
-      <span ng-if="me.role === 8 && geneMeta.lastSavedAt" class="geneLastModify">Last update to database was made on {{geneMeta.lastSavedAt  | date : 'MMM d, h:mm a'}} by {{geneMeta.lastSavedBy}}</span>
+      <span ng-if="me.admin && geneMeta.lastSavedAt" class="geneLastModify">Last update to database was made on {{geneMeta.lastSavedAt  | date : 'MMM d, h:mm a'}} by {{geneMeta.lastSavedBy}}</span>
       <span ng-if="geneMeta.review.currentReviewer" class="geneLastModify" style="color:red">{{geneMeta.review.currentReviewer}} is reviewing this gene</span>
       <span class="btn-group btn-group-sm pull-right top-tools-menu" uib-dropdown>
-        <button type="button" class="btn btn-default" ng-if="::(userRole === 8 && internal)" ng-disabled="!fileEditable"
+        <button type="button" class="btn btn-default" ng-if="::(me.admin && internal)" ng-disabled="!fileEditable"
           ng-click="review()">{{reviewMode ? 'Review Complete' : 'Review'}}</button>
         <button type="button" class="btn btn-default" ng-if="developerCheck()" ng-click="exitReview()">Exit Review</button>
         <button type="button" class="btn btn-default" ng-click="getAllCitations()">Citations</button>
@@ -107,7 +107,7 @@
             </div>
             <div ng-show="!reviewMode" style="margin-top:-30px">
               <span style="float:right">
-                  <span ng-show="!reviewMode && userRole === 8 && fileEditable">
+                  <span ng-show="!reviewMode && me.admin && fileEditable">
                       <i class="fa fa-arrows" uib-tooltip-placement="top" uib-tooltip="{{movingInfo.message}}" ng-show="displayMoveIcon('mutation', 'initial', mutation.name_uuid)" style="margin-right:10px;" ng-style="movingInfo.style" ng-click="startMoving('mutation', path, mutation.name_uuid, $index)"></i>
                       <i class="fa fa-arrows" uib-tooltip-placement="top" uib-tooltip="Click to put above this mutation" ng-show="displayMoveIcon('mutation', 'up', mutation.name_uuid, $index)" style="margin-right:10px;color:green" ng-click="endMoving(path, 'up')"></i>
                   </span>
@@ -173,7 +173,7 @@
                     <span style="margin-left:5px"><comments-dict key="'cancerTypes'" path="path"></comments-dict></span>
                     <span style="margin-left:5px" ng-bind-html="tumorContent[tumor.cancerTypes_uuid].result"></span>
                     <span style="float:right" ng-if="fileEditable">
-                        <span ng-if="userRole === 8">
+                        <span ng-if="me.admin">
                           <i class="fa fa-arrows" uib-tooltip-placement="top" uib-tooltip="{{movingInfo.message}}" ng-show="displayMoveIcon('tumor', 'initial', tumor.cancerTypes_uuid)" style="margin-right:10px;" ng-style="movingInfo.style" ng-click="startMoving('tumor', path, tumor.cancerTypes_uuid, $index)"></i>
                           <i class="fa fa-arrows" uib-tooltip-placement="top" uib-tooltip="Click to put above this tumor" ng-show="displayMoveIcon('tumor', 'up', tumor.cancerTypes_uuid, $index)" style="margin-right:10px;color:green" ng-click="endMoving(path, 'up')"></i>
                         </span>
@@ -272,8 +272,9 @@
                                 <comments-dict key="'name'" path="path"></comments-dict>
                                 <span class="curationNoEntry" ng-if="isEmptySection(treatment, 'treatment')">No Entry</span>
                               </div>
+
                               <span style="float:right" ng-show="!reviewMode && fileEditable">
-                                  <span ng-if="userRole === 8">
+                                  <span ng-if="me.admin">
                                       <i class="fa fa-arrows" uib-tooltip-placement="top" uib-tooltip="{{movingInfo.message}}"  ng-show="displayMoveIcon('treatment', 'initial', treatment.name_uuid)" style="margin-right:10px;" ng-style="movingInfo.style" ng-click="startMoving('treatment', path, treatment.name_uuid, $index)"></i>
                                       <i class="fa fa-arrows" uib-tooltip-placement="top" uib-tooltip="Click to put above this treatment" ng-show="displayMoveIcon('treatment', 'up', treatment.name_uuid, $index)" style="margin-right:10px;color:green" ng-click="endMoving(path, 'up')"></i>
                                   </span>

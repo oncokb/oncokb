@@ -11,12 +11,12 @@
  * gmail.com will be used as standard email format, googlemail address will be converted to gmail
  */
 angular.module('oncokbApp')
-    .service('user', function user($routeParams, $q, $firebaseAuth, $firebaseObject, $rootScope, $location) {
+    .service('user', function user($routeParams, $q, $firebaseAuth, $firebaseObject, $rootScope) {
         var me = {
+            admin: false,
             email: '',
             name: '',
-            role: 1,
-            genes: []
+            photoURL: ''
         };
         var editableData = {};
         var allUsers = {};
@@ -56,14 +56,14 @@ angular.module('oncokbApp')
                 me.photoURL = user.photoURL;
             }
             var defer = $q.defer();
-            getAllUsers().then(function() {
-                if (allUsers[me.name.toLowerCase()].admin === true) {
-                    me.role = 8;
-                } else {
-                    me.role = 4;
+            getAllUsers().then(function(allUsers) {
+                if (!_.isUndefined(allUsers[me.name.toLowerCase()].admin)) {
+                    me.admin = allUsers[me.name.toLowerCase()].admin;
+                } else if (!_.isUndefined(allUsers[me.name.toLowerCase()].genes)) {
+                    me.genes = allUsers[me.name.toLowerCase()].genes;
                 }
-                defer.resolve();
                 $rootScope.me = me;
+                defer.resolve();
             });
             return defer.promise;
         }
@@ -97,7 +97,7 @@ angular.module('oncokbApp')
             getAllUsers().then(function(users) {
                 var name = me.name.toLowerCase();
                 _.each(hugoSymbols, function(hugoSymbol) {
-                    if (users[name].admin === true || users[name].genes.indexOf(hugoSymbol) !== -1) {
+                    if (users[name].admin === true || users[name].genes.write === 'all' || users[name].genes.write.indexOf(hugoSymbol) !== -1) {
                         editableData[hugoSymbol] = true;
                     } else {
                         editableData[hugoSymbol] = false;

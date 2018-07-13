@@ -24,7 +24,6 @@ angular.module('oncokbApp')
                     hasComment: false,
                     allResolved: false
                 };
-                scope.userRole = $rootScope.me.role;
                 $firebaseObject(firebase.database().ref(scope.path)).$bindTo(scope, "obj").then(function (success) {
                     scope.checkResolvedStatus();
                     scope.status.rendering = false;

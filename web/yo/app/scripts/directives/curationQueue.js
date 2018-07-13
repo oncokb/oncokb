@@ -120,7 +120,6 @@ angular.module('oncokbApp')
                     });
                     $scope.data.curators = tempArr;
                 });
-                $scope.userRole = $rootScope.me.role;
                 $scope.getButtonHtml = function (type, addedAt) {
                     var result = '';
                     switch(type) {

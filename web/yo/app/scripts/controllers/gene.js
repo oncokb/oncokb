@@ -3,6 +3,14 @@
 angular.module('oncokbApp')
     .controller('GeneCtrl', ['_', 'S', '$resource', '$interval', '$timeout', '$scope', '$rootScope', '$location', '$route', '$routeParams', '$window', '$q', 'dialogs', 'OncoKB', 'DatabaseConnector', 'SecretEmptyKey', '$sce', 'jspdf', 'FindRegex', 'mainUtils', 'ReviewResource', 'loadFiles', '$firebaseObject', '$firebaseArray', 'FirebaseModel', 'user',
         function (_, S, $resource, $interval, $timeout, $scope, $rootScope, $location, $route, $routeParams, $window, $q, dialogs, OncoKB, DatabaseConnector, SecretEmptyKey, $sce, jspdf, FindRegex, mainUtils, ReviewResource, loadFiles, $firebaseObject, $firebaseArray, FirebaseModel, user) {
+            checkReadPermission();
+            // Check permission for user who can only read and write specific genes.
+            function checkReadPermission() {
+                if (!$rootScope.me.admin && $rootScope.me.genes.read !== 'all' && !$rootScope.me.genes.read.includes($routeParams.geneName)) {
+                    dialogs.notify('Warning', 'Sorry, you don\'t have permission to read this gene.');
+                    $location.url('/genes');
+                }
+            }
             // Remove current collaborator when user changes url directly.
             $scope.$on('$locationChangeStart', function(event, next, current) {
                 if (next && next !== current) {

@@ -17,7 +17,20 @@ angular.module('oncokbApp')
                 var metaDefer = $q.defer();
                 var ref = firebase.database().ref('Meta');
                 ref.on('value', function(doc) {
-                    $rootScope.metaData = doc.val();
+                    if ($rootScope.me.admin) {
+                        $rootScope.metaData = doc.val();
+                    } else if (!_.isUndefined($rootScope.me.genes)) {
+                        if ($rootScope.me.genes.read === 'all') {
+                            $rootScope.metaData = doc.val();
+                        } else {
+                            var hugoSymbols = $rootScope.me.genes.read.split(',');
+                            var metas = {};
+                            _.each(hugoSymbols,function(hugoSymbol) {
+                                metas[hugoSymbol] = doc.val()[hugoSymbol];
+                            });
+                            $rootScope.metaData = metas;
+                        }
+                    }
                     metaDefer.resolve('success');
                 }, function(error) {
                     metaDefer.reject('Fail to load queues file');
