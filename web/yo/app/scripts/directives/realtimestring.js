@@ -97,10 +97,10 @@ angular.module('oncokbApp')
                             scope.editingMessage = '';
                         }
                     });
-                    scope.setReviewRelatedContent = function(n, o, isPropogation) {
+                    scope.setReviewRelatedContent = function(n, o, isPropagation) {
                         var key = scope.key;
                         var uuid = scope.uuid;
-                        if (isPropogation === true) {
+                        if (isPropagation === true) {
                             key = 'propagation';
                             uuid = scope.data.propagation_uuid;
                         }
