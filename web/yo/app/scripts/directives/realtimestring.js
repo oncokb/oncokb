@@ -34,7 +34,9 @@ angular.module('oncokbApp')
                         scope.cleanUpEditing();
                         scope.initializeFE();
                         $rootScope.$watch('reviewMode', function(n, o) {
-                            scope.calculateDiff();
+                            if (n !== o && n === true) {
+                                scope.calculateDiff();
+                            }
                         });
                     }, function (error) {
                         console.log('error');
@@ -83,6 +85,9 @@ angular.module('oncokbApp')
                                     delete scope.data[scope.key+'_editing'];
                                     scope.initializeFE();
                                 }, 10*1000);
+                            }
+                            if ($rootScope.reviewMode && ['p', 'MUTATION_NAME', 'TREATMENT_NAME'].indexOf(scope.t) !== -1) {
+                                scope.calculateDiff();
                             }
                         }                                               
                     });
