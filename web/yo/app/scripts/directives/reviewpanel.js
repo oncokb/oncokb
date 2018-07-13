@@ -291,7 +291,7 @@ angular.module('oncokbApp')
                             case 'Investigational implications for sensitivity to therapy':
                             case 'Investigational implications for resistance to therapy':
                                 var treatment = $scope.getRefs($scope.mutation, $scope.tumor, $scope.ti, $scope.treatment).treatment;
-                                _.each(['name', 'level', 'propogation', 'indication', 'description'], function(key) {
+                                _.each(['name', 'level', 'propagation', 'indication', 'description'], function(key) {
                                     rejectionItems.push({uuid: treatment[key + '_uuid'], key: key, obj: treatment});
                                 });
                                 break;
