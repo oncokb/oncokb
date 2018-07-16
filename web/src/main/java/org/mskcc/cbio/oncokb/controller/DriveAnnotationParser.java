@@ -324,7 +324,7 @@ public class DriveAnnotationParser {
 //                (mutationEffect.getString("short").trim().isEmpty() ? null : mutationEffect.getString("short").trim())
 //                : null;
 
-            if (effect != null || effectDesc != null) {
+            if (!com.mysql.jdbc.StringUtils.isNullOrEmpty(effect) || !com.mysql.jdbc.StringUtils.isNullOrEmpty(effectDesc)) {
                 // save
                 Evidence evidence = new Evidence();
                 evidence.setEvidenceType(EvidenceType.MUTATION_EFFECT);
