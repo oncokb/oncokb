@@ -1718,7 +1718,19 @@ angular.module('oncokbApp')
                     console.log("Error:", error);
                 });                
             };
-
+            $scope.getVUSClass = function(time) {
+                var dt = new Date(time);
+                var _month = new Date().getMonth();
+                var _year = new Date().getYear();
+                var _monthDiff = (_year - dt.getYear()) * 12 + _month - dt.getMonth();
+                if (_monthDiff > 3) {
+                    return 'danger';
+                } else if (_monthDiff > 1) {
+                    return 'warning';
+                } else {
+                    return '';
+                }
+            };
             $scope.getCancerTypesName = function (tumor) {
                 return mainUtils.getCancerTypesName(tumor.cancerTypes);
             };

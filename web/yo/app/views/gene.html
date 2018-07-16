@@ -390,7 +390,7 @@
     </h3>
     <div ng-repeat="variant in vusItems">
         <div class="input-group  input-group-sm vusGroup">
-            <span class="input-group-addon" ng-class="getClass(dt)" qtip type="vusItem" time="variant.time.value" by="variant.time.by.name">{{::variant.name}}</span>
+            <span class="input-group-addon" ng-class="getVUSClass(variant.time.value)" qtip type="vusItem" time="variant.time.value" by="variant.time.by.name">{{::variant.name}}</span>
             <span class="input-group-btn" ng-show="fileEditable">
                 <button class="btn btn-default" type="button" style="text-align:left">
                     <comments-dict key="'name'" path="getObservePath({type: 'vus', variant: variant})"></comments-dict>
