@@ -409,7 +409,7 @@ angular.module('oncokbApp')
                                 articleStr += (new Date(articleData.pubdate)).getFullYear();
                             }
                             $scope.pmid = pmid;
-                            $scope.predictedArticle = articleStr;
+                            $scope.predictedArticle = mainUtils.getTextString(articleStr);
                             $scope.validPMID = true;
                             $scope.input.link = 'https://www.ncbi.nlm.nih.gov/pubmed/' + pmid;
                         }
