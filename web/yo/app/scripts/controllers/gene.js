@@ -6,10 +6,16 @@ angular.module('oncokbApp')
             checkReadPermission();
             // Check permission for user who can only read and write specific genes.
             function checkReadPermission() {
-                $scope.hugoSymbols = _.without(_.keys($rootScope.metaData), 'collaborators');
-                if (!$scope.hugoSymbols.includes($routeParams.geneName)) {
-                    $location.url('/genes');
-                } else if (!$rootScope.me.admin && $rootScope.me.genes.read !== 'all' && !$rootScope.me.genes.read.includes($routeParams.geneName)) {
+                if (_.isUndefined($rootScope.metaData)) {
+                    loadFiles.load(['meta']).then(function() {
+                        checkValidUrl();
+                    }, function() {
+                        console.log('fail to load meta file');
+                    });
+                } else {
+                    checkValidUrl();
+                }
+                if (!$rootScope.me.admin && $rootScope.me.genes.read !== 'all' && !$rootScope.me.genes.read.includes($routeParams.geneName)) {
                     dialogs.notify('Warning', 'Sorry, you don\'t have permission to read this gene.');
                     $location.url('/genes');
                 }
@@ -23,6 +29,12 @@ angular.module('oncokbApp')
             // Remove current collaborator when user closes tab.
             $window.onbeforeunload = function () {
                 removeCollaborator();
+            }
+            function checkValidUrl() {
+                $scope.hugoSymbols = _.without(_.keys($rootScope.metaData), 'collaborators');
+                if (!$scope.hugoSymbols.includes($routeParams.geneName)) {
+                    $location.url('/genes');
+                }
             }
             function removeCollaborator() {
                 var myName = $rootScope.me.name.toLowerCase();
