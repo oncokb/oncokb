@@ -393,7 +393,6 @@ angular.module('oncokbApp')
                 if (onlyReviewedContent && data[key+'_review'] && !_.isUndefined(data[key+'_review'].lastReviewed)) {
                     data[key] = data[key+'_review'].lastReviewed;
                 }
-                delete data[key+'_review'];
             });
         }
         function shouldExclude(onlyReviewedContent, reviewObj) {
