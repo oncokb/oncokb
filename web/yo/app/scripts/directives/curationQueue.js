@@ -22,6 +22,7 @@ angular.module('oncokbApp')
             replace: true,
             link: {
                 pre: function preLink(scope) {
+                    scope.me = $rootScope.me;
                     scope.data = {
                         allCurations: false,
                         curators: [],
@@ -73,7 +74,7 @@ angular.module('oncokbApp')
                     ];
                     scope.queue = [];
                     loadFiles.load(['queues', 'meta']).then(function(result) {
-                        scope.data.hugoSymbols = _.keys($rootScope.metaData);
+                        scope.data.hugoSymbols = _.without(_.keys($rootScope.metaData), 'collaborators');
                         if (scope.location === 'gene') {
                             scope.queue = scope.getQueuesByGene(scope.hugoSymbol);
                         } else if (scope.location === 'queues') {

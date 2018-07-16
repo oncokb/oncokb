@@ -17,6 +17,7 @@ angular.module('oncokbApp')
             },
             replace: true,
             link: function postLink(scope, element, attrs) {
+                scope.me = $rootScope.me;
                 scope.mouseLeaveTimeout = '';
                 scope.params = {};
                 scope.status = {
