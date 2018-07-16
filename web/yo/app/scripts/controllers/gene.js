@@ -1920,11 +1920,6 @@ angular.module('oncokbApp')
                 }
                 DatabaseConnector.deleteEvidences(evidenceUUIDs, historyData, function (result) {
                     removeModel({ type: type, indicies: indicies, uuids: allUUIDs });
-
-                    // Update all priority if one of treatments is deleted.
-                    if (type && type === 'treatment') {
-                        $scope.updatePriority(ti.treatments);
-                    }
                     ReviewResource.loading = _.without(ReviewResource.loading, loadingUUID);
                 }, function (error) {
                     dialogs.error('Error', 'Failed to update to database! Please contact the developer.');
@@ -1946,6 +1941,8 @@ angular.module('oncokbApp')
                 } else if (data.type === 'treatment') {
                     $scope.gene.mutations[indices[0]].tumors[indices[1]].TIs[indices[2]].treatments.splice(indices[3], 1);
                     $scope.indicateTumorContent($scope.gene.mutations[indices[0]].tumors[indices[1]]);
+                    // Update all priority if one of treatments is deleted.
+                    $scope.updatePriority($scope.gene.mutations[indices[0]].tumors[indices[1]].TIs[indices[2]].treatments);
                 }
                 _.each(data.uuids, function (uuid) {
                     if ($scope.geneMeta.review[uuid]) {
@@ -2103,11 +2100,9 @@ angular.module('oncokbApp')
                 dialogs.notify('All Citations', messageContent.join(''), { size: 'lg' });
             };
             $scope.specifyAnnotation = function () {
-                return true;
                 var annotationLocation = {};
                 setAnnotationResult(annotationLocation, fetchResults(FindRegex.result(this.gene.background)), 'Gene Background');
-                var mutations = mainUtils.getGeneData(this.gene, true, false).mutations;
-                _.each(mutations, function (mutation) {
+                _.each($scope.gene.mutations, function (mutation) {
                     setAnnotationResult(annotationLocation, fetchResults(FindRegex.result(JSON.stringify(mutation))), mutation.name);
                 });
                 return annotationLocation;
