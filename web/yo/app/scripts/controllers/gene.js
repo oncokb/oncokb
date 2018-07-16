@@ -6,7 +6,10 @@ angular.module('oncokbApp')
             checkReadPermission();
             // Check permission for user who can only read and write specific genes.
             function checkReadPermission() {
-                if (!$rootScope.me.admin && $rootScope.me.genes.read !== 'all' && !$rootScope.me.genes.read.includes($routeParams.geneName)) {
+                $scope.hugoSymbols = _.without(_.keys($rootScope.metaData), 'collaborators');
+                if (!$scope.hugoSymbols.includes($routeParams.geneName)) {
+                    $location.url('/genes');
+                } else if (!$rootScope.me.admin && $rootScope.me.genes.read !== 'all' && !$rootScope.me.genes.read.includes($routeParams.geneName)) {
                     dialogs.notify('Warning', 'Sorry, you don\'t have permission to read this gene.');
                     $location.url('/genes');
                 }

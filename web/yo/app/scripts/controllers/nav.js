@@ -87,6 +87,18 @@ angular.module('oncokbApp')
             });
         };
 
+        $scope.tabIsActive = function(route) {
+            if (route instanceof Array) {
+                for (var i = route.length - 1; i >= 0; i--) {
+                    if (route[i] === $location.path()) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            return route === $location.path();
+        };
+
         // This flag we use to show or hide the button in our HTML.
         // $scope.signedIn = false;
 
