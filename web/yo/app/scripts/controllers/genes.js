@@ -70,54 +70,47 @@ angular.module('oncokbApp')
                     }
                     var fileId = $scope.documents[docIndex].id;
                     var hugoSymbol = $scope.documents[docIndex].title;
-                    if (['BRAF', 'AKT1', 'EGFR', 'MTOR'].indexOf(hugoSymbol) !== -1) {
-                    // if (['BRAF'].indexOf(hugoSymbol) !== -1) {
-                        storage.getRealtimeDocument(fileId).then(function(realtime) {
-                            var apiCalls = [];
-                            var gene = realtime.getModel().getRoot().get('gene');
-                            if (gene) {
-                                var geneData = stringUtils.getGeneData(gene);
-                                apiCalls.push(importGeneData(geneData));
-                            }
-                            var vus = realtime.getModel().getRoot().get('vus');
-                            if (vus) {
-                                var vusData = stringUtils.getVUSFullData(vus);
-                                console.log(vusData);
-                                apiCalls.push(importVUSData({
-                                    hugoSymbol: hugoSymbol,
-                                    data: vusData
-                                }));
-                            }
-                            var history = realtime.getModel().getRoot().get('history');
-                            if (history) {
-                                var historyData = stringUtils.getHistoryData(history);
-                                apiCalls.push(importHistoryData({
-                                    hugoSymbol: hugoSymbol,
-                                    data: historyData
-                                }));
-                            }
-                            $q.all(apiCalls).then(function() {
-                                $timeout(function() {
-                                    exportGene(++docIndex);
-                                }, 500, false);
-                            }, function(error) {
-                                console.log('fail to save gene ', error);
-                                $timeout(function() {
-                                    exportGene(++docIndex);
-                                }, 500, false);
-                            });
-                        }, function() {
-                            console.log('fail to load drive gene ', hugoSymbol);
+                    storage.getRealtimeDocument(fileId).then(function(realtime) {
+                        var apiCalls = [];
+                        var gene = realtime.getModel().getRoot().get('gene');
+                        if (gene) {
+                            var geneData = stringUtils.getGeneData(gene);
+                            apiCalls.push(importGeneData(geneData));
+                        }
+                        var vus = realtime.getModel().getRoot().get('vus');
+                        if (vus) {
+                            var vusData = stringUtils.getVUSFullData(vus);
+                            apiCalls.push(importVUSData({
+                                hugoSymbol: hugoSymbol,
+                                data: vusData
+                            }));
+                        }
+                        var history = realtime.getModel().getRoot().get('history');
+                        if (history) {
+                            var historyData = stringUtils.getHistoryData(history);
+                            apiCalls.push(importHistoryData({
+                                hugoSymbol: hugoSymbol,
+                                data: historyData
+                            }));
+                        }
+                        $q.all(apiCalls).then(function() {
                             $timeout(function() {
                                 exportGene(++docIndex);
-                            }, 1000, false);
+                            }, 500, false);
+                        }, function(error) {
+                            console.log('fail to save gene ', error);
+                            $timeout(function() {
+                                exportGene(++docIndex);
+                            }, 500, false);
                         });
-                    } else {
-                        exportGene(++docIndex);
-                    }                    
+                    }, function() {
+                        console.log('fail to load drive gene ', hugoSymbol);
+                        $timeout(function() {
+                            exportGene(++docIndex);
+                        }, 1000, false);
+                    });                    
                 } else {
-                    console.log('finished');
-                    // exportMeta();
+                    exportMeta();
                 }
             }
             var exportAdditional = {};
