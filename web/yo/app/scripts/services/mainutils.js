@@ -87,9 +87,9 @@ angular.module('oncokbApp')
             }
             var list = [];
             _.each(cancerTypes, function(cancerType) {
-                if (cancerType.subtype.name) {
+                if (cancerType.subtype) {
                     list.push(cancerType.subtype.name);
-                } else if (cancerType.mainType.name) {
+                } else if (cancerType.mainType) {
                     list.push(cancerType.mainType.name);
                 }
             });

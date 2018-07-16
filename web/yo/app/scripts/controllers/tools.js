@@ -8,7 +8,7 @@ angular.module('oncokbApp')
             $scope.init = function() {
                 $scope.loading = false;
                 loadFiles.load(['meta']).then(function() {
-                    $scope.geneNames =  _.keys($rootScope.metaData);
+                    $scope.geneNames = _.without(_.keys($rootScope.metaData), 'collaborators');
                 }, function() {
                     console.log('fail to load meta file');
                 });
