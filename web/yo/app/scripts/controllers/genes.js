@@ -9,8 +9,8 @@ angular.module('oncokbApp')
                  DTColumnDefBuilder, DTOptionsBuilder, DatabaseConnector,
                  OncoKB, S, mainUtils, UUIDjs, dialogs, loadFiles, $firebaseObject, $firebaseArray, FirebaseModel, user, $q) {
             function saveGene(docIndex) {
-                if (docIndex < $scope.hugoSymbols.length) {
-                    var hugoSymbol = $scope.hugoSymbols[docIndex];
+                if (docIndex < $rootScope.hugoSymbols.length) {
+                    var hugoSymbol = $rootScope.hugoSymbols[docIndex];
                     console.log(docIndex, hugoSymbol);
                     var params = {};
                     var gene = $scope.allFiles.gene[hugoSymbol];
@@ -45,9 +45,9 @@ angular.module('oncokbApp')
             $scope.metaFlags = {};
             function processMeta() {
                 loadFiles.load(['meta', 'queues']).then(function(result) {
-                    $scope.hugoSymbols = _.without(_.keys($rootScope.metaData), 'collaborators');
-                    user.setFileeditable($scope.hugoSymbols).then(function(editableData) {
-                        _.each($scope.hugoSymbols, function(hugoSymbol) {
+                    $rootScope.hugoSymbols = _.without(_.keys($rootScope.metaData), 'collaborators');
+                    user.setFileeditable($rootScope.hugoSymbols).then(function(editableData) {
+                        _.each($rootScope.hugoSymbols, function(hugoSymbol) {
                             $scope.metaFlags[hugoSymbol] = {
                                 hugoSymbol: hugoSymbol,
                                 lastModifiedBy: $rootScope.metaData[hugoSymbol].lastModifiedBy,
@@ -178,8 +178,7 @@ angular.module('oncokbApp')
 
             function createGene(geneName) {
                 var deferred = $q.defer();
-                var allGeneNameList = _.keys($scope.metaFlags);
-                if (allGeneNameList.includes(geneName)) {
+                if ($rootScope.hugoSymbols.includes(geneName)) {
                     dialogs.notify('Warning', 'Sorry, gene ' + geneName + ' has been created.');
                 } else {
                     var gene = new FirebaseModel.Gene(geneName);
