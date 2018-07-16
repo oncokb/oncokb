@@ -59,8 +59,12 @@ public class DriveAnnotationParser {
             for (int i = 0; i < vus.length(); i++) {
                 JSONObject variant = vus.getJSONObject(i);
                 String mutationStr = variant.has("name") ? variant.getString("name") : null;
-                String lastEdit = variant.has("lastEdit") ? variant.getString("lastEdit") : null;
-                JSONArray nameComments = variant.has("nameComments") ? variant.getJSONArray("nameComments") : null;
+                JSONObject time = variant.has("time") ? variant.getJSONObject("time") : null;
+                Long lastEdit = null;
+                if(time != null) {
+                    lastEdit = time.has("value") ? time.getLong("value") : null;
+                }
+//                JSONArray nameComments = variant.has("nameComments") ? variant.getJSONArray("nameComments") : null;
                 if (mutationStr != null) {
                     Map<String, String> mutations = parseMutationString(mutationStr);
                     Set<Alteration> alterations = new HashSet<>();
@@ -85,20 +89,20 @@ public class DriveAnnotationParser {
                     evidence.setGene(gene);
                     evidence.setAlterations(alterations);
                     if (lastEdit != null) {
-                        Date date = new Date(Long.valueOf(lastEdit).longValue());
+                        Date date = new Date(lastEdit);
                         evidence.setLastEdit(date);
                     }
                     if (evidence.getLastEdit() == null) {
                         System.out.println(spaceStrByNestLevel(nestLevel + 1) + "WARNING: " + mutationStr + " do not have last update.");
                     }
-                    if (nameComments != null) {
-                        for (int j = 0; j < nameComments.length(); j++) {
-                            JSONObject item = nameComments.getJSONObject(j);
-                            if (item != null && item.has("content") && item.getString("content") != null) {
-                                setDocuments(item.getString("content"), evidence);
-                            }
-                        }
-                    }
+//                    if (nameComments != null) {
+//                        for (int j = 0; j < nameComments.length(); j++) {
+//                            JSONObject item = nameComments.getJSONObject(j);
+//                            if (item != null && item.has("content") && item.getString("content") != null) {
+//                                setDocuments(item.getString("content"), evidence);
+//                            }
+//                        }
+//                    }
                     evidenceBo.save(evidence);
                 }
             }
