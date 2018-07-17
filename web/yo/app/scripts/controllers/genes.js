@@ -14,7 +14,7 @@ angular.module('oncokbApp')
                     console.log(docIndex, hugoSymbol);
                     var params = {};
                     var gene = $scope.allFiles.gene[hugoSymbol];
-                    var vus = $scope.allFiles.vus[hugoSymbol].vus;
+                    var vus = $scope.allFiles.vus[hugoSymbol];
                     if (gene) {
                         var geneData = mainUtils.getGeneData(gene, true, true);
                         params.gene = JSON.stringify(geneData);
