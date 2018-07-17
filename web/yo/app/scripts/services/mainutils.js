@@ -361,14 +361,16 @@ angular.module('oncokbApp')
             firebase.database().ref('Meta/' + $routeParams.geneName + '/review/' + uuid).remove();
         }
         function getVUSData(vus, excludeComments) {
-            var vusData = vus;
+            var vusData = angular.copy(vus);      
+            var vusDataArray = [];      
             excludeComments = _.isBoolean(excludeComments) ? excludeComments : false;
-            if (excludeComments) {
-                _.each(vusData, function(vusItem) {
+            _.each(vusData, function(vusItem) {
+                if (excludeComments) {
                     delete vusItem.name_comments;
-                });
-            }
-            return vusData;
+                }
+                vusDataArray.push(vusItem);
+            });            
+            return vusDataArray;
         }
 
         // get history data
