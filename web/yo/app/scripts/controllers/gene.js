@@ -679,8 +679,9 @@ angular.module('oncokbApp')
                         .then(function (result) {
                             doneSaving(userName);
                         }, function (error) {
-                            doneSaving(userName);
                             dialogs.error('Error', 'Failed to update to database! Please contact the developer.');
+                            $scope.status[userName].savingAll = false;
+                            $scope.status[userName].noChanges = false;
                         });
                 }
             };
@@ -831,10 +832,10 @@ angular.module('oncokbApp')
                 var updatedEvidenceModels = evidencesAllUsers[userName].updatedEvidenceModels;
                 var updatedEvidences = evidencesAllUsers[userName].updatedEvidences;
                 var historyData = evidencesAllUsers[userName].historyData.update;
-                _.each(_.keys(updatedEvidences), function (uuid) {
-                    mainUtils.deleteUUID(uuid);  
-                });
                 DatabaseConnector.updateEvidenceBatch(updatedEvidences, historyData, function (result) {
+                    _.each(_.keys(updatedEvidences), function (uuid) {
+                        mainUtils.deleteUUID(uuid);  
+                    });
                     for (var i = 0; i < updatedEvidenceModels.length; i++) {
                         $scope.modelUpdate(updatedEvidenceModels[i][0], updatedEvidenceModels[i][1], updatedEvidenceModels[i][2], updatedEvidenceModels[i][3], updatedEvidenceModels[i][4]);
                     }
