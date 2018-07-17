@@ -51,13 +51,6 @@ angular.module('oncokbApp')
                 return false;
             };
 
-            $scope.getCollapseIcon = function(trial, attr) {
-                if (typeof $scope.isCollapsed[trial.trial_id] === 'undefined' || $scope.isCollapsed[trial.trial_id][attr]) {
-                    return 'images/add.svg';
-                }
-                return 'images/subtract.svg';
-            };
-
             $scope.findRegex = FindRegex.get;
 
             $scope.isNonArray = function(object) {
@@ -94,7 +87,6 @@ angular.module('oncokbApp')
                 summaryTableTitlesContent: '=',
                 specialAttr: '=',
                 displayProcess: '=',
-                setCollapsed: '=',
                 isCollapsed: '=',
                 fdaApproved: '=',
                 displayParts: '='

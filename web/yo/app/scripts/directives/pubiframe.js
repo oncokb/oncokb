@@ -15,19 +15,23 @@ angular.module('oncokbApp')
             link: function(scope, element, attr, ngModel) {
                 /* eslint new-cap: 0*/
                 function updatePubs(modelValue) {
+                    if (!modelValue) {
+                        modelValue = '';
+                    }
                     modelValue = S(modelValue).decodeHTMLEntities().s;
                     modelValue = S(modelValue).stripTags().s;
                     modelValue = S(modelValue).collapseWhitespace().s;
                     var pubs = FindRegex.result(modelValue);
-                    if (pubs.length === 0) {
-                        scope.pubs = [];
-                    } else {
-                        FindRegex.validation(pubs).then(function(result) {
-                            scope.pubs = result;
-                        }, function (error) {
-                            console.log('Error happened', error);
-                        });
-                    }
+                    scope.pubs = pubs;
+                    // if (pubs.length === 0) {
+                    //     scope.pubs = [];
+                    // } else {
+                    //     FindRegex.validation(pubs).then(function(result) {
+                    //         scope.pubs = result;
+                    //     }, function (error) {
+                    //         console.log('Error happened', error);
+                    //     });
+                    // }
                 }
 
                 scope.pubs = [];

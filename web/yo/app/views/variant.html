@@ -33,37 +33,16 @@
                 <div class="btn-group btn-group-sm" style='width:100%'>
                     <button ng-class="{'half': !annotation, 'oneThird': annotation}" id="searchVariantBtn" type="button" ng-disabled="rendering || !isSearchable()" ng-click="search()" class="btn btn-default"><span ng-hide="rendering">Search</span><i ng-show="rendering" class="fa fa-spinner fa-spin"></i></button>
                     <button ng-class="{'half': !annotation, 'oneThird': annotation}" id="useExampleBtn" type="button" ng-disabled="rendering" ng-click="useExample()" class="btn btn-default"><span ng-hide="rendering">Example</span><i ng-show="rendering" class="fa fa-spinner fa-spin"></i></button>
-                    <button ng-class="{'oneThird': true}" id="generateReport" type="button" ng-disabled="generaingReport" ng-show="annotation" ng-click="generateReport()" class="btn btn-default"><span ng-hide="generaingReport">Report</span><i ng-show="generaingReport" class="fa fa-spinner fa-spin"></i></button>
                 </div>
             </div>
         </div>
-        <!--<div class="row" ng-show="annotation">-->
-            <!--<div id="variantDisplayResult" class="col-lg-12 col-md-12 col-sm-12 col-xs-12">-->
-                <!--<table class='table'>-->
-                    <!--<thead>-->
-                        <!--<tr style='background-color: lightgrey;font-weight: bold;'>-->
-                            <!--<td>Gene Name</td>-->
-                            <!--<td>Mutation</td>-->
-                            <!--<td>Tumor Type</td>-->
-                        <!--</tr>-->
-                    <!--</thead>-->
-                    <!--<tbody>-->
-                        <!--<tr>-->
-                            <!--<td>{{gene}}</td>-->
-                            <!--<td>{{alteration}}</td>-->
-                            <!--<td>{{selectedTumorType}}</td>-->
-                        <!--</tr>-->
-                    <!--</tbody>-->
-                <!--</table>-->
-            <!--</div>-->
-        <!--</div>-->
         <div class="row" ng-hide="rendering" style="margin-top: 20px">
             <uib-tabset ng-show="annotation" justified="true" class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                 <uib-tab heading="Report" active="reportViewActive">
                     <report-view report-params="reportViewData" summary-table-titles="summaryTableTitles" report-matched-params="reportMatchedParams"></report-view>
                 </uib-tab>
                 <uib-tab heading="Details" active="regularViewActive">
-                    <regular-view annotation="annotation" summary-table-titles-content="summaryTableTitlesContent" summary-table-titles="summaryTableTitles" special-attr="specialAttr" set-collapsed="setCollapsed" is-collapsed="isCollapsed" fda-approved="fdaApproved" generate-trail="generateTrail" display-process="displayProcess" display-parts="displayParts"></regular-view>
+                    <regular-view annotation="annotation" summary-table-titles-content="summaryTableTitlesContent" summary-table-titles="summaryTableTitles" special-attr="specialAttr" is-collapsed="isCollapsed" fda-approved="fdaApproved" generate-trail="generateTrail" display-process="displayProcess" display-parts="displayParts"></regular-view>
                 </uib-tab>
             </uib-tabset>
         </div>

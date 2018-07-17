@@ -8,7 +8,7 @@
  * Service in the oncokbApp.
  */
 angular.module('oncokbApp')
-    .service('reportItem', function(stringUtils, $rootScope, _) {
+    .service('reportItem', function($rootScope, _) {
         var specialKeyChars = 'o_n_c_o_k_b';
 
         function Item(geneName, mutation, tumorType) {

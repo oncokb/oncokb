@@ -69,4 +69,6 @@ public interface AlterationBo extends GenericBo<Alteration> {
      * @return
      */
     LinkedHashSet<Alteration> findRelevantAlterations(Alteration alteration, Set<Alteration> alterations, boolean includeAlternativeAllele);
+
+    void deleteMutationsWithoutEvidenceAssociatedByGene(Gene gene);
 }

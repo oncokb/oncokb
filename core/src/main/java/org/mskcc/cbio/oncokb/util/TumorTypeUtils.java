@@ -364,6 +364,10 @@ public class TumorTypeUtils {
         return new ArrayList<>(new LinkedHashSet<>(mappedTumorTypesFromSource));
     }
 
+    public static String getOncoTreeVersion() {
+        return ONCO_TREE_ONCOKB_VERSION;
+    }
+
     /*-- PRIVATE --*/
     private static List<TumorType> filterOutDiffMainType(List<TumorType> tumorTypes, TumorType searchedTumorType) {
         List<TumorType> filteredResult = new ArrayList<>();
