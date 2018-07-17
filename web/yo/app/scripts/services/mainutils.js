@@ -406,16 +406,20 @@ angular.module('oncokbApp')
             onlyReviewedContent = _.isBoolean(onlyReviewedContent) ? onlyReviewedContent : false;
             processData(gene, ['summary', 'background'], excludeComments, onlyReviewedContent);
             processData(gene.type, ['tsg', 'ocg'], excludeComments, onlyReviewedContent);
+            var tempMutations = [];
+            var tempTumors = [];
+            var tempTreatments = [];
             _.each(gene.mutations, function(mutation, mutationIndex) {
                 if (shouldExclude(onlyReviewedContent, mutation.name_review)) {
-                    gene.mutations.splice(mutationIndex, 1);
+                    tempMutations.push(mutation);
                     return true;
                 }
                 processData(mutation, ['name'], excludeComments, onlyReviewedContent);
                 processData(mutation.mutation_effect, ['oncogenic', 'effect', 'description'], excludeComments, onlyReviewedContent);
+                tempTumors = [];
                 _.each(mutation.tumors, function(tumor, tumorIndex) {
                     if (shouldExclude(onlyReviewedContent, tumor.cancerTypes_review)) {
-                        mutation.tumors.splice(tumorIndex, 1);
+                        tempTumors.push(tumor);
                         return true;
                     }
                     // process tumor cancerTypes
@@ -424,15 +428,34 @@ angular.module('oncokbApp')
                     processData(tumor.prognostic, ['level', 'description'], excludeComments, onlyReviewedContent);
                     _.each(tumor.TIs, function(ti) {
                         processData(ti, ['description'], excludeComments, onlyReviewedContent);
+                        tempTreatments = [];
                         _.each(ti.treatments, function(treatment, treatmentIndex) {
                             if (shouldExclude(onlyReviewedContent, treatment.name_review)) {
-                                ti.treatments.splice(treatmentIndex, 1);
+                                tempTreatments.push(treatment);
                                 return true;
                             }
                             processData(treatment, ['name', 'level', 'propagation', 'indication', 'description'], excludeComments, onlyReviewedContent);
                         });
+                        _.each(tempTreatments, function(item) {
+                            var index = ti.treatments.indexOf(item);
+                            if (index !== -1) {
+                                ti.treatments.splice(index, 1);
+                            }
+                        });
                     });
                 });
+                _.each(tempTumors, function(item) {
+                    var index = mutation.tumors.indexOf(item);
+                    if (index !== -1) {
+                        mutation.tumors.splice(index, 1);
+                    }
+                });
+            });
+            _.each(tempMutations, function(item) {
+                var index = gene.mutations.indexOf(item);
+                if (index !== -1) {
+                    gene.mutations.splice(index, 1);
+                }
             });
             return gene;
         }
