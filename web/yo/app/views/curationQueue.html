@@ -57,6 +57,7 @@
                             ng-options="tt.name for tt in data.subTypes[input.mainType] | orderBy: tt.name" class="subTypeSelect">
                     </select>
                 </div>
+
             </div>
             <div class="inputMargin">
                 <label for="section" class="labelAlign">Section(s):</label>
@@ -95,7 +96,7 @@
                 <button class="btn btn-default" ng-click="clearInput()">Cancel</button>
             </div>
         </div>
-        <table class="table" id="queues" datatable="ng" dt-options="dtOptions" dt-columns="dtColumns" class="tableStyle">
+        <table ng-if="queue.length > 0" class="table" id="queues" datatable="ng" dt-options="dtOptions" dt-columns="dtColumns" class="tableStyle">
             <thead>
                 <tr>
                     <th ng-if="location === 'queues'">Gene</th>
@@ -113,8 +114,12 @@
                 </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="x in queue" ng-show="data.allCurations || !x.curated">
-                    <td ng-if="location === 'queues'"><strong><a ng-href="#/gene/{{x.hugoSymbol}}">{{x.hugoSymbol}}</a></strong></td>
+                <!--
+                    make sure to add track by $index, otherwise angualr will add $$hashkey to array element automatically,
+                    which will cause issue to update to firestore
+                -->
+                <tr ng-repeat="x in queue track by $index" ng-show="data.allCurations || !x.curated">
+                    <td ng-if="location === 'queues'"><strong><a ng-href="#!/gene/{{x.hugoSymbol}}">{{x.hugoSymbol}}</a></strong></td>
                     <td>
                         <a href="{{x.link}}" target="_blank" ng-if="x.link">{{x.article}}</a>
                         <span ng-if="!x.link">{{x.article}}</span>
@@ -127,7 +132,7 @@
                         <span>{{x.variant}}</span>
                     </td>
                     <td>
-                        <span>{{x.subType ? x.subType : x.mainType}}</span>
+                        <span>{{x.subType}}</span>
                     </td>
                     <td>
                         <span>{{x.section}}</span>
@@ -151,10 +156,10 @@
                                     uib-tooltip-placement="top" uib-tooltip="Complete curation" ng-bind-html="getButtonHtml('complete', x.addedAt)">
                             </button>
                             <button type="button" class="btn btn-warning buttonStyle" ng-click="initialProcess(x, 'edit')"
-                                    ng-show="userRole === 8" uib-tooltip-placement="top" uib-tooltip="Modify curation"><i class="fa fa-edit"></i>
+                                    ng-show="me.admin" uib-tooltip-placement="top" uib-tooltip="Modify curation"><i class="fa fa-edit"></i>
                             </button>
                             <button type="button" class="btn btn-danger buttonStyle" ng-click="initialProcess(x, 'delete')"
-                                    ng-show="userRole === 8" uib-tooltip-placement="top"
+                                    ng-show="me.admin" uib-tooltip-placement="top"
                                     uib-tooltip="Delete curation" ng-bind-html="getButtonHtml('delete', x.addedAt)">
                             </button>
                         </div>

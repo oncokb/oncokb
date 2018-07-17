@@ -12,13 +12,12 @@ angular.module('oncokbApp')
         'reportGeneratorParseAnnotation',
         'GenerateReportDataService',
         'reportViewFactory',
-        'DeepMerge',
         'x2js',
         'FindRegex',
         'OncoKB',
-        'stringUtils',
+        'mainUtils',
         '_',
-        function($scope, $filter, $location, $timeout, $rootScope, dialogs, DatabaseConnector, reportGeneratorParseAnnotation, ReportDataService, reportViewFactory, DeepMerge, x2js, FindRegex, OncoKB, stringUtils, _) {
+        function($scope, $filter, $location, $timeout, $rootScope, dialogs, DatabaseConnector, reportGeneratorParseAnnotation, ReportDataService, reportViewFactory, x2js, FindRegex, OncoKB, mainUtils, _) {
             'use strict';
 
             function getUnique(data, attr) {
@@ -43,7 +42,7 @@ angular.module('oncokbApp')
                             $scope.gene = $scope.genes[$filter('getIndexByObjectNameInArray')($scope.genes, urlVars.hugoSymbol || '')];
                         }
                         if (urlVars.hasOwnProperty('alteration')) {
-                            $scope.alteration = stringUtils.trimMutationName(urlVars.alteration);
+                            $scope.alteration = mainUtils.trimMutationName(urlVars.alteration);
                         }
                         if (urlVars.hasOwnProperty('cancerType')) {
                             $scope.view.selectedCancerType = $filter('getCancerTypeByMainType')($scope.view.filteredCancerTypes, urlVars.cancerType);
@@ -104,10 +103,10 @@ angular.module('oncokbApp')
 
                     $scope.reportParams.reportContent = ReportDataService.init([params]);
                     $scope.reportParams.requestInfo = {
-                        email: $rootScope.user.email,
+                        email: $rootScope.me.email,
                         folderName: '',
                         fileName: params.geneName + '_' + params.alteration + '_' + params.cancerType + '_' + params.subtype,
-                        userName: $rootScope.user.name
+                        userName: $rootScope.me.name
                     };
 
                     var reportViewParams = {};
@@ -219,7 +218,6 @@ angular.module('oncokbApp')
                     'Treatment Implications',
                     'FDA Approved Drugs in Tumor Type',
                     'FDA Approved Drugs in Other Tumor Type',
-                    'Clinical Trials',
                     'Additional Information'
                 ];
 
@@ -227,15 +225,12 @@ angular.module('oncokbApp')
                     'treatment',
                     'fdaApprovedInTumor',
                     'fdaApprovedInOtherTumor',
-                    'clinicalTrials',
                     'additionalInfo'
                 ];
 
                 $scope.summaryTableTitlesContent = {
                     'Treatment Implications': [
-                        'nccn_guidelines',
                         'standard_therapeutic_implications'],
-                    'Clinical Trials': ['clinical_trial', 'investigational_therapeutic_implications'],
                     'Additional Information': [ 'prognostic_implications'],
                     'FDA Approved Drugs in Tumor Type': [],
                     'FDA Approved Drugs in Other Tumor Type': []
@@ -303,10 +298,6 @@ angular.module('oncokbApp')
                 return false;
             };
 
-            $scope.setCollapsed = function(trial, attr) {
-                $scope.isCollapsed[trial.trial_id][attr] = !$scope.isCollapsed[trial.trial_id][attr];
-            };
-
             $scope.isArray = function(_var) {
                 if (_var instanceof Array) {
                     return true;
@@ -322,7 +313,6 @@ angular.module('oncokbApp')
             };
 
             $scope.displayProcess = function(str) {
-                var specialUpperCasesWords = ['NCCN'];
                 var specialLowerCasesWords = ['of', 'for'];
 
                 str = str.replace(/_/g, ' ');
@@ -331,10 +321,6 @@ angular.module('oncokbApp')
                     function(txt) {
                         var _upperCase = txt.toUpperCase();
                         var _lowerCase = txt.toLowerCase();
-
-                        if (specialUpperCasesWords.indexOf(_upperCase) !== -1) {
-                            return _upperCase;
-                        }
 
                         if (specialLowerCasesWords.indexOf(_lowerCase) !== -1) {
                             return _lowerCase;
@@ -351,7 +337,7 @@ angular.module('oncokbApp')
                 $scope.rendering = true;
                 $scope.reportViewActive = hasSelectedCancerType;
                 $scope.regularViewActive = !hasSelectedCancerType;
-                $scope.alteration = stringUtils.trimMutationName($scope.alteration);
+                $scope.alteration = mainUtils.trimMutationName($scope.alteration);
                 var params = {alterationType: 'MUTATION'};
                 var paramsContent = {
                     hugoSymbol: $scope.gene || '',
@@ -382,7 +368,7 @@ angular.module('oncokbApp')
                 changeUrl(params);
 
                 DatabaseConnector.searchAnnotation(params, function(data) {
-                    searchAnnotationCallback('success', data);
+                    searchAnnotationCallback('success', data.data);
                 }, function() {
                     searchAnnotationCallback('fail');
                 });

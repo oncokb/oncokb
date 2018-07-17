@@ -7,13 +7,8 @@ angular.module('oncokbApp').factory('TumorType', ['$http', 'OncoKB', function($h
         return $http.get(OncoKB.config.apiLink + 'tumorType.json');
     }
 
-    function getFromFile() {
-        return $http.get('data/tumorType.json');
-    }
-
     return {
-        getFromServer: getFromServer,
-        getFromFile: getFromFile
+        getFromServer: getFromServer
     };
 }]);
 
@@ -24,13 +19,8 @@ angular.module('oncokbApp').factory('Gene', ['$http', 'OncoKB', function($http, 
         return $http.get(OncoKB.config.curationLink + 'gene.json');
     }
 
-    function getFromFile() {
-        return $http.get('data/gene.json');
-    }
-
     return {
-        getFromServer: getFromServer,
-        getFromFile: getFromFile
+        getFromServer: getFromServer
     };
 }]);
 
@@ -38,10 +28,6 @@ angular.module('oncokbApp').factory('DataSummary', ['$http', function($http) {
     'use strict';
 
     function getFromServer() {
-        return $http.get('data/summary.json');
-    }
-
-    function getFromFile() {
         return $http.get('data/summary.json');
     }
     function getGeneType() {
@@ -52,7 +38,6 @@ angular.module('oncokbApp').factory('DataSummary', ['$http', function($http) {
     }
     return {
         getFromServer: getFromServer,
-        getFromFile: getFromFile,
         getGeneType: getGeneType,
         getEvidenceByType: getEvidenceByType
     };
@@ -65,13 +50,8 @@ angular.module('oncokbApp').factory('Alteration', ['$http', 'OncoKB', function($
         return $http.get(OncoKB.config.apiLink + 'alteration.json');
     }
 
-    function getFromFile() {
-        return $http.get('data/alteration.json');
-    }
-
     return {
-        getFromServer: getFromServer,
-        getFromFile: getFromFile
+        getFromServer: getFromServer
     };
 }]);
 
@@ -82,13 +62,8 @@ angular.module('oncokbApp').factory('DriveOncokbInfo', ['$http', 'OncoKB', funct
         return $http.get(OncoKB.config.curationLink + 'oncokbInfo.json');
     }
 
-    function getFromFile() {
-        return $http.get('data/oncokbInfo.json');
-    }
-
     return {
-        getFromServer: getFromServer,
-        getFromFile: getFromFile
+        getFromServer: getFromServer
     };
 }]);
 
@@ -132,38 +107,6 @@ angular.module('oncokbApp').config(function($httpProvider) {
     };
 }]);
 
-angular.module('oncokbApp').factory('GenerateDoc', ['$http', 'OncoKB', function($http, OncoKB) {
-    'use strict';
-    var transform = function(data) {
-        return $.param(data);
-    };
-
-    function getDoc(params) {
-        return $http.post(
-            OncoKB.config.apiLink + 'generateGoogleDoc',
-            {reportParams: JSON.stringify(params)},
-            {
-                headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
-                transformRequest: transform
-            });
-    }
-
-    function createFolder(params) {
-        return $http.post(
-            OncoKB.config.apiLink + 'createGoogleFolder',
-            params,
-            {
-                headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
-                transformRequest: transform
-            });
-    }
-
-    return {
-        getDoc: getDoc,
-        createFolder: createFolder
-    };
-}]);
-
 angular.module('oncokbApp').factory('SendEmail', ['$http', 'OncoKB', function($http, OncoKB) {
     'use strict';
     var transform = function(data) {
@@ -204,17 +147,6 @@ angular.module('oncokbApp').factory('DriveAnnotation', ['$http', 'OncoKB', '_', 
     function updateGeneType(hugoSymbol, data) {
         return $http.post(
             OncoKB.config.apiLink + 'genes/update/' + hugoSymbol,
-            data,
-            {
-                transformResponse: function(result) {
-                    return {status: result};
-                }
-            });
-    }
-
-    function updateEvidence(uuid, data) {
-        return $http.post(
-            OncoKB.config.apiLink + 'evidences/update/' + uuid,
             data,
             {
                 transformResponse: function(result) {
@@ -304,7 +236,6 @@ angular.module('oncokbApp').factory('DriveAnnotation', ['$http', 'OncoKB', '_', 
     return {
         updateGene: updateGene,
         updateGeneType: updateGeneType,
-        updateEvidence: updateEvidence,
         deleteEvidences: deleteEvidences,
         updateVUS: updateVUS,
         updateEvidenceBatch: updateEvidenceBatch,
@@ -384,17 +315,23 @@ angular.module('oncokbApp').factory('Cache', ['$http', 'OncoKB', function($http,
 angular.module('oncokbApp').factory('OncoTree', ['$http', 'OncoKB', '_', function($http, OncoKB, _) {
     'use strict';
 
-    function getAllMainTypes() {
+    function getTumorTypeByMainType(mainType) {
+        return $http.get(OncoKB.config.oncoTreeLink +
+            'tumorTypes/search/maintype/' + mainType + '?exactMatch=true&version=' + OncoKB.config.oncoTreeVersion);
+    }
+
+    function getMainTypes() {
         return $http.get(OncoKB.config.privateApiLink + 'utils/oncotree/mainTypes');
     }
 
-    function getAllSubtypes() {
+    function getSubTypes() {
         return $http.get(OncoKB.config.privateApiLink + 'utils/oncotree/subtypes');
     }
 
     return {
-        getAllMainTypes: getAllMainTypes,
-        getAllSubtypes: getAllSubtypes
+        getTumorTypeByMainType: getTumorTypeByMainType,
+        getMainTypes: getMainTypes,
+        getSubTypes: getSubTypes
     };
 }]);
 
@@ -445,7 +382,6 @@ angular.module('oncokbApp')
     .factory('ReviewResource', ['$http', 'OncoKB', function() {
         'use strict';
         return {
-            reviewMode: false, // reviewMode is tracked in the factory to avoid watchers in directives
             mostRecent: {}, // uuid string is the key, and value is an object with updateTime and updatedBy
             // the following attributes will be arrays with uuids as content
             accepted: [], // accepted section
@@ -457,6 +393,162 @@ angular.module('oncokbApp')
             nameChanged: [], // name changed sections
             added: [], // newly added sections
             removed: [], // deleted sections
-            precise: [] // the exact item that has been changed
+            precise: [], // the exact item that has been changed
+            reviewObjs: {}
+        };
+    }]);
+angular.module('oncokbApp')
+    .factory('FirebaseModel', ['$rootScope', function($rootScope) {
+        'use strict';
+        function getUUID() {
+            return UUIDjs.create(4).toString();
+        };
+        function createTIs() {
+            var result = [];
+            for (var i = 0; i < 4; i++) {
+                var ti = new TI();
+                switch(i) {
+                    case 0:
+                        ti.type = 'SS';
+                        ti.name = 'Standard implications for sensitivity to therapy';
+                        break;
+                    case 1:
+                        ti.type = 'SR';
+                        ti.name = 'Standard implications for resistance to therapy';
+                        break;
+                    case 2:
+                        ti.type = 'IS';
+                        ti.name = 'Investigational implications for sensitivity to therapy';
+                        break;
+                    case 3:
+                        ti.type = 'IR';
+                        ti.name = 'Investigational implications for resistance to therapy';
+                        break;
+                }
+                result.push(ti);
+            }
+            return result;
+        }
+        function Gene(name) {
+            this.name = name;
+            this.summary = '';
+            this.summary_uuid = getUUID();
+            this.background = '';
+            this.background_uuid = getUUID();
+            this.isoform_override = '';
+            this.dmp_refseq_id = '';
+            this.type = {
+                tsg: '',
+                tsg_uuid: getUUID(),
+                ocg: '',
+                ocg_uuid: getUUID()
+            };
+            this.type_uuid = getUUID();
+            this.mutations_uuid = getUUID();
+        }
+        function Mutation(name) {
+            this.name = name;
+            this.name_uuid = getUUID();
+            this.mutation_effect = {
+                oncogenic: '',
+                oncogenic_uuid: getUUID(),
+                effect: '',
+                effect_uuid: getUUID(),
+                description: '',
+                description_uuid: getUUID(),
+                short: ''
+            };
+            this.mutation_effect_uuid = getUUID();
+            this.tumors_uuid = getUUID();
+        };
+        function Tumor(cancerTypes) {
+            this.cancerTypes = cancerTypes;
+            this.cancerTypes_uuid = getUUID();
+            this.summary = '';
+            this.summary_uuid = getUUID();
+            this.prognostic = {
+                level: '',
+                level_uuid: getUUID(),
+                description: '',
+                description_uuid: getUUID(),
+                short: ''
+            };
+            this.prognostic_uuid = getUUID();
+            this.diagnostic = {
+                level: '',
+                level_uuid: getUUID(),
+                description: '',
+                description_uuid: getUUID(),
+                short: ''
+            };
+            this.diagnostic_uuid = getUUID();
+            this.TIs = createTIs();
+        };
+        function Cancertype(mainType, subtype, code) {
+            this.mainType = mainType;
+            this.subtype = subtype;
+            this.code = code;
+        }
+        function TI() {
+            this.name =  '';
+            this.name_uuid = getUUID();
+            this.type = '';
+            this.treatments = [];
+            this.treatments_uuid = getUUID();
+        }
+        function Treatment(name) {
+            this.name = name;
+            this.name_uuid = getUUID();
+            this.level = '';
+            this.level_uuid = getUUID();
+            this.propagation = '';
+            this.propagation_uuid = getUUID();
+            this.indication = '';
+            this.indication_uuid = getUUID();
+            this.description = '';
+            this.description_uuid = getUUID();
+            this.short = '';
+        };
+        function Comment(userName, email, content) {
+            this.date = (new Date()).getTime().toString();
+            this.userName = userName;
+            this.email = email;
+            this.content = content;
+            this.resolved = 'false';
+        }
+        function VUSItem(name, userName, userEmail) {
+            this.name = name;
+            this.time = {
+                by: {
+                    name: userName,
+                    email: userEmail
+                },
+                value: new Date().getTime()
+            };
+        }
+        function TimeStamp(userName, userEmail) {
+            this.by = {
+                name: userName,
+                email: userEmail
+            };
+            this.value = (new Date()).getTime().toString();
+        }
+        function Meta() {
+            this.lastModifiedBy = $rootScope.me.name;
+            this.lastModifiedAt = (new Date()).getTime().toString();
+            this.review = {
+                currentReviewer: ''
+            };
+        }
+        return {
+            Gene: Gene,
+            Mutation: Mutation,
+            Tumor: Tumor,
+            Treatment: Treatment,
+            Comment: Comment,
+            Cancertype: Cancertype,
+            VUSItem: VUSItem,
+            TimeStamp: TimeStamp,
+            Meta: Meta
         };
     }]);

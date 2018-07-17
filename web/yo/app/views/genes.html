@@ -2,69 +2,41 @@
     <div ng-hide="status.rendering">
         <div class="header-buttons">
             <span class="btn-group btn-group-sm pull-left group" role="group">
-                <!--<button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="givePermission()">Give files permission</button>-->
-                <!--<button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="resetPermission()">Reset files permission</button>-->
-                <!--<button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="giveFolderPermission()">Give folder permission</button>-->
-                <!--<button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="create()">Create Doc</button>-->
-                <!--<button type="button" class="btn btn-default" ng-if="userRole === 8" ng-click="startFEUUIDImportingFE()">UUID</button>-->
-                <button type="button" class="btn btn-default" ng-if="userRole === 8 && developerCheck()" ng-click="checkError()">Check errors</button>
-                <button type="button" class="btn btn-default" ng-if="userRole === 8 && developerCheck()" ng-click="saveAllGenes()"><span ng-show="!!!status.saveAllGenes"><i class="fa fa-spinner fa-spin"></i></span><span ng-show="!!status.saveAllGenes">Save All Genes</span></button>
-                <!--<button type="button" class="btn btn-default" ng-if="userRole === 8 && internal" ng-click="resetCache()"><span>Reset Cache</span></button>-->
-                <!--<button type="button" class="btn btn-default" ng-if="userRole === 8 && internal" ng-click="changeData()"><span>Change Data</span></button>-->
-                <!--<button ng-if="status.hasOwnProperty('cache') && (status.cache === 'enabled' || status.cache === 'disabled') && internal"  type="button" class="btn btn-default" ng-if="userRole === 8 && internal" ng-click="changeCacheStatus()">-->
-                    <!--<span ng-show="status.cache === 'enabled'">Disable Cache</span>-->
-                    <!--<span ng-show="status.cache === 'disabled'">Enable Cache</span>-->
-                <!--</button>-->
-                <!--<button ng-if="status.hasOwnProperty('cache') && status.cache==='unknown' && internal" type="button"-->
-                        <!--class="btn btn-default" ng-if="userRole === 8 && internal" disabled>Unknown Cache status-->
-                <!--</button>-->
-                <!--<button type="button" class="btn btn-default" ng-if="userRole === 8 && internal" ng-click="initialStatus()">Initial status</button>-->
-                <!--<button type="button" class="btn btn-default" ng-if="userRole === 8 && internal" ng-click="showDocs()">Get docs info</button>-->
-                <!--<button type="button" class="btn btn-default" ng-if="userRole === 8 && internal" ng-click="convertTumorTypes()">Convert tumor types</button>-->
-                <!--<button type="button" class="btn btn-default" ng-if="userRole === 8 && internal" ng-click="convertMutationEffect()">Convert mutation effect and oncogenic</button>-->
-                <!--<button type="button" class="btn btn-default" ng-if="userRole === 8 && internal" ng-click="findRelevantVariants()">Find relevant variants</button>-->
-                <!--<button type="button" class="btn btn-default" ng-if="userRole === 8 && internal" ng-click="migrate()"><span ng-show="!!!status.migrate"><i class="fa fa-spinner fa-spin"></i></span><span ng-show="!!status.migrate">Migrate</span></button>-->
-                <!--<button type="button" class="btn btn-default" ng-if="userRole === 8 && internal" ng-click="showValidationResult()"><span ng-show="!!!status.migrate"><i class="fa fa-spinner fa-spin"></i></span><span ng-show="!!status.migrate">Show Validation Result</span></button>-->
+                <button type="button" class="btn btn-default" ng-if="developerCheck() && internal" ng-click="saveAllGenes()"><span ng-show="!!!status.saveAllGenes"><i class="fa fa-spinner fa-spin"></i></span><span ng-show="!!status.saveAllGenes">Save All Genes</span></button>
             </span>
-            <span class="input-group input-group-sm group backup" role="group" ng-if="userRole === 8" >
-                <input type="text" class="form-control" placeholder="Backup folder Name" ng-model="backupFolderName">
+            <span class="input-group input-group-sm create group" role="group" ng-show="developerCheck()">
+                <input type="text" class="form-control" ng-model="newGenes" placeholder="Comma-separated gene names">
                 <span class="input-group-btn">
-                    <button type="button" class="btn btn-default  btn-secondary" ng-disabled="!!!status.backup"
-                            ng-click="backup(backupFolderName)">
-                        <span ng-show="!!!status.backup"><i class="fa fa-spinner fa-spin"></i></span>
-                        <span ng-show="!!status.backup">Backup</span>
-                    </button>
+                    <button type="button" class="btn btn-default  btn-secondary" ng-click="create()">Create Genes</button>
                 </span>
             </span>
         </div>
         <table class="table" datatable="ng" dt-options="dtOptions" dt-columns="dtColumns">
             <thead>
-            <tr class="dashedHeader"><!-- <th>ID</th> -->
+            <tr class="dashedHeader">
                 <th>Gene</th>
                 <th>Last modified</th>
                 <th>Last modified by</th>
                 <th>Edit</th>
-                <th ng-if="userRole === 8">Needs to be reviewed</th>
-                <th ng-if="userRole === 8"># of articles to curate</th>
+                <th ng-if="me.admin">Needs to be reviewed</th>
+                <th ng-if="me.admin"># of articles to curate</th>
             </tr>
             </thead>
             <tbody>
-                <tr data-ng-repeat="gene in documents">
-                    <!-- <td>{{$index + 1}}</td> -->
-                    <td><strong><a ng-href="#/gene/{{::gene.title}}">{{::gene.title}}</a></strong></td>
-                    <td>{{!metaFlags[gene.title].lastModifiedAt ? '' : metaFlags[gene.title].lastModifiedAt | date : 'MMM d, h:mm a yyyy'}}</a></td>
-                    <td>{{!metaFlags[gene.title].lastModifiedBy ? '' : metaFlags[gene.title].lastModifiedBy}}</a></td>
+                <tr data-ng-repeat="meta in metaFlags">
+                    <td><strong><a ng-href="#!/gene/{{meta.hugoSymbol}}">{{ meta.hugoSymbol }}</a></strong></td>
+                    <td>{{ meta.lastModifiedAt | date : 'MMM d, h:mm a yyyy'}}</a></td>
+                    <td>{{ meta.lastModifiedBy }}</a></td>
                     <td>
-                        <i ng-if="gene.editable" class="fa fa-pencil" ng-click="redirect('/gene/' + gene.title)"><span style="display:none">1</span></i>
-                        <i ng-if="!gene.editable" class="fa fa-eye" ng-click="redirect('/gene/' + gene.title)"><span style="display:none">0</span></i>
+                        <i class="fa " ng-class="{'fa-pencil': meta.editable, 'fa-eye': !meta.editable}" ng-click="redirect('/gene/' + meta.hugoSymbol)"><span style="display:none">1</span></i>
                     </td>
-                    <td ng-if="userRole === 8">{{!metaFlags[gene.title].review ? 'No' : 'Yes'}}</td>
-                    <td ng-if="userRole === 8">{{!metaFlags[gene.title].queues ? 0 : metaFlags[gene.title].queues}}</td>
+                    <td ng-if="me.admin">{{ meta.review }}</td>
+                    <td ng-if="me.admin">{{ meta.queues }}</td>
                 </tr>
             </tbody>
         </table>
     </div>
-    <div ng-if="userRole === 8">
+    <div ng-if="me.admin">
         <loading ng-model="status.rendering" content="Please wait, we are loading genes information."></loading>
     </div>
 </div>

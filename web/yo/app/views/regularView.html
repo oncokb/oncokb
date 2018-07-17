@@ -45,23 +45,8 @@
                                     <p ng-bind-html="getDrugBody(senitive)"></p>
                                 </div>
                             </div>
-                            <div ng-if="content === 'nccn_guidelines'" ng-repeat="nccn in cancerType[content]">
-                            <p ng-bind-html="generateNCCN(nccn)"></p>
-                            </div>
 
-                            <div ng-if="content === 'clinical_trial'" ng-repeat="trial in cancerType[content]" class="annotationClinicalTrial">
-                                <span ng-bind-html="generateTrial(trial)"></span>
-                                <span>PURPOSE</span><img  ng-click="setCollapsed(trial, 'purpose')" ng-src="{{getCollapseIcon(trial, 'purpose')}}" class='icon'></img>
-                                <div uib-collapse="isCollapsed[trial.trial_id]['purpose']">
-                                    <div class="well well-lg">{{trial.purpose}}</div>
-                                </div>
-                                <span>ELIGIBILITY CRITERIA</span><img  ng-click="setCollapsed(trial, 'eligibilityCriteria')" ng-src="{{getCollapseIcon(trial, 'eligibilityCriteria')}}" class='icon'></img>
-                                <div uib-collapse="isCollapsed[trial.trial_id]['eligibilityCriteria']">
-                                    <div class="well well-lg">{{trial.eligibilityCriteria}}</div>
-                                </div>
-                            </div>
-
-                            <div ng-if="content !== 'nccn_guidelines' && content !== 'clinical_trial' && specialAttr.indexOf(content) === -1">
+                            <div ng-if="specialAttr.indexOf(content) === -1">
                             <p ng-bind-html="findRegex(cancerType[content].description)"></p>
                             </div>
                         </div>

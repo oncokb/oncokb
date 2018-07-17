@@ -198,10 +198,10 @@ public class Evidence implements java.io.Serializable {
     @Enumerated(EnumType.STRING)
     private EvidenceType evidenceType;
 
-    @Column(name = "cancer_type", length = 50)
+    @Column(name = "cancer_type", length = 100)
     private String cancerType;
 
-    @Column(length = 10)
+    @Column(length = 50)
     private String subtype;
 
     @Transient

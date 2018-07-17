@@ -3,16 +3,16 @@
   "version": "2.0.0",
   "dependencies": {
     "jquery": "~2.1.1",
-    "angular": "~1.4.8",
+    "angular": "~1.6.10",
     "json3": "~3.3.1",
     "es5-shim": "~3.1.0",
     "bootstrap-sass-official": "~3.2.0",
-    "angular-resource": "~1.4.8",
-    "angular-cookies": "~1.4.8",
-    "angular-sanitize": "~1.4.8",
-    "angular-animate": "~1.4.8",
-    "angular-touch": "~1.4.8",
-    "angular-route": "~1.4.8",
+    "angular-resource": "~1.6.10",
+    "angular-cookies": "~1.6.10",
+    "angular-sanitize": "~1.6.10",
+    "angular-animate": "~1.6.10",
+    "angular-touch": "~1.6.10",
+    "angular-route": "~1.6.10",
     "angular-bootstrap": "~0.14.3",
     "angular-chosen": "*",
     "bootstrap-chosen": "*",
@@ -39,17 +39,19 @@
     "file-saver.js": "~1.20150304.1",
     "fontawesome": "~4.4.0",
     "uuid-js": "^0.7.5",
-    "google-diff-match-patch-js": "^1.0.0",
-    "Blob": "*"
+    "Blob": "*",
+    "angularfire": "^2.3.0",
+    "angular-ui-notification": "MikhailRoot/angular-ui-notification#0.3.5",
+    "google-diff-match-patch-js": "^1.0.0"
   },
   "devDependencies": {
-    "angular-mocks": "~1.4.8",
-    "angular-scenario": "~1.4.8"
+    "angular-mocks": "~1.6.10",
+    "angular-scenario": "~1.6.10"
   },
   "appPath": "app",
   "distPath": "dist",
   "resolutions": {
-    "angular": "~1.4.8",
+    "angular": "~1.6.10",
     "angular-bootstrap": "~0.14.3"
   },
   "overrides": {

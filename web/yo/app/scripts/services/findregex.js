@@ -8,7 +8,7 @@
  * Factory in the oncokb.
  */
 angular.module('oncokbApp')
-    .factory('FindRegex', function(_, S, DatabaseConnector, $q, ReviewResource) {
+    .factory('FindRegex', function($rootScope, _, S, DatabaseConnector, $q, ReviewResource) {
         var allRegex = {
             pmid: {
                 regex: /PMID:?\s*([0-9]+,?\s*)+/ig,
@@ -173,7 +173,7 @@ angular.module('oncokbApp')
                     break;
                 }
             });
-            if (ReviewResource.reviewMode === true) {
+            if ($rootScope.reviewMode === true) {
                 deferred.resolve(_.union(pubmedArticles, trials, abstracts));
             } else {
                 var apiCalls = [];

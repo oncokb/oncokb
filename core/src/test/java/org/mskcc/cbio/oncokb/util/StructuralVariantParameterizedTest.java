@@ -87,6 +87,7 @@ public class StructuralVariantParameterizedTest {
             query.setConsequence("fusion");
         }
         IndicatorQueryResp resp = IndicatorUtils.processQuery(query, null, null, null, true, null);
+//        System.out.println("New: " + fusionPair + "&&" + alteration + "&&" + svClass + "&&" + tumorType + "&&" + isFunctionalFusion + "&&" + resp.getOncogenic() + "&&" + resp.getGeneSummary() + "&&" + resp.getVariantSummary() + "&&" + resp.getTumorTypeSummary());
 
         assertEquals("Oncogenicities are not matched. Query: " + _query, oncogenicity, resp.getOncogenic());
         assertEquals("Gene summaries are not matched. Query: " + _query, geneSummary, resp.getGeneSummary());

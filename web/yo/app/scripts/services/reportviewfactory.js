@@ -65,7 +65,7 @@ angular.module('oncokbApp')
 
         function objToArray(obj) {
             var delayAttrs = ['description'];
-            var priorAttrs = ['trial', 'nccn_special', 'recommendation category 1 / 2A / 2 / 2A / 2A'];
+            var priorAttrs = ['recommendation category 1 / 2A / 2 / 2A / 2A'];
 
             if (!angular.isObject(obj)) {
                 return obj;

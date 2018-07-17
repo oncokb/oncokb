@@ -8,99 +8,83 @@
  * Controller of the oncokbApp
  */
 angular.module('oncokbApp')
-    .controller('NavCtrl', function($scope, $location, $rootScope, config, gapi, user, storage, access, DatabaseConnector) {
+    .controller('NavCtrl', function($scope, $location, $rootScope, $q, DatabaseConnector, $firebaseAuth, $firebaseObject, user) {
         var tabs = {
-            // 'vus': 'VUS',
-            tree: 'Tree',
             variant: 'Variant Annotation',
             genes: 'Genes',
-            // 'dataSummary': 'Summary',
-            reportGenerator: 'Tools',
+            tools: 'Tools',
             feedback: 'Feedback',
             queues: 'Curation Queue'
         };
 
-        var accessLevels = config.accessLevels;
-
-        function loginCallback() {
-            // console.log('In login callback.');
-
-            testInternal(function() {
-                if ($scope.$$phase) {
-                    setParams();
-                } else {
-                    $scope.$apply(setParams);
-                }
-                // $rootScope.$apply(function() {
-                var url = access.getURL();
-                // console.log('Current URL:', url);
-                if (url) {
-                    // console.log('is logged in? ', access.isLoggedIn());
-                    if (access.isLoggedIn()) {
-                        access.setURL('');
-                        $location.path(url);
-                    }
-                } else if (access.isLoggedIn() && access.authorize(config.accessLevels.curator)) {
-                    // console.log('logged in and has authorize.');
-                    $location.path('/genes');
-                } else {
-                    // console.log('is logged in? ', access.isLoggedIn());
-                    // console.log('does not have access? ', access.authorize(config.accessLevels.curator));
-                    $location.path('/');
-                }
-                // });
-            });
-        }
-
         function setParams() {
             var filterTabs = [];
-            $scope.user = $rootScope.user;
-            if (access.authorize(accessLevels.curator)) {
-                filterTabs.push({key: 'genes', value: tabs.genes});
-                filterTabs.push({key: 'queues', value: tabs.queues});
-            }
-            if (access.authorize(accessLevels.admin) && $rootScope.internal) {
-                var keys = ['tree', 'variant', 'reportGenerator', 'feedback'];
-
+            filterTabs.push({key: 'genes', value: tabs.genes});
+            filterTabs.push({key: 'queues', value: tabs.queues});
+            if ($rootScope.me.admin) {
+                var keys = ['variant', 'tools', 'feedback'];
                 keys.forEach(function(e) {
                     filterTabs.push({key: e, value: tabs[e]});
                 });
             }
-            $scope.signedIn = access.isLoggedIn();
             $scope.tabs = filterTabs;
         }
-
-        function testInternal(callback) {
-            DatabaseConnector.testAccess(function() {
-                $rootScope.internal = true;
-                if (angular.isFunction(callback)) {
-                    callback();
-                }
-            }, function(data, status, headers, config) {
-                console.log(data, status, headers, config);
-                $rootScope.internal = false;
-                if (angular.isFunction(callback)) {
-                    callback();
-                }
-            });
+        $scope.setLocalStorage = function(key) {
+            if (key !== 'gene') {
+                delete window.localStorage.geneName;
+            }
+            window.localStorage.tab = key;
         }
 
-        // Render the sign in button.
-        $scope.renderSignInButton = function(immediateMode) {
-            if (immediateMode !== false) {
-                immediateMode = true;
-            }
-            storage.requireAuth(immediateMode).then(function(result) {
-                $scope.signInCallback(result);
+        function testInternal() {
+            var defer = $q.defer();
+            DatabaseConnector.testAccess(function() {
+                $rootScope.internal = true;
+                defer.resolve();
+            }, function(data, status, headers, config) {
+                $rootScope.internal = false;
+                defer.resolve();
+            });
+            return defer.promise;
+        }
+        $firebaseAuth().$onAuthStateChanged(function(firebaseUser) {
+            if (firebaseUser) {
+                $rootScope.isSignedIn = true;
+                user.setRole(firebaseUser).then(function() {
+                    $scope.user = $rootScope.me;
+                    setParams();
+                    testInternal().then(function() {
+                        if (window.localStorage.geneName) {
+                            $location.url('/gene/' + window.localStorage.geneName);
+                        } else if (window.localStorage.tab){
+                            $location.url('/' + window.localStorage.tab);
+                        } else {
+                            $location.url('/genes');
+                        }
+                    });                    
+                }, function(error) {
+                });
+            } else {
+                console.log('not logged in yet');
+            }                
+        });
+        $scope.signIn = function() {
+            user.login().then(function() {
+                $scope.user = $rootScope.me;
+                setParams();
+                $location.url('/genes');
+            }, function(error) {
+                console.log('failed to login', error);
+                console.log('finish is called');
+                loadingScreen.finish();
             });
         };
-
+        
         $scope.signOut = function() {
-            access.logout();
-            $scope.signedIn = false;
-            $scope.user = $rootScope.user;
-            $location.path('/');
-            gapi.auth.signOut();
+            user.logout().then(function() {
+                $location.path('/');
+                $scope.tabs = [];
+            });
         };
 
         $scope.tabIsActive = function(route) {
@@ -115,37 +99,12 @@ angular.module('oncokbApp')
             return route === $location.path();
         };
 
-        // When callback is received, we need to process authentication.
-        $scope.signInCallback = function(authResult) {
-            // Do a check if authentication has been successful.
-            // console.log('In processAuth');
-
-            if (authResult.access_token) {
-                // Successful sign in.
-                // $scope.signedIn = true;
-                //  console.log('access success', authResult);
-                access.login(loginCallback);
-            } else if (authResult.error) {
-                // Error while signing in.
-                // $scope.signedIn = false;
-                console.log('access failed', authResult);
-                loginCallback();
-                // Report error.
-            } else {
-                console.log('access failed and does not have error.', authResult);
-                loginCallback();
-            }
-        };
-
         // This flag we use to show or hide the button in our HTML.
-        $scope.signedIn = false;
-        $scope.user = $rootScope.user;
+        // $scope.signedIn = false;
 
-        $rootScope.$watch('user', setParams);
-
-        $rootScope.$watch('dataLoaded', function(n) {
-            if (n) {
-                $scope.renderSignInButton();
+        $rootScope.$watch('isSignedIn', function(n, o) {
+            if (n !== o) {
+                $scope.isSignedIn = $rootScope.isSignedIn;
             }
         });
     });

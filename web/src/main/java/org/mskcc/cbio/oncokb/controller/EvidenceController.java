@@ -371,7 +371,7 @@ public class EvidenceController {
         // if passed in evidence is empty, we delete them in the database and return empty list
         if (isEmptyEvidence(queryEvidence)) {
             evidenceBo.deleteAll(evidences);
-            return new ArrayList<Evidence>();
+            return new ArrayList<>(evidences);
         }
         // common cases for evidence update
         // Use controlled vocabulary to update oncogenic knowneffect
@@ -477,14 +477,13 @@ public class EvidenceController {
         for (Evidence evidence : evidences) {
             genes.add(evidence.getGene());
         }
-        for (Gene gene : genes) {
-            CacheUtils.updateGene(gene.getEntrezGeneId(), true);
-        }
+        updateCacheBasedOnGenes(genes);
     }
 
     private void updateCacheBasedOnGenes(Set<Gene> genes) {
         // The sample solution for now is updating all gene related evidences.
         for (Gene gene : genes) {
+            ApplicationContextSingleton.getAlterationBo().deleteMutationsWithoutEvidenceAssociatedByGene(gene);
             CacheUtils.updateGene(gene.getEntrezGeneId(), true);
         }
     }

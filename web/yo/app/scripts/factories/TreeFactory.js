@@ -5,13 +5,8 @@ angular.module('oncokbApp').factory('Evidence', ['$http', 'OncoKB', function($ht
         return $http.get(OncoKB.config.apiLink + 'evidence.json');
     }
 
-    function getFromFile() {
-        return $http.get('data/evidence.json');
-    }
-
     return {
         getFromServer: getFromServer,
-        getFromFile: getFromFile
     };
 }]);
 
