@@ -61,7 +61,9 @@ angular.module('oncokbApp')
                 }
             }
             $scope.exportData = function() {
-                exportGene(0);
+                // exportGene(0);
+                exportMeta();
+                // firebase.database().ref('Meta/').set({});
             }
             function exportGene(docIndex) {
                 if (docIndex < $scope.documents.length) {
@@ -115,49 +117,53 @@ angular.module('oncokbApp')
             }
             var exportAdditional = {};
             function exportMeta() {
-                additionalFile.load(['meta']).then(function(result) {
-                    var metaByGene = {};
-                    _.each($rootScope.metaData.keys(), function(hugoSymbol) {
-                        var uuidsToCopy = {
-                            currentReviewer: ''
-                        };
-                        var uuids = $rootScope.metaData.get(hugoSymbol).keys();
-                        _.each(uuids, function(uuid) {
-                            if ($rootScope.metaData.get(hugoSymbol).get(uuid).type === 'Map') {
-                                if ($rootScope.metaData.get(hugoSymbol).get(uuid).get('review') === true) {
-                                    uuidsToCopy[uuid] = true;
-                                }
-                            }
-                        });
-                        if (!_.isEmpty(uuidsToCopy)) {
-                            metaByGene[hugoSymbol] = {
-                                review: uuidsToCopy
+                firebase.database().ref('Genes/').on('value', function(doc) {
+                    var allCreatedGenes = _.keys(doc.val());
+                    additionalFile.load(['meta']).then(function(result) {
+                        var metaByGene = {};
+                        _.each(allCreatedGenes, function(hugoSymbol) {
+                            // assign uuids
+                            var uuidsToCopy = {
+                                currentReviewer: ''
                             };
-                        }
-                    });
-                    _.each($rootScope.timeStamp.keys(), function(hugoSymbol) {
-                        if (!metaByGene[hugoSymbol]) {
-                            metaByGene[hugoSymbol] = {};
-                        }
-                        _.each($rootScope.timeStamp.get(hugoSymbol).keys(), function(timeStampKey) {
-                            metaByGene[hugoSymbol][timeStampKey] = $rootScope.timeStamp.get(hugoSymbol).get(timeStampKey);
+                            if ($rootScope.metaData.has(hugoSymbol)) {
+                                var uuids = $rootScope.metaData.get(hugoSymbol).keys();
+                                _.each(uuids, function(uuid) {
+                                    if ($rootScope.metaData.get(hugoSymbol).get(uuid).type === 'Map') {
+                                        if ($rootScope.metaData.get(hugoSymbol).get(uuid).get('review') === true) {
+                                            uuidsToCopy[uuid] = true;
+                                        }
+                                    }
+                                });
+                            }                            
+                            metaByGene[hugoSymbol] = {
+                                review: uuidsToCopy,
+                                lastModifiedAt: '',
+                                lastModifiedBy: '', 
+                                lastSavedAt: '',
+                                lastSavedBy: ''
+                            };
+                            // assign timestamp
+                            if ($rootScope.timeStamp.has(hugoSymbol)) {
+                                _.each($rootScope.timeStamp.get(hugoSymbol).keys(), function(timeStampKey) {
+                                    metaByGene[hugoSymbol][timeStampKey] = $rootScope.timeStamp.get(hugoSymbol).get(timeStampKey);
+                                });
+                            }                            
+                            // assign api keys
+                            if ($rootScope.apiData.has(hugoSymbol) && $rootScope.apiData.get(hugoSymbol).has('vus')) {
+                                metaByGene[hugoSymbol].vus = $rootScope.apiData.get(hugoSymbol).get('vus').get('data');
+                            }
+                        });                      
+                        // exportAdditional.meta = metaByGene;
+                        importMetaData(metaByGene).then(function() {
+                            console.log('finished');
+                            // exportQueues();
+                        }, function() {
+                            console.log('failed');
+                            // exportQueues();
                         });
                     });
-                    _.each($rootScope.apiData.keys(), function(hugoSymbol) {
-                        if (!metaByGene[hugoSymbol]) {
-                            metaByGene[hugoSymbol] = {};
-                        }
-                        if ($rootScope.apiData.get(hugoSymbol).has('vus')) {
-                            metaByGene[hugoSymbol].vus = $rootScope.apiData.get(hugoSymbol).get('vus').get('data');
-                        }
-                    });
-                    exportAdditional.meta = metaByGene;
-                    importMetaData(metaByGene).then(function() {
-                        exportQueues();
-                    }, function() {
-                        exportQueues();
-                    });
-                });
+                });                
             }
             function exportQueues() {
                 var queuesInfo = {};
