@@ -102,7 +102,7 @@ angular.module('oncokbApp')
         function hasDuplicateCancerTypes(cancerTypes) {
             var result = false;
             if (!cancerTypes) {
-                result = false;
+                return false;
             }
             var list = [];
             var tempName = '';
