@@ -51,7 +51,8 @@ angular.module('oncokbApp')
             if (firebaseUser) {
                 $rootScope.isSignedIn = true;
                 user.setRole(firebaseUser).then(function() {
-                    setParams();
+                    $rootScope.signedInUser = $rootScope.me;
+                    setParams();                    
                     testInternal().then(function() {
                         if (window.localStorage.geneName) {
                             $location.url('/gene/' + window.localStorage.geneName);

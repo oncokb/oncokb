@@ -259,7 +259,7 @@ angular.module('oncokbApp')
                 $scope.reviewLayout = function (type) {
                     if (type === 'regular') {
                         // display the new header, and difference header and content only when the item is not inside an added/deleted sections, and haven't accepted or rejected yet
-                        return !mainUtils.processedInReview('accept', $scope.uuid) && !mainUtils.processedInReview('reject', $scope.uuid) && !mainUtils.processedInReview('inside', $scope.uuid);
+                        return !mainUtils.processedInReview('accept', $scope.uuid) && !mainUtils.processedInReview('reject', $scope.uuid) && !mainUtils.processedInReview('inside', $scope.uuid) && !mainUtils.processedInReview('rollback', $scope.uuid);
                     } else if (type === 'name') {
                         return mainUtils.processedInReview('name', $scope.uuid) && !mainUtils.processedInReview('accept', $scope.uuid) && !mainUtils.processedInReview('reject', $scope.uuid) && !mainUtils.processedInReview('add', $scope.uuid) && !mainUtils.processedInReview('inside', $scope.uuid);
                     } else if (type === 'inside') {
