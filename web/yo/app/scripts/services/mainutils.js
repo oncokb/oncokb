@@ -87,13 +87,20 @@ angular.module('oncokbApp')
             }
             var list = [];
             _.each(cancerTypes, function(cancerType) {
-                if (cancerType.subtype) {
-                    list.push(cancerType.subtype.name);
-                } else if (cancerType.mainType) {
-                    list.push(cancerType.mainType.name);
+                if (cancerType.mainType !== null && cancerType.mainType.name) {
+                    if (cancerType.subtype.name) {
+                        list.push(cancerType.subtype.name);
+                    } else {
+                        list.push(cancerType.mainType.name);
+                    }
                 }
             });
+            var listWithDup = list;
             list = _.uniq(list).sort();
+            // Same tumor exists in new Cancer Types
+            if (listWithDup.length !== list.length) {
+                return 'Same tumor exists';
+            }
             return list.join(', ');
         }
         /**
