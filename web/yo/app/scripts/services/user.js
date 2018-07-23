@@ -27,7 +27,6 @@ angular.module('oncokbApp')
                 me.email = gResp.user.email;
                 me.photoURL = gResp.user.photoURL;
                 $rootScope.isSignedIn = true;
-                $rootScope.signedInUser = me;
                 setRole(gResp.user).then(function() {
                     if (allUsers[me.name.toLowerCase()].email && allUsers[me.name.toLowerCase()].email !== me.email) {
                         defer.reject('You do not have access to login. Please contact the OncoKB team.');
@@ -129,7 +128,7 @@ angular.module('oncokbApp')
                 });
             } else {
                 defer.resolve(allUsers);
-            }       
+            }            
             return defer.promise;
         }
         return {
