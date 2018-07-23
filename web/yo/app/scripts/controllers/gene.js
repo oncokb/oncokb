@@ -2893,6 +2893,19 @@ angular.module('oncokbApp')
             mutation: data.mutation
         };
 
+        getOriginalTumorsName();
+
+        function getOriginalTumorsName() {
+            $scope.meta.originalTumorNameList = [];
+            _.each($scope.meta.cancerTypes, function (tumor) {
+                if (tumor.subtype) {
+                    $scope.meta.originalTumorNameList.push(tumor.subtype);
+                } else if (tumor.mainType) {
+                    $scope.meta.originalTumorNameList.push(tumor.mainType);
+                }
+            });
+        }
+
         $scope.cancel = function () {
             $modalInstance.dismiss('canceled');
         };
@@ -3020,7 +3033,8 @@ angular.module('oncokbApp')
             });
             var currentTumorStr = mainUtils.getNewCancerTypesName($scope.meta.newCancerTypes);
             console.log(currentTumorStr);
-            if (mainUtils.hasDuplicateCancerTypes($scope.meta.newCancerTypes) || (currentTumorStr.includes(',') && tumorNameList.indexOf(currentTumorStr) !== -1)) {
+            if (mainUtils.hasDuplicateCancerTypes($scope.meta.newCancerTypes) ||
+                    (!$scope.meta.originalTumorNameList.includes(currentTumorStr) && tumorNameList.indexOf(currentTumorStr) !== -1)) {
                 $scope.invalidTumor = true;
             } else {
                 $scope.invalidTumor = false;
