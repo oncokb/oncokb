@@ -362,6 +362,7 @@
                             ng-options="tt.name for tt in cancerType.oncoTreeTumorTypes | orderBy: 'name' track by tt.code">
                         <option value=""></option>
                     </select>
+                    <!-- <span style="color:orange">maintype subtype same warning message to be added here</span> -->
                 </div>
                 <button type="button" class="btn btn-default btn-sm"
                         ng-disabled="emptyTT()"

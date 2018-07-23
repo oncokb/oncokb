@@ -77,7 +77,7 @@ angular.module('oncokbApp')
                     list.push(cancerType.mainType);
                 }
             });
-            list = _.uniq(list).sort();
+            list = list.sort();
             return list.join(', ');
         }
 
@@ -87,15 +87,13 @@ angular.module('oncokbApp')
             }
             var list = [];
             _.each(cancerTypes, function(cancerType) {
-                if (cancerType.mainType !== null && cancerType.mainType.name) {
-                    if (cancerType.subtype && cancerType.subtype.name) {
-                        list.push(cancerType.subtype.name);
-                    } else {
-                        list.push(cancerType.mainType.name);
-                    }
+                if (cancerType.subtype && cancerType.subtype.name) {
+                    list.push(cancerType.subtype.name);
+                } else if (cancerType.mainType && cancerType.mainType.name){
+                    list.push(cancerType.mainType.name);
                 }
             });
-            list = _.uniq(list).sort();
+            list = list.sort();
             return list.join(', ');
         }
 
@@ -108,9 +106,9 @@ angular.module('oncokbApp')
             var tempName = '';
             _.some(cancerTypes, function(cancerType) {
                 tempName = '';
-                if (cancerType.subtype) {
+                if (cancerType.subtype && cancerType.subtype.name) {
                     tempName = cancerType.subtype.name;
-                } else if (cancerType.mainType) {
+                } else if (cancerType.mainType && cancerType.mainType.name) {
                     tempName = cancerType.mainType.name;
                 }
                 if (list.indexOf(tempName) !== -1) {
