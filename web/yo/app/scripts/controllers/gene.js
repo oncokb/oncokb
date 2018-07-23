@@ -64,7 +64,7 @@ angular.module('oncokbApp')
                         if (mutation.name.toLowerCase() === variantName) {
                             validMutation = false;
                             if (mutation.name_review && mutation.name_review.removed === true) {
-                                message += 'just got removed, we will reuse the old one';    
+                                message += 'just got removed, we will reuse the old one';
                                 delete mutation.name_review.removed;
                                 mainUtils.deleteUUID(mutation.name_uuid);
                             } else {
@@ -101,7 +101,7 @@ angular.module('oncokbApp')
                     } else {
                         $scope.gene.mutations.push(mutation);
                     }
-                    mainUtils.setUUIDInReview(mutation.name_uuid);  
+                    mainUtils.setUUIDInReview(mutation.name_uuid);
                 }
             };
             /**
@@ -185,7 +185,7 @@ angular.module('oncokbApp')
                 };
                 if (tumor.summary) {
                     $scope.tumorContent[uuid].result = '1x TTS';
-                }  
+                }
                 for (var m = 0; m < tumor.TIs.length; m++) {
                     var ti = tumor.TIs[m];
                     if (!ti.treatments) {
@@ -202,7 +202,7 @@ angular.module('oncokbApp')
                             }
                         }
                     }
-                }                    
+                }
                 var levels = _.without(_.keys($scope.tumorContent[uuid]), 'result');
                 if (levels.length > 0) {
                     levels.sort(function (a, b) {
@@ -215,7 +215,7 @@ angular.module('oncokbApp')
                     if ($scope.tumorContent[uuid].result) {
                         $scope.tumorContent[uuid].result += ', ';
                     }
-                    $scope.tumorContent[uuid].result += result.join('; ');                   
+                    $scope.tumorContent[uuid].result += result.join('; ');
                 }
             }
             $scope.getTreatmentMessages = function (mutation, tumor, ti) {
@@ -258,7 +258,7 @@ angular.module('oncokbApp')
                     }, function(error) {
                         console.log('error happened when saving VUS to DB', error);
                     });
-                }, 2000);                
+                }, 2000);
             };
             function parseMutationString(mutationStr) {
                 mutationStr = mutationStr.replace(/\([^\)]+\)/g, '');
@@ -342,7 +342,7 @@ angular.module('oncokbApp')
                         return true;
                     } else {
                         return mainUtils.processedInReview('precise', uuid);
-                    } 
+                    }
                 }
             };
             $scope.review = function () {
@@ -361,7 +361,7 @@ angular.module('oncokbApp')
                         dlg.result.then(function () {
                             if (!$scope.geneMeta.review.currentReviewer) {
                                 prepareReviewItems();
-                            }                            
+                            }
                         });
                     } else {
                         prepareReviewItems();
@@ -623,7 +623,7 @@ angular.module('oncokbApp')
                 });
                 if ($scope.status.hasReviewContent === false) {
                     $scope.geneMeta.review.currentReviewer = '';
-                    // This is to increase the fault tolerance of the platform. UUIDs are supposed to be cleaned up after acception or rejection. 
+                    // This is to increase the fault tolerance of the platform. UUIDs are supposed to be cleaned up after acception or rejection.
                     // If after scaning whole gene document and found nothing need to be reviewed, then we clean up everything in the review EXCEPT currentReviewer
                     if (_.keys($scope.geneMeta.review).length > 1) {
                         _.each(_.keys($scope.geneMeta.review), function(key) {
@@ -632,7 +632,7 @@ angular.module('oncokbApp')
                             }
                         });
                     }
-                    
+
                     dialogs.notify('Warning', 'No changes need to be reviewed');
                 } else {
                     $scope.geneMeta.review.currentReviewer = $rootScope.me.name;
@@ -733,7 +733,7 @@ angular.module('oncokbApp')
                 if (isChangedBy('precise', $scope.gene.background_uuid, userName, $scope.gene.background_review)) {
                     formEvidencesPerUser(userName, 'GENE_BACKGROUND', null, null, null, null);
                 }
-                if (isChangedBy('precise', $scope.gene.type.tsg_uuid, userName, $scope.gene.type.tsg_review) 
+                if (isChangedBy('precise', $scope.gene.type.tsg_uuid, userName, $scope.gene.type.tsg_review)
                     || isChangedBy('precise', $scope.gene.type.ocg_uuid, userName, $scope.gene.type.ocg_review)) {
                     evidencesAllUsers[userName].geneTypeEvidence = {
                         hugoSymbol: $scope.gene.name,
@@ -850,7 +850,7 @@ angular.module('oncokbApp')
                 DatabaseConnector.deleteEvidences(deletedEvidences, historyData, function (result) {
                     _.each(deletedEvidenceModels, function (item) {
                         var data = $scope.getRefs(item.mutation, item.tumor, item.ti, item.treatment);
-                        var indicies = [data.mutationIndex, data.tumorIndex, data.tiIndex, data.treatmentIndex];             
+                        var indicies = [data.mutationIndex, data.tumorIndex, data.tiIndex, data.treatmentIndex];
                         removeModel({indicies: indicies, uuids: deletedEvidences, type: item.type});
                     });
                     deferred.resolve();
@@ -1449,7 +1449,7 @@ angular.module('oncokbApp')
                                                             return true;
                                                         }
                                                     });
-                                                }                                                
+                                                }
                                                 return true;
                                             }
                                         });
@@ -1508,7 +1508,7 @@ angular.module('oncokbApp')
                 var dlg = dialogs.confirm('Reminder', 'Are you sure you want to reject this change?');
                 dlg.result.then(function () {
                     var data = $scope.getRefs(mutation, tumor, ti, treatment);
-                    var indicies = [data.mutationIndex, data.tumorIndex, data.tiIndex, data.treatmentIndex];    
+                    var indicies = [data.mutationIndex, data.tumorIndex, data.tiIndex, data.treatmentIndex];
                     var tempUUIDs = getUUIDsByType(type, mutation, tumor, ti, treatment);
                     removeModel({type: type, uuids: tempUUIDs, indicies: indicies});
                 });
@@ -1628,7 +1628,7 @@ angular.module('oncokbApp')
                         oncoTreeTumorTypes: angular.copy($scope.oncoTree.allTumorTypes)
                     }];
                     $scope.indicateMutationContent($scope.gene.mutations[index]);
-                    mainUtils.setUUIDInReview(tumor.cancerTypes_uuid);  
+                    mainUtils.setUUIDInReview(tumor.cancerTypes_uuid);
                 }
             };
 
@@ -1726,7 +1726,7 @@ angular.module('oncokbApp')
                     console.log('data refreshed');
                 }, function(error) {
                     console.log("Error:", error);
-                });                
+                });
             };
             $scope.getVUSClass = function(time) {
                 var dt = new Date(time);
@@ -1768,7 +1768,7 @@ angular.module('oncokbApp')
                 if (type === 'tumor') {
                     if (obj.cancerTypes_review && obj.cancerTypes_review.added) {
                         directlyRemove = true;
-                    } 
+                    }
                 } else if (obj.name_review && obj.name_review.added) {
                     directlyRemove = true;
                 }
@@ -1970,7 +1970,7 @@ angular.module('oncokbApp')
                     if ($scope.geneMeta.review[uuid]) {
                         mainUtils.deleteUUID(uuid);
                     }
-                }); 
+                });
             }
             function removeUUIDs(uuids) {
                 if (uuids && _.isArray(uuids)) {
@@ -2169,7 +2169,7 @@ angular.module('oncokbApp')
                             return false;
                         } else {
                             return true;
-                        }                        
+                        }
                     }
                 }
             };
@@ -2184,17 +2184,17 @@ angular.module('oncokbApp')
                 $scope.movingInfo.startIndex = index;
                 if ($scope.movingInfo.preMoving) {
                     $scope.movingInfo.style.color = 'gray';
-                    $scope.movingInfo.message = 'Click to move';                        
+                    $scope.movingInfo.message = 'Click to move';
                 } else {
                     $scope.movingInfo.style.color = 'orange';
-                    $scope.movingInfo.message = 'Click again to cancel';    
+                    $scope.movingInfo.message = 'Click again to cancel';
                 }
                 if (!$scope.movingInfo.preMoving) {
                     $scope.movingInfo[$scope.movingInfo.uuid] = {
                         'border-left-style':'solid',
                         'border-left-color':'red'
                     };
-                }                
+                }
             };
             $rootScope.moving = false;
             $scope.endMoving = function(path, moveType) {
@@ -2223,7 +2223,7 @@ angular.module('oncokbApp')
                 var movingSectionCopy = _.clone(dataList[$scope.movingInfo.startIndex]);
                 if ($scope.movingInfo.startIndex > endIndex) {
                     for (var i = $scope.movingInfo.startIndex-1; i >= endIndex+1; i--) {
-                        dataList[i+1] = _.clone(dataList[i]); 
+                        dataList[i+1] = _.clone(dataList[i]);
                     }
                     if (moveType === 'up') {
                         dataList[endIndex+1] = _.clone(dataList[endIndex]);
@@ -2239,14 +2239,14 @@ angular.module('oncokbApp')
                         dataList[endIndex-1] = movingSectionCopy;
                     } else if (moveType === 'down') {
                         dataList[endIndex-1] = _.clone(dataList[endIndex]);
-                        dataList[endIndex] = movingSectionCopy; 
+                        dataList[endIndex] = movingSectionCopy;
                     }
                 }
                 if (type === 'treatment') {
                     $scope.updatePriority(dataList);
                 }
-                $scope.movingInfo.preMoving = true;   
-                $scope.movingInfo.style.color = 'gray';  
+                $scope.movingInfo.preMoving = true;
+                $scope.movingInfo.style.color = 'gray';
                 $scope.movingInfo.message = 'Click to move';
                 $scope.movingInfo[$scope.movingInfo.uuid] = {
                     'border-left-style':'solid',
@@ -2265,7 +2265,7 @@ angular.module('oncokbApp')
             $scope.generatePDF = function () {
                 jspdf.create(mainUtils.getGeneData(this.gene, true, false));
             };
-            // emptySectionsUUIDs is still TBD in terms of where it should be used 
+            // emptySectionsUUIDs is still TBD in terms of where it should be used
             var emptySectionsUUIDs = {};
             $scope.isEmptySection = function (obj, type) {
                 if ($scope.reviewMode) {
@@ -2527,17 +2527,17 @@ angular.module('oncokbApp')
                 }
                 function callback(index, mainType, subType, oncoTreeTumorTypes) {
                     n[index].oncoTreeTumorTypes = oncoTreeTumorTypes ? oncoTreeTumorTypes : $scope.oncoTree.allTumorTypes;
-    
+
                     if (mainType) {
                         n[index].mainType = mainType;
                     }
-    
+
                     var next = index + 1;
                     if (next < n.length - 1) {
                         findCancerType(next, n[next].mainType, n[next].subtype, callback);
                     }
                 }
-    
+
                 if (n.length > 1) {
                     findCancerType(0, n[0].mainType, n[0].subtype, callback);
                 }
@@ -2778,7 +2778,7 @@ angular.module('oncokbApp')
                                 $rootScope.fileEditable = false;
                             } else {
                                 $rootScope.fileEditable = $scope.status.fileEditable;
-                            }                            
+                            }
                             $scope.status.rendering = false;
                             watchCurrentReviewer();
                         }, function (error) {
@@ -2797,14 +2797,14 @@ angular.module('oncokbApp')
                                 if ($scope.status.fileEditable === true && $rootScope.fileEditable === false) {
                                     $rootScope.fileEditable = $scope.status.fileEditable;
                                     console.log('reset happening');
-                                }      
+                                }
                             } else if (n !== $rootScope.me.name) {
                                 $rootScope.fileEditable = false;
                             }
-                        }   
+                        }
                     }
                 });
-            }            
+            }
             $scope.getObservePath = function (data) {
                 if (data.type === 'gene') {
                     return 'Genes/' + $routeParams.geneName;
@@ -2893,9 +2893,22 @@ angular.module('oncokbApp')
             mutation: data.mutation
         };
 
+        getOriginalTumorsName();
+
+        function getOriginalTumorsName() {
+            $scope.meta.originalTumorNameList = [];
+            _.each($scope.meta.cancerTypes, function (tumor) {
+                if (tumor.subtype) {
+                    $scope.meta.originalTumorNameList.push(tumor.subtype);
+                } else if (tumor.mainType) {
+                    $scope.meta.originalTumorNameList.push(tumor.mainType);
+                }
+            });
+        }
+
         $scope.cancel = function () {
             $modalInstance.dismiss('canceled');
-        }; 
+        };
 
         $scope.save = function () {
             var cancerTypes = [];
@@ -2911,8 +2924,8 @@ angular.module('oncokbApp')
                 }
                 if (_.isUndefined(data.tumorRef.cancerTypes_review.lastReviewed)) {
                     data.tumorRef.cancerTypes_review.lastReviewed = $scope.meta.cancerTypes;
-                } 
-                mainUtils.setUUIDInReview($scope.meta.cancerTypes_uuid);  
+                }
+                mainUtils.setUUIDInReview($scope.meta.cancerTypes_uuid);
             }
             _.each($scope.meta.newCancerTypes, function (ct) {
                 if (ct.mainType.name) {
@@ -3020,7 +3033,8 @@ angular.module('oncokbApp')
             });
             var currentTumorStr = mainUtils.getNewCancerTypesName($scope.meta.newCancerTypes);
             console.log(currentTumorStr);
-            if (tumorNameList.indexOf(currentTumorStr) !== -1) {
+            if (mainUtils.hasDuplicateCancerTypes($scope.meta.newCancerTypes) ||
+                    (!$scope.meta.originalTumorNameList.includes(currentTumorStr) && tumorNameList.indexOf(currentTumorStr) !== -1)) {
                 $scope.invalidTumor = true;
             } else {
                 $scope.invalidTumor = false;
