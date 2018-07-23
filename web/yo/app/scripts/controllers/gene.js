@@ -3020,7 +3020,7 @@ angular.module('oncokbApp')
             });
             var currentTumorStr = mainUtils.getNewCancerTypesName($scope.meta.newCancerTypes);
             console.log(currentTumorStr);
-            if (mainUtils.checkDuplicateNewCancerTypesName($scope.meta.newCancerTypes) || (currentTumorStr.includes(',') && tumorNameList.indexOf(currentTumorStr) !== -1)) {
+            if (mainUtils.hasDuplicateCancerTypes($scope.meta.newCancerTypes) || (currentTumorStr.includes(',') && tumorNameList.indexOf(currentTumorStr) !== -1)) {
                 $scope.invalidTumor = true;
             } else {
                 $scope.invalidTumor = false;

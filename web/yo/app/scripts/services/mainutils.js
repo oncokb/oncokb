@@ -99,27 +99,29 @@ angular.module('oncokbApp')
             return list.join(', ');
         }
 
-        function checkDuplicateNewCancerTypesName(cancerTypes) {
+        function hasDuplicateCancerTypes(cancerTypes) {
+            var result = false;
             if (!cancerTypes) {
-                return false;
+                result = false;
             }
             var list = [];
-            _.each(cancerTypes, function(cancerType) {
-                if (cancerType.mainType !== null && cancerType.mainType.name) {
-                    if (cancerType.subtype && cancerType.subtype.name) {
-                        list.push(cancerType.subtype.name);
-                    } else {
-                        list.push(cancerType.mainType.name);
-                    }
+            var tempName = '';
+            _.some(cancerTypes, function(cancerType) {
+                tempName = '';
+                if (cancerType.subtype) {
+                    tempName = cancerType.subtype.name;
+                } else if (cancerType.mainType) {
+                    tempName = cancerType.mainType.name;
+                }
+                if (list.indexOf(tempName) !== -1) {
+                    result = true;
+                    return true;
+                }
+                if (tempName) {
+                    list.push(tempName);
                 }
             });
-            var uniqlist = _.uniq(list);
-            // Same tumor exists in new Cancer Types
-            if (list.length !== uniqlist.length) {
-                return true;
-            } else {
-                return false;
-            }
+            return result;
         }
         /**
          * Check whether searched mainType in cancerTypes
@@ -532,7 +534,7 @@ angular.module('oncokbApp')
             setIsoFormAndGeneType: setIsoFormAndGeneType,
             getCancerTypesName: getCancerTypesName,
             getNewCancerTypesName: getNewCancerTypesName,
-            checkDuplicateNewCancerTypesName: checkDuplicateNewCancerTypesName,
+            hasDuplicateCancerTypes: hasDuplicateCancerTypes,
             containMainType: containMainType,
             getIsoform: getIsoform,
             getOncogeneTSG: getOncogeneTSG,
