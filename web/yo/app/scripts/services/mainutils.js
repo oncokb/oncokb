@@ -95,13 +95,31 @@ angular.module('oncokbApp')
                     }
                 }
             });
-            var listWithDup = list;
             list = _.uniq(list).sort();
-            // Same tumor exists in new Cancer Types
-            if (listWithDup.length !== list.length) {
-                return 'Same tumor exists';
-            }
             return list.join(', ');
+        }
+
+        function checkDuplicateNewCancerTypesName(cancerTypes) {
+            if (!cancerTypes) {
+                return false;
+            }
+            var list = [];
+            _.each(cancerTypes, function(cancerType) {
+                if (cancerType.mainType !== null && cancerType.mainType.name) {
+                    if (cancerType.subtype.name) {
+                        list.push(cancerType.subtype.name);
+                    } else {
+                        list.push(cancerType.mainType.name);
+                    }
+                }
+            });
+            var uniqlist = _.uniq(list);
+            // Same tumor exists in new Cancer Types
+            if (list.length !== uniqlist.length) {
+                return true;
+            } else {
+                return false;
+            }
         }
         /**
          * Check whether searched mainType in cancerTypes
@@ -279,11 +297,11 @@ angular.module('oncokbApp')
                             var tempArr = [];
                             _.each(result2, function(item) {
                                 if (item.mainType && item.mainType.name && item.mainType.name === mainTypeName) {
-                                    tempArr.push(item);                         
+                                    tempArr.push(item);
                                 }
                             });
                             subtypeResult.push(tempArr);
-                        });    
+                        });
                         $rootScope.meta.mainType = mainTypeResult;
                         $rootScope.meta.tumorTypes = subtypeResult;
                         deferred.resolve({
@@ -296,7 +314,7 @@ angular.module('oncokbApp')
                 }, function(error) {
                     deferred.reject(error);
                 });
-            }            
+            }
             return deferred.promise;
         }
 
@@ -337,7 +355,7 @@ angular.module('oncokbApp')
             case 'loading':
                 return ReviewResource.loading.indexOf(uuid) !== -1;
             case 'precise':
-                return ReviewResource.precise.indexOf(uuid) !== -1;    
+                return ReviewResource.precise.indexOf(uuid) !== -1;
             default:
                 return false;
             }
@@ -368,15 +386,15 @@ angular.module('oncokbApp')
             firebase.database().ref('Meta/' + $routeParams.geneName + '/review/' + uuid).remove();
         }
         function getVUSData(vus, excludeComments) {
-            var vusData = angular.copy(vus);      
-            var vusDataArray = [];      
+            var vusData = angular.copy(vus);
+            var vusDataArray = [];
             excludeComments = _.isBoolean(excludeComments) ? excludeComments : false;
             _.each(vusData, function(vusItem) {
                 if (excludeComments) {
                     delete vusItem.name_comments;
                 }
                 vusDataArray.push(vusItem);
-            });            
+            });
             return vusDataArray;
         }
 
@@ -514,6 +532,7 @@ angular.module('oncokbApp')
             setIsoFormAndGeneType: setIsoFormAndGeneType,
             getCancerTypesName: getCancerTypesName,
             getNewCancerTypesName: getNewCancerTypesName,
+            checkDuplicateNewCancerTypesName: checkDuplicateNewCancerTypesName,
             containMainType: containMainType,
             getIsoform: getIsoform,
             getOncogeneTSG: getOncogeneTSG,
