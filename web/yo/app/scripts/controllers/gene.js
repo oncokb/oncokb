@@ -2853,6 +2853,19 @@ angular.module('oncokbApp')
                 return obj[data.key + '_uuid'];
             }
             populateBindings();
+            $scope.subIsSameWithMain = function(cancerType, type) {
+                cancerType.message = '';
+                if (type === 'sub' || !cancerType.mainType) {
+                    return;
+                }
+                var mainTypeName = cancerType.mainType.name;
+                _.some(cancerType.oncoTreeTumorTypes, function(subtypeItem) {
+                    if (subtypeItem.name === mainTypeName) {
+                        cancerType.message = 'same name also exist in Subtype';
+                        return true;
+                    }
+                });
+            };
             function getOncoTreeMainTypes() {
                 mainUtils.getOncoTreeMainTypes().then(function(result) {
                     var mainTypesReturned = result.mainTypes,
@@ -2960,6 +2973,7 @@ angular.module('oncokbApp')
             if (n.length > 1) {
                 findCancerType(0, n[0].mainType, n[0].subtype, callback);
             }
+            $scope.tumorValidationCheck();
         }, true);
 
         initNewCancerTypes();
@@ -3015,29 +3029,65 @@ angular.module('oncokbApp')
             }
             return '';
         }
-        $scope.tumorDuplicationCheck = function () {
-            $timeout(function() {
-                var tumorNameList = [];
-                _.each($scope.meta.mutation.tumors, function (tumor) {
-                    tumorNameList.push(mainUtils.getCancerTypesName(tumor.cancerTypes));
-                });
-                var currentTumorStr = mainUtils.getNewCancerTypesName($scope.meta.newCancerTypes);
-                if (!currentTumorStr) {
-                    $scope.meta.message = 'Please input cancer type';
-                    $scope.meta.invalid = true;
-                } else if (currentTumorStr === $scope.meta.originalTumorName) {
-                    $scope.meta.message = 'Same with original tumor type';
-                    $scope.meta.invalid = true;
-                } else if (mainUtils.hasDuplicateCancerTypes($scope.meta.newCancerTypes)) {
-                    $scope.meta.message = 'Remove duplication in the cancer type input';
-                    $scope.meta.invalid = true;
-                } else if (tumorNameList.indexOf(currentTumorStr) !== -1) {
-                    $scope.meta.message = 'Same tumor type already exists';
-                    $scope.meta.invalid = true;
-                } else {
+        // This function is desgined to handle the case that maintype name is the same with subtype
+        // For example, previous cancerTypes are "Melanoma(maintype), Colorectal Cancer", the current cancerTypes are "Melanoma(subtype), Colorectal Cancer"
+        // In that case, we should allow save changes even though the tumor type name stay the same
+        function changedSubSameWithMainItem(newCancerTypes, oldCancerTypes) {
+            var result = false;
+            _.some(newCancerTypes, function(item1) {
+                if (item1.mainType && item1.subtype && item1.mainType.name === item1.subtype.name) {
+                    _.some(oldCancerTypes, function(item2) {
+                        if (item2.mainType && item2.mainType === item1.mainType.name && !item2.subtype) {
+                            result = true;
+                            return true;
+                        }
+                    });
+                    return true;
+                }
+            });
+            if (result) {
+                return result;
+            }
+            _.some(oldCancerTypes, function(item1) {
+                if (item1.mainType && item1.subtype && item1.mainType === item1.subtype) {
+                    _.some(newCancerTypes, function(item2) {
+                        if (item2.mainType && item2.mainType.name === item1.mainType && !(item2.subtype && item2.subtype.name)) {
+                            result = true;
+                            return true;
+                        }
+                    });
+                    return true;
+                }
+            });
+            return result;
+        }
+        $scope.tumorValidationCheck = function () {
+            var tumorNameList = [];
+            _.each($scope.meta.mutation.tumors, function (tumor) {
+                tumorNameList.push(mainUtils.getCancerTypesName(tumor.cancerTypes));
+            });
+            var currentTumorStr = mainUtils.getNewCancerTypesName($scope.meta.newCancerTypes);
+            if (!currentTumorStr) {
+                $scope.meta.message = 'Please input cancer type';
+                $scope.meta.invalid = true;
+            } else if (currentTumorStr === $scope.meta.originalTumorName) {
+                var exceptionResult = changedSubSameWithMainItem($scope.meta.newCancerTypes, data.tumor.cancerTypes);
+                if (exceptionResult) {
                     $scope.meta.message = '';
                     $scope.meta.invalid = false;
-                }
-            }, 200);            
+                } else {
+                    $scope.meta.message = 'Same with original tumor type';
+                    $scope.meta.invalid = true;
+                }                
+            } else if (mainUtils.hasDuplicateCancerTypes($scope.meta.newCancerTypes)) {
+                $scope.meta.message = 'Remove duplication in the cancer type input';
+                $scope.meta.invalid = true;
+            } else if (tumorNameList.indexOf(currentTumorStr) !== -1) {
+                $scope.meta.message = 'Same tumor type already exists';
+                $scope.meta.invalid = true;
+            } else {
+                $scope.meta.message = '';
+                $scope.meta.invalid = false;
+            }            
         };
     });
