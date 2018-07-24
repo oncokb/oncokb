@@ -14,8 +14,7 @@
                                 data-placeholder="Choose a main tumor type"
                                 no-results-text="'Could not find any'"
                                 ng-model="cancerType.mainType"
-                                ng-options="tt.name for tt in meta.oncoTree.mainTypes | orderBy: 'name' track by tt.name"
-                                ng-change="tumorDuplicationCheck()">
+                                ng-options="tt.name for tt in meta.oncoTree.mainTypes | orderBy: 'name' track by tt.name">
                             <option value=""></option>
                         </select>
                     </div>
@@ -28,8 +27,7 @@
                                 data-placeholder="Choose a tumor type"
                                 no-results-text="'Could not find any'"
                                 ng-model="cancerType.subtype"
-                                ng-options="tt.name for tt in cancerType.oncoTreeTumorTypes | orderBy: 'name' track by tt.code"
-                                ng-change="tumorDuplicationCheck()">
+                                ng-options="tt.name for tt in cancerType.oncoTreeTumorTypes | orderBy: 'name' track by tt.code">
                             <option value=""></option>
                         </select>
                     </div>
