@@ -7,7 +7,7 @@
                     <p contenteditable="{{fe}}"
                         ng-class="getInputClass()"
                         ng-model="data[key]"
-                        ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 2000, 'blur': 0 } }">
+                        ng-model-options="{ updateOn: 'blur', debounce: { 'default': 2000, 'blur': 0 } }">
                      </p>
                     <pub-iframe
                             ng-model="pContent">
@@ -19,7 +19,7 @@
                         ng-class="getInputClass()"
                         ng-model="data[key]"
                         ng-click="setTrackSignal()"
-                        ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 2000, 'blur': 0 } }"
+                        ng-model-options="{ updateOn: 'blur', debounce: { 'default': 2000, 'blur': 0 } }"
                         class="editEmpty">
                     </p>
                     <!-- <span style="color:red">{{getDuplicationMessage()}}</span> -->
@@ -83,7 +83,7 @@
                     <p contenteditable="{{reviewContentEditable('regular')}}"
                        ng-class="getInputClass()"
                        ng-model="data[key]"
-                       ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 2000, 'blur': 0 } }">
+                       ng-model-options="{ updateOn: 'blur', debounce: { 'default': 2000, 'blur': 0 } }">
                     </p>
                     <div ng-if="reviewLayout('regular')">
                         <h4>Difference comparing to the old content:</h4>
@@ -98,7 +98,7 @@
                     <p contenteditable="{{reviewContentEditable('regular')}}"
                           ng-class="editableBox"
                           ng-model="data[key]"
-                          ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 2000, 'blur': 0 } }"
+                          ng-model-options="{ updateOn: 'blur', debounce: { 'default': 2000, 'blur': 0 } }"
                           class="editEmpty">
                     </p>
                     <div ng-if="reviewLayout('name')" ng-class="getOldContentDivClass(data[key])">
@@ -117,7 +117,7 @@
                     <div ng-if="reviewLayout('regular') && data[key+'_review'].lastReviewed">
                         <h4>Old Content:</h4>
                         <select ng-disabled="true"
-                                chosen 
+                                chosen
                                 ng-model="data[key+'_review'].lastReviewed"
                                 ng-options="opt.value as opt.label for opt in o">
                             <option value="NA"></option>
@@ -161,7 +161,7 @@
                         <div ng-if="reviewLayout('regular')">
                             <h4>Old Content:</h4>
                             <select ng-disabled="true"
-                                    chosen 
+                                    chosen
                                     ng-model="data[key+'_review'].lastReviewed"
                                     ng-options="opt.value as opt.label for opt in o">
                                 <option value="NA"></option>
