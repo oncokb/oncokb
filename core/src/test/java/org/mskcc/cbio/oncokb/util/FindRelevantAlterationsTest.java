@@ -49,6 +49,9 @@ public class FindRelevantAlterationsTest {
                 // General truncating consequence should be associated with Truncating Mutations
                 // Check splice
                 {"TP53", "X33_splice", null, "X33_splice, Truncating Mutations, Oncogenic Mutations"},
+                {"MET", "X1010_splice", null, "X1010_splice, 981_1028splice, 963_D1010splice, Oncogenic Mutations"},
+                {"MET", "X1010splice", null, "X1010_splice, 981_1028splice, 963_D1010splice, Oncogenic Mutations"},
+
                 // Check stop_gained
                 {"MAP2K4", "R304*", null, "R304*, Truncating Mutations, Oncogenic Mutations"},
 

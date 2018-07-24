@@ -690,6 +690,27 @@ public final class AlterationUtils {
         });
     }
 
+    public static void sortAlterationsByTheRange(List<Alteration> alterations) {
+        Collections.sort(alterations, new Comparator<Alteration>() {
+            @Override
+            public int compare(Alteration a1, Alteration a2) {
+                if (a1.getProteinStart() == null || a1.getProteinEnd() == null) {
+                    if (a2.getProteinStart() == null || a2.getProteinEnd() == null) {
+                        return 0;
+                    } else {
+                        return 1;
+                    }
+                }
+                if (a2.getProteinStart() == null || a2.getProteinEnd() == null) {
+                    return -1;
+                }
+                int range1 = a1.getProteinEnd() - a1.getProteinStart();
+                int range2 = a2.getProteinEnd() - a2.getProteinStart();
+                return range1 - range2;
+            }
+        });
+    }
+
     public static List<Alteration> getAlleleAndRelevantAlterations(Alteration alteration) {
         List<Alteration> alleles = getAlleleAlterations(alteration);
         Alteration oncogenicAllele = AlterationUtils.findOncogenicAllele(alleles);
