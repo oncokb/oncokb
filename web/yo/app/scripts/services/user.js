@@ -28,7 +28,7 @@ angular.module('oncokbApp')
                 me.name = gResp.user.displayName;
                 me.email = gResp.user.email;
                 me.photoURL = gResp.user.photoURL;
-                me.key = gResp.user.email.replace('.', '');
+                me.key = gResp.user.email.replace(/\./g, '');
                 $rootScope.isSignedIn = true;
                 // $rootScope.signedInUser is used to store user info who passed google authentication, but they might not be authorized to the curation platform 
                 $rootScope.signedInUser = me;
@@ -59,6 +59,7 @@ angular.module('oncokbApp')
                 me.email = user.email;
                 me.name = user.displayName;
                 me.photoURL = user.photoURL;
+                me.key = user.email.replace(/\./g, '');
             }
             var defer = $q.defer();
             getAllUsers().then(function(allUsers) {
