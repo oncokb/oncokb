@@ -1020,7 +1020,11 @@ public class SummaryUtils {
             || StringUtils.containsIgnoreCase(queryAlteration, "splice")
             || MainUtils.isEGFRTruncatingVariants(queryAlteration)
             ) {
-            sb.append(gene.getHugoSymbol() + " " + queryAlteration);
+            if (NamingUtils.hasAbbreviation(queryAlteration)) {
+                sb.append(gene.getHugoSymbol() + " " + NamingUtils.getFullName(queryAlteration) + " (" + queryAlteration + ")");
+            } else {
+                sb.append(gene.getHugoSymbol() + " " + queryAlteration);
+            }
             if (!queryAlteration.endsWith("alteration")) {
                 sb.append(" alteration");
             }
