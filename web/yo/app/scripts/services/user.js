@@ -12,11 +12,13 @@
  */
 angular.module('oncokbApp')
     .service('user', function user($routeParams, $q, $firebaseAuth, $firebaseObject, $rootScope) {
+        // me is used only inside user.js to share user information
         var me = {
             admin: false,
             email: '',
             name: '',
-            photoURL: ''
+            photoURL: '',
+            key: '' // this is the key used in the Firebase Realtime Users table 
         };
         var editableData = {};
         var allUsers = {};
@@ -26,13 +28,15 @@ angular.module('oncokbApp')
                 me.name = gResp.user.displayName;
                 me.email = gResp.user.email;
                 me.photoURL = gResp.user.photoURL;
+                me.key = gResp.user.email.replace(/\./g, '');
                 $rootScope.isSignedIn = true;
+                // $rootScope.signedInUser is used to store user info who passed google authentication, but they might not be authorized to the curation platform 
                 $rootScope.signedInUser = me;
                 setRole(gResp.user).then(function() {
-                    if (allUsers[me.name.toLowerCase()].email && allUsers[me.name.toLowerCase()].email !== me.email) {
+                    if (!allUsers[me.key]) {
                         defer.reject('You do not have access to login. Please contact the OncoKB team.');
                     } else {
-                        if (!allUsers[me.name.toLowerCase()].email) {
+                        if (!allUsers[me.key].email) {
                             updateUserInfo().then(function() {
                                 defer.resolve();
                             }, function(error) {
@@ -55,14 +59,16 @@ angular.module('oncokbApp')
                 me.email = user.email;
                 me.name = user.displayName;
                 me.photoURL = user.photoURL;
+                me.key = user.email.replace(/\./g, '');
             }
             var defer = $q.defer();
             getAllUsers().then(function(allUsers) {
-                if (!_.isUndefined(allUsers[me.name.toLowerCase()].admin)) {
-                    me.admin = allUsers[me.name.toLowerCase()].admin;
-                } else if (!_.isUndefined(allUsers[me.name.toLowerCase()].genes)) {
-                    me.genes = allUsers[me.name.toLowerCase()].genes;
+                if (!_.isUndefined(allUsers[me.key].admin)) {
+                    me.admin = allUsers[me.key].admin;
+                } else if (!_.isUndefined(allUsers[me.key].genes)) {
+                    me.genes = allUsers[me.key].genes;
                 }
+                // $rootScope.me is used to store the user who passed both authtication and authorization process. It is used accross the whole project to access current user info.
                 $rootScope.me = me;
                 defer.resolve();
             });
@@ -70,13 +76,12 @@ angular.module('oncokbApp')
         }
         function updateUserInfo() {
             var defer = $q.defer();
-            var myName = $rootScope.me.name.toLowerCase();
             var updatedUserInfo = {
-                name: $rootScope.me.name,
-                email: $rootScope.me.email,
-                photoURL: $rootScope.me.photoURL
+                name: me.name,
+                email: me.email,
+                photoURL: me.photoURL
             };
-            firebase.database().ref('Users/'+myName).update(updatedUserInfo).then(function() {
+            firebase.database().ref('Users/'+me.key).update(updatedUserInfo).then(function() {
                 defer.resolve();
             }, function(error) {
                 defer.reject(error);
@@ -96,9 +101,8 @@ angular.module('oncokbApp')
         function setFileeditable(hugoSymbols) {
             var defer = $q.defer();
             getAllUsers().then(function(users) {
-                var name = me.name.toLowerCase();
                 _.each(hugoSymbols, function(hugoSymbol) {
-                    if (users[name].admin === true || users[name].genes.write === 'all' || users[name].genes.write.indexOf(hugoSymbol) !== -1) {
+                    if (users[me.key].admin === true || users[me.key].genes.write === 'all' || users[me.key].genes.write.indexOf(hugoSymbol) !== -1) {
                         editableData[hugoSymbol] = true;
                     } else {
                         editableData[hugoSymbol] = false;
