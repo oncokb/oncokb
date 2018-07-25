@@ -65,13 +65,9 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
                 for (Alteration alteration : alterations) {
                     if (alteration.getGene().equals(gene) && alteration.getConsequence() != null && alteration.getConsequence().equals(consequence)) {
 
-                        //For missense variant, as long as they are overlapped to each, return the alteration
-                        if (consequence.equals(VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant"))) {
-                            if (end >= alteration.getProteinStart()
-                                && start <= alteration.getProteinEnd()) {
-                                result.add(alteration);
-                            }
-                        } else if (alteration.getProteinStart() <= start && alteration.getProteinEnd() >= end) {
+                        //For variant, as long as they are overlapped to each, return the alteration
+                        if (end >= alteration.getProteinStart()
+                            && start <= alteration.getProteinEnd()) {
                             result.add(alteration);
                         }
                     }
