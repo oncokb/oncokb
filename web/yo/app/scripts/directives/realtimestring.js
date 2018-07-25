@@ -56,8 +56,11 @@ angular.module('oncokbApp')
                         if (n !== o && !_.isUndefined(n)) {
                             if (!scope.data || !scope.data[scope.key+'_editing'] || scope.data[scope.key+'_editing'] === $rootScope.me.name) {
                                 if (!$rootScope.reviewMode || ReviewResource.rejected.indexOf(scope.uuid) === -1) {     
-                                    mainUtils.updateLastModified();
-                                    scope.data[scope.key] = OncoKB.utils.getString(scope.data[scope.key]);                  
+                                    mainUtils.updateLastModified();   
+                                    if (scope.pasting === true) {
+                                        scope.data[scope.key] = OncoKB.utils.getString(scope.data[scope.key]);    
+                                        scope.pasting = false;        
+                                    }   
                                     scope.pContent = scope.data[scope.key];
                                     if (scope.t === 'treatment-select' && scope.key === 'level') {
                                         scope.changePropagation();
@@ -308,6 +311,9 @@ angular.module('oncokbApp')
                         tumor: tumor
                     });
                 };
+                $scope.trimCSS = function() {
+                    $scope.pasting = true;
+                }
             }
         };
     })
