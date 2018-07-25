@@ -72,6 +72,9 @@ public class FindRelevantAlterationsTest {
                 // Range missense variant
                 {"PDGFRA", "D842I", null, "D842I, D842H, D842V, D842Y, D842_I843delinsIM, Oncogenic Mutations"},
 
+                // Check whether the overlapped variants(with the same consequencwe) will be mapped
+                {"MAP2K1", "E41_F53del", null, "E41_F53del, E41_L54del, F53_Q58del, F53_Q58delinsL, E51_Q58del, Oncogenic Mutations"},
+
                 // Truncating Mutations in the Oncogene should not be mapped to any range mutation unless the consequence is truncating
                 {"KIT", "K509Nfs*2", null, ""},
                 {"MED12", "Q1836Lfs*57", null, "Truncating Mutations"},
