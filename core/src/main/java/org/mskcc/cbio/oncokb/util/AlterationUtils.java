@@ -690,7 +690,7 @@ public final class AlterationUtils {
         });
     }
 
-    public static void sortAlterationsByTheRange(List<Alteration> alterations) {
+    public static void sortAlterationsByTheRange(List<Alteration> alterations, final int proteinStart, final int proteinEnd) {
         Collections.sort(alterations, new Comparator<Alteration>() {
             @Override
             public int compare(Alteration a1, Alteration a2) {
@@ -704,9 +704,16 @@ public final class AlterationUtils {
                 if (a2.getProteinStart() == null || a2.getProteinEnd() == null) {
                     return -1;
                 }
-                int range1 = a1.getProteinEnd() - a1.getProteinStart();
-                int range2 = a2.getProteinEnd() - a2.getProteinStart();
-                return range1 - range2;
+
+                int overlap1 = Math.min(a1.getProteinEnd(), proteinEnd) - Math.max(a1.getProteinStart(), proteinStart);
+                int overlap2 = Math.min(a2.getProteinEnd(), proteinEnd) - Math.max(a2.getProteinStart(), proteinStart);
+
+                if (overlap1 == overlap2) {
+                    int diff = a1.getProteinEnd() - a1.getProteinStart() - (a2.getProteinEnd() - a2.getProteinStart());
+                    return diff == 0 ? a1.getAlteration().compareTo(a2.getAlteration()) : diff;
+                } else {
+                    return overlap2 - overlap1;
+                }
             }
         });
     }

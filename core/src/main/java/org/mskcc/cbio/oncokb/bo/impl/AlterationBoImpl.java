@@ -85,7 +85,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         }
 
         List<Alteration> resultList = new ArrayList<>(result);
-        AlterationUtils.sortAlterationsByTheRange(resultList);
+        AlterationUtils.sortAlterationsByTheRange(resultList, start, end);
         return resultList;
     }
 

@@ -12,6 +12,8 @@ import java.util.List;
 public class AlterationUtilsTest extends TestCase
 {
     public void testSortAlterationsByTheRange() throws Exception {
+        int start = 8;
+        int end = 8;
         Integer[] starts = {0, 8, 8, null, 8};
         Integer[] ends = {10, 9, 8, 8, null};
         List<Alteration> alterationList = new ArrayList<>();
@@ -22,7 +24,7 @@ public class AlterationUtilsTest extends TestCase
             alt.setName(Integer.toString(i));
             alterationList.add(alt);
         }
-        AlterationUtils.sortAlterationsByTheRange(alterationList);
+        AlterationUtils.sortAlterationsByTheRange(alterationList, start, end);
         assertEquals(5, alterationList.size());
         assertEquals(alterationList.get(0).getProteinStart().intValue(), 8);
         assertEquals(alterationList.get(0).getProteinEnd().intValue(), 8);
