@@ -896,7 +896,7 @@ public class EvidenceUtils {
             for (Alteration alt : queryAlterations) {
                 String proteinChange = alt.getAlteration();
                 String displayName = alt.getName();
-                Alteration alteration = alterationBo.findAlteration(gene, type, proteinChange);
+                Alteration alteration = alterationBo.findAlterationFromDao(gene, type, proteinChange, displayName);
                 if (alteration == null) {
                     alteration = new Alteration();
                     alteration.setGene(gene);
@@ -950,9 +950,8 @@ public class EvidenceUtils {
     }
 
     /**
-     *
      * @param evidences
-     * @param isDesc default is false
+     * @param isDesc    default is false
      * @return
      */
     public static List<Evidence> sortTumorTypeEvidenceBasedNumOfAlts(List<Evidence> evidences, Boolean isDesc) {

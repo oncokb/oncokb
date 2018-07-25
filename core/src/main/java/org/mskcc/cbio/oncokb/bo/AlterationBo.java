@@ -4,31 +4,30 @@
  */
 package org.mskcc.cbio.oncokb.bo;
 
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.AlterationType;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.VariantConsequence;
 
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
 /**
- *
  * @author jgao
  */
 public interface AlterationBo extends GenericBo<Alteration> {
 
     /**
      * Get set of alterations by entrez gene Ids.
+     *
      * @param genes
      * @return
      */
     List<Alteration> findAlterationsByGene(Collection<Gene> genes);
 
     /**
-     *
      * @param gene
      * @param alterationType
      * @param alteration
@@ -36,8 +35,27 @@ public interface AlterationBo extends GenericBo<Alteration> {
      */
     Alteration findAlteration(Gene gene, AlterationType alterationType, String alteration);
 
+    Alteration findAlteration(Gene gene, AlterationType alterationType, String alteration, String name);
+
     /**
-     *
+     * @param gene
+     * @param alterationType
+     * @param alteration
+     * @return
+     */
+    Alteration findAlterationFromDao(Gene gene, AlterationType alterationType, String alteration);
+
+    /**
+     * @param gene
+     * @param alterationType
+     * @param alteration
+     * @param name
+     * @return
+     */
+    Alteration findAlterationFromDao(Gene gene, AlterationType alterationType, String alteration, String name);
+
+
+    /**
      * @param gene
      * @param consequence
      * @param start
@@ -47,7 +65,6 @@ public interface AlterationBo extends GenericBo<Alteration> {
     List<Alteration> findMutationsByConsequenceAndPosition(Gene gene, VariantConsequence consequence, int start, int end, Collection<Alteration> alterations);
 
     /**
-     *
      * @param gene
      * @param consequence
      * @param start
@@ -57,14 +74,12 @@ public interface AlterationBo extends GenericBo<Alteration> {
     List<Alteration> findMutationsByConsequenceAndPositionOnSamePosition(Gene gene, VariantConsequence consequence, int start, int end, Collection<Alteration> alterations);
 
     /**
-     *
      * @param alteration
      * @return
      */
     LinkedHashSet<Alteration> findRelevantAlterations(Alteration alteration, boolean includeAlternativeAllele);
 
     /**
-     *
      * @param alteration
      * @return
      */
