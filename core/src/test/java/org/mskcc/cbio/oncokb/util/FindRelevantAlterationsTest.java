@@ -49,6 +49,9 @@ public class FindRelevantAlterationsTest {
                 // General truncating consequence should be associated with Truncating Mutations
                 // Check splice
                 {"TP53", "X33_splice", null, "X33_splice, Truncating Mutations, Oncogenic Mutations"},
+                {"MET", "X1010_splice", null, "X1010_splice, 963_D1010splice, 981_1028splice, Oncogenic Mutations"},
+                {"MET", "X1010splice", null, "X1010_splice, 963_D1010splice, 981_1028splice, Oncogenic Mutations"},
+
                 // Check stop_gained
                 {"MAP2K4", "R304*", null, "R304*, Truncating Mutations, Oncogenic Mutations"},
 
@@ -72,8 +75,8 @@ public class FindRelevantAlterationsTest {
                 // Range missense variant
                 {"PDGFRA", "D842I", null, "D842I, D842H, D842V, D842Y, D842_I843delinsIM, Oncogenic Mutations"},
 
-                // Check whether the overlapped variants(with the same consequencwe) will be mapped
-                {"MAP2K1", "E41_F53del", null, "E41_F53del, E41_L54del, F53_Q58del, F53_Q58delinsL, E51_Q58del, Oncogenic Mutations"},
+                // Check whether the overlapped variants(with the same consequence) will be mapped
+                {"MAP2K1", "E41_F53del", null, "E41_F53del, E41_L54del, E51_Q58del, F53_Q58del, F53_Q58delinsL, Oncogenic Mutations"},
 
                 // Truncating Mutations in the Oncogene should not be mapped to any range mutation unless the consequence is truncating
                 {"KIT", "K509Nfs*2", null, ""},

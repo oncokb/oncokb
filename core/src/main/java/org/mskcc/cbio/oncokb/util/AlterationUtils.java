@@ -690,6 +690,34 @@ public final class AlterationUtils {
         });
     }
 
+    public static void sortAlterationsByTheRange(List<Alteration> alterations, final int proteinStart, final int proteinEnd) {
+        Collections.sort(alterations, new Comparator<Alteration>() {
+            @Override
+            public int compare(Alteration a1, Alteration a2) {
+                if (a1.getProteinStart() == null || a1.getProteinEnd() == null) {
+                    if (a2.getProteinStart() == null || a2.getProteinEnd() == null) {
+                        return 0;
+                    } else {
+                        return 1;
+                    }
+                }
+                if (a2.getProteinStart() == null || a2.getProteinEnd() == null) {
+                    return -1;
+                }
+
+                int overlap1 = Math.min(a1.getProteinEnd(), proteinEnd) - Math.max(a1.getProteinStart(), proteinStart);
+                int overlap2 = Math.min(a2.getProteinEnd(), proteinEnd) - Math.max(a2.getProteinStart(), proteinStart);
+
+                if (overlap1 == overlap2) {
+                    int diff = a1.getProteinEnd() - a1.getProteinStart() - (a2.getProteinEnd() - a2.getProteinStart());
+                    return diff == 0 ? a1.getAlteration().compareTo(a2.getAlteration()) : diff;
+                } else {
+                    return overlap2 - overlap1;
+                }
+            }
+        });
+    }
+
     public static List<Alteration> getAlleleAndRelevantAlterations(Alteration alteration) {
         List<Alteration> alleles = getAlleleAlterations(alteration);
         Alteration oncogenicAllele = AlterationUtils.findOncogenicAllele(alleles);

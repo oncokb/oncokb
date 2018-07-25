@@ -8,7 +8,6 @@ import com.mysql.jdbc.StringUtils;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.dao.AlterationDao;
-import org.mskcc.cbio.oncokb.dao.EvidenceDao;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.*;
 
@@ -85,7 +84,9 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             }
         }
 
-        return new ArrayList<>(result);
+        List<Alteration> resultList = new ArrayList<>(result);
+        AlterationUtils.sortAlterationsByTheRange(resultList, start, end);
+        return resultList;
     }
 
     @Override

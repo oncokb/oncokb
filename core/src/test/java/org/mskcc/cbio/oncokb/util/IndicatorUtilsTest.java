@@ -209,6 +209,7 @@ public class IndicatorUtilsTest {
         assertEquals("The Oncogenicity is not oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The variant summary is not expected.", "The EGFR kinase domain duplication (KDD) alteration is known to be oncogenic.", indicatorQueryResp.getVariantSummary());
         assertEquals("The highest sensitive level should be 1", LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
+
         // Check FLT3 ITD
         query = new Query(null, null, null, "FLT3", "ITD", null, null, "AML", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true, null);
