@@ -413,6 +413,8 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
                     if (isOncogenic != null && isOncogenic) {
                         add = true;
                     }
+                } else if (HotspotUtils.isHotspot(exactAlt)) {
+                    add = true;
                 } else {
                     // When we look at the oncogenicity, the VUS relevant variants should be excluded.
                     for (Alteration alt : AlterationUtils.excludeVUS(new ArrayList<>(relevantAlts))) {
