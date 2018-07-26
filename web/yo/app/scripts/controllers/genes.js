@@ -38,7 +38,9 @@ angular.module('oncokbApp')
                         saveGene(++docIndex);
                     }
                 } else {
-                    $scope.status.saveAllGenes = true;
+                    $scope.$apply(function() {
+                        $scope.status.saveAllGenes = true;
+                    });
                     console.log('finished.');
                 }
             }
