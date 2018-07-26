@@ -64,6 +64,8 @@ public class EvidenceUtils {
                 (levelOfEvidences == null ? "" : ("&" + levelOfEvidences.toString()));
             Alteration alt = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getAlteration(),
                 AlterationType.getByName(query.getAlterationType()), query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
+            AlterationUtils.annotateAlteration(alt, alt.getAlteration());
+
             List<Alteration> relevantAlterations = AlterationUtils.getRelevantAlterations(alt);
             List<Alteration> alleles = AlterationUtils.getAlleleAlterations(alt);
 
@@ -800,10 +802,12 @@ public class EvidenceUtils {
                     if (!com.mysql.jdbc.StringUtils.isNullOrEmpty(requestQuery.getAlteration())) {
                         Alteration alt = AlterationUtils.findAlteration(query.getGene(), requestQuery.getAlteration());
 
-                        if (alt == null)
+                        if (alt == null) {
                             alt = AlterationUtils.getAlteration(query.getGene().getHugoSymbol(),
                                 requestQuery.getAlteration(), null, requestQuery.getConsequence(),
                                 requestQuery.getProteinStart(), requestQuery.getProteinEnd());
+                            AlterationUtils.annotateAlteration(alt, alt.getAlteration());
+                        }
                         List<Alteration> relevantAlts = AlterationUtils.getRelevantAlterations(alt);
 
                         // Look for Oncogenic Mutations if no relevantAlt found for alt and alt is hotspot
@@ -816,6 +820,7 @@ public class EvidenceUtils {
                         }
 
                         Alteration alteration = AlterationUtils.getAlteration(query.getGene().getHugoSymbol(), requestQuery.getAlteration(), AlterationType.MUTATION, requestQuery.getConsequence(), requestQuery.getProteinStart(), requestQuery.getProteinEnd());
+                        AlterationUtils.annotateAlteration(alteration, alteration.getAlteration());
                         List<Alteration> allelesAlts = AlterationUtils.getAlleleAlterations(alteration);
                         relevantAlts.removeAll(allelesAlts);
                         query.setAlterations(relevantAlts);
