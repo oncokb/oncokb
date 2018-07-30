@@ -43,7 +43,7 @@
         <b>You are currently in "Review" mode. Click the "Review Complete" button to exit.</b>
       </p>
       <span class="btn-group">
-        <button type="button" class="btn btn-default" ng-click="acceptChangesByPerson(x)" ng-disabled="status[x].noChanges || status[x].savingAll"
+        <button type="button" class="btn btn-default" ng-click="acceptChangesByPerson(x)" ng-disabled="isNoReviewItems(x) || status[x].savingAll"
           ng-repeat="x in namesWithChanges" ng-bind-html="getButtonContent(x)"></button>
       </span>
     </div>
@@ -118,8 +118,8 @@
             </div>
             <div style="margin-top:-20px;margin-bottom:20px">
                 <review-panel uuid="mutation.name_uuid" review-obj="mutation.name_review" evidence-type="'mutation'" mutation="mutation" get-evidence="getEvidence(type, mutation)" model-update="modelUpdate(type, mutation)"
-                              accept-added="acceptAdded(type, mutation, tumor, ti, treatment)" reject-added="rejectAdded(type, mutation, tumor, ti, treatment)"
-                              confirm-delete="confirmDelete(type, mutation, tumor, ti, treatment)" cancel-delete="cancelDelete(type, mutation, tumor, ti, treatment)" get-refs="getRefs(mutation)"></review-panel>
+                              accept-added="acceptAdded(type, mutation, tumor, ti, treatment, updatedBy)" reject-added="rejectAdded(type, mutation, tumor, ti, treatment, updatedBy)"
+                              confirm-delete="confirmDelete(type, mutation, tumor, ti, treatment, updatedBy)" cancel-delete="cancelDelete(type, mutation, tumor, ti, treatment, updatedBy)" get-refs="getRefs(mutation)"></review-panel>
             </div>
 
           </div>
@@ -188,8 +188,8 @@
                     </span>
                 <div style="margin-top:-20px;margin-bottom:20px">
                     <review-panel uuid="tumor.cancerTypes_uuid" review-obj="tumor.cancerTypes_review" evidence-type="'tumor'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)"
-                                  confirm-delete="confirmDelete(type, mutation, tumor, ti, treatment)" cancel-delete="cancelDelete(type, mutation, tumor, ti, treatment)" get-refs="getRefs(mutation, tumor, ti, treatment)"
-                                  accept-added="acceptAdded(type, mutation, tumor, ti, treatment)" reject-added="rejectAdded(type, mutation, tumor, ti, treatment)"></review-panel>
+                                  confirm-delete="confirmDelete(type, mutation, tumor, ti, treatment, updatedBy)" cancel-delete="cancelDelete(type, mutation, tumor, ti, treatment, updatedBy)" get-refs="getRefs(mutation, tumor, ti, treatment)"
+                                  accept-added="acceptAdded(type, mutation, tumor, ti, treatment, updatedBy)" reject-added="rejectAdded(type, mutation, tumor, ti, treatment, updatedBy)"></review-panel>
                 </div>
               </div>
               <div class="panelContent" ng-if="initialOpen[tumor.cancerTypes_uuid]" id="{{tumor.cancerTypes_uuid}}" ng-init="bindTIs({uuid: tumor.cancerTypes_uuid, path: path})">
@@ -284,9 +284,9 @@
                             <div style="margin-top:-45px;margin-bottom:45px;">
                                   <review-panel uuid="treatment.name_uuid" review-obj="treatment.name_review" evidence-type="ti.name" mutation="mutation"
                                     tumor="tumor" therapy-category="ti" treatment="treatment" get-evidence="getEvidence(type, mutation, tumor, ti, treatment)"
-                                    model-update="modelUpdate(type, mutation, tumor, ti, treatment)" confirm-delete="confirmDelete(type, mutation, tumor, ti, treatment)"
-                                    cancel-delete="cancelDelete(type, mutation, tumor, ti, treatment)" accept-added="acceptAdded(type, mutation, tumor, ti, treatment)"
-                                    reject-added="rejectAdded(type, mutation, tumor, ti, treatment)" update-priority="updatePriority(treatments)" get-refs="getRefs(mutation, tumor, ti, treatment)"></review-panel>
+                                    model-update="modelUpdate(type, mutation, tumor, ti, treatment)" confirm-delete="confirmDelete(type, mutation, tumor, ti, treatment, updatedBy)"
+                                    cancel-delete="cancelDelete(type, mutation, tumor, ti, treatment, updatedBy)" accept-added="acceptAdded(type, mutation, tumor, ti, treatment, updatedBy)"
+                                    reject-added="rejectAdded(type, mutation, tumor, ti, treatment, updatedBy)" update-priority="updatePriority(treatments)" get-refs="getRefs(mutation, tumor, ti, treatment)"></review-panel>
                             </div>
                           </div>
                           <div class="panelContent" ng-if="initialOpen[treatment.name_uuid]" id="{{treatment.name_uuid}}">
