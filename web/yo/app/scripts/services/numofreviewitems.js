@@ -13,15 +13,14 @@ angular.module('oncokbApp')
     .factory('numOfReviewItems', function() {
         var reviewItemsCount = {};
 
+        function clear() {
+            reviewItemsCount = {};
+        }
         function get() {
             return reviewItemsCount;
         }
         function set(userName, count) {
-            if (_.isEmpty(userName)) {
-                reviewItemsCount = count;
-            } else {
-                reviewItemsCount[userName] = count;
-            }
+            reviewItemsCount[userName] = count;
         }
         function add(updatedBy) {
             if (_.isUndefined(reviewItemsCount[updatedBy])) {
@@ -34,8 +33,9 @@ angular.module('oncokbApp')
         }
 
         return {
-            set: set,
+            clear: clear,
             get: get,
+            set: set,
             add: add,
             minus: minus
         };
