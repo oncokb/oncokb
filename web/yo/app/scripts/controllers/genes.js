@@ -103,6 +103,18 @@ angular.module('oncokbApp')
             if ($rootScope.me.admin) {
                 sorting = [[4, 'desc'], [5, 'desc'], [1, 'desc'], [0, 'asc']];
             }
+            jQuery.extend(jQuery.fn.dataTableExt.oSort, {
+                'date-html-asc': function(a, b) {
+                    if (_.isEmpty(a)) return 1;
+                    if (_.isEmpty(b)) return -1;
+                    return mainUtils.getTimeStamp(a) - mainUtils.getTimeStamp(b);
+                },
+                'date-html-desc': function(a, b) {
+                    if (_.isEmpty(a)) return 1;
+                    if (_.isEmpty(b)) return -1;
+                    return mainUtils.getTimeStamp(b) - mainUtils.getTimeStamp(a);
+                }
+            });
 
             $scope.dtOptions = DTOptionsBuilder
                 .newOptions()
@@ -114,7 +126,7 @@ angular.module('oncokbApp')
 
             $scope.dtColumns = [
                 DTColumnDefBuilder.newColumnDef(0),
-                DTColumnDefBuilder.newColumnDef(1).withOption('sType', 'date'),
+                DTColumnDefBuilder.newColumnDef(1).withOption('sType', 'date-html'),
                 DTColumnDefBuilder.newColumnDef(2),
                 DTColumnDefBuilder.newColumnDef(3)
             ];
