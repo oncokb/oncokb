@@ -349,7 +349,7 @@ angular.module('oncokbApp')
                 if ($rootScope.reviewMode) {
                     $scope.exitReview();
                 } else {
-                    numOfReviewItems.set('', {});
+                    numOfReviewItems.clear();
                     var collaborators = $rootScope.collaborators;
                     var otherCollaborators = [];
                     _.each(collaborators, function (collaborator) {
@@ -370,7 +370,7 @@ angular.module('oncokbApp')
                 }
             };
             $scope.exitReview = function () {
-                numOfReviewItems.set('', {});
+                numOfReviewItems.clear();
                 $scope.geneMeta.review.currentReviewer = '';
                 $rootScope.fileEditable = true;
                 evidencesAllUsers = {};
