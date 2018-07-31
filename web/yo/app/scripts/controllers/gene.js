@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('oncokbApp')
-    .controller('GeneCtrl', ['_', 'S', '$resource', '$interval', '$timeout', '$scope', '$rootScope', '$location', '$route', '$routeParams', '$window', '$q', 'dialogs', 'OncoKB', 'DatabaseConnector', 'SecretEmptyKey', '$sce', 'jspdf', 'FindRegex', 'mainUtils', 'ReviewResource', 'loadFiles', '$firebaseObject', '$firebaseArray', 'FirebaseModel', 'user', 'numOfReviewItems',
-        function (_, S, $resource, $interval, $timeout, $scope, $rootScope, $location, $route, $routeParams, $window, $q, dialogs, OncoKB, DatabaseConnector, SecretEmptyKey, $sce, jspdf, FindRegex, mainUtils, ReviewResource, loadFiles, $firebaseObject, $firebaseArray, FirebaseModel, user, numOfReviewItems) {
+    .controller('GeneCtrl', ['_', 'S', '$resource', '$interval', '$timeout', '$scope', '$rootScope', '$location', '$route', '$routeParams', '$window', '$q', 'dialogs', 'OncoKB', 'DatabaseConnector', 'SecretEmptyKey', '$sce', 'jspdf', 'FindRegex', 'mainUtils', 'ReviewResource', 'loadFiles', '$firebaseObject', '$firebaseArray', 'FirebaseModel', 'user', 'numOfReviewItems', 'checkNameChange',
+        function (_, S, $resource, $interval, $timeout, $scope, $rootScope, $location, $route, $routeParams, $window, $q, dialogs, OncoKB, DatabaseConnector, SecretEmptyKey, $sce, jspdf, FindRegex, mainUtils, ReviewResource, loadFiles, $firebaseObject, $firebaseArray, FirebaseModel, user, numOfReviewItems, checkNameChange) {
             checkReadPermission();
             // Check permission for user who can only read and write specific genes.
             function checkReadPermission() {
@@ -30,6 +30,7 @@ angular.module('oncokbApp')
             $window.onbeforeunload = function () {
                 removeCollaborator();
             }
+            checkNameChange.clear();
             function checkValidUrl() {
                 $scope.hugoSymbols = _.without(_.keys($rootScope.metaData), 'collaborators');
                 if (!$scope.hugoSymbols.includes($routeParams.geneName)) {
@@ -371,6 +372,7 @@ angular.module('oncokbApp')
             };
             $scope.exitReview = function () {
                 numOfReviewItems.clear();
+                checkNameChange.clear();
                 $scope.geneMeta.review.currentReviewer = '';
                 $rootScope.fileEditable = true;
                 evidencesAllUsers = {};
@@ -1961,6 +1963,9 @@ angular.module('oncokbApp')
                     removeModel({ type: type, indicies: indicies, uuids: allUUIDs });
                     ReviewResource.loading = _.without(ReviewResource.loading, loadingUUID);
                     numOfReviewItems.minus(updatedBy);
+                    if (type === 'mutation') {
+                        checkNameChange.set(true);
+                    }
                 }, function (error) {
                     dialogs.error('Error', 'Failed to update to database! Please contact the developer.');
                     ReviewResource.loading = _.without(ReviewResource.loading, loadingUUID);
