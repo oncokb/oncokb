@@ -588,19 +588,20 @@ public class MainUtils {
         Collections.sort(variants, new Comparator<AnnotatedVariant>() {
             @Override
             public int compare(AnnotatedVariant a1, AnnotatedVariant a2) {
-                // Oncogenicity
-                int result = MainUtils.compareOncogenicity(
-                    Oncogenicity.getByEffect(a1.getOncogenicity()),
-                    Oncogenicity.getByEffect(a2.getOncogenicity()),
-                    true
-                );
                 // Gene
-                if (result == 0) {
-                    result = a1.getGene().compareTo(a2.getGene());
+                int result = a1.getGene().compareTo(a2.getGene());
 
-                    // Variant
+                // Alteration
+                if (result == 0) {
+                    result = a1.getVariant().compareTo(a2.getVariant());
+
+                    // Oncogenicity
                     if (result == 0) {
-                        result = a1.getVariant().compareTo(a2.getVariant());
+                        result = MainUtils.compareOncogenicity(
+                            Oncogenicity.getByEffect(a1.getOncogenicity()),
+                            Oncogenicity.getByEffect(a2.getOncogenicity()),
+                            true
+                        );
 
                         // Mutation Effect
                         if (result == 0) {
