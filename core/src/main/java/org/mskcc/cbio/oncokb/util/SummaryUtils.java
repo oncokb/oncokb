@@ -400,7 +400,7 @@ public class SummaryUtils {
         }
         if (oncogenicity != null) {
             if (query.getAlteration().toLowerCase().contains("truncating mutation") && query.getSvType() != null) {
-                return "This " + alteration.getGene().getHugoSymbol() + " " + query.getSvType().name().toLowerCase() + " maybe a truncating alteration and is " + getOncogenicSubTextFromOncogenicity(oncogenicity) + ".";
+                return "This " + alteration.getGene().getHugoSymbol() + " " + query.getSvType().name().toLowerCase() + " may be a truncating alteration and is " + getOncogenicSubTextFromOncogenicity(oncogenicity) + ".";
             }
 
             if (oncogenicity.equals(Oncogenicity.INCONCLUSIVE)) {
