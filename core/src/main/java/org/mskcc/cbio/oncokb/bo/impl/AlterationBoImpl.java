@@ -45,13 +45,44 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         return null;
     }
 
+    private Alteration findAlteration(String alteration, String name, Set<Alteration> fullAlterations) {
+        if (alteration == null) {
+            return null;
+        }
+        for (Alteration alt : fullAlterations) {
+            if (alt.getAlteration() != null && alt.getAlteration().equalsIgnoreCase(alteration) && alt.getName().equalsIgnoreCase(name)) {
+                return alt;
+            }
+        }
+        return null;
+    }
+
     @Override
     public Alteration findAlteration(Gene gene, AlterationType alterationType, String alteration) {
         if (CacheUtils.isEnabled()) {
             return findAlteration(alteration, CacheUtils.getAlterations(gene.getEntrezGeneId()));
         } else {
-            return getDao().findAlteration(gene, alterationType, alteration);
+            return findAlterationFromDao(gene, alterationType, alteration);
         }
+    }
+
+    @Override
+    public Alteration findAlteration(Gene gene, AlterationType alterationType, String alteration, String name) {
+        if (CacheUtils.isEnabled()) {
+            return findAlteration(alteration, name, CacheUtils.getAlterations(gene.getEntrezGeneId()));
+        } else {
+            return findAlterationFromDao(gene, alterationType, alteration, name);
+        }
+    }
+
+    @Override
+    public Alteration findAlterationFromDao(Gene gene, AlterationType alterationType, String alteration) {
+        return getDao().findAlteration(gene, alterationType, alteration);
+    }
+
+    @Override
+    public Alteration findAlterationFromDao(Gene gene, AlterationType alterationType, String alteration, String name) {
+        return getDao().findAlteration(gene, alterationType, alteration, name);
     }
 
     @Override
@@ -140,7 +171,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
      */
     @Override
     public LinkedHashSet<Alteration> findRelevantAlterations(Alteration alteration, Set<Alteration> fullAlterations, boolean includeAlternativeAllele) {
-        if(fullAlterations == null) {
+        if (fullAlterations == null) {
             return new LinkedHashSet<>();
         }
         return findRelevantAlterationsSub(alteration, fullAlterations, includeAlternativeAllele);
@@ -151,11 +182,11 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
         Set<Alteration> relatedAlts = new HashSet<>();
         List<Alteration> noMappingAlts = new ArrayList<>();
-        for(Evidence evidence : evidenceBo.findEvidencesByGeneFromDB(Collections.singleton(gene))) {
+        for (Evidence evidence : evidenceBo.findEvidencesByGeneFromDB(Collections.singleton(gene))) {
             relatedAlts.addAll(evidence.getAlterations());
         }
-        for(Alteration alteration : findAlterationsByGene(Collections.singleton(gene))){
-            if(!relatedAlts.contains(alteration)) {
+        for (Alteration alteration : findAlterationsByGene(Collections.singleton(gene))) {
+            if (!relatedAlts.contains(alteration)) {
                 noMappingAlts.add(alteration);
             }
         }
@@ -291,7 +322,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         }
 
         if (addDeletion) {
-            Alteration deletion = findAlteration( "Deletion", fullAlterations);
+            Alteration deletion = findAlteration("Deletion", fullAlterations);
             if (deletion != null) {
                 alterations.add(deletion);
 
@@ -306,7 +337,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         }
 
         if (addOncogenicMutations(alteration, alterations)) {
-            Alteration oncogenicMutations = findAlteration( "oncogenic mutations", fullAlterations);
+            Alteration oncogenicMutations = findAlteration("oncogenic mutations", fullAlterations);
             if (oncogenicMutations != null) {
                 alterations.add(oncogenicMutations);
             }
@@ -329,7 +360,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         }
 
         for (String effect : effects) {
-            Alteration alt = findAlteration( effect + " mutations", fullAlterations);
+            Alteration alt = findAlteration(effect + " mutations", fullAlterations);
             if (alt != null) {
                 alterations.add(alt);
             }
@@ -382,6 +413,8 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
                     if (isOncogenic != null && isOncogenic) {
                         add = true;
                     }
+                } else if (HotspotUtils.isHotspot(exactAlt)) {
+                    add = true;
                 } else {
                     // When we look at the oncogenicity, the VUS relevant variants should be excluded.
                     for (Alteration alt : AlterationUtils.excludeVUS(new ArrayList<>(relevantAlts))) {
