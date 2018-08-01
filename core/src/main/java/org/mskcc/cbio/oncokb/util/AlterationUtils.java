@@ -766,24 +766,7 @@ public final class AlterationUtils {
         if (gene == null) {
             return null;
         }
-        if (CacheUtils.isEnabled()) {
-            Set<Alteration> alterations = CacheUtils.getAlterations(gene.getEntrezGeneId());
-            for (Alteration al : alterations) {
-                if (al.getAlteration().equalsIgnoreCase(alteration)) {
-                    return al;
-                }
-            }
-
-            // If no alteration find, search for name
-            for (Alteration al : alterations) {
-                if (al.getName().equalsIgnoreCase(alteration)) {
-                    return al;
-                }
-            }
-            return null;
-        } else {
-            return alterationBo.findAlteration(gene, AlterationType.MUTATION, alteration);
-        }
+        return alterationBo.findAlteration(gene, AlterationType.MUTATION, alteration);
     }
 
     public static Boolean isOncogenicAlteration(Alteration alteration) {

@@ -244,7 +244,7 @@ public class IndicatorUtils {
 
                 if (hasTreatmentEvidence) {
                     treatmentEvidences = EvidenceUtils.keepHighestLevelForSameTreatments(
-                        EvidenceUtils.getRelevantEvidences(query, source, geneStatus,
+                        EvidenceUtils.getRelevantEvidences(query, source, geneStatus, matchedAlt,
                             selectedTreatmentEvidence,
                             (levels != null ?
                                 new HashSet<LevelOfEvidence>(CollectionUtils.intersection(levels,
@@ -387,7 +387,7 @@ public class IndicatorUtils {
         // If there is no oncogenic info available for this variant, find oncogenicity from relevant variants
         if (oncogenicity == null || oncogenicity.equals(Oncogenicity.INCONCLUSIVE)) {
             oncogenicityEvidence = MainUtils.findHighestOncogenicEvidenceByEvidences(
-                EvidenceUtils.getRelevantEvidences(query, source, geneStatus,
+                EvidenceUtils.getRelevantEvidences(query, source, geneStatus, alteration,
                     Collections.singleton(EvidenceType.ONCOGENIC), null));
             if (oncogenicityEvidence != null) {
                 Oncogenicity tmpOncogenicity = Oncogenicity.getByEffect(oncogenicityEvidence.getKnownEffect());
@@ -428,7 +428,7 @@ public class IndicatorUtils {
         // If there is no mutation effect info available for this variant, find mutation effect from relevant variants
         if (indicatorQueryMutationEffect.getMutationEffect() == null || indicatorQueryMutationEffect.getMutationEffect().equals(MutationEffect.INCONCLUSIVE)) {
             indicatorQueryMutationEffect = MainUtils.findHighestMutationEffectByEvidence(
-                EvidenceUtils.getRelevantEvidences(query, source, geneStatus,
+                EvidenceUtils.getRelevantEvidences(query, source, geneStatus, alteration,
                     Collections.singleton(EvidenceType.MUTATION_EFFECT), null));
         }
         return indicatorQueryMutationEffect;

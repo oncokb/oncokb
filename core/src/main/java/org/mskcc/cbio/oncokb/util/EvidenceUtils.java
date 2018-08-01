@@ -51,7 +51,7 @@ public class EvidenceUtils {
     }
 
     public static Set<Evidence> getRelevantEvidences(
-        Query query, String source, String geneStatus,
+        Query query, String source, String geneStatus, Alteration matchedAlt,
         Set<EvidenceType> evidenceTypes, Set<LevelOfEvidence> levelOfEvidences) {
         if (query == null) {
             return new HashSet<>();
@@ -62,12 +62,13 @@ public class EvidenceUtils {
                 (source != null ? ("&" + source) : "") +
                 "&" + evidenceTypes.toString() +
                 (levelOfEvidences == null ? "" : ("&" + levelOfEvidences.toString()));
-            Alteration alt = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getAlteration(),
-                AlterationType.getByName(query.getAlterationType()), query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
-            AlterationUtils.annotateAlteration(alt, alt.getAlteration());
-
-            List<Alteration> relevantAlterations = AlterationUtils.getRelevantAlterations(alt);
-            List<Alteration> alleles = AlterationUtils.getAlleleAlterations(alt);
+            if(matchedAlt == null) {
+                matchedAlt = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getAlteration(),
+                    AlterationType.getByName(query.getAlterationType()), query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
+                AlterationUtils.annotateAlteration(matchedAlt, matchedAlt.getAlteration());
+            }
+            List<Alteration> relevantAlterations = AlterationUtils.getRelevantAlterations(matchedAlt);
+            List<Alteration> alleles = AlterationUtils.getAlleleAlterations(matchedAlt);
 
             Set<Evidence> relevantEvidences;
             List<TumorType> relevantTumorTypes = new ArrayList<>();

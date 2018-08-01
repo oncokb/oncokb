@@ -42,6 +42,10 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
                 return alt;
             }
         }
+
+        if (NamingUtils.hasAbbreviation(alteration)) {
+            return findAlteration(NamingUtils.getFullName(alteration), fullAlterations);
+        }
         return null;
     }
 
@@ -62,7 +66,11 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         if (CacheUtils.isEnabled()) {
             return findAlteration(alteration, CacheUtils.getAlterations(gene.getEntrezGeneId()));
         } else {
-            return findAlterationFromDao(gene, alterationType, alteration);
+            Alteration alt = getDao().findAlteration(gene, alterationType, alteration);
+            if (alt == null && NamingUtils.hasAbbreviation(alteration)) {
+                alt = getDao().findAlteration(gene, alterationType, NamingUtils.getFullName(alteration));
+            }
+            return alt;
         }
     }
 
