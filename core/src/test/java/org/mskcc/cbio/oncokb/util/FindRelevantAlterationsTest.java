@@ -94,6 +94,14 @@ public class FindRelevantAlterationsTest {
                 {"BRCA2", "Deletion", null, "Deletion, Oncogenic Mutations"},
                 // Without specific Deletion curated
                 {"MAP2K4", "Deletion", null, "Truncating Mutations, Oncogenic Mutations"},
+
+                // Abbreviated alterations
+                {"EGFR", "KDD", null, "L698_S1037dup, Oncogenic Mutations"},
+                {"EGFR", "Kinase Domain Duplication", null, "L698_S1037dup, Oncogenic Mutations"},
+                {"EGFR", "CTD", null, "G983_A1210indel, Oncogenic Mutations"},
+                {"EGFR", "C-terminal domain", null, "G983_A1210indel, Oncogenic Mutations"},
+                {"EGFR", "vII", null, "vII, Oncogenic Mutations"},
+                {"EGFR", "vIII", null, "vIII, Oncogenic Mutations"},
             });
     }
 
