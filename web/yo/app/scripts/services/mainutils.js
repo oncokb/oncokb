@@ -528,6 +528,14 @@ angular.module('oncokbApp')
             var date = new Date();
             return date.getTime();
         }
+        function getTimeStamp(str) {
+            var date = new Date(str);
+            if(date instanceof Date && !isNaN(date.getTime())) {
+                return date.getTime();
+            } else {
+                return 0;
+            }
+        }
         return {
             setIsoFormAndGeneType: setIsoFormAndGeneType,
             getCancerTypesName: getCancerTypesName,
@@ -556,6 +564,7 @@ angular.module('oncokbApp')
             deleteUUID: deleteUUID,
             updateMovingFlag: updateMovingFlag,
             processData: processData,
-            shouldExclude: shouldExclude
+            shouldExclude: shouldExclude,
+            getTimeStamp: getTimeStamp
         };
     });

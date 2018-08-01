@@ -7,7 +7,7 @@
  * # driveRealtimeString
  */
 angular.module('oncokbApp')
-    .directive('realtimeString', function ($timeout, _, $rootScope, mainUtils, ReviewResource, $firebaseObject) {
+    .directive('realtimeString', function ($timeout, _, $rootScope, mainUtils, ReviewResource, $firebaseObject, checkNameChange) {
         return {
             templateUrl: 'views/realtimeString.html',
             restrict: 'AE',
@@ -55,25 +55,25 @@ angular.module('oncokbApp')
                     scope.$watch('data[key]', function (n, o) {
                         if (n !== o && !_.isUndefined(n)) {
                             if (!scope.data || !scope.data[scope.key+'_editing'] || scope.data[scope.key+'_editing'] === $rootScope.me.name) {
-                                if (!$rootScope.reviewMode || ReviewResource.rejected.indexOf(scope.uuid) === -1) {     
-                                    mainUtils.updateLastModified();   
+                                if (!$rootScope.reviewMode || ReviewResource.rejected.indexOf(scope.uuid) === -1) {
+                                    mainUtils.updateLastModified();
                                     if (scope.pasting === true) {
-                                        scope.data[scope.key] = OncoKB.utils.getString(scope.data[scope.key]);    
-                                        scope.pasting = false;        
-                                    }   
+                                        scope.data[scope.key] = OncoKB.utils.getString(scope.data[scope.key]);
+                                        scope.pasting = false;
+                                    }
                                     scope.pContent = scope.data[scope.key];
                                     if (scope.t === 'treatment-select' && scope.key === 'level') {
                                         scope.changePropagation();
                                     }
-                                    if (scope.key !== 'short' && !(scope.key === 'name' && $rootScope.movingSection)) {
+                                    if (scope.key !== 'short' && !(scope.key === 'name' && ($rootScope.movingSection || checkNameChange.get()))) {
                                         scope.setReviewRelatedContent(n, o, false);
                                     }
-                                }  
+                                }
                                 if (n !== o && (scope.key === 'level' || scope.key === 'summary' && scope.mutation && scope.tumor)) {
                                     $timeout(function() {
                                         scope.indicateMutationContent(scope.mutation);
                                         scope.indicateTumorContent(scope.tumor);
-                                    }, 500);                            
+                                    }, 500);
                                 }
                             }
                             if (scope.t === 'p' || scope.t === 'short') {
@@ -92,7 +92,7 @@ angular.module('oncokbApp')
                             if ($rootScope.reviewMode && ['p', 'MUTATION_NAME', 'TREATMENT_NAME'].indexOf(scope.t) !== -1) {
                                 scope.calculateDiff();
                             }
-                        }                                               
+                        }
                     });
                     $rootScope.$watch('fileEditable', function(n, o) {
                         if (n !== o) {
@@ -117,7 +117,7 @@ angular.module('oncokbApp')
                         scope.data[key + '_review'].updateTime = new Date().getTime();
                         if ((!$rootScope.reviewMeta[uuid] || _.isUndefined(scope.data[key + '_review'].lastReviewed)) && !_.isUndefined(o)) {
                             scope.data[key + '_review'].lastReviewed = o;
-                            mainUtils.setUUIDInReview(uuid);                                    
+                            mainUtils.setUUIDInReview(uuid);
                             ReviewResource.rollback = _.without(ReviewResource.rollback, uuid);
                         } else if (n === scope.data[key + '_review'].lastReviewed) {
                             delete scope.data[key + '_review'].lastReviewed;
@@ -162,7 +162,7 @@ angular.module('oncokbApp')
                         } else {
                             $scope.fe = false;
                             $scope.editingMessage = 'Please wait. ' + $scope.data[$scope.key+'_editing'] + ' is editing this section...';
-                        }                        
+                        }
                     } else {
                         $scope.fe = $rootScope.fileEditable;
                     }
@@ -176,7 +176,7 @@ angular.module('oncokbApp')
                     if (!initial && $scope.data.propagation_review) {
                         delete $scope.data.propagation_review.lastReviewed;
                         mainUtils.deleteUUID($scope.data.propagation_uuid);
-                    }                    
+                    }
                     var _propagationOpts = [];
                     if ($scope.data[$scope.key] === '1' || $scope.data[$scope.key] === '2A') {
                         _propagationOpts = [
@@ -256,7 +256,7 @@ angular.module('oncokbApp')
                         if (_.isUndefined($scope.data[$scope.key+'_review']) || _.isUndefined($scope.data[$scope.key+'_review'].lastReviewed)) {
                             return $scope.data[$scope.key] === checkbox;
                         }
-                    } 
+                    }
                     return $scope.data && $scope.data[$scope.key+'_review'] && $scope.data[$scope.key+'_review'].lastReviewed === checkbox;
                 }
                 $scope.reviewLayout = function (type) {

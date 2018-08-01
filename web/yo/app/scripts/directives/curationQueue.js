@@ -81,7 +81,7 @@ angular.module('oncokbApp')
                             _.each(_.keys($rootScope.firebaseQueues), function(key) {
                                 scope.queue = scope.queue.concat($rootScope.firebaseQueues[key].queue);
                             });
-                        }                        
+                        }
                         scope.data.loading = false;
                         scope.secondTimeAutoNotify();
                     });
@@ -554,14 +554,6 @@ angular.module('oncokbApp')
                         }
                     });
                 };
-                function getTimeStamp(str) {
-                    var date = new Date(str);
-                    if(date instanceof Date && !isNaN(date.getTime())) {
-                        return date.getTime();
-                    } else {
-                        return 0;
-                    }
-                }
                 $scope.getQueuesByGene = function(hugoSymbol) {
                     return $rootScope.firebaseQueues[hugoSymbol] ? angular.copy($rootScope.firebaseQueues[hugoSymbol].queue) : [];
                 };
@@ -581,12 +573,12 @@ angular.module('oncokbApp')
                     'date-html-asc': function(a, b) {
                         a = $(a).text();
                         b = $(b).text();
-                        return getTimeStamp(a) - getTimeStamp(b);
+                        return mainUtils.getTimeStamp(a) - mainUtils.getTimeStamp(b);
                     },
                     'date-html-desc': function(a, b) {
                         a = $(a).text();
                         b = $(b).text();
-                        return getTimeStamp(b) - getTimeStamp(a);
+                        return mainUtils.getTimeStamp(b) - mainUtils.getTimeStamp(a);
                     }
                 });
             }
