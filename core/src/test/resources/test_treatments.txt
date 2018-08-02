@@ -71,3 +71,4 @@ KIT	D816A	Melanoma	2A: Imatinib; 3B: Avapritinib;
 KIT	D816A	Colorectal Cancer	3B: Avapritinib;
 KIT	D816A	Mastocytosis	3A: Avapritinib;
 KIT	D816A	Thymic Tumor	2A: Sunitinib; 2A: Sorafenib; 3B: Avapritinib;
+MTOR	L2427Q	Renal Clear Cell Carcinoma	3A: Temsirolimus;

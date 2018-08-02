@@ -1,8 +1,8 @@
 package org.mskcc.cbio.oncokb.util;
 
 import junit.framework.TestCase;
-import org.mskcc.cbio.oncokb.model.Alteration;
-import org.mskcc.cbio.oncokb.model.Evidence;
+import org.apache.commons.lang3.StringUtils;
+import org.mskcc.cbio.oncokb.model.*;
 
 import java.util.*;
 
@@ -121,4 +121,96 @@ public class EvidenceUtilsTest extends TestCase {
 
     }
 
+
+    public void testKeepHighestLevelForSameTreatments() throws Exception {
+        Evidence e1 = new Evidence();
+        Evidence e2 = new Evidence();
+        Evidence e3 = new Evidence();
+        Evidence e4 = new Evidence();
+
+        e1.setId(1);
+        e2.setId(2);
+        e3.setId(3);
+        e4.setId(4);
+
+        e1.setLevelOfEvidence(LevelOfEvidence.LEVEL_1);
+        e2.setLevelOfEvidence(LevelOfEvidence.LEVEL_1);
+        e3.setLevelOfEvidence(LevelOfEvidence.LEVEL_1);
+        e4.setLevelOfEvidence(LevelOfEvidence.LEVEL_2A);
+
+        Drug d1 = new Drug("Vemurafinib");
+        Drug d2 = new Drug("Dabrafinib");
+
+        List<Drug> dc1 = new ArrayList<>();
+        List<Drug> dc2 = new ArrayList<>();
+        List<Drug> dc3 = new ArrayList<>();
+
+        dc1.add(d1);
+        dc2.add(d2);
+
+        dc3.add(d1);
+        dc3.add(d2);
+
+        Treatment t1 = new Treatment();
+        Treatment t2 = new Treatment();
+        Treatment t3 = new Treatment();
+
+        t1.setDrugs(dc1);
+        t2.setDrugs(dc2);
+        t3.setDrugs(dc3);
+
+        List<Treatment> tc1 = new ArrayList<>();
+        List<Treatment> tc2 = new ArrayList<>();
+        List<Treatment> tc3 = new ArrayList<>();
+        List<Treatment> tc4 = new ArrayList<>();
+
+        // d1
+        tc1.add(t1);
+
+        // d2
+        tc2.add(t2);
+
+        // d1+d2
+        tc3.add(t3);
+
+        // d1, d2
+        tc4.add(t1);
+        tc4.add(t2);
+
+        e1.setTreatments(tc1);
+        e2.setTreatments(tc2);
+        e3.setTreatments(tc3);
+        e4.setTreatments(tc4);
+
+        Set<Evidence> sets = new HashSet<>();
+        sets.add(e1);
+        sets.add(e2);
+
+        Set<Evidence> filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets);
+        assertEquals("1,2", getIds(filtered));
+
+        sets.add(e3);
+        filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets);
+        assertEquals("1,2,3", getIds(filtered));
+
+        sets = new HashSet<>();
+        sets.add(e1);
+        sets.add(e4);
+        filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets);
+        assertEquals("1", getIds(filtered));
+
+        e1.setLevelOfEvidence(LevelOfEvidence.LEVEL_3A);
+        filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets);
+        assertEquals("4", getIds(filtered));
+    }
+
+    private String getIds(Set<Evidence> evidences) {
+        List<String> ids = new ArrayList<>();
+        for (Evidence evidence : evidences) {
+            ids.add(evidence.getId().toString());
+        }
+
+        Collections.sort(ids);
+        return StringUtils.join(ids, ",");
+    }
 }
