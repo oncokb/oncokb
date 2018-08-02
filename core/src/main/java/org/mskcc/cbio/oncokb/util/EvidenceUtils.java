@@ -62,7 +62,7 @@ public class EvidenceUtils {
                 (source != null ? ("&" + source) : "") +
                 "&" + evidenceTypes.toString() +
                 (levelOfEvidences == null ? "" : ("&" + levelOfEvidences.toString()));
-            if(matchedAlt == null) {
+            if (matchedAlt == null) {
                 matchedAlt = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getAlteration(),
                     AlterationType.getByName(query.getAlterationType()), query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
                 AlterationUtils.annotateAlteration(matchedAlt, matchedAlt.getAlteration());
@@ -613,24 +613,57 @@ public class EvidenceUtils {
         return levels;
     }
 
+    private static Map<String, Object> getBiggerItem(List<String> query, Set<List<String>> keys) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("exist", false);
+        map.put("origin", false);
+        map.put("result", query);
+        for(List<String> key : keys) {
+            // Check whether key has all elements in query;
+            if (key.containsAll(query)) {
+                map.put("exist", true);
+                map.put("result", key);
+                return map;
+            }
+
+            // Check whether query has all elements in key;
+            if (query.containsAll(key)) {
+                map.put("exist", true);
+                map.put("origin", true);
+                map.put("result", key);
+                return map;
+            }
+        }
+        return map;
+    }
+
     public static Set<Evidence> keepHighestLevelForSameTreatments(Set<Evidence> evidences) {
-        Map<String, Set<Evidence>> maps = new HashedMap();
+        Map<List<String>, Set<Evidence>> maps = new HashedMap();
         Set<Evidence> filtered = new HashSet<>();
 
         for (Evidence evidence : evidences) {
             if (evidence.getTreatments() != null && evidence.getTreatments().size() > 0) {
-                String treatmentsName = TreatmentUtils.getTreatmentName(new HashSet<>(evidence.getTreatments()));
-                if (!maps.containsKey(treatmentsName)) {
-                    maps.put(treatmentsName, new HashSet<Evidence>());
+                List<String> treatments = TreatmentUtils.getTreatments(new HashSet<>(evidence.getTreatments()));
+
+                Map<String, Object> map = getBiggerItem(treatments, maps.keySet());
+                if ((boolean) map.get("exist")) {
+                    if ((boolean) map.get("origin")) {
+                        maps.get(map.get("result")).add(evidence);
+                    } else {
+                        maps.put(treatments, maps.get(map.get("result")));
+                        maps.get(treatments).add(evidence);
+                    }
+                } else {
+                    maps.put(treatments, new HashSet<Evidence>());
+                    maps.get(treatments).add(evidence);
                 }
-                maps.get(treatmentsName).add(evidence);
             } else {
                 // Keep all un-treatment evidences
                 filtered.add(evidence);
             }
         }
 
-        for (Map.Entry<String, Set<Evidence>> entry : maps.entrySet()) {
+        for (Map.Entry<List<String>, Set<Evidence>> entry : maps.entrySet()) {
             Set<Evidence> highestEvis = EvidenceUtils.getOnlyHighestLevelEvidences(entry.getValue());
 
             // If highestEvis has more than 1 items, find highest original level if the level is 2B, 3B
