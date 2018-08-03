@@ -563,6 +563,8 @@ angular.module('oncokbApp')
             setUUIDInReview: setUUIDInReview,
             deleteUUID: deleteUUID,
             updateMovingFlag: updateMovingFlag,
+            processData: processData,
+            shouldExclude: shouldExclude,
             getTimeStamp: getTimeStamp
         };
     });
