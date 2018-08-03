@@ -14,6 +14,7 @@ var OncoKB = {
     gene: {
         "background": "AKT1 is a serine/threonine protein kinase that is a critical downstream effector in the PI3K (phosphoinositide 3-kinase) signaling pathway. Following activation of PI3K, cytosolic inactive AKT1 is recruited to the membrane and engages PIP3 (PtdIns3,4,5-P3), leading to phosphorylation and activation of AKT1 (PMID: 28431241). AKT1 can activate a number of downstream substrates, including GSK3, FOXO and mTORC1, which are critical for cellular survival, proliferation, and metabolism (PMID: 9843996, 7611497). Negative regulation of AKT1 occurs when PI3K signaling is terminated by PTEN phosphatase activity (PMID: 28431241). AKT1 is frequently activated in cancers, typically through activation of the PI3K pathway or by inactivation of PTEN (PMID: 28431241). Activating mutations in AKT1 (PMID: 17611497, 23134728, 20440266) and infrequent AKT1 gene amplification (PMID: 18767981) have been identified in human cancers, which allow for phosphoinositide-independent AKT1 activation. The ATP-competitive AKT1 inhibitor AZD5363 has demonstrated activity in patients with AKT1-mutant cancers (PMID: 28489509). Negative feedback mechanisms can mediate AKT-inhibitor resistance in human cancers with dysregulated AKT signaling (PMID: 29535262, 29339542).",
         "background_review": {
+            "lastReviewed": "",
             "updateTime": 1524594735169,
             "updatedBy": "Moriah Nissan"
         },
@@ -267,6 +268,7 @@ var OncoKB = {
             "userName": "Sarah Phillips"
         }],
         "summary_review": {
+            "lastReviewed": "",
             "updateTime": 1493325255069,
             "updatedBy": 'Jiaojiao wang'
         },

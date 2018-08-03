@@ -81,7 +81,7 @@ describe('Gene Controller', function () {
 					operation: 'update',
 					location: 'Gene Summary',
                     new: $scope.gene.summary,
-                    old: undefined,
+                    old: $scope.gene.summary_review.lastReviewed,
 					uuids: $scope.gene.summary_uuid,
 					lastEditBy: $scope.gene.summary_review.updatedBy
 				}
@@ -106,7 +106,7 @@ describe('Gene Controller', function () {
 					operation: 'update',
 					location: 'Gene Background',
                     new: $scope.gene.background,
-                    old: undefined,
+                    old: $scope.gene.background_review.lastReviewed,
 					uuids: $scope.gene.background_uuid,
 					lastEditBy: $scope.gene.background_review.updatedBy
 				}
