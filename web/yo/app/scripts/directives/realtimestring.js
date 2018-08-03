@@ -106,6 +106,11 @@ angular.module('oncokbApp')
                         if (isPropagation === true) {
                             key = 'propagation';
                             uuid = scope.data.propagation_uuid;
+                            if (_.isUndefined(o)) {
+                                // Even if propagation old content is undefined, i.e. Level 0 -> Level 2A Propagation 2B.
+                                // We still need to set its UUID in Meta/GeneName/review since we need its UUID for recording history old content.
+                                mainUtils.setUUIDInReview(uuid);
+                            }
                         }
                         // 1) we track the change in two conditions:
                         // 2) When editing happens not in review mode

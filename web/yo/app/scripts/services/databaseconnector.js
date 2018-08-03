@@ -508,6 +508,7 @@ angular.module('oncokbApp')
                 updateVUS: updateVUS,
                 updateEvidenceBatch: updateEvidenceBatch,
                 updateEvidenceTreatmentPriorityBatch: updateEvidenceTreatmentPriorityBatch,
+                updateHistory: updateHistory,
                 sendEmail: sendEmail,
                 getCacheStatus: getCacheStatus,
                 disableCache: function() {
