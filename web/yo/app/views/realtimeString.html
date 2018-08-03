@@ -51,7 +51,7 @@
                             chosen allow-single-deselect="true"
                             ng-model="data[key]"
                             ng-options="opt.value as opt.label for opt in o">
-                        <option value="NA"></option>
+                        <option disabled></option>
                     </select>
                 </div>
                 <div ng-switch-when="select-chosen" class="chosen-full-width">
@@ -121,7 +121,7 @@
                     <div ng-if="reviewLayout('regular') && data[key+'_review'].lastReviewed">
                         <h4>Old Content:</h4>
                         <select ng-disabled="true"
-                                chosen 
+                                chosen
                                 ng-model="data[key+'_review'].lastReviewed"
                                 ng-options="opt.value as opt.label for opt in o">
                             <option value="NA"></option>
@@ -165,7 +165,7 @@
                         <div ng-if="reviewLayout('regular')">
                             <h4>Old Content:</h4>
                             <select ng-disabled="true"
-                                    chosen 
+                                    chosen
                                     ng-model="data[key+'_review'].lastReviewed"
                                     ng-options="opt.value as opt.label for opt in o">
                                 <option value="NA"></option>

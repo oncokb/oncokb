@@ -45,34 +45,36 @@ angular.module('oncokbApp')
                         return;
                     }
                     if (type === 'accept') {
+                        // We only record new and old content for accepted 'update' and 'name'(name change) operations.
+                        // For 'add' operation, there is only 'new' content. For 'delete' operation, there is only 'old' content.
                         switch($scope.panelType) {
-                        case 'update':
-                            $scope.accept();
-                            break;
-                        case 'name':
-                            $scope.accept();
-                            break;
-                        case 'delete':
-                            $scope.confirmDelete($scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment, $scope.updatedBy);
-                            break;
-                        case 'add':
-                            $scope.acceptAdded($scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment, $scope.updatedBy);
-                            break;
+                            case 'update':
+                                $scope.accept();
+                                break;
+                            case 'name':
+                                $scope.accept();
+                                break;
+                            case 'delete':
+                                $scope.confirmDelete($scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment, $scope.updatedBy);
+                                break;
+                            case 'add':
+                                $scope.acceptAdded($scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment, $scope.updatedBy);
+                                break;
                         }
                     } else if (type === 'reject') {
                         switch($scope.panelType) {
-                        case 'update':
-                            $scope.reject();
-                            break;
-                        case 'name':
-                            $scope.reject();
-                            break;
-                        case 'delete':
-                            $scope.cancelDelete($scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment, $scope.updatedBy);
-                            break;
-                        case 'add':
-                            $scope.rejectAdded($scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment, $scope.updatedBy);
-                            break;
+                            case 'update':
+                                $scope.reject();
+                                break;
+                            case 'name':
+                                $scope.reject();
+                                break;
+                            case 'delete':
+                                $scope.cancelDelete($scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment, $scope.updatedBy);
+                                break;
+                            case 'add':
+                                $scope.rejectAdded($scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment, $scope.updatedBy);
+                                break;
                         }
                     }
 
@@ -201,9 +203,24 @@ angular.module('oncokbApp')
                             oncogene: !(!$scope.obj.type.ocg),
                             tsg: !(!$scope.obj.type.tsg)
                         };
+                        var newContent = $scope.obj.type.tsg + '  ' + $scope.obj.type.ocg;
+                        var oldContent = '';
+                        if (_.isUndefined($scope.obj.type.tsg_review) || _.isUndefined($scope.obj.type.tsg_review.lastReviewed)) {
+                            oldContent = $scope.obj.type.tsg;
+                        } else if (!_.isUndefined($scope.obj.type.tsg_review.lastReviewed)) {
+                            oldContent = $scope.obj.type.tsg_review.lastReviewed;
+                        }
+                        if (_.isUndefined($scope.obj.type.ocg_review) || _.isUndefined($scope.obj.type.ocg_review.lastReviewed)) {
+                            oldContent = oldContent + '  ' + $scope.obj.type.ocg;
+                        } else if (!_.isUndefined($scope.obj.type.ocg_review.lastReviewed)) {
+                            oldContent = oldContent + '  ' + $scope.obj.type.ocg_review.lastReviewed;
+                        }
                         var historyData = [{
                             lastEditBy: ReviewResource.mostRecent[$scope.uuid].updatedBy,
-                            operationName: 'update',
+                            new: newContent.trim(),
+                            old: oldContent.trim(),
+                            location: 'Gene Type',
+                            operation: 'update',
                             uuids: $scope.uuid
                         }];
                         ReviewResource.loading.push($scope.uuid);

@@ -940,6 +940,8 @@ angular.module('oncokbApp')
                         dataUUID = $scope.gene.summary_uuid;
                         data.lastEdit = $scope.gene.summary_review.updateTime;
                         historyData.location = 'Gene Summary';
+                        historyData.new = $scope.gene.summary;
+                        historyData.old = $scope.gene.summary_review.lastReviewed;
                         reviewObj = $scope.gene.summary_review;
                         break;
                     case 'GENE_BACKGROUND':
@@ -947,22 +949,35 @@ angular.module('oncokbApp')
                         dataUUID = $scope.gene.background_uuid;
                         data.lastEdit = $scope.gene.background_review.updateTime;
                         historyData.location = 'Gene Background';
+                        historyData.new = $scope.gene.background;
+                        historyData.old = $scope.gene.background_review.lastReviewed;
                         reviewObj = $scope.gene.background_review;
                         break;
                     case 'MUTATION_EFFECT':
                         var MEObj = mutation.mutation_effect;
+                        historyData.new = {};
+                        historyData.old = {};
                         if ($scope.geneMeta.review[MEObj.oncogenic_uuid]) {
                             data.evidenceType = 'ONCOGENIC';
                             data.knownEffect = MEObj.oncogenic;
                             dataUUID = MEObj.oncogenic_uuid;
                             data.lastEdit = MEObj.oncogenic_review.updateTime;
                             historyData.location = mutation.name + ', Mutation Effect';
+                            historyData.new.oncogenic = MEObj.oncogenic;
+                            historyData.old.oncogenic = MEObj.oncogenic_review.lastReviewed;
                             reviewObj = MEObj.oncogenic_review;
                         }
                         // tempFlag is set to true when MUTATION_EFFECT evidence exists which means either mutation effect or mutation description got changed.
                         var tempFlag = false;
-                        if ($scope.geneMeta.review[MEObj.effect_uuid] || $scope.geneMeta.review[MEObj.description_uuid]) {
+                        if ($scope.geneMeta.review[MEObj.effect_uuid]) {
                             tempFlag = true;
+                            historyData.new.effect = MEObj.effect;
+                            historyData.old.effect = MEObj.effect_review.lastReviewed;
+                        }
+                        if ($scope.geneMeta.review[MEObj.description_uuid]) {
+                            tempFlag = true;
+                            historyData.new.description = MEObj.description;
+                            historyData.old.description = MEObj.description_review.lastReviewed;
                         }
                         if (tempFlag) {
                             tempReviewObjArr = [MEObj.effect_review, MEObj.description_review];
@@ -986,11 +1001,26 @@ angular.module('oncokbApp')
                             dataUUID = tumor.summary_uuid;
                             data.lastEdit = tumor.summary_review.updateTime;
                             historyData.location = historyStr(mutation, tumor) + ', Tumor Type Summary';
+                            historyData.new = tumor.summary;
+                            historyData.old = tumor.summary_review.lastReviewed;
                             reviewObj = tumor.summary_review;
                         }
                         break;
                     case 'PROGNOSTIC_IMPLICATION':
-                        if ($scope.geneMeta.review[tumor.prognostic.description_uuid] || $scope.geneMeta.review[tumor.prognostic.level_uuid]) {
+                        var hasUpdate = false;
+                        historyData.new = {};
+                        historyData.old = {};
+                        if ($scope.geneMeta.review[tumor.prognostic.description_uuid]) {
+                            hasUpdate = true;
+                            historyData.new.description = tumor.prognostic.description;
+                            historyData.old.description = tumor.prognostic.description_review.lastReviewed;
+                        }
+                        if ($scope.geneMeta.review[tumor.prognostic.level_uuid]) {
+                            hasUpdate = true;
+                            historyData.new.level = tumor.prognostic.level;
+                            historyData.old.level = tumor.prognostic.level_review.lastReviewed;
+                        }
+                        if (hasUpdate) {
                             data.description = tumor.prognostic.description;
                             data.levelOfEvidence = levelMapping[tumor.prognostic.level];
                             dataUUID = tumor.prognostic_uuid;
@@ -1002,7 +1032,20 @@ angular.module('oncokbApp')
                         }
                         break;
                     case 'DIAGNOSTIC_IMPLICATION':
-                        if ($scope.geneMeta.review[tumor.diagnostic.description_uuid] || $scope.geneMeta.review[tumor.diagnostic.level_uuid]) {
+                        var hasUpdate = false;
+                        historyData.new = {};
+                        historyData.old = {};
+                        if ($scope.geneMeta.review[tumor.diagnostic.description_uuid]) {
+                            hasUpdate = true;
+                            historyData.new.description = tumor.diagnostic.description;
+                            historyData.old.description = tumor.diagnostic.description_review.lastReviewed;
+                        }
+                        if ($scope.geneMeta.review[tumor.diagnostic.level_uuid]) {
+                            hasUpdate = true;
+                            historyData.new.level = tumor.diagnostic.level;
+                            historyData.old.level = tumor.diagnostic.level_review.lastReviewed;
+                        }
+                        if (hasUpdate) {
                             data.description = tumor.diagnostic.description;
                             data.levelOfEvidence = levelMapping[tumor.diagnostic.level];
                             dataUUID = tumor.diagnostic_uuid;
@@ -1033,16 +1076,22 @@ angular.module('oncokbApp')
                         uuids = collectUUIDs('mutation', mutation, [], 'evidenceOnly');
                         data.evidenceType = null;
                         historyData.location = mutation.name;
+                        historyData.new = mutation.name;
+                        historyData.old = mutation.name_review.lastReviewed;
                         break;
                     case 'TUMOR_NAME_CHANGE':
                         uuids = collectUUIDs('tumor', tumor, [], 'evidenceOnly');
                         data.evidenceType = null;
                         historyData.location = historyStr(mutation, tumor);
+                        historyData.new = $scope.getCancerTypesName(tumor);
+                        historyData.old = mainUtils.getCancerTypesName(tumor.cancerTypes_review.lastReviewed);
                         break;
                     case 'TREATMENT_NAME_CHANGE':
                         uuids = collectUUIDs('treatment', treatment, [], 'evidenceOnly');
                         data.evidenceType = null;
                         historyData.location = historyStr(mutation, tumor) + ', ' + data.evidenceType + ', ' + treatment.name;
+                        historyData.new = treatment.name;
+                        historyData.old = treatment.name_review.lastReviewed;
                         break;
                     default:
                         break;
@@ -1070,6 +1119,29 @@ angular.module('oncokbApp')
                     dataUUID = treatment.name_uuid;
                     if (!ReviewResource.mostRecent[dataUUID]) {
                         setUpdatedSignature([treatment.name_review, treatment.level_review, treatment.indication_review, treatment.description_review], treatment.name_uuid);
+                    }
+                    historyData.new = {};
+                    historyData.old = {};
+                    if ($scope.geneMeta.review[treatment.description_uuid]) {
+                        historyData.new.description = treatment.description;
+                        historyData.old.description = treatment.description_review.lastReviewed;
+                    }
+                    if ($scope.geneMeta.review[treatment.indication_uuid]) {
+                        historyData.new.indication = treatment.indication;
+                        historyData.old.indication = treatment.indication_review.lastReviewed;
+                    }
+                    if ($scope.geneMeta.review[treatment.level_uuid] &&
+                        !_.isUndefined(treatment.level) && !_.isUndefined(treatment.level_review.lastReviewed)) {
+                        historyData.new.level = treatment.level;
+                        historyData.old.level = treatment.level_review.lastReviewed;
+                    }
+                    if ($scope.geneMeta.review[treatment.propagation_uuid]) {
+                        if (!_.isUndefined(treatment.propagation)) {
+                            historyData.new.propagation = treatment.propagation;
+                        }
+                        if (!_.isUndefined(treatment.propagation_review.lastReviewed)) {
+                            historyData.old.propagation = treatment.propagation_review.lastReviewed;
+                        }
                     }
                     data.lastEdit = ReviewResource.mostRecent[dataUUID].updateTime;
                     data.levelOfEvidence = levelMapping[treatment.level];
@@ -1492,23 +1564,28 @@ angular.module('oncokbApp')
             $scope.acceptAdded = function (type, mutation, tumor, ti, treatment, updatedBy) {
                 var tempEvidences = formSectionEvidencesByType(type, mutation, tumor, ti, treatment);
                 var evidences = tempEvidences.evidences;
-                var historyData = [tempEvidences.historyData];
-                if (_.isEmpty(evidences)) {
-                    acceptSection(type, mutation, tumor, ti, treatment);
-                    numOfReviewItems.minus(updatedBy);
-                    return;
-                }
                 var loadingUUID;
                 switch (type) {
                     case 'mutation':
                         loadingUUID = mutation.name_uuid;
+                        tempEvidences.historyData.new = mutation;
                         break;
                     case 'tumor':
                         loadingUUID = tumor.cancerTypes_uuid;
+                        tempEvidences.historyData.new = tumor;
                         break;
                     case 'treatment':
                         loadingUUID = treatment.name_uuid;
+                        tempEvidences.historyData.new = treatment;
                         break;
+                }
+                var historyData = [tempEvidences.historyData];
+                if (_.isEmpty(evidences)) {
+                    acceptSection(type, mutation, tumor, ti, treatment);
+                    numOfReviewItems.minus(updatedBy);
+                    // Add history record for newly added empty mutation.
+                    DatabaseConnector.updateHistory(historyData);
+                    return;
                 }
                 if (loadingUUID) {
                     ReviewResource.loading.push(loadingUUID);
@@ -1953,7 +2030,7 @@ angular.module('oncokbApp')
                 var indicies = [data.mutationIndex, data.tumorIndex, data.tiIndex, data.treatmentIndex];
                 var allUUIDs = collectUUIDs(type, obj, []);
                 var evidenceUUIDs = collectUUIDs(type, obj, [], 'evidenceOnly');
-                var historyData = [{ operation: 'delete', lastEditBy: (type === 'tumor' ? obj.cancerTypes_review : obj.name_review).updatedBy, location: location }];
+                var historyData = [{ operation: 'delete', lastEditBy: (type === 'tumor' ? obj.cancerTypes_review : obj.name_review).updatedBy, location: location, old: obj }];
                 // make the api call to delete evidences
                 var loadingUUID = (type === 'tumor' ? obj.cancerTypes_uuid : obj.name_uuid);
                 if (loadingUUID) {
