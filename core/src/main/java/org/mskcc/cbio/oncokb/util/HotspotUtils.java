@@ -18,6 +18,7 @@ import java.util.*;
  */
 public class HotspotUtils {
     private static Map<Gene, List<SingleResidueHotspotMutation>> hotspotMutations = new HashMap<>();
+    private static boolean hotspotMutationsInitialized = false;
 
     public static void getHotspotsFromRemote() {
         List<SingleResidueHotspotMutation> hotspots = new ArrayList<>();
@@ -33,6 +34,7 @@ public class HotspotUtils {
             hotspots = new ArrayList<>(Arrays.asList(mutations));
         }
         parseData(hotspots);
+        hotspotMutationsInitialized = true;
     }
 
     private static void parseData(List<SingleResidueHotspotMutation> hotspots) {
@@ -50,7 +52,7 @@ public class HotspotUtils {
     }
 
     public static Map<Gene, List<SingleResidueHotspotMutation>> getHotspots() {
-        if (hotspotMutations.keySet().size() == 0) {
+        if (!hotspotMutationsInitialized) {
             getHotspotsFromRemote();
         }
         return hotspotMutations;
