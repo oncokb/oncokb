@@ -1,6 +1,7 @@
 package org.mskcc.cbio.oncokb.util;
 
 import com.google.common.collect.Sets;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
@@ -805,19 +806,19 @@ public class EvidenceUtils {
             evidenceTypes = new HashSet<>(EvidenceTypeUtils.getAllEvidenceTypes());
         }
 
+        levelOfEvidences = levelOfEvidences == null ? LevelUtils.getPublicAndOtherIndicationLevels() :
+            new HashSet<>(CollectionUtils.intersection(levelOfEvidences, LevelUtils.getPublicAndOtherIndicationLevels()));
+
         if (requestQueries == null || requestQueries.size() == 0) {
             Set<Evidence> evidences = new HashSet<>();
             if ((evidenceTypes != null && evidenceTypes.size() > 0) ||
-                (levelOfEvidences != null && levelOfEvidences.size() > 0)) {
+                levelOfEvidences.size() > 0) {
                 evidences = EvidenceUtils.getEvidenceByEvidenceTypesAndLevels(evidenceTypes, levelOfEvidences);
             }
             EvidenceQueryRes query = new EvidenceQueryRes();
             query.setEvidences(new ArrayList<>(evidences));
             return Collections.singletonList(query);
         } else {
-            if (levelOfEvidences == null) {
-                levelOfEvidences = LevelUtils.getPublicLevels();
-            }
             for (Query requestQuery : requestQueries) {
                 EvidenceQueryRes query = new EvidenceQueryRes();
 
@@ -865,9 +866,7 @@ public class EvidenceUtils {
                         query.setAlterations(new ArrayList<Alteration>(AlterationUtils.getAllAlterations(query.getGene())));
                     }
                 }
-                if (levelOfEvidences != null) {
-                    query.setLevelOfEvidences(new ArrayList<LevelOfEvidence>(levelOfEvidences));
-                }
+                query.setLevelOfEvidences(new ArrayList<LevelOfEvidence>(levelOfEvidences));
                 evidenceQueries.add(query);
             }
         }

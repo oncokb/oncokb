@@ -22,6 +22,9 @@ public class IndicatorUtils {
         geneStatus = geneStatus != null ? geneStatus : "complete";
         highestLevelOnly = highestLevelOnly == null ? false : highestLevelOnly;
 
+        levels = levels == null ? LevelUtils.getPublicAndOtherIndicationLevels() :
+            new HashSet<>(CollectionUtils.intersection(levels, LevelUtils.getPublicAndOtherIndicationLevels()));
+
         Set<EvidenceType> selectedTreatmentEvidence = new HashSet<>();
         if (evidenceTypes == null || evidenceTypes.isEmpty()) {
             evidenceTypes = new HashSet<>(EvidenceTypeUtils.getAllEvidenceTypes());
@@ -245,10 +248,7 @@ public class IndicatorUtils {
                 if (hasTreatmentEvidence) {
                     treatmentEvidences = EvidenceUtils.keepHighestLevelForSameTreatments(
                         EvidenceUtils.getRelevantEvidences(query, source, geneStatus, matchedAlt,
-                            selectedTreatmentEvidence,
-                            (levels != null ?
-                                new HashSet<LevelOfEvidence>(CollectionUtils.intersection(levels,
-                                    LevelUtils.getPublicAndOtherIndicationLevels())) : LevelUtils.getPublicAndOtherIndicationLevels())));
+                            selectedTreatmentEvidence, levels));
                 }
             }
 
@@ -264,10 +264,7 @@ public class IndicatorUtils {
                         treatmentEvidences.addAll(EvidenceUtils.keepHighestLevelForSameTreatments(
                             EvidenceUtils.convertEvidenceLevel(
                                 EvidenceUtils.getEvidence(Collections.singletonList(oncogenicMutation),
-                                    selectedTreatmentEvidence,
-                                    (levels != null ?
-                                        new HashSet<>(CollectionUtils.intersection(levels,
-                                            LevelUtils.getPublicAndOtherIndicationLevels())) : LevelUtils.getPublicAndOtherIndicationLevels())), new HashSet<>(oncoTreeTypes))));
+                                    selectedTreatmentEvidence, levels), new HashSet<>(oncoTreeTypes))));
                     }
                 }
             }

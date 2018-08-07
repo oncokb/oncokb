@@ -58,11 +58,11 @@ public class FindRelevantAlterationsTest {
 
                 // EGFR exon deletion
                 {"EGFR", "vIII", null, "vIII, Oncogenic Mutations"},
-                {"EGFR", "CTD", null, "G983_A1210indel, Oncogenic Mutations"},
-                {"EGFR", "vIV", null, "G983_A1210indel, Oncogenic Mutations"},
-                {"EGFR", "vIVa", null, "G983_A1210indel, Oncogenic Mutations"},
-                {"EGFR", "vIVb", null, "G983_A1210indel, Oncogenic Mutations"},
-                {"EGFR", "vIVc", null, "G983_A1210indel, Oncogenic Mutations"},
+                {"EGFR", "CTD", null, "C-terminal domain, Oncogenic Mutations"},
+                {"EGFR", "vIV", null, "C-terminal domain, Oncogenic Mutations"},
+                {"EGFR", "vIVa", null, "C-terminal domain, Oncogenic Mutations"},
+                {"EGFR", "vIVb", null, "C-terminal domain, Oncogenic Mutations"},
+                {"EGFR", "vIVc", null, "C-terminal domain, Oncogenic Mutations"},
 
                 // Check range
                 {"MED12", "G44S", null, "G44S, G44A, G44C, G44D, G44V, 34_68mut"},
@@ -96,10 +96,10 @@ public class FindRelevantAlterationsTest {
                 {"MAP2K4", "Deletion", null, "Truncating Mutations, Oncogenic Mutations"},
 
                 // Abbreviated alterations
-                {"EGFR", "KDD", null, "L698_S1037dup, Oncogenic Mutations"},
-                {"EGFR", "Kinase Domain Duplication", null, "L698_S1037dup, Oncogenic Mutations"},
-                {"EGFR", "CTD", null, "G983_A1210indel, Oncogenic Mutations"},
-                {"EGFR", "C-terminal domain", null, "G983_A1210indel, Oncogenic Mutations"},
+                {"EGFR", "KDD", null, "Kinase Domain Duplication, Oncogenic Mutations"},
+                {"EGFR", "Kinase Domain Duplication", null, "Kinase Domain Duplication, Oncogenic Mutations"},
+                {"EGFR", "CTD", null, "C-terminal domain, Oncogenic Mutations"},
+                {"EGFR", "C-terminal domain", null, "C-terminal domain, Oncogenic Mutations"},
                 {"EGFR", "vII", null, "vII, Oncogenic Mutations"},
                 {"EGFR", "vIII", null, "vIII, Oncogenic Mutations"},
             });
