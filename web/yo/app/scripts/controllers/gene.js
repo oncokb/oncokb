@@ -2100,10 +2100,10 @@ angular.module('oncokbApp')
                     var tempUUIDs = getUUIDsByType(type, mutation, tumor, ti, treatment);
                     ReviewResource.rejected = _.union(ReviewResource.rejected, tempUUIDs);
                     numOfReviewItems.minus(updatedBy);
-                    cancelDelteSection(type, mutation, tumor, ti, treatment);
+                    cancelDeleteSection(type, mutation, tumor, ti, treatment);
                 });
             };
-            function cancelDelteSection(type, mutationCopy, tumorCopy, tiCopy, treatmentCopy) {
+            function cancelDeleteSection(type, mutationCopy, tumorCopy, tiCopy, treatmentCopy) {
                 var data = $scope.getRefs(mutationCopy, tumorCopy, tiCopy, treatmentCopy);
                 var mutation = data.mutation;
                 var tumor = data.tumor;
@@ -2114,7 +2114,7 @@ angular.module('oncokbApp')
                         cancelDeleteItem(mutation.name_review, mutation.name_uuid);
                         _.each(mutation.tumors, function (tumor) {
                             if (tumor.cancerTypes_review.removed) {
-                                cancelDelteSection('tumor', mutation, tumor, ti, treatment);
+                                cancelDeleteSection('tumor', mutation, tumor, ti, treatment);
                             }
                         });
                         break;
@@ -2123,7 +2123,7 @@ angular.module('oncokbApp')
                         _.each(tumor.TIs, function (ti) {
                             _.each(ti.treatments, function (treatment) {
                                 if (treatment.name_review.removed) {
-                                    cancelDelteSection('treatment', mutation, tumor, ti, treatment);
+                                    cancelDeleteSection('treatment', mutation, tumor, ti, treatment);
                                 }
                             });
                         });
@@ -2863,13 +2863,7 @@ angular.module('oncokbApp')
                 }, function (error) {
                     deferred5.reject('Failed to bind meta by gene');
                 });
-                var deferred6 = $q.defer();
-                firebase.database().ref('Meta/' + $routeParams.geneName).on('value', function (doc) {
-                    deferred6.resolve('success');
-                }, function (error) {
-                    deferred6.reject('Failed to bind meta by gene');
-                });
-                var bindingAPI = [deferred1.promise, deferred2.promise, deferred3.promise, deferred4.promise, deferred5.promise, deferred6.promise];
+                var bindingAPI = [deferred1.promise, deferred2.promise, deferred3.promise, deferred4.promise, deferred5.promise];
                 $q.all(bindingAPI)
                     .then(function (result) {
                         user.setFileeditable([$routeParams.geneName]).then(function (result) {

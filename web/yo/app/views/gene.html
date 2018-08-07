@@ -274,7 +274,7 @@
                               </div>
 
                               <span style="float:right" ng-show="!reviewMode && fileEditable">
-                                  <span ng-if="me.admin">
+                                  <span ng-if="me.admin && internal">
                                       <i class="fa fa-arrows" uib-tooltip-placement="top" uib-tooltip="{{movingInfo.message}}"  ng-show="displayMoveIcon('treatment', 'initial', treatment.name_uuid)" style="margin-right:10px;" ng-style="movingInfo.style" ng-click="startMoving('treatment', path, treatment.name_uuid, $index)"></i>
                                       <i class="fa fa-arrows" uib-tooltip-placement="top" uib-tooltip="Click to put above this treatment" ng-show="displayMoveIcon('treatment', 'up', treatment.name_uuid, $index)" style="margin-right:10px;color:green" ng-click="endMoving(path, 'up')"></i>
                                   </span>

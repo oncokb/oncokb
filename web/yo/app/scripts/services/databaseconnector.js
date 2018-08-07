@@ -193,14 +193,14 @@ angular.module('oncokbApp')
                             }, function(error) {
                                 var subject = 'VUS update Error for ' + hugoSymbol;
                                 var content = 'The system error returned is ' + JSON.stringify(error);
-                                // sendEmail({sendTo: 'dev.oncokb@gmail.com', subject: subject, content: content},
-                                //     function(result) {
-                                //         console.log('sent old history to oncokb dev account');
-                                //     },
-                                //     function(error) {
-                                //         console.log('fail to send old history to oncokb dev account', error);
-                                //     }
-                                // );
+                                sendEmail({sendTo: 'dev.oncokb@gmail.com', subject: subject, content: content},
+                                    function(result) {
+                                        console.log('sent old history to oncokb dev account');
+                                    },
+                                    function(error) {
+                                        console.log('fail to send old history to oncokb dev account', error);
+                                    }
+                                );
                                 fail(error);
                                 setAPIData('vus', hugoSymbol, data);
                             });
@@ -210,11 +210,14 @@ angular.module('oncokbApp')
                 }
             }
             function setAPIData(type, hugoSymbol, data) {
-                if (!$rootScope.apiData.has(hugoSymbol)) {
-                    $rootScope.apiData.set(hugoSymbol, $rootScope.metaModel.createMap());
+                if (_.isUndefined($rootScope.apiData)) {
+                    $rootScope.apiData = {};
+                }
+                if (_.isUndefined($rootScope.apiData[hugoSymbol])) {
+                    $rootScope.apiData[hugoSymbol] = {};
                 }
                 if (type === 'vus') {
-                    $rootScope.apiData.get(hugoSymbol).set('vus', $rootScope.metaModel.createMap({data: data}));
+                    $rootScope.apiData[hugoSymbol]['vus'] = data;
                 } else if (type === 'priority' || type === 'drug') {
                     // TODO
                     // $rootScope.apiData.get(hugoSymbol).set(type, $rootScope.metaModel.createList(''));
