@@ -32,6 +32,9 @@ angular.module('oncokbApp')
                         }
                     }
                     metaDefer.resolve('success');
+                    if ($rootScope.internal && !_.isUndefined($rootScope.apiData)) {
+                        synchronizeData();
+                    }
                 }, function(error) {
                     metaDefer.reject('Fail to load queues file');
                 });
@@ -47,7 +50,7 @@ angular.module('oncokbApp')
                     }, function (error) {
                         collaboratorsDefer.reject('Failed to bind meta firebase object');
                     });
-                }                
+                }
                 return collaboratorsDefer.promise;
             }
             function loadReviewMeta(hugoSymbol) {
@@ -57,7 +60,7 @@ angular.module('oncokbApp')
                     reviewMetaDefer.resolve('success');
                 }, function () {
                     reviewMetaDefer.reject('Failed to bind meta firebase object');
-                });        
+                });
                 return reviewMetaDefer.promise;
             }
             function loadMovingMeta(hugoSymbol) {
@@ -67,7 +70,7 @@ angular.module('oncokbApp')
                     movingSectionDefer.resolve('success');
                 }, function () {
                     movingSectionDefer.reject('Failed to bind meta firebase object');
-                });        
+                });
                 return movingSectionDefer.promise;
             }
             function loadQueues() {
@@ -96,10 +99,10 @@ angular.module('oncokbApp')
              * Loop through api calls recorded in the meta file and update it to database every 5 mins
              * **/
             function synchronizeData() {
-                var hugoSymbols = $rootScope.apiData.keys();
+                var hugoSymbols = _.keys($rootScope.apiData);
                 _.each(hugoSymbols, function(hugoSymbol) {
-                    if ($rootScope.apiData.get(hugoSymbol).has('vus')) {
-                        updateByType('vus', hugoSymbol, $rootScope.apiData.get(hugoSymbol).get('vus').get('data'));
+                    if (!_.isUndefined($rootScope.apiData[hugoSymbol]['vus'])) {
+                        updateByType('vus', hugoSymbol, $rootScope.apiData[hugoSymbol]['vus']);
                     }
                     // TODO
                     // updateByType('priority', hugoSymbol, $rootScope.apiData.get(hugoSymbol).get('priority'));
@@ -112,7 +115,7 @@ angular.module('oncokbApp')
             function updateByType(type, hugoSymbol, data) {
                 if (type === 'vus') {
                     DatabaseConnector.updateVUS(hugoSymbol, data, function() {
-                        $rootScope.apiData.get(hugoSymbol).delete('vus');
+                        delete $rootScope.apiData[hugoSymbol]['vus'];
                     });
                 } else if (type === 'priority') {
                     // TODO
