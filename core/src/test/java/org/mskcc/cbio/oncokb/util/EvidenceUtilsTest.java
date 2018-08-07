@@ -127,16 +127,19 @@ public class EvidenceUtilsTest extends TestCase {
         Evidence e2 = new Evidence();
         Evidence e3 = new Evidence();
         Evidence e4 = new Evidence();
+        Evidence e5 = new Evidence();
 
         e1.setId(1);
         e2.setId(2);
         e3.setId(3);
         e4.setId(4);
+        e5.setId(5);
 
         e1.setLevelOfEvidence(LevelOfEvidence.LEVEL_1);
         e2.setLevelOfEvidence(LevelOfEvidence.LEVEL_1);
         e3.setLevelOfEvidence(LevelOfEvidence.LEVEL_1);
         e4.setLevelOfEvidence(LevelOfEvidence.LEVEL_2A);
+        e5.setLevelOfEvidence(LevelOfEvidence.LEVEL_R1);
 
         Drug d1 = new Drug("Vemurafinib");
         Drug d2 = new Drug("Dabrafinib");
@@ -181,6 +184,7 @@ public class EvidenceUtilsTest extends TestCase {
         e2.setTreatments(tc2);
         e3.setTreatments(tc3);
         e4.setTreatments(tc4);
+        e5.setTreatments(tc1);
 
         Set<Evidence> sets = new HashSet<>();
         sets.add(e1);
@@ -202,6 +206,25 @@ public class EvidenceUtilsTest extends TestCase {
         e1.setLevelOfEvidence(LevelOfEvidence.LEVEL_3A);
         filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets);
         assertEquals("4", getIds(filtered));
+
+        sets = new HashSet<>();
+        sets.add(e1);
+        sets.add(e5);
+
+        e1.setLevelOfEvidence(LevelOfEvidence.LEVEL_1);
+        e5.setLevelOfEvidence(LevelOfEvidence.LEVEL_R1);
+        filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets);
+        assertEquals("5", getIds(filtered));
+
+        e1.setLevelOfEvidence(LevelOfEvidence.LEVEL_2A);
+        e5.setLevelOfEvidence(LevelOfEvidence.LEVEL_R1);
+        filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets);
+        assertEquals("5", getIds(filtered));
+
+        e1.setLevelOfEvidence(LevelOfEvidence.LEVEL_2A);
+        e5.setLevelOfEvidence(LevelOfEvidence.LEVEL_R2);
+        filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets);
+        assertEquals("1", getIds(filtered));
     }
 
     private String getIds(Set<Evidence> evidences) {

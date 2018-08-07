@@ -12,7 +12,7 @@ import java.util.*;
 public class LevelUtils {
     public static final List<LevelOfEvidence> LEVELS = Collections.unmodifiableList(
         Arrays.asList(LevelOfEvidence.LEVEL_R3, LevelOfEvidence.LEVEL_R2, LevelOfEvidence.LEVEL_4, LevelOfEvidence.LEVEL_3B, LevelOfEvidence.LEVEL_3A,
-            LevelOfEvidence.LEVEL_2B, LevelOfEvidence.LEVEL_2A, LevelOfEvidence.LEVEL_R1, LevelOfEvidence.LEVEL_1)
+            LevelOfEvidence.LEVEL_2B, LevelOfEvidence.LEVEL_2A, LevelOfEvidence.LEVEL_1, LevelOfEvidence.LEVEL_R1)
     );
 
     public static final List<LevelOfEvidence> SENSITIVE_LEVELS = Collections.unmodifiableList(
