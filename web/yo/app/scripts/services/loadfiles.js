@@ -108,9 +108,6 @@ angular.module('oncokbApp')
                     // updateByType('priority', hugoSymbol, $rootScope.apiData.get(hugoSymbol).get('priority'));
                     // updateByType('drug', hugoSymbol, $rootScope.apiData.get(hugoSymbol).get('drug'));
                 });
-                $timeout(function() {
-                    synchronizeData();
-                }, 300000);
             }
             function updateByType(type, hugoSymbol, data) {
                 if (type === 'vus') {

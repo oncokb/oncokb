@@ -60,7 +60,7 @@ angular.module('oncokbApp')
                             if ($rootScope.metaData[hugoSymbol].review && _.keys($rootScope.metaData[hugoSymbol].review).length > 1) {
                                 $scope.metaFlags[hugoSymbol].review = 'Yes';
                             }
-                            if ($rootScope.firebaseQueues[hugoSymbol]) {
+                            if ($rootScope.firebaseQueues && $rootScope.firebaseQueues[hugoSymbol]) {
                                 _.each($rootScope.firebaseQueues[hugoSymbol].queue, function(item) {
                                     if (!item.curated) {
                                         if ($scope.metaFlags[hugoSymbol] && $scope.metaFlags[hugoSymbol].queues) {
@@ -81,15 +81,15 @@ angular.module('oncokbApp')
                 $location.path(path);
             };
             $scope.allFiles = {
-                gene: '',
-                vus: ''
+                gene: {},
+                vus: {}
             };
             $scope.saveAllGenes = function() {
                 $scope.status.saveAllGenes = false;
                 firebase.database().ref('Genes').on('value', function(geneFiles) {
-                    $scope.allFiles.gene = geneFiles.val();
+                    $scope.allFiles.gene = geneFiles.val() ? geneFiles.val() : {};
                     firebase.database().ref('VUS').on('value', function(vusFiles) {
-                        $scope.allFiles.vus = vusFiles.val();
+                        $scope.allFiles.vus = vusFiles.val() ? vusFiles.val() : {};
                         saveGene(0);
                     }, function() {
                         console.log('fail to get vus data');
