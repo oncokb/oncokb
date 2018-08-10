@@ -66,8 +66,9 @@ angular.module('oncokbApp')
                                     if (scope.t === 'treatment-select' && scope.key === 'level') {
                                         scope.changePropagation();
                                     }
-                                    // 1) Do not trigger setReviewRelatedContent() when edit Additional Information (Optional)
-                                    // 2) Do not trigger setReviewRelatedContent() when move mutations
+                                    // 1) Do not trigger setReviewRelatedContent() when edit Additional Information (Optional).
+                                    // 2) Do not trigger setReviewRelatedContent() when changes have been rejected.
+                                    // 3) Do not trigger setReviewRelatedContent() when move mutations.
                                     if (scope.key !== 'short' && !isRejected && !(scope.key === 'name' && ($rootScope.movingSection || checkNameChange.get()))) {
                                         scope.setReviewRelatedContent(n, o, false);
                                     }
@@ -121,15 +122,17 @@ angular.module('oncokbApp')
                         if (_.isUndefined(scope.data[key + '_review'])) {
                             scope.data[key + '_review'] = {};
                         }
+                        var currentTime = new Date().getTime();
                         if (!_.isUndefined(scope.data[key + '_review'].added) && scope.data[key + '_review'].added) {
                             scope.data[key + '_review'].updatedBy = scope.data[key + '_review'].updatedBy;
                             scope.data[key + '_review'].updateTime = scope.data[key + '_review'].updateTime;
                         } else if (!_.isUndefined(scope.data[key + '_review'].removed) && scope.data[key + '_review'].removed) {
                             scope.data[key + '_review'].updatedBy = scope.data[key + '_review'].updatedBy;
                             scope.data[key + '_review'].updateTime = scope.data[key + '_review'].updateTime;
-                        } else {
+                        } else if (_.isUndefined(scope.data[key + '_review'].lastReviewed) || (currentTime - scope.data[key + '_review'].updateTime) > 10000) {
+                            // Update updateBy if the gap time over 10s. This is used for preventing cascade update when multiply users work on same gene.
                             scope.data[key + '_review'].updatedBy = $rootScope.me.name;
-                            scope.data[key + '_review'].updateTime = new Date().getTime();
+                            scope.data[key + '_review'].updateTime = currentTime;
                         }
                         if ((!$rootScope.reviewMeta[uuid] || _.isUndefined(scope.data[key + '_review'].lastReviewed)) && !_.isUndefined(o)) {
                             scope.data[key + '_review'].lastReviewed = o;
