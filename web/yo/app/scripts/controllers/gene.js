@@ -2726,7 +2726,12 @@ angular.module('oncokbApp')
                         var tempCollaborators = {};
                         _.each(_.keys(allColl), function (key) {
                             if (allColl[key].indexOf($routeParams.geneName) !== -1) {
-                                tempCollaborators[key] = allUsersInfo[key];
+                                _.some(allUsersInfo, function(user) {
+                                    if (!_.isUndefined(user.name) && user.name.toLowerCase() === key) {
+                                        tempCollaborators[key] = user;
+                                        return true;
+                                    }
+                                });
                             }
                         });
                         $rootScope.collaborators = tempCollaborators;

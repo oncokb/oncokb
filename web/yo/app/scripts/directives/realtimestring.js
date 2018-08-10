@@ -53,9 +53,10 @@ angular.module('oncokbApp')
                         });
                     }
                     scope.$watch('data[key]', function (n, o) {
-                        if (n !== o && !_.isUndefined(n)) {
+                        if (n !== o && !_.isUndefined(n) && scope.fe) {
                             if (!scope.data || !scope.data[scope.key+'_editing'] || scope.data[scope.key+'_editing'] === $rootScope.me.name) {
-                                if (!$rootScope.reviewMode || ReviewResource.rejected.indexOf(scope.uuid) === -1) {
+                                var isRejected = mainUtils.processedInReview('reject', scope.uuid);
+                                if (!$rootScope.reviewMode || !isRejected) {
                                     mainUtils.updateLastModified();
                                     if (scope.pasting === true) {
                                         scope.data[scope.key] = OncoKB.utils.getString(scope.data[scope.key]);
@@ -65,7 +66,9 @@ angular.module('oncokbApp')
                                     if (scope.t === 'treatment-select' && scope.key === 'level') {
                                         scope.changePropagation();
                                     }
-                                    if (scope.key !== 'short' && !(scope.key === 'name' && ($rootScope.movingSection || checkNameChange.get()))) {
+                                    // 1) Do not trigger setReviewRelatedContent() when edit Additional Information (Optional)
+                                    // 2) Do not trigger setReviewRelatedContent() when move mutations
+                                    if (scope.key !== 'short' && !isRejected && !(scope.key === 'name' && ($rootScope.movingSection || checkNameChange.get()))) {
                                         scope.setReviewRelatedContent(n, o, false);
                                     }
                                 }
@@ -118,8 +121,16 @@ angular.module('oncokbApp')
                         if (_.isUndefined(scope.data[key + '_review'])) {
                             scope.data[key + '_review'] = {};
                         }
-                        scope.data[key + '_review'].updatedBy = $rootScope.me.name;
-                        scope.data[key + '_review'].updateTime = new Date().getTime();
+                        if (!_.isUndefined(scope.data[key + '_review'].added) && scope.data[key + '_review'].added) {
+                            scope.data[key + '_review'].updatedBy = scope.data[key + '_review'].updatedBy;
+                            scope.data[key + '_review'].updateTime = scope.data[key + '_review'].updateTime;
+                        } else if (!_.isUndefined(scope.data[key + '_review'].removed) && scope.data[key + '_review'].removed) {
+                            scope.data[key + '_review'].updatedBy = scope.data[key + '_review'].updatedBy;
+                            scope.data[key + '_review'].updateTime = scope.data[key + '_review'].updateTime;
+                        } else {
+                            scope.data[key + '_review'].updatedBy = $rootScope.me.name;
+                            scope.data[key + '_review'].updateTime = new Date().getTime();
+                        }
                         if ((!$rootScope.reviewMeta[uuid] || _.isUndefined(scope.data[key + '_review'].lastReviewed)) && !_.isUndefined(o)) {
                             scope.data[key + '_review'].lastReviewed = o;
                             mainUtils.setUUIDInReview(uuid);
