@@ -141,7 +141,7 @@ angular.module('oncokbApp')
                             scope.data[key + '_review'].updatedBy = scope.data[scope.key+'_editing'];
                             scope.data[key + '_review'].updateTime = new Date().getTime();
                         } else {
-                            scope.data[key + '_review'].updatedBy = $rootScope.me.name;;
+                            scope.data[key + '_review'].updatedBy = $rootScope.me.name;
                             scope.data[key + '_review'].updateTime = new Date().getTime();
                         }
                         if ((!$rootScope.reviewMeta[uuid] || _.isUndefined(scope.data[key + '_review'].lastReviewed)) && !_.isUndefined(o)) {
