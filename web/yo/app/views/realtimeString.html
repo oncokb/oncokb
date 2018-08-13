@@ -15,8 +15,9 @@
                     </pub-iframe>
                 </div>
                 <div ng-switch-when="MUTATION_NAME|TREATMENT_NAME" ng-switch-when-separator="|">
-                    <p ng-if="!fe && editingMessage" style="font-style:italic;margin-top:-30px;margin-left:30%;color:orange">{{editingMessage}}</p>
+                    <p ng-if="!fe && editingMessage" style="font-style:italic;color:orange">{{editingMessage}}</p>
                     <p contenteditable="{{fe}}"
+                        ng-hide="editingMessage"
                         ng-class="getInputClass()"
                         ng-model="data[key]"
                         ng-click="setTrackSignal()"
@@ -29,7 +30,8 @@
                 </div>
                 <div ng-switch-when="treatment-select" class="chosen-full-width">
                     <div style="margin-top:10px;margin-bottom:10px">
-                        <select ng-disabled="!fe"
+                        <p ng-if="!fe && editingMessage" style="font-style:italic;color:orange">{{editingMessage}}</p>
+                        <select ng-disabled="!fe || editingMessage"
                             chosen allow-single-deselect="true"
                             ng-model="data[key]"
                             ng-options="opt.value as opt.label for opt in o">
@@ -38,7 +40,8 @@
                     </div>
                     <div ng-if="content.propagationOpts.length > 0" style="margin-bottom:10px">
                         <span>Level of Evidence in other tumor types: </span>
-                        <select ng-disabled="!fe"
+                        <p ng-if="!fe && editingMessage" style="font-style:italic;color:orange">{{editingMessage}}</p>
+                        <select ng-disabled="!fe || editingMessage"
                             chosen allow-single-deselect="true"
                             ng-model="data.propagation"
                             ng-options="opt.value as opt.name for opt in content.propagationOpts">
@@ -47,7 +50,8 @@
                     </div>
                 </div>
                 <div ng-switch-when="implication" class="chosen-full-width">
-                    <select ng-disabled="!fe"
+                    <p ng-if="!fe && editingMessage" style="font-style:italic;color:orange">{{editingMessage}}</p>
+                    <select ng-disabled="!fe || editingMessage"
                             chosen allow-single-deselect="true"
                             ng-model="data[key]"
                             ng-options="opt.value as opt.label for opt in o">
@@ -55,7 +59,8 @@
                     </select>
                 </div>
                 <div ng-switch-when="select-chosen" class="chosen-full-width">
-                    <select ng-disabled="!fe"
+                    <p ng-if="!fe && editingMessage" style="font-style:italic;color:orange">{{editingMessage}}</p>
+                    <select ng-disabled="!fe || editingMessage"
                             chosen allow-single-deselect="true"
                             ng-model="data[key]"
                             ng-options="opt for opt in o">
@@ -63,16 +68,17 @@
                     </select>
                 </div>
                 <div ng-switch-when="checkbox">
+                    <p ng-if="!fe && editingMessage && key !== 'ocg' && key !== 'tsg'" style="font-style:italic;color:orange">{{editingMessage}}</p>
                     <div>
-                            <span ng-repeat="checkbox in checkboxes">
-                              <input id="::{{uuid+$index}}"
-                                      type="radio"
-                                      ng-model="data[key]"
-                                      ng-value="checkbox"
-                                      ng-disabled="!fe"
-                                      ng-click="uncheck($event)">
-                              <label for="::{{uuid+$index}}">{{checkbox}}</label>
-                            </span>
+                        <span ng-repeat="checkbox in checkboxes">
+                            <input id="::{{uuid+$index}}"
+                                  type="radio"
+                                  ng-model="data[key]"
+                                  ng-value="checkbox"
+                                  ng-disabled="!fe || editingMessage"
+                                  ng-click="uncheck($event)">
+                            <label for="::{{uuid+$index}}">{{checkbox}}</label>
+                        </span>
                     </div>
                 </div>
                 <div ng-switch-default></div>

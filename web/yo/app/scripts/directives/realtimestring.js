@@ -21,7 +21,8 @@ angular.module('oncokbApp')
                 mutation: '=',
                 tumor: '=',
                 indicateMutationContentInGene: '&indicateMutationContent',
-                indicateTumorContentInGene: '&indicateTumorContent'
+                indicateTumorContentInGene: '&indicateTumorContent',
+                setGeneTypeEditingMessageInGene: '&setGeneTypeEditingMessage'
             },
             replace: true,
             link: {
@@ -66,8 +67,9 @@ angular.module('oncokbApp')
                                     if (scope.t === 'treatment-select' && scope.key === 'level') {
                                         scope.changePropagation();
                                     }
-                                    // 1) Do not trigger setReviewRelatedContent() when edit Additional Information (Optional)
-                                    // 2) Do not trigger setReviewRelatedContent() when move mutations
+                                    // 1) Do not trigger setReviewRelatedContent() when edit Additional Information (Optional).
+                                    // 2) Do not trigger setReviewRelatedContent() when changes have been rejected.
+                                    // 3) Do not trigger setReviewRelatedContent() when move mutations.
                                     if (scope.key !== 'short' && !isRejected && !(scope.key === 'name' && ($rootScope.movingSection || checkNameChange.get()))) {
                                         scope.setReviewRelatedContent(n, o, false);
                                     }
@@ -79,19 +81,27 @@ angular.module('oncokbApp')
                                     }, 500);
                                 }
                             }
-                            if (scope.t === 'p' || scope.t === 'short') {
-                                $timeout.cancel(scope.timeoutRef);
-                                if (scope.fe === true && !scope.data[scope.key+'_editing']) {
-                                    scope.data[scope.key+'_editing'] = $rootScope.me.name;
-                                }
-                                if (scope.data && (scope.data[scope.key+'_editing'] !== $rootScope.me.name)) {
-                                    scope.initializeFE();
-                                }
-                                scope.timeoutRef = $timeout(function() {
-                                    delete scope.data[scope.key+'_editing'];
-                                    scope.initializeFE();
-                                }, 10*1000);
+                            var pauseTime = 2000; // Default pause time 2s.
+                            if (scope.t === 'MUTATION_NAME' || scope.t === 'TREATMENT_NAME') {
+                                pauseTime = 5000; // Name change pause time 5s
+                            } else if (scope.t === 'p' || scope.t === 'short') {
+                                pauseTime = 10000; // Paragraph pause time 10s.
                             }
+
+                            $timeout.cancel(scope.timeoutRef);
+                            if (scope.fe === true && !scope.data[scope.key+'_editing']) {
+                                scope.data[scope.key+'_editing'] = $rootScope.me.name;
+                            }
+                            if (scope.data && (scope.data[scope.key+'_editing'] !== $rootScope.me.name)) {
+                                scope.initializeFE();
+                                if (scope.t === 'treatment-select' && scope.key === 'level') {
+                                    scope.changePropagation();
+                                }
+                            }
+                            scope.timeoutRef = $timeout(function() {
+                                delete scope.data[scope.key+'_editing'];
+                                scope.initializeFE();
+                            }, pauseTime);
                             if ($rootScope.reviewMode && ['p', 'MUTATION_NAME', 'TREATMENT_NAME'].indexOf(scope.t) !== -1) {
                                 scope.calculateDiff();
                             }
@@ -127,6 +137,9 @@ angular.module('oncokbApp')
                         } else if (!_.isUndefined(scope.data[key + '_review'].removed) && scope.data[key + '_review'].removed) {
                             scope.data[key + '_review'].updatedBy = scope.data[key + '_review'].updatedBy;
                             scope.data[key + '_review'].updateTime = scope.data[key + '_review'].updateTime;
+                        } else if (!_.isUndefined(scope.data[scope.key+'_editing'])) {
+                            scope.data[key + '_review'].updatedBy = scope.data[scope.key+'_editing'];
+                            scope.data[key + '_review'].updateTime = new Date().getTime();
                         } else {
                             scope.data[key + '_review'].updatedBy = $rootScope.me.name;
                             scope.data[key + '_review'].updateTime = new Date().getTime();
@@ -181,13 +194,17 @@ angular.module('oncokbApp')
                         }
                     } else {
                         $scope.fe = $rootScope.fileEditable;
+                        $scope.editingMessage = '';
+                    }
+                    if ($scope.key === 'tsg' || $scope.key === 'ocg') {
+                        $scope.setGeneTypeEditingMessage($scope.fe, $scope.editingMessage);
                     }
                 };
                 $scope.cleanUpEditing = function() {
                     if ($scope.data[$scope.key+'_editing']) {
                         $scope.data[$scope.key+'_editing'] = '';
                     }
-                }
+                };
                 $scope.changePropagation = function (initial) {
                     if (!initial && $scope.data.propagation_review) {
                         delete $scope.data.propagation_review.lastReviewed;
@@ -329,7 +346,10 @@ angular.module('oncokbApp')
                 };
                 $scope.trimCSS = function() {
                     $scope.pasting = true;
-                }
+                };
+                $scope.setGeneTypeEditingMessage = function(fe, editingMessage) {
+                    $scope.setGeneTypeEditingMessageInGene({ fe: fe, editingMessage: editingMessage });
+                };
             }
         };
     })

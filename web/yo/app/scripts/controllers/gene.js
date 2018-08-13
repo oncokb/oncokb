@@ -2950,7 +2950,7 @@ angular.module('oncokbApp')
                     }
                 }
                 return obj[data.key + '_uuid'];
-            }
+            };
             populateBindings();
             $scope.subIsSameWithMain = function(cancerType, type) {
                 cancerType.message = '';
@@ -2993,6 +2993,10 @@ angular.module('oncokbApp')
                 });
             }
             getOncoTreeMainTypes();
+            $scope.setGeneTypeEditingMessage = function (fe, editingMessage) {
+                $scope.fe = fe;
+                $scope.editingMessage = editingMessage;
+            };
         }]
     )
     .controller('ModifyTumorTypeCtrl', function ($scope, $modalInstance, data, _, OncoKB, $rootScope, mainUtils, FirebaseModel, $timeout) {
