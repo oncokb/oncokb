@@ -71,6 +71,10 @@ public class AlterationUtilsTest extends TestCase
 
         alteration = AlterationUtils.getAlteration("AKT1", "EE17AA", null, null, null, null);
         assertFalse("This variant should NOT be position variant.", AlterationUtils.isPositionVariant(alteration));
+
+        alteration = AlterationUtils.getAlteration("EGFR", "L747Rfs*13", null, null, null, null);
+        assertFalse("This variant should NOT be position variant.", AlterationUtils.isPositionVariant(alteration));
+
     }
 
 }

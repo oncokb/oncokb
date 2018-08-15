@@ -862,6 +862,8 @@ public final class AlterationUtils {
             && alteration.getProteinStart().equals(alteration.getProteinEnd())
             && alteration.getRefResidues() != null && alteration.getRefResidues().length() == 1
             && alteration.getVariantResidues() == null
+            && alteration.getConsequence() != null
+            && alteration.getConsequence().getTerm().equals("NA")
             )
             isPositionVariant = true;
         return isPositionVariant;
