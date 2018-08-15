@@ -15,7 +15,7 @@ public class HotspotUtilsTest extends TestCase {
         assertFalse("This stop gain variant should not be hotspot", HotspotUtils.isHotspot(alteration));
 
         alteration = AlterationUtils.getAlteration("AKT1", "E17", null, null, null, null);
-        assertTrue(HotspotUtils.isHotspot(alteration));
+        assertFalse(HotspotUtils.isHotspot(alteration));
 
         alteration = AlterationUtils.getAlteration("AKT1", "P68_C77dup", null, null, null, null);
         assertTrue(HotspotUtils.isHotspot(alteration));
@@ -37,6 +37,9 @@ public class HotspotUtilsTest extends TestCase {
 
         alteration = AlterationUtils.getAlteration("AKT1", "P76_C77delinsSFG", null, null, null, null);
         assertTrue(HotspotUtils.isHotspot(alteration));
+
+        alteration = AlterationUtils.getAlteration("EGFR", "L747Rfs*13", null, null, null, null);
+        assertFalse(HotspotUtils.isHotspot(alteration));
 
         // PAK7 is an alias of PAK5
         alteration = AlterationUtils.getAlteration("PAK7", "M173I", null, null, null, null);
