@@ -2993,10 +2993,6 @@ angular.module('oncokbApp')
                 });
             }
             getOncoTreeMainTypes();
-            $scope.setGeneTypeEditingMessage = function (fe, editingMessage) {
-                $scope.fe = fe;
-                $scope.editingMessage = editingMessage;
-            };
         }]
     )
     .controller('ModifyTumorTypeCtrl', function ($scope, $modalInstance, data, _, OncoKB, $rootScope, mainUtils, FirebaseModel, $timeout) {
