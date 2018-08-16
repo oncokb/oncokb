@@ -628,11 +628,10 @@ angular.module('oncokbApp')
                     $scope.geneMeta.review.currentReviewer = '';
                     // This is to increase the fault tolerance of the platform. UUIDs are supposed to be cleaned up after acception or rejection.
                     // If after scaning whole gene document and found nothing need to be reviewed, then we clean up everything in the review EXCEPT currentReviewer
-                    if (_.keys($scope.geneMeta.review).length > 1) {
-                        _.each(_.keys($scope.geneMeta.review), function(key) {
-                            if (key !== 'currentReviewer') {
-                                mainUtils.deleteUUID(key);
-                            }
+                    var reviewUUIDs = _.without(_.keys($scope.geneMeta.review), 'currentReviewer');
+                    if (reviewUUIDs.length > 0) {
+                        _.each(reviewUUIDs, function(key) {
+                            mainUtils.deleteUUID(key);
                         });
                     }
 
@@ -2736,7 +2735,8 @@ angular.module('oncokbApp')
                         });
                         $rootScope.collaborators = tempCollaborators;
                         //If an admin enter the review mode and left gene page directly without click Review Complete button, we need to reset the currentReviewer
-                        if (!$rootScope.collaborators[$rootScope.me.name.toLowerCase()] && $rootScope.reviewMode && $scope.geneMeta.review.currentReviewer === $rootScope.me.name) {
+                        if (!$rootScope.collaborators[$rootScope.me.name.toLowerCase()] && $rootScope.reviewMode &&
+                            !_.isUndefined($scope.geneMeta.review) && $scope.geneMeta.review.currentReviewer === $rootScope.me.name) {
                             firebase.database().ref('Meta/' + $routeParams.geneName + '/review').update({currentReviewer: ''}).then(function (result) {}).catch(function (error) {});
                         }
                         defer.resolve();
@@ -2857,7 +2857,9 @@ angular.module('oncokbApp')
                 });
                 var deferred5 = $q.defer();
                 $firebaseObject(firebase.database().ref('Meta/' + $routeParams.geneName)).$bindTo($scope, "geneMeta").then(function () {
-                    if (_.isUndefined($scope.geneMeta.review.currentReviewer)) {
+                    if (_.isUndefined($scope.geneMeta.review)) {
+                        $scope.geneMeta.review = { currentReviewer: ''};
+                    } else if (_.isUndefined($scope.geneMeta.review.currentReviewer)) {
                         $scope.geneMeta.review.currentReviewer = '';
                     }
                     getAllCollaborators().then(function() {

@@ -314,7 +314,7 @@ angular.module('oncokbApp')
                     return className;
                 }
                 $scope.getOldContentDivClass = function(content) {
-                    if (content.length > 80) {
+                    if (content && content.length > 80) {
                         return 'longContentDivMargin';
                     }
                 };
@@ -330,7 +330,7 @@ angular.module('oncokbApp')
                 };
                 $scope.trimCSS = function() {
                     $scope.pasting = true;
-                }
+                };
             }
         };
     });
