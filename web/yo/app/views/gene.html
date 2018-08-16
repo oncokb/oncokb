@@ -104,6 +104,7 @@
             <div style="float:left;" ng-class="mutation.name.length > 80 ? 'levelWithLongName' : 'levelWithoutLongName'" ng-show="!reviewMode">
               <comments-dict key="'name'" path="path"></comments-dict>
               <span style="margin-right:10px" ng-bind-html="mutationContent[mutation.name_uuid].result"></span>
+                <span class="curationNoEntry" ng-if="isEmptySection(mutation, 'mutation')">No Entry</span>
             </div>
             <div ng-show="!reviewMode" style="margin-top:-30px">
               <span style="float:right">
