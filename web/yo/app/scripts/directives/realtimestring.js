@@ -66,8 +66,9 @@ angular.module('oncokbApp')
                                     if (scope.t === 'treatment-select' && scope.key === 'level') {
                                         scope.changePropagation();
                                     }
-                                    // 1) Do not trigger setReviewRelatedContent() when edit Additional Information (Optional)
-                                    // 2) Do not trigger setReviewRelatedContent() when move mutations
+                                    // 1) Do not trigger setReviewRelatedContent() when edit Additional Information (Optional).
+                                    // 2) Do not trigger setReviewRelatedContent() when changes have been rejected.
+                                    // 3) Do not trigger setReviewRelatedContent() when move mutations.
                                     if (scope.key !== 'short' && !isRejected && !(scope.key === 'name' && ($rootScope.movingSection || checkNameChange.get()))) {
                                         scope.setReviewRelatedContent(n, o, false);
                                     }

@@ -350,6 +350,7 @@
                                        data-placeholder="Choose a main tumor type"
                                        no-results-text="'Could not find any'"
                                        ng-model="cancerType.mainType"
+                                       ng-disabled = "!fileEditable"
                                        ng-options="tt.name for tt in oncoTree.mainTypes | orderBy: 'name'"
                                        ng-change="subIsSameWithMain(cancerType, 'main')">
                     <option value=""></option>
@@ -360,6 +361,7 @@
                             no-results-text="'Could not find any'"
                             allow-single-deselect="true"
                             ng-model="cancerType.subtype"
+                            ng-disabled = "!fileEditable"
                             ng-options="tt.name for tt in cancerType.oncoTreeTumorTypes | orderBy: 'name' track by tt.code"
                             ng-change="subIsSameWithMain(cancerType, 'sub')">
                         <option value=""></option>
