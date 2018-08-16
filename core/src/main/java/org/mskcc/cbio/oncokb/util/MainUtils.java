@@ -396,6 +396,7 @@ public class MainUtils {
 
             alterations = AlterationUtils.excludeVUS(gene, new ArrayList<>(AlterationUtils.getAllAlterations(gene)));
             alterations = AlterationUtils.excludeInferredAlterations(alterations);
+            alterations = AlterationUtils.excludePositionedAlterations(alterations);
 
 //                oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Get all alterations for " + hugoSymbol);
 

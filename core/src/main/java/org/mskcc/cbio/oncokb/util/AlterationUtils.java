@@ -474,6 +474,16 @@ public final class AlterationUtils {
         return result;
     }
 
+    public static List<Alteration> excludePositionedAlterations(List<Alteration> alterations) {
+        List<Alteration> result = new ArrayList<>();
+        for (Alteration alteration : alterations) {
+            if (!isPositionedAlteration(alteration)) {
+                result.add(alteration);
+            }
+        }
+        return result;
+    }
+
     public static Boolean isInferredAlterations(String alteration) {
         Boolean isInferredAlt = false;
         if (alteration != null) {
@@ -854,7 +864,7 @@ public final class AlterationUtils {
         return variants;
     }
 
-    public static boolean isPositionVariant(Alteration alteration) {
+    public static boolean isPositionedAlteration(Alteration alteration) {
         boolean isPositionVariant = false;
         if (alteration != null
             && alteration.getProteinStart() != null
