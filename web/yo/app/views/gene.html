@@ -59,9 +59,9 @@
            <h3 ng-if="reviewMode">Gene Type:
                <review-panel uuid="gene.type_uuid" review-obj="gene.type_review" evidence-type="'GENE_TYPE'" obj="gene" get-evidence="getEvidence(type)" model-update="modelUpdate(type)"></review-panel>
            </h3>
-           <realtime-string key="'tsg'" path="getObservePath({type: 'geneType'})" review-obj="gene.type_review" uuid="::gene.type.tsg_uuid" fe="geneEditable" t="'checkbox'" object="gene.type" objecttype="'object'" objectkey="'TSG'" checkboxes="checkboxes['TSG']" checkboxid="'TSG'"></realtime-string>
+           <realtime-string key="'tsg'" path="getObservePath({type: 'geneType'})" review-obj="gene.type_review" uuid="::gene.type.tsg_uuid" fe="geneEditable" t="'checkbox'" object="gene.type" objecttype="'object'" objectkey="'tsg'" checkboxes="checkboxes['TSG']" checkboxid="'TSG'"></realtime-string>
            <div style="margin-top:-25px;margin-left:150px">
-              <realtime-string key="'ocg'" path="getObservePath({type: 'geneType'})" review-obj="gene.type_review" uuid="::gene.type.ocg_uuid" fe="geneEditable" t="'checkbox'" object="gene.type" objecttype="'object'" objectkey="'OCG'" checkboxes="checkboxes['OCG']" checkboxid="'OCG'"></realtime-string>
+              <realtime-string key="'ocg'" path="getObservePath({type: 'geneType'})" review-obj="gene.type_review" uuid="::gene.type.ocg_uuid" fe="geneEditable" t="'checkbox'" object="gene.type" objecttype="'object'" objectkey="'ocg'" checkboxes="checkboxes['OCG']" checkboxid="'OCG'"></realtime-string>
            </div>
       </div>
     <div ng-show="displayPrecisely(gene.background_uuid)">
