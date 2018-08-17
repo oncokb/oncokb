@@ -93,11 +93,13 @@ angular.module('oncokbApp')
                     // The panel type is assigned in the priority of remove, add, name change and update. We need to pay special attentions when adjusting the order, which is reflected in the following if else statements
                     if (mainUtils.processedInReview('remove', $scope.uuid)) {
                         $scope.panelType = 'delete';
+                        $scope.adjustedEvidenceType = $scope.evidenceType;
                         if (isTreatmentType()) {
                             $scope.adjustedEvidenceType = 'treatment';
                         }
                     } else if (mainUtils.processedInReview('add', $scope.uuid)) {
                         $scope.panelType = 'add';
+                        $scope.adjustedEvidenceType = $scope.evidenceType;
                         if (isTreatmentType()) {
                             $scope.adjustedEvidenceType = 'treatment';
                         }

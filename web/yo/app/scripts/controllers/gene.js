@@ -2112,7 +2112,7 @@ angular.module('oncokbApp')
                     case 'mutation':
                         cancelDeleteItem(mutation.name_review, mutation.name_uuid);
                         _.each(mutation.tumors, function (tumor) {
-                            if (tumor.cancerTypes_review.removed) {
+                            if (tumor.cancerTypes_review && tumor.cancerTypes_review.removed) {
                                 cancelDeleteSection('tumor', mutation, tumor, ti, treatment);
                             }
                         });
@@ -2371,7 +2371,12 @@ angular.module('oncokbApp')
                 if ($scope.reviewMode) {
                     return false;
                 }
-                if (type === 'mutation_effect') {
+                if (type === 'mutation') {
+                    if (obj.mutation_effect.oncogenic || obj.mutation_effect.effect || obj.mutation_effect.description || obj.mutation_effect.short || !_.isUndefined(obj.tumors)) {
+                        return false;
+                    }
+                    emptySectionsUUIDs[obj.name_uuid] = true;
+                } else if (type === 'mutation_effect') {
                     if (obj.oncogenic || obj.effect || obj.description || obj.short) {
                         return false;
                     }
