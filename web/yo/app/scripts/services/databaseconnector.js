@@ -255,7 +255,7 @@ angular.module('oncokbApp')
             }
 
             function sendEmail(params, success, fail) {
-                if (testing || inProduction) {
+                if (testing || !inProduction) {
                     success(true);
                 } else {
                     SendEmail
