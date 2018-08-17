@@ -2112,7 +2112,7 @@ angular.module('oncokbApp')
                     case 'mutation':
                         cancelDeleteItem(mutation.name_review, mutation.name_uuid);
                         _.each(mutation.tumors, function (tumor) {
-                            if (tumor.cancerTypes_review.removed) {
+                            if (tumor.cancerTypes_review && tumor.cancerTypes_review.removed) {
                                 cancelDeleteSection('tumor', mutation, tumor, ti, treatment);
                             }
                         });
