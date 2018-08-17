@@ -39,6 +39,7 @@ angular.module('oncokbApp')
             var numOfLocks = {};
             var data = {};
             var testing = OncoKB.config.testing || false;
+            var inProduction = OncoKB.config.production || false;
 
             function getAllGene(callback, timestamp) {
                 Gene.getFromServer()
@@ -254,7 +255,7 @@ angular.module('oncokbApp')
             }
 
             function sendEmail(params, success, fail) {
-                if (testing) {
+                if (testing || !inProduction) {
                     success(true);
                 } else {
                     SendEmail

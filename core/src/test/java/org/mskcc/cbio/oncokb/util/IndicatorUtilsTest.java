@@ -255,11 +255,12 @@ public class IndicatorUtilsTest {
         assertEquals("The isHotspot is not true, but it should be.", Boolean.TRUE, indicatorQueryResp.getHotspot());
 
         // For variant has VUS as relevant alteration and the this VUS happens to be a hotspot, this variant should not be annotated as hotspot mutation.
-        query = new Query(null, null, null, "MAP2K1", "N109_R113del", null, null, "Gastrointestinal Stromal Tumor", null, null, null, null);
-        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true, null);
-        assertEquals("The Oncogenicity is not empty, but it should be.", "", indicatorQueryResp.getOncogenic());
-        assertEquals("The isHotspot is true, but it should not be.", Boolean.FALSE, indicatorQueryResp.getHotspot());
-        assertEquals("The highest level of sensitive treatment is not null, but it should be.", null, indicatorQueryResp.getHighestSensitiveLevel());
+        // No longer applicable
+//        query = new Query(null, null, null, "MAP2K1", "N109_R113del", null, null, "Gastrointestinal Stromal Tumor", null, null, null, null);
+//        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true, null);
+//        assertEquals("The Oncogenicity is not empty, but it should be.", "", indicatorQueryResp.getOncogenic());
+//        assertEquals("The isHotspot is true, but it should not be.", Boolean.FALSE, indicatorQueryResp.getHotspot());
+//        assertEquals("The highest level of sensitive treatment is not null, but it should be.", null, indicatorQueryResp.getHighestSensitiveLevel());
 
         // For non-functional fusion, the Deletion should still be mapped
         query = new Query(null, null, null, "BRCA2", null, "structural_variant", StructuralVariantType.DELETION, "Ovarian Cancer", null, null, null, null);
