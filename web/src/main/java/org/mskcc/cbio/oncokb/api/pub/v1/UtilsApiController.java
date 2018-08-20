@@ -3,15 +3,16 @@ package org.mskcc.cbio.oncokb.api.pub.v1;
 import org.mskcc.cbio.oncokb.apiModels.ActionableGene;
 import org.mskcc.cbio.oncokb.apiModels.AnnotatedVariant;
 import org.mskcc.cbio.oncokb.model.*;
+import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
 import org.mskcc.cbio.oncokb.util.CancerGeneUtils;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
 import org.mskcc.cbio.oncokb.util.MainUtils;
-import org.mskcc.cbio.oncokb.model.oncotree.TumorType;;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
 import java.util.*;
+
 /**
  * Created by Hongxin on 10/28/16.
  */
@@ -20,7 +21,49 @@ public class UtilsApiController implements UtilsApi {
 
     @Override
     public ResponseEntity<List<AnnotatedVariant>> utilsAllAnnotatedVariantsGet() {
-        HttpStatus status = HttpStatus.OK;
+        return new ResponseEntity<>(getAllAnnotatedVariants(), HttpStatus.OK);
+
+    }
+
+    @Override
+    public ResponseEntity<String> utilsAllAnnotatedVariantsTxtGet() {
+        String separator = "\t";
+        String newLine = "\n";
+
+        StringBuilder sb = new StringBuilder();
+        List<String> header = new ArrayList<>();
+        header.add("Isoform");
+        header.add("RefSeq");
+        header.add("Entrez Gene ID");
+        header.add("Gene");
+        header.add("Alteration");
+        header.add("Protein Change");
+        header.add("Oncogenicity");
+        header.add("Mutation Effect");
+        header.add("PMIDs for Mutation Effect");
+        header.add("Abstracts for Mutation Effect");
+        sb.append(MainUtils.listToString(header, separator));
+        sb.append(newLine);
+
+        for (AnnotatedVariant annotatedVariant : getAllAnnotatedVariants()) {
+            List<String> row = new ArrayList<>();
+            row.add(annotatedVariant.getIsoform());
+            row.add(annotatedVariant.getRefSeq());
+            row.add(String.valueOf(annotatedVariant.getEntrezGeneId()));
+            row.add(annotatedVariant.getGene());
+            row.add(annotatedVariant.getVariant());
+            row.add(annotatedVariant.getProteinChange());
+            row.add(annotatedVariant.getOncogenicity());
+            row.add(annotatedVariant.getMutationEffect());
+            row.add(annotatedVariant.getMutationEffectPmids());
+            row.add(annotatedVariant.getMutationEffectAbstracts());
+            sb.append(MainUtils.listToString(row, separator));
+            sb.append(newLine);
+        }
+        return new ResponseEntity<>(sb.toString(), HttpStatus.OK);
+    }
+
+    private List<AnnotatedVariant> getAllAnnotatedVariants() {
         List<AnnotatedVariant> annotatedVariantList = new ArrayList<>();
         Set<Gene> genes = GeneUtils.getAllGenes();
         Map<Gene, Set<BiologicalVariant>> map = new HashMap<>();
@@ -50,22 +93,19 @@ public class UtilsApiController implements UtilsApi {
         }
 
         annotatedVariantList.addAll(annotatedVariants);
-        return new ResponseEntity<>(annotatedVariantList, status);
-
+        MainUtils.sortAnnotatedVariants(annotatedVariantList);
+        return annotatedVariantList;
     }
 
     @Override
-    public ResponseEntity<String> utilsAllAnnotatedVariantsTxtGet() {
-        Set<Gene> genes = GeneUtils.getAllGenes();
-        Map<Gene, Set<BiologicalVariant>> map = new HashMap<>();
+    public ResponseEntity<List<ActionableGene>> utilsAllActionableVariantsGet() {
+        return new ResponseEntity<>(getAllActionableVariants(), HttpStatus.OK);
+    }
 
-        for (Gene gene : genes) {
-            map.put(gene, MainUtils.getBiologicalVariants(gene));
-        }
-
+    @Override
+    public ResponseEntity<String> utilsAllActionableVariantsTxtGet() {
         String separator = "\t";
         String newLine = "\n";
-
         StringBuilder sb = new StringBuilder();
         List<String> header = new ArrayList<>();
         header.add("Isoform");
@@ -74,42 +114,34 @@ public class UtilsApiController implements UtilsApi {
         header.add("Gene");
         header.add("Alteration");
         header.add("Protein Change");
-        header.add("Oncogenicity");
-        header.add("Mutation Effect");
-        header.add("PMIDs for Mutation Effect");
-        header.add("Abstracts for Mutation Effect");
+        header.add("Cancer Type");
+        header.add("Level");
+        header.add("Drugs(s)");
+        header.add("PMIDs for drug");
+        header.add("Abstracts for drug");
         sb.append(MainUtils.listToString(header, separator));
         sb.append(newLine);
 
-        for (Map.Entry<Gene, Set<BiologicalVariant>> entry : map.entrySet()) {
-            Gene gene = entry.getKey();
-            for (BiologicalVariant biologicalVariant : entry.getValue()) {
-                List<String> row = new ArrayList<>();
-                row.add(gene.getCuratedIsoform());
-                row.add(gene.getCuratedRefSeq());
-                row.add(String.valueOf(gene.getEntrezGeneId()));
-                row.add(gene.getHugoSymbol());
-                row.add(biologicalVariant.getVariant().getName());
-                row.add(biologicalVariant.getVariant().getAlteration());
-                row.add(biologicalVariant.getOncogenic());
-                row.add(biologicalVariant.getMutationEffect());
-                row.add(MainUtils.listToString(new ArrayList<>(biologicalVariant.getMutationEffectPmids()), ", "));
-                Set<ArticleAbstract> articleAbstracts = biologicalVariant.getMutationEffectAbstracts();
-                List<String> abstracts = new ArrayList<>();
-                for (ArticleAbstract articleAbstract : articleAbstracts) {
-                    abstracts.add(articleAbstract.getAbstractContent() + " " + articleAbstract.getLink());
-                }
-                row.add(MainUtils.listToString(abstracts, "; "));
-                sb.append(MainUtils.listToString(row, separator));
-                sb.append(newLine);
-            }
+        for (ActionableGene actionableGene : getAllActionableVariants()) {
+            List<String> row = new ArrayList<>();
+            row.add(actionableGene.getIsoform());
+            row.add(actionableGene.getRefSeq());
+            row.add(String.valueOf(actionableGene.getEntrezGeneId()));
+            row.add(actionableGene.getGene());
+            row.add(actionableGene.getVariant());
+            row.add(actionableGene.getProteinChange());
+            row.add(actionableGene.getCancerType());
+            row.add(actionableGene.getLevel());
+            row.add(actionableGene.getDrugs());
+            row.add(actionableGene.getPmids());
+            row.add(actionableGene.getAbstracts());
+            sb.append(MainUtils.listToString(row, separator));
+            sb.append(newLine);
         }
         return new ResponseEntity<>(sb.toString(), HttpStatus.OK);
     }
 
-    @Override
-    public ResponseEntity<List<ActionableGene>> utilsAllActionableVariantsGet() {
-        HttpStatus status = HttpStatus.OK;
+    private List<ActionableGene> getAllActionableVariants() {
         List<ActionableGene> actionableGeneList = new ArrayList<>();
         Set<Gene> genes = GeneUtils.getAllGenes();
         Map<Gene, Set<ClinicalVariant>> map = new HashMap<>();
@@ -142,61 +174,8 @@ public class UtilsApiController implements UtilsApi {
         }
 
         actionableGeneList.addAll(actionableGenes);
-        return new ResponseEntity<>(actionableGeneList, status);
-    }
-
-    @Override
-    public ResponseEntity<String> utilsAllActionableVariantsTxtGet() {
-        Set<Gene> genes = GeneUtils.getAllGenes();
-        Map<Gene, Set<ClinicalVariant>> map = new HashMap<>();
-
-        for (Gene gene : genes) {
-            map.put(gene, MainUtils.getClinicalVariants(gene));
-        }
-
-        String separator = "\t";
-        String newLine = "\n";
-        StringBuilder sb = new StringBuilder();
-        List<String> header = new ArrayList<>();
-        header.add("Isoform");
-        header.add("RefSeq");
-        header.add("Entrez Gene ID");
-        header.add("Gene");
-        header.add("Alteration");
-        header.add("Protein Change");
-        header.add("Cancer Type");
-        header.add("Level");
-        header.add("Drugs(s)");
-        header.add("PMIDs for drug");
-        header.add("Abstracts for drug");
-        sb.append(MainUtils.listToString(header, separator));
-        sb.append(newLine);
-
-        for (Map.Entry<Gene, Set<ClinicalVariant>> entry : map.entrySet()) {
-            Gene gene = entry.getKey();
-            for (ClinicalVariant clinicalVariant : entry.getValue()) {
-                List<String> row = new ArrayList<>();
-                row.add(gene.getCuratedIsoform());
-                row.add(gene.getCuratedRefSeq());
-                row.add(String.valueOf(gene.getEntrezGeneId()));
-                row.add(gene.getHugoSymbol());
-                row.add(clinicalVariant.getVariant().getName());
-                row.add(clinicalVariant.getVariant().getAlteration());
-                row.add(getCancerType(clinicalVariant.getOncoTreeType()));
-                row.add(clinicalVariant.getLevel());
-                row.add(MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrug()), ", "));
-                row.add(MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrugPmids()), ", "));
-                Set<ArticleAbstract> articleAbstracts = clinicalVariant.getDrugAbstracts();
-                List<String> abstracts = new ArrayList<>();
-                for (ArticleAbstract articleAbstract : articleAbstracts) {
-                    abstracts.add(articleAbstract.getAbstractContent() + " " + articleAbstract.getLink());
-                }
-                row.add(MainUtils.listToString(abstracts, "; "));
-                sb.append(MainUtils.listToString(row, separator));
-                sb.append(newLine);
-            }
-        }
-        return new ResponseEntity<>(sb.toString(), HttpStatus.OK);
+        MainUtils.sortActionableVariants(actionableGeneList);
+        return actionableGeneList;
     }
 
     private String getCancerType(TumorType oncoTreeType) {

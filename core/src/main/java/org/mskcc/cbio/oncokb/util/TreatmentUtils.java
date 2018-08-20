@@ -55,6 +55,11 @@ public final class TreatmentUtils {
     }
 
     public static String getTreatmentName(Set<Treatment> treatments) {
+        List<String> treatmentNames = getTreatments(treatments);
+        return MainUtils.listToString(treatmentNames, ", ");
+    }
+
+    public static List<String> getTreatments(Set<Treatment> treatments) {
         List<String> treatmentNames = new ArrayList<>();
         List<Treatment> sortedTreatment = new ArrayList<>(treatments);
         Collections.sort(sortedTreatment, new Comparator<Treatment>() {
@@ -82,7 +87,7 @@ public final class TreatmentUtils {
             }
             treatmentNames.add(MainUtils.listToString(drugNames, "+"));
         }
-        return MainUtils.listToString(treatmentNames, ", ");
+        return treatmentNames;
     }
 
     public static Set<Treatment> getTreatmentsByGeneAndLevels(Gene gene, Set<LevelOfEvidence> levels) {

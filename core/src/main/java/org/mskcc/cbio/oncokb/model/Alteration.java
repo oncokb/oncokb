@@ -26,6 +26,10 @@ import java.util.Set;
         query = "select a from Alteration a where a.gene=? and a.alteration=?"
     ),
     @NamedQuery(
+        name = "findAlterationByAlterationAndName",
+        query = "select a from Alteration a where a.gene=? and a.alteration=? and a.name=?"
+    ),
+    @NamedQuery(
         name = "findMutationsByConsequence",
         query = "select a from Alteration a where a.gene=? and a.consequence=?"
     ),
@@ -204,24 +208,27 @@ public class Alteration implements java.io.Serializable {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Alteration)) return false;
+
+        Alteration that = (Alteration) o;
+
+        if (getUuid() != null ? !getUuid().equals(that.getUuid()) : that.getUuid() != null) return false;
+        if (getGene() != null ? !getGene().equals(that.getGene()) : that.getGene() != null) return false;
+        if (getAlterationType() != that.getAlterationType()) return false;
+        if (getConsequence() != null ? !getConsequence().equals(that.getConsequence()) : that.getConsequence() != null)
             return false;
-        }
-        if (getClass() != obj.getClass()) {
+        if (getAlteration() != null ? !getAlteration().equals(that.getAlteration()) : that.getAlteration() != null)
             return false;
-        }
-        final Alteration other = (Alteration) obj;
-        if (this.gene != other.gene && (this.gene == null || !this.gene.equals(other.gene))) {
+        if (getName() != null ? !getName().equals(that.getName()) : that.getName() != null) return false;
+        if (getRefResidues() != null ? !getRefResidues().equals(that.getRefResidues()) : that.getRefResidues() != null)
             return false;
-        }
-        if ((this.alteration == null) ? (other.alteration != null) : !this.alteration.equals(other.alteration)) {
+        if (getProteinStart() != null ? !getProteinStart().equals(that.getProteinStart()) : that.getProteinStart() != null)
             return false;
-        }
-        if ((this.alterationType == null) ? (other.alterationType != null) : !this.alterationType.equals(other.alterationType)) {
+        if (getProteinEnd() != null ? !getProteinEnd().equals(that.getProteinEnd()) : that.getProteinEnd() != null)
             return false;
-        }
-        return true;
+        return getVariantResidues() != null ? getVariantResidues().equals(that.getVariantResidues()) : that.getVariantResidues() == null;
     }
 
     @Override

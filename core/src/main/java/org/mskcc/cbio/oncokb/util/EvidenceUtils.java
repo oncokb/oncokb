@@ -1,6 +1,7 @@
 package org.mskcc.cbio.oncokb.util;
 
 import com.google.common.collect.Sets;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
@@ -51,7 +52,7 @@ public class EvidenceUtils {
     }
 
     public static Set<Evidence> getRelevantEvidences(
-        Query query, String source, String geneStatus,
+        Query query, String source, String geneStatus, Alteration matchedAlt,
         Set<EvidenceType> evidenceTypes, Set<LevelOfEvidence> levelOfEvidences) {
         if (query == null) {
             return new HashSet<>();
@@ -62,10 +63,13 @@ public class EvidenceUtils {
                 (source != null ? ("&" + source) : "") +
                 "&" + evidenceTypes.toString() +
                 (levelOfEvidences == null ? "" : ("&" + levelOfEvidences.toString()));
-            Alteration alt = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getAlteration(),
-                AlterationType.getByName(query.getAlterationType()), query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
-            List<Alteration> relevantAlterations = AlterationUtils.getRelevantAlterations(alt);
-            List<Alteration> alleles = AlterationUtils.getAlleleAlterations(alt);
+            if (matchedAlt == null) {
+                matchedAlt = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getAlteration(),
+                    AlterationType.getByName(query.getAlterationType()), query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
+                AlterationUtils.annotateAlteration(matchedAlt, matchedAlt.getAlteration());
+            }
+            List<Alteration> relevantAlterations = AlterationUtils.getRelevantAlterations(matchedAlt);
+            List<Alteration> alleles = AlterationUtils.getAlleleAlterations(matchedAlt);
 
             Set<Evidence> relevantEvidences;
             List<TumorType> relevantTumorTypes = new ArrayList<>();
@@ -610,24 +614,57 @@ public class EvidenceUtils {
         return levels;
     }
 
+    private static Map<String, Object> getBiggerItem(List<String> query, Set<List<String>> keys) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("exist", false);
+        map.put("origin", false);
+        map.put("result", query);
+        for(List<String> key : keys) {
+            // Check whether key has all elements in query;
+            if (key.containsAll(query)) {
+                map.put("exist", true);
+                map.put("result", key);
+                return map;
+            }
+
+            // Check whether query has all elements in key;
+            if (query.containsAll(key)) {
+                map.put("exist", true);
+                map.put("origin", true);
+                map.put("result", key);
+                return map;
+            }
+        }
+        return map;
+    }
+
     public static Set<Evidence> keepHighestLevelForSameTreatments(Set<Evidence> evidences) {
-        Map<String, Set<Evidence>> maps = new HashedMap();
+        Map<List<String>, Set<Evidence>> maps = new HashedMap();
         Set<Evidence> filtered = new HashSet<>();
 
         for (Evidence evidence : evidences) {
             if (evidence.getTreatments() != null && evidence.getTreatments().size() > 0) {
-                String treatmentsName = TreatmentUtils.getTreatmentName(new HashSet<>(evidence.getTreatments()));
-                if (!maps.containsKey(treatmentsName)) {
-                    maps.put(treatmentsName, new HashSet<Evidence>());
+                List<String> treatments = TreatmentUtils.getTreatments(new HashSet<>(evidence.getTreatments()));
+
+                Map<String, Object> map = getBiggerItem(treatments, maps.keySet());
+                if ((boolean) map.get("exist")) {
+                    if ((boolean) map.get("origin")) {
+                        maps.get(map.get("result")).add(evidence);
+                    } else {
+                        maps.put(treatments, maps.get(map.get("result")));
+                        maps.get(treatments).add(evidence);
+                    }
+                } else {
+                    maps.put(treatments, new HashSet<Evidence>());
+                    maps.get(treatments).add(evidence);
                 }
-                maps.get(treatmentsName).add(evidence);
             } else {
                 // Keep all un-treatment evidences
                 filtered.add(evidence);
             }
         }
 
-        for (Map.Entry<String, Set<Evidence>> entry : maps.entrySet()) {
+        for (Map.Entry<List<String>, Set<Evidence>> entry : maps.entrySet()) {
             Set<Evidence> highestEvis = EvidenceUtils.getOnlyHighestLevelEvidences(entry.getValue());
 
             // If highestEvis has more than 1 items, find highest original level if the level is 2B, 3B
@@ -769,19 +806,19 @@ public class EvidenceUtils {
             evidenceTypes = new HashSet<>(EvidenceTypeUtils.getAllEvidenceTypes());
         }
 
+        levelOfEvidences = levelOfEvidences == null ? LevelUtils.getPublicAndOtherIndicationLevels() :
+            new HashSet<>(CollectionUtils.intersection(levelOfEvidences, LevelUtils.getPublicAndOtherIndicationLevels()));
+
         if (requestQueries == null || requestQueries.size() == 0) {
             Set<Evidence> evidences = new HashSet<>();
             if ((evidenceTypes != null && evidenceTypes.size() > 0) ||
-                (levelOfEvidences != null && levelOfEvidences.size() > 0)) {
+                levelOfEvidences.size() > 0) {
                 evidences = EvidenceUtils.getEvidenceByEvidenceTypesAndLevels(evidenceTypes, levelOfEvidences);
             }
             EvidenceQueryRes query = new EvidenceQueryRes();
             query.setEvidences(new ArrayList<>(evidences));
             return Collections.singletonList(query);
         } else {
-            if (levelOfEvidences == null) {
-                levelOfEvidences = LevelUtils.getPublicLevels();
-            }
             for (Query requestQuery : requestQueries) {
                 EvidenceQueryRes query = new EvidenceQueryRes();
 
@@ -800,10 +837,12 @@ public class EvidenceUtils {
                     if (!com.mysql.jdbc.StringUtils.isNullOrEmpty(requestQuery.getAlteration())) {
                         Alteration alt = AlterationUtils.findAlteration(query.getGene(), requestQuery.getAlteration());
 
-                        if (alt == null)
+                        if (alt == null) {
                             alt = AlterationUtils.getAlteration(query.getGene().getHugoSymbol(),
                                 requestQuery.getAlteration(), null, requestQuery.getConsequence(),
                                 requestQuery.getProteinStart(), requestQuery.getProteinEnd());
+                            AlterationUtils.annotateAlteration(alt, alt.getAlteration());
+                        }
                         List<Alteration> relevantAlts = AlterationUtils.getRelevantAlterations(alt);
 
                         // Look for Oncogenic Mutations if no relevantAlt found for alt and alt is hotspot
@@ -816,6 +855,7 @@ public class EvidenceUtils {
                         }
 
                         Alteration alteration = AlterationUtils.getAlteration(query.getGene().getHugoSymbol(), requestQuery.getAlteration(), AlterationType.MUTATION, requestQuery.getConsequence(), requestQuery.getProteinStart(), requestQuery.getProteinEnd());
+                        AlterationUtils.annotateAlteration(alteration, alteration.getAlteration());
                         List<Alteration> allelesAlts = AlterationUtils.getAlleleAlterations(alteration);
                         relevantAlts.removeAll(allelesAlts);
                         query.setAlterations(relevantAlts);
@@ -826,9 +866,7 @@ public class EvidenceUtils {
                         query.setAlterations(new ArrayList<Alteration>(AlterationUtils.getAllAlterations(query.getGene())));
                     }
                 }
-                if (levelOfEvidences != null) {
-                    query.setLevelOfEvidences(new ArrayList<LevelOfEvidence>(levelOfEvidences));
-                }
+                query.setLevelOfEvidences(new ArrayList<LevelOfEvidence>(levelOfEvidences));
                 evidenceQueries.add(query);
             }
         }
@@ -896,7 +934,7 @@ public class EvidenceUtils {
             for (Alteration alt : queryAlterations) {
                 String proteinChange = alt.getAlteration();
                 String displayName = alt.getName();
-                Alteration alteration = alterationBo.findAlteration(gene, type, proteinChange);
+                Alteration alteration = alterationBo.findAlterationFromDao(gene, type, proteinChange, displayName);
                 if (alteration == null) {
                     alteration = new Alteration();
                     alteration.setGene(gene);
@@ -950,9 +988,8 @@ public class EvidenceUtils {
     }
 
     /**
-     *
      * @param evidences
-     * @param isDesc default is false
+     * @param isDesc    default is false
      * @return
      */
     public static List<Evidence> sortTumorTypeEvidenceBasedNumOfAlts(List<Evidence> evidences, Boolean isDesc) {

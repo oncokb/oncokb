@@ -400,7 +400,7 @@ public class SummaryUtils {
         }
         if (oncogenicity != null) {
             if (query.getAlteration().toLowerCase().contains("truncating mutation") && query.getSvType() != null) {
-                return "This " + alteration.getGene().getHugoSymbol() + " " + query.getSvType().name().toLowerCase() + " maybe a truncating alteration and is " + getOncogenicSubTextFromOncogenicity(oncogenicity) + ".";
+                return "This " + alteration.getGene().getHugoSymbol() + " " + query.getSvType().name().toLowerCase() + " may be a truncating alteration and is " + getOncogenicSubTextFromOncogenicity(oncogenicity) + ".";
             }
 
             if (oncogenicity.equals(Oncogenicity.INCONCLUSIVE)) {
@@ -1020,7 +1020,11 @@ public class SummaryUtils {
             || StringUtils.containsIgnoreCase(queryAlteration, "splice")
             || MainUtils.isEGFRTruncatingVariants(queryAlteration)
             ) {
-            sb.append(gene.getHugoSymbol() + " " + queryAlteration);
+            if (NamingUtils.hasAbbreviation(queryAlteration)) {
+                sb.append(gene.getHugoSymbol() + " " + NamingUtils.getFullName(queryAlteration) + " (" + queryAlteration + ")");
+            } else {
+                sb.append(gene.getHugoSymbol() + " " + queryAlteration);
+            }
             if (!queryAlteration.endsWith("alteration")) {
                 sb.append(" alteration");
             }

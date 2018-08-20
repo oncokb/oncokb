@@ -38,7 +38,6 @@ public final class AlterationUtils {
         String var = null;
         Integer start = -1;
         Integer end = 100000;
-        boolean isDup = false;
 
         if (alteration == null) {
             return;
@@ -157,7 +156,6 @@ public final class AlterationUtils {
                                 break;
                             case "dup":
                                 consequence = "inframe_insertion";
-                                isDup = true;
                                 break;
                             case "mut":
                                 consequence = "any";
@@ -184,7 +182,6 @@ public final class AlterationUtils {
                                         consequence = "inframe_insertion";
                                         break;
                                     case "dup":
-                                        isDup = true;
                                         consequence = "inframe_insertion";
                                         break;
                                     case "del":
@@ -217,11 +214,11 @@ public final class AlterationUtils {
             alteration.setVariantResidues(var);
         }
 
-        if ((alteration.getProteinStart() == null || isDup) && start != null) {
+        if (alteration.getProteinStart() == null || (start != null && start != -1)) {
             alteration.setProteinStart(start);
         }
 
-        if ((alteration.getProteinEnd() == null || isDup) && end != null) {
+        if (alteration.getProteinEnd() == null || (end != null && end != 100000)) {
             alteration.setProteinEnd(end);
         }
 
@@ -477,6 +474,16 @@ public final class AlterationUtils {
         return result;
     }
 
+    public static List<Alteration> excludePositionedAlterations(List<Alteration> alterations) {
+        List<Alteration> result = new ArrayList<>();
+        for (Alteration alteration : alterations) {
+            if (!isPositionedAlteration(alteration)) {
+                result.add(alteration);
+            }
+        }
+        return result;
+    }
+
     public static Boolean isInferredAlterations(String alteration) {
         Boolean isInferredAlt = false;
         if (alteration != null) {
@@ -690,6 +697,34 @@ public final class AlterationUtils {
         });
     }
 
+    public static void sortAlterationsByTheRange(List<Alteration> alterations, final int proteinStart, final int proteinEnd) {
+        Collections.sort(alterations, new Comparator<Alteration>() {
+            @Override
+            public int compare(Alteration a1, Alteration a2) {
+                if (a1.getProteinStart() == null || a1.getProteinEnd() == null) {
+                    if (a2.getProteinStart() == null || a2.getProteinEnd() == null) {
+                        return 0;
+                    } else {
+                        return 1;
+                    }
+                }
+                if (a2.getProteinStart() == null || a2.getProteinEnd() == null) {
+                    return -1;
+                }
+
+                int overlap1 = Math.min(a1.getProteinEnd(), proteinEnd) - Math.max(a1.getProteinStart(), proteinStart);
+                int overlap2 = Math.min(a2.getProteinEnd(), proteinEnd) - Math.max(a2.getProteinStart(), proteinStart);
+
+                if (overlap1 == overlap2) {
+                    int diff = a1.getProteinEnd() - a1.getProteinStart() - (a2.getProteinEnd() - a2.getProteinStart());
+                    return diff == 0 ? a1.getAlteration().compareTo(a2.getAlteration()) : diff;
+                } else {
+                    return overlap2 - overlap1;
+                }
+            }
+        });
+    }
+
     public static List<Alteration> getAlleleAndRelevantAlterations(Alteration alteration) {
         List<Alteration> alleles = getAlleleAlterations(alteration);
         Alteration oncogenicAllele = AlterationUtils.findOncogenicAllele(alleles);
@@ -741,24 +776,7 @@ public final class AlterationUtils {
         if (gene == null) {
             return null;
         }
-        if (CacheUtils.isEnabled()) {
-            Set<Alteration> alterations = CacheUtils.getAlterations(gene.getEntrezGeneId());
-            for (Alteration al : alterations) {
-                if (al.getAlteration().equalsIgnoreCase(alteration)) {
-                    return al;
-                }
-            }
-
-            // If no alteration find, search for name
-            for (Alteration al : alterations) {
-                if (al.getName().equalsIgnoreCase(alteration)) {
-                    return al;
-                }
-            }
-            return null;
-        } else {
-            return alterationBo.findAlteration(gene, AlterationType.MUTATION, alteration);
-        }
+        return alterationBo.findAlteration(gene, AlterationType.MUTATION, alteration);
     }
 
     public static Boolean isOncogenicAlteration(Alteration alteration) {
@@ -846,7 +864,7 @@ public final class AlterationUtils {
         return variants;
     }
 
-    public static boolean isPositionVariant(Alteration alteration) {
+    public static boolean isPositionedAlteration(Alteration alteration) {
         boolean isPositionVariant = false;
         if (alteration != null
             && alteration.getProteinStart() != null
@@ -854,6 +872,8 @@ public final class AlterationUtils {
             && alteration.getProteinStart().equals(alteration.getProteinEnd())
             && alteration.getRefResidues() != null && alteration.getRefResidues().length() == 1
             && alteration.getVariantResidues() == null
+            && alteration.getConsequence() != null
+            && alteration.getConsequence().getTerm().equals("NA")
             )
             isPositionVariant = true;
         return isPositionVariant;

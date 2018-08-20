@@ -77,7 +77,7 @@ angular.module('oncokbApp')
                     list.push(cancerType.mainType);
                 }
             });
-            list = _.uniq(list).sort();
+            list = list.sort();
             return list.join(', ');
         }
 
@@ -87,14 +87,39 @@ angular.module('oncokbApp')
             }
             var list = [];
             _.each(cancerTypes, function(cancerType) {
-                if (cancerType.subtype) {
+                if (cancerType.subtype && cancerType.subtype.name) {
                     list.push(cancerType.subtype.name);
-                } else if (cancerType.mainType) {
+                } else if (cancerType.mainType && cancerType.mainType.name){
                     list.push(cancerType.mainType.name);
                 }
             });
-            list = _.uniq(list).sort();
+            list = list.sort();
             return list.join(', ');
+        }
+
+        function hasDuplicateCancerTypes(cancerTypes) {
+            var result = false;
+            if (!cancerTypes) {
+                return false;
+            }
+            var list = [];
+            var tempName = '';
+            _.some(cancerTypes, function(cancerType) {
+                tempName = '';
+                if (cancerType.subtype && cancerType.subtype.name) {
+                    tempName = cancerType.subtype.name;
+                } else if (cancerType.mainType && cancerType.mainType.name) {
+                    tempName = cancerType.mainType.name;
+                }
+                if (list.indexOf(tempName) !== -1) {
+                    result = true;
+                    return true;
+                }
+                if (tempName) {
+                    list.push(tempName);
+                }
+            });
+            return result;
         }
         /**
          * Check whether searched mainType in cancerTypes
@@ -272,11 +297,11 @@ angular.module('oncokbApp')
                             var tempArr = [];
                             _.each(result2, function(item) {
                                 if (item.mainType && item.mainType.name && item.mainType.name === mainTypeName) {
-                                    tempArr.push(item);                         
+                                    tempArr.push(item);
                                 }
                             });
                             subtypeResult.push(tempArr);
-                        });    
+                        });
                         $rootScope.meta.mainType = mainTypeResult;
                         $rootScope.meta.tumorTypes = subtypeResult;
                         deferred.resolve({
@@ -289,7 +314,7 @@ angular.module('oncokbApp')
                 }, function(error) {
                     deferred.reject(error);
                 });
-            }            
+            }
             return deferred.promise;
         }
 
@@ -330,7 +355,7 @@ angular.module('oncokbApp')
             case 'loading':
                 return ReviewResource.loading.indexOf(uuid) !== -1;
             case 'precise':
-                return ReviewResource.precise.indexOf(uuid) !== -1;    
+                return ReviewResource.precise.indexOf(uuid) !== -1;
             default:
                 return false;
             }
@@ -361,15 +386,15 @@ angular.module('oncokbApp')
             firebase.database().ref('Meta/' + $routeParams.geneName + '/review/' + uuid).remove();
         }
         function getVUSData(vus, excludeComments) {
-            var vusData = angular.copy(vus);      
-            var vusDataArray = [];      
+            var vusData = angular.copy(vus);
+            var vusDataArray = [];
             excludeComments = _.isBoolean(excludeComments) ? excludeComments : false;
             _.each(vusData, function(vusItem) {
                 if (excludeComments) {
                     delete vusItem.name_comments;
                 }
                 vusDataArray.push(vusItem);
-            });            
+            });
             return vusDataArray;
         }
 
@@ -503,10 +528,19 @@ angular.module('oncokbApp')
             var date = new Date();
             return date.getTime();
         }
+        function getTimeStamp(str) {
+            var date = new Date(str);
+            if(date instanceof Date && !isNaN(date.getTime())) {
+                return date.getTime();
+            } else {
+                return 0;
+            }
+        }
         return {
             setIsoFormAndGeneType: setIsoFormAndGeneType,
             getCancerTypesName: getCancerTypesName,
             getNewCancerTypesName: getNewCancerTypesName,
+            hasDuplicateCancerTypes: hasDuplicateCancerTypes,
             containMainType: containMainType,
             getIsoform: getIsoform,
             getOncogeneTSG: getOncogeneTSG,
@@ -528,6 +562,9 @@ angular.module('oncokbApp')
             getHistoryData: getHistoryData,
             setUUIDInReview: setUUIDInReview,
             deleteUUID: deleteUUID,
-            updateMovingFlag: updateMovingFlag
+            updateMovingFlag: updateMovingFlag,
+            processData: processData,
+            shouldExclude: shouldExclude,
+            getTimeStamp: getTimeStamp
         };
     });

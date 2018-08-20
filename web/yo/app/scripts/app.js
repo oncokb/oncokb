@@ -115,10 +115,10 @@ var oncokbApp = angular.module('oncokbApp', [
                     reason: exception,
                     case: cause
                 });
-                // $rootScope.$emit('oncokbError', {message: 'Exception', reason: exception, case: cause});
-                // if (!config.production && exception) {
+                $rootScope.$emit('oncokbError', {message: 'Exception', reason: exception, case: cause});
+                if (!OncoKB.config.production && exception) {
                     $delegate(exception, cause);
-                // }
+                }
             };
         });
 

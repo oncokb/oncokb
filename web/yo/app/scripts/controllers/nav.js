@@ -51,8 +51,8 @@ angular.module('oncokbApp')
             if (firebaseUser) {
                 $rootScope.isSignedIn = true;
                 user.setRole(firebaseUser).then(function() {
-                    $scope.user = $rootScope.me;
-                    setParams();
+                    $rootScope.signedInUser = $rootScope.me;
+                    setParams();                    
                     testInternal().then(function() {
                         if (window.localStorage.geneName) {
                             $location.url('/gene/' + window.localStorage.geneName);
@@ -61,16 +61,15 @@ angular.module('oncokbApp')
                         } else {
                             $location.url('/genes');
                         }
-                    });                    
+                    });
                 }, function(error) {
                 });
             } else {
                 console.log('not logged in yet');
-            }                
+            }
         });
         $scope.signIn = function() {
             user.login().then(function() {
-                $scope.user = $rootScope.me;
                 setParams();
                 $location.url('/genes');
             }, function(error) {
@@ -79,7 +78,7 @@ angular.module('oncokbApp')
                 loadingScreen.finish();
             });
         };
-        
+
         $scope.signOut = function() {
             user.logout().then(function() {
                 $location.path('/');
