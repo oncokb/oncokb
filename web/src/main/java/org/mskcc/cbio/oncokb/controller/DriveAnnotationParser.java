@@ -139,8 +139,8 @@ public class DriveAnnotationParser {
                     System.out.println(spaceStrByNestLevel(nestLevel) + "Gene: " + gene.getHugoSymbol());
                     // Get gene type info
                     JSONObject geneType = geneInfo.has("type") ? geneInfo.getJSONObject("type") : null;
-                    String oncogene = geneType.has("ocg") ? geneType.getString("ocg").trim() : null;
-                    String tsg = geneType.has("tsg") ? geneType.getString("tsg").trim() : null;
+                    String oncogene = geneType == null ? null : (geneType.has("ocg") ? geneType.getString("ocg").trim() : null);
+                    String tsg = geneType == null ? null : (geneType.has("tsg") ? geneType.getString("tsg").trim() : null);
 
                     if (oncogene != null) {
                         if (oncogene.equals("Oncogene")) {

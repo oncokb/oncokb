@@ -1,5 +1,7 @@
 package org.mskcc.cbio.oncokb.util;
 
+import org.mskcc.cbio.oncokb.apiModels.ActionableGene;
+import org.mskcc.cbio.oncokb.apiModels.AnnotatedVariant;
 import org.mskcc.cbio.oncokb.apiModels.Citations;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
@@ -394,6 +396,7 @@ public class MainUtils {
 
             alterations = AlterationUtils.excludeVUS(gene, new ArrayList<>(AlterationUtils.getAllAlterations(gene)));
             alterations = AlterationUtils.excludeInferredAlterations(alterations);
+            alterations = AlterationUtils.excludePositionedAlterations(alterations);
 
 //                oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Get all alterations for " + hugoSymbol);
 
@@ -580,5 +583,63 @@ public class MainUtils {
             }
         }
         return citations;
+    }
+
+    public static void sortAnnotatedVariants(List<AnnotatedVariant> variants) {
+        Collections.sort(variants, new Comparator<AnnotatedVariant>() {
+            @Override
+            public int compare(AnnotatedVariant a1, AnnotatedVariant a2) {
+                // Gene
+                int result = a1.getGene().compareTo(a2.getGene());
+
+                // Alteration
+                if (result == 0) {
+                    result = a1.getVariant().compareTo(a2.getVariant());
+
+                    // Oncogenicity
+                    if (result == 0) {
+                        result = MainUtils.compareOncogenicity(
+                            Oncogenicity.getByEffect(a1.getOncogenicity()),
+                            Oncogenicity.getByEffect(a2.getOncogenicity()),
+                            true
+                        );
+
+                        // Mutation Effect
+                        if (result == 0) {
+                            result = a1.getMutationEffect().compareTo(a2.getMutationEffect());
+                        }
+                    }
+                }
+                return result;
+            }
+        });
+    }
+
+    public static void sortActionableVariants(List<ActionableGene> variants) {
+        Collections.sort(variants, new Comparator<ActionableGene>() {
+            @Override
+            public int compare(ActionableGene a1, ActionableGene a2) {
+                // Level
+                int result = LevelUtils.compareLevel(
+                    LevelOfEvidence.getByLevel(a1.getLevel()),
+                    LevelOfEvidence.getByLevel(a2.getLevel())
+                );
+                // Gene
+                if (result == 0) {
+                    result = a1.getGene().compareTo(a2.getGene());
+
+                    // Cancer Type
+                    if (result == 0) {
+                        result = a1.getCancerType().compareTo(a2.getCancerType());
+
+                        // Alteration
+                        if (result == 0) {
+                            result = a1.getVariant().compareTo(a2.getVariant());
+                        }
+                    }
+                }
+                return result;
+            }
+        });
     }
 }

@@ -43,7 +43,7 @@
         <b>You are currently in "Review" mode. Click the "Review Complete" button to exit.</b>
       </p>
       <span class="btn-group">
-        <button type="button" class="btn btn-default" ng-click="acceptChangesByPerson(x)" ng-disabled="status[x].noChanges || status[x].savingAll"
+        <button type="button" class="btn btn-default" ng-click="acceptChangesByPerson(x)" ng-disabled="isNoReviewItems(x) || status[x].savingAll"
           ng-repeat="x in namesWithChanges" ng-bind-html="getButtonContent(x)"></button>
       </span>
     </div>
@@ -59,9 +59,9 @@
            <h3 ng-if="reviewMode">Gene Type:
                <review-panel uuid="gene.type_uuid" review-obj="gene.type_review" evidence-type="'GENE_TYPE'" obj="gene" get-evidence="getEvidence(type)" model-update="modelUpdate(type)"></review-panel>
            </h3>
-           <realtime-string key="'tsg'" path="getObservePath({type: 'geneType'})" review-obj="gene.type_review" uuid="::gene.type.tsg_uuid" fe="geneEditable" t="'checkbox'" object="gene.type" objecttype="'object'" objectkey="'TSG'" checkboxes="checkboxes['TSG']" checkboxid="'TSG'"></realtime-string>
+           <realtime-string key="'tsg'" path="getObservePath({type: 'geneType'})" review-obj="gene.type_review" uuid="::gene.type.tsg_uuid" fe="geneEditable" t="'checkbox'" object="gene.type" objecttype="'object'" objectkey="'tsg'" checkboxes="checkboxes['TSG']" checkboxid="'TSG'"></realtime-string>
            <div style="margin-top:-25px;margin-left:150px">
-              <realtime-string key="'ocg'" path="getObservePath({type: 'geneType'})" review-obj="gene.type_review" uuid="::gene.type.ocg_uuid" fe="geneEditable" t="'checkbox'" object="gene.type" objecttype="'object'" objectkey="'OCG'" checkboxes="checkboxes['OCG']" checkboxid="'OCG'"></realtime-string>
+              <realtime-string key="'ocg'" path="getObservePath({type: 'geneType'})" review-obj="gene.type_review" uuid="::gene.type.ocg_uuid" fe="geneEditable" t="'checkbox'" object="gene.type" objecttype="'object'" objectkey="'ocg'" checkboxes="checkboxes['OCG']" checkboxid="'OCG'"></realtime-string>
            </div>
       </div>
     <div ng-show="displayPrecisely(gene.background_uuid)">
@@ -104,6 +104,7 @@
             <div style="float:left;" ng-class="mutation.name.length > 80 ? 'levelWithLongName' : 'levelWithoutLongName'" ng-show="!reviewMode">
               <comments-dict key="'name'" path="path"></comments-dict>
               <span style="margin-right:10px" ng-bind-html="mutationContent[mutation.name_uuid].result"></span>
+                <span class="curationNoEntry" ng-if="isEmptySection(mutation, 'mutation')">No Entry</span>
             </div>
             <div ng-show="!reviewMode" style="margin-top:-30px">
               <span style="float:right">
@@ -118,8 +119,8 @@
             </div>
             <div style="margin-top:-20px;margin-bottom:20px">
                 <review-panel uuid="mutation.name_uuid" review-obj="mutation.name_review" evidence-type="'mutation'" mutation="mutation" get-evidence="getEvidence(type, mutation)" model-update="modelUpdate(type, mutation)"
-                              accept-added="acceptAdded(type, mutation, tumor, ti, treatment)" reject-added="rejectAdded(type, mutation, tumor, ti, treatment)"
-                              confirm-delete="confirmDelete(type, mutation, tumor, ti, treatment)" cancel-delete="cancelDelete(type, mutation, tumor, ti, treatment)" get-refs="getRefs(mutation)"></review-panel>
+                              accept-added="acceptAdded(type, mutation, tumor, ti, treatment, updatedBy)" reject-added="rejectAdded(type, mutation, tumor, ti, treatment, updatedBy)"
+                              confirm-delete="confirmDelete(type, mutation, tumor, ti, treatment, updatedBy)" cancel-delete="cancelDelete(type, mutation, tumor, ti, treatment, updatedBy)" get-refs="getRefs(mutation)"></review-panel>
             </div>
 
           </div>
@@ -188,8 +189,8 @@
                     </span>
                 <div style="margin-top:-20px;margin-bottom:20px">
                     <review-panel uuid="tumor.cancerTypes_uuid" review-obj="tumor.cancerTypes_review" evidence-type="'tumor'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)"
-                                  confirm-delete="confirmDelete(type, mutation, tumor, ti, treatment)" cancel-delete="cancelDelete(type, mutation, tumor, ti, treatment)" get-refs="getRefs(mutation, tumor, ti, treatment)"
-                                  accept-added="acceptAdded(type, mutation, tumor, ti, treatment)" reject-added="rejectAdded(type, mutation, tumor, ti, treatment)"></review-panel>
+                                  confirm-delete="confirmDelete(type, mutation, tumor, ti, treatment, updatedBy)" cancel-delete="cancelDelete(type, mutation, tumor, ti, treatment, updatedBy)" get-refs="getRefs(mutation, tumor, ti, treatment)"
+                                  accept-added="acceptAdded(type, mutation, tumor, ti, treatment, updatedBy)" reject-added="rejectAdded(type, mutation, tumor, ti, treatment, updatedBy)"></review-panel>
                 </div>
               </div>
               <div class="panelContent" ng-if="initialOpen[tumor.cancerTypes_uuid]" id="{{tumor.cancerTypes_uuid}}" ng-init="bindTIs({uuid: tumor.cancerTypes_uuid, path: path})">
@@ -274,7 +275,7 @@
                               </div>
 
                               <span style="float:right" ng-show="!reviewMode && fileEditable">
-                                  <span ng-if="me.admin">
+                                  <span ng-if="me.admin && internal">
                                       <i class="fa fa-arrows" uib-tooltip-placement="top" uib-tooltip="{{movingInfo.message}}"  ng-show="displayMoveIcon('treatment', 'initial', treatment.name_uuid)" style="margin-right:10px;" ng-style="movingInfo.style" ng-click="startMoving('treatment', path, treatment.name_uuid, $index)"></i>
                                       <i class="fa fa-arrows" uib-tooltip-placement="top" uib-tooltip="Click to put above this treatment" ng-show="displayMoveIcon('treatment', 'up', treatment.name_uuid, $index)" style="margin-right:10px;color:green" ng-click="endMoving(path, 'up')"></i>
                                   </span>
@@ -284,9 +285,9 @@
                             <div style="margin-top:-45px;margin-bottom:45px;">
                                   <review-panel uuid="treatment.name_uuid" review-obj="treatment.name_review" evidence-type="ti.name" mutation="mutation"
                                     tumor="tumor" therapy-category="ti" treatment="treatment" get-evidence="getEvidence(type, mutation, tumor, ti, treatment)"
-                                    model-update="modelUpdate(type, mutation, tumor, ti, treatment)" confirm-delete="confirmDelete(type, mutation, tumor, ti, treatment)"
-                                    cancel-delete="cancelDelete(type, mutation, tumor, ti, treatment)" accept-added="acceptAdded(type, mutation, tumor, ti, treatment)"
-                                    reject-added="rejectAdded(type, mutation, tumor, ti, treatment)" update-priority="updatePriority(treatments)" get-refs="getRefs(mutation, tumor, ti, treatment)"></review-panel>
+                                    model-update="modelUpdate(type, mutation, tumor, ti, treatment)" confirm-delete="confirmDelete(type, mutation, tumor, ti, treatment, updatedBy)"
+                                    cancel-delete="cancelDelete(type, mutation, tumor, ti, treatment, updatedBy)" accept-added="acceptAdded(type, mutation, tumor, ti, treatment, updatedBy)"
+                                    reject-added="rejectAdded(type, mutation, tumor, ti, treatment, updatedBy)" update-priority="updatePriority(treatments)" get-refs="getRefs(mutation, tumor, ti, treatment)"></review-panel>
                             </div>
                           </div>
                           <div class="panelContent" ng-if="initialOpen[treatment.name_uuid]" id="{{treatment.name_uuid}}">
@@ -350,7 +351,9 @@
                                        data-placeholder="Choose a main tumor type"
                                        no-results-text="'Could not find any'"
                                        ng-model="cancerType.mainType"
-                                       ng-options="tt.name for tt in oncoTree.mainTypes | orderBy: 'name'">
+                                       ng-disabled = "!fileEditable"
+                                       ng-options="tt.name for tt in oncoTree.mainTypes | orderBy: 'name'"
+                                       ng-change="subIsSameWithMain(cancerType, 'main')">
                     <option value=""></option>
                 </select>
                     Subtype:
@@ -359,9 +362,12 @@
                             no-results-text="'Could not find any'"
                             allow-single-deselect="true"
                             ng-model="cancerType.subtype"
-                            ng-options="tt.name for tt in cancerType.oncoTreeTumorTypes | orderBy: 'name' track by tt.code">
+                            ng-disabled = "!fileEditable"
+                            ng-options="tt.name for tt in cancerType.oncoTreeTumorTypes | orderBy: 'name' track by tt.code"
+                            ng-change="subIsSameWithMain(cancerType, 'sub')">
                         <option value=""></option>
                     </select>
+                    <span style="color:orange">{{ cancerType.message }}</span>
                 </div>
                 <button type="button" class="btn btn-default btn-sm"
                         ng-disabled="emptyTT()"

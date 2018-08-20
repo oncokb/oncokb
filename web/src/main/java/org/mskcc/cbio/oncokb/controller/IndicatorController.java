@@ -4,6 +4,7 @@
  */
 package org.mskcc.cbio.oncokb.controller;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.service.JsonResultFactory;
 import org.mskcc.cbio.oncokb.util.IndicatorUtils;
@@ -49,7 +50,7 @@ public class IndicatorController {
         @RequestParam(value = "hgvs", required = false) String hgvs
     ) {
         Query query = new Query(id, queryType, entrezGeneId, hugoSymbol, alteration, alterationType, svType, tumorType, consequence, proteinStart, proteinEnd, hgvs);
-        Set<LevelOfEvidence> levelOfEvidences = levels == null ? LevelUtils.getPublicAndOtherIndicationLevels() : LevelUtils.parseStringLevelOfEvidences(levels);
+        Set<LevelOfEvidence> levelOfEvidences = levels == null ? null : LevelUtils.parseStringLevelOfEvidences(levels);
         IndicatorQueryResp resp = IndicatorUtils.processQuery(query, geneStatus, levelOfEvidences, source, highestLevelOnly, null);
 
         return JsonResultFactory.getIndicatorQueryResp(resp, fields);
@@ -73,7 +74,7 @@ public class IndicatorController {
 
         for (Query query : body.getQueries()) {
             result.add(IndicatorUtils.processQuery(query, null,
-                body.getLevels() == null ? LevelUtils.getPublicAndOtherIndicationLevels() : body.getLevels(),
+                body.getLevels() == null ? null : body.getLevels(),
                 source, body.getHighestLevelOnly(),  new HashSet<>(stringToEvidenceTypes(body.getEvidenceTypes(), ","))));
         }
 

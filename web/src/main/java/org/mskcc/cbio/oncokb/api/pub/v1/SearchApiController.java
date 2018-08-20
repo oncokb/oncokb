@@ -1,6 +1,7 @@
 package org.mskcc.cbio.oncokb.api.pub.v1;
 
 import io.swagger.annotations.ApiParam;
+import org.apache.commons.collections.CollectionUtils;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.service.JsonResultFactory;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
@@ -54,7 +55,7 @@ public class SearchApiController implements SearchApi {
             Query query = new Query(id, queryType, entrezGeneId, hugoSymbol, variant, variantType, svType, tumorType, consequence, proteinStart, proteinEnd, hgvs);
             source = source == null ? "oncokb" : source;
 
-            Set<LevelOfEvidence> levelOfEvidences = levels == null ? LevelUtils.getPublicAndOtherIndicationLevels() : LevelUtils.parseStringLevelOfEvidences(levels);
+            Set<LevelOfEvidence> levelOfEvidences = levels == null ? null : LevelUtils.parseStringLevelOfEvidences(levels);
             indicatorQueryResp = IndicatorUtils.processQuery(query, null, levelOfEvidences, source, highestLevelOnly, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceType, ",")));
         }
         return ResponseEntity.status(status.value()).body(JsonResultFactory.getIndicatorQueryResp(indicatorQueryResp, fields));
@@ -76,7 +77,7 @@ public class SearchApiController implements SearchApi {
 
             for (Query query : body.getQueries()) {
                 result.add(IndicatorUtils.processQuery(query, null,
-                    body.getLevels() == null ? LevelUtils.getPublicAndOtherIndicationLevels() : body.getLevels(),
+                    body.getLevels() == null ? null : body.getLevels(),
                     source, body.getHighestLevelOnly(), new HashSet<>(stringToEvidenceTypes(body.getEvidenceTypes(), ","))));
             }
         }

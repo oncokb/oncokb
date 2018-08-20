@@ -7,7 +7,7 @@
  * # driveRealtimeString
  */
 angular.module('oncokbApp')
-    .directive('realtimeString', function ($timeout, _, $rootScope, mainUtils, ReviewResource, $firebaseObject) {
+    .directive('realtimeString', function ($timeout, _, $rootScope, mainUtils, ReviewResource, $firebaseObject, checkNameChange) {
         return {
             templateUrl: 'views/realtimeString.html',
             restrict: 'AE',
@@ -53,24 +53,31 @@ angular.module('oncokbApp')
                         });
                     }
                     scope.$watch('data[key]', function (n, o) {
-                        if (n !== o && !_.isUndefined(n)) {
+                        if (n !== o && !_.isUndefined(n) && scope.fe) {
                             if (!scope.data || !scope.data[scope.key+'_editing'] || scope.data[scope.key+'_editing'] === $rootScope.me.name) {
-                                if (!$rootScope.reviewMode || ReviewResource.rejected.indexOf(scope.uuid) === -1) {     
+                                var isRejected = mainUtils.processedInReview('reject', scope.uuid);
+                                if (!$rootScope.reviewMode || !isRejected) {
                                     mainUtils.updateLastModified();
-                                    scope.data[scope.key] = OncoKB.utils.getString(scope.data[scope.key]);                  
+                                    if (scope.pasting === true) {
+                                        scope.data[scope.key] = OncoKB.utils.getString(scope.data[scope.key]);
+                                        scope.pasting = false;
+                                    }
                                     scope.pContent = scope.data[scope.key];
                                     if (scope.t === 'treatment-select' && scope.key === 'level') {
                                         scope.changePropagation();
                                     }
-                                    if (scope.key !== 'short' && !(scope.key === 'name' && $rootScope.movingSection)) {
+                                    // 1) Do not trigger setReviewRelatedContent() when edit Additional Information (Optional).
+                                    // 2) Do not trigger setReviewRelatedContent() when changes have been rejected.
+                                    // 3) Do not trigger setReviewRelatedContent() when move mutations.
+                                    if (scope.key !== 'short' && !isRejected && !(scope.key === 'name' && ($rootScope.movingSection || checkNameChange.get()))) {
                                         scope.setReviewRelatedContent(n, o, false);
                                     }
-                                }  
+                                }
                                 if (n !== o && (scope.key === 'level' || scope.key === 'summary' && scope.mutation && scope.tumor)) {
                                     $timeout(function() {
                                         scope.indicateMutationContent(scope.mutation);
                                         scope.indicateTumorContent(scope.tumor);
-                                    }, 500);                            
+                                    }, 500);
                                 }
                             }
                             if (scope.t === 'p' || scope.t === 'short') {
@@ -89,7 +96,7 @@ angular.module('oncokbApp')
                             if ($rootScope.reviewMode && ['p', 'MUTATION_NAME', 'TREATMENT_NAME'].indexOf(scope.t) !== -1) {
                                 scope.calculateDiff();
                             }
-                        }                                               
+                        }
                     });
                     $rootScope.$watch('fileEditable', function(n, o) {
                         if (n !== o) {
@@ -103,6 +110,11 @@ angular.module('oncokbApp')
                         if (isPropagation === true) {
                             key = 'propagation';
                             uuid = scope.data.propagation_uuid;
+                            if (_.isUndefined(o)) {
+                                // Even if propagation old content is undefined, i.e. Level 0 -> Level 2A Propagation 2B.
+                                // We still need to set its UUID in Meta/GeneName/review since we need its UUID for recording history old content.
+                                mainUtils.setUUIDInReview(uuid);
+                            }
                         }
                         // 1) we track the change in two conditions:
                         // 2) When editing happens not in review mode
@@ -110,11 +122,19 @@ angular.module('oncokbApp')
                         if (_.isUndefined(scope.data[key + '_review'])) {
                             scope.data[key + '_review'] = {};
                         }
-                        scope.data[key + '_review'].updatedBy = $rootScope.me.name;
-                        scope.data[key + '_review'].updateTime = new Date().getTime();
+                        if (!_.isUndefined(scope.data[key + '_review'].added) && scope.data[key + '_review'].added) {
+                            scope.data[key + '_review'].updatedBy = scope.data[key + '_review'].updatedBy;
+                            scope.data[key + '_review'].updateTime = scope.data[key + '_review'].updateTime;
+                        } else if (!_.isUndefined(scope.data[key + '_review'].removed) && scope.data[key + '_review'].removed) {
+                            scope.data[key + '_review'].updatedBy = scope.data[key + '_review'].updatedBy;
+                            scope.data[key + '_review'].updateTime = scope.data[key + '_review'].updateTime;
+                        } else {
+                            scope.data[key + '_review'].updatedBy = $rootScope.me.name;
+                            scope.data[key + '_review'].updateTime = new Date().getTime();
+                        }
                         if ((!$rootScope.reviewMeta[uuid] || _.isUndefined(scope.data[key + '_review'].lastReviewed)) && !_.isUndefined(o)) {
                             scope.data[key + '_review'].lastReviewed = o;
-                            mainUtils.setUUIDInReview(uuid);                                    
+                            mainUtils.setUUIDInReview(uuid);
                             ReviewResource.rollback = _.without(ReviewResource.rollback, uuid);
                         } else if (n === scope.data[key + '_review'].lastReviewed) {
                             delete scope.data[key + '_review'].lastReviewed;
@@ -159,7 +179,7 @@ angular.module('oncokbApp')
                         } else {
                             $scope.fe = false;
                             $scope.editingMessage = 'Please wait. ' + $scope.data[$scope.key+'_editing'] + ' is editing this section...';
-                        }                        
+                        }
                     } else {
                         $scope.fe = $rootScope.fileEditable;
                     }
@@ -168,12 +188,12 @@ angular.module('oncokbApp')
                     if ($scope.data[$scope.key+'_editing']) {
                         $scope.data[$scope.key+'_editing'] = '';
                     }
-                }
+                };
                 $scope.changePropagation = function (initial) {
                     if (!initial && $scope.data.propagation_review) {
                         delete $scope.data.propagation_review.lastReviewed;
                         mainUtils.deleteUUID($scope.data.propagation_uuid);
-                    }                    
+                    }
                     var _propagationOpts = [];
                     if ($scope.data[$scope.key] === '1' || $scope.data[$scope.key] === '2A') {
                         _propagationOpts = [
@@ -253,13 +273,13 @@ angular.module('oncokbApp')
                         if (_.isUndefined($scope.data[$scope.key+'_review']) || _.isUndefined($scope.data[$scope.key+'_review'].lastReviewed)) {
                             return $scope.data[$scope.key] === checkbox;
                         }
-                    } 
+                    }
                     return $scope.data && $scope.data[$scope.key+'_review'] && $scope.data[$scope.key+'_review'].lastReviewed === checkbox;
                 }
                 $scope.reviewLayout = function (type) {
                     if (type === 'regular') {
                         // display the new header, and difference header and content only when the item is not inside an added/deleted sections, and haven't accepted or rejected yet
-                        return !mainUtils.processedInReview('accept', $scope.uuid) && !mainUtils.processedInReview('reject', $scope.uuid) && !mainUtils.processedInReview('inside', $scope.uuid);
+                        return !mainUtils.processedInReview('accept', $scope.uuid) && !mainUtils.processedInReview('reject', $scope.uuid) && !mainUtils.processedInReview('inside', $scope.uuid) && !mainUtils.processedInReview('rollback', $scope.uuid);
                     } else if (type === 'name') {
                         return mainUtils.processedInReview('name', $scope.uuid) && !mainUtils.processedInReview('accept', $scope.uuid) && !mainUtils.processedInReview('reject', $scope.uuid) && !mainUtils.processedInReview('add', $scope.uuid) && !mainUtils.processedInReview('inside', $scope.uuid);
                     } else if (type === 'inside') {
@@ -294,7 +314,7 @@ angular.module('oncokbApp')
                     return className;
                 }
                 $scope.getOldContentDivClass = function(content) {
-                    if (content.length > 80) {
+                    if (content && content.length > 80) {
                         return 'longContentDivMargin';
                     }
                 };
@@ -308,7 +328,9 @@ angular.module('oncokbApp')
                         tumor: tumor
                     });
                 };
+                $scope.trimCSS = function() {
+                    $scope.pasting = true;
+                };
             }
         };
-    })
-    ;
+    });
