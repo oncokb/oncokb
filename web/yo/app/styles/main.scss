@@ -259,7 +259,18 @@ p.editableBox.doubleH {
   top: 20px;
 }
 .reportGenerator .row{
-  margin: 0;
+    margin-left: 0px;
+    margin-right:0px;
+}
+.first-row-margin {
+    margin-top:30px;
+    margin-bottom:10px;
+}
+.row-margin {
+    margin-bottom:10px;
+}
+.last-row-margin {
+    margin-bottom:30px;
 }
 .approvedIndication,.mutationEffect {
   width: 100%;
@@ -885,10 +896,10 @@ input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:b
   margin-top:5px
 }
 
-.validResut {
+.validResult {
   color: green;
 }
-.invalidResut {
+.invalidResult {
   color: red;
 }
 .validationButton {
@@ -958,7 +969,7 @@ input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:b
   font-weight: bolder;
 }
 .sectionStyle {
-  border: 0.5px solid #ddd; 
+  border: 0.5px solid #ddd;
 }
 .editEmpty {
     display: block;
@@ -985,3 +996,28 @@ input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:b
 .longContentDivMargin {
     margin-top: 30px;
 }
+.tage-label {
+    display: inline-block;
+    padding: .2em .6em .3em;
+    margin-bottom:5px;
+    font-size: 15px;
+    color: #fff;
+    white-space: pre-wrap;
+    border-radius: .25em;
+}
+.records-width {
+    max-width: 700px;
+}
+.date-range-column {
+    display: inline-flex
+}
+.cancel-icon {
+    margin-top: 5px;
+    position: relative;
+    left: -20px;
+    cursor: default;
+}
+.result-margin {
+    margin-bottom:80px;
+}
+

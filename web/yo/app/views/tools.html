@@ -1,13 +1,12 @@
 <div class="reportGenerator" ng-init="init()">
     <h3>Review History</h3>
-    <div class="row" style="margin-top:30px; margin-bottom:30px;">
+    <div class="row first-row-margin">
         <div class="col-sm-1">Genes:</div>
         <div class="col-sm-6">
             <select chosen multiple
                     data-placeholder="Enter A Gene"
                     ng-model="genesForHistory"
                     ng-options="m as m for m in geneNames"
-                    ng-change="checkHistoryInputStatus()"
                     class="chosen-select">
                 <option value=""></option>
             </select>
@@ -17,10 +16,34 @@
             <label for="includeUUID">Include UUID</label>
         </div>
         <div class="col-sm-2">
-            <button type="button" class="btn btn-default" ng-click="searchHistory(genesForHistory)" ng-disabled="disableHistoryButton" ng-bind-html="getHistoryButtonContent()"></button>
+            <button type="button" class="btn btn-default" ng-click="searchHistory(genesForHistory)" ng-bind-html="getHistoryButtonContent()"></button>
         </div>
     </div>
-    <div style="margin-bottom:80px" ng-if="historySearchResults.length > 0">
+    <div class="row row-margin">
+        <div class="col-sm-1">Date:</div>
+        <div class="col-sm-6 date-range-column">
+            <input date-range-picker class="form-control date-picker" type="text" options="dateRangeOptions" ng-model="dateRange" />
+            <span id='close' class="cancel-icon" ng-click="clearDateRange()">x</span>
+        </div>
+    </div>
+    <div class="row last-row-margin">
+        <div class="col-sm-1">Type:</div>
+        <div class="col-sm-6">
+            <span ng-repeat="checkbox in typeCheckboxes">
+                <input id="{{checkbox}}" type="checkbox" ng-checked="selectedTypeCheckboxes.indexOf(checkbox) > -1"
+                       ng-click="toggleSelection(checkbox)">
+                <label for="{{checkbox}}">{{checkbox}}</label>
+            </span>
+        </div>
+    </div>
+    <div class="result-margin" ng-if="historySearchResults.length > 0">
+        <div>
+            <span class="tage tage-label label-primary">Location</span>
+            <span class="tage tage-label label-default">Operation</span>
+            <span class="tage tage-label label-warning">Editor</span>
+            <span class="tage tage-label label-success">New Content</span>
+            <span class="tage tage-label label-danger">Old Content</span>
+        </div>
         <table datatable="ng" class="row-border hover" dt-options="dtOptions" dt-columns="dtColumns">
             <thead>
             <tr>
@@ -35,15 +58,23 @@
                 <td><strong><a href="#!/gene/{{x.gene}}">{{ x.gene }}</a></strong></td>
                 <td>{{x.admin}}</td>
                 <td>{{x.timeStamp | date : 'MMM d, h:mm a yyyy'}}</td>
-                <td>
+                <td class="records-width">
                     <ul class="list-group">
                         <li class="list-group-item" ng-repeat="y in x.records track by $index">
                             <div ng-switch on="y.operation">
                                 <div ng-switch-when="add">
-                                    {{y.location + ' ' + y.operation + 'ed' + (y.lastEditBy ? ' by ' + y.lastEditBy : '')}}
+                                    <span class="tage tage-label label-primary">{{ y.location }}</span>
+                                    <span class="tage tage-label label-default">{{ y.operation }} </span>
+                                    <span class="tage tage-label label-warning">{{ y.lastEditBy }}</span>
+                                    <span ng-if="y.new" class="tage tage-label label-success">{{ y.new }}</span>
+                                    <span ng-if="y.old" class="tage tage-label label-danger">{{ y.old }}</span>
                                 </div>
                                 <div ng-switch-default>
-                                    {{y.location + ' ' + y.operation + 'd' + ' by ' + y.lastEditBy}}
+                                    <span class="tage tage-label label-primary" style="word-wrap: break-word;">{{ y.location }}</span>
+                                    <span class="tage tage-label label-default">{{ y.operation }} </span>
+                                    <span class="tage tage-label label-warning">{{ y.lastEditBy }}</span>
+                                    <span ng-if="y.new" class="tage tage-label label-success">{{ y.new }} </span>
+                                    <span ng-if="y.old" class="tage tage-label label-danger">{{ y.old }}</span>
                                 </div>
                                 <div ng-if="includeUUID">{{y.uuids}}</div>
                             </div>
@@ -53,6 +84,9 @@
             </tr>
             </tbody>
         </table>
+    </div>
+    <div class="result-margin" ng-if="historySearchResults.length === 0">
+        <h4 class="invalidResult">Sorry, there are no results that match your search.</h4>
     </div>
     <hr/>
     <h3>Query Reviewed Data</h3>
@@ -101,7 +135,7 @@
     <div class="validationButton">
         <button type="button" class="btn btn-default" ng-click="validateTruncating('tmValidation')" ng-bind-html="getValidationButtonContent('tmValidation')"></button>
     </div>
-    <h4 ng-class="{'invalidResut': !tmValidation.flag, 'validResut': tmValidation.flag}">
+    <h4 ng-class="{'invalidResult': !tmValidation.flag, 'validResult': tmValidation.flag}">
         {{ tmValidation.result }}
     </h4>
     <hr/>
@@ -109,7 +143,7 @@
     <div class="validationButton">
         <button type="button" class="btn btn-default" ng-click="validateTruncating('tsgValidation')" ng-bind-html="getValidationButtonContent('tsgValidation')"></button>
     </div>
-    <h4 ng-class="{'invalidResut': !tsgValidation.flag, 'validResut': tsgValidation.flag}">
+    <h4 ng-class="{'invalidResult': !tsgValidation.flag, 'validResult': tsgValidation.flag}">
         {{ tsgValidation.result }}
     </h4>
     <br/><br/>
