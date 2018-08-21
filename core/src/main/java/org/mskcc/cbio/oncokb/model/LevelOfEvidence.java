@@ -24,15 +24,15 @@ public enum LevelOfEvidence {
     LEVEL_R3 ("R3", "Compelling biological evidence supports the biomarker as being predictive of resistance to a drug, but neither biomarker nor drug are standard care"),
 
     // Levels for prognostic implications
-    LEVEL_P1("P1", "WHO included criteria"),
-    LEVEL_P2("P2", "ELN included criteria (only for AML, may be combined with Px1)"),
-    LEVEL_P3("P3", "NCCN included criteria"),
-    LEVEL_P4("P4", "Compelling peer reviewed literature"),
+    LEVEL_Px1("Px1", "FDA and/or professional guideline-recognized biomarker prognostic in this indication based on well-powered studies"),
+    LEVEL_Px2("Px2", "FDA and/or professional guideline-recognized biomarker prognostic in this indication based on a single or multiple small studies"),
+    LEVEL_Px3("Px3", "Clinical evidence based on well-powered studies that supports the biomarker as being prognostic in this indication"),
+    LEVEL_Px4("Px4", "Clinical evidence based on single or multiple small studies that supports the biomarker as being prognostic in this indication"),
 
     // Levels for diagnostic implications
-    LEVEL_D1("D1", "WHO included criteria"),
-    LEVEL_D2("D2", "NCCN included criteria"),
-    LEVEL_D3("D3", "Compelling peer reviewed literature");
+    LEVEL_Dx1("Dx1", "FDA and/or professional guideline-recognized biomarker indicative of diagnosis in this indication"),
+    LEVEL_Dx2("Dx2", "FDA and/or professional guideline-recognized biomarker that strongly supports diagnosis in this indication"),
+    LEVEL_Dx3("Dx3", "Biomarker that may assist disease diagnosis in this indication based on clinical evidence");
 
     LevelOfEvidence(String level, String description) {
         this.level = level;
