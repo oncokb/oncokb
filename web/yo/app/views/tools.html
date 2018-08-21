@@ -85,8 +85,8 @@
             </tbody>
         </table>
     </div>
-    <div class="result-margin" ng-if="historySearchResults.length === 0">
-        <h4 class="invalidResult">Sorry, there are no results that match your search.</h4>
+    <div class="result-margin" ng-if="errorMessage.length > 0">
+        <h4 class="invalidResult">{{ errorMessage }}</h4>
     </div>
     <hr/>
     <h3>Query Reviewed Data</h3>

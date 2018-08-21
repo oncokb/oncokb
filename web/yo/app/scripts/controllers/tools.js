@@ -19,7 +19,7 @@ angular.module('oncokbApp')
                 loadFiles.load('history').then(function() {
                     $scope.geneNames = _.keys($rootScope.historyData);
                 }, function() {
-                    console.log('fail to load history file');
+                    dialogs.notify('Warning', 'Sorry, the system failed to load history. Please try again or search later.');
                 });
             };
             var sorting = [[2, 'desc'], [1, 'asc'], [0, 'asc']];
@@ -38,10 +38,12 @@ angular.module('oncokbApp')
             ];
 
             $scope.searchHistory = function(genesForHistory) {
+                $scope.errorMessage = '';
+                $scope.historySearchResults = [];
                 if ((!$scope.dateRange.startDate || !$scope.dateRange.endDate) &&
                     (!_.isArray($scope.genesForHistory) || $scope.genesForHistory.length === 0) &&
                     $scope.selectedTypeCheckboxes.length === 0) {
-                    dialogs.notify('Warning', 'Please select genes or date range or operation types!');
+                    $scope.errorMessage = 'Please choose conditions from Gene, Date or Type.';
                     return;
                 }
                 $scope.loading = true;
@@ -86,6 +88,9 @@ angular.module('oncokbApp')
                         historyResults = getHistoryByOperation($rootScope.historyData, $scope.selectedTypeCheckboxes);
                     }
                     $scope.historySearchResults = historyResults;
+                    if ($scope.historySearchResults.length === 0) {
+                        $scope.errorMessage = 'Sorry, there are no results that match your search.';
+                    }
                     $scope.loading = false;
                 });
             };
