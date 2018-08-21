@@ -41,7 +41,7 @@ angular.module('oncokbApp')
                 if ((!$scope.dateRange.startDate || !$scope.dateRange.endDate) &&
                     (!_.isArray($scope.genesForHistory) || $scope.genesForHistory.length === 0) &&
                     $scope.selectedTypeCheckboxes.length === 0) {
-                    dialogs.notify('Warning', 'Please select genes or date range!');
+                    dialogs.notify('Warning', 'Please select genes or date range or operation types!');
                     return;
                 }
                 $scope.loading = true;
