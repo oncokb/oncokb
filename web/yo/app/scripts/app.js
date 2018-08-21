@@ -46,7 +46,8 @@ var oncokbApp = angular.module('oncokbApp', [
     'datatables',
     'datatables.bootstrap',
     'ui.sortable',
-    'firebase'
+    'firebase',
+    'daterangepicker'
 ])
     .value('OncoKB', OncoKB)
     // This is used for typeahead
@@ -198,7 +199,7 @@ angular.module('oncokbApp').run(
                         if (fromIndex !== -1) {
                             var genesOpened = $rootScope.collaboratorsMeta[myName];
                             $rootScope.collaboratorsMeta[myName] = _.without(genesOpened, hugoSymbol);
-                        }                        
+                        }
                         if (toIndex !== -1) {
                             if (!$rootScope.collaboratorsMeta[myName]) {
                                 $rootScope.collaboratorsMeta[myName] = [];
@@ -206,7 +207,7 @@ angular.module('oncokbApp').run(
                             if ($rootScope.collaboratorsMeta[myName].indexOf(hugoSymbol) === -1) {
                                 $rootScope.collaboratorsMeta[myName].push(hugoSymbol);
                             }
-                        }                        
+                        }
                     }, function(error) {
                         console.log(error);
                     });
@@ -217,7 +218,7 @@ angular.module('oncokbApp').run(
                         loading = false;
                     }
                     $location.path('/');
-                }                
+                }
             });
             // Other unidentify error
             $rootScope.$on('oncokbError', function(event, data) {
