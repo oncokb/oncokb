@@ -2836,19 +2836,13 @@ angular.module('oncokbApp')
                     deferred1.reject(error);
                 });
                 var deferred2 = $q.defer();
-                $firebaseObject(firebase.database().ref('History/' + $routeParams.geneName)).$bindTo($rootScope, "historyRef").then(function () {
-                    deferred2.resolve('success');
-                }, function (error) {
-                    deferred2.reject('Failed to bind history by gene');
-                });
-                var deferred3 = $q.defer();
                 loadFiles.load(['reviewMeta', 'movingSection'], $routeParams.geneName).then(function() {
-                    deferred3.resolve('success');
+                    deferred2.resolve('success');
                 }, function(error) {
-                    deferred3.reject(error);
+                    deferred2.reject(error);
                 });
                 $scope.vusItems = $firebaseArray(firebase.database().ref('VUS/' + $routeParams.geneName));
-                var deferred4 = $q.defer();
+                var deferred3 = $q.defer();
                 $scope.mutations = $firebaseArray(firebase.database().ref('Genes/' + $routeParams.geneName + '/mutations'));
                 $scope.mutations.$loaded().then(function (success) {
                     $scope.getMutationMessages();
@@ -2856,11 +2850,11 @@ angular.module('oncokbApp')
                         $scope.initialOpen[mutation.name_uuid] = false;
                         $scope.mutIndexByUUID[mutation.name_uuid] = index;
                     });
-                    deferred4.resolve();
+                    deferred3.resolve();
                 }, function (error) {
-                    deferred4.reject(error);
+                    deferred3.reject(error);
                 });
-                var deferred5 = $q.defer();
+                var deferred4 = $q.defer();
                 $firebaseObject(firebase.database().ref('Meta/' + $routeParams.geneName)).$bindTo($scope, "geneMeta").then(function () {
                     if (_.isUndefined($scope.geneMeta.review)) {
                         $scope.geneMeta.review = { currentReviewer: ''};
@@ -2868,14 +2862,14 @@ angular.module('oncokbApp')
                         $scope.geneMeta.review.currentReviewer = '';
                     }
                     getAllCollaborators().then(function() {
-                        deferred5.resolve('success');
+                        deferred4.resolve('success');
                     }, function() {
-                        deferred5.reject('fail to get collaborators info');
+                        deferred4.reject('fail to get collaborators info');
                     });
                 }, function (error) {
-                    deferred5.reject('Failed to bind meta by gene');
+                    deferred4.reject('Failed to bind meta by gene');
                 });
-                var bindingAPI = [deferred1.promise, deferred2.promise, deferred3.promise, deferred4.promise, deferred5.promise];
+                var bindingAPI = [deferred1.promise, deferred2.promise, deferred3.promise, deferred4.promise];
                 $q.all(bindingAPI)
                     .then(function (result) {
                         user.setFileeditable([$routeParams.geneName]).then(function (result) {

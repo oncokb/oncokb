@@ -19,6 +19,7 @@ angular.module('oncokbApp')
         'InternalAccess',
         'ApiUtils',
         'PrivateApiUtils',
+        '$firebaseArray',
         function($timeout,
                  $q,
                  $rootScope,
@@ -35,7 +36,8 @@ angular.module('oncokbApp')
                  OncoTree,
                  InternalAccess,
                  ApiUtils,
-                 PrivateApiUtils) {
+                 PrivateApiUtils,
+                 $firebaseArray) {
             var numOfLocks = {};
             var data = {};
             var testing = OncoKB.config.testing || false;
@@ -447,13 +449,18 @@ angular.module('oncokbApp')
             }
 
             function updateHistory(historyData) {
-                if (!$rootScope.historyRef.api) {
-                    $rootScope.historyRef.api = [];
-                }
-                $rootScope.historyRef.api.push({
+                var hugoSymbol = historyData.hugoSymbol;
+                delete historyData.hugoSymbol;
+
+                var historyList = $firebaseArray(firebase.database().ref('History/' + hugoSymbol + '/api'));
+                historyList.$add({
                     admin: $rootScope.me.name,
                     timeStamp: new Date().getTime(),
                     records: historyData
+                }).then(function(ref) {
+                    console.log('Added a new history record.');
+                }, function (error) {
+                    console.log('Failed to bind history by gene.', error);
                 });
             }
 
