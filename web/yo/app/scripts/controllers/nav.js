@@ -8,7 +8,7 @@
  * Controller of the oncokbApp
  */
 angular.module('oncokbApp')
-    .controller('NavCtrl', function($scope, $location, $rootScope, $q, DatabaseConnector, $firebaseAuth, $firebaseObject, user) {
+    .controller('NavCtrl', function($scope, $location, $rootScope, $q, DatabaseConnector, $firebaseAuth, $firebaseObject, user, dialogs) {
         var tabs = {
             variant: 'Variant Annotation',
             genes: 'Genes',
@@ -52,7 +52,7 @@ angular.module('oncokbApp')
                 $rootScope.isSignedIn = true;
                 user.setRole(firebaseUser).then(function() {
                     $rootScope.signedInUser = $rootScope.me;
-                    setParams();                    
+                    setParams();
                     testInternal().then(function() {
                         if (window.localStorage.geneName) {
                             $location.url('/gene/' + window.localStorage.geneName);
@@ -77,6 +77,9 @@ angular.module('oncokbApp')
                 console.log('finish is called');
                 loadingScreen.finish();
             });
+            if (!user.isAuthorizedUser()) {
+                dialogs.notify('Warning', 'You do not have access to login. Please contact the OncoKB team.');
+            }
         };
 
         $scope.signOut = function() {

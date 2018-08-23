@@ -18,10 +18,11 @@ angular.module('oncokbApp')
             email: '',
             name: '',
             photoURL: '',
-            key: '' // this is the key used in the Firebase Realtime Users table 
+            key: '' // this is the key used in the Firebase Realtime Users table
         };
         var editableData = {};
         var allUsers = {};
+        var authorizedUser = false;
         function login() {
             var defer = $q.defer();
             $firebaseAuth().$signInWithPopup("google").then(function(gResp) {
@@ -30,7 +31,7 @@ angular.module('oncokbApp')
                 me.photoURL = gResp.user.photoURL;
                 me.key = gResp.user.email.replace(/\./g, '');
                 $rootScope.isSignedIn = true;
-                // $rootScope.signedInUser is used to store user info who passed google authentication, but they might not be authorized to the curation platform 
+                // $rootScope.signedInUser is used to store user info who passed google authentication, but they might not be authorized to the curation platform
                 $rootScope.signedInUser = me;
                 setRole(gResp.user).then(function() {
                     if (!allUsers[me.key]) {
@@ -38,14 +39,16 @@ angular.module('oncokbApp')
                     } else {
                         if (!allUsers[me.key].email) {
                             updateUserInfo().then(function() {
+                                authorizedUser = true;
                                 defer.resolve();
                             }, function(error) {
                                 defer.reject('fail to initialize user info ' + error);
                             });
                         } else {
+                            authorizedUser = true;
                             defer.resolve();
-                        }                        
-                    }                    
+                        }
+                    }
                 }, function(error) {
                     defer.reject(error);
                 });
@@ -71,6 +74,8 @@ angular.module('oncokbApp')
                 // $rootScope.me is used to store the user who passed both authtication and authorization process. It is used accross the whole project to access current user info.
                 $rootScope.me = me;
                 defer.resolve();
+            } , function(error) {
+                defer.reject(error);
             });
             return defer.promise;
         }
@@ -133,8 +138,11 @@ angular.module('oncokbApp')
                 });
             } else {
                 defer.resolve(allUsers);
-            }       
+            }
             return defer.promise;
+        }
+        function isAuthorizedUser() {
+            return authorizedUser;
         }
         return {
             login: login,
@@ -142,6 +150,7 @@ angular.module('oncokbApp')
             isFileEditable: isFileEditable,
             setFileeditable: setFileeditable,
             setRole: setRole,
-            getAllUsers: getAllUsers
+            getAllUsers: getAllUsers,
+            isAuthorizedUser: isAuthorizedUser
         };
     });
