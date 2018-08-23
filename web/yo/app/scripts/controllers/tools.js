@@ -94,7 +94,7 @@ angular.module('oncokbApp')
                         _.each($scope.historySearchResults, function(history) {
                             _.each(history.records, function(record) {
                                 if (record.old && record.new) {
-                                    record.diffHTML = calculateDiff(record.old, record.new);
+                                    record.diffHTML = mainUtils.calculateDiff(record.old, record.new);
                                 }
                             });
                         });
@@ -102,12 +102,6 @@ angular.module('oncokbApp')
                     $scope.loading = false;
                 });
             };
-            function calculateDiff(oldContent, newContent) {
-                var dmp = new diff_match_patch();
-                var diff = dmp.diff_main(mainUtils.getTextString(oldContent), mainUtils.getTextString(newContent));
-                dmp.diff_cleanupSemantic(diff);
-                return dmp.diff_prettyHtml(diff);
-            }
             function getHistoryByHugoSymbol(historyData, hugoSymbols) {
                 var results =[];
                 _.each(hugoSymbols, function(hugoSymbol) {

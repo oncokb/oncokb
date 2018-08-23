@@ -50,7 +50,7 @@
     <div ng-show="displayPrecisely(gene.summary_uuid)">
       <h3>Summary:
         <span ng-show="!reviewMode"><comments-dict key="'summary'" path="getObservePath({type: 'gene'})"></comments-dict></span>
-        <review-panel evidence-type="'GENE_SUMMARY'" obj="gene" get-evidence="getEvidence(type)" model-update="modelUpdate(type)"
+        <review-panel hugo-symbol="gene.name" evidence-type="'GENE_SUMMARY'" obj="gene" get-evidence="getEvidence(type)" model-update="modelUpdate(type)"
         uuid="getUUID({type: 'gene', key: 'summary'})" review-obj="gene.summary_review"></review-panel>
       </h3>
       <realtime-string t="'p'" key="'summary'" path="getObservePath({type: 'gene'})" uuid="getUUID({type: 'gene', key: 'summary'})"></realtime-string>
@@ -69,7 +69,7 @@
       <br/>
       <h3>Background:
         <span ng-show="!reviewMode"><comments-dict key="'background'" path="getObservePath({type: 'gene'})"></comments-dict></span>
-        <review-panel uuid="gene.background_uuid" review-obj="gene.background_review" evidence-type="'GENE_BACKGROUND'" obj="gene"
+        <review-panel hugo-symbol="gene.name" uuid="gene.background_uuid" review-obj="gene.background_review" evidence-type="'GENE_BACKGROUND'" obj="gene"
           get-evidence="getEvidence(type)" model-update="modelUpdate(type)"></review-panel>
       </h3>
       <realtime-string t="'p'" key="'background'" path="getObservePath({type: 'gene'})" uuid="getUUID({type: 'gene', key: 'background'})"></realtime-string>
