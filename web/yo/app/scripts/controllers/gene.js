@@ -1579,6 +1579,7 @@ angular.module('oncokbApp')
                         break;
                 }
                 var historyData = [tempEvidences.historyData];
+                historyData.hugoSymbol = $scope.gene.name;
                 if (_.isEmpty(evidences)) {
                     acceptSection(type, mutation, tumor, ti, treatment);
                     numOfReviewItems.minus(updatedBy);
@@ -2030,6 +2031,7 @@ angular.module('oncokbApp')
                 var allUUIDs = collectUUIDs(type, obj, []);
                 var evidenceUUIDs = collectUUIDs(type, obj, [], 'evidenceOnly');
                 var historyData = [{ operation: 'delete', lastEditBy: (type === 'tumor' ? obj.cancerTypes_review : obj.name_review).updatedBy, location: location, old: obj }];
+                historyData.hugoSymbol = $scope.gene.name;
                 // make the api call to delete evidences
                 var loadingUUID = (type === 'tumor' ? obj.cancerTypes_uuid : obj.name_uuid);
                 if (loadingUUID) {

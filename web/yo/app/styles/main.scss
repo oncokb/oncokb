@@ -1020,4 +1020,12 @@ input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:b
 .result-margin {
     margin-bottom:40px;
 }
+.label-new {
+    color: #000000;
+    background-color: #F1F9FF;
+}
+.label-old {
+    color: #000000;
+    background-color: #ccc;
+}
 

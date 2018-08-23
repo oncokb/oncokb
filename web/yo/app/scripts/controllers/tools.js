@@ -90,10 +90,24 @@ angular.module('oncokbApp')
                     $scope.historySearchResults = historyResults;
                     if ($scope.historySearchResults.length === 0) {
                         $scope.errorMessage = 'Sorry, there are no results that match your search.';
+                    } else if ($scope.historySearchResults.length > 0) {
+                        _.each($scope.historySearchResults, function(history) {
+                            _.each(history.records, function(record) {
+                                if (record.old && record.new) {
+                                    record.diffHTML = calculateDiff(record.old, record.new);
+                                }
+                            });
+                        });
                     }
                     $scope.loading = false;
                 });
             };
+            function calculateDiff(oldContent, newContent) {
+                var dmp = new diff_match_patch();
+                var diff = dmp.diff_main(mainUtils.getTextString(oldContent), mainUtils.getTextString(newContent));
+                dmp.diff_cleanupSemantic(diff);
+                return dmp.diff_prettyHtml(diff);
+            }
             function getHistoryByHugoSymbol(historyData, hugoSymbols) {
                 var results =[];
                 _.each(hugoSymbols, function(hugoSymbol) {
