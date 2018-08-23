@@ -922,13 +922,13 @@ angular.module('oncokbApp')
                     'R2': 'LEVEL_R2',
                     'R3': 'LEVEL_R3',
                     'no': 'NO',
-                    'P1': 'LEVEL_P1',
-                    'P2': 'LEVEL_P2',
-                    'P3': 'LEVEL_P3',
-                    'P4': 'LEVEL_P4',
-                    'D1': 'LEVEL_D1',
-                    'D2': 'LEVEL_D2',
-                    'D3': 'LEVEL_D3'
+                    'Px1': 'LEVEL_Px1',
+                    'Px2': 'LEVEL_Px2',
+                    'Px3': 'LEVEL_Px3',
+                    'Px4': 'LEVEL_Px4',
+                    'Dx1': 'LEVEL_Dx1',
+                    'Dx2': 'LEVEL_Dx2',
+                    'Dx3': 'LEVEL_Dx3'
                 };
                 var extraData = _.clone(data);
                 var i = 0;
@@ -2527,27 +2527,27 @@ angular.module('oncokbApp')
                     }
                 });
                 levels.prognostic = [{
-                    value: 'P1',
-                    label: 'Px1 - WHO included criteria'
+                    value: 'Px1',
+                    label: 'Px1 - FDA and/or professional guideline-recognized biomarker prognostic in this indication based on well-powered studies'
                 }, {
-                    value: 'P2',
-                    label: 'Px2 - ELN included criteria (only for AML, may be combined with Px1)'
+                    value: 'Px2',
+                    label: 'Px2 - FDA and/or professional guideline-recognized biomarker prognostic in this indication based on a single or multiple small studies'
                 }, {
-                    value: 'P3',
-                    label: 'Px3 - NCCN included criteria'
+                    value: 'Px3',
+                    label: 'Px3 - Clinical evidence based on well-powered studies that supports the biomarker as being prognostic in this indication'
                 }, {
-                    value: 'P4',
-                    label: 'Px4 - Compelling peer reviewed literature'
+                    value: 'Px4',
+                    label: 'Px4 - Clinical evidence based on single or multiple small studies that supports the biomarker as being prognostic in this indication'
                 }];
                 levels.diagnostic = [{
-                    value: 'D1',
-                    label: 'Dx1 - WHO included criteria'
+                    value: 'Dx1',
+                    label: 'Dx1 - FDA and/or professional guideline-recognized biomarker indicative of diagnosis in this indication'
                 }, {
-                    value: 'D2',
-                    label: 'Dx2 - NCCN included criteria'
+                    value: 'Dx2',
+                    label: 'Dx2 - FDA and/or professional guideline-recognized biomarker that strongly supports diagnosis in this indication'
                 }, {
-                    value: 'D3',
-                    label: 'Dx3 - Compelling peer reviewed literature'
+                    value: 'Dx3',
+                    label: 'Dx3 - Biomarker that may assist disease diagnosis in this indication based on clinical evidence'
                 }];
                 return levels;
             }
