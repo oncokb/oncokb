@@ -212,7 +212,7 @@ angular.module('oncokbApp').run(
                         console.log(error);
                     });
                 }
-                if (!$rootScope.isSignedIn) {
+                if (!$rootScope.isAuthorizedUser) {
                     if (loading) {
                         loadingScreen.finish();
                         loading = false;

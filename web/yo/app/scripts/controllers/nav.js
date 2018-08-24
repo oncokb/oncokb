@@ -49,8 +49,8 @@ angular.module('oncokbApp')
         }
         $firebaseAuth().$onAuthStateChanged(function(firebaseUser) {
             if (firebaseUser) {
-                $rootScope.isSignedIn = true;
                 user.setRole(firebaseUser).then(function() {
+                    $rootScope.isAuthorizedUser = true;
                     $rootScope.signedInUser = $rootScope.me;
                     setParams();
                     testInternal().then(function() {
@@ -73,13 +73,12 @@ angular.module('oncokbApp')
                 setParams();
                 $location.url('/genes');
             }, function(error) {
-                console.log('failed to login', error);
                 console.log('finish is called');
                 loadingScreen.finish();
+                if (!$rootScope.isAuthorizedUser) {
+                    dialogs.notify('Warning', 'You do not have access to the system. Please contact the OncoKB team.');
+                }
             });
-            if (!user.isAuthorizedUser()) {
-                dialogs.notify('Warning', 'You do not have access to login. Please contact the OncoKB team.');
-            }
         };
 
         $scope.signOut = function() {
@@ -104,9 +103,9 @@ angular.module('oncokbApp')
         // This flag we use to show or hide the button in our HTML.
         // $scope.signedIn = false;
 
-        $rootScope.$watch('isSignedIn', function(n, o) {
+        $rootScope.$watch('isAuthorizedUser', function(n, o) {
             if (n !== o) {
-                $scope.isSignedIn = $rootScope.isSignedIn;
+                $scope.isAuthorizedUser = $rootScope.isAuthorizedUser;
             }
         });
     });
