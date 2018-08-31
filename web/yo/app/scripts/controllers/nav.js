@@ -8,7 +8,7 @@
  * Controller of the oncokbApp
  */
 angular.module('oncokbApp')
-    .controller('NavCtrl', function($scope, $location, $rootScope, $q, DatabaseConnector, $firebaseAuth, $firebaseObject, user) {
+    .controller('NavCtrl', function($scope, $location, $rootScope, $q, DatabaseConnector, $firebaseAuth, $firebaseObject, user, dialogs) {
         var tabs = {
             variant: 'Variant Annotation',
             genes: 'Genes',
@@ -49,10 +49,10 @@ angular.module('oncokbApp')
         }
         $firebaseAuth().$onAuthStateChanged(function(firebaseUser) {
             if (firebaseUser) {
-                $rootScope.isSignedIn = true;
                 user.setRole(firebaseUser).then(function() {
+                    $rootScope.isAuthorizedUser = true;
                     $rootScope.signedInUser = $rootScope.me;
-                    setParams();                    
+                    setParams();
                     testInternal().then(function() {
                         if (window.localStorage.geneName) {
                             $location.url('/gene/' + window.localStorage.geneName);
@@ -63,6 +63,8 @@ angular.module('oncokbApp')
                         }
                     });
                 }, function(error) {
+                    mainUtils.sendEmail('dev.oncokb@gmail.com', 'Failed to set user role.',
+                        'Content: \n' + JSON.stringify(firebaseUser) + '\n\nError: \n' + JSON.stringify(error));
                 });
             } else {
                 console.log('not logged in yet');
@@ -73,9 +75,11 @@ angular.module('oncokbApp')
                 setParams();
                 $location.url('/genes');
             }, function(error) {
-                console.log('failed to login', error);
                 console.log('finish is called');
                 loadingScreen.finish();
+                if (!$rootScope.isAuthorizedUser) {
+                    dialogs.notify('Warning', 'You do not have access to the system. Please contact the OncoKB team.');
+                }
             });
         };
 
@@ -101,9 +105,9 @@ angular.module('oncokbApp')
         // This flag we use to show or hide the button in our HTML.
         // $scope.signedIn = false;
 
-        $rootScope.$watch('isSignedIn', function(n, o) {
+        $rootScope.$watch('isAuthorizedUser', function(n, o) {
             if (n !== o) {
-                $scope.isSignedIn = $rootScope.isSignedIn;
+                $scope.isAuthorizedUser = $rootScope.isAuthorizedUser;
             }
         });
     });

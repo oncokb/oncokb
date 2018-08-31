@@ -113,7 +113,6 @@ angular.module('oncokbApp')
             var sortedLevel = _.keys($rootScope.meta.levelsDesc).sort();
             $scope.getMutationMessages = function () {
                 $scope.mutationContent = {};
-                var tempNameList = [];
                 for (var i = 0; i < $scope.mutations.length; i++) {
                     var mutation = $scope.mutations[i];
                     $scope.indicateMutationContent(mutation);
