@@ -39,10 +39,10 @@
     <div class="result-margin" ng-if="historySearchResults.length > 0">
         <div>
             <span class="tage tage-label label-primary">Location</span>
-            <span class="tage tage-label label-default">Operation</span>
+            <span class="tage tage-label label-success">Operation</span>
             <span class="tage tage-label label-warning">Edit By</span>
-            <span class="tage tage-label label-success">New Content</span>
-            <span class="tage tage-label label-danger">Old Content</span>
+            <span class="tage tage-label label-new">New Content</span>
+            <span class="tage tage-label label-old">Old Content</span>
         </div>
         <table datatable="ng" class="row-border hover" dt-options="dtOptions" dt-columns="dtColumns">
             <thead>
@@ -61,23 +61,12 @@
                 <td class="records-width">
                     <ul class="list-group">
                         <li class="list-group-item" ng-repeat="y in x.records track by $index">
-                            <div ng-switch on="y.operation">
-                                <div ng-switch-when="add">
-                                    <span class="tage tage-label label-primary">{{ y.location }}</span>
-                                    <span class="tage tage-label label-default">{{ y.operation }} </span>
-                                    <span class="tage tage-label label-warning">{{ y.lastEditBy }}</span>
-                                    <span ng-if="y.new" class="tage tage-label label-success">{{ y.new }}</span>
-                                    <span ng-if="y.old" class="tage tage-label label-danger">{{ y.old }}</span>
-                                </div>
-                                <div ng-switch-default>
-                                    <span class="tage tage-label label-primary" style="word-wrap: break-word;">{{ y.location }}</span>
-                                    <span class="tage tage-label label-default">{{ y.operation }} </span>
-                                    <span class="tage tage-label label-warning">{{ y.lastEditBy }}</span>
-                                    <span ng-if="y.new" class="tage tage-label label-success">{{ y.new }} </span>
-                                    <span ng-if="y.old" class="tage tage-label label-danger">{{ y.old }}</span>
-                                </div>
-                                <div ng-if="includeUUID">{{y.uuids}}</div>
-                            </div>
+                            <span class="tage tage-label label-primary">{{ y.location }}</span>
+                            <span class="tage tage-label label-success">{{ y.operation }} </span>
+                            <span class="tage tage-label label-warning">{{ y.lastEditBy }}</span>
+                            <span ng-if="y.new" class="tage tage-label label-new">{{ y.new }} </span>
+                            <span ng-if="y.old && !y.diffHTML" class="tage tage-label label-old">{{ y.old }}</span>
+                            <span ng-if="y.diffHTML" class="tage tage-label label-old" ng-bind-html="y.diffHTML"></span>
                         </li>
                     </ul>
                 </td>

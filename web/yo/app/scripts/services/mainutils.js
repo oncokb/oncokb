@@ -536,6 +536,12 @@ angular.module('oncokbApp')
                 return 0;
             }
         }
+        function calculateDiff(oldContent, newContent) {
+            var dmp = new diff_match_patch();
+            var diff = dmp.diff_main(OncoKB.utils.getString(oldContent), OncoKB.utils.getString(newContent));
+            dmp.diff_cleanupSemantic(diff);
+            return dmp.diff_prettyHtml(diff);
+        }
         return {
             setIsoFormAndGeneType: setIsoFormAndGeneType,
             getCancerTypesName: getCancerTypesName,
@@ -565,6 +571,7 @@ angular.module('oncokbApp')
             updateMovingFlag: updateMovingFlag,
             processData: processData,
             shouldExclude: shouldExclude,
-            getTimeStamp: getTimeStamp
+            getTimeStamp: getTimeStamp,
+            calculateDiff: calculateDiff
         };
     });

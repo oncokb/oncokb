@@ -231,15 +231,11 @@ angular.module('oncokbApp')
                 };
                 $scope.calculateDiff = function() {
                     if ($rootScope.reviewMode && $scope.t === 'p') {
-                        var dmp = new diff_match_patch();
-                        var newContent = mainUtils.getTextString($scope.data[$scope.key]);
                         var oldContent = '';
                         if ($scope.data[$scope.key+'_review'] && $scope.data[$scope.key+'_review'].lastReviewed) {
-                            oldContent = mainUtils.getTextString($scope.data[$scope.key+'_review'].lastReviewed);
+                            oldContent = $scope.data[$scope.key+'_review'].lastReviewed;
                         }
-                        var diff = dmp.diff_main(oldContent, newContent);
-                        dmp.diff_cleanupSemantic(diff);
-                        $scope.diffHTML = dmp.diff_prettyHtml(diff);
+                        $scope.diffHTML = mainUtils.calculateDiff(oldContent, $scope.data[$scope.key])
                     }
                 }
                 $scope.uncheck = function () {

@@ -90,6 +90,14 @@ angular.module('oncokbApp')
                     $scope.historySearchResults = historyResults;
                     if ($scope.historySearchResults.length === 0) {
                         $scope.errorMessage = 'Sorry, there are no results that match your search.';
+                    } else if ($scope.historySearchResults.length > 0) {
+                        _.each($scope.historySearchResults, function(history) {
+                            _.each(history.records, function(record) {
+                                if (record.old && record.new) {
+                                    record.diffHTML = mainUtils.calculateDiff(record.old, record.new);
+                                }
+                            });
+                        });
                     }
                     $scope.loading = false;
                 });
