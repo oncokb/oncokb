@@ -56,8 +56,7 @@ angular.module('oncokbApp')
                         if (n !== o && !_.isUndefined(n) && scope.fe) {
                             if (!scope.data || !scope.data[scope.key+'_editing'] || scope.data[scope.key+'_editing'] === $rootScope.me.name) {
                                 if (_.keys($rootScope.collaborators).length > 1) { // Multiple users on the same gene
-                                    var changedByOthers = scope.isChangedByOthers();
-                                    if (changedByOthers) {
+                                    if (scope.isChangedByOthers()) {
                                         return;
                                     }
                                 }
