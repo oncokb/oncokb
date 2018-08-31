@@ -2,9 +2,9 @@
 
 angular.module('oncokbApp')
     .controller('ToolsCtrl', ['$scope', 'dialogs', 'OncoKB', 'DatabaseConnector', '$timeout', '_', 'FindRegex',
-        'mainUtils', 'loadFiles', '$rootScope', 'DTColumnDefBuilder', 'DTOptionsBuilder', '$firebaseArray',
+        'mainUtils', 'loadFiles', '$rootScope', 'DTColumnDefBuilder', 'DTOptionsBuilder', '$firebaseArray', '$q',
         function($scope, dialogs, OncoKB, DatabaseConnector, $timeout, _, FindRegex, mainUtils, loadFiles, $rootScope,
-                 DTColumnDefBuilder, DTOptionsBuilder, $firebaseArray) {
+                 DTColumnDefBuilder, DTOptionsBuilder, $firebaseArray, $q) {
             $scope.init = function() {
                 $scope.loading = false;
                 $scope.typeCheckboxes = ['update', 'name change', 'add', 'delete'];
@@ -601,25 +601,35 @@ angular.module('oncokbApp')
             };
             $scope.refactorHistory =  function() {
                 $scope.status.refactoring = true;
-                var count = 0;
-                _.each($scope.geneNames, function(hugoSymbol) {
-                    var historyItems = $rootScope.historyData[hugoSymbol].api;
-                    var historyList = $firebaseArray(firebase.database().ref('NewHistory/' + hugoSymbol + '/api'));
-                    _.each(historyItems, function (item) {
-                        historyList.$add({
-                            admin: item.admin,
-                            timeStamp: item.timeStamp,
-                            records: item.records
-                        }).then(function(ref) {
-                            count++;
-                            if (count === _.keys($scope.geneNames).length) {
-                                $scope.status.refactoring = false;
-                            }
-                        }, function (error) {
-                            mainUtils.sendEmail('dev.oncokb@gmail.com', 'Failed to add a new history record for ' + hugoSymbol
-                                + '.', 'Content: \n' + JSON.stringify(item) + '\n\nError: \n' + JSON.stringify(error));
-                        });
+                _.each($scope.geneNames, function(hugoSymbol, index) {
+                    addHistoryByHugoSymbol(hugoSymbol).then(function (res) {
+                        if (index === _.keys($scope.geneNames).length - 1) {
+                            $scope.status.refactoring = false;
+                        }
+                    }, function(error) {
+                        console.log(error);
                     });
                 });
             };
+            function addHistoryByHugoSymbol(hugoSymbol) {
+                var defer = $q.defer();
+                var historyItems = $rootScope.historyData[hugoSymbol].api;
+                var historyList = $firebaseArray(firebase.database().ref('NewHistory/' + hugoSymbol + '/api'));
+                _.each(historyItems, function (item, index) {
+                    historyList.$add({
+                        admin: item.admin,
+                        timeStamp: item.timeStamp,
+                        records: item.records
+                    }).then(function(ref) {
+                        if (index === historyItems.length - 1) {
+                            defer.resolve();
+                        }
+                    }, function (error) {
+                        mainUtils.sendEmail('dev.oncokb@gmail.com', 'Failed to add a new history record for ' + hugoSymbol
+                            + '.', 'Content: \n' + JSON.stringify(item) + '\n\nError: \n' + JSON.stringify(error));
+                        defer.reject(error);
+                    });
+                });
+                return defer.promise;
+            }
         }]);
