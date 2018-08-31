@@ -55,6 +55,11 @@ angular.module('oncokbApp')
                     scope.$watch('data[key]', function (n, o) {
                         if (n !== o && !_.isUndefined(n) && scope.fe) {
                             if (!scope.data || !scope.data[scope.key+'_editing'] || scope.data[scope.key+'_editing'] === $rootScope.me.name) {
+                                if (_.keys($rootScope.collaborators).length > 1) { // Multiple users on the same gene
+                                    if (scope.isChangedByOthers()) {
+                                        return;
+                                    }
+                                }
                                 var isRejected = mainUtils.processedInReview('reject', scope.uuid);
                                 if (!$rootScope.reviewMode || !isRejected) {
                                     mainUtils.updateLastModified();
@@ -67,9 +72,8 @@ angular.module('oncokbApp')
                                         scope.changePropagation();
                                     }
                                     // 1) Do not trigger setReviewRelatedContent() when edit Additional Information (Optional).
-                                    // 2) Do not trigger setReviewRelatedContent() when changes have been rejected.
-                                    // 3) Do not trigger setReviewRelatedContent() when move mutations.
-                                    if (scope.key !== 'short' && !isRejected && !(scope.key === 'name' && ($rootScope.movingSection || checkNameChange.get()))) {
+                                    // 2) Do not trigger setReviewRelatedContent() when move mutations.
+                                    if (scope.key !== 'short' && !(scope.key === 'name' && ($rootScope.movingSection || checkNameChange.get()))) {
                                         scope.setReviewRelatedContent(n, o, false);
                                     }
                                 }
@@ -237,7 +241,7 @@ angular.module('oncokbApp')
                         }
                         $scope.diffHTML = mainUtils.calculateDiff(oldContent, $scope.data[$scope.key])
                     }
-                }
+                };
                 $scope.uncheck = function () {
                     if ($scope.preStringO === $scope.data[$scope.key] && $scope.preStringO !== '') {
                         $scope.data[$scope.key] = '';
@@ -271,7 +275,7 @@ angular.module('oncokbApp')
                         }
                     }
                     return $scope.data && $scope.data[$scope.key+'_review'] && $scope.data[$scope.key+'_review'].lastReviewed === checkbox;
-                }
+                };
                 $scope.reviewLayout = function (type) {
                     if (type === 'regular') {
                         // display the new header, and difference header and content only when the item is not inside an added/deleted sections, and haven't accepted or rejected yet
@@ -301,14 +305,14 @@ angular.module('oncokbApp')
                         $scope.path = tempArr.join('/');
                         console.log($scope.path);
                     }
-                }
+                };
                 $scope.getOldContentClass = function(content) {
                     var className = 'unEditableBox';
                     if (content && content.length > 80) {
                         className += ' longContent';
                     }
                     return className;
-                }
+                };
                 $scope.getOldContentDivClass = function(content) {
                     if (content && content.length > 80) {
                         return 'longContentDivMargin';
@@ -326,6 +330,18 @@ angular.module('oncokbApp')
                 };
                 $scope.trimCSS = function() {
                     $scope.pasting = true;
+                };
+                $scope.isChangedByOthers = function() {
+                    var changedByOthers = false;
+                    firebase.database().ref($scope.path).on('value', function(doc) {
+                        if (doc.val()[$scope.key] === $scope.data[$scope.key]) {
+                            changedByOthers = true;
+                            return;
+                        }
+                    }, function () {
+                        console.log('Failed to load firebase object');
+                    });
+                    return changedByOthers;
                 };
             }
         };
