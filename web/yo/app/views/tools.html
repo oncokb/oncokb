@@ -1,4 +1,9 @@
 <div class="reportGenerator" ng-init="init()">
+    <div class="header-buttons" style="float: right;">
+        <span class="btn-group btn-group-sm pull-left group" role="group">
+            <button type="button" class="btn btn-default" ng-if="developerCheck()" ng-click="refactorHistory()"><span ng-show="status.refactoring"><i class="fa fa-spinner fa-spin"></i></span><span ng-show="!status.refactoring">Refactor History</span></button>
+        </span>
+    </div>
     <h3>Review History</h3>
     <div class="row first-row-margin">
         <div class="col-sm-1">Genes:</div>
