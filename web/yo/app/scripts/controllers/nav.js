@@ -63,6 +63,8 @@ angular.module('oncokbApp')
                         }
                     });
                 }, function(error) {
+                    mainUtils.sendEmail('dev.oncokb@gmail.com', 'Failed to set user role.',
+                        'Content: \n' + JSON.stringify(firebaseUser) + '\n\nError: \n' + JSON.stringify(error));
                 });
             } else {
                 console.log('not logged in yet');
