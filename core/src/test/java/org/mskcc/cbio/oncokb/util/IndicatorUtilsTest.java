@@ -431,7 +431,23 @@ public class IndicatorUtilsTest {
         query2 = new Query(null, null, null, "EGFR-RAD51", null, "structural_variant", StructuralVariantType.INSERTION, "Ovarian Cancer", "fusion", null, null, null);
         resp1 = IndicatorUtils.processQuery(query1, null, null, null, true, null);
         resp2 = IndicatorUtils.processQuery(query2, null, null, null, true, null);
+        pairComparison(resp1, resp2);
 
+        // When the structural variant is functional fusion, the alteration name if is fusion, it should be ignored.
+        query1 = new Query(null, null, null, "KIF5B-MET", null, "structural_variant", StructuralVariantType.DELETION, "Lung Adenocarcinoma", "fusion", null, null, null);
+        query2 = new Query(null, null, null, "KIF5B-MET", "FUSION", "structural_variant", StructuralVariantType.DELETION, "Lung Adenocarcinoma", "fusion", null, null, null);
+        resp1 = IndicatorUtils.processQuery(query1, null, null, null, true, null);
+        resp2 = IndicatorUtils.processQuery(query2, null, null, null, true, null);
+        pairComparison(resp1, resp2);
+
+        query1 = new Query(null, null, null, "EGFR", "KDD", null, null, "NSCLC", null, null, null, null);
+        query2 = new Query(null, null, null, "EGFR", "KDD", "structural_variant", StructuralVariantType.DUPLICATION, "NSCLC", "fusion", null, null, null);
+        resp1 = IndicatorUtils.processQuery(query1, null, null, null, true, null);
+        resp2 = IndicatorUtils.processQuery(query2, null, null, null, true, null);
+        pairComparison(resp1, resp2);
+    }
+
+    private void pairComparison(IndicatorQueryResp resp1, IndicatorQueryResp resp2) {
         assertTrue("The gene exist should be the same.", resp1.getGeneExist().equals(resp2.getGeneExist()));
         assertTrue("The oncogenicity should be the same.", resp1.getOncogenic().equals(resp2.getOncogenic()));
         assertTrue("The VUS info should be the same", resp1.getVUS().equals(resp2.getVUS()));
@@ -451,7 +467,6 @@ public class IndicatorUtilsTest {
         assertTrue("The gene summary should be the same.", resp1.getGeneSummary().equals(resp2.getGeneSummary()));
         assertTrue("The variant summary should be the same.", resp1.getVariantSummary().equals(resp2.getVariantSummary()));
         assertTrue("The tumor type summary should be the same.", resp1.getTumorTypeSummary().equals(resp2.getTumorTypeSummary()));
-
     }
 
     private Boolean treatmentsContainLevel(List<IndicatorQueryTreatment> treatments, LevelOfEvidence level) {

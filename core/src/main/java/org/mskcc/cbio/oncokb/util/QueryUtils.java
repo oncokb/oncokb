@@ -14,9 +14,7 @@ public class QueryUtils {
     public static String getAlterationName(Query query) {
         String name = "";
         if (query != null) {
-            if (!StringUtils.isNullOrEmpty(query.getAlteration())) {
-                name = query.getAlteration().trim();
-            } else {
+            if (StringUtils.isNullOrEmpty(query.getAlteration()) || query.getAlteration().trim().matches("(?i)^fusion$")) {
                 AlterationType alterationType = AlterationType.getByName(query.getAlterationType());
                 if (alterationType != null) {
                     if (alterationType.equals(AlterationType.FUSION) ||
@@ -33,6 +31,10 @@ public class QueryUtils {
                     }
                 }
             }
+        }
+
+        if (StringUtils.isNullOrEmpty(name)) {
+            name = query.getAlteration().trim();
         }
         return name;
     }
