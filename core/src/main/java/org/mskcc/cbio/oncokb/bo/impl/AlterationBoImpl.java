@@ -296,11 +296,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             List<Alteration> includeRangeAlts = findMutationsByConsequenceAndPosition(alteration.getGene(), alteration.getConsequence(), alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations);
 
             // For missense mutation, also include positioned
-            VariantConsequence variantConsequence = new VariantConsequence();
-            variantConsequence.setTerm("NA");
-            List<Alteration> positionVariants = findMutationsByConsequenceAndPositionOnSamePosition(alteration.getGene(), variantConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations);
-
-            includeRangeAlts.addAll(positionVariants);
+            includeRangeAlts.addAll(AlterationUtils.getPositionedAlterations(alteration, fullAlterations));
 
             for (Alteration alt : includeRangeAlts) {
                 if (!alterations.contains(alt)) {

@@ -611,6 +611,25 @@ public final class AlterationUtils {
         return getAlleleAlterationsSub(alteration, fullAlterations);
     }
 
+    // Only for missense alteration
+    public static List<Alteration> getPositionedAlterations(Alteration alteration) {
+        return getPositionedAlterations(alteration, getAllAlterations(alteration.getGene()));
+    }
+
+    // Only for missense alteration
+    public static List<Alteration> getPositionedAlterations(Alteration alteration, Set<Alteration> fullAlterations) {
+        if (alteration.getConsequence() != null && alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant"))) {
+            VariantConsequence variantConsequence = new VariantConsequence();
+            variantConsequence.setTerm("NA");
+            return ApplicationContextSingleton.getAlterationBo().findMutationsByConsequenceAndPositionOnSamePosition(alteration.getGene(), variantConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations);
+        }
+        return new ArrayList<>();
+    }
+
+    public static List<Alteration> getUniqueAlterations(List<Alteration> alterations) {
+        return new ArrayList<>(new LinkedHashSet<>(alterations));
+    }
+
     private static List<Alteration> getAlleleAlterationsSub(Alteration alteration, Set<Alteration> fullAlterations) {
         if (alteration == null || alteration.getConsequence() == null ||
             !alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant"))) {
