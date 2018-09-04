@@ -64,8 +64,8 @@
                             <span class="tage tage-label label-primary">{{ y.location }}</span>
                             <span class="tage tage-label label-success">{{ y.operation }} </span>
                             <span class="tage tage-label label-warning">{{ y.lastEditBy }}</span>
-                            <span ng-if="y.new" class="tage tage-label label-new">{{ y.new }} </span>
-                            <span ng-if="y.old && !y.diffHTML" class="tage tage-label label-old">{{ y.old }}</span>
+                            <span ng-if="y.new" class="tage tage-label label-new">{{y.new | json}}</span>
+                            <span ng-if="y.old && !y.diffHTML" class="tage tage-label label-old">{{ y.old | json}}</span>
                             <span ng-if="y.diffHTML" class="tage tage-label label-old" ng-bind-html="y.diffHTML"></span>
                         </li>
                     </ul>

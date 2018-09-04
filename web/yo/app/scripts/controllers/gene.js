@@ -726,6 +726,7 @@ angular.module('oncokbApp')
                 evidencesAllUsers[userName] = {
                     updatedEvidences: {},
                     historyData: {
+                        hugoSymbol: $scope.gene.name,
                         geneType: [],
                         update: [],
                         deletion: []
@@ -754,11 +755,15 @@ angular.module('oncokbApp')
                     } else {
                         updatedBy = $scope.gene.type.tsg_review.updatedBy;
                     }
+                    var newContent = $scope.gene.type.tsg + '  ' + $scope.gene.type.ocg;
+                    var oldContent = mainUtils.getOldGeneType($scope.gene.type);
                     evidencesAllUsers[userName].historyData.geneType = [{
                         lastEditBy: updatedBy,
                         operation: 'update',
                         uuids: $scope.gene.type_uuid,
-                        location: 'Gene Type'
+                        location: 'Gene Type',
+                        new: newContent.trim(),
+                        old: oldContent.trim()
                     }];
                 }
                 _.each($scope.mutations, function (mutation) {
@@ -767,7 +772,7 @@ angular.module('oncokbApp')
                         if (mainUtils.processedInReview('remove', mutation.name_uuid)) {
                             evidencesAllUsers[userName].deletedEvidences = collectUUIDs('mutation', mutation, evidencesAllUsers[userName].deletedEvidences, 'evidenceOnly');
                             evidencesAllUsers[userName].deletedEvidenceModels.push({type: 'mutation', mutation: mutation});
-                            evidencesAllUsers[userName].historyData.deletion.push({ operation: 'delete', lastEditBy: mutation.name_review.updatedBy, location: mutation.name });
+                            evidencesAllUsers[userName].historyData.deletion.push({ operation: 'delete', lastEditBy: mutation.name_review.updatedBy, location: mutation.name, old: mutation });
                             return true;
                         } else if (mainUtils.processedInReview('add', mutation.name_uuid)) {
                             processAddedSection(userName, 'mutation', mutation);
@@ -786,7 +791,7 @@ angular.module('oncokbApp')
                             if (mainUtils.processedInReview('remove', tumor.cancerTypes_uuid)) {
                                 evidencesAllUsers[userName].deletedEvidences = collectUUIDs('tumor', tumor, evidencesAllUsers[userName].deletedEvidences, 'evidenceOnly');
                                 evidencesAllUsers[userName].deletedEvidenceModels.push({type: 'tumor', mutation: mutation, tumor: tumor});
-                                evidencesAllUsers[userName].historyData.deletion.push({ operation: 'delete', lastEditBy: tumor.cancerTypes_review.updatedBy, location: historyStr(mutation, tumor) });
+                                evidencesAllUsers[userName].historyData.deletion.push({ operation: 'delete', lastEditBy: tumor.cancerTypes_review.updatedBy, location: historyStr(mutation, tumor), old: tumor });
                                 return true;
                             } else if (mainUtils.processedInReview('add', tumor.cancerTypes_uuid)) {
                                 processAddedSection(userName, 'tumor', mutation, tumor);
@@ -808,7 +813,7 @@ angular.module('oncokbApp')
                                     if (mainUtils.processedInReview('remove', treatment.name_uuid)) {
                                         evidencesAllUsers[userName].deletedEvidences = collectUUIDs('treatment', treatment, evidencesAllUsers[userName].deletedEvidences, 'evidenceOnly');
                                         evidencesAllUsers[userName].deletedEvidenceModels.push({type: 'treatment', mutation: mutation, tumor: tumor, ti: ti, treatment: treatment});
-                                        evidencesAllUsers[userName].historyData.deletion.push({ operation: 'delete', lastEditBy: treatment.name_review.updatedBy, location: historyStr(mutation, tumor) + ', ' + ti.name + ', ' + treatment.name });
+                                        evidencesAllUsers[userName].historyData.deletion.push({ operation: 'delete', lastEditBy: treatment.name_review.updatedBy, location: historyStr(mutation, tumor) + ', ' + ti.name + ', ' + treatment.name, old: treatment });
                                         return true;
                                     } else if (mainUtils.processedInReview('add', treatment.name_uuid)) {
                                         processAddedSection(userName, 'treatment', mutation, tumor, ti, treatment);
@@ -832,6 +837,7 @@ angular.module('oncokbApp')
                 var deferred = $q.defer();
                 var geneTypeEvidence = evidencesAllUsers[userName].geneTypeEvidence;
                 var historyData = evidencesAllUsers[userName].historyData.geneType;
+                historyData.hugoSymbol = evidencesAllUsers[userName].historyData.hugoSymbol;
                 DatabaseConnector.updateGeneType($scope.gene.name, geneTypeEvidence, historyData, function (result) {
                     $scope.modelUpdate('GENE_TYPE', null, null, null, null);
                     deferred.resolve();
@@ -846,6 +852,7 @@ angular.module('oncokbApp')
                 var updatedEvidenceModels = evidencesAllUsers[userName].updatedEvidenceModels;
                 var updatedEvidences = evidencesAllUsers[userName].updatedEvidences;
                 var historyData = evidencesAllUsers[userName].historyData.update;
+                historyData.hugoSymbol = evidencesAllUsers[userName].historyData.hugoSymbol;
                 DatabaseConnector.updateEvidenceBatch(updatedEvidences, historyData, function (result) {
                     for (var i = 0; i < updatedEvidenceModels.length; i++) {
                         $scope.modelUpdate(updatedEvidenceModels[i][0], updatedEvidenceModels[i][1], updatedEvidenceModels[i][2], updatedEvidenceModels[i][3], updatedEvidenceModels[i][4]);
@@ -861,6 +868,7 @@ angular.module('oncokbApp')
                 var deletedEvidenceModels = evidencesAllUsers[userName].deletedEvidenceModels;
                 var deletedEvidences = evidencesAllUsers[userName].deletedEvidences;
                 var historyData = evidencesAllUsers[userName].historyData.deletion;
+                historyData.hugoSymbol = evidencesAllUsers[userName].historyData.hugoSymbol;
                 DatabaseConnector.deleteEvidences(deletedEvidences, historyData, function (result) {
                     _.each(deletedEvidenceModels, function (item) {
                         var data = $scope.getRefs(item.mutation, item.tumor, item.ti, item.treatment);
@@ -1379,11 +1387,13 @@ angular.module('oncokbApp')
                     case 'mutation':
                         historyData.location = mutation.name;
                         historyData.lastEditBy = mutation.name_review.updatedBy;
+                        historyData.new = mutation;
                         formSectionEvidences(type, mutation, tumor, TI, treatment, evidences, historyData);
                         break;
                     case 'tumor':
                         historyData.location = historyStr(mutation, tumor);
                         historyData.lastEditBy = tumor.cancerTypes_review.updatedBy;
+                        historyData.new = tumor;
                         formSectionEvidences(type, mutation, tumor, TI, treatment, evidences, historyData);
                         break;
                     case 'TI':
@@ -1392,6 +1402,7 @@ angular.module('oncokbApp')
                     case 'treatment':
                         historyData.location = historyStr(mutation, tumor) + ', ' + TI.name + ', ' + treatment.name;
                         historyData.lastEditBy = treatment.name_review.updatedBy;
+                        historyData.new = treatment;
                         formSectionEvidences(type, mutation, tumor, TI, treatment, evidences, historyData);
                         break;
                     case 'GENE_SUMMARY':

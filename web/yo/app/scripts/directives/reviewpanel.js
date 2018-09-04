@@ -207,17 +207,7 @@ angular.module('oncokbApp')
                             tsg: !(!$scope.obj.type.tsg)
                         };
                         var newContent = $scope.obj.type.tsg + '  ' + $scope.obj.type.ocg;
-                        var oldContent = '';
-                        if (_.isUndefined($scope.obj.type.tsg_review) || _.isUndefined($scope.obj.type.tsg_review.lastReviewed)) {
-                            oldContent = $scope.obj.type.tsg;
-                        } else if (!_.isUndefined($scope.obj.type.tsg_review.lastReviewed)) {
-                            oldContent = $scope.obj.type.tsg_review.lastReviewed;
-                        }
-                        if (_.isUndefined($scope.obj.type.ocg_review) || _.isUndefined($scope.obj.type.ocg_review.lastReviewed)) {
-                            oldContent = oldContent + '  ' + $scope.obj.type.ocg;
-                        } else if (!_.isUndefined($scope.obj.type.ocg_review.lastReviewed)) {
-                            oldContent = oldContent + '  ' + $scope.obj.type.ocg_review.lastReviewed;
-                        }
+                        var oldContent = mainUtils.getOldGeneType($scope.obj.type);
                         var historyData = [{
                             lastEditBy: ReviewResource.mostRecent[$scope.uuid].updatedBy,
                             new: newContent.trim(),

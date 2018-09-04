@@ -53,7 +53,8 @@ angular.module('oncokbApp')
                 if ($scope.dateRange.startDate && $scope.dateRange.endDate) {
                     hasDateRange = true;
                     startTimestamp = new Date($scope.dateRange.startDate.format('YYYY-MM-DD')).getTime();
-                    endTimestamp = new Date($scope.dateRange.endDate.format('YYYY-MM-DD')).getTime();
+                    var endDate = moment($scope.dateRange.endDate).add(1, 'days');
+                    endTimestamp = new Date(endDate.format('YYYY-MM-DD')).getTime();
                 }
                 loadFiles.load('history').then(function(success) {
                     var historyResults = [];
