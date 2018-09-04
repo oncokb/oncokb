@@ -2,9 +2,9 @@
 
 angular.module('oncokbApp')
     .controller('ToolsCtrl', ['$scope', 'dialogs', 'OncoKB', 'DatabaseConnector', '$timeout', '_', 'FindRegex',
-        'mainUtils', 'loadFiles', '$rootScope', 'DTColumnDefBuilder', 'DTOptionsBuilder',
+        'mainUtils', 'loadFiles', '$rootScope', 'DTColumnDefBuilder', 'DTOptionsBuilder', '$firebaseArray', '$q',
         function($scope, dialogs, OncoKB, DatabaseConnector, $timeout, _, FindRegex, mainUtils, loadFiles, $rootScope,
-                 DTColumnDefBuilder, DTOptionsBuilder) {
+                 DTColumnDefBuilder, DTOptionsBuilder, $firebaseArray, $q) {
             $scope.init = function() {
                 $scope.loading = false;
                 $scope.typeCheckboxes = ['update', 'name change', 'add', 'delete'];
@@ -601,4 +601,43 @@ angular.module('oncokbApp')
                     $scope.selectedTypeCheckboxes.push(checkbox);
                 }
             };
+            $scope.developerCheck = function() {
+                return mainUtils.developerCheck($rootScope.me.name);
+            };
+            $scope.status = {
+                refactoring: false
+            };
+            $scope.refactorHistory =  function() {
+                $scope.status.refactoring = true;
+                _.each($scope.geneNames, function(hugoSymbol, index) {
+                    addHistoryByHugoSymbol(hugoSymbol).then(function (res) {
+                        if (index === _.keys($scope.geneNames).length - 1) {
+                            $scope.status.refactoring = false;
+                        }
+                    }, function(error) {
+                        console.log(error);
+                    });
+                });
+            };
+            function addHistoryByHugoSymbol(hugoSymbol) {
+                var defer = $q.defer();
+                var historyItems = $rootScope.historyData[hugoSymbol].api;
+                var historyList = $firebaseArray(firebase.database().ref('NewHistory/' + hugoSymbol + '/api'));
+                _.each(historyItems, function (item, index) {
+                    historyList.$add({
+                        admin: item.admin,
+                        timeStamp: item.timeStamp,
+                        records: item.records
+                    }).then(function(ref) {
+                        if (index === historyItems.length - 1) {
+                            defer.resolve();
+                        }
+                    }, function (error) {
+                        mainUtils.sendEmail('dev.oncokb@gmail.com', 'Failed to add a new history record for ' + hugoSymbol
+                            + '.', 'Content: \n' + JSON.stringify(item) + '\n\nError: \n' + JSON.stringify(error));
+                        defer.reject(error);
+                    });
+                });
+                return defer.promise;
+            }
         }]);
