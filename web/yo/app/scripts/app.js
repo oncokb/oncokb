@@ -181,14 +181,26 @@ angular.module('oncokbApp').run(
             $rootScope.$on('$routeChangeStart', function(event, next) {
                 var fromIndex = window.location.href.indexOf('/gene/');
                 var hugoSymbol = '';
+                var regex = /\/([^\/]+)\/?$/;
                 if (fromIndex !== -1) {
                     //When the curator left the gene page
-                    hugoSymbol = window.location.href.substring(fromIndex+6);
+                    hugoSymbol = window.location.href.match(regex)[1];
+                    window.localStorage.geneName = hugoSymbol;
                 }
                 var toIndex = $location.path().indexOf('/gene/');
                 if (toIndex !== -1) {
                     //When the curator enter the gene page
-                    hugoSymbol = $location.path().substring(toIndex+6);
+                    hugoSymbol = $location.path().match(regex)[1];
+                    window.localStorage.geneName = hugoSymbol;
+                }
+                if (toIndex === -1) {
+                    var filteredUrl = $location.path().match(regex);
+                    if (filteredUrl && filteredUrl.length > 1) {
+                        window.localStorage.tab = filteredUrl[1];
+                        if (fromIndex === -1) {
+                            window.localStorage.geneName = '';
+                        }
+                    }
                 }
                 if (fromIndex !== -1 || toIndex !== -1) {
                     loadFiles.load(['collaborators']).then(function() {
