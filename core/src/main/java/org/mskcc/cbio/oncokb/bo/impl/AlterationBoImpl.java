@@ -100,16 +100,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         // Don't search for NA cases
         if (gene != null && consequence != null && !consequence.getTerm().equals("NA")) {
             if (alterations != null && alterations.size() > 0) {
-                for (Alteration alteration : alterations) {
-                    if (alteration.getGene().equals(gene) && alteration.getConsequence() != null && alteration.getConsequence().equals(consequence)) {
-
-                        //For variant, as long as they are overlapped to each, return the alteration
-                        if (end >= alteration.getProteinStart()
-                            && start <= alteration.getProteinEnd()) {
-                            result.add(alteration);
-                        }
-                    }
-                }
+                result.addAll(AlterationUtils.findOverlapAlteration(new HashSet<>(alterations), gene, consequence, start, end));
             } else {
                 Collection<Alteration> queryResult;
                 if (CacheUtils.isEnabled()) {
@@ -313,10 +304,8 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         }
 
         // Match all variants with `any` as consequence. Currently, only format start_end mut is supported.
-        if (alteration.getProteinStart() != null && alteration.getProteinStart() > 0 && alteration.getProteinEnd() != null && alteration.getProteinEnd() < 100000) {
-            VariantConsequence anyConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm("any");
-            alterations.addAll(findMutationsByConsequenceAndPosition(alteration.getGene(), anyConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations));
-        }
+        VariantConsequence anyConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm("any");
+        alterations.addAll(findMutationsByConsequenceAndPosition(alteration.getGene(), anyConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations));
 
         // Remove all range mutations as relevant for truncating mutations in oncogenes
         oncogeneTruncMuts(alteration, alterations);

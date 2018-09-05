@@ -32,12 +32,32 @@ public final class AlterationUtils {
         throw new AssertionError();
     }
 
+    public static Set<Alteration> findOverlapAlteration(Set<Alteration> alterations, Gene gene, VariantConsequence consequence, int start, int end) {
+        Set<Alteration> overlaps = new HashSet<>();
+        for (Alteration alteration : alterations) {
+            if (alteration.getGene().equals(gene) && alteration.getConsequence() != null && alteration.getConsequence().equals(consequence)) {
+                //For alteration without specific position, do not do intersection
+                if (start <= AlterationPositionBoundary.START.getValue() || end >= AlterationPositionBoundary.END.getValue()) {
+                    if (start >= alteration.getProteinStart()
+                        && end <= alteration.getProteinEnd()) {
+                        overlaps.add(alteration);
+                    }
+                } else if (end >= alteration.getProteinStart()
+                    && start <= alteration.getProteinEnd()) {
+                    //For variant, as long as they are overlapped to each, return the alteration
+                    overlaps.add(alteration);
+                }
+            }
+        }
+        return overlaps;
+    }
+
     public static void annotateAlteration(Alteration alteration, String proteinChange) {
         String consequence = "NA";
         String ref = null;
         String var = null;
-        Integer start = -1;
-        Integer end = 100000;
+        Integer start = AlterationPositionBoundary.START.getValue();
+        Integer end = AlterationPositionBoundary.END.getValue();
 
         if (alteration == null) {
             return;
@@ -214,11 +234,11 @@ public final class AlterationUtils {
             alteration.setVariantResidues(var);
         }
 
-        if (alteration.getProteinStart() == null || (start != null && start != -1)) {
+        if (alteration.getProteinStart() == null || (start != null && start != AlterationPositionBoundary.START.getValue())) {
             alteration.setProteinStart(start);
         }
 
-        if (alteration.getProteinEnd() == null || (end != null && end != 100000)) {
+        if (alteration.getProteinEnd() == null || (end != null && end != AlterationPositionBoundary.END.getValue())) {
             alteration.setProteinEnd(end);
         }
 
