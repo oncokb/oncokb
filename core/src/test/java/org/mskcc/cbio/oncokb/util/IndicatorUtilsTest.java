@@ -373,6 +373,17 @@ public class IndicatorUtilsTest {
         assertEquals("The oncogenicity is not Oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The highest sensitive level is not 1, but it should be.", LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
         assertEquals("The gene summary is not empty, but it should be.", "", indicatorQueryResp.getGeneSummary());
+        assertEquals("The variant summary is not expected.", "Genetic or epigenetic alterations resulting in loss of function of mismatch repair (MMR) genes lead to a microsatellite instability-high (MSI-H)/mismatch repair deficient (MMR-D) phenotype (PMID: 23636398, 22810696). The MSIsensor score detected in this tumor indicates MSI-H/MMR-D status.", indicatorQueryResp.getVariantSummary());
+        assertEquals("The tumor type summary is not expected.", "The anti-PD-1 antibodies pembrolizumab or nivolumab, as single-agents, are FDA-approved for the treatment of patients with MMR-D or MSI-H metastatic colorectal cancer.", indicatorQueryResp.getTumorTypeSummary());
+
+        query = new Query(null, null, null, null, "MSI-H", null, null, "Endometrioid Carcinoma", null, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, true, null);
+        assertTrue("The geneExist is not false, but it should be.", indicatorQueryResp.getGeneExist() == false);
+        assertEquals("The oncogenicity is not Oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The highest sensitive level is not 1, but it should be.", LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
+        assertEquals("The gene summary is not empty, but it should be.", "", indicatorQueryResp.getGeneSummary());
+        assertEquals("The variant summary is not expected.", "Genetic or epigenetic alterations resulting in loss of function of mismatch repair (MMR) genes lead to a microsatellite instability-high (MSI-H)/mismatch repair deficient (MMR-D) phenotype (PMID: 23636398, 22810696). The MSIsensor score detected in this tumor indicates MSI-H/MMR-D status.", indicatorQueryResp.getVariantSummary());
+        assertEquals("The tumor type summary is not expected.", "The anti-PD-1 antibody pembrolizumab is an FDA-approved drug for therapy of adult and pediatric patients with unresectable or metastatic MSI-H/MMR-D solid cancers that have progressed following prior treatment.", indicatorQueryResp.getTumorTypeSummary());
 
         // Test indicator endpoint supports HGVS
         query = new Query(null, null, null, null, null, null, null, "Melanoma", null, null, null, "7:g.140453136A>T");
