@@ -183,20 +183,19 @@ angular.module('oncokbApp').run(
                 var hugoSymbol = '';
                 if (fromIndex !== -1) {
                     //When the curator left the gene page
-                    hugoSymbol = window.location.href.substring(fromIndex+6);
+                    hugoSymbol = window.location.href.match(/\/([^\/]+)\/?$/)[1];
                     window.localStorage.geneName = hugoSymbol;
                 }
                 var toIndex = $location.path().indexOf('/gene/');
                 if (toIndex !== -1) {
                     //When the curator enter the gene page
-                    hugoSymbol = $location.path().substring(toIndex+6);
+                    hugoSymbol = $location.path().match(/\/([^\/]+)\/?$/)[1];
                     window.localStorage.geneName = hugoSymbol;
                 }
                 if (toIndex === -1) {
-                    var tabs = ['variant', 'genes', 'tools', 'feedback', 'queues'];
-                    var tab = $location.path().substring(1);
-                    if (tabs.includes(tab)) {
-                        window.localStorage.tab = tab;
+                    var filteredUrl = $location.path().match(/\/([^\/]+)\/?$/);
+                    if (filteredUrl && filteredUrl.length > 1) {
+                        window.localStorage.tab = filteredUrl[1];
                         if (fromIndex === -1) {
                             window.localStorage.geneName = '';
                         }
