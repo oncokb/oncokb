@@ -104,6 +104,9 @@ public class FindRelevantAlterationsTest {
                 {"EGFR", "C-terminal domain", null, "C-terminal domain, Oncogenic Mutations"},
                 {"EGFR", "vII", null, "vII, Oncogenic Mutations"},
                 {"EGFR", "vIII", null, "vIII, Oncogenic Mutations"},
+
+                // Do not mapping Oncogenic Mutations to Amplification
+                {"KIT", "Amplification", null, "Amplification"},
             });
     }
 
