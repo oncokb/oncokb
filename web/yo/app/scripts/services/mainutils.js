@@ -536,6 +536,27 @@ angular.module('oncokbApp')
                 return 0;
             }
         }
+        function calculateDiff(oldContent, newContent) {
+            var dmp = new diff_match_patch();
+            var diff = dmp.diff_main(OncoKB.utils.getString(oldContent), OncoKB.utils.getString(newContent));
+            dmp.diff_cleanupSemantic(diff);
+            return dmp.diff_prettyHtml(diff);
+        }
+        function getOldGeneType(type) {
+            var oldContent = '';
+            if (_.isUndefined(type.tsg_review) || _.isUndefined(type.tsg_review.lastReviewed)) {
+                oldContent = type.tsg;
+            } else if (!_.isUndefined(type.tsg_review.lastReviewed)) {
+                oldContent = type.tsg_review.lastReviewed;
+            }
+            if (_.isUndefined(type.ocg_review) || _.isUndefined(type.ocg_review.lastReviewed)) {
+                oldContent = oldContent + '  ' + type.ocg;
+            } else if (!_.isUndefined(type.ocg_review.lastReviewed)) {
+                oldContent = oldContent + '  ' + type.ocg_review.lastReviewed;
+            }
+
+            return oldContent;
+        }
         return {
             setIsoFormAndGeneType: setIsoFormAndGeneType,
             getCancerTypesName: getCancerTypesName,
@@ -565,6 +586,8 @@ angular.module('oncokbApp')
             updateMovingFlag: updateMovingFlag,
             processData: processData,
             shouldExclude: shouldExclude,
-            getTimeStamp: getTimeStamp
+            getTimeStamp: getTimeStamp,
+            calculateDiff: calculateDiff,
+            getOldGeneType: getOldGeneType
         };
     });

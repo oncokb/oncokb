@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.mskcc.cbio.oncokb.model.Alteration;
+import org.mskcc.cbio.oncokb.model.AlterationPositionBoundary;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -51,7 +52,7 @@ public class AnnotateAlterationTest {
 
                 // feature_truncating variant
                 {"D286_L292trunc", "286", "292", "286", "292", null, null, "feature_truncation"},
-                {"Truncating Mutations", "-1", "100000", "-1", "100000", null, null, "feature_truncation"},
+                {"Truncating Mutations", Integer.toString(AlterationPositionBoundary.START.getValue()), Integer.toString(AlterationPositionBoundary.END.getValue()), Integer.toString(AlterationPositionBoundary.START.getValue()), Integer.toString(AlterationPositionBoundary.END.getValue()), null, null, "feature_truncation"},
 
                 // frameshift event
                 {"N457Mfs*22", "457", "457", "457", "457", "N", null, "frameshift_variant"},
@@ -74,8 +75,8 @@ public class AnnotateAlterationTest {
                 {"M1?", "1", "1", "1", "1", "M", "?", "start_lost"},
 
                 // NA
-                {"BCR-ABL1 Fusion", "-1", "100000", "-1", "100000", null, null, "NA"},
-                {"Oncogenic Mutations", "-1", "100000", "-1", "100000", null, null, "NA"},
+                {"BCR-ABL1 Fusion", Integer.toString(AlterationPositionBoundary.START.getValue()), Integer.toString(AlterationPositionBoundary.END.getValue()), Integer.toString(AlterationPositionBoundary.START.getValue()), Integer.toString(AlterationPositionBoundary.END.getValue()), null, null, "NA"},
+                {"Oncogenic Mutations", Integer.toString(AlterationPositionBoundary.START.getValue()), Integer.toString(AlterationPositionBoundary.END.getValue()), Integer.toString(AlterationPositionBoundary.START.getValue()), Integer.toString(AlterationPositionBoundary.END.getValue()), null, null, "NA"},
                 {"V600", "600", "600", "600", "600", "V", null, "NA"},
 
                 // Splice

@@ -321,15 +321,7 @@ public class CacheUtils {
     }
 
     public static Set<Alteration> findMutationsByConsequenceAndPosition(Gene gene, VariantConsequence consequence, int start, int end) {
-        Set<Alteration> alterations = new HashSet<>();
-        for (Alteration alteration : getAlterations(gene.getEntrezGeneId())) {
-            if (alteration.getConsequence().equals(consequence)
-                && alteration.getProteinStart() <= start
-                && alteration.getProteinEnd() >= end) {
-                alterations.add(alteration);
-            }
-        }
-        return alterations;
+        return AlterationUtils.findOverlapAlteration(getAlterations(gene.getEntrezGeneId()), gene, consequence, start, end);
     }
 
     public static Set<Alteration> findMutationsByConsequenceAndPositionOnSamePosition(Gene gene, VariantConsequence consequence, int start, int end) {

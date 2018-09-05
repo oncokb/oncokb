@@ -100,16 +100,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         // Don't search for NA cases
         if (gene != null && consequence != null && !consequence.getTerm().equals("NA")) {
             if (alterations != null && alterations.size() > 0) {
-                for (Alteration alteration : alterations) {
-                    if (alteration.getGene().equals(gene) && alteration.getConsequence() != null && alteration.getConsequence().equals(consequence)) {
-
-                        //For variant, as long as they are overlapped to each, return the alteration
-                        if (end >= alteration.getProteinStart()
-                            && start <= alteration.getProteinEnd()) {
-                            result.add(alteration);
-                        }
-                    }
-                }
+                result.addAll(AlterationUtils.findOverlapAlteration(new HashSet<>(alterations), gene, consequence, start, end));
             } else {
                 Collection<Alteration> queryResult;
                 if (CacheUtils.isEnabled()) {
@@ -296,11 +287,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             List<Alteration> includeRangeAlts = findMutationsByConsequenceAndPosition(alteration.getGene(), alteration.getConsequence(), alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations);
 
             // For missense mutation, also include positioned
-            VariantConsequence variantConsequence = new VariantConsequence();
-            variantConsequence.setTerm("NA");
-            List<Alteration> positionVariants = findMutationsByConsequenceAndPositionOnSamePosition(alteration.getGene(), variantConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations);
-
-            includeRangeAlts.addAll(positionVariants);
+            includeRangeAlts.addAll(AlterationUtils.getPositionedAlterations(alteration, fullAlterations));
 
             for (Alteration alt : includeRangeAlts) {
                 if (!alterations.contains(alt)) {

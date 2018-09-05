@@ -5,15 +5,11 @@
 package org.mskcc.cbio.oncokb.dao.impl;
 
 import org.mskcc.cbio.oncokb.dao.AlterationDao;
-import org.mskcc.cbio.oncokb.model.Alteration;
-import org.mskcc.cbio.oncokb.model.AlterationType;
-import org.mskcc.cbio.oncokb.model.Gene;
-import org.mskcc.cbio.oncokb.model.VariantConsequence;
+import org.mskcc.cbio.oncokb.model.*;
 
 import java.util.List;
 
 /**
- *
  * @author jgao
  */
 public class AlterationDaoImpl extends GenericDaoImpl<Alteration, Integer> implements AlterationDao {
@@ -36,7 +32,11 @@ public class AlterationDaoImpl extends GenericDaoImpl<Alteration, Integer> imple
 
     @Override
     public List<Alteration> findMutationsByConsequenceAndPosition(Gene gene, VariantConsequence consequence, int start, int end) {
-        return findByNamedQuery("findMutationsByConsequenceAndPosition", gene, consequence, start, end);
+        if (start <= AlterationPositionBoundary.START.getValue() || end >= AlterationPositionBoundary.END.getValue()) {
+            return findByNamedQuery("findMutationsByConsequenceAndPosition", gene, consequence, start, end);
+        } else {
+            return findByNamedQuery("findMutationsByConsequenceAndPosition", gene, consequence, end, start);
+        }
     }
 
     @Override

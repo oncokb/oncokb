@@ -113,7 +113,6 @@ angular.module('oncokbApp')
             var sortedLevel = _.keys($rootScope.meta.levelsDesc).sort();
             $scope.getMutationMessages = function () {
                 $scope.mutationContent = {};
-                var tempNameList = [];
                 for (var i = 0; i < $scope.mutations.length; i++) {
                     var mutation = $scope.mutations[i];
                     $scope.indicateMutationContent(mutation);
@@ -727,6 +726,7 @@ angular.module('oncokbApp')
                 evidencesAllUsers[userName] = {
                     updatedEvidences: {},
                     historyData: {
+                        hugoSymbol: $scope.gene.name,
                         geneType: [],
                         update: [],
                         deletion: []
@@ -755,11 +755,15 @@ angular.module('oncokbApp')
                     } else {
                         updatedBy = $scope.gene.type.tsg_review.updatedBy;
                     }
+                    var newContent = $scope.gene.type.tsg + '  ' + $scope.gene.type.ocg;
+                    var oldContent = mainUtils.getOldGeneType($scope.gene.type);
                     evidencesAllUsers[userName].historyData.geneType = [{
                         lastEditBy: updatedBy,
                         operation: 'update',
                         uuids: $scope.gene.type_uuid,
-                        location: 'Gene Type'
+                        location: 'Gene Type',
+                        new: newContent.trim(),
+                        old: oldContent.trim()
                     }];
                 }
                 _.each($scope.mutations, function (mutation) {
@@ -768,7 +772,7 @@ angular.module('oncokbApp')
                         if (mainUtils.processedInReview('remove', mutation.name_uuid)) {
                             evidencesAllUsers[userName].deletedEvidences = collectUUIDs('mutation', mutation, evidencesAllUsers[userName].deletedEvidences, 'evidenceOnly');
                             evidencesAllUsers[userName].deletedEvidenceModels.push({type: 'mutation', mutation: mutation});
-                            evidencesAllUsers[userName].historyData.deletion.push({ operation: 'delete', lastEditBy: mutation.name_review.updatedBy, location: mutation.name });
+                            evidencesAllUsers[userName].historyData.deletion.push({ operation: 'delete', lastEditBy: mutation.name_review.updatedBy, location: mutation.name, old: mutation });
                             return true;
                         } else if (mainUtils.processedInReview('add', mutation.name_uuid)) {
                             processAddedSection(userName, 'mutation', mutation);
@@ -787,7 +791,7 @@ angular.module('oncokbApp')
                             if (mainUtils.processedInReview('remove', tumor.cancerTypes_uuid)) {
                                 evidencesAllUsers[userName].deletedEvidences = collectUUIDs('tumor', tumor, evidencesAllUsers[userName].deletedEvidences, 'evidenceOnly');
                                 evidencesAllUsers[userName].deletedEvidenceModels.push({type: 'tumor', mutation: mutation, tumor: tumor});
-                                evidencesAllUsers[userName].historyData.deletion.push({ operation: 'delete', lastEditBy: tumor.cancerTypes_review.updatedBy, location: historyStr(mutation, tumor) });
+                                evidencesAllUsers[userName].historyData.deletion.push({ operation: 'delete', lastEditBy: tumor.cancerTypes_review.updatedBy, location: historyStr(mutation, tumor), old: tumor });
                                 return true;
                             } else if (mainUtils.processedInReview('add', tumor.cancerTypes_uuid)) {
                                 processAddedSection(userName, 'tumor', mutation, tumor);
@@ -809,7 +813,7 @@ angular.module('oncokbApp')
                                     if (mainUtils.processedInReview('remove', treatment.name_uuid)) {
                                         evidencesAllUsers[userName].deletedEvidences = collectUUIDs('treatment', treatment, evidencesAllUsers[userName].deletedEvidences, 'evidenceOnly');
                                         evidencesAllUsers[userName].deletedEvidenceModels.push({type: 'treatment', mutation: mutation, tumor: tumor, ti: ti, treatment: treatment});
-                                        evidencesAllUsers[userName].historyData.deletion.push({ operation: 'delete', lastEditBy: treatment.name_review.updatedBy, location: historyStr(mutation, tumor) + ', ' + ti.name + ', ' + treatment.name });
+                                        evidencesAllUsers[userName].historyData.deletion.push({ operation: 'delete', lastEditBy: treatment.name_review.updatedBy, location: historyStr(mutation, tumor) + ', ' + ti.name + ', ' + treatment.name, old: treatment });
                                         return true;
                                     } else if (mainUtils.processedInReview('add', treatment.name_uuid)) {
                                         processAddedSection(userName, 'treatment', mutation, tumor, ti, treatment);
@@ -833,6 +837,7 @@ angular.module('oncokbApp')
                 var deferred = $q.defer();
                 var geneTypeEvidence = evidencesAllUsers[userName].geneTypeEvidence;
                 var historyData = evidencesAllUsers[userName].historyData.geneType;
+                historyData.hugoSymbol = evidencesAllUsers[userName].historyData.hugoSymbol;
                 DatabaseConnector.updateGeneType($scope.gene.name, geneTypeEvidence, historyData, function (result) {
                     $scope.modelUpdate('GENE_TYPE', null, null, null, null);
                     deferred.resolve();
@@ -847,6 +852,7 @@ angular.module('oncokbApp')
                 var updatedEvidenceModels = evidencesAllUsers[userName].updatedEvidenceModels;
                 var updatedEvidences = evidencesAllUsers[userName].updatedEvidences;
                 var historyData = evidencesAllUsers[userName].historyData.update;
+                historyData.hugoSymbol = evidencesAllUsers[userName].historyData.hugoSymbol;
                 DatabaseConnector.updateEvidenceBatch(updatedEvidences, historyData, function (result) {
                     for (var i = 0; i < updatedEvidenceModels.length; i++) {
                         $scope.modelUpdate(updatedEvidenceModels[i][0], updatedEvidenceModels[i][1], updatedEvidenceModels[i][2], updatedEvidenceModels[i][3], updatedEvidenceModels[i][4]);
@@ -862,6 +868,7 @@ angular.module('oncokbApp')
                 var deletedEvidenceModels = evidencesAllUsers[userName].deletedEvidenceModels;
                 var deletedEvidences = evidencesAllUsers[userName].deletedEvidences;
                 var historyData = evidencesAllUsers[userName].historyData.deletion;
+                historyData.hugoSymbol = evidencesAllUsers[userName].historyData.hugoSymbol;
                 DatabaseConnector.deleteEvidences(deletedEvidences, historyData, function (result) {
                     _.each(deletedEvidenceModels, function (item) {
                         var data = $scope.getRefs(item.mutation, item.tumor, item.ti, item.treatment);
@@ -922,13 +929,13 @@ angular.module('oncokbApp')
                     'R2': 'LEVEL_R2',
                     'R3': 'LEVEL_R3',
                     'no': 'NO',
-                    'P1': 'LEVEL_P1',
-                    'P2': 'LEVEL_P2',
-                    'P3': 'LEVEL_P3',
-                    'P4': 'LEVEL_P4',
-                    'D1': 'LEVEL_D1',
-                    'D2': 'LEVEL_D2',
-                    'D3': 'LEVEL_D3'
+                    'Px1': 'LEVEL_Px1',
+                    'Px2': 'LEVEL_Px2',
+                    'Px3': 'LEVEL_Px3',
+                    'Px4': 'LEVEL_Px4',
+                    'Dx1': 'LEVEL_Dx1',
+                    'Dx2': 'LEVEL_Dx2',
+                    'Dx3': 'LEVEL_Dx3'
                 };
                 var extraData = _.clone(data);
                 var i = 0;
@@ -1380,11 +1387,13 @@ angular.module('oncokbApp')
                     case 'mutation':
                         historyData.location = mutation.name;
                         historyData.lastEditBy = mutation.name_review.updatedBy;
+                        historyData.new = mutation;
                         formSectionEvidences(type, mutation, tumor, TI, treatment, evidences, historyData);
                         break;
                     case 'tumor':
                         historyData.location = historyStr(mutation, tumor);
                         historyData.lastEditBy = tumor.cancerTypes_review.updatedBy;
+                        historyData.new = tumor;
                         formSectionEvidences(type, mutation, tumor, TI, treatment, evidences, historyData);
                         break;
                     case 'TI':
@@ -1393,6 +1402,7 @@ angular.module('oncokbApp')
                     case 'treatment':
                         historyData.location = historyStr(mutation, tumor) + ', ' + TI.name + ', ' + treatment.name;
                         historyData.lastEditBy = treatment.name_review.updatedBy;
+                        historyData.new = treatment;
                         formSectionEvidences(type, mutation, tumor, TI, treatment, evidences, historyData);
                         break;
                     case 'GENE_SUMMARY':
@@ -1579,6 +1589,7 @@ angular.module('oncokbApp')
                         break;
                 }
                 var historyData = [tempEvidences.historyData];
+                historyData.hugoSymbol = $scope.gene.name;
                 if (_.isEmpty(evidences)) {
                     acceptSection(type, mutation, tumor, ti, treatment);
                     numOfReviewItems.minus(updatedBy);
@@ -2030,6 +2041,7 @@ angular.module('oncokbApp')
                 var allUUIDs = collectUUIDs(type, obj, []);
                 var evidenceUUIDs = collectUUIDs(type, obj, [], 'evidenceOnly');
                 var historyData = [{ operation: 'delete', lastEditBy: (type === 'tumor' ? obj.cancerTypes_review : obj.name_review).updatedBy, location: location, old: obj }];
+                historyData.hugoSymbol = $scope.gene.name;
                 // make the api call to delete evidences
                 var loadingUUID = (type === 'tumor' ? obj.cancerTypes_uuid : obj.name_uuid);
                 if (loadingUUID) {
@@ -2527,27 +2539,27 @@ angular.module('oncokbApp')
                     }
                 });
                 levels.prognostic = [{
-                    value: 'P1',
-                    label: 'Px1 - WHO included criteria'
+                    value: 'Px1',
+                    label: 'Px1 - FDA and/or professional guideline-recognized biomarker prognostic in this indication based on well-powered studies'
                 }, {
-                    value: 'P2',
-                    label: 'Px2 - ELN included criteria (only for AML, may be combined with Px1)'
+                    value: 'Px2',
+                    label: 'Px2 - FDA and/or professional guideline-recognized biomarker prognostic in this indication based on a single or multiple small studies'
                 }, {
-                    value: 'P3',
-                    label: 'Px3 - NCCN included criteria'
+                    value: 'Px3',
+                    label: 'Px3 - Clinical evidence based on well-powered studies that supports the biomarker as being prognostic in this indication'
                 }, {
-                    value: 'P4',
-                    label: 'Px4 - Compelling peer reviewed literature'
+                    value: 'Px4',
+                    label: 'Px4 - Clinical evidence based on single or multiple small studies that supports the biomarker as being prognostic in this indication'
                 }];
                 levels.diagnostic = [{
-                    value: 'D1',
-                    label: 'Dx1 - WHO included criteria'
+                    value: 'Dx1',
+                    label: 'Dx1 - FDA and/or professional guideline-recognized biomarker indicative of diagnosis in this indication'
                 }, {
-                    value: 'D2',
-                    label: 'Dx2 - NCCN included criteria'
+                    value: 'Dx2',
+                    label: 'Dx2 - FDA and/or professional guideline-recognized biomarker that strongly supports diagnosis in this indication'
                 }, {
-                    value: 'D3',
-                    label: 'Dx3 - Compelling peer reviewed literature'
+                    value: 'Dx3',
+                    label: 'Dx3 - Biomarker that may assist disease diagnosis in this indication based on clinical evidence'
                 }];
                 return levels;
             }
@@ -2836,19 +2848,13 @@ angular.module('oncokbApp')
                     deferred1.reject(error);
                 });
                 var deferred2 = $q.defer();
-                $firebaseObject(firebase.database().ref('History/' + $routeParams.geneName)).$bindTo($rootScope, "historyRef").then(function () {
-                    deferred2.resolve('success');
-                }, function (error) {
-                    deferred2.reject('Failed to bind history by gene');
-                });
-                var deferred3 = $q.defer();
                 loadFiles.load(['reviewMeta', 'movingSection'], $routeParams.geneName).then(function() {
-                    deferred3.resolve('success');
+                    deferred2.resolve('success');
                 }, function(error) {
-                    deferred3.reject(error);
+                    deferred2.reject(error);
                 });
                 $scope.vusItems = $firebaseArray(firebase.database().ref('VUS/' + $routeParams.geneName));
-                var deferred4 = $q.defer();
+                var deferred3 = $q.defer();
                 $scope.mutations = $firebaseArray(firebase.database().ref('Genes/' + $routeParams.geneName + '/mutations'));
                 $scope.mutations.$loaded().then(function (success) {
                     $scope.getMutationMessages();
@@ -2856,11 +2862,11 @@ angular.module('oncokbApp')
                         $scope.initialOpen[mutation.name_uuid] = false;
                         $scope.mutIndexByUUID[mutation.name_uuid] = index;
                     });
-                    deferred4.resolve();
+                    deferred3.resolve();
                 }, function (error) {
-                    deferred4.reject(error);
+                    deferred3.reject(error);
                 });
-                var deferred5 = $q.defer();
+                var deferred4 = $q.defer();
                 $firebaseObject(firebase.database().ref('Meta/' + $routeParams.geneName)).$bindTo($scope, "geneMeta").then(function () {
                     if (_.isUndefined($scope.geneMeta.review)) {
                         $scope.geneMeta.review = { currentReviewer: ''};
@@ -2868,14 +2874,14 @@ angular.module('oncokbApp')
                         $scope.geneMeta.review.currentReviewer = '';
                     }
                     getAllCollaborators().then(function() {
-                        deferred5.resolve('success');
+                        deferred4.resolve('success');
                     }, function() {
-                        deferred5.reject('fail to get collaborators info');
+                        deferred4.reject('fail to get collaborators info');
                     });
                 }, function (error) {
-                    deferred5.reject('Failed to bind meta by gene');
+                    deferred4.reject('Failed to bind meta by gene');
                 });
-                var bindingAPI = [deferred1.promise, deferred2.promise, deferred3.promise, deferred4.promise, deferred5.promise];
+                var bindingAPI = [deferred1.promise, deferred2.promise, deferred3.promise, deferred4.promise];
                 $q.all(bindingAPI)
                     .then(function (result) {
                         user.setFileeditable([$routeParams.geneName]).then(function (result) {
