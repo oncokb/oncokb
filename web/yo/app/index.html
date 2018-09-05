@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="components/please-wait/build/please-wait.css" />
     <link rel="stylesheet" href="components/spinkit/css/spinkit.css" />
     <link rel="stylesheet" href="components/angular-ui-notification/dist/angular-ui-notification.css" />
+    <link rel="stylesheet" href="components/bootstrap-daterangepicker/daterangepicker.css" />
     <!-- endbower -->
     <link rel="stylesheet" href="components/angular-datatables/dist/plugins/bootstrap/datatables.bootstrap.min.css">
     <link rel="stylesheet" href="_components/jquery.qtip.min.css">
@@ -86,14 +87,14 @@
                             <!-- <span ng-if="!signedIn"><i class="fa fa-google fa-lg"></i> Login with Google</span>
                             <span ng-if="signedIn">Welcome</span> -->
 
-                            <div ng-if="isSignedIn" style="float: left">
+                            <div ng-if="signedInUser.email" style="float: left">
                                 <div style="float: left; margin: 5px">
                                     <span>{{signedInUser.email | cut:true:20}}</span><br/>
                                     <span id="signout" ng-click="signOut()">Sign out</span>
                                 </div>
                                 <img style="float: left;width:50px" ng-if="signedInUser.photoURL !== ''" ng-src="{{signedInUser.photoURL}}">
                             </div>
-                            <div class="btn-group" role="group" ng-show="!isSignedIn" id="googleSignIn">
+                            <div class="btn-group" role="group" ng-show="!signedInUser.email" id="googleSignIn">
                                 <!-- <span id="signInButton">
                                 </span> -->
                                 <!-- <i class="fa fa-google"></i> -->
@@ -174,6 +175,9 @@
     <script src="components/uuid-js/lib/uuid.js"></script>
     <script src="components/Blob/Blob.js"></script>
     <script src="components/google-diff-match-patch-js/diff_match_patch.js"></script>
+    <script src="components/moment/moment.js"></script>
+    <script src="components/bootstrap-daterangepicker/daterangepicker.js"></script>
+    <script src="components/angular-daterangepicker/js/angular-daterangepicker.js"></script>
     <!-- endbower -->
     <!-- endbuild -->
 

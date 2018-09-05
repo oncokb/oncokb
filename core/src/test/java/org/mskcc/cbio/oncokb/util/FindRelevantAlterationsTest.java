@@ -32,6 +32,9 @@ public class FindRelevantAlterationsTest {
     public static Collection<String[]> getParameters() {
         return Arrays.asList(
             new String[][]{
+                {"MSH2", null, null, ""},
+                {"MSH2", "", null, ""},
+
                 // Critical cases
                 {"BRAF", "V600E", null, "V600E, V600A, V600D, V600G, V600K, V600L, V600M, V600Q, V600R, VK600EI, V600, Oncogenic Mutations"},
                 {"SMARCB1", "R374Q", null, "R374Q, R374W, Oncogenic Mutations"},
@@ -104,6 +107,9 @@ public class FindRelevantAlterationsTest {
                 {"EGFR", "C-terminal domain", null, "C-terminal domain, Oncogenic Mutations"},
                 {"EGFR", "vII", null, "vII, Oncogenic Mutations"},
                 {"EGFR", "vIII", null, "vIII, Oncogenic Mutations"},
+
+                // Do not mapping Oncogenic Mutations to Amplification
+                {"KIT", "Amplification", null, "Amplification"},
             });
     }
 

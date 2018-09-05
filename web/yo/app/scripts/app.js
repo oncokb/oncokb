@@ -46,7 +46,8 @@ var oncokbApp = angular.module('oncokbApp', [
     'datatables',
     'datatables.bootstrap',
     'ui.sortable',
-    'firebase'
+    'firebase',
+    'daterangepicker'
 ])
     .value('OncoKB', OncoKB)
     // This is used for typeahead
@@ -180,14 +181,26 @@ angular.module('oncokbApp').run(
             $rootScope.$on('$routeChangeStart', function(event, next) {
                 var fromIndex = window.location.href.indexOf('/gene/');
                 var hugoSymbol = '';
+                var regex = /\/([^\/]+)\/?$/;
                 if (fromIndex !== -1) {
                     //When the curator left the gene page
-                    hugoSymbol = window.location.href.substring(fromIndex+6);
+                    hugoSymbol = window.location.href.match(regex)[1];
+                    window.localStorage.geneName = hugoSymbol;
                 }
                 var toIndex = $location.path().indexOf('/gene/');
                 if (toIndex !== -1) {
                     //When the curator enter the gene page
-                    hugoSymbol = $location.path().substring(toIndex+6);
+                    hugoSymbol = $location.path().match(regex)[1];
+                    window.localStorage.geneName = hugoSymbol;
+                }
+                if (toIndex === -1) {
+                    var filteredUrl = $location.path().match(regex);
+                    if (filteredUrl && filteredUrl.length > 1) {
+                        window.localStorage.tab = filteredUrl[1];
+                        if (fromIndex === -1) {
+                            window.localStorage.geneName = '';
+                        }
+                    }
                 }
                 if (fromIndex !== -1 || toIndex !== -1) {
                     loadFiles.load(['collaborators']).then(function() {
@@ -198,7 +211,7 @@ angular.module('oncokbApp').run(
                         if (fromIndex !== -1) {
                             var genesOpened = $rootScope.collaboratorsMeta[myName];
                             $rootScope.collaboratorsMeta[myName] = _.without(genesOpened, hugoSymbol);
-                        }                        
+                        }
                         if (toIndex !== -1) {
                             if (!$rootScope.collaboratorsMeta[myName]) {
                                 $rootScope.collaboratorsMeta[myName] = [];
@@ -206,18 +219,18 @@ angular.module('oncokbApp').run(
                             if ($rootScope.collaboratorsMeta[myName].indexOf(hugoSymbol) === -1) {
                                 $rootScope.collaboratorsMeta[myName].push(hugoSymbol);
                             }
-                        }                        
+                        }
                     }, function(error) {
                         console.log(error);
                     });
                 }
-                if (!$rootScope.isSignedIn) {
+                if (!$rootScope.isAuthorizedUser) {
                     if (loading) {
                         loadingScreen.finish();
                         loading = false;
                     }
                     $location.path('/');
-                }                
+                }
             });
             // Other unidentify error
             $rootScope.$on('oncokbError', function(event, data) {

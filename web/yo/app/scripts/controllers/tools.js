@@ -7,10 +7,19 @@ angular.module('oncokbApp')
                  DTColumnDefBuilder, DTOptionsBuilder) {
             $scope.init = function() {
                 $scope.loading = false;
-                loadFiles.load(['meta']).then(function() {
-                    $scope.geneNames = _.without(_.keys($rootScope.metaData), 'collaborators');
+                $scope.typeCheckboxes = ['update', 'name change', 'add', 'delete'];
+                $scope.selectedTypeCheckboxes = [];
+                $scope.dateRange = {startDate: null, endDate: null};
+                $scope.dateRangeOptions = {
+                    ranges: {
+                        'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+                        'Last 30 Days': [moment().subtract(29, 'days'), moment()]
+                    }
+                };
+                loadFiles.load('history').then(function() {
+                    $scope.geneNames = _.keys($rootScope.historyData);
                 }, function() {
-                    console.log('fail to load meta file');
+                    dialogs.notify('Warning', 'Sorry, the system failed to load history. Please try again or search later.');
                 });
             };
             var sorting = [[2, 'desc'], [1, 'asc'], [0, 'asc']];
@@ -28,29 +37,132 @@ angular.module('oncokbApp')
                 DTColumnDefBuilder.newColumnDef(3)
             ];
 
-            $scope.disableHistoryButton = true;
-            $scope.checkHistoryInputStatus = function() {
-                if (_.isArray($scope.genesForHistory) && $scope.genesForHistory.length > 0) {
-                    $scope.disableHistoryButton = false;
-                } else {
-                    $scope.disableHistoryButton = true;
-                }
-            };
             $scope.searchHistory = function(genesForHistory) {
+                $scope.errorMessage = '';
+                $scope.historySearchResults = [];
+                if ((!$scope.dateRange.startDate || !$scope.dateRange.endDate) &&
+                    (!_.isArray($scope.genesForHistory) || $scope.genesForHistory.length === 0) &&
+                    $scope.selectedTypeCheckboxes.length === 0) {
+                    $scope.errorMessage = 'Please choose conditions from Gene, Date or Type.';
+                    return;
+                }
                 $scope.loading = true;
+                var startTimestamp = 0;
+                var endTimestamp = 0;
+                var hasDateRange = false;
+                if ($scope.dateRange.startDate && $scope.dateRange.endDate) {
+                    hasDateRange = true;
+                    startTimestamp = new Date($scope.dateRange.startDate.format('YYYY-MM-DD')).getTime();
+                    var endDate = moment($scope.dateRange.endDate).add(1, 'days');
+                    endTimestamp = new Date(endDate.format('YYYY-MM-DD')).getTime();
+                }
                 loadFiles.load('history').then(function(success) {
                     var historyResults = [];
-                    _.each(_.keys($rootScope.historyData), function(hugoSymbol) {
-                        if (genesForHistory.indexOf(hugoSymbol) !== -1){
-                            _.each($rootScope.historyData[hugoSymbol].api, function(item) {
-                                historyResults.push({gene: hugoSymbol, admin: item.admin, timeStamp: item.timeStamp, records: item.records});
-                            });
+                    if (_.isArray($scope.genesForHistory) && $scope.genesForHistory.length > 0) {
+                        if ($scope.selectedTypeCheckboxes.length > 0) {
+                            if (hasDateRange) {
+                                // Get history by gene & date & operation
+                                historyResults = getHistoryByOperation(getHistoryByDateRange(getHistoryByHugoSymbol($rootScope.historyData, genesForHistory), startTimestamp, endTimestamp), $scope.selectedTypeCheckboxes);
+                            } else {
+                                // Get history by gene & operation
+                                historyResults = getHistoryByOperation(getHistoryByHugoSymbol($rootScope.historyData, genesForHistory), $scope.selectedTypeCheckboxes);
+                            }
+                        } else {
+                            if (hasDateRange) {
+                                // Get history by gene & date
+                                historyResults = getHistoryByDateRange(getHistoryByHugoSymbol($rootScope.historyData, genesForHistory), startTimestamp, endTimestamp);
+                            } else {
+                                // Get history by gene
+                                historyResults = getHistoryByHugoSymbol($rootScope.historyData, genesForHistory);
+                            }
                         }
-                    });
+                    } else if (hasDateRange) {
+                        if ($scope.selectedTypeCheckboxes.length > 0) {
+                            // Get history by operation & date
+                            historyResults = getHistoryByOperation(getHistoryByDateRange($rootScope.historyData, startTimestamp, endTimestamp), $scope.selectedTypeCheckboxes);
+                        } else {
+                            // Get history by date
+                            historyResults = getHistoryByDateRange($rootScope.historyData, startTimestamp, endTimestamp);
+                        }
+                    } else if ($scope.selectedTypeCheckboxes.length > 0) {
+                        // Get history by operation
+                        historyResults = getHistoryByOperation($rootScope.historyData, $scope.selectedTypeCheckboxes);
+                    }
                     $scope.historySearchResults = historyResults;
+                    if ($scope.historySearchResults.length === 0) {
+                        $scope.errorMessage = 'Sorry, there are no results that match your search.';
+                    } else if ($scope.historySearchResults.length > 0) {
+                        _.each($scope.historySearchResults, function(history) {
+                            _.each(history.records, function(record) {
+                                if (record.old && record.new) {
+                                    record.diffHTML = mainUtils.calculateDiff(record.old, record.new);
+                                }
+                            });
+                        });
+                    }
                     $scope.loading = false;
                 });
             };
+            function getHistoryByHugoSymbol(historyData, hugoSymbols) {
+                var results =[];
+                _.each(hugoSymbols, function(hugoSymbol) {
+                    _.each(historyData[hugoSymbol].api, function(item) {
+                        results.push({gene: hugoSymbol, admin: item.admin, timeStamp: item.timeStamp, records: item.records});
+                    });
+                });
+                return results;
+            }
+            function getHistoryByDateRange(historyData, startTimestamp, endTimestamp) {
+                var results =[];
+                _.each(historyData, function(history, hugoSymbol) {
+                    if (history.gene) {
+                        hugoSymbol = history.gene;
+                    }
+                    if (history.api) {
+                        _.each(history.api, function(item) {
+                            if (startTimestamp < item.timeStamp && item.timeStamp <= endTimestamp) {
+                                results.push({gene: hugoSymbol, admin: item.admin, timeStamp: item.timeStamp, records: item.records});
+                            }
+                        });
+                    } else if (startTimestamp < history.timeStamp && history.timeStamp <= endTimestamp) {
+                        results.push({gene: hugoSymbol, admin: history.admin, timeStamp: history.timeStamp, records: history.records});
+                    }
+                });
+                return results;
+            }
+            function getHistoryByOperation(historyData, operations) {
+                var results =[];
+                var records = [];
+                _.each(historyData, function(history, hugoSymbol) {
+                    if (history.gene) {
+                        hugoSymbol = history.gene;
+                    }
+                    if (history.api) {
+                        _.each(history.api, function(item) {
+                            records = [];
+                            _.each(item.records, function(record) {
+                                if (operations.indexOf(record.operation) !== -1) {
+                                    records.push(record);
+                                }
+                            });
+                            if (records.length > 0) {
+                                results.push({gene: hugoSymbol, admin: item.admin, timeStamp: item.timeStamp, records: records});
+                            }
+                        });
+                    } else {
+                        records = [];
+                        _.each(history.records, function(record) {
+                            if (operations.indexOf(record.operation) !== -1) {
+                                records.push(record);
+                            }
+                        });
+                        if (records.length > 0) {
+                            results.push({gene: hugoSymbol, admin: history.admin, timeStamp: history.timeStamp, records: records});
+                        }
+                    }
+                });
+                return results;
+            }
             $scope.getHistoryButtonContent = function() {
                 if ($scope.loading) {
                     return 'Loading <i class="fa fa-spinner fa-spin"></i>';
@@ -478,5 +590,16 @@ angular.module('oncokbApp')
                 } else {
                     return 'Validate';
                 }
-            }
+            };
+            $scope.clearDateRange = function() {
+                $scope.dateRange = {startDate: null, endDate: null};
+            };
+            $scope.toggleSelection = function toggleSelection(checkbox) {
+                var idx = $scope.selectedTypeCheckboxes.indexOf(checkbox);
+                if (idx > -1) {
+                    $scope.selectedTypeCheckboxes.splice(idx, 1);
+                } else {
+                    $scope.selectedTypeCheckboxes.push(checkbox);
+                }
+            };
         }]);

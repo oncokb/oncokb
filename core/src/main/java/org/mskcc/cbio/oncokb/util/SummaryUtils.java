@@ -120,21 +120,14 @@ public class SummaryUtils {
             return tumorTypeSummary;
         }
 
-        // Get tumor type summary from exact matched alteration
-        for (int i = 0; i < relevantTumorTypes.size(); i++) {
-            tumorTypeSummary = getRelevantTumorTypeSummaryByAlt(alteration, Collections.singleton(relevantTumorTypes.get(i)));
-            if (tumorTypeSummary != null)
-                break;
-        }
+        tumorTypeSummary = null;
 
-        // Get Other Tumor Types summary within this alteration
-        if (tumorTypeSummary == null) {
-            tumorTypeSummary = getOtherTumorTypeSummaryByAlt(alteration);
-        }
+        List<Alteration> alternativeAlleles = new ArrayList<>();
+        alternativeAlleles.add(alteration);
+        alternativeAlleles.addAll(AlterationUtils.getAlleleAlterations(alteration));
+        alternativeAlleles.addAll(AlterationUtils.getPositionedAlterations(alteration));
 
-        List<Alteration> alternativeAlleles = AlterationUtils.getAlleleAlterations(alteration);
-
-        // Get all tumor type summary evidences for the alternative alleles
+        // Get all tumor type summary evidences for the exact alteration + alternative alleles
         // Tumor type has high priority. Get relevant tumor type summary across all alternative alleles, then look for other tumor types summary
         if (tumorTypeSummary == null) {
             // Special case for PDGFRA: don't match D842V as alternative allele

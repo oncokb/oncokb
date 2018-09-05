@@ -21,6 +21,7 @@ angular.module('oncokbApp')
                 therapyCategory: '=', // therapy category
                 treatment: '=', // treatment
                 obj: '=', // temporary object
+                hugoSymbol: '=', // gene name
                 confirmDeleteInGene: '&confirmDelete',
                 cancelDeleteInGene: '&cancelDelete',
                 getEvidenceInGene: '&getEvidence',
@@ -206,17 +207,7 @@ angular.module('oncokbApp')
                             tsg: !(!$scope.obj.type.tsg)
                         };
                         var newContent = $scope.obj.type.tsg + '  ' + $scope.obj.type.ocg;
-                        var oldContent = '';
-                        if (_.isUndefined($scope.obj.type.tsg_review) || _.isUndefined($scope.obj.type.tsg_review.lastReviewed)) {
-                            oldContent = $scope.obj.type.tsg;
-                        } else if (!_.isUndefined($scope.obj.type.tsg_review.lastReviewed)) {
-                            oldContent = $scope.obj.type.tsg_review.lastReviewed;
-                        }
-                        if (_.isUndefined($scope.obj.type.ocg_review) || _.isUndefined($scope.obj.type.ocg_review.lastReviewed)) {
-                            oldContent = oldContent + '  ' + $scope.obj.type.ocg;
-                        } else if (!_.isUndefined($scope.obj.type.ocg_review.lastReviewed)) {
-                            oldContent = oldContent + '  ' + $scope.obj.type.ocg_review.lastReviewed;
-                        }
+                        var oldContent = mainUtils.getOldGeneType($scope.obj.type);
                         var historyData = [{
                             lastEditBy: ReviewResource.mostRecent[$scope.uuid].updatedBy,
                             new: newContent.trim(),
@@ -225,6 +216,7 @@ angular.module('oncokbApp')
                             operation: 'update',
                             uuids: $scope.uuid
                         }];
+                        historyData.hugoSymbol = $scope.obj.name;
                         ReviewResource.loading.push($scope.uuid);
                         DatabaseConnector.updateGeneType($scope.obj.name, params, historyData, function(result) {
                             $scope.modelUpdate($scope.adjustedEvidenceType);
@@ -240,6 +232,7 @@ angular.module('oncokbApp')
                         var getEvidenceResult = $scope.getEvidence($scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment);
                         var evidences = getEvidenceResult.evidences;
                         var historyData = [getEvidenceResult.historyData];
+                        historyData.hugoSymbol = $scope.hugoSymbol;
                         DatabaseConnector.updateEvidenceBatch(evidences, historyData, function(result) {
                             $scope.modelUpdate($scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment);
                             if ($scope.adjustedEvidenceType === 'TREATMENT_NAME_CHANGE' && _.isFunction($scope.updatePriorityInGene)) {
