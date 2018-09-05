@@ -313,8 +313,10 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         }
 
         // Match all variants with `any` as consequence. Currently, only format start_end mut is supported.
-        VariantConsequence anyConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm("any");
-        alterations.addAll(findMutationsByConsequenceAndPosition(alteration.getGene(), anyConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations));
+        if (alteration.getProteinStart() != null && alteration.getProteinStart() > 0 && alteration.getProteinEnd() != null && alteration.getProteinEnd() < 100000) {
+            VariantConsequence anyConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm("any");
+            alterations.addAll(findMutationsByConsequenceAndPosition(alteration.getGene(), anyConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations));
+        }
 
         // Remove all range mutations as relevant for truncating mutations in oncogenes
         oncogeneTruncMuts(alteration, alterations);
