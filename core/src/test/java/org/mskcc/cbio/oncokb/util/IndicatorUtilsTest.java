@@ -48,6 +48,11 @@ public class IndicatorUtilsTest {
             e.printStackTrace();
         }
 
+        // Alteration not available
+        query = new Query(null, null, null, "MSH2", "", null, null, "CANCER", null, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, true, null);
+        assertEquals("The oncogenicity is not empty, but it should.", "", indicatorQueryResp.getOncogenic());
+
         // Oncogenic should always match with oncogenic summary, similar to likely oncogenic
         query = new Query(null, null, null, "TP53", "R248Q", null, null, "Pancreatic Adenocarcinoma", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, true, null);
