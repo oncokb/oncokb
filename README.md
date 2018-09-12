@@ -1,6 +1,6 @@
 Repository for OncoKB, a precision oncology knowledge base.
 
-We use Google Reatime API to store all information curators generated.
+We use Google Firebase Realtime Database to store all information curators generated.
 We use MySQL to store data after reviewing.
 
 Current repository contains server-side and curation platform.
@@ -29,27 +29,20 @@ OncoKB front-end is built with lots of great open source JS libraries. AngularJS
 File is located under web/yo/app/data
 ```
 {
-    clientId: 'Your client ID from google developer console',
-    scopes: [
-        'https://www.googleapis.com/auth/plus.profile.emails.read',
-        'https://www.googleapis.com/auth/drive.file'
-    ],
-    folderId: '', // The folder ID where you put all google realtime documents. By default, we will point you to an example folder.
-    additionalsFolderId: '', // The folder ID where additional files are stored, including meta data file and curation queues file. By default, we will point you to an example folder.
-    userRoles: {
-        'public': 1, // 0001
-        'user':   2, // 0010
-        'curator':4, // 0100
-        'admin':  8  // 1000
-    },
-    backupFolderId: '', //The backup folder ID. By default, we will point you to an example backup folder.
-    users: '', // The google spreadsheet ID which used to manage the user info. Please share this file to the service email address with view permission. We will point you to an example file.
     curationLink: 'legacy-api/', // Your endpoints URL specifically designed for curation platform.
     apiLink: "legacy-api/",  // Your endpoints URL.
     privateApiLink: "api/private/", // Endpints are specifically designed to use internally.
     publicApiLink: "api/v1/",
-    oncoTreeLink: 'http://oncotree.mskcc.org/oncotree/api/',
-    testing: false // If the testing is set to ture, all endpoints will be disabled and will use the files from web/yo/app/data folder
+    testing: false // If the testing is set to ture, all endpoints will be disabled and will use the files from web/yo/app/data folder.
+    production: true, // If the production is set to ture, all endpoints will be enabled and reviewed data will be updated to MySQL database.
+    firebaseConfig: { // Go to "Authentication" page in Firebase Console, click "Web setup" button and Firebase config will pop up.
+        apiKey: "",
+        authDomain: "",
+        databaseURL: "",
+        projectId: "",
+        storageBucket: "",
+        messagingSenderId: ""
+    }
 };
 ```
 
