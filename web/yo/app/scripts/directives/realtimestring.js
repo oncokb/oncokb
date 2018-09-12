@@ -47,7 +47,7 @@ angular.module('oncokbApp')
                     scope.pContent = '';
                     if (scope.t === 'treatment-select' && scope.key === 'level') {
                         scope.$watch('data.propagation', function(newPro, oldPro) {
-                            if (newPro !== oldPro && (!$rootScope.reviewMode || ReviewResource.rejected.indexOf(scope.data.propagation_uuid) === -1)) {
+                            if (newPro !== oldPro && !_.isUndefined(newPro) && (!$rootScope.reviewMode || ReviewResource.rejected.indexOf(scope.data.propagation_uuid) === -1)) {
                                 scope.setReviewRelatedContent(newPro, oldPro, true);
                             }
                         });
