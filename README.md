@@ -78,6 +78,11 @@ File is located under web/yo/app/data
 ```
 3. Under web/yo/, run 'grunt serve'
 
+## Testing
+For front-end, we use Karma and Jasmin to run unit test cases.
+1. Copy data/config.json to **OncoKB.config** in app.spec.js.
+2. Under web/yo/, run **karma start**.
+
 ## Coding Rules
 Because of the similarity of the project, we follow jhipster requirement.
 To ensure consistency throughout the source code, keep these rules in mind as you are working:
