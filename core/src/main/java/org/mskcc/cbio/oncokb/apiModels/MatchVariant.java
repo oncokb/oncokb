@@ -22,4 +22,23 @@ public class MatchVariant implements java.io.Serializable {
     public void setAlteration(String alteration) {
         this.alteration = alteration;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof MatchVariant)) return false;
+
+        MatchVariant that = (MatchVariant) o;
+
+        if (getHugoSymbol() != null ? !getHugoSymbol().equals(that.getHugoSymbol()) : that.getHugoSymbol() != null)
+            return false;
+        return getAlteration() != null ? getAlteration().equals(that.getAlteration()) : that.getAlteration() == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getHugoSymbol() != null ? getHugoSymbol().hashCode() : 0;
+        result = 31 * result + (getAlteration() != null ? getAlteration().hashCode() : 0);
+        return result;
+    }
 }
