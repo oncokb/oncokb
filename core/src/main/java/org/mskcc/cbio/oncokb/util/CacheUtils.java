@@ -293,13 +293,13 @@ public class CacheUtils {
             return new HashSet<>();
         }
         if (VUS.containsKey(entrezGeneId)) {
-            return VUS.get(entrezGeneId);
+            return new HashSet<>(VUS.get(entrezGeneId));
         } else {
             Gene gene = GeneUtils.getGeneByEntrezId(entrezGeneId);
             if (gene != null) {
                 synEvidences();
             }
-            return VUS.get(entrezGeneId);
+            return new HashSet<>(VUS.get(entrezGeneId));
         }
     }
 
@@ -315,9 +315,10 @@ public class CacheUtils {
         synAlterations();
         Set<Alteration> result = alterations.get(entrezGeneId);
         if (result == null) {
-            result = new HashSet<>();
+            return new HashSet<>();
+        }else {
+            return new HashSet<>(result);
         }
-        return result;
     }
 
     public static Set<Alteration> findMutationsByConsequenceAndPosition(Gene gene, VariantConsequence consequence, int start, int end) {
@@ -437,8 +438,7 @@ public class CacheUtils {
         synEvidences();
 
         if (evidences.containsKey(gene.getEntrezGeneId())) {
-            Set<Evidence> result = evidences.get(gene.getEntrezGeneId());
-            return result;
+            return new HashSet<>(evidences.get(gene.getEntrezGeneId()));
         } else {
             return new HashSet<>();
         }
