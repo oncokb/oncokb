@@ -293,13 +293,13 @@ public class CacheUtils {
             return new HashSet<>();
         }
         if (VUS.containsKey(entrezGeneId)) {
-            return new HashSet<>(VUS.get(entrezGeneId));
+            return VUS.get(entrezGeneId) == null ? new HashSet<Alteration>() : new HashSet<>(VUS.get(entrezGeneId));
         } else {
             Gene gene = GeneUtils.getGeneByEntrezId(entrezGeneId);
             if (gene != null) {
                 synEvidences();
             }
-            return new HashSet<>(VUS.get(entrezGeneId));
+            return VUS.get(entrezGeneId) == null ? new HashSet<Alteration>() : new HashSet<>(VUS.get(entrezGeneId));
         }
     }
 
@@ -438,7 +438,7 @@ public class CacheUtils {
         synEvidences();
 
         if (evidences.containsKey(gene.getEntrezGeneId())) {
-            return new HashSet<>(evidences.get(gene.getEntrezGeneId()));
+            return evidences.get(gene.getEntrezGeneId()) == null ? new HashSet<Evidence>() : new HashSet<>(evidences.get(gene.getEntrezGeneId()));
         } else {
             return new HashSet<>();
         }
