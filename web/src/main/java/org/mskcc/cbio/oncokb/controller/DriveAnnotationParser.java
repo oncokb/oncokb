@@ -56,6 +56,7 @@ public class DriveAnnotationParser {
             EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
             AlterationType type = AlterationType.MUTATION; //TODO: cna and fusion
 
+            System.out.println("\t" + vus.length() + " VUSs");
             for (int i = 0; i < vus.length(); i++) {
                 JSONObject variant = vus.getJSONObject(i);
                 String mutationStr = variant.has("name") ? variant.getString("name") : null;
@@ -95,16 +96,10 @@ public class DriveAnnotationParser {
                     if (evidence.getLastEdit() == null) {
                         System.out.println(spaceStrByNestLevel(nestLevel + 1) + "WARNING: " + mutationStr + " do not have last update.");
                     }
-//                    if (nameComments != null) {
-//                        for (int j = 0; j < nameComments.length(); j++) {
-//                            JSONObject item = nameComments.getJSONObject(j);
-//                            if (item != null && item.has("content") && item.getString("content") != null) {
-//                                setDocuments(item.getString("content"), evidence);
-//                            }
-//                        }
-//                    }
                     evidenceBo.save(evidence);
                 }
+                if (i % 10 == 9)
+                    System.out.println("\t\tImported " + (i + 1));
             }
         } else {
             if (vus == null) {
