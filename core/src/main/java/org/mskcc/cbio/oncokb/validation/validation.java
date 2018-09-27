@@ -34,14 +34,21 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-;
-
 /**
  * @author jiaojiao
  */
 public class validation {
+    static Drive driveService;
+    static SpreadsheetService spreadsheetService;
 
-    public static void main(String[] args) throws IOException, GeneralSecurityException, URISyntaxException, ServiceException {
+    static List<WorksheetEntry> worksheets;
+
+    private static void initialService() throws GeneralSecurityException, IOException, URISyntaxException, ServiceException {
+        driveService = GoogleAuth.getDriveService();
+        spreadsheetService = GoogleAuth.getSpreadSheetService();
+    }
+
+    private static void getWorksheets() throws IOException, ServiceException {
         String propFileName = "properties/config.properties";
         Properties prop = new Properties();
         ValidationConfig config = new ValidationConfig();
@@ -59,7 +66,7 @@ public class validation {
 
         String REPORT_PARENT_FOLDER = prop.getProperty("google.report_parent_folder");
         String REPORT_DATA_TEMPLATE = prop.getProperty("google.report_data_template");
-        Drive driveService = GoogleAuth.getDriveService();
+
         System.out.println("Got drive service");
 
         DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
@@ -80,26 +87,40 @@ public class validation {
         String fileId = file.getId();
         URL SPREADSHEET_FEED_URL = new URL("https://spreadsheets.google.com/feeds/spreadsheets/private/full/" + fileId);
 
-        SpreadsheetService service = GoogleAuth.getSpreadSheetService();
-        SpreadsheetEntry spreadSheetEntry = service.getEntry(SPREADSHEET_FEED_URL, SpreadsheetEntry.class);
+        SpreadsheetEntry spreadSheetEntry = spreadsheetService.getEntry(SPREADSHEET_FEED_URL, SpreadsheetEntry.class);
 
-        WorksheetFeed worksheetFeed = service.getFeed(
+        WorksheetFeed worksheetFeed = spreadsheetService.getFeed(
             spreadSheetEntry.getWorksheetFeedUrl(), WorksheetFeed.class);
-        List<WorksheetEntry> worksheets = worksheetFeed.getEntries();
+        worksheets = worksheetFeed.getEntries();
+    }
 
-        WorksheetEntry worksheet3 = worksheets.get(1),
-            worksheet5 = worksheets.get(2);
+    public static void main(String[] args) throws IOException, GeneralSecurityException, URISyntaxException, ServiceException {
+        initialService();
+        if (driveService == null || spreadsheetService == null) {
+            System.out.println("ERROR: service is not available\n");
+            return;
+        }
 
-        // Fetch the list feed of the worksheets.
-        URL listFeedUrl3 = worksheet3.getListFeedUrl(),
-            listFeedUrl5 = worksheet5.getListFeedUrl();
+        getWorksheets();
 
+        System.out.println("Updating actionable genes.\n");
+        compareActionableGenes();
 
-        Map<Gene, Set<Evidence>> allGeneBasedEvidences = EvidenceUtils.getAllGeneBasedEvidences();
-        Set<Gene> genes = GeneUtils.getAllGenes();
-        Integer count = 0;
-//        Set<String> specialAlterations = AlterationUtils.getGeneralVariants();
+        System.out.println("Checking for empty clinical data...\n");
+        getEmptyClinicalVariants();
 
+        System.out.println("Checking for empty biological data...\n");
+        getEmptyBiologicalVariants();
+
+        System.out.println("Getting all tumor type summaries...\n");
+        printTumorTypeSummary();
+
+        System.out.println("Checking gene summary and background");
+        checkGeneSummaryBackground();
+
+    }
+
+    private static void compareActionableGenes() throws IOException {
         List<LevelOfEvidence> levels = new ArrayList<>();
         levels.add(LevelOfEvidence.LEVEL_1);
         levels.add(LevelOfEvidence.LEVEL_2A);
@@ -111,197 +132,61 @@ public class validation {
             System.out.println("\tOn level " + levelOfEvidence.getLevel());
 
             //Get published actionable genes
-            printEvidences(getPublishedEvidencesByLevel(levelOfEvidence), service, worksheets.get(6));
+            printEvidences(getFeedUrl(WorkSheetEntryEnum.PUBLISHED_ACTIONABLE_GENES), getPublishedEvidencesByLevel(levelOfEvidence));
 
             //Get latest actionable genes
-            printEvidences(getEvidencesByLevel(levelOfEvidence), service, worksheets.get(5));
+            printEvidences(getFeedUrl(WorkSheetEntryEnum.LATEST_ACTIONABLE_GENES), getEvidencesByLevel(levelOfEvidence));
         }
-        System.out.println("Done updating actionable genes.\n");
-
-        System.out.println("Now... validating data based on genes...");
-        for (Gene gene : genes) {
-            //Check for empty clinical data
-            getEmptyClinicalVariants(gene, service, worksheets.get(3));
-
-            //Check for empty biological data
-            getEmptyBiologicalVariants(gene, service, worksheets.get(4));
-
-            // Get Tumor Type Summary for this gene
-            printTumorTypeSummary(EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY)), service, worksheets.get(7));
-
-            Set<Evidence> evidences = allGeneBasedEvidences.get(gene);
-            Set<Alteration> VUSAlterations = AlterationUtils.findVUSFromEvidences(evidences);
-            Map<Alteration, ArrayList<Alteration>> relevantAlterationsMapping = new HashMap<Alteration, ArrayList<Alteration>>();
-            Map<Alteration, String> oncogenicityMapping = new HashMap<Alteration, String>();
-            Map<Alteration, String> mutationEffectMapping = new HashMap<Alteration, String>();
-            Map<Alteration, Set<Evidence>> multipleMutationEffects = new HashMap<>();
-            Map<Alteration, Set<String>> referencesMapping = new HashMap<Alteration, Set<String>>();
-            ArrayList<Alteration> altsWithDescriptions = new ArrayList<Alteration>();
-            Set<Alteration> allVariants = new HashSet<Alteration>();
-            Set<Alteration> allAlts = new HashSet<Alteration>();
-            for (Evidence evidenceItem : evidences) {
-                allVariants = evidenceItem.getAlterations();
-                allAlts.addAll(allVariants);
-                for (Alteration alterationItem : allVariants) {
-                    relevantAlterationsMapping.put(alterationItem, new ArrayList<Alteration>(AlterationUtils.getRelevantAlterations(alterationItem)));
-                    if (evidenceItem.getEvidenceType().toString().equals("ONCOGENIC")) {
-                        oncogenicityMapping.put(alterationItem, evidenceItem.getKnownEffect());
-                    }
-                    if (evidenceItem.getEvidenceType().toString().equals("MUTATION_EFFECT")) {
-                        mutationEffectMapping.put(alterationItem, evidenceItem.getKnownEffect());
-                    }
-                    if (evidenceItem.getEvidenceType().toString().equals("MUTATION_EFFECT")) {
-                        if (!multipleMutationEffects.containsKey(alterationItem)) {
-                            multipleMutationEffects.put(alterationItem, new HashSet<Evidence>());
-                        }
-                        multipleMutationEffects.get(alterationItem).add(evidenceItem);
-                    }
-                    if (referencesMapping.containsKey(alterationItem)) {
-                        Set<String> oldRefs = referencesMapping.get(alterationItem);
-                        Set<String> pmids = EvidenceUtils.getPmids(new HashSet<Evidence>(Arrays.asList(evidenceItem)));
-                        Set<String> abstracts = getAbstractContentFromEvidence(evidenceItem);
-                        oldRefs.addAll(pmids);
-                        oldRefs.addAll(abstracts);
-                        referencesMapping.put(alterationItem, oldRefs);
-                    } else {
-                        referencesMapping.put(alterationItem, EvidenceUtils.getPmids(new HashSet<Evidence>(Arrays.asList(evidenceItem))));
-                    }
-                    if (!altsWithDescriptions.contains(alterationItem)) {
-                        if (evidenceItem.getDescription() != null && !evidenceItem.getDescription().isEmpty()) {
-                            altsWithDescriptions.add(alterationItem);
-                        }
-                    }
-                }
-            }
-            for (Alteration alt : allAlts) {
-                ArrayList<Alteration> relevantAlts = relevantAlterationsMapping.get(alt);
-//                for (Alteration relevantAlt : relevantAlts) {
-//                    if (oncogenicityMapping.containsKey(alt)
-//                        && oncogenicityMapping.get(alt) != null
-//                        && oncogenicityMapping.get(relevantAlt) != null
-//                        && oncogenicityMapping.containsKey(relevantAlt)
-//                        && !oncogenicityMapping.get(alt).equals(oncogenicityMapping.get(relevantAlt))) {
-//                        ListEntry row = new ListEntry();
-//                        setValue(row, "Gene", alt.getGene().getHugoSymbol());
-//                        setValue(row, "Alteration", alt.getAlteration());
-//                        setValue(row, "Oncogenicty", Oncogenicity.getByEffect(oncogenicityMapping.get(alt)).getOncogenic());
-//                        setValue(row, "RelevantAlteration", relevantAlt.getAlteration());
-//                        setValue(row, "RelevantAlterationOncogenicty", Oncogenicity.getByEffect(oncogenicityMapping.get(relevantAlt)).getOncogenic());
-//                        service.insert(listFeedUrl1, row);
-//                        break;
-//                    }
-//                }
-//                for (Alteration relevantAlt : relevantAlts) {
-//                    if (mutationEffectMapping.containsKey(alt) && mutationEffectMapping.containsKey(relevantAlt) &&
-//                        mutationEffectMapping.get(alt) != null && mutationEffectMapping.get(relevantAlt) != null &&
-//                        !mutationEffectMapping.get(alt).equals(mutationEffectMapping.get(relevantAlt))) {
-//                        ListEntry row = new ListEntry();
-//                        setValue(row, "Gene", alt.getGene().getHugoSymbol());
-//                        setValue(row, "Alteration", alt.getAlteration());
-//                        setValue(row, "MutationEffect", mutationEffectMapping.get(alt));
-//                        setValue(row, "RelevantAlteration", relevantAlt.getAlteration());
-//                        setValue(row, "RelevantAlterationMutationEffect", mutationEffectMapping.get(relevantAlt));
-//                        service.insert(listFeedUrl2, row);
-//                        break;
-//                    }
-//                }
-//                if (oncogenicityMapping.containsKey(alt)
-//                    && oncogenicityMapping.get(alt) != null
-//                    && oncogenicityMapping.get(alt).equals(Oncogenicity.INCONCLUSIVE.getOncogenic())
-//                    && mutationEffectMapping.containsKey(alt)
-//                    && mutationEffectMapping.get(alt) != null
-//                    && mutationEffectMapping.get(alt).equals(MutationEffect.INCONCLUSIVE.getMutationEffect())) {
-//                    Integer relevantsSize = relevantAlts.size();
-//                    Integer relevantCount = 0;
-//                    for (Alteration relevantAlt : relevantAlts) {
-//                        relevantCount++;
-//                        if (relevantCount == relevantsSize - 1 && oncogenicityMapping.containsKey(alt) && oncogenicityMapping.get(relevantAlt) != null && oncogenicityMapping.get(relevantAlt).equals(Oncogenicity.INCONCLUSIVE.getOncogenic())
-//                            && mutationEffectMapping.containsKey(alt) && mutationEffectMapping.get(relevantAlt).equals(MutationEffect.INCONCLUSIVE.getMutationEffect())) {
-//                            ListEntry row = new ListEntry();
-//                            setValue(row, "Gene", relevantAlt.getGene().getHugoSymbol());
-//                            setValue(row, "Alteration", relevantAlt.getAlteration());
-//                            service.insert(listFeedUrl3, row);
-//
-//                        }
-//                    }
-//                }
-//                if (!oncogenicityMapping.containsKey(alt) && !mutationEffectMapping.containsKey(alt) && !VUSAlterations.contains(alt) && !specialAlterations.contains(alt.getAlteration()) && !altsWithDescriptions.contains(alt)) {
-//                    ListEntry row = new ListEntry();
-//                    setValue(row, "Gene", alt.getGene().getHugoSymbol());
-//                    setValue(row, "Alteration", alt.getAlteration());
-//                    service.insert(listFeedUrl4, row);
-//
-//                }
-//                if (oncogenicityMapping.containsKey(alt) && mutationEffectMapping.containsKey(alt) && referencesMapping.get(alt).size() == 0) {
-//                    ListEntry row = new ListEntry();
-//                    setValue(row, "Gene", alt.getGene().getHugoSymbol());
-//                    setValue(row, "Alteration", alt.getAlteration());
-//                    service.insert(listFeedUrl5, row);
-//
-//                }
-//                if (multipleMutationEffects.containsKey(alt) && multipleMutationEffects.get(alt).size() > 1) {
-//                    ListEntry row = new ListEntry();
-//                    setValue(row, "Gene", alt.getGene().getHugoSymbol());
-//                    setValue(row, "Alteration", alt.getAlteration());
-//                    service.insert(listFeedUrl6, row);
-//
-//                }
-
-            }
-            count++;
-            System.out.println("\tProcessing " + gene.getHugoSymbol() + "  " + 100 * count / genes.size() + "% finished");
-        }
-
-        System.out.println("");
     }
 
-    private static void getEmptyClinicalVariants(Gene gene, SpreadsheetService service, WorksheetEntry entry) throws IOException, ServiceException {
-        if (gene != null && service != null && entry != null) {
-            URL feedUrl = entry.getListFeedUrl();
-            Set<ClinicalVariant> variants = MainUtils.getClinicalVariants(gene);
+    private static void getEmptyClinicalVariants() {
+        URL feedUrl = getFeedUrl(WorkSheetEntryEnum.EMPTY_CLINICAL);
+        if (feedUrl != null) {
+            for (Gene gene : GeneUtils.getAllGenes()) {
+                Set<ClinicalVariant> variants = MainUtils.getClinicalVariants(gene);
+                for (ClinicalVariant variant : variants) {
+                    if (variant.getOncoTreeType() == null || StringUtils.isNullOrEmpty(variant.getLevel())
+                        || (variant.getDrugAbstracts().isEmpty() && variant.getDrugPmids().isEmpty())
+                        || variant.getDrug().isEmpty()) {
 
-            for (ClinicalVariant variant : variants) {
-
-                if (variant.getOncoTreeType() == null || StringUtils.isNullOrEmpty(variant.getLevel())
-                    || (variant.getDrugAbstracts().isEmpty() && variant.getDrugPmids().isEmpty())
-                    || variant.getDrug().isEmpty()) {
-
-                    ListEntry row = new ListEntry();
-                    setValue(row, "Gene", gene.getHugoSymbol());
-                    setValue(row, "Alteration", variant.getVariant().getAlteration());
-                    setValue(row, "CancerType", getCancerType(variant.getOncoTreeType()));
-                    setValue(row, "Level", variant.getLevel());
-                    setValue(row, "Drug", org.apache.commons.lang3.StringUtils.join(variant.getDrug(), ", "));
-                    setValue(row, "Pmids", org.apache.commons.lang3.StringUtils.join(variant.getDrugPmids(), ", "));
-                    setValue(row, "Abstracts", org.apache.commons.lang3.StringUtils.join(variant.getDrugAbstracts(), ", "));
-                    service.insert(feedUrl, row);
+                        ListEntry row = new ListEntry();
+                        setValue(row, "Gene", gene.getHugoSymbol());
+                        setValue(row, "Alteration", variant.getVariant().getAlteration());
+                        setValue(row, "CancerType", getCancerType(variant.getOncoTreeType()));
+                        setValue(row, "Level", variant.getLevel());
+                        setValue(row, "Drug", org.apache.commons.lang3.StringUtils.join(variant.getDrug(), ", "));
+                        setValue(row, "Pmids", org.apache.commons.lang3.StringUtils.join(variant.getDrugPmids(), ", "));
+                        setValue(row, "Abstracts", org.apache.commons.lang3.StringUtils.join(variant.getDrugAbstracts(), ", "));
+                        insertRowToEntry(feedUrl, row);
+                    }
                 }
             }
         }
     }
 
-    private static void getEmptyBiologicalVariants(Gene gene, SpreadsheetService service, WorksheetEntry entry) throws IOException, ServiceException {
-        if (gene != null && service != null && entry != null) {
-            URL feedUrl = entry.getListFeedUrl();
-            Set<BiologicalVariant> variants = MainUtils.getBiologicalVariants(gene);
+    private static void getEmptyBiologicalVariants() {
+        URL feedUrl = getFeedUrl(WorkSheetEntryEnum.EMPTY_BIOLOGICAL);
+        if (feedUrl != null) {
+            for (Gene gene : GeneUtils.getAllGenes()) {
+                Set<BiologicalVariant> variants = MainUtils.getBiologicalVariants(gene);
+                for (BiologicalVariant variant : variants) {
+                    if (variant.getOncogenic() == null || variant.getMutationEffect() == null
+                        || (variant.getMutationEffectPmids().isEmpty() && variant.getMutationEffectAbstracts().isEmpty())) {
 
-            for (BiologicalVariant variant : variants) {
-                if (variant.getOncogenic() == null || variant.getMutationEffect() == null
-                    || (variant.getMutationEffectPmids().isEmpty() && variant.getMutationEffectAbstracts().isEmpty())) {
-
-                    ListEntry row = new ListEntry();
-                    setValue(row, "Gene", gene.getHugoSymbol());
-                    setValue(row, "Alteration", variant.getVariant().getAlteration());
-                    setValue(row, "Oncogenicity", variant.getOncogenic());
-                    setValue(row, "MutationEffect", variant.getMutationEffect());
-                    setValue(row, "PMIDs", org.apache.commons.lang3.StringUtils.join(variant.getMutationEffectPmids(), ", "));
-                    Set<ArticleAbstract> articleAbstracts = variant.getMutationEffectAbstracts();
-                    Set<String> abstracts = new HashSet<>();
-                    for (ArticleAbstract articleAbstract : articleAbstracts) {
-                        abstracts.add(articleAbstract.getAbstractContent());
+                        ListEntry row = new ListEntry();
+                        setValue(row, "Gene", gene.getHugoSymbol());
+                        setValue(row, "Alteration", variant.getVariant().getAlteration());
+                        setValue(row, "Oncogenicity", variant.getOncogenic());
+                        setValue(row, "MutationEffect", variant.getMutationEffect());
+                        setValue(row, "PMIDs", org.apache.commons.lang3.StringUtils.join(variant.getMutationEffectPmids(), ", "));
+                        Set<ArticleAbstract> articleAbstracts = variant.getMutationEffectAbstracts();
+                        Set<String> abstracts = new HashSet<>();
+                        for (ArticleAbstract articleAbstract : articleAbstracts) {
+                            abstracts.add(articleAbstract.getAbstractContent());
+                        }
+                        setValue(row, "Abstracts", org.apache.commons.lang3.StringUtils.join(abstracts, ", "));
+                        insertRowToEntry(feedUrl, row);
                     }
-                    setValue(row, "Abstracts", org.apache.commons.lang3.StringUtils.join(abstracts, ", "));
-                    service.insert(feedUrl, row);
                 }
             }
         }
@@ -313,9 +198,8 @@ public class validation {
         return EvidenceUtils.getEvidenceByEvidenceTypesAndLevels(EvidenceTypeUtils.getTreatmentEvidenceTypes(), Collections.singleton(levelOfEvidence));
     }
 
-    private static void printEvidences(Set<Evidence> evidences, SpreadsheetService service, WorksheetEntry entry) throws IOException, ServiceException {
-        URL feedUrl = entry.getListFeedUrl();
-        if (evidences != null && service != null && entry != null) {
+    private static void printEvidences(URL feedUrl, Set<Evidence> evidences) {
+        if (evidences != null && feedUrl != null) {
             for (Evidence evidence : evidences) {
                 ListEntry row = new ListEntry();
 
@@ -339,8 +223,7 @@ public class validation {
 
                 Set<String> abstractContent = getAbstractContentFromEvidence(evidence);
                 setValue(row, "Abstracts", org.apache.commons.lang3.StringUtils.join(abstractContent, ", "));
-
-                service.insert(feedUrl, row);
+                insertRowToEntry(feedUrl, row);
             }
         }
     }
@@ -354,22 +237,77 @@ public class validation {
         return abstractContent;
     }
 
-    private static void printTumorTypeSummary(Set<Evidence> evidences, SpreadsheetService service, WorksheetEntry entry) throws IOException, ServiceException {
-        URL feedUrl = entry.getListFeedUrl();
-        if (evidences != null && service != null && entry != null) {
-            for (Evidence evidence : evidences) {
-                ListEntry row = new ListEntry();
-                setValue(row, "Gene", evidence.getGene().getHugoSymbol());
+    private static void printTumorTypeSummary() {
+        URL feedUrl = getFeedUrl(WorkSheetEntryEnum.TUMOR_SUMMARIES);
+        if (feedUrl != null) {
+            for (Gene gene : GeneUtils.getAllGenes()) {
+                Set<Evidence> evidences = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY));
+                for (Evidence evidence : evidences) {
+                    ListEntry row = new ListEntry();
+                    setValue(row, "Gene", evidence.getGene().getHugoSymbol());
 
-                List<String> alterationNames = getAlterationNameByEvidence(evidence);
+                    List<String> alterationNames = getAlterationNameByEvidence(evidence);
 
-                setValue(row, "Variants", MainUtils.listToString(alterationNames, ", "));
+                    setValue(row, "Variants", MainUtils.listToString(alterationNames, ", "));
 
-                setValue(row, "CancerType", getCancerType(evidence.getOncoTreeType()));
-                setValue(row, "Summary", evidence.getDescription());
-                service.insert(feedUrl, row);
+                    setValue(row, "CancerType", getCancerType(evidence.getOncoTreeType()));
+                    setValue(row, "Summary", evidence.getDescription());
+                    insertRowToEntry(feedUrl, row);
+                }
             }
         }
+    }
+
+    private static void checkGeneSummaryBackground() {
+        URL feedUrl = getFeedUrl(WorkSheetEntryEnum.GENE_SUMMARY_BACKGROUND);
+        if (feedUrl != null) {
+            for (Gene gene : GeneUtils.getAllGenes()) {
+                ListEntry row = new ListEntry();
+                setValue(row, "Gene", gene.getHugoSymbol());
+
+                boolean hasIssue = false;
+
+                // Summary
+                Set<Evidence> evidences = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Collections.singleton(EvidenceType.GENE_SUMMARY));
+                String issue = getIssue(evidences);
+                if (issue != null) {
+                    hasIssue = true;
+                    setValue(row, "Summary", issue);
+                }
+
+                // Background
+                evidences = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Collections.singleton(EvidenceType.GENE_BACKGROUND));
+                issue = getIssue(evidences);
+                if (issue != null) {
+                    hasIssue = true;
+                    setValue(row, "Background", issue);
+                }
+
+                if (hasIssue && !gene.getEntrezGeneId().equals(-2)) {
+                    insertRowToEntry(feedUrl, row);
+                } else if (!hasIssue && gene.getEntrezGeneId().equals(-2)) {
+                    setValue(row, "Summary", "Has summary, but it should not.");
+                    setValue(row, "Background", "Has background, but it should not.");
+                    insertRowToEntry(feedUrl, row);
+                }
+            }
+        }
+    }
+
+    private static String getIssue(Set<Evidence> evidences) {
+        String issue = null;
+        if (evidences.size() == 0) {
+            issue = "No record";
+        }
+        if (evidences.size() > 2) {
+            issue = "Multiple items detected";
+        }
+        for (Evidence evidence : evidences) {
+            if (StringUtils.isNullOrEmpty(evidence.getDescription())) {
+                issue = "No info";
+            }
+        }
+        return issue;
     }
 
     private static List<String> getAlterationNameByEvidence(Evidence evidence) {
@@ -416,5 +354,22 @@ public class validation {
             }
         }
         return cancerTypeName;
+    }
+
+    private static URL getFeedUrl(WorkSheetEntryEnum entryEnum) {
+        WorksheetEntry entry = worksheets.get(entryEnum.index());
+        return entry.getListFeedUrl();
+    }
+
+    private static void insertRowToEntry(URL url, ListEntry row) {
+        if (url != null) {
+            try {
+                spreadsheetService.insert(url, row);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ServiceException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
