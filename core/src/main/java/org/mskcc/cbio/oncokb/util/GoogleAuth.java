@@ -110,7 +110,7 @@ public final class GoogleAuth {
 
     private static void refreshToken() throws IOException {
         long timestamp = System.currentTimeMillis() + 10 * 60 * 1000; // If current token expires in 10 minutes, refresh token
-        if (CREDENTIAL.getExpiresInSeconds().compareTo(timestamp) > 0) {
+        if (CREDENTIAL.getExpiresInSeconds() == null || CREDENTIAL.getExpiresInSeconds().compareTo(timestamp) > 0) {
             CREDENTIAL.refreshToken();
         }
     }
