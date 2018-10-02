@@ -47,10 +47,17 @@ public interface UtilsApi {
         method = RequestMethod.GET)
     ResponseEntity<String> utilsAllActionableVariantsTxtGet();
 
-    @ApiOperation(value = "", notes = "Get cancer gene list in text file.", tags = "Utils")
+    @ApiOperation(value = "", notes = "Get cancer gene list", tags = "Utils")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK")})
     @RequestMapping(value = "/utils/cancerGeneList",
             method = RequestMethod.GET)
     ResponseEntity<List<CancerGene>> utilsCancerGeneListGet();
+
+    @ApiOperation(value = "", notes = "Get cancer gene list in text file.", tags = "Utils")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK")})
+    @RequestMapping(value = "/utils/cancerGeneList.txt",
+        method = RequestMethod.GET)
+    ResponseEntity<String> utilsCancerGeneListTxtGet();
 }
