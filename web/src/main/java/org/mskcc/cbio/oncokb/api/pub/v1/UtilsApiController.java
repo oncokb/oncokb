@@ -199,7 +199,7 @@ public class UtilsApiController implements UtilsApi {
         List<String> header = new ArrayList<>();
         header.add("Hugo Symbol");
         header.add("Entrez Gene ID");
-        header.add("# of occurrence within resources (Column E-J)");
+        header.add("# of occurrence within resources (Column D-J)");
         header.add("OncoKB Annotated");
         header.add("MSK-IMPACT");
         header.add("MSK-HEME");
@@ -214,8 +214,8 @@ public class UtilsApiController implements UtilsApi {
             List<String> row = new ArrayList<>();
             row.add(cancerGene.getHugoSymbol());
             row.add(cancerGene.getEntrezGeneId());
-            row.add(getStringByBoolean(cancerGene.getOncokbAnnotated()));
             row.add(String.valueOf(cancerGene.getOccurrenceCount()));
+            row.add(getStringByBoolean(cancerGene.getOncokbAnnotated()));
             row.add(getStringByBoolean(cancerGene.getmSKImpact()));
             row.add(getStringByBoolean(cancerGene.getmSKHeme()));
             row.add(getStringByBoolean(cancerGene.getFoundation()));

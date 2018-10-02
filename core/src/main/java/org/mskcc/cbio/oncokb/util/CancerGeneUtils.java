@@ -39,7 +39,11 @@ public class CancerGeneUtils {
                     cancerGene.setEntrezGeneId(items[1]);
                     Gene gene = GeneUtils.getGeneByEntrezId(Integer.parseInt(items[1]));
                     cancerGene.setOncokbAnnotated(gene == null ? false : true);
-                    cancerGene.setOccurrenceCount(NumberUtils.isNumber(items[2].trim()) ? Integer.parseInt(items[2].trim()) : 0);
+                    int occurence = NumberUtils.isNumber(items[2].trim()) ? Integer.parseInt(items[2].trim()) : 0;
+                    if (cancerGene.getOncokbAnnotated()) {
+                        occurence++;
+                    }
+                    cancerGene.setOccurrenceCount(occurence);
                     cancerGene.setmSKImpact(items[3].trim().equals("1"));
                     cancerGene.setmSKHeme(items[4].trim().equals("1"));
                     cancerGene.setFoundation(items[5].trim().equals("1"));
