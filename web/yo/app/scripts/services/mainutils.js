@@ -557,6 +557,12 @@ angular.module('oncokbApp')
 
             return oldContent;
         }
+        function clearCollaboratorsByName(myName) {
+            firebase.database().ref('Meta/collaborators/' + myName).set([]).then(function (result) {
+            }).catch(function (error) {
+                console.log(error);
+            });
+        }
         return {
             setIsoFormAndGeneType: setIsoFormAndGeneType,
             getCancerTypesName: getCancerTypesName,
@@ -588,6 +594,7 @@ angular.module('oncokbApp')
             shouldExclude: shouldExclude,
             getTimeStamp: getTimeStamp,
             calculateDiff: calculateDiff,
-            getOldGeneType: getOldGeneType
+            getOldGeneType: getOldGeneType,
+            clearCollaboratorsByName: clearCollaboratorsByName
         };
     });

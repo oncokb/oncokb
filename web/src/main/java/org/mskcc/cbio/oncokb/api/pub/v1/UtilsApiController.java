@@ -190,4 +190,45 @@ public class UtilsApiController implements UtilsApi {
         List<CancerGene> result = CancerGeneUtils.getCancerGeneList();
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
+
+    @Override
+    public ResponseEntity<String> utilsCancerGeneListTxtGet() {
+        String separator = "\t";
+        String newLine = "\n";
+        StringBuilder sb = new StringBuilder();
+        List<String> header = new ArrayList<>();
+        header.add("Hugo Symbol");
+        header.add("Entrez Gene ID");
+        header.add("# of occurrence within resources (Column D-J)");
+        header.add("OncoKB Annotated");
+        header.add("MSK-IMPACT");
+        header.add("MSK-HEME");
+        header.add("FOUNDATION ONE");
+        header.add("FOUNDATION ONE HEME");
+        header.add("Vogelstein");
+        header.add("SANGER CGC(05/30/2017)");
+        sb.append(MainUtils.listToString(header, separator));
+        sb.append(newLine);
+
+        for (CancerGene cancerGene : CancerGeneUtils.getCancerGeneList()) {
+            List<String> row = new ArrayList<>();
+            row.add(cancerGene.getHugoSymbol());
+            row.add(cancerGene.getEntrezGeneId());
+            row.add(String.valueOf(cancerGene.getOccurrenceCount()));
+            row.add(getStringByBoolean(cancerGene.getOncokbAnnotated()));
+            row.add(getStringByBoolean(cancerGene.getmSKImpact()));
+            row.add(getStringByBoolean(cancerGene.getmSKHeme()));
+            row.add(getStringByBoolean(cancerGene.getFoundation()));
+            row.add(getStringByBoolean(cancerGene.getFoundationHeme()));
+            row.add(getStringByBoolean(cancerGene.getVogelstein()));
+            row.add(getStringByBoolean(cancerGene.getSangerCGC()));
+            sb.append(MainUtils.listToString(row, separator));
+            sb.append(newLine);
+        }
+        return new ResponseEntity<>(sb.toString(), HttpStatus.OK);
+    }
+
+    private String getStringByBoolean(Boolean val) {
+        return val ? "Yes" : "No";
+    }
 }

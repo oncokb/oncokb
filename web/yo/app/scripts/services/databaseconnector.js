@@ -460,8 +460,15 @@ angular.module('oncokbApp')
                 }).then(function(ref) {
                     console.log('Added a new history record.');
                 }, function (error) {
-                    mainUtils.sendEmail('dev.oncokb@gmail.com', 'Failed to add a new history record for ' + hugoSymbol
-                        + '.', 'Content: \n' + JSON.stringify(historyData) + '\n\nError: \n' + JSON.stringify(error));
+                    sendEmail({sendTo: 'dev.oncokb@gmail.com', subject: 'Failed to add a new history record for ' + hugoSymbol
+                        + '.', content: JSON.stringify(historyData) + '\n\nError: \n' + JSON.stringify(error)},
+                        function(result) {
+                            console.log('sent history error to oncokb dev account');
+                        },
+                        function(error) {
+                            console.log('fail to send history error to oncokb dev account', error);
+                        }
+                    );
                 });
             }
 
