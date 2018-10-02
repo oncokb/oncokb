@@ -95,6 +95,7 @@ angular.module('oncokbApp')
         }
         function logout() {
             var defer = $q.defer();
+            mainUtils.clearCollaboratorsByName($rootScope.me.name.toLowerCase());
             $firebaseAuth().$signOut().then(function() {
                 $rootScope.isAuthorizedUser = false;
                 $rootScope.signedInUser = {};

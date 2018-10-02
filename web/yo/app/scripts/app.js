@@ -202,7 +202,7 @@ angular.module('oncokbApp').run(
                         }
                     }
                 }
-                if (fromIndex !== -1 || toIndex !== -1) {
+                if ($rootScope.me && (fromIndex !== -1 || toIndex !== -1)) {
                     loadFiles.load(['collaborators']).then(function() {
                         var myName = $rootScope.me.name.toLowerCase();
                         if (!$rootScope.collaboratorsMeta) {

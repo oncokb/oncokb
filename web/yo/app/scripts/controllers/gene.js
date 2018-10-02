@@ -22,7 +22,8 @@ angular.module('oncokbApp')
             }
             // Remove current collaborator when user changes url directly.
             $scope.$on('$locationChangeStart', function(event, next, current) {
-                if (next && next !== current) {
+                // Once user logged out, we do not need to remove current gene since we'll clear Meta/collaborators/currentUser in logout().
+                if ($rootScope.isAuthorizedUser && next && next !== current) {
                     removeCollaborator();
                 }
             });
