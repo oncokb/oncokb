@@ -1,4 +1,4 @@
-# Hugo Symbol	Entrez Gene ID	# of occurrence within resources (Column E-J)	MSK-IMPACT	MSK-HEME	FOUNDATION ONE	FOUNDATION ONE HEME	Vogelstein	SANGER CGC(05/30/2017)
+# Hugo Symbol	Entrez Gene ID	# of occurrence within resources	MSK-IMPACT	MSK-HEME	FOUNDATION ONE	FOUNDATION ONE HEME	Vogelstein	SANGER CGC(05/30/2017)
 ABL1	25	6	1	1	1	1	1	1
 ABL2	27	3	0	0	1	1	0	1
 ACTB	60	1	0	0	0	1	0	0
