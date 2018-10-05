@@ -28,8 +28,7 @@ public class DrugsApiController implements DrugsApi {
 
     public ResponseEntity<List<Drug>> drugsLookupGet(
         @ApiParam(value = "Drug Name") @RequestParam(value = "name", required = false) String name
-//        , @ApiParam(value = "") @RequestParam(value = "fdaApproved", required = false) String fdaApproved
-        , @ApiParam(value = "ATC Code") @RequestParam(value = "atcCode", required = false) String atcCode
+        , @ApiParam(value = "NCI Thesaurus Code") @RequestParam(value = "ncitCode", required = false) String ncitCode
         , @ApiParam(value = "Drug Synonyms") @RequestParam(value = "synonym", required = false) String synonym
         , @ApiParam(value = "Exactly Match", required = true) @RequestParam(value = "exactMatch", required = true, defaultValue = "true") Boolean exactMatch
     ) {
@@ -44,14 +43,10 @@ public class DrugsApiController implements DrugsApi {
             drugs = DrugUtils.getDrugsByNames(Collections.singleton(name), !exactMatch);
         }
 
-        if (atcCode != null) {
-            Set<Drug> result = DrugUtils.getDrugsBySAtcCodes(Collections.singleton(atcCode), !exactMatch);
-            if (result != null) {
-                if (drugs == null) {
-                    drugs = result;
-                } else {
-                    drugs = new HashSet<>(CollectionUtils.intersection(drugs, result));
-                }
+        if (ncitCode != null) {
+            Drug drug = DrugUtils.getDrugByNcitCode(ncitCode);
+            if (drug != null) {
+                drugs = new HashSet<>(Collections.singleton(drug));
             }
         }
 

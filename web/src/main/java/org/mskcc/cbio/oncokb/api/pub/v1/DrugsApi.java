@@ -31,8 +31,7 @@ public interface DrugsApi {
         method = RequestMethod.GET)
     ResponseEntity<List<Drug>> drugsLookupGet(
         @ApiParam(value = "Drug Name") @RequestParam(value = "name", required = false) String name
-//        , @ApiParam(value = "") @RequestParam(value = "fdaApproved", required = false) String fdaApproved
-        , @ApiParam(value = "ATC Code") @RequestParam(value = "atcCode", required = false) String atcCode
+        , @ApiParam(value = "NCI Thesaurus Code") @RequestParam(value = "ncitCode", required = false) String ncitCode
         , @ApiParam(value = "Drug Synonyms") @RequestParam(value = "synonym", required = false) String synonym
         , @ApiParam(value = "Exactly Match", required = true) @RequestParam(value = "exactMatch", required = true, defaultValue = "true") Boolean exactMatch
     );
