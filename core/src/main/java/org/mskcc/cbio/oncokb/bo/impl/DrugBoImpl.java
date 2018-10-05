@@ -17,17 +17,6 @@ import java.util.List;
  * @author jgao
  */
 public class DrugBoImpl extends GenericBoImpl<Drug, DrugDao> implements DrugBo {
-    private String correctDrugName(String drugName) {
-        // Always uppercase first letter
-        if (drugName == null || drugName.isEmpty()) {
-            return drugName;
-        } else if (drugName.length() == 1) {
-            return drugName.toUpperCase();
-        }
-        drugName = drugName.replaceAll("(\\([^\\)]*\\))|(\\[[^\\]]*\\])", "");
-        return drugName.substring(0, 1).toUpperCase() + drugName.substring(1);
-    }
-
     @Override
     public Drug findDrugByName(String drugName) {
         return getDao().findDrugByName(drugName);
@@ -78,7 +67,7 @@ public class DrugBoImpl extends GenericBoImpl<Drug, DrugDao> implements DrugBo {
     @Override
     public void update(Drug drug) {
         if (drug != null) {
-            drug.setDrugName(correctDrugName(drug.getDrugName()));
+            drug.setDrugName(drug.getDrugName());
         }
         super.update(drug);
     }
@@ -86,7 +75,7 @@ public class DrugBoImpl extends GenericBoImpl<Drug, DrugDao> implements DrugBo {
     @Override
     public void save(Drug drug) {
         if (drug != null) {
-            drug.setDrugName(correctDrugName(drug.getDrugName()));
+            drug.setDrugName(drug.getDrugName());
         }
         super.save(drug);
     }
@@ -94,7 +83,7 @@ public class DrugBoImpl extends GenericBoImpl<Drug, DrugDao> implements DrugBo {
     @Override
     public void saveOrUpdate(Drug drug) {
         if (drug != null) {
-            drug.setDrugName(correctDrugName(drug.getDrugName()));
+            drug.setDrugName(drug.getDrugName());
         }
         super.saveOrUpdate(drug);
     }
