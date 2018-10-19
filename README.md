@@ -97,17 +97,15 @@ To ensure consistency throughout the source code, keep these rules in mind as yo
    'Warning: Running "compass:server" (compass) task       
     Warning: not found: compass Use --force to continue.       
     Aborted due to warnings.'                                
-    ```
-    install -g ruby-compass  
-    ```              
-    ```
-    gem install compass            
-    ```       
+                    
+    install -g ruby-compass               
+    gem install compass             
+                    
    #### Gem sources changed       
    'ERROR:  Could not find a valid gem 'compass' (>= 0), here is why:Unable to download data from https://rubygems.org/ - SSL_connect returned=1 errno=0 state=SSLv2/v3 read server hello A: tlsv1 alert protocol version (https://rubygems.org/latest_specs.4.8.gz)'         
-    ```
-    gem sources -a http://rubygems.org                       
-    ```
+                
+    gem sources -a http://rubygems.org                         
+    
 #### 2. Can’t getAllUsers() because of the different rules set in Firebase. It still shows 'don’t have access...' after logging in successfully.         
    Add rules to the database.     
           
