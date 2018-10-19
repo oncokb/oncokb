@@ -91,7 +91,26 @@ To ensure consistency throughout the source code, keep these rules in mind as yo
 * Java files **must be** formatted using [Intellij IDEA's code style](http://confluence.jetbrains.com/display/IntelliJIDEA/Code+Style+and+Formatting).
 * Web apps JavaScript files **must follow** [Google's JavaScript Style Guide](https://google-styleguide.googlecode.com/svn/trunk/javascriptguide.xml).
 * AngularJS files **must follow** [John Papa's Angular 1 style guide] (https://github.com/johnpapa/angular-styleguide/blob/master/a1/README.md).
-
+         
+## FAQs      
+#### 1. Unsuccessful installation of compass 
+   'Warning: Running "compass:server" (compass) task       
+    Warning: not found: compass Use --force to continue.       
+    Aborted due to warnings.'                                
+    ```
+    install -g ruby-compass  
+    ```              
+    ```
+    gem install compass            
+    ```       
+   #### Gem sources changed       
+   'ERROR:  Could not find a valid gem 'compass' (>= 0), here is why:Unable to download data from https://rubygems.org/ - SSL_connect returned=1 errno=0 state=SSLv2/v3 read server hello A: tlsv1 alert protocol version (https://rubygems.org/latest_specs.4.8.gz)'         
+    ```
+    gem sources -a http://rubygems.org                       
+    ```
+#### 2. Can’t getAllUsers() because of the different rules set in Firebase. It still shows 'don’t have access...' after logging in successfully.         
+   Add rules to the database.     
+          
 ## OncoKB Public Website
 In order to build a OncoKB public website instance, please clone [oncokb-public](https://github.com/oncokb/oncokb-public) to web/public folder. And in the pom file, please choose public as profile.
 
