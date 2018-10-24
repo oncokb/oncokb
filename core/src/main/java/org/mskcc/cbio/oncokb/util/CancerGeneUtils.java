@@ -34,11 +34,20 @@ public class CancerGeneUtils {
                     String[] items = line.split("\t");
                     if (items.length != 9) continue;
 
-                    CancerGene cancerGene = new CancerGene();
-                    cancerGene.setHugoSymbol(items[0]);
-                    cancerGene.setEntrezGeneId(items[1]);
                     Gene gene = GeneUtils.getGeneByEntrezId(Integer.parseInt(items[1]));
-                    cancerGene.setOncokbAnnotated(gene == null ? false : true);
+                    CancerGene cancerGene = new CancerGene();
+                    cancerGene.setEntrezGeneId(items[1]);
+
+                    if (gene == null) {
+                        cancerGene.setHugoSymbol(items[0]);
+                        cancerGene.setOncokbAnnotated(false);
+                    } else {
+                        if (!gene.getHugoSymbol().equals(items[0])) {
+                            System.out.println("The gene hugo does not match, expect " + gene.getHugoSymbol() + ", but got: " + items[0]);
+                        }
+                        cancerGene.setHugoSymbol(gene.getHugoSymbol());
+                        cancerGene.setOncokbAnnotated(true);
+                    }
                     int occurence = NumberUtils.isNumber(items[2].trim()) ? Integer.parseInt(items[2].trim()) : 0;
                     if (cancerGene.getOncokbAnnotated()) {
                         occurence++;
