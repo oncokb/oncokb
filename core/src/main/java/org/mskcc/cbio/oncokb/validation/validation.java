@@ -126,13 +126,16 @@ public class validation {
         levels.add(LevelOfEvidence.LEVEL_2A);
         levels.add(LevelOfEvidence.LEVEL_3A);
         levels.add(LevelOfEvidence.LEVEL_4);
+        levels.add(LevelOfEvidence.LEVEL_R1);
+        levels.add(LevelOfEvidence.LEVEL_R2);
 
         System.out.println("Prepare actionable genes for published version and latest version...");
         for (LevelOfEvidence levelOfEvidence : levels) {
             System.out.println("\tOn level " + levelOfEvidence.getLevel());
 
             //Get published actionable genes
-            printEvidences(getFeedUrl(WorkSheetEntryEnum.PUBLISHED_ACTIONABLE_GENES), getPublishedEvidencesByLevel(levelOfEvidence));
+            if(!levelOfEvidence.equals(LevelOfEvidence.LEVEL_R2))
+                printEvidences(getFeedUrl(WorkSheetEntryEnum.PUBLISHED_ACTIONABLE_GENES), getPublishedEvidencesByLevel(levelOfEvidence));
 
             //Get latest actionable genes
             printEvidences(getFeedUrl(WorkSheetEntryEnum.LATEST_ACTIONABLE_GENES), getEvidencesByLevel(levelOfEvidence));
