@@ -1,13 +1,14 @@
 package org.mskcc.cbio.oncokb.util;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.model.SpecialTumorType;
 import org.mskcc.cbio.oncokb.model.TumorForm;
+import org.mskcc.cbio.oncokb.model.newoncotree.NewTumorType;
 import org.mskcc.cbio.oncokb.model.oncotree.MainType;
 import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
 
@@ -23,7 +24,7 @@ import java.util.*;
  * the difference, tumorType will be used to include both.
  */
 public class TumorTypeUtils {
-    private static final String ONCO_TREE_ONCOKB_VERSION = "oncotree_2017_06_21";
+    private static final String ONCO_TREE_ONCOKB_VERSION = "oncotree_2018_06_15";
     private static final String ACCESS_ERROR_ONCO_TREE_MESSAGE = "Error: Cannot access OncoTree service.";
     private static String ONCO_TREE_API_URL = null;
     private static List<TumorType> allOncoTreeCancerTypes = new ArrayList<TumorType>() {{
@@ -222,11 +223,6 @@ public class TumorTypeUtils {
             List<TumorType> matchedSubtypes = getOncoTreeSubtypesByCode(Collections.singletonList(code));
             if (matchedSubtypes != null && matchedSubtypes.size() > 0) {
                 return matchedSubtypes.get(0);
-            }
-
-            List<TumorType> matchedCancerTypes = getOncoTreeCancerTypes(Collections.singletonList(code));
-            if (matchedCancerTypes != null && matchedCancerTypes.size() > 0) {
-                return matchedCancerTypes.get(0);
             }
         }
 
@@ -611,131 +607,53 @@ public class TumorTypeUtils {
         return types;
     }
 
-    private static Set<TumorType> fromCbioportalTumorType(String cbioTumorType) {
-        if (cbioTumorTypeMap == null) {
-            cbioTumorTypeMap = new HashMap<String, List<TumorType>>();
-
-            TumorType tumorTypeAll = getMappedSpecialTumor(SpecialTumorType.ALL_TUMORS);
-
-            List<String> lines;
-            try {
-                lines = FileUtils.readTrimedLinesStream(
-                    TumorTypeUtils.class.getResourceAsStream("/data/cbioportal-tumor-types.txt"));
-            } catch (IOException e) {
-                e.printStackTrace();
-                return Collections.singleton(tumorTypeAll);
-            }
-            for (String line : lines) {
-                if (line.startsWith("#")) {
-                    continue;
-                }
-
-                String[] parts = line.split("\t");
-                if (parts.length > 2) {
-                    String cbioType = parts[0].toLowerCase();
-                    List<TumorType> types = cbioTumorTypeMap.get(cbioType);
-                    if (types == null) {
-                        types = new LinkedList<>();
-                        cbioTumorTypeMap.put(cbioType, types);
-                    }
-
-                    for (int i = 1; i < parts.length; i++) {
-                        TumorType oncokbType = getOncoTreeSubtypeByCode(parts[i]);
-                        if (oncokbType == null) {
-                            oncokbType = getOncoTreeCancerType(parts[i]);
-
-                            if (oncokbType == null) {
-                                System.err.println("no " + parts[i] + " as tumor type in oncokb");
-                                continue;
-                            }
-                        }
-                        types.add(oncokbType);
-                    }
-                }
-            }
-
-            if (tumorTypeAll != null) {
-                for (List<TumorType> list : cbioTumorTypeMap.values()) {
-                    list.add(tumorTypeAll);
-                }
-            }
-        }
-
-        cbioTumorType = cbioTumorType == null ? null : cbioTumorType.toLowerCase();
-
-        if (cbioTumorType == null) {
-            return new LinkedHashSet<>();
-        }
-
-        List<TumorType> ret = cbioTumorTypeMap.get(cbioTumorType);
-
-        return ret == null ? new LinkedHashSet<TumorType>() : new LinkedHashSet<>(ret);
-    }
-
     private static List<TumorType> getOncoTreeCancerTypesFromSource() {
-        String url = getOncoTreeApiUrl() + "mainTypes?version=" + ONCO_TREE_ONCOKB_VERSION;
         List<TumorType> cancerTypes = new ArrayList<>();
-
         try {
-            String json = FileUtils.readRemote(url);
-            Map map = JsonUtils.jsonToMap(json);
-            List<Map<String, Object>> data = (List<Map<String, Object>>) map.get("data");
-            if (data != null) {
-                for (Map<String, Object> datum : data) {
-                    TumorType cancerType = new TumorType();
-                    MainType mainType = new MainType();
-                    mainType.setId((Integer) datum.get("id"));
-                    mainType.setName((String) datum.get("name"));
-                    cancerType.setMainType(mainType);
-                    cancerTypes.add(cancerType);
-                }
-            }
-        } catch (Exception e) {
-            System.out.println(ACCESS_ERROR_ONCO_TREE_MESSAGE + " Fetch local file for all OncoTree MainTypes.");
-            Gson gson = new GsonBuilder().create();
-            MainType[] mainTypes = gson.fromJson(new BufferedReader(new InputStreamReader(TumorTypeUtils.class.getResourceAsStream("/data/oncotree-maintypes.json"))), MainType[].class);
-            for (int i = 0; i < mainTypes.length; i++) {
+            String json = IOUtils.toString(new InputStreamReader(TumorTypeUtils.class.getResourceAsStream("/data/oncotree-maintypes.json")));
+            List<String> mainTypes = JsonUtils.jsonToArray(json);
+            for (String str : mainTypes) {
                 TumorType cancerType = new TumorType();
-                cancerType.setMainType(mainTypes[i]);
+                MainType mainType = new MainType(str);
+                cancerType.setMainType(mainType);
                 cancerTypes.add(cancerType);
             }
+        } catch (Exception e) {
+            System.out.println("You need to include oncotree nested file. Endpoint: mainTypes?version=" + ONCO_TREE_ONCOKB_VERSION);
+            e.printStackTrace();
         }
         return cancerTypes;
     }
 
     private static Map<String, TumorType> getAllNestedOncoTreeSubtypesFromSource() {
-        String url = getOncoTreeApiUrl() + "tumorTypes?version=" + ONCO_TREE_ONCOKB_VERSION + "&flat=false&deprecated=false";
+        String url = getOncoTreeApiUrl() + "tumorTypes?version=" + ONCO_TREE_ONCOKB_VERSION + "&flat=false";
         Map<String, TumorType> result = new HashMap<>();
-        TumorType tumorType = null;
         try {
-            String json = FileUtils.readRemote(url);
+            String json = IOUtils.toString(new InputStreamReader(TumorTypeUtils.class.getResourceAsStream("/data/oncotree-tumortypes.json")));
             Map map = JsonUtils.jsonToMap(json);
-            Map<String, TumorType> data = (Map<String, TumorType>) map.get("data");
-            tumorType = new ObjectMapper().convertValue(data.get("TISSUE"), TumorType.class);
+            Map<String, NewTumorType> data = (Map<String, NewTumorType>) map;
+            NewTumorType tumorType = new ObjectMapper().convertValue(data.get("TISSUE"), NewTumorType.class);
+            result.put("TISSUE", new TumorType(tumorType));
         } catch (Exception e) {
-            System.out.println(ACCESS_ERROR_ONCO_TREE_MESSAGE + " Fetch local file for nested OncoTree Subtypes.");
-            Gson gson = new GsonBuilder().create();
-            tumorType = gson.fromJson(new BufferedReader(new InputStreamReader(TumorTypeUtils.class.getResourceAsStream("/data/oncotree-tumortypes.json"))), TumorType.class);
+            System.out.println("You need to include oncotree nested file. Endpoint: tumorTypes?version=" + ONCO_TREE_ONCOKB_VERSION + "&flat=false");
+            e.printStackTrace();
         }
-        result.put("TISSUE", tumorType);
         return result;
     }
 
     private static List<TumorType> getOncoTreeSubtypesFromSource() {
-        List<TumorType> subtypes = new ArrayList<>();
-        String url = getOncoTreeApiUrl() + "tumorTypes?version=" + ONCO_TREE_ONCOKB_VERSION + "&flat=true&deprecated=false";
+        List<TumorType> tumorTypes = new ArrayList<>();
         try {
-            String json = FileUtils.readRemote(url);
-            Map map = JsonUtils.jsonToMap(json);
-            subtypes = new ObjectMapper().convertValue(map.get("data"), new TypeReference<List<TumorType>>() {
-            });
-        } catch (Exception e) {
-            System.out.println(ACCESS_ERROR_ONCO_TREE_MESSAGE + " Fetch local file for all OncoTree Subtypes.");
             Gson gson = new GsonBuilder().create();
-            TumorType[] tumorType = gson.fromJson(new BufferedReader(new InputStreamReader(TumorTypeUtils.class.getResourceAsStream("/data/oncotree-tumortypes-flat.json"))), TumorType[].class);
-            subtypes = Arrays.asList(tumorType);
+            NewTumorType[] tumorType = gson.fromJson(new BufferedReader(new InputStreamReader(TumorTypeUtils.class.getResourceAsStream("/data/oncotree-tumortypes-flat.json"))), NewTumorType[].class);
+            for (NewTumorType tt : Arrays.asList(tumorType)) {
+                tumorTypes.add(new TumorType(tt));
+            }
+        } catch (Exception e) {
+            System.out.println("You need to include oncotree flat file. Endpoint: tumorTypes?version=" + ONCO_TREE_ONCOKB_VERSION + "&flat=true");
+            e.printStackTrace();
         }
-        return subtypes;
+        return tumorTypes;
     }
 
     private static Set<TumorType> getAllSpecialTumorOncoTreeTypes() {

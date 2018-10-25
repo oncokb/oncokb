@@ -21,12 +21,12 @@ public class LevelUtils {
     );
 
     public static final List<LevelOfEvidence> RESISTANCE_LEVELS = Collections.unmodifiableList(
-        Arrays.asList(LevelOfEvidence.LEVEL_R1)
+        Arrays.asList(LevelOfEvidence.LEVEL_R2, LevelOfEvidence.LEVEL_R1)
     );
 
     public static final List<LevelOfEvidence> PUBLIC_LEVELS = Collections.unmodifiableList(
         Arrays.asList(LevelOfEvidence.LEVEL_1, LevelOfEvidence.LEVEL_R1, LevelOfEvidence.LEVEL_2A,
-            LevelOfEvidence.LEVEL_3A, LevelOfEvidence.LEVEL_4)
+            LevelOfEvidence.LEVEL_3A, LevelOfEvidence.LEVEL_4, LevelOfEvidence.LEVEL_R2)
     );
 
     public static final List<LevelOfEvidence> OTHER_INDICATION_LEVELS = Collections.unmodifiableList(

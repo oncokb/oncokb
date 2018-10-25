@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang3.StringUtils;
+import org.mskcc.cbio.oncokb.model.newoncotree.NewTumorType;
 
 import java.util.*;
 
@@ -228,6 +229,28 @@ public class TumorType {
 
     public void setLevel(Integer level) {
         this.level = level;
+    }
+
+    public TumorType() {
+    }
+
+    public TumorType(NewTumorType newTumorType) {
+        this.setName(newTumorType.getName());
+        this.setTissue(newTumorType.getTissue());
+        this.setCode(newTumorType.getCode());
+        this.setColor(newTumorType.getColor());
+        MainType mainType = new MainType();
+        mainType.setName(newTumorType.getMainType());
+        this.setMainType(mainType);
+        this.setParent(newTumorType.getParent());
+        this.setHistory(newTumorType.getHistory());
+        this.setLevel(newTumorType.getLevel());
+        Map<String, TumorType> children = new HashMap<>();
+        for(Map.Entry<String, NewTumorType> entry: newTumorType.getChildren().entrySet()) {
+            children.put(entry.getKey(), new TumorType(entry.getValue()));
+        }
+        this.setChildren(children);
+        this.setTissue(newTumorType.getTissue());
     }
 
     @Override
