@@ -12,6 +12,8 @@ import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static org.mskcc.cbio.oncokb.util.LevelUtils.LEVELS;
+
 /**
  * Created by hongxinzhang on 4/5/16.
  */
@@ -467,20 +469,42 @@ public class IndicatorUtils {
     private static List<IndicatorQueryTreatment> getIndicatorQueryTreatments(Set<Evidence> evidences) {
         List<IndicatorQueryTreatment> treatments = new ArrayList<>();
         if (evidences != null) {
-            List<Evidence> sortedEvidence = new ArrayList<>(evidences);
+            Map<LevelOfEvidence, Set<Evidence>> evidenceSetMap = EvidenceUtils.separateEvidencesByLevel(evidences);
 
-            CustomizeComparator.sortEvidenceBasedOnPriority(sortedEvidence);
+            ListIterator<LevelOfEvidence> li = LEVELS.listIterator(LEVELS.size());
+            while (li.hasPrevious()) {
+                LevelOfEvidence level = li.previous();
+                if (evidenceSetMap.containsKey(level)) {
+                    Set<Treatment> sameLevelTreatments = new HashSet<>();
+                    Map<Treatment, Set<String>> pmidsMap = new HashMap<>();
+                    Map<Treatment, Set<ArticleAbstract>> abstractsMap = new HashMap<>();
 
-            for (Evidence evidence : sortedEvidence) {
-                Citations citations = MainUtils.getCitationsByEvidence(evidence);
-                for (Treatment treatment : evidence.getSortedTreatment()) {
-                    IndicatorQueryTreatment indicatorQueryTreatment = new IndicatorQueryTreatment();
-                    indicatorQueryTreatment.setDrugs(treatment.getDrugs());
-                    indicatorQueryTreatment.setApprovedIndications(treatment.getApprovedIndications());
-                    indicatorQueryTreatment.setLevel(evidence.getLevelOfEvidence());
-                    indicatorQueryTreatment.setPmids(citations.getPmids());
-                    indicatorQueryTreatment.setAbstracts(citations.getAbstracts());
-                    treatments.add(indicatorQueryTreatment);
+                    for (Evidence evidence : evidenceSetMap.get(level)) {
+                        Citations citations = MainUtils.getCitationsByEvidence(evidence);
+                        for (Treatment treatment : evidence.getTreatments()) {
+                            if (!pmidsMap.containsKey(treatment)) {
+                                pmidsMap.put(treatment, new HashSet<String>());
+                            }
+                            if (!abstractsMap.containsKey(treatment)) {
+                                abstractsMap.put(treatment, new HashSet<ArticleAbstract>());
+                            }
+                            pmidsMap.put(treatment, citations.getPmids());
+                            abstractsMap.put(treatment, citations.getAbstracts());
+                        }
+                        sameLevelTreatments.addAll(evidence.getTreatments());
+                    }
+                    List<Treatment> list = new ArrayList<>(sameLevelTreatments);
+                    TreatmentUtils.sortTreatmentsByName(list);
+                    for (Treatment treatment : list) {
+                        IndicatorQueryTreatment indicatorQueryTreatment = new IndicatorQueryTreatment();
+                        indicatorQueryTreatment.setDrugs(treatment.getDrugs());
+                        indicatorQueryTreatment.setApprovedIndications(treatment.getApprovedIndications());
+                        indicatorQueryTreatment.setLevel(level);
+                        indicatorQueryTreatment.setPmids(pmidsMap.get(treatment));
+                        indicatorQueryTreatment.setAbstracts(abstractsMap.get(treatment));
+                        treatments.add(indicatorQueryTreatment);
+                    }
+
                 }
             }
         }

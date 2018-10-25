@@ -59,6 +59,15 @@ public final class TreatmentUtils {
         return MainUtils.listToString(treatmentNames, ", ");
     }
 
+    public static List<Treatment> sortTreatmentsByName(List<Treatment> treatments) {
+        Collections.sort(treatments, new Comparator<Treatment>() {
+            public int compare(Treatment t1, Treatment t2) {
+                return t1.getName() .compareTo(t2.getName());
+            }
+        });
+        return treatments;
+    }
+
     public static List<String> getTreatments(Set<Treatment> treatments) {
         List<String> treatmentNames = new ArrayList<>();
         List<Treatment> sortedTreatment = new ArrayList<>(treatments);
