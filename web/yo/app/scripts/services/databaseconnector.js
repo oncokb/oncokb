@@ -14,6 +14,7 @@ angular.module('oncokbApp')
         'DriveAnnotation',
         'SendEmail',
         'DataSummary',
+        'Drugs',
         'Cache',
         'OncoTree',
         'InternalAccess',
@@ -32,6 +33,7 @@ angular.module('oncokbApp')
                  DriveAnnotation,
                  SendEmail,
                  DataSummary,
+                 Drugs,
                  Cache,
                  OncoTree,
                  InternalAccess,
@@ -42,6 +44,49 @@ angular.module('oncokbApp')
             var data = {};
             var testing = OncoKB.config.testing || false;
             var inProduction = OncoKB.config.production || false;
+
+
+            function getAllDrugs() {
+                var deferred = $q.defer();
+                Drugs.getAllDrugs()
+                    .then(function(data) {
+                        deferred.resolve(data.data);
+                    }, function(error) {
+                        var subject = 'getAllDrugs Error';
+                        var content = 'The system error returned is ' + JSON.stringify(error);
+                        sendEmail({sendTo: 'dev.oncokb@gmail.com', subject: subject, content: content},
+                            function(result) {
+                                console.log('sent getAllDrugs Error to oncokb dev account');
+                            },
+                            function(error) {
+                                console.log('fail to send getAllDrugs Error to oncokb dev account', error);
+                            }
+                        );
+                        deferred.reject(error);
+                    });
+                return deferred.promise;
+            }
+
+            function searchDrugs(keyword) {
+                var deferred = $q.defer();
+                Drugs.searchDrugs(keyword)
+                    .then(function(data) {
+                        deferred.resolve(data.data);
+                    }, function(error) {
+                        var subject = 'searchDrugs Error';
+                        var content = 'The system error returned is ' + JSON.stringify(error);
+                        sendEmail({sendTo: 'dev.oncokb@gmail.com', subject: subject, content: content},
+                            function(result) {
+                                console.log('sent searchDrugs Error to oncokb dev account');
+                            },
+                            function(error) {
+                                console.log('fail to send searchDrugs Error to oncokb dev account', error);
+                            }
+                        );
+                        deferred.reject(error);
+                    });
+                return deferred.promise;
+            }
 
             function getAllGene(callback, timestamp) {
                 Gene.getFromServer()
@@ -519,6 +564,8 @@ angular.module('oncokbApp')
             }
             // Public API here
             return {
+                getAllDrugs: getAllDrugs,
+                searchDrugs: searchDrugs,
                 getGeneTumorType: getGeneTumorType,
                 searchAnnotation: searchVariant,
                 updateGene: updateGene,

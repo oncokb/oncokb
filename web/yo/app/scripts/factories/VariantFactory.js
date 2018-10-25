@@ -43,6 +43,23 @@ angular.module('oncokbApp').factory('DataSummary', ['$http', function($http) {
     };
 }]);
 
+angular.module('oncokbApp').factory('Drugs', ['$http', 'OncoKB', function($http, OncoKB) {
+    'use strict';
+
+    function getAllDrugs() {
+        return $http.get(OncoKB.config.publicApiLink + 'drugs');
+    }
+
+    function searchDrugs(keyword) {
+        return $http.get(OncoKB.config.privateApiLink + 'search/drugs?query=' + keyword);
+    }
+
+    return {
+        getAllDrugs: getAllDrugs,
+        searchDrugs: searchDrugs
+    }
+}]);
+
 angular.module('oncokbApp').factory('Alteration', ['$http', 'OncoKB', function($http, OncoKB) {
     'use strict';
 

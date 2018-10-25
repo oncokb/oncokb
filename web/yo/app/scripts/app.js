@@ -93,6 +93,10 @@ var oncokbApp = angular.module('oncokbApp', [
             .when('/queues', {
                 templateUrl: 'views/queues.html'
             })
+            .when('/drugs', {
+                templateUrl: 'views/drugs.html',
+                controller: 'DrugsCtrl'
+            })
             .otherwise({
                 redirectTo: '/genes'
             });
