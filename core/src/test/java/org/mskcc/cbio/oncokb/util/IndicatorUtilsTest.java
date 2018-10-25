@@ -130,6 +130,23 @@ public class IndicatorUtilsTest {
             LevelOfEvidence.LEVEL_R1, indicatorQueryResp.getHighestResistanceLevel());
 
 
+        // Test R2 data
+        query = new Query(null, null, null, "ALK", "I1171N", null, null, "Lung Adenocarcinoma", null, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, false, null);
+        assertEquals("The oncogenicity should be 'Oncogenic'", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The highest sensitive level should be 4",
+            LevelOfEvidence.LEVEL_4, indicatorQueryResp.getHighestSensitiveLevel());
+        assertEquals("The highest resistance level should be R1",
+            LevelOfEvidence.LEVEL_R2, indicatorQueryResp.getHighestResistanceLevel());
+
+        query = new Query(null, null, null, "EGFR", "C797S", null, null, "Lung Adenocarcinoma", null, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, false, null);
+        assertEquals("The oncogenicity should be 'Oncogenic'", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The highest sensitive level should be 4",
+            null, indicatorQueryResp.getHighestSensitiveLevel());
+        assertEquals("The highest resistance level should be R1",
+            LevelOfEvidence.LEVEL_R2, indicatorQueryResp.getHighestResistanceLevel());
+
         // Test cases generated through MSK-IMPACT reports which ran into issue before
         query = new Query(null, null, null, "EGFR", "S768_V769delinsIL", null, null, "Non-Small Cell Lung Cancer", "missense_variant", null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true, null);

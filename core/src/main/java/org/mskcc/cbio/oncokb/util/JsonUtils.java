@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -27,5 +28,10 @@ public final class JsonUtils {
 
     public static Map<String, Object> jsonToMap(String json) throws IOException {
         return objectMapper.readValue(json, typeRefMap);
+    }
+
+    public static <T> List<T> jsonToArray(String json) throws IOException {
+        return objectMapper.readValue(json, new TypeReference<List<T>>() {
+        });
     }
 }
