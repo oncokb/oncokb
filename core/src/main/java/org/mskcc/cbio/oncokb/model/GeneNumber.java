@@ -61,11 +61,11 @@ public class GeneNumber {
         this.highestSensitiveLevel = highestSensitiveLevel;
     }
 
-    public String getHighestResistenceLevel() {
+    public String getHighestResistanceLevel() {
         return highestResistanceLevel;
     }
 
-    public void setHighestResistenceLevel(String highestResistanceLevel) {
+    public void setHighestResistanceLevel(String highestResistanceLevel) {
         this.highestResistanceLevel = highestResistanceLevel;
     }
 

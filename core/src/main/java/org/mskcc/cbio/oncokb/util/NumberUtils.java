@@ -24,7 +24,7 @@ public class NumberUtils {
             LevelOfEvidence highestSensitiveLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(pair.getValue(), LevelUtils.getPublicSensitiveLevels());
             LevelOfEvidence highestResistanceLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(pair.getValue(), LevelUtils.getPublicResistanceLevels());
             geneNumber.setHighestSensitiveLevel(highestSensitiveLevel != null ? highestSensitiveLevel.name() : null);
-            geneNumber.setHighestResistenceLevel(highestResistanceLevel != null ? highestResistanceLevel.name() : null);
+            geneNumber.setHighestResistanceLevel(highestResistanceLevel != null ? highestResistanceLevel.name() : null);
 
             Set<Alteration> alterations = AlterationUtils.getAllAlterations(pair.getKey());
             List<Alteration> excludeVUS = AlterationUtils.excludeVUS(pair.getKey(), new ArrayList<>(alterations));
