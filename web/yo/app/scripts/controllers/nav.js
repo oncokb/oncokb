@@ -14,13 +14,15 @@ angular.module('oncokbApp')
             genes: 'Genes',
             tools: 'Tools',
             feedback: 'Feedback',
-            queues: 'Curation Queue'
+            queues: 'Curation Queue',
+            drugs: 'Drugs'
         };
 
         function setParams() {
             var filterTabs = [];
             filterTabs.push({key: 'genes', value: tabs.genes});
             filterTabs.push({key: 'queues', value: tabs.queues});
+            filterTabs.push({key: 'drugs', value: tabs.drugs});
             if ($rootScope.me.admin) {
                 var keys = ['variant', 'tools', 'feedback'];
                 keys.forEach(function(e) {
