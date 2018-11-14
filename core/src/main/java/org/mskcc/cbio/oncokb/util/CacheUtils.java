@@ -293,13 +293,13 @@ public class CacheUtils {
             return new HashSet<>();
         }
         if (VUS.containsKey(entrezGeneId)) {
-            return VUS.get(entrezGeneId) == null ? new HashSet<Alteration>() : new HashSet<>(VUS.get(entrezGeneId));
+            return VUS.get(entrezGeneId) == null ? new HashSet<Alteration>() : Collections.unmodifiableSet(VUS.get(entrezGeneId));
         } else {
             Gene gene = GeneUtils.getGeneByEntrezId(entrezGeneId);
             if (gene != null) {
                 synEvidences();
             }
-            return VUS.get(entrezGeneId) == null ? new HashSet<Alteration>() : new HashSet<>(VUS.get(entrezGeneId));
+            return VUS.get(entrezGeneId) == null ? new HashSet<Alteration>() : Collections.unmodifiableSet(VUS.get(entrezGeneId));
         }
     }
 
@@ -317,7 +317,7 @@ public class CacheUtils {
         if (result == null) {
             return new HashSet<>();
         }else {
-            return new HashSet<>(result);
+            return Collections.unmodifiableSet(result);
         }
     }
 
@@ -438,7 +438,7 @@ public class CacheUtils {
         synEvidences();
 
         if (evidences.containsKey(gene.getEntrezGeneId())) {
-            return evidences.get(gene.getEntrezGeneId()) == null ? new HashSet<Evidence>() : new HashSet<>(evidences.get(gene.getEntrezGeneId()));
+            return evidences.get(gene.getEntrezGeneId()) == null ? new HashSet<Evidence>() : Collections.unmodifiableSet(evidences.get(gene.getEntrezGeneId()));
         } else {
             return new HashSet<>();
         }
