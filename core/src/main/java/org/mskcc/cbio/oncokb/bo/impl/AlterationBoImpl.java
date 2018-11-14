@@ -472,7 +472,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         if (alteration.getGene().getOncogene() != null && alteration.getGene().getTSG() != null && alteration.getGene().getOncogene() && !alteration.getGene().getTSG() && alteration.getConsequence().getIsGenerallyTruncating()) {
             LinkedHashSet<Alteration> filtered = new LinkedHashSet<>();
             for (Alteration alt : relevantAlts) {
-                if (!alt.getConsequence().getIsGenerallyTruncating() || !alt.getProteinEnd().equals(alt.getProteinStart()) || !alt.getProteinStart().equals(-1)) {
+                if (alt.getConsequence().getIsGenerallyTruncating() || alt.getProteinEnd().equals(alt.getProteinStart()) || alt.getProteinStart().equals(-1)) {
                     filtered.add(alt);
                 }
             }
