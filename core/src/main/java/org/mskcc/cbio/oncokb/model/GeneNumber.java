@@ -83,7 +83,7 @@ public class GeneNumber {
             return false;
         if (getHighestSensitiveLevel() != null ? !getHighestSensitiveLevel().equals(that.getHighestSensitiveLevel()) : that.getHighestSensitiveLevel() != null)
             return false;
-        if (getHighestResistenceLevel() != null ? !getHighestResistenceLevel().equals(that.getHighestResistenceLevel()) : that.getHighestResistenceLevel() != null)
+        if (getHighestResistanceLevel() != null ? !getHighestResistanceLevel().equals(that.getHighestResistanceLevel()) : that.getHighestResistanceLevel() != null)
             return false;
 
         return true;
@@ -95,7 +95,7 @@ public class GeneNumber {
         result = 31 * result + (getAlteration() != null ? getAlteration().hashCode() : 0);
         result = 31 * result + (getTumorType() != null ? getTumorType().hashCode() : 0);
         result = 31 * result + (getHighestSensitiveLevel() != null ? getHighestSensitiveLevel().hashCode() : 0);
-        result = 31 * result + (getHighestResistenceLevel() != null ? getHighestResistenceLevel().hashCode() : 0);
+        result = 31 * result + (getHighestResistanceLevel() != null ? getHighestResistanceLevel().hashCode() : 0);
         return result;
     }
 

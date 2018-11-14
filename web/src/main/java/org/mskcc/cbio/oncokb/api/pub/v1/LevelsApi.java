@@ -31,7 +31,7 @@ public interface LevelsApi {
     @RequestMapping(value = "/levels/resistance",
         produces = {"application/json"},
         method = RequestMethod.GET)
-    ResponseEntity<Map<LevelOfEvidence, String>> levelsResistenceGet();
+    ResponseEntity<Map<LevelOfEvidence, String>> levelsResistanceGet();
 
 
     @ApiOperation(value = "", notes = "Get all sensitive levels.", response = Map.class, tags = {"Levels",})
