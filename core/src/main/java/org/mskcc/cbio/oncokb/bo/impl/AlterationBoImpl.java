@@ -94,13 +94,13 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
     }
 
     @Override
-    public List<Alteration> findMutationsByConsequenceAndPosition(Gene gene, VariantConsequence consequence, int start, int end, Collection<Alteration> alterations) {
+    public List<Alteration> findMutationsByConsequenceAndPosition(Gene gene, VariantConsequence consequence, int start, int end, Set<Alteration> alterations) {
         Set<Alteration> result = new HashSet<>();
 
         // Don't search for NA cases
         if (gene != null && consequence != null && !consequence.getTerm().equals("NA")) {
             if (alterations != null && alterations.size() > 0) {
-                result.addAll(AlterationUtils.findOverlapAlteration(new HashSet<>(alterations), gene, consequence, start, end));
+                result.addAll(AlterationUtils.findOverlapAlteration(alterations, gene, consequence, start, end));
             } else {
                 Collection<Alteration> queryResult;
                 if (CacheUtils.isEnabled()) {
@@ -308,7 +308,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         alterations.addAll(findMutationsByConsequenceAndPosition(alteration.getGene(), anyConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations));
 
         // Remove all range mutations as relevant for truncating mutations in oncogenes
-        oncogeneTruncMuts(alteration, alterations);
+        alterations = oncogeneTruncMuts(alteration, alterations);
 
         // Match Truncating Mutations section to Deletion if no Deletion section specifically curated
         if (alteration.getAlteration().toLowerCase().matches("deletion")) {
@@ -468,15 +468,17 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         return false;
     }
 
-    private void oncogeneTruncMuts(Alteration alteration, LinkedHashSet<Alteration> relevantAlts) {
+    private LinkedHashSet<Alteration> oncogeneTruncMuts(Alteration alteration, LinkedHashSet<Alteration> relevantAlts) {
         if (alteration.getGene().getOncogene() != null && alteration.getGene().getTSG() != null && alteration.getGene().getOncogene() && !alteration.getGene().getTSG() && alteration.getConsequence().getIsGenerallyTruncating()) {
-            Iterator<Alteration> iterator = relevantAlts.iterator();
-            while (iterator.hasNext()) {
-                Alteration relevantAlt = iterator.next();
-                if (!relevantAlt.getConsequence().getIsGenerallyTruncating() && !relevantAlt.getProteinEnd().equals(relevantAlt.getProteinStart()) && !relevantAlt.getProteinStart().equals(-1)) {
-                    iterator.remove();
+            LinkedHashSet<Alteration> filtered = new LinkedHashSet<>();
+            for (Alteration alt : relevantAlts) {
+                if (!alt.getConsequence().getIsGenerallyTruncating() || !alt.getProteinEnd().equals(alt.getProteinStart()) || !alt.getProteinStart().equals(-1)) {
+                    filtered.add(alt);
                 }
             }
+            return filtered;
+        } else {
+            return relevantAlts;
         }
     }
 }

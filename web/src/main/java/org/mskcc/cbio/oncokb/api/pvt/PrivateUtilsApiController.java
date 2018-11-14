@@ -231,6 +231,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
                 // it into the list for mapping.
                 Alteration exactMatch = AlterationUtils.findAlteration(gene, variant);
                 if (exactMatch == null) {
+                    allAlterations = new HashSet<>(allAlterations);
                     allAlterations.add(oncokbVariant);
                 }
                 relevantAlterations = alterationBo.findRelevantAlterations(exampleVariant, allAlterations, true);
