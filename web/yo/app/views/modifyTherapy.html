@@ -1,0 +1,41 @@
+<head>
+    <link rel="stylesheet" href="styles/modifyWindow.css" type="text/css" >
+</head>
+
+<div class="modal-header">
+    <h4 class="modal-title">
+        Add Therapy</h4></div>
+<div class="modal-body">
+    <div class="input-group input-group-sm" style="width: 100%">
+        <div ng-repeat="element in therapy">
+            <div class="flexRow">
+                <div ng-click="addTherapy($index)" class="inputDrugs">
+                    <tags-input ng-model="element.tags" display-property="drugName" replace-spaces-with-dashes="false" placeholder="Add drugs" add-from-autocomplete-only="true" on-tag-added="addDruginTherapy($tag, $index)" on-tag-removed="removeDruginTherapy($tag, $index)">
+                        <auto-complete source="loadDrugs($query)"
+                                       min-length="1"
+                                       load-on-focus="true"
+                                       load-on-empty="false"
+                                       template="drugsDropdown"></auto-complete>
+                    </tags-input>
+                </div>
+                <button class="btn btn-default addButton"><i class="fa fa-remove" ng-click="deleteTherapy($index)"></i></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-footer">
+    <p class="errorNote" ng-show="addTherapyError">{{therapyErrorMessage}}</p>
+    <button type="button" class="btn btn-default" ng-click="cancel()">Cancel</button>
+    <button type="button" class="btn btn-primary" ng-click="save()" ng-disabled="addTherapyError">Save</button>
+</div>
+
+<script type="text/ng-template" id="drugsDropdown">
+    <div>
+        <div ng-bind-html="$highlight($getDisplayText())"></div>
+        <div>Also known as
+            <span ng-bind-html="$highlight(data.synonyms.join(', '))"></span>
+        </div>
+    </div>
+</script>
+

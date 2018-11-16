@@ -1,0 +1,17 @@
+.flexRow{
+    display:flex;
+    flex-direction: row;
+}
+.inputDrugs{
+    flex-grow: 1;
+    flex-basis: 70%;
+}
+.addButton{
+    border:0px;
+    flex-grow: 0;
+    font-size:20px;
+}
+.errorNote{
+    color:red;
+    float:left;
+}

@@ -267,7 +267,7 @@
                         <div class="sectionStyle">
                           <div ng-style="movingInfo[treatment.name_uuid]" class="headerLevel4">
                             <div ng-click="toggleSection(treatment.name_uuid)"><i ng-class="getAngleClass(treatment.name_uuid)"></i> Therapy:</div>
-                            <div style="margin-left:90px;margin-top:-22px">
+                            <div style="margin-left:90px;margin-top:-22px;overflow: hidden">
                               <div ng-style="getNameStyle()"><realtime-string t="'TREATMENT_NAME'" key="'name'" path="path" uuid="getUUID({type: 'treatment', key: 'name', path: path})"></realtime-string></div>
                               <div style="float:left;margin-left:10px;" ng-show="!reviewMode">
                                 <comments-dict key="'name'" path="path"></comments-dict>
@@ -329,12 +329,11 @@
                         </div>
                       </div>
                       <div ng-show="!reviewMode && fileEditable" class="input-group input-group-sm accordionMarginTop">
-                        <input type="text" class="form-control" ng-model="newTIName" placeholder="Therapy name" />
-                        <span class="input-group-btn">
-                          <button type="button" class="btn btn-default" ng-disabled="!(!!newTIName)" ng-click="addTreatment(newTIName, path); newTIName=''">
-                            <i class="fa fa-plus"></i> Add Therapy and {{::(ti.type[0] === 'I' ? 'Investigational' : 'Standard')}} implications
-                          </button>
-                        </span>
+                          <span class="input-group-btn">
+                              <button type="button" class="btn btn-default btn-sm" style="border-radius:3px" ng-click="modifyTherapy(path)">
+                                <i class="fa fa-plus"></i> Add Therapy and {{::(ti.type[0] === 'I' ? 'Investigational' : 'Standard')}} Implications
+                              </button>
+                          </span>
                       </div>
                     </div>
                   </div>

@@ -14,7 +14,10 @@
                             ng-model="pContent">
                     </pub-iframe>
                 </div>
-                <div ng-switch-when="MUTATION_NAME|TREATMENT_NAME" ng-switch-when-separator="|">
+                <!--Seperate Mutation_Name & Treatment_Name here. We may need to recombine them in the future.
+                    <div ng-switch-when="MUTATION_NAME|TREATMENT_NAME" ng-switch-when-seperator="|">
+                -->
+                <div ng-switch-when="MUTATION_NAME">
                     <p ng-if="!fe && editingMessage" style="font-style:italic;margin-top:-30px;margin-left:30%;color:orange">{{editingMessage}}</p>
                     <p contenteditable="{{fe}}"
                         ng-class="getInputClass()"
@@ -26,6 +29,17 @@
                     </p>
                     <!-- <span style="color:red">{{getDuplicationMessage()}}</span> -->
                     <!-- <br/> -->
+                </div>
+                <div ng-switch-when="TREATMENT_NAME">
+                    <p ng-if="!fe && editingMessage" style="font-style:italic;margin-top:-30px;margin-left:30%;color:orange">{{editingMessage}}</p>
+                    <p contenteditable="false"
+                       ng-class="getInputClass()"
+                       ng-model="data[key]"
+                       ng-click="setTrackSignal()"
+                       ng-paste="trimCSS()"
+                       ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 200, 'blur': 0 } }"
+                       class="editEmpty">
+                    </p>
                 </div>
                 <div ng-switch-when="treatment-select" class="chosen-full-width">
                     <div style="margin-top:10px;margin-bottom:10px">

@@ -1751,40 +1751,18 @@ angular.module('oncokbApp')
                         size: 'lg'
                 });
             };
-            function isValidTreatment(indices, newTreatmentName) {
-                var isValid = true;
-                var message = '';
-                _.some($scope.gene.mutations[indices[0]].tumors[indices[1]].TIs[indices[2]].treatments, function (treatment) {
-                    if (treatment.name.toLowerCase() === newTreatmentName.toLowerCase()) {
-                        isValid = false;
-                        message = 'This treament has already been added';
-                        return true;
-                    }
-                });
-                if (!isValid) {
-                    dialogs.notify('Warning', message);
-                }
-                return isValid;
-            }
-            $scope.addTreatment = function (newTreatmentName, path) {
-                newTreatmentName = newTreatmentName.trim();
+            $scope.modifyTherapy = function (path) {
                 var indices = getIndexByPath(path);
-                var treatment = new FirebaseModel.Treatment(newTreatmentName);
-                treatment.name_review = {
-                    updatedBy: $rootScope.me.name,
-                    updateTime: new Date().getTime(),
-                    added: true
-                };
-                if (!$scope.gene.mutations[indices[0]].tumors[indices[1]].TIs[indices[2]].treatments) {
-                    $scope.gene.mutations[indices[0]].tumors[indices[1]].TIs[indices[2]].treatments = [];
-                }
-                if (isValidTreatment(indices, newTreatmentName)) {
-                    $scope.gene.mutations[indices[0]].tumors[indices[1]].TIs[indices[2]].treatments.push(treatment);
-                    $scope.indicateTumorContent($scope.gene.mutations[indices[0]].tumors[indices[1]]);
-                }
-                mainUtils.setUUIDInReview(treatment.name_uuid);
+                var tumorRef = $scope.gene.mutations[indices[0]].tumors[indices[1]];
+                var treatmentRef = $scope.gene.mutations[indices[0]].tumors[indices[1]].TIs[indices[2]];
+                var dlgfortherapy = dialogs.create('views/modifyTherapy.html', 'ModifyTherapyCtrl',{
+                    tumorRef: tumorRef,
+                    treatmentRef: treatmentRef,
+                    oncoTree: $scope.oncoTree
+                }, {
+                    size: 'lg'
+                });
             };
-
             $scope.onFocus = function (e) {
                 $timeout(function () {
                     $(e.target).trigger('input');
@@ -3009,6 +2987,119 @@ angular.module('oncokbApp')
             getOncoTreeMainTypes();
         }]
     )
+
+    .controller('ModifyTherapyCtrl', function ($scope, $modalInstance, data, _, OncoKB, $rootScope, mainUtils, FirebaseModel, $timeout, DatabaseConnector){
+        $scope.therapy = [[]];
+        $scope.addTherapyError = false;
+        $scope.loadDrugs = function($query){
+            return DatabaseConnector.getAllDrugs()
+                .then(function(result){
+                    $scope.addTherapyError = false;
+                    var drugs = result;
+                    return drugs.filter(function (drug) {
+                        return (drug.drugName.toLowerCase().indexOf($query.toLowerCase()) != -1) || (drug.synonyms.join(',').toLowerCase().indexOf($query.toLowerCase()) != -1);
+                    })
+                })
+                .catch(
+                    function (error) {
+                        $scope.therapyErrorMessage = "Sorry, the list of drugs is not available now.";
+                        $scope.addTherapyError = true;
+                    }
+                )
+        }
+        $scope.addDruginTherapy = function(tag,index){
+            $scope.therapy[index].push(tag.drugName);
+            addTherapy(index);
+        }
+
+        $scope.removeDruginTherapy = function(tag,index){
+            var id = $scope.therapy[index].indexOf(tag.drugName);
+            if (id > -1) {
+                $scope.therapy[index].splice(id, 1);
+            }
+            addTherapy(index);
+        }
+        function addTherapy(index) {
+            if ($scope.therapy.length === index + 1 ){
+                $scope.therapy.push([]);
+            }
+            valiElement(index);
+        }
+        function valiElement(index) {
+            $scope.addTherapyError = false;
+            var therapyVali = [];
+            _.each($scope.therapy, function(element) {
+                element = element.sort();
+                element = element.join(' ').trim();
+                if (element!=='')
+                    therapyVali.push(element);
+            });
+            for(var i=0;i<therapyVali.length;i++){
+                for(var j=i+1;j<=therapyVali.length;j++){
+                    if (therapyVali[i] == therapyVali[j]) {
+                        $scope.therapyErrorMessage = "Same Elements. Please check and save again.";
+                        $scope.addTherapyError = true;
+                    }
+                }
+            }
+        }
+
+        $scope.deleteTherapy = function(index){
+            if (index > 0){
+                $scope.therapy.splice(index, 1);
+            }
+            valiElement(index);
+        }
+
+        function isValidTreatment(indices, newTreatmentName) {
+            var isValid = true;
+            _.find(data.treatmentRef.treatments, function (treatment) {
+                if (treatment.name === newTreatmentName) {
+                    isValid = false;
+                    return true;
+                }
+            });
+            if (!isValid) {
+                $scope.therapyErrorMessage = "Same therapy exists.";
+                $scope.addTherapyError = true;
+            }
+            return isValid;
+        }
+
+        $scope.save = function(){
+            for(;$scope.therapy[$scope.therapy.length-1]=='';){
+                $scope.therapy.splice($scope.therapy.length-1, 1);
+            };
+            var therapyString = [];
+            var indices = data.indices;
+            _.each($scope.therapy,function(element){
+                element = element.join(' + ').trim();
+                therapyString.push(element);
+            });
+            var newTreatmentName = therapyString.join(', ');
+            var treatment = new FirebaseModel.Treatment(newTreatmentName);
+            treatment.name_review = {
+                updatedBy: $rootScope.me.name,
+                updateTime: new Date().getTime(),
+                added: true
+            };
+            if (!data.treatmentRef.treatments) {
+                data.treatmentRef.treatments = [];
+            }
+            if (isValidTreatment(indices, newTreatmentName)) {
+                data.treatmentRef.treatments.push(treatment);
+                $scope.$$prevSibling.indicateTumorContent(data.tumorRef);
+                mainUtils.setUUIDInReview(treatment.name_uuid);
+                $modalInstance.close();
+            }
+        }
+
+        $scope.cancel = function () {
+            $modalInstance.dismiss('canceled');
+        };
+
+    })
+
     .controller('ModifyTumorTypeCtrl', function ($scope, $modalInstance, data, _, OncoKB, $rootScope, mainUtils, FirebaseModel, $timeout) {
         $scope.meta = {
             cancerTypes: data.tumor.cancerTypes,
