@@ -37,8 +37,9 @@ public class DrugDaoImpl extends GenericDaoImpl<Drug, Integer> implements DrugDa
     }
 
     @Override
-    public List<Drug> findDrugByAtcCode(String atcCode) {
-        return findByNamedQuery("findDrugByAtcCode", atcCode);
+    public Drug findDrugByNcitCode(String ncitCode) {
+        List<Drug> list = findByNamedQuery("findDrugByNcitCode", ncitCode);
+        return list.isEmpty() ? null : list.get(0);
     }
 
     @Override

@@ -26,10 +26,6 @@ import java.util.Set;
         query = "select d from Drug d join d.synonyms s where s=?"
     ),
     @NamedQuery(
-        name = "findDrugByAtcCode",
-        query = "select d from Drug d join d.atcCodes a where a=?"
-    ),
-    @NamedQuery(
         name = "findDrugByNcitCode",
         query = "select d from Drug d where d.ncitCode=?"
     )
@@ -41,10 +37,8 @@ public class Drug implements java.io.Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonIgnore
     private Integer id;
 
-    @JsonIgnore
     @Column(length = 20, name = "ncit_code", nullable = false)
     private String ncitCode;
 

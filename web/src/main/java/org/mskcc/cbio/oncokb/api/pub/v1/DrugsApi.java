@@ -21,14 +21,14 @@ public interface DrugsApi {
     ResponseEntity<List<Drug>> drugsGet();
 
 
-    @ApiOperation(value = "Add a new drug", nickname = "addDrug", notes = "", tags = {"drugs",})
+    @ApiOperation(value = "Add a new drug", nickname = "addDrug", notes = "", tags = {"Drugs",})
     @ApiResponses(value = {
-        @ApiResponse(code = 405, message = "Invalid input")})
+        @ApiResponse(code = 400, message = "Bad request")})
     @RequestMapping(value = "/drugs",
         produces = {"application/json"},
-        consumes = {"application/json"},
+        consumes = {"application/x-www-form-urlencoded"},
         method = RequestMethod.POST)
-    ResponseEntity<Void> addDrug(@ApiParam(value = "Drug object that needs to be added", required = true) @RequestBody Drug body);
+    ResponseEntity<Void> addDrug(@ApiParam(value = "Prefer drug name") @RequestParam(value = "name", required = false) String name, @ApiParam(value = "NCIT Code") @RequestParam(value = "ncitCode", required = false) String ncitCode);
 
 
     @ApiOperation(value = "", notes = "Search drugs.", response = Drug.class, responseContainer = "List", tags = {"Drugs", "Search",})

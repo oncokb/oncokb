@@ -42,10 +42,10 @@ public interface DrugBo extends GenericBo<Drug> {
 
     /**
      *
-     * @param atcCode
+     * @param ncitCode
      * @return
      */
-    List<Drug> findDrugsByAtcCode(String atcCode);
+    Drug findDrugsByNcitCode(String ncitCode);
     
     /**
      * 

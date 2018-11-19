@@ -65,8 +65,8 @@ public class DrugBoImpl extends GenericBoImpl<Drug, DrugDao> implements DrugBo {
     }
 
     @Override
-    public List<Drug> findDrugsByAtcCode(String atcCode) {
-        return getDao().findDrugByAtcCode(atcCode);
+    public Drug findDrugsByNcitCode(String ncit) {
+        return getDao().findDrugByNcitCode(ncit);
     }
 
     @Override

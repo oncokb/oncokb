@@ -29,10 +29,10 @@ public interface DrugDao extends GenericDao<Drug, Integer> {
 
     /**
      *
-     * @param atcCode
+     * @param ncitCode
      * @return
      */
-    List<Drug> findDrugByAtcCode(String atcCode);
+    Drug findDrugByNcitCode(String ncitCode);
 
     @Override
     void save(Drug drug);

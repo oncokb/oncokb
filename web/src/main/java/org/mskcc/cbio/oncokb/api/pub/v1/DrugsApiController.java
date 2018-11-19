@@ -7,6 +7,7 @@ import org.mskcc.cbio.oncokb.dao.DrugDao;
 import org.mskcc.cbio.oncokb.model.Drug;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 import org.mskcc.cbio.oncokb.util.DrugUtils;
+import org.mskcc.cbio.oncokb.util.NCITDrugUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -30,9 +31,43 @@ public class DrugsApiController implements DrugsApi {
         return new ResponseEntity<>(drugs, HttpStatus.OK);
     }
 
-    public ResponseEntity<Void> addDrug(@ApiParam(value = "Drug object that needs to be added", required = true) @RequestBody Drug body) {
+    public ResponseEntity<Void> addDrug(@ApiParam(value = "Prefer drug name") @RequestParam(value = "name", required = false) String name, @ApiParam(value = "NCIT Code") @RequestParam(value = "ncitCode", required = false) String ncitCode) {
+        DrugBo drugBo = ApplicationContextSingleton.getDrugBo();
         try {
-            ApplicationContextSingleton.getDrugBo().save(body);
+            if (ncitCode != null) {
+                Drug existDrug = drugBo.findDrugsByNcitCode(ncitCode);
+                if (existDrug != null) {
+                    return new ResponseEntity<Void>(HttpStatus.BAD_REQUEST);
+                }
+                Drug drug = NCITDrugUtils.findDrugByNcitCode(ncitCode);
+                if (drug == null) {
+                    return new ResponseEntity<Void>(HttpStatus.BAD_REQUEST);
+                }
+                if (name != null) {
+                    if (!drug.getSynonyms().contains(name)) {
+                        return new ResponseEntity<Void>(HttpStatus.BAD_REQUEST);
+                    }
+
+                    Drug drugToSave = new Drug();
+                    drugToSave.setDrugName(name);
+                    drugToSave.setNcitCode(drug.getNcitCode());
+                    drugToSave.setDescription(drug.getDescription());
+                    drugToSave.setSynonyms(drug.getSynonyms());
+                    drugBo.save(drugToSave);
+                } else {
+                    drugBo.save(drug);
+                }
+            } else if (name == null) {
+                return new ResponseEntity<Void>(HttpStatus.BAD_REQUEST);
+            } else {
+                Drug existDrug = drugBo.findDrugByName(name);
+                if (existDrug != null) {
+                    return new ResponseEntity<Void>(HttpStatus.BAD_REQUEST);
+                }
+                Drug drugToSave = new Drug();
+                drugToSave.setDrugName(name);
+                drugBo.save(drugToSave);
+            }
             return new ResponseEntity<Void>(HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<Void>(HttpStatus.SERVICE_UNAVAILABLE);
