@@ -13,6 +13,20 @@ public class NCITDrugUtils {
     private static boolean allNcitDrugsInitialized = false;
     private static Set<Drug> allNcitDrugs = new HashSet<>();
 
+    public static Drug findDrugByNcitCode(String ncitCode) {
+        if (!allNcitDrugsInitialized) {
+            cacheDrugs();
+            allNcitDrugsInitialized = true;
+        }
+
+        for (Drug drug : allNcitDrugs) {
+            if (drug.getNcitCode().equals(ncitCode)) {
+                return drug;
+            }
+        }
+        return null;
+    }
+
     public static LinkedHashSet<Drug> findDrugs(String query) {
         LinkedHashSet<Drug> matches = new LinkedHashSet<>();
         if (!allNcitDrugsInitialized) {

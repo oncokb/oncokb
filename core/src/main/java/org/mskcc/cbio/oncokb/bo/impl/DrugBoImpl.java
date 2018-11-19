@@ -18,6 +18,11 @@ import java.util.List;
  */
 public class DrugBoImpl extends GenericBoImpl<Drug, DrugDao> implements DrugBo {
     @Override
+    public Drug findDrugById(Integer id) {
+        return getDao().findDrugById(id);
+    }
+
+    @Override
     public Drug findDrugByName(String drugName) {
         return getDao().findDrugByName(drugName);
     }
@@ -60,8 +65,8 @@ public class DrugBoImpl extends GenericBoImpl<Drug, DrugDao> implements DrugBo {
     }
 
     @Override
-    public List<Drug> findDrugsByAtcCode(String atcCode) {
-        return getDao().findDrugByAtcCode(atcCode);
+    public Drug findDrugsByNcitCode(String ncit) {
+        return getDao().findDrugByNcitCode(ncit);
     }
 
     @Override

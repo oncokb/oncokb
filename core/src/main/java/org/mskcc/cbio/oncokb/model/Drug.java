@@ -18,12 +18,12 @@ import java.util.Set;
         query = "select d from Drug d where d.drugName=?"
     ),
     @NamedQuery(
-        name = "findDrugBySynonym",
-        query = "select d from Drug d join d.synonyms s where s=?"
+        name = "findDrugById",
+        query = "select d from Drug d where d.id=?"
     ),
     @NamedQuery(
-        name = "findDrugByAtcCode",
-        query = "select d from Drug d join d.atcCodes a where a=?"
+        name = "findDrugBySynonym",
+        query = "select d from Drug d join d.synonyms s where s=?"
     ),
     @NamedQuery(
         name = "findDrugByNcitCode",
@@ -37,10 +37,8 @@ public class Drug implements java.io.Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonIgnore
     private Integer id;
 
-    @JsonIgnore
     @Column(length = 20, name = "ncit_code", nullable = false)
     private String ncitCode;
 
