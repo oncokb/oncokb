@@ -12,6 +12,8 @@ import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static org.mskcc.cbio.oncokb.util.LevelUtils.LEVELS;
+
 /**
  * Created by hongxinzhang on 4/5/16.
  */
@@ -180,24 +182,29 @@ public class IndicatorUtils {
 
             List<Alteration> nonVUSRelevantAlts = AlterationUtils.excludeVUS(relevantAlterations);
             Map<String, LevelOfEvidence> highestLevels = new HashMap<>();
-            List<Alteration> alleles = AlterationUtils.getAlleleAlterations(alteration);
             List<TumorType> oncoTreeTypes = new ArrayList<>();
 
             Alteration matchedAlt = AlterationUtils.findAlteration(alteration.getGene(), alteration.getAlteration());
             indicatorQuery.setVariantExist(matchedAlt != null);
 
+            if(matchedAlt == null) {
+                matchedAlt = alteration;
+            }
+
+            List<Alteration> alleles = AlterationUtils.getAlleleAlterations(matchedAlt);
+
             // Whether alteration is hotpot from Matt's list
             if (query.getProteinEnd() == null || query.getProteinStart() == null) {
-                indicatorQuery.setHotspot(HotspotUtils.isHotspot(alteration));
+                indicatorQuery.setHotspot(HotspotUtils.isHotspot(matchedAlt));
             } else {
-                indicatorQuery.setHotspot(HotspotUtils.isHotspot(alteration));
+                indicatorQuery.setHotspot(HotspotUtils.isHotspot(matchedAlt));
             }
 
             if (query.getTumorType() != null) {
                 oncoTreeTypes = TumorTypeUtils.getMappedOncoTreeTypesBySource(query.getTumorType(), source);
             }
 
-            indicatorQuery.setVUS(isVUS(matchedAlt == null ? alteration : matchedAlt));
+            indicatorQuery.setVUS(isVUS(matchedAlt));
 
             if (indicatorQuery.getVUS()) {
                 List<Evidence> vusEvidences = EvidenceUtils.getEvidence(Collections.singletonList(matchedAlt), Collections.singleton(EvidenceType.VUS), null);
@@ -216,7 +223,7 @@ public class IndicatorUtils {
 
             if (nonVUSRelevantAlts.size() > 0) {
                 if (hasOncogenicEvidence) {
-                    IndicatorQueryOncogenicity indicatorQueryOncogenicity = getOncogenicity(matchedAlt == null ? alteration : matchedAlt, alleles, query, source, geneStatus);
+                    IndicatorQueryOncogenicity indicatorQueryOncogenicity = getOncogenicity(matchedAlt, alleles, query, source, geneStatus);
 
                     if (indicatorQueryOncogenicity.getOncogenicityEvidence() != null) {
                         allQueryRelatedEvidences.add(indicatorQueryOncogenicity.getOncogenicityEvidence());
@@ -229,7 +236,7 @@ public class IndicatorUtils {
                 }
 
                 if (hasMutationEffectEvidence) {
-                    IndicatorQueryMutationEffect indicatorQueryMutationEffect = getMutationEffect(matchedAlt == null ? alteration : matchedAlt, alleles, query, source, geneStatus);
+                    IndicatorQueryMutationEffect indicatorQueryMutationEffect = getMutationEffect(matchedAlt, alleles, query, source, geneStatus);
 
                     if (indicatorQueryMutationEffect.getMutationEffectEvidence() != null) {
                         allQueryRelatedEvidences.add(indicatorQueryMutationEffect.getMutationEffectEvidence());
@@ -467,20 +474,42 @@ public class IndicatorUtils {
     private static List<IndicatorQueryTreatment> getIndicatorQueryTreatments(Set<Evidence> evidences) {
         List<IndicatorQueryTreatment> treatments = new ArrayList<>();
         if (evidences != null) {
-            List<Evidence> sortedEvidence = new ArrayList<>(evidences);
+            Map<LevelOfEvidence, Set<Evidence>> evidenceSetMap = EvidenceUtils.separateEvidencesByLevel(evidences);
 
-            CustomizeComparator.sortEvidenceBasedOnPriority(sortedEvidence);
+            ListIterator<LevelOfEvidence> li = LEVELS.listIterator(LEVELS.size());
+            while (li.hasPrevious()) {
+                LevelOfEvidence level = li.previous();
+                if (evidenceSetMap.containsKey(level)) {
+                    Set<Treatment> sameLevelTreatments = new HashSet<>();
+                    Map<Treatment, Set<String>> pmidsMap = new HashMap<>();
+                    Map<Treatment, Set<ArticleAbstract>> abstractsMap = new HashMap<>();
 
-            for (Evidence evidence : sortedEvidence) {
-                Citations citations = MainUtils.getCitationsByEvidence(evidence);
-                for (Treatment treatment : evidence.getSortedTreatment()) {
-                    IndicatorQueryTreatment indicatorQueryTreatment = new IndicatorQueryTreatment();
-                    indicatorQueryTreatment.setDrugs(treatment.getDrugs());
-                    indicatorQueryTreatment.setApprovedIndications(treatment.getApprovedIndications());
-                    indicatorQueryTreatment.setLevel(evidence.getLevelOfEvidence());
-                    indicatorQueryTreatment.setPmids(citations.getPmids());
-                    indicatorQueryTreatment.setAbstracts(citations.getAbstracts());
-                    treatments.add(indicatorQueryTreatment);
+                    for (Evidence evidence : evidenceSetMap.get(level)) {
+                        Citations citations = MainUtils.getCitationsByEvidence(evidence);
+                        for (Treatment treatment : evidence.getTreatments()) {
+                            if (!pmidsMap.containsKey(treatment)) {
+                                pmidsMap.put(treatment, new HashSet<String>());
+                            }
+                            if (!abstractsMap.containsKey(treatment)) {
+                                abstractsMap.put(treatment, new HashSet<ArticleAbstract>());
+                            }
+                            pmidsMap.put(treatment, citations.getPmids());
+                            abstractsMap.put(treatment, citations.getAbstracts());
+                        }
+                        sameLevelTreatments.addAll(evidence.getTreatments());
+                    }
+                    List<Treatment> list = new ArrayList<>(sameLevelTreatments);
+                    TreatmentUtils.sortTreatmentsByName(list);
+                    for (Treatment treatment : list) {
+                        IndicatorQueryTreatment indicatorQueryTreatment = new IndicatorQueryTreatment();
+                        indicatorQueryTreatment.setDrugs(treatment.getDrugs());
+                        indicatorQueryTreatment.setApprovedIndications(treatment.getApprovedIndications());
+                        indicatorQueryTreatment.setLevel(level);
+                        indicatorQueryTreatment.setPmids(pmidsMap.get(treatment));
+                        indicatorQueryTreatment.setAbstracts(abstractsMap.get(treatment));
+                        treatments.add(indicatorQueryTreatment);
+                    }
+
                 }
             }
         }

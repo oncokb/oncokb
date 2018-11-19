@@ -284,12 +284,6 @@ public class DriveAnnotationParser {
             String effect = mutationEffect.has("effect") ? mutationEffect.getString("effect") : null;
             addDateToSetFromObject(lastEditDatesEffect, mutationEffect, "effect_review");
             String effect_uuid = mutationEffect.has("effect_uuid") ? mutationEffect.getString("effect_uuid") : "";
-            // If both mutation effect and oncogenicity both unknown, ignore variant.
-            if (oncogenic != null && oncogenic.equals(Oncogenicity.INCONCLUSIVE)
-                && effect != null && effect.toLowerCase().equals("inconclusive")
-                && gene.getHugoSymbol().equals("EGFR")) {
-                return;
-            }
 
             Map<String, String> mutations = parseMutationString(mutationStr);
             for (Map.Entry<String, String> mutation : mutations.entrySet()) {

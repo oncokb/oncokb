@@ -26,7 +26,7 @@ public class LevelsApiController implements LevelsApi {
         return new ResponseEntity<>(map, HttpStatus.OK);
     }
 
-    public ResponseEntity<Map<LevelOfEvidence, String>> levelsResistenceGet() {
+    public ResponseEntity<Map<LevelOfEvidence, String>> levelsResistanceGet() {
         Set<LevelOfEvidence> levelOfEvidenceSet = LevelUtils.getResistanceLevels();
         Map<LevelOfEvidence, String> map = new HashedMap();
 

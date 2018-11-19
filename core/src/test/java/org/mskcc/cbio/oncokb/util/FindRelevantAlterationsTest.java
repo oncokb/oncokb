@@ -89,8 +89,9 @@ public class FindRelevantAlterationsTest {
                 {"MED12", "Q1836Lfs*57", null, "Truncating Mutations"},
                 {"PIK3CA", "*1069Ffs*5", null, ""},
 
-                // 34 is in Exon 2, the Exon 2 should not be mapped.
-                {"MED12", "A34*", null, "Truncating Mutations"},
+                // For oncogene, we do not map mut range to truncating mutations.
+                // But we do map if gene is oncogene and TSG. TSG here is a Oncogene+TSG
+                {"MED12", "A34*", null, "34_68mut, Truncating Mutations"},
 
                 {"NOTCH1", "Q2405Rfs*17", null, "Q2405Rfs*17, T2375_K2555trunc"},
 

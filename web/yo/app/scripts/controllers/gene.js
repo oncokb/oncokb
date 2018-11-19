@@ -3012,7 +3012,7 @@ angular.module('oncokbApp')
     .controller('ModifyTumorTypeCtrl', function ($scope, $modalInstance, data, _, OncoKB, $rootScope, mainUtils, FirebaseModel, $timeout) {
         $scope.meta = {
             cancerTypes: data.tumor.cancerTypes,
-            originalTumorName: mainUtils.getCancerTypesName(data.tumor.cancerTypes),
+            originalTumorName: mainUtils.getFullCancerTypesNames(data.tumor.cancerTypes),
             newCancerTypes: [],
             cancerTypes_review: data.tumor.cancerTypes_review,
             cancerTypes_uuid: data.tumor.cancerTypes_uuid,
@@ -3177,9 +3177,9 @@ angular.module('oncokbApp')
         $scope.tumorValidationCheck = function () {
             var tumorNameList = [];
             _.each($scope.meta.mutation.tumors, function (tumor) {
-                tumorNameList.push(mainUtils.getCancerTypesName(tumor.cancerTypes));
+                tumorNameList.push(mainUtils.getFullCancerTypesName(tumor.cancerTypes));
             });
-            var currentTumorStr = mainUtils.getNewCancerTypesName($scope.meta.newCancerTypes);
+            var currentTumorStr = mainUtils.getFullCancerTypesNames($scope.meta.newCancerTypes);
             if (!currentTumorStr) {
                 $scope.meta.message = 'Please input cancer type';
                 $scope.meta.invalid = true;

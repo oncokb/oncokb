@@ -126,6 +126,8 @@ public class validation {
         levels.add(LevelOfEvidence.LEVEL_2A);
         levels.add(LevelOfEvidence.LEVEL_3A);
         levels.add(LevelOfEvidence.LEVEL_4);
+        levels.add(LevelOfEvidence.LEVEL_R1);
+        levels.add(LevelOfEvidence.LEVEL_R2);
 
         System.out.println("Prepare actionable genes for published version and latest version...");
         for (LevelOfEvidence levelOfEvidence : levels) {

@@ -108,7 +108,14 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
                 alterations = AlterationUtils.excludeInferredAlterations(alterations);
 
                 mainNumber.setAlteration(alterations.size());
-                mainNumber.setTumorType(TumorTypeUtils.getAllTumorTypes().size());
+                Set<Evidence> evidences = CacheUtils.getAllEvidences();
+                Set<TumorType> treatmentTumorTypes = new HashSet<>();
+                for(Evidence evidence : evidences) {
+                    if(evidence.getLevelOfEvidence() != null && evidence.getOncoTreeType() != null) {
+                        treatmentTumorTypes.add(evidence.getOncoTreeType());
+                    }
+                }
+                mainNumber.setTumorType(treatmentTumorTypes.size());
                 mainNumber.setDrug(NumberUtils.getDrugsCountByLevels(LevelUtils.getPublicLevels()));
                 CacheUtils.setNumbers("main", mainNumber);
             } else {
@@ -224,6 +231,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
                 // it into the list for mapping.
                 Alteration exactMatch = AlterationUtils.findAlteration(gene, variant);
                 if (exactMatch == null) {
+                    allAlterations = new HashSet<>(allAlterations);
                     allAlterations.add(oncokbVariant);
                 }
                 relevantAlterations = alterationBo.findRelevantAlterations(exampleVariant, allAlterations, true);

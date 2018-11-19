@@ -80,6 +80,33 @@ angular.module('oncokbApp')
             list = list.sort();
             return list.join(', ');
         }
+        function getFullCancerTypesName(cancerTypes) {
+            if (!cancerTypes) {
+                return null;
+            }
+            var list = [];
+            _.each(cancerTypes, function(cancerType) {
+                var name = ['', '', ''];
+                var hasInfo = false;
+                if (cancerType.mainType) {
+                    name[0] = cancerType.mainType;
+                    hasInfo = true;
+                }
+                if (cancerType.code) {
+                    name[1] = cancerType.code;
+                    hasInfo = true;
+                }
+                if (cancerType.subtype) {
+                    name[2] = cancerType.subtype;
+                    hasInfo = true;
+                }
+                if(hasInfo) {
+                    list.push(name.join('-'));
+                }
+            });
+            list = list.sort();
+            return list.join(', ');
+        }
 
         function getNewCancerTypesName(cancerTypes) {
             if (!cancerTypes) {
@@ -91,6 +118,34 @@ angular.module('oncokbApp')
                     list.push(cancerType.subtype.name);
                 } else if (cancerType.mainType && cancerType.mainType.name){
                     list.push(cancerType.mainType.name);
+                }
+            });
+            list = list.sort();
+            return list.join(', ');
+        }
+
+        function getFullCancerTypesNames(cancerTypes) {
+            if (!cancerTypes) {
+                return null;
+            }
+            var list = [];
+            _.each(cancerTypes, function(cancerType) {
+                var name = ['', '', ''];
+                var hasInfo = false;
+                if (cancerType.mainType && cancerType.mainType.name) {
+                    name[0] = cancerType.mainType.name;
+                    hasInfo = true;
+                }
+                if (cancerType.subtype && cancerType.subtype.code) {
+                    name[1] = cancerType.subtype.code;
+                    hasInfo = true;
+                }
+                if (cancerType.subtype && cancerType.subtype.name) {
+                    name[2] = cancerType.subtype.name;
+                    hasInfo = true;
+                }
+                if(hasInfo) {
+                    list.push(name.join('-'));
                 }
             });
             list = list.sort();
@@ -316,6 +371,29 @@ angular.module('oncokbApp')
                 });
             }
             return deferred.promise;
+        }
+
+        function exactSameTumorType(t1, t2) {
+            if(t1 === t2) {
+                return true;
+            }
+            if(JSON.stringify(t1) === JSON.stringify(t2)){
+                return true;
+            }
+            if (t1.mainType && t2.mainType) {
+                var flag = t1.mainType.name === t2.mainType.name;
+
+                if (t1.subtype && t2.subtype) {
+                    if(flag) {
+                        if (t1.subtype.name === t2.subtype.name && t1.subtype.code === t2.subtype.code) {
+                            return true;
+                        }
+                    }
+                } else if (flag) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         /*
@@ -566,7 +644,10 @@ angular.module('oncokbApp')
         return {
             setIsoFormAndGeneType: setIsoFormAndGeneType,
             getCancerTypesName: getCancerTypesName,
+            getFullCancerTypesName: getFullCancerTypesName,
             getNewCancerTypesName: getNewCancerTypesName,
+            getFullCancerTypesNames: getFullCancerTypesNames,
+            exactSameTumorType: exactSameTumorType,
             hasDuplicateCancerTypes: hasDuplicateCancerTypes,
             containMainType: containMainType,
             getIsoform: getIsoform,
