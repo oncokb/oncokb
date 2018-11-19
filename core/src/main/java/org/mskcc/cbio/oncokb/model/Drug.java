@@ -18,6 +18,10 @@ import java.util.Set;
         query = "select d from Drug d where d.drugName=?"
     ),
     @NamedQuery(
+        name = "findDrugById",
+        query = "select d from Drug d where d.id=?"
+    ),
+    @NamedQuery(
         name = "findDrugBySynonym",
         query = "select d from Drug d join d.synonyms s where s=?"
     ),

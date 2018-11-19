@@ -21,6 +21,10 @@ public interface DrugBo extends GenericBo<Drug> {
      * @return 
      */
     List<Drug> findDrugsByNames(Collection<String> drugNames);
+
+
+    Drug findDrugById(Integer id);
+
     
     /**
      * 
