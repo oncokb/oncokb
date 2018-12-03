@@ -88,6 +88,18 @@ angular.module('oncokbApp')
                 return deferred.promise;
             }
 
+            function addtheDrug(name, ncitCode, success, fail) {
+                    Drugs
+                        .addDrug(name, ncitCode)
+                        .then(function(data) {
+
+                        }, function() {
+                            fail;
+                        });
+            }
+
+
+
             function getAllGene(callback, timestamp) {
                 Gene.getFromServer()
                     .then(function(data) {
@@ -566,6 +578,7 @@ angular.module('oncokbApp')
             return {
                 getAllDrugs: getAllDrugs,
                 searchDrugs: searchDrugs,
+                addtheDrug: addtheDrug,
                 getGeneTumorType: getGeneTumorType,
                 searchAnnotation: searchVariant,
                 updateGene: updateGene,

@@ -54,9 +54,31 @@ angular.module('oncokbApp').factory('Drugs', ['$http', 'OncoKB', function($http,
         return $http.get(OncoKB.config.privateApiLink + 'search/drugs?query=' + keyword);
     }
 
+    function addDrug(name, ncitCode) {
+        name = JSON.stringify(name);
+        name = name.substring(1,name.length-1);
+        ncitCode = JSON.stringify(ncitCode);
+        ncitCode = ncitCode.substring(1,ncitCode.length-1);
+        return $http.post(OncoKB.config.publicApiLink + 'drugs', {
+            name: name,
+            ncitCode: ncitCode},
+            {
+                headers: {'Content-Type': 'application/x-www-form-urlencoded;'},
+                transformRequest: function(obj) {
+                    var str = [];
+                    for(var p in obj)
+                        str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+                    return str.join("&");
+                }
+
+            });
+    }
+
+
     return {
         getAllDrugs: getAllDrugs,
-        searchDrugs: searchDrugs
+        searchDrugs: searchDrugs,
+        addDrug: addDrug,
     }
 }]);
 

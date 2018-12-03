@@ -37,8 +37,8 @@ angular.module('oncokbApp')
                     }
                 }
             };
-            $scope.addDrug = function (suggestedDrug) {
-                //To do; API
+            $scope.addDrug = function (preferName, drugCode) {
+                return DatabaseConnector.addtheDrug(preferName, drugCode)
             }
         }]
     );

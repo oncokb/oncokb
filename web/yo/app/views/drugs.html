@@ -16,6 +16,7 @@
                             <button type="button" class="btn btn-warning buttonStyle " uib-tooltip-placement="top" uib-tooltip="Modify Name" ng-click="editDrugName=!editDrugName"><i class="fa fa-edit"></i>
                             </button>
                             {{ drug.drugName}}
+                            {{ drug.id}}
                         </div>
                         <div ng-show="editDrugName===true">
                             <button type="button" class="btn btn-success buttonStyle" uib-tooltip-placement="top" uib-tooltip="Save Name" ng-click="saveDrugName(drug,newDrugName);editDrugName=!editDrugName"><i class="fa fa-check"></i>
@@ -30,7 +31,9 @@
             </table>
             <div class="form-inline">
                 <input type="text" class="form-control searchbox" ng-model="suggestedDrug" uib-typeahead="drug as drug.drugName for drug in processSearchDrugs($viewValue)" typeahead-min-length="1" typeahead-template-url="drugsDropdown.html"/>
-                <button class="btn btn-success" ng-click="addDrug(suggestedDrug)">Add Drug</button>
+                <input ng-hide="(suggestedDrug == null) || (suggestedDrug === '')" type="text" class="form-control searchbox" ng-model="preferName" uib-typeahead="synonyms for synonyms in suggestedDrug.synonyms" typeahead-min-length="0" placeholder="Prefer Name"/>
+                <button class="btn btn-success" ng-click="addDrug(preferName,suggestedDrug.ncitCode)">Add Drug</button>
+                <div ng-hide="(suggestedDrug == null) || (suggestedDrug === '')">If you want to use the initial name, please leave Prefer Name blank.</div>
             </div>
             <p class="errorReminder" ng-show="searchDrugsError">Sorry, suggested drugs are unavailable now.</p>
         </div>
@@ -44,6 +47,10 @@
         <div class="basicName" ng-bind-html="match.model.drugName | uibTypeaheadHighlight:query"></div>
         <div class="alsoKnownAs">Also known as:
             <span ng-bind-html="match.model.synonyms | uibTypeaheadHighlight:query"></span>
+        </div>
+        <!--add-->
+        <div class="alsoKnownAs">Code:
+            <span ng-bind-html="match.model.ncitCode | uibTypeaheadHighlight:query"></span>
         </div>
     </a>
 </script>
