@@ -24,19 +24,66 @@
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>com.github.trecloux</groupId>
-                        <artifactId>yeoman-maven-plugin</artifactId>
-                        <version>0.5</version>
+                        <groupId>com.github.eirslett</groupId>
+                        <artifactId>frontend-maven-plugin</artifactId>
+                        <version>1.0</version>
+
                         <executions>
                             <execution>
+                                <id>install node and npm</id>
                                 <goals>
-                                    <goal>build</goal>
+                                    <goal>install-node-and-npm</goal>
                                 </goals>
+                                <configuration>
+                                    <!-- See https://nodejs.org/en/download/ for latest node and npm (lts) versions -->
+                                    <nodeVersion>v8.12.0</nodeVersion>
+                                    <npmVersion>6.4.1</npmVersion>
+                                </configuration>
+                            </execution>
+
+                            <execution>
+                                <id>npm install</id>
+                                <goals>
+                                    <goal>npm</goal>
+                                </goals>
+                                <configuration>
+                                    <arguments>install</arguments>
+                                </configuration>
+                            </execution>
+
+                            <execution>
+                                <id>bower install</id>
+                                <goals>
+                                    <goal>bower</goal>
+                                </goals>
+
+                                <configuration>
+                                    <!-- optional: The default argument is actually
+                                    "install", so unless you need to run some other bower command,
+                                    you can remove this whole <configuration> section.
+                                    -->
+                                    <arguments>install</arguments>
+                                </configuration>
+                            </execution>
+
+                            <execution>
+                                <id>grunt build</id>
+                                <goals>
+                                    <goal>grunt</goal>
+                                </goals>
+
+                                <!-- optional: the default phase is "generate-resources" -->
+                                <phase>generate-resources</phase>
+
+                                <configuration>
+                                    <!-- optional: if not specified, it will run Grunt's default
+                                    task (and you can remove this whole <configuration> section.) -->
+                                    <arguments>build</arguments>
+                                </configuration>
                             </execution>
                         </executions>
                         <configuration>
-                            <skipTests>true</skipTests>
-                            <yeomanProjectDirectory>${web.folder}</yeomanProjectDirectory>
+                            <workingDirectory>${web.folder}</workingDirectory>
                         </configuration>
                     </plugin>
                     <plugin>
@@ -138,43 +185,6 @@
         <profile>
             <id>backend</id>
         </profile>
-        <profile>
-            <id>docker</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>com.spotify</groupId>
-                        <artifactId>docker-maven-plugin</artifactId>
-                        <version>0.4.13</version>
-                        <configuration>
-                            <imageName>cbioportal/oncokb</imageName>
-                            <baseImage>tomcat:8-alpine</baseImage>
-                            <entryPoint>["catalina.sh", "run"]</entryPoint>
-                            <imageTags>
-                                <imageTag>${project.version}</imageTag>
-                                <imageTag>latest</imageTag>
-                            </imageTags>
-                            <resources>
-                                <resource>
-                                    <targetPath>/usr/local/tomcat/webapps</targetPath>
-                                    <directory>${project.build.directory}</directory>
-                                    <include>${project.build.finalName}.war</include>
-                                </resource>
-                            </resources>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>build-image</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>build</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
     </profiles>
 
     <properties>
@@ -252,16 +262,6 @@
             <groupId>log4j</groupId>
             <artifactId>apache-log4j-extras</artifactId>
             <version>1.1</version>
-        </dependency>
-        <dependency>
-            <groupId>javax.sql</groupId>
-            <artifactId>jdbc-stdext</artifactId>
-            <version>2.0</version>
-        </dependency>
-        <dependency>
-            <groupId>javax.transaction</groupId>
-            <artifactId>jta</artifactId>
-            <version>1.0.1B</version>
         </dependency>
         <dependency>
             <groupId>mysql</groupId>
@@ -367,6 +367,50 @@
                 <configuration>
                     <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.3</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>com.github.jsimone</groupId>
+                                    <artifactId>webapp-runner</artifactId>
+                                    <version>8.0.24.0</version>
+                                    <destFileName>webapp-runner.jar</destFileName>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+              <groupId>com.spotify</groupId>
+              <artifactId>dockerfile-maven-plugin</artifactId>
+              <version>1.4.8</version>
+              <executions>
+                <execution>
+                  <id>default</id>
+                  <goals>
+                    <goal>build</goal>
+                    <goal>push</goal>
+                  </goals>
+                </execution>
+              </executions>
+              <configuration>
+                <repository>cbioportal/oncokb</repository>
+                <tag>${project.version}</tag>
+                <buildArgs>
+                  <JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
+                </buildArgs>
+              </configuration>
             </plugin>
         </plugins>
     </build>
