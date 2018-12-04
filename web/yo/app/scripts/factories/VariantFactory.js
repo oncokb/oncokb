@@ -46,6 +46,10 @@ angular.module('oncokbApp').factory('DataSummary', ['$http', function($http) {
 angular.module('oncokbApp').factory('Drugs', ['$http', 'OncoKB', function($http, OncoKB) {
     'use strict';
 
+    var transform = function(data) {
+        return $.param(data);
+    };
+
     function getAllDrugs() {
         return $http.get(OncoKB.config.publicApiLink + 'drugs');
     }
@@ -55,6 +59,7 @@ angular.module('oncokbApp').factory('Drugs', ['$http', 'OncoKB', function($http,
     }
 
     function addDrug(name, ncitCode) {
+
         name = JSON.stringify(name);
         name = name.substring(1,name.length-1);
         ncitCode = JSON.stringify(ncitCode);
@@ -63,22 +68,43 @@ angular.module('oncokbApp').factory('Drugs', ['$http', 'OncoKB', function($http,
             name: name,
             ncitCode: ncitCode},
             {
-                headers: {'Content-Type': 'application/x-www-form-urlencoded;'},
+                headers: {'Content-Type': 'application/x-www-form-urlencoded; '},
                 transformRequest: function(obj) {
                     var str = [];
                     for(var p in obj)
                         str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
                     return str.join("&");
                 }
+                // headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
+                // transformRequest: transform
 
             });
     }
 
+    // function updateDrugName(id, name) {
+    //     name = JSON.stringify(name);
+    //     name = name.substring(1,name.length-1);
+    //     id = JSON.stringify(id);
+    //     id = id.substring(1,id.length-1);
+    //     return $http.post(OncoKB.config.publicApiLink + 'drugs/' + id, {
+    //             name: name},
+    //         {
+    //             headers: {'Content-Type': 'application/x-www-form-urlencoded;'},
+    //             transformRequest: function(obj) {
+    //                 var str = [];
+    //                 for(var p in obj)
+    //                     str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+    //                 return str.join("&");
+    //             }
+    //
+    //         });
+    // }
 
     return {
         getAllDrugs: getAllDrugs,
         searchDrugs: searchDrugs,
         addDrug: addDrug,
+        //updateDrugName: updateDrugName
     }
 }]);
 

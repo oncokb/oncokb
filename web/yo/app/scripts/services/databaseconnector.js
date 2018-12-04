@@ -89,16 +89,26 @@ angular.module('oncokbApp')
             }
 
             function addtheDrug(name, ncitCode, success, fail) {
-                    Drugs
-                        .addDrug(name, ncitCode)
+                Drugs
+                    .addDrug(name, ncitCode)
                         .then(function(data) {
-
-                        }, function() {
-                            fail;
+                            success(data);
+                        }, function(error) {
+                            console.log("add drug failed");
                         });
             }
 
-
+            // function updateDrugName(name, id) {
+            //     Drugs
+            //         .updateDrugName(name, id)
+            //             .then(function(data) {
+            //                 success(data);
+            //             }, function(error) {
+            //                 console.log("update drugName failed")
+            //             });
+            //
+            //
+            // }
 
             function getAllGene(callback, timestamp) {
                 Gene.getFromServer()
@@ -579,6 +589,7 @@ angular.module('oncokbApp')
                 getAllDrugs: getAllDrugs,
                 searchDrugs: searchDrugs,
                 addtheDrug: addtheDrug,
+                //updateDrugName: updateDrugName,
                 getGeneTumorType: getGeneTumorType,
                 searchAnnotation: searchVariant,
                 updateGene: updateGene,

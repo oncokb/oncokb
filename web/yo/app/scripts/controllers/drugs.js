@@ -26,19 +26,39 @@ angular.module('oncokbApp')
                     )
             };
 
-            $scope.saveDrugName = function (drug,newDrugName) {
+            $scope.saveDrugName = function (newDrugName, id) {
                 //To do; API
-                if ((!(newDrugName === "" || newDrugName === null)) && (newDrugName !== drug.drugName)){
-                    if (_.contains(drug.synonyms, drug.drugName)){
-                        drug.drugName = newDrugName;
-                    }else{
-                        drug.synonyms.push(drug.drugName);
-                        drug.drugName = newDrugName;
-                    }
-                }
+                return DatabaseConnector.updateDrugName(newDrugName, id, function (result) {
+                        console.log("update successfully");
+                    },
+                    function (error) {
+                        console.log("failed");
+                    });
+
+
+                // if ((!(newDrugName === "" || newDrugName === null)) && (newDrugName !== drug.drugName)){
+                //     if (_.contains(drug.synonyms, drug.drugName)){
+                //         drug.drugName = newDrugName;
+                //     }else{
+                //         drug.synonyms.push(drug.drugName);
+                //         drug.drugName = newDrugName;
+                //     }
+                // }
+
+
             };
+
             $scope.addDrug = function (preferName, drugCode) {
-                return DatabaseConnector.addtheDrug(preferName, drugCode)
+                return DatabaseConnector.addtheDrug(preferName, drugCode, function (result) {
+                        getDrugList();
+                        $scope.suggestedDrug = "";
+                        $scope.preferName = "";
+                        $scope.addDrugMessage = "It has been added successfully.";
+                    },
+                    function (error) {
+                        $scope.addDrugMessage = "Sorry, adding the drug failed.";
+                    });
             }
+
         }]
     );
