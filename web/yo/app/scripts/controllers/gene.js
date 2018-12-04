@@ -2991,22 +2991,22 @@ angular.module('oncokbApp')
     .controller('ModifyTherapyCtrl', function ($scope, $modalInstance, data, _, OncoKB, $rootScope, mainUtils, FirebaseModel, $timeout, DatabaseConnector){
         $scope.therapy = [[]];
         $scope.addTherapyError = false;
-        $scope.loadDrugs = function($query){
-            return DatabaseConnector.getAllDrugs()
-                .then(function(result){
-                    $scope.addTherapyError = false;
-                    var drugs = result;
-                    return drugs.filter(function (drug) {
-                        return (drug.drugName.toLowerCase().indexOf($query.toLowerCase()) != -1) || (drug.synonyms.join(',').toLowerCase().indexOf($query.toLowerCase()) != -1);
-                    })
-                })
-                .catch(
-                    function (error) {
-                        $scope.therapyErrorMessage = "Sorry, the list of drugs is not available now.";
-                        $scope.addTherapyError = true;
-                    }
-                )
-        }
+        // $scope.loadDrugs = function($query){
+        //     return DatabaseConnector.getAllDrugs()
+        //         .then(function(result){
+        //             $scope.addTherapyError = false;
+        //             var drugs = result;
+        //             return drugs.filter(function (drug) {
+        //                 return (drug.drugName.toLowerCase().indexOf($query.toLowerCase()) != -1) || (drug.synonyms.join(',').toLowerCase().indexOf($query.toLowerCase()) != -1);
+        //             })
+        //         })
+        //         .catch(
+        //             function (error) {
+        //                 $scope.therapyErrorMessage = "Sorry, the list of drugs is not available now.";
+        //                 $scope.addTherapyError = true;
+        //             }
+        //         )
+        // }
         $scope.addDruginTherapy = function(tag,index){
             $scope.therapy[index].push(tag.drugName);
             addTherapy(index);

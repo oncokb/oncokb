@@ -50,36 +50,36 @@ angular.module('oncokbApp').factory('Drugs', ['$http', 'OncoKB', function($http,
         return $.param(data);
     };
 
-    function getAllDrugs() {
-        return $http.get(OncoKB.config.publicApiLink + 'drugs');
-    }
+    // function getAllDrugs() {
+    //     return $http.get(OncoKB.config.publicApiLink + 'drugs');
+    // }
 
     function searchDrugs(keyword) {
         return $http.get(OncoKB.config.privateApiLink + 'search/drugs?query=' + keyword);
     }
 
-    function addDrug(name, ncitCode) {
-
-        name = JSON.stringify(name);
-        name = name.substring(1,name.length-1);
-        ncitCode = JSON.stringify(ncitCode);
-        ncitCode = ncitCode.substring(1,ncitCode.length-1);
-        return $http.post(OncoKB.config.publicApiLink + 'drugs', {
-            name: name,
-            ncitCode: ncitCode},
-            {
-                headers: {'Content-Type': 'application/x-www-form-urlencoded; '},
-                transformRequest: function(obj) {
-                    var str = [];
-                    for(var p in obj)
-                        str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
-                    return str.join("&");
-                }
-                // headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
-                // transformRequest: transform
-
-            });
-    }
+    // function addDrug(name, ncitCode) {
+    //
+    //     name = JSON.stringify(name);
+    //     name = name.substring(1,name.length-1);
+    //     ncitCode = JSON.stringify(ncitCode);
+    //     ncitCode = ncitCode.substring(1,ncitCode.length-1);
+    //     return $http.post(OncoKB.config.publicApiLink + 'drugs', {
+    //         name: name,
+    //         ncitCode: ncitCode},
+    //         {
+    //             headers: {'Content-Type': 'application/x-www-form-urlencoded; '},
+    //             transformRequest: function(obj) {
+    //                 var str = [];
+    //                 for(var p in obj)
+    //                     str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+    //                 return str.join("&");
+    //             }
+    //             // headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
+    //             // transformRequest: transform
+    //
+    //         });
+    // }
 
     // function updateDrugName(id, name) {
     //     name = JSON.stringify(name);
@@ -101,9 +101,9 @@ angular.module('oncokbApp').factory('Drugs', ['$http', 'OncoKB', function($http,
     // }
 
     return {
-        getAllDrugs: getAllDrugs,
+        //getAllDrugs: getAllDrugs,
         searchDrugs: searchDrugs,
-        addDrug: addDrug,
+        //addDrug: addDrug,
         //updateDrugName: updateDrugName
     }
 }]);
@@ -605,6 +605,14 @@ angular.module('oncokbApp')
                 currentReviewer: ''
             };
         }
+        function Drug(drugName, ncitCode, synonyms, ncitName){
+            this.drugName = drugName;
+            this.ncitCode = ncitCode;
+            this.uuid = getUUID();
+            this.description = '';
+            this.ncitName = ncitName;
+            this.synonyms = synonyms;
+        }
         return {
             Gene: Gene,
             Mutation: Mutation,
@@ -614,6 +622,7 @@ angular.module('oncokbApp')
             Cancertype: Cancertype,
             VUSItem: VUSItem,
             TimeStamp: TimeStamp,
-            Meta: Meta
+            Meta: Meta,
+            Drug: Drug
         };
     }]);

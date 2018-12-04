@@ -16,39 +16,39 @@
                             <button type="button" class="btn btn-warning buttonStyle " uib-tooltip-placement="top" uib-tooltip="Modify Name" ng-click="editDrugName=!editDrugName"><i class="fa fa-edit"></i>
                             </button>
                             {{ drug.drugName}}
-                            {{ drug.id}}
                         </div>
                         <div ng-show="editDrugName===true">
-                            <button type="button" class="btn btn-success buttonStyle" uib-tooltip-placement="top" uib-tooltip="Save Name" ng-click="saveDrugName(newDrugName, drug.id);editDrugName=!editDrugName"><i class="fa fa-check"></i>
+                            <button type="button" class="btn btn-success buttonStyle" uib-tooltip-placement="top" uib-tooltip="Save Name" ng-click="saveDrugName(newDrugName, drug.ncitCode);editDrugName=!editDrugName"><i class="fa fa-check"></i>
                             </button>
                             <input type="text" ng-model="newDrugName" placeholder="{{drug.drugName}}" uib-typeahead="name for name in drug.synonyms" typeahead-min-length="0"/>
                         </div>
                     </td>
-                    <td>{{ drug.NCI }}</td>
+                    <td>{{ drug.ncitCode }}</td>
                     <td>{{ drug.description }}</td>
                 </tr>
                 </tbody>
             </table>
-            <div class="form-inline">
-                <input type="text" class="form-control searchbox" ng-model="suggestedDrug" uib-typeahead="drug as drug.drugName for drug in processSearchDrugs($viewValue)" typeahead-min-length="1" typeahead-template-url="drugsDropdown.html"/>
-                <select chosen
-                        ng-model="preferName"
-                        ng-hide="(suggestedDrug == null) || (suggestedDrug === '')"
-                        class="form-control searchbox"
-                        data-placeholder="Prefer Name"
-                        ng-options="synonyms for synonyms in suggestedDrug.synonyms">
-                    <option value=""></option>
-                </select>
-
-                <button class="btn btn-success" ng-click="addDrug(preferName,suggestedDrug.ncitCode)">Add Drug</button>
-                <div ng-hide="(suggestedDrug == null) || (suggestedDrug === '')">If you want to use the initial name, please leave Prefer Name blank.</div>
-                <div>{{addDrugMessage}}</div>
-            </div>
-            <p class="errorReminder" ng-show="searchDrugsError">Sorry, suggested drugs are unavailable now.</p>
         </div>
         <div ng-if="drugList===undefined">
             <p class="errorReminderXL">The page is unavailable now.</p>
         </div>
+        <div class="form-inline">
+            <input type="text" class="form-control searchbox" ng-model="suggestedDrug" uib-typeahead="drug as drug.drugName for drug in processSearchDrugs($viewValue)" typeahead-min-length="1" typeahead-template-url="drugsDropdown.html"/>
+            <select chosen
+                    ng-model="preferName"
+                    ng-hide="(suggestedDrug == null) || (suggestedDrug === '')"
+                    class="form-control searchbox"
+                    data-placeholder="Prefer Name"
+                    ng-options="synonyms for synonyms in suggestedDrug.synonyms"
+                    style="width: 500px">
+                <option value=""></option>
+            </select>
+
+            <button class="btn btn-success" ng-click="addDrug(suggestedDrug, preferName)">Add Drug</button>
+            <div ng-hide="(suggestedDrug == null) || (suggestedDrug === '')">If you want to use the initial name, please leave Prefer Name blank.</div>
+            <div>{{addDrugMessage}}</div>
+        </div>
+        <p class="errorReminder" ng-show="searchDrugsError">Sorry, suggested drugs are unavailable now.</p>
 </div>
 
 <script type="text/ng-template" id="drugsDropdown.html">

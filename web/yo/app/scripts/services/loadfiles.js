@@ -13,6 +13,19 @@
 angular.module('oncokbApp')
     .service('loadFiles', function loadFiles($rootScope, $q, mainUtils, dialogs, $timeout, DatabaseConnector, $firebaseObject) {
         function load(types, data) {
+
+            function loadDrugs() {
+                var drugsDefer = $q.defer();
+                var ref = firebase.database().ref('Drugs');
+                ref.on('value', function(doc) {
+                    $rootScope.drugsData = doc.val();
+                    drugsDefer.resolve('success');
+                }, function(error) {
+                    drugsDefer.reject('Fail to load drug file');
+                });
+                return drugsDefer.promise;
+            }
+
             function loadMeta() {
                 var metaDefer = $q.defer();
                 var ref = firebase.database().ref('Meta');
@@ -122,6 +135,9 @@ angular.module('oncokbApp')
             }
             var deferred = $q.defer();
             var apiCalls = [];
+            if (types.indexOf('drugs') !== -1) {
+                apiCalls.push(loadDrugs());
+            }
             if (types.indexOf('meta') !== -1) {
                 apiCalls.push(loadMeta());
             }
