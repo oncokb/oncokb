@@ -46,9 +46,9 @@ angular.module('oncokbApp').factory('DataSummary', ['$http', function($http) {
 angular.module('oncokbApp').factory('Drugs', ['$http', 'OncoKB', function($http, OncoKB) {
     'use strict';
 
-    var transform = function(data) {
-        return $.param(data);
-    };
+    // var transform = function(data) {
+    //     return $.param(data);
+    // };
 
     // function getAllDrugs() {
     //     return $http.get(OncoKB.config.publicApiLink + 'drugs');
