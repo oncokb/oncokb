@@ -345,18 +345,9 @@ angular.module('oncokbApp')
                             } else if ($scope.evidenceType === 'drugs') {
                                 _.each(response.data, function(item) {
                                     var drugs = [];
-                                    var drugCombination = [];
                                     if (item.treatments.length > 0) {
                                         _.each(item.treatments, function (treatment) {
-                                            if (treatment.drugs.length > 1) {
-                                                drugCombination = [];
-                                                _.each(treatment.drugs, function (drug) {
-                                                    drugCombination.push(drug.drugName);
-                                                });
-                                                drugs.push(drugCombination.join('+'));
-                                            } else {
-                                                drugs.push(treatment.drugs[0].drugName);
-                                            }
+                                            drugs.push(treatment.drugs.map(function(drug){ return drug.drugName}).join('+'));
                                         });
                                         var tempObj = {
                                             gene: item.gene.hugoSymbol,
