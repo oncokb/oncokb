@@ -4,21 +4,21 @@ angular.module('oncokbApp')
     .controller('DrugsCtrl', ['$window', '$scope', '$rootScope', '$location', '$timeout', '$routeParams', '_', 'DTColumnDefBuilder', 'DTOptionsBuilder', 'DatabaseConnector', 'loadFiles', '$firebaseObject', '$firebaseArray', 'FirebaseModel', '$q',
         function($window, $scope, $rootScope, $location, $timeout, $routeParams, _, DTColumnDefBuilder, DTOptionsBuilder, DatabaseConnector, loadFiles, $firebaseObject, $firebaseArray, FirebaseModel, $q) {
 
-            $scope.drugList = {};
             function getDrugList() {
+                $scope.drugList = {};
                 loadFiles.load(['drugs']).then(function(result) {
                     $scope.hugoSymbols = _.without(_.keys($rootScope.drugsData));
-                     _.each($scope.hugoSymbols, function(hugoSymbol) {
-                         $scope.drugList[hugoSymbol] = {
-                                drugName: $rootScope.drugsData[hugoSymbol].drugName,
-                                ncitCode: $rootScope.drugsData[hugoSymbol].ncitCode,
-                                description: $rootScope.drugsData[hugoSymbol].description,
-                                uuid: $rootScope.drugsData[hugoSymbol].uuid,
-                                ncitName: $rootScope.drugsData[hugoSymbol].ncitName,
-                                synonyms: $rootScope.drugsData[hugoSymbol].synonyms
-                         };
-                     });
-                //$scope.status.rendering = false;
+                    _.each($scope.hugoSymbols, function(hugoSymbol) {
+                        $scope.drugList[hugoSymbol] = {
+                            drugName: $rootScope.drugsData[hugoSymbol].drugName,
+                            ncitCode: $rootScope.drugsData[hugoSymbol].ncitCode,
+                            description: $rootScope.drugsData[hugoSymbol].description,
+                            uuid: $rootScope.drugsData[hugoSymbol].uuid,
+                            ncitName: $rootScope.drugsData[hugoSymbol].ncitName,
+                            synonyms: $rootScope.drugsData[hugoSymbol].synonyms
+                        };
+                    });
+                    //$scope.status.rendering = false;
                 });
             };
             getDrugList();

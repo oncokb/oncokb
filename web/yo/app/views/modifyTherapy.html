@@ -10,7 +10,7 @@
         <div ng-repeat="element in therapy">
             <div class="flexRow">
                 <div ng-click="addTherapy($index)" class="inputDrugs">
-                    <tags-input ng-model="element.tags" display-property="drugName" replace-spaces-with-dashes="false" placeholder="Add drugs" add-from-autocomplete-only="true" on-tag-added="addDruginTherapy($tag, $index)" on-tag-removed="removeDruginTherapy($tag, $index)">
+                    <tags-input ng-model="element.tags" display-property="drugName" replace-spaces-with-dashes="false" placeholder="Add drugs" add-from-autocomplete-only="true" on-tag-added="addDruginElement($tag, $index)" on-tag-removed="removeDruginElement($tag, $index)">
                         <auto-complete source="loadDrugs($query)"
                                        min-length="1"
                                        load-on-focus="true"
