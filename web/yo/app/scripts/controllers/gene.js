@@ -1754,10 +1754,16 @@ angular.module('oncokbApp')
             $scope.modifyTherapy = function (path) {
                 var indices = getIndexByPath(path);
                 var tumorRef = $scope.gene.mutations[indices[0]].tumors[indices[1]];
+                var geneName = $scope.gene.name;
+                var mutationName = $scope.gene.mutations[indices[0]].name;
+                var cancerTypes = $scope.gene.mutations[indices[0]].tumors[indices[1]].cancerTypes;
                 var treatmentRef = $scope.gene.mutations[indices[0]].tumors[indices[1]].TIs[indices[2]];
                 var dlgfortherapy = dialogs.create('views/modifyTherapy.html', 'ModifyTherapyCtrl',{
                     tumorRef: tumorRef,
                     treatmentRef: treatmentRef,
+                    geneName: geneName,
+                    mutationName: mutationName,
+                    cancerTypes: cancerTypes,
                     oncoTree: $scope.oncoTree
                 }, {
                     size: 'lg'
@@ -3139,11 +3145,18 @@ angular.module('oncokbApp')
             _.each($scope.therapy,function(element){
                 treatment.drugs.push(element);
                 _.each(element,function(drug){
-                    console.log(drug);
-                    console.log(data.gene.key);
-                    console.log(data.gene);
-                    console.log(data.mutation)
-                    //firebase.database().ref('Map/' + drug + '/' + data.gene).set(newDrugName);
+                    _.each(data.cancerTypes, function(cancerType) {
+                        if (cancerType.mainType) {
+                            firebase.database().ref('Map/' + drug + '/' + data.geneName + '/' + data.mutationName +'/').once('value', function(snapshot){
+                                if (snapshot.hasChild(cancerType.mainType) == false){
+                                    firebase.database().ref('Map/' + drug + '/' + data.geneName + '/' + data.mutationName + '/' + cancerType.mainType).set('');
+                                }
+                            });
+                        }
+                        if (cancerType.subtype) {
+                            firebase.database().ref('Map/' + drug + '/' + data.geneName + '/' + data.mutationName +'/' + cancerType.mainType + '/' + cancerType.subtype).set('');
+                        }
+                    });
                 });
             });
             if (!data.treatmentRef.treatments) {
@@ -3208,6 +3221,7 @@ angular.module('oncokbApp')
             data.tumorRef.cancerTypes = cancerTypes;
             $modalInstance.close();
         };
+
         $scope.$watch('meta.newCancerTypes', function (n) {
             if (n.length > 0 && (n[n.length - 1].mainType || n[n.length - 1].subtype)) {
                 $scope.meta.newCancerTypes.push({
