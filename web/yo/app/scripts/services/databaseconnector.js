@@ -453,15 +453,16 @@ angular.module('oncokbApp')
                 delete historyData.hugoSymbol;
 
                 var historyList = $firebaseArray(firebase.database().ref('History/' + hugoSymbol + '/api'));
-                historyList.$add({
+                var historyObject = {
                     admin: $rootScope.me.name,
                     timeStamp: new Date().getTime(),
                     records: historyData
-                }).then(function(ref) {
+                };
+                historyList.$add(historyObject).then(function(ref) {
                     console.log('Added a new history record.');
                 }, function (error) {
                     sendEmail({sendTo: 'dev.oncokb@gmail.com', subject: 'Failed to add a new history record for ' + hugoSymbol
-                        + '.', content: JSON.stringify(historyData) + '\n\nError: \n' + JSON.stringify(error)},
+                        + '.', content: JSON.stringify(historyObject) + '\n\nError: \n' + JSON.stringify(error)},
                         function(result) {
                             console.log('sent history error to oncokb dev account');
                         },
