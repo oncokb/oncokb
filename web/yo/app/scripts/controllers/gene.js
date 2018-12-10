@@ -2991,6 +2991,9 @@ angular.module('oncokbApp')
                 });
             }
             getOncoTreeMainTypes();
+
+
+
         }]
     )
 
@@ -3064,12 +3067,12 @@ angular.module('oncokbApp')
         }
 
         $scope.addDruginElement = function(tag,index){
-            $scope.therapy[index].push(tag.drugName);
+            $scope.therapy[index].push(tag.uuid);
             addTherapy(index);
         }
 
         $scope.removeDruginElement = function(tag,index){
-            var id = $scope.therapy[index].indexOf(tag.drugName);
+            var id = $scope.therapy[index].indexOf(tag.uuid);
             if (id > -1) {
                 $scope.therapy[index].splice(id, 1);
             }
@@ -3141,22 +3144,21 @@ angular.module('oncokbApp')
                 added: true
             };
             //The previous drugs?
-            treatment.drugs = [];
             _.each($scope.therapy,function(element){
-                treatment.drugs.push(element);
                 _.each(element,function(drug){
-                    _.each(data.cancerTypes, function(cancerType) {
-                        if (cancerType.mainType) {
-                            firebase.database().ref('Map/' + drug + '/' + data.geneName + '/' + data.mutationName +'/').once('value', function(snapshot){
-                                if (snapshot.hasChild(cancerType.mainType) == false){
-                                    firebase.database().ref('Map/' + drug + '/' + data.geneName + '/' + data.mutationName + '/' + cancerType.mainType).set('');
-                                }
-                            });
-                        }
-                        if (cancerType.subtype) {
-                            firebase.database().ref('Map/' + drug + '/' + data.geneName + '/' + data.mutationName +'/' + cancerType.mainType + '/' + cancerType.subtype).set('');
-                        }
-                    });
+                    // _.each(data.cancerTypes, function(cancerType) {
+                    //     if (cancerType.mainType) {
+                    //         firebase.database().ref('Map/' + drug + '/' + data.geneName + '/' + data.mutationName +'/').once('value', function(snapshot){
+                    //             if (snapshot.hasChild(cancerType.mainType) == false){
+                    //                 firebase.database().ref('Map/' + drug + '/' + data.geneName + '/' + data.mutationName + '/' + cancerType.mainType).set('');
+                    //             }
+                    //         });
+                    //     }
+                    //     if (cancerType.subtype) {
+                    //         firebase.database().ref('Map/' + drug + '/' + data.geneName + '/' + data.mutationName +'/' + cancerType.mainType + '/' + cancerType.subtype).set('');
+                    //     }
+                    // });
+                    firebase.database().ref('Map/' + drug + '/' + data.geneName + '/' + data.mutationName).set('');
                 });
             });
             if (!data.treatmentRef.treatments) {

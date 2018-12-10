@@ -268,8 +268,13 @@
                           <div ng-style="movingInfo[treatment.name_uuid]" class="headerLevel4">
                             <div ng-click="toggleSection(treatment.name_uuid)"><i ng-class="getAngleClass(treatment.name_uuid)"></i> Therapy:</div>
                             <div style="margin-left:90px;margin-top:-22px;overflow: hidden">
-                              <div ng-style="getNameStyle()"><realtime-string t="'TREATMENT_NAME'" key="'name'" path="path" uuid="getUUID({type: 'treatment', key: 'name', path: path})"></realtime-string></div>
-                              <div style="float:left;margin-left:10px;" ng-show="!reviewMode">
+                              <div ng-style="getNameStyle()">
+                                  <realtime-string t="'TREATMENT_NAME'" key="'name'" path="path" uuid="getUUID({type: 'treatment', key: 'name', path: path})"></realtime-string>
+                              </div>
+
+                                <i class="fa fa-edit ng-scope" ng-click="modifyTherapy(path)"></i>
+
+                                <div style="float:left;margin-left:10px;" ng-show="!reviewMode">
                                 <comments-dict key="'name'" path="path"></comments-dict>
                                 <span class="curationNoEntry" ng-if="isEmptySection(treatment, 'treatment')">No Entry</span>
                               </div>

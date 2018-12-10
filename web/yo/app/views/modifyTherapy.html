@@ -24,7 +24,32 @@
     </div>
 </div>
 
+
+
+
 <div class="modal-footer">
+
+    <div class="form-control-static pull-left">
+        <div class="form-inline">
+            <input type="text" class="form-control searchbox" ng-model="suggestedDrug" uib-typeahead="drug as drug.drugName for drug in processSearchDrugs($viewValue)" typeahead-min-length="1" typeahead-template-url="drugsDropdown.html"/>
+            <select chosen
+                    ng-model="preferName"
+                    data-placeholder="Choose a prefer name"
+                    ng-hide="(suggestedDrug == null) || (suggestedDrug === '')"
+                    class="form-control searchbox"
+                    data-placeholder="Prefer Name"
+                    ng-options="synonyms for synonyms in suggestedDrug.synonyms"
+                    style="width: 500px">
+                <option value="suggetedDrug.drugName"></option>
+            </select>
+
+            <button class="btn btn-success" ng-click="addDrug(suggestedDrug, preferName)">Add Drug</button>
+            <div>{{addDrugMessage}}</div>
+        </div>
+        <p class="errorReminder" ng-show="searchDrugsError">Sorry, suggested drugs are unavailable now.</p>
+
+    </div>
+
     <p class="errorNote" ng-show="addTherapyError">{{therapyErrorMessage}}</p>
     <button type="button" class="btn btn-default" ng-click="cancel()">Cancel</button>
     <button type="button" class="btn btn-primary" ng-click="save()" ng-disabled="addTherapyError">Save</button>
