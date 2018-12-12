@@ -7,20 +7,21 @@
                     <th>Name</th>
                     <th>NCI Thesaurus Code</th>
                     <th>Description</th>
+                    <!--<th>Information</th>-->
                 </tr>
                 </thead>
                 <tbody>
                 <tr data-ng-repeat="drug in drugList">
                     <td ng-init="editDrugName=false">
                         <div ng-show="editDrugName===false">
-                            <button type="button" class="btn btn-danger buttonStyle" ng-click="" uib-tooltip-placement="top" uib-tooltip="Delete drug"><i class="fa fa-remove"></i>
+                            <button type="button" class="btn btn-danger buttonStyle" ng-click="removeDrug(drug)" uib-tooltip-placement="top" uib-tooltip="Delete drug"><i class="fa fa-remove"></i>
                             </button>
                             <button type="button" class="btn btn-warning buttonStyle " uib-tooltip-placement="top" uib-tooltip="Modify Name" ng-click="editDrugName=!editDrugName"><i class="fa fa-edit"></i>
                             </button>
                             {{ drug.drugName}}
                         </div>
                         <div ng-show="editDrugName===true">
-                            <button type="button" class="btn btn-danger buttonStyle" ng-click="" uib-tooltip-placement="top" uib-tooltip="Delete drug">
+                            <button type="button" class="btn btn-danger buttonStyle" ng-click="removeDrug(drug)" uib-tooltip-placement="top" uib-tooltip="Delete drug"><i class="fa fa-remove"></i></button>
                             <button type="button" class="btn btn-success buttonStyle" uib-tooltip-placement="top" uib-tooltip="Save Name" ng-click="saveDrugName(newDrugName, drug);editDrugName=!editDrugName"><i class="fa fa-check"></i>
                             </button>
                             <input type="text" ng-model="newDrugName" placeholder="{{drug.drugName}}" uib-typeahead="name for name in drug.synonyms" typeahead-min-length="0"/>
@@ -28,6 +29,7 @@
                     </td>
                     <td>{{ drug.ncitCode }}</td>
                     <td>{{ drug.description }}</td>
+                    <!--<td>{{drug.information}}</td>-->
                 </tr>
                 </tbody>
             </table>

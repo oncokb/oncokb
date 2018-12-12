@@ -146,6 +146,16 @@ angular.module('oncokbApp')
 
             };
 
+
+            $scope.removeDrug = function (drug){
+                console.log(drug.uuid);
+                firebase.database().ref('Map').once('value', function(snapshot){
+                    if (snapshot.hasChild(drug.uuid)) {
+                        alert("Can't delete this drug, because it is used in therapies.")
+                    }
+                })
+            }
+
             // $scope.addDrug = function (preferName, drugCode) {
             //     return DatabaseConnector.addtheDrug(preferName, drugCode, function (result) {
             //             getDrugList();

@@ -1753,24 +1753,39 @@ angular.module('oncokbApp')
             };
             $scope.modifyTherapy = function (path) {
                 console.log(path);
+                //path if
                 var indices = getIndexByPath(path);
                 var tumorRef = $scope.gene.mutations[indices[0]].tumors[indices[1]];
                 var geneName = $scope.gene.name;
                 var mutationUuid = $scope.gene.mutations[indices[0]].name_uuid;
                 var cancerTypes = $scope.gene.mutations[indices[0]].tumors[indices[1]].cancerTypes;
                 var tiRef = $scope.gene.mutations[indices[0]].tumors[indices[1]].TIs[indices[2]];
-                var treatmentRef = $scope.gene.mutations[indices[0]].tumors[indices[1]].TIs[indices[2]].treatments[indices[3]];
-                var dlgfortherapy = dialogs.create('views/modifyTherapy.html', 'ModifyTherapyCtrl',{
-                    tumorRef: tumorRef,
-                    treatmentRef: treatmentRef,
-                    tiRef: tiRef,
-                    geneName: geneName,
-                    mutationUuid: mutationUuid,
-                    cancerTypes: cancerTypes,
-                    oncoTree: $scope.oncoTree
-                }, {
-                    size: 'lg'
-                });
+                if(indices[3]==-1){
+                    var dlgfortherapy = dialogs.create('views/modifyTherapy.html', 'ModifyTherapyCtrl',{
+                        tumorRef: tumorRef,
+                        tiRef: tiRef,
+                        geneName: geneName,
+                        mutationUuid: mutationUuid,
+                        cancerTypes: cancerTypes,
+                        modifymode: false
+                    }, {
+                        size: 'lg'
+                    });
+                }else{
+                    var treatmentRef = $scope.gene.mutations[indices[0]].tumors[indices[1]].TIs[indices[2]].treatments[indices[3]];
+                    var dlgfortherapy = dialogs.create('views/modifyTherapy.html', 'ModifyTherapyCtrl',{
+                        tumorRef: tumorRef,
+                        treatmentRef: treatmentRef,
+                        tiRef: tiRef,
+                        geneName: geneName,
+                        mutationUuid: mutationUuid,
+                        cancerTypes: cancerTypes,
+                        modifymode: true
+                    }, {
+                        size: 'lg'
+                    });
+                }
+
             };
             $scope.onFocus = function (e) {
                 $timeout(function () {
@@ -3047,8 +3062,17 @@ angular.module('oncokbApp')
         //     return drugList;
         // };
 
-        $scope.therapy = new Array();
-        function initNewTherapy() {
+
+
+
+        if(data.modifymode === true){
+            $scope.therapy = new Array();
+            initTherapy();
+        }else{
+            $scope.therapy = [[]];
+        }
+
+        function initTherapy() {
             var newTherapy = [];
             // _.each(data.tiRef.treatments, function (element) {
             //     newTherapy = element.name.split(",");
@@ -3070,14 +3094,12 @@ angular.module('oncokbApp')
                     }
                     $scope.therapy[i]={tags:tem};
                 }
-                }, function(error){
+            }, function(error){
                 console.error((error));
             });
             $scope.therapy.push({});
         }
 
-        initNewTherapy();
-        
 
         $scope.loadDrugs = function($query){
             return firebase.database().ref('Drugs').once('value').then(function(snapshot){
@@ -3192,9 +3214,9 @@ angular.module('oncokbApp')
                     firebase.database().ref('Map/' + drug + '/' + data.geneName + '/' + data.mutationUuid).set('');
                 });
             });
-            if (!data.tiRef.treatments) {
-                data.tiRef.treatments = [];
-            }
+            // if (!data.tiRef.treatments) {
+            //     data.tiRef.treatments = [];
+            // }
             if (isValidTreatment(indices, newTreatmentName)) {
                 data.tiRef.treatments.push(treatment);
                 $scope.$$prevSibling.indicateTumorContent(data.tumorRef);

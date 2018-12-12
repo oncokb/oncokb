@@ -888,15 +888,18 @@ input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:b
     .headerStyle {
         margin-bottom: 30px;
     }
-    .buttonStyle {
-        padding: 5px;
-        font-size: 14px;
-        line-height: 14px;
-        i {
-            width: 14px;
-            height: 14px;
+    .table{
+        .buttonStyle {
+            padding: 5px;
+            font-size: 14px;
+            line-height: 14px;
+            i {
+                width: 14px;
+                height: 14px;
+            }
         }
     }
+
     table > tbody > tr > td, table > thead > tr > th {
         padding: 5px;
     }
