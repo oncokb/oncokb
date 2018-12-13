@@ -15,13 +15,20 @@ angular.module('oncokbApp')
                             description: $rootScope.drugsData[hugoSymbol].description,
                             uuid: $rootScope.drugsData[hugoSymbol].uuid,
                             ncitName: $rootScope.drugsData[hugoSymbol].ncitName,
-                            synonyms: $rootScope.drugsData[hugoSymbol].synonyms
+                            synonyms: $rootScope.drugsData[hugoSymbol].synonyms,
+                            //information: getInformation($rootScope.drugsData[hugoSymbol].uuid)
                         };
                     });
                     //$scope.status.rendering = false;
                 });
             };
             getDrugList();
+
+            // function getInformation(uuid){
+            //     firebase.database().ref('Map/' + uuid).once('value', function(snapshot){
+            //         console.log(snapshot.val());
+            //     });
+            // }
 
             function checkSame(drugName, ncitCode) {
                 loadFiles.load(['drugs']).then(function (result) {
