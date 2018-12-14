@@ -14,6 +14,18 @@ angular.module('oncokbApp')
     .service('loadFiles', function loadFiles($rootScope, $q, mainUtils, dialogs, $timeout, DatabaseConnector, $firebaseObject) {
         function load(types, data) {
 
+            function loadMap(){
+                var mapDefer = $q.defer();
+                var ref = firebase.database().ref('Map');
+                ref.on('value', function(doc) {
+                    $rootScope.mapData = doc.val();
+                    mapDefer.resolve('success');
+                }, function(error) {
+                    drugsDefer.reject('Fail to load map file');
+                });
+                return mapDefer.promise;
+            }
+
             function loadDrugs() {
                 var drugsDefer = $q.defer();
                 var ref = firebase.database().ref('Drugs');
@@ -135,6 +147,9 @@ angular.module('oncokbApp')
             }
             var deferred = $q.defer();
             var apiCalls = [];
+            if (types.indexOf('map') !== -1) {
+                apiCalls.push(loadMap());
+            }
             if (types.indexOf('drugs') !== -1) {
                 apiCalls.push(loadDrugs());
             }

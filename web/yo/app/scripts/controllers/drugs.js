@@ -4,8 +4,29 @@ angular.module('oncokbApp')
     .controller('DrugsCtrl', ['$window', '$scope', '$rootScope', '$location', '$timeout', '$routeParams', '_', 'DTColumnDefBuilder', 'DTOptionsBuilder', 'DatabaseConnector', 'loadFiles', '$firebaseObject', '$firebaseArray', 'FirebaseModel', '$q',
         function($window, $scope, $rootScope, $location, $timeout, $routeParams, _, DTColumnDefBuilder, DTOptionsBuilder, DatabaseConnector, loadFiles, $firebaseObject, $firebaseArray, FirebaseModel, $q) {
 
+            $scope.drugList = {};
+            $scope.mapList = {};
             function getDrugList() {
-                $scope.drugList = {};
+
+                loadFiles.load(['map']).then(function (result) {
+                    var inforArray = new Array();
+                    $scope.keys = _.without(_.keys($rootScope.mapData));
+                    _.each($scope.keys, function (key) {
+                        inforArray = [];
+                        var genes = _.without(_.keys($rootScope.mapData[key]));
+                        _.each(genes, function (gindex) {
+                            var mutations = _.without(_.keys($rootScope.mapData[key][gindex]));
+                            var informationtext = gindex + ":" + mutations.length + " mutations";
+                            inforArray.push(informationtext);
+                        });
+                        $scope.mapList[key] = {
+                            key: key,
+                            geneNumber: genes.length,
+                            inforArray: inforArray
+                        };
+                    });
+                });
+
                 loadFiles.load(['drugs']).then(function (result) {
                     $scope.hugoSymbols = _.without(_.keys($rootScope.drugsData));
                     _.each($scope.hugoSymbols, function (hugoSymbol) {
@@ -16,41 +37,38 @@ angular.module('oncokbApp')
                             uuid: $rootScope.drugsData[hugoSymbol].uuid,
                             ncitName: $rootScope.drugsData[hugoSymbol].ncitName,
                             synonyms: $rootScope.drugsData[hugoSymbol].synonyms,
-                            information: getInformation($rootScope.drugsData[hugoSymbol].uuid)
+                            map: $scope.mapList[$rootScope.drugsData[hugoSymbol].uuid]
                         };
                     });
-                    //$scope.status.rendering = false;
                 });
+
             };
             getDrugList();
 
-            function getInformation(uuid){
-                var num = 0;
-                var mapDrug = new Array();
-                firebase.database().ref('Map/' + uuid).once('value', function(snapshot){
-                    mapDrug = snapshot.val();
-                    //
-                    // _.each(mapDrug,function (gene) {
-                    //     console.log(gene.key);
-                    // })
-                });
-                return num;
-            }
 
-            function checkSame(drugName, ncitCode) {
+            function checkSame(drugName, code) {
+                var isSame = false;
                 loadFiles.load(['drugs']).then(function (result) {
-                    $scope.hugoSymbols = _.without(_.keys($rootScope.drugsData));
-                    _.each($scope.hugoSymbols, function (hugoSymbol) {
-                        if ((ncitCode == '') || (ncitCode == null)) {
-                            if (drugName == $scope.drugList[hugoSymbol].drugName)
-                                return true
+                    var keys = _.without(_.keys($rootScope.drugsData));
+                    console.log(keys);
+                    _.each(keys, function (key) {
+                        console.log($scope.drugList[key].ncitCode);
+                        if ((code == '') || (code == null)) {
+                            console.log("1");
+                            if (drugName == $scope.drugList[key].drugName)
+                                isSame = true
                         }
-                        else if (ncitCode == $scope.drugList[hugoSymbol].ncitCode)
-                            return true
-                        else return false;
+                        else if (code == $scope.drugList[key].ncitCode)
+                        {console.log("2");
+                            isSame = true;}
 
                     });
+                    console.log(isSame);
                 });
+                if(isSame){
+                    return true;
+                }
+                return false;
             };
 
 
@@ -78,6 +96,7 @@ angular.module('oncokbApp')
                 //     deferred.reject('same element');
                 // }else{
                 //console.log("jiale");
+                console.log(checkSame(drugName, ncitCode));
                 if (checkSame(drugName, ncitCode) == false) {
                     firebase.database().ref('Drugs/' + drug.uuid).set(drug).then(function (result) {
                         deferred.resolve();
@@ -90,7 +109,11 @@ angular.module('oncokbApp')
                     $scope.addDrugMessage = drugName + " has been added successfully.";
                 }
                 //}
-                else $scope.addDrugMessage = "Sorry, same drug exists.";
+                else {
+                    $scope.addDrugMessage = "Sorry, same drug exists.";
+                    $scope.suggestedDrug = '';
+                    $scope.preferName = '';
+                }
                 return deferred.promise;
             }
 
@@ -166,6 +189,11 @@ angular.module('oncokbApp')
                 firebase.database().ref('Map').once('value', function(snapshot){
                     if (snapshot.hasChild(drug.uuid)) {
                         alert("Can't delete this drug, because it is used in therapies.")
+                    }
+                    else{
+                        firebase.database().ref('Drugs/' + drug.uuid).set(null).then();
+                        alert(drug.drugName + "has been deleted." );
+
                     }
                 })
             }

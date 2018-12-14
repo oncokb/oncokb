@@ -29,7 +29,10 @@
                     </td>
                     <td>{{ drug.ncitCode }}</td>
                     <td>{{ drug.description }}</td>
-                    <td>{{ drug.information }}</td>
+                    <td ng-mouseover="hoverIn(drug)" ng-mouseleave="hoverOut(drug)">{{ drug.map.geneNumber }}
+                        <span style="float:right;">{{drug.map.inforArray}}</span>
+                    </td>
+
                 </tr>
                 </tbody>
             </table>
