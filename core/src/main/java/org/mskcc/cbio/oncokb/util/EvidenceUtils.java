@@ -619,7 +619,7 @@ public class EvidenceUtils {
         map.put("exist", false);
         map.put("origin", false);
         map.put("result", query);
-        for(List<String> key : keys) {
+        for (List<String> key : keys) {
             // Check whether key has all elements in query;
             if (key.containsAll(query)) {
                 map.put("exist", true);
@@ -960,6 +960,7 @@ public class EvidenceUtils {
         if (articles != null && !articles.isEmpty()) {
             ArticleBo articleBo = ApplicationContextSingleton.getArticleBo();
             Set<Article> annotatedArticles = new HashSet<>();
+            Set<String> articlesToBeAdded = new HashSet<>();
             for (Article article : articles) {
                 String tempPMID = article.getPmid();
                 if (tempPMID == null) {
@@ -973,16 +974,20 @@ public class EvidenceUtils {
                 } else {
                     Article tempAT = articleBo.findArticleByPmid(tempPMID);
                     if (tempAT == null) {
-                        Article newArticle = NcbiEUtils.readPubmedArticle(tempPMID);
-                        if (newArticle != null) {
-                            articleBo.save(newArticle);
-                            annotatedArticles.add(newArticle);
-                        }
+                        articlesToBeAdded.add(tempPMID);
                     } else {
                         annotatedArticles.add(tempAT);
                     }
                 }
             }
+
+            if (!articlesToBeAdded.isEmpty()) {
+                for (Article article : NcbiEUtils.readPubmedArticles(articlesToBeAdded)) {
+                    articleBo.save(article);
+                    annotatedArticles.add(article);
+                }
+            }
+
             evidence.setArticles(annotatedArticles);
         }
     }
