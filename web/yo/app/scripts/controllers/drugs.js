@@ -16,7 +16,7 @@ angular.module('oncokbApp')
                             uuid: $rootScope.drugsData[hugoSymbol].uuid,
                             ncitName: $rootScope.drugsData[hugoSymbol].ncitName,
                             synonyms: $rootScope.drugsData[hugoSymbol].synonyms,
-                            //information: getInformation($rootScope.drugsData[hugoSymbol].uuid)
+                            information: getInformation($rootScope.drugsData[hugoSymbol].uuid)
                         };
                     });
                     //$scope.status.rendering = false;
@@ -24,11 +24,18 @@ angular.module('oncokbApp')
             };
             getDrugList();
 
-            // function getInformation(uuid){
-            //     firebase.database().ref('Map/' + uuid).once('value', function(snapshot){
-            //         console.log(snapshot.val());
-            //     });
-            // }
+            function getInformation(uuid){
+                var num = 0;
+                var mapDrug = new Array();
+                firebase.database().ref('Map/' + uuid).once('value', function(snapshot){
+                    mapDrug = snapshot.val();
+                    //
+                    // _.each(mapDrug,function (gene) {
+                    //     console.log(gene.key);
+                    // })
+                });
+                return num;
+            }
 
             function checkSame(drugName, ncitCode) {
                 loadFiles.load(['drugs']).then(function (result) {

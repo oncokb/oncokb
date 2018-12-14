@@ -1761,6 +1761,7 @@ angular.module('oncokbApp')
                 var tiRef = $scope.gene.mutations[indices[0]].tumors[indices[1]].TIs[indices[2]];
                 if(indices[3]==-1){
                     var dlgfortherapy = dialogs.create('views/modifyTherapy.html', 'ModifyTherapyCtrl',{
+                        path: path,
                         tumorRef: tumorRef,
                         tiRef: tiRef,
                         geneName: geneName,
@@ -3044,11 +3045,9 @@ angular.module('oncokbApp')
 
 
         if(data.modifymode === true){
-            console.log("modify mode");
             $scope.therapy = new Array();
             initTherapy();
         }else{
-            console.log("add mode");
             $scope.therapy = [[]];
             therapyuuid = [[]];
         }
@@ -3078,14 +3077,12 @@ angular.module('oncokbApp')
                     }
                     $scope.therapy[i]={tags:tem};
                     therapyuuid[i] = temuuid;
-                    console.log(therapyuuid[i]);
                 }
             }, function(error){
                 console.error((error));
             });
             $scope.therapy.push({});
             therapyuuid.push([]);
-            console.log(therapyuuid);
         }
 
 
@@ -3105,9 +3102,7 @@ angular.module('oncokbApp')
         }
 
         $scope.addDruginElement = function(tag,index){
-            console.log("addDruginElement");
             therapyuuid[index].push(tag.uuid);
-            console.log(therapyuuid[index]);
             addTherapy(index);
         }
 
@@ -3121,7 +3116,6 @@ angular.module('oncokbApp')
 
 
         function addTherapy(index) {
-            console.log("addTherapy");
             if ($scope.therapy.length === index + 1 ){
                 $scope.therapy.push([]);
                 therapyuuid.push([]);
@@ -3130,7 +3124,6 @@ angular.module('oncokbApp')
 
         }
         function valiElement(index) {
-            console.log("Vali");
             $scope.addTherapyError = false;
             var therapyVali = [];
             _.each(therapyuuid, function(element) {
@@ -3177,7 +3170,6 @@ angular.module('oncokbApp')
                 $scope.therapy.splice($scope.therapy.length-1, 1);
                 therapyuuid.splice(therapyuuid.length-1, 1);
             };
-            console.log(therapyuuid);
             var therapyString = [];
             var indices = data.indices;
 
@@ -3214,10 +3206,11 @@ angular.module('oncokbApp')
             //     data.tiRef.treatments = [];
             // }
             if (isValidTreatment(indices, newTreatmentName)) {
-                // if(data.tiRef.treatments == undefined){
-                //     data.tiRef.push("/treatments");
-                // };
-                data.tiRef.treatments.push(treatment);
+                if(data.tiRef.treatments == undefined){
+                    firebase.database().ref(data.path + "/treatments/0").set(treatment);
+                }else{
+                    data.tiRef.treatments.push(treatment);
+                }
                 $scope.$$prevSibling.indicateTumorContent(data.tumorRef);
                 mainUtils.setUUIDInReview(treatment.name_uuid);
                 $modalInstance.close();
