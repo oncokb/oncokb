@@ -39,6 +39,7 @@ public final class PropertiesUtils {
             inputStream.close();
         }
 
-        return PROPERTIES.get(name) == null ? null : (String)PROPERTIES.get(name);
+        // use system property if available, otherwise get from file
+        return System.getProperty(name, PROPERTIES.get(name) == null ? null : (String)PROPERTIES.get(name));
     }
 }
