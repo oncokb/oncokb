@@ -34,11 +34,10 @@
                     <p ng-if="!fe && editingMessage" style="font-style:italic;margin-top:-30px;margin-left:30%;color:orange">{{editingMessage}}</p>
                     <p contenteditable="false"
                        ng-class="getInputClass()"
-                       ng-model="data[key]"
                        ng-click="setTrackSignal()"
                        ng-paste="trimCSS()"
                        ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 200, 'blur': 0 } }"
-                       class="editEmpty">
+                       class="editEmpty">{{uuidtoName(data[key])}}
                     </p>
                 </div>
                 <div ng-switch-when="treatment-select" class="chosen-full-width">

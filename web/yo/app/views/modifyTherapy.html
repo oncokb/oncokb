@@ -15,7 +15,7 @@
                                        min-length="1"
                                        load-on-focus="true"
                                        load-on-empty="false"
-                                       template="drugsDropdown"></auto-complete>
+                                       template="drugsLibrary"></auto-complete>
                     </tags-input>
                 </div>
                 <button class="btn btn-default addButton"><i class="fa fa-remove" ng-click="deleteTherapy($index)"></i></button>
@@ -55,12 +55,25 @@
     <button type="button" class="btn btn-primary" ng-click="save()" ng-disabled="addTherapyError">Save</button>
 </div>
 
-<script type="text/ng-template" id="drugsDropdown">
+<script type="text/ng-template" id="drugsLibrary">
     <div>
         <div ng-bind-html="$highlight($getDisplayText())"></div>
         <div>Also known as
             <span ng-bind-html="$highlight(data.synonyms.join(', '))"></span>
         </div>
     </div>
+</script>
+
+<script type="text/ng-template" id="drugsDropdown.html">
+    <a class="drugsDropdown">
+        <div class="basicName" ng-bind-html="match.model.drugName | uibTypeaheadHighlight:query"></div>
+        <div class="alsoKnownAs">Also known as:
+            <span ng-bind-html="match.model.synonyms | uibTypeaheadHighlight:query"></span>
+        </div>
+        <!--add-->
+        <div class="alsoKnownAs">Code:
+            <span ng-bind-html="match.model.ncitCode | uibTypeaheadHighlight:query"></span>
+        </div>
+    </a>
 </script>
 

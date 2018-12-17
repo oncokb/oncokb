@@ -4,7 +4,7 @@ angular.module('oncokbApp')
     .controller('DrugsCtrl', ['$window', '$scope', '$rootScope', '$location', '$timeout', '$routeParams', '_', 'DTColumnDefBuilder', 'DTOptionsBuilder', 'DatabaseConnector', 'loadFiles', '$firebaseObject', '$firebaseArray', 'FirebaseModel', '$q',
         function($window, $scope, $rootScope, $location, $timeout, $routeParams, _, DTColumnDefBuilder, DTOptionsBuilder, DatabaseConnector, loadFiles, $firebaseObject, $firebaseArray, FirebaseModel, $q) {
 
-            $scope.drugList = {};
+            $rootScope.drugList = {};
             $scope.mapList = {};
             function getDrugList() {
 
@@ -30,7 +30,7 @@ angular.module('oncokbApp')
                 loadFiles.load(['drugs']).then(function (result) {
                     $scope.hugoSymbols = _.without(_.keys($rootScope.drugsData));
                     _.each($scope.hugoSymbols, function (hugoSymbol) {
-                        $scope.drugList[hugoSymbol] = {
+                        $rootScope.drugList[hugoSymbol] = {
                             drugName: $rootScope.drugsData[hugoSymbol].drugName,
                             ncitCode: $rootScope.drugsData[hugoSymbol].ncitCode,
                             description: $rootScope.drugsData[hugoSymbol].description,
@@ -48,47 +48,42 @@ angular.module('oncokbApp')
 
             function checkSame(drugName, code) {
                 var isSame = false;
-                loadFiles.load(['drugs']).then(function (result) {
-                    var keys = _.without(_.keys($rootScope.drugsData));
-                    console.log(keys);
-                    _.each(keys, function (key) {
-                        console.log($scope.drugList[key].ncitCode);
-                        if ((code == '') || (code == null)) {
-                            console.log("1");
-                            if (drugName == $scope.drugList[key].drugName)
-                                isSame = true
-                        }
-                        else if (code == $scope.drugList[key].ncitCode)
-                        {console.log("2");
-                            isSame = true;}
-
-                    });
-                    console.log(isSame);
-                });
+                // loadFiles.load(['drugs']).then(function (result) {
+                //     var keys = _.without(_.keys($rootScope.drugsData));
+                //     console.log(keys);
+                //     _.each(keys, function (key) {
+                //         console.log($rootScope.drugList[key].ncitCode);
+                //         if ((code == '') || (code == null)) {
+                //             console.log("1");
+                //             if (drugName == $rootScope.drugList[key].drugName)
+                //                 isSame = true
+                //         }
+                //         else if (code == $rootScope.drugList[key].ncitCode)
+                //         {console.log("2");
+                //             isSame = true;}
+                //
+                //     });
+                //     console.log(isSame);
+                // });
+                _.each($rootScope.drugList, function (drug) {
+                    if ((code == '') || (code == null)) {
+                        if (drugName == drug.drugName)
+                            isSame = true;
+                    }
+                    else if (code == drug.ncitCode){
+                        isSame = true;
+                    }
+                })
                 if(isSame){
                     return true;
                 }
                 return false;
             };
 
-
-            // function checkSame(Code){
-            //     var ref = firebase.database().ref();
-            //     ref.once("value", function (element) {
-            //         if(element.child(Code).exists()){
-            //             console.log("exists");
-            //             return true;
-            //         }
-            //         else{
-            //             return false;
-            //         }
-            //     })
-            // }
-
             function createDrug(drugName, ncitCode, synonyms, ncitName) {
                 var deferred = $q.defer(); //check same，free text
                 var drug = new FirebaseModel.Drug(drugName, ncitCode, synonyms, ncitName);
-                var key;
+                //var key;
                 // console.log(checkSame(ncitCode, drugName));
                 // if(checkSame(ncitCode, drugName) == true){
                 //     console.log("meijia");
@@ -96,7 +91,6 @@ angular.module('oncokbApp')
                 //     deferred.reject('same element');
                 // }else{
                 //console.log("jiale");
-                console.log(checkSame(drugName, ncitCode));
                 if (checkSame(drugName, ncitCode) == false) {
                     firebase.database().ref('Drugs/' + drug.uuid).set(drug).then(function (result) {
                         deferred.resolve();
@@ -152,14 +146,6 @@ angular.module('oncokbApp')
                 }
             }
 
-            // function getDrugList() {
-            //     DatabaseConnector.getAllDrugs()
-            //         .then(function(result){
-            //             $scope.drugList = result;
-            //         })
-            // };
-
-
             $scope.processSearchDrugs = function (keyword) {
                 return DatabaseConnector.searchDrugs(keyword)
                     .then(
@@ -185,7 +171,6 @@ angular.module('oncokbApp')
 
 
             $scope.removeDrug = function (drug){
-                console.log(drug.uuid);
                 firebase.database().ref('Map').once('value', function(snapshot){
                     if (snapshot.hasChild(drug.uuid)) {
                         alert("Can't delete this drug, because it is used in therapies.")
@@ -195,7 +180,8 @@ angular.module('oncokbApp')
                         alert(drug.drugName + "has been deleted." );
 
                     }
-                })
+                });
+                getDrugList();
             }
 
             // $scope.addDrug = function (preferName, drugCode) {

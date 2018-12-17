@@ -1752,7 +1752,6 @@ angular.module('oncokbApp')
                 });
             };
             $scope.modifyTherapy = function (path) {
-                console.log(path);
                 var indices = getIndexByPath(path);
                 var tumorRef = $scope.gene.mutations[indices[0]].tumors[indices[1]];
                 var geneName = $scope.gene.name;
@@ -1774,6 +1773,7 @@ angular.module('oncokbApp')
                 }else{
                     var treatmentRef = $scope.gene.mutations[indices[0]].tumors[indices[1]].TIs[indices[2]].treatments[indices[3]];
                     var dlgfortherapy = dialogs.create('views/modifyTherapy.html', 'ModifyTherapyCtrl',{
+                        path: path,
                         tumorRef: tumorRef,
                         treatmentRef: treatmentRef,
                         tiRef: tiRef,
@@ -3010,7 +3010,24 @@ angular.module('oncokbApp')
             }
             getOncoTreeMainTypes();
 
+            function getDrugList() {
+                $rootScope.drugList = {};
+                loadFiles.load(['drugs']).then(function (result) {
+                    $scope.hugoSymbols = _.without(_.keys($rootScope.drugsData));
+                    _.each($scope.hugoSymbols, function (hugoSymbol) {
+                        $rootScope.drugList[hugoSymbol] = {
+                            drugName: $rootScope.drugsData[hugoSymbol].drugName,
+                            ncitCode: $rootScope.drugsData[hugoSymbol].ncitCode,
+                            description: $rootScope.drugsData[hugoSymbol].description,
+                            uuid: $rootScope.drugsData[hugoSymbol].uuid,
+                            ncitName: $rootScope.drugsData[hugoSymbol].ncitName,
+                            synonyms: $rootScope.drugsData[hugoSymbol].synonyms
+                        };
+                    });
+                });
 
+            };
+            getDrugList();
 
         }]
     )
@@ -3023,6 +3040,26 @@ angular.module('oncokbApp')
         //     {tags:[{ drugName: "a", synonyms: ["a1","b1"], uuid: "abcd"}]},
         //     {tags:[]}
         // ];
+
+        function getDrugList() {
+            $rootScope.drugList = {};
+            loadFiles.load(['drugs']).then(function (result) {
+                $scope.hugoSymbols = _.without(_.keys($rootScope.drugsData));
+                _.each($scope.hugoSymbols, function (hugoSymbol) {
+                    $rootScope.drugList[hugoSymbol] = {
+                        drugName: $rootScope.drugsData[hugoSymbol].drugName,
+                        ncitCode: $rootScope.drugsData[hugoSymbol].ncitCode,
+                        description: $rootScope.drugsData[hugoSymbol].description,
+                        uuid: $rootScope.drugsData[hugoSymbol].uuid,
+                        ncitName: $rootScope.drugsData[hugoSymbol].ncitName,
+                        synonyms: $rootScope.drugsData[hugoSymbol].synonyms
+                    };
+                });
+            });
+
+        };
+        getDrugList();
+
         $scope.addTherapyError = false;
         var therapyuuid = new Array(); //save just uuid
         // $scope.loadDrugs = function($query){
@@ -3072,7 +3109,6 @@ angular.module('oncokbApp')
                     var temuuid = new Array();
                     for(var j=0, arr=[]; j<newTherapy[i].length; j++){
                         tem.push(druglist[newTherapy[i][j]]);
-                        console.log(druglist[newTherapy[i][j]].uuid);
                         temuuid.push(druglist[newTherapy[i][j]].uuid);
                     }
                     $scope.therapy[i]={tags:tem};
@@ -3209,13 +3245,136 @@ angular.module('oncokbApp')
                 if(data.tiRef.treatments == undefined){
                     firebase.database().ref(data.path + "/treatments/0").set(treatment);
                 }else{
-                    data.tiRef.treatments.push(treatment);
+                    if(data.modifymode === true){
+                        firebase.database().ref(data.path).set(treatment);
+                    }
+                    else {
+                        data.tiRef.treatments.push(treatment);
+                    }
                 }
                 $scope.$$prevSibling.indicateTumorContent(data.tumorRef);
                 mainUtils.setUUIDInReview(treatment.name_uuid);
                 $modalInstance.close();
             }
         }
+
+
+
+        function checkSame(drugName, code) {
+            var isSame = false;
+            // loadFiles.load(['drugs']).then(function (result) {
+            //     var keys = _.without(_.keys($rootScope.drugsData));
+            //     console.log(keys);
+            //     _.each(keys, function (key) {
+            //         console.log($rootScope.drugList[key].ncitCode);
+            //         if ((code == '') || (code == null)) {
+            //             console.log("1");
+            //             if (drugName == $rootScope.drugList[key].drugName)
+            //                 isSame = true
+            //         }
+            //         else if (code == $rootScope.drugList[key].ncitCode)
+            //         {console.log("2");
+            //             isSame = true;}
+            //
+            //     });
+            //     console.log(isSame);
+            // });
+            _.each($rootScope.drugList, function (drug) {
+                if ((code == '') || (code == null)) {
+                    if (drugName == drug.drugName)
+                        isSame = true;
+                }
+                else if (code == drug.ncitCode){
+                    isSame = true;
+                }
+            })
+            if(isSame){
+                return true;
+            }
+            return false;
+        };
+
+        function createDrug(drugName, ncitCode, synonyms, ncitName) {
+            var deferred = $q.defer(); //check same，free text
+            var drug = new FirebaseModel.Drug(drugName, ncitCode, synonyms, ncitName);
+            //var key;
+            // console.log(checkSame(ncitCode, drugName));
+            // if(checkSame(ncitCode, drugName) == true){
+            //     console.log("meijia");
+            //     dialogs.notify('Warning', 'Failed to create the drug ' + drugName + '!');
+            //     deferred.reject('same element');
+            // }else{
+            //console.log("jiale");
+            if (checkSame(drugName, ncitCode) == false) {
+                firebase.database().ref('Drugs/' + drug.uuid).set(drug).then(function (result) {
+                    deferred.resolve();
+                }, function (error) {
+                    console.log(error);
+                    dialogs.notify('Warning', 'Failed to create the drug ' + drugName + '!');
+                    deferred.reject(error);
+                });
+                //getDrugList();///difference
+                $scope.addDrugMessage = drugName + " has been added successfully.";
+                getDrugList();
+            }
+            //}
+            else {
+                $scope.addDrugMessage = "Sorry, same drug exists.";
+                $scope.suggestedDrug = '';
+                $scope.preferName = '';
+            }
+            return deferred.promise;
+        }
+
+        $scope.addDrug = function (drug, preferName) {
+
+
+            // firebase.database().ref.child("Drugs").orderByChild("ncitCode").equalTo("drug.ncitCode").once("value",snapshot => {
+            //     const existingData = snapshot.val();
+            //     if (existingData){
+            //         console.log("exists!");
+            //     }
+            // });
+
+            if ((drug.ncitCode == null) || (drug.ncitCode == '')) {
+                preferName = drug;
+                createDrug(preferName, '', '', '').then(function (result) {
+                        $scope.suggestedDrug = '';
+                        $scope.preferName = '';
+                        $scope.addDrugMessage = '';
+                    },
+                    function (error) {
+                        console.log("add unsuccessfully")
+                    });
+            }
+            else {
+                if ((preferName == '') || (preferName == null)) {
+                    preferName = drug.drugName;
+                }
+                createDrug(preferName, drug.ncitCode, drug.synonyms, drug.drugName).then(function (result) {
+                        $scope.suggestedDrug = '';
+                        $scope.preferName = '';
+                    },
+                    function (error) {
+                        console.log("add unsuccessfully.")
+                    });
+            }
+        }
+
+        $scope.processSearchDrugs = function (keyword) {
+            return DatabaseConnector.searchDrugs(keyword)
+                .then(
+                    function (result) {
+                        $scope.searchDrugsError = false;
+                        return result;
+                    })
+                .catch(
+                    function (error) {
+                        $scope.searchDrugsError = true;
+                    }
+                )
+        };
+
 
         $scope.cancel = function () {
             $modalInstance.dismiss('canceled');

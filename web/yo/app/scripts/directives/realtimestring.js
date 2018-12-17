@@ -175,6 +175,10 @@ angular.module('oncokbApp')
                 $scope.setTrackSignal = function() {
                     mainUtils.updateMovingFlag(false);
                 };
+                $scope.uuidtoName = function(key){
+                    return mainUtils.drugUuidtoName(key);
+                }
+
                 $scope.initializeFE = function() {
                     if ($scope.data[$scope.key+'_editing']) {
                         if ($scope.data[$scope.key+'_editing'] === $rootScope.me.name) {

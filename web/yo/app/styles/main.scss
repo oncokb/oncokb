@@ -929,6 +929,9 @@ input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:b
         font-size: 11px;
         font-style: italic;
     }
+    .drugsDropdown {
+        width: 60%;
+    }
 
 }
 

@@ -8,7 +8,7 @@
  * Service in the oncokbApp.
  */
 angular.module('oncokbApp')
-    .factory('mainUtils', function(OncoKB, _, $q, DatabaseConnector, $rootScope, ReviewResource, S, UUIDjs, $routeParams) {
+    .factory('mainUtils', function(OncoKB, _, $q, DatabaseConnector, $rootScope, ReviewResource, S, UUIDjs, $routeParams, ) {
         var isoforms = {};
         var oncogeneTSG = {};
 
@@ -563,6 +563,59 @@ angular.module('oncokbApp')
                 console.log(error);
             });
         }
+
+        function drugUuidtoName(key){
+            var keys = new Array();
+            if(key != undefined)
+                keys = key.split(",");
+            for(var i=0; i<keys.length; i++){
+                keys[i] = keys[i].trim();
+                keys[i] = keys[i].split(" + ");
+            };
+            for(var i=0; i<keys.length; i++){
+                for(var j=0; j<keys[i].length; j++){
+                    keys[i][j] = $rootScope.drugList[keys[i][j]].drugName;
+                }
+                keys[i] = keys[i].join(" + ");
+            };
+            var newkeys = keys.join(", ");
+            return newkeys;
+        }
+
+        function checkSame(drugName, code) {
+            var isSame = false;
+            // loadFiles.load(['drugs']).then(function (result) {
+            //     var keys = _.without(_.keys($rootScope.drugsData));
+            //     console.log(keys);
+            //     _.each(keys, function (key) {
+            //         console.log($rootScope.drugList[key].ncitCode);
+            //         if ((code == '') || (code == null)) {
+            //             console.log("1");
+            //             if (drugName == $rootScope.drugList[key].drugName)
+            //                 isSame = true
+            //         }
+            //         else if (code == $rootScope.drugList[key].ncitCode)
+            //         {console.log("2");
+            //             isSame = true;}
+            //
+            //     });
+            //     console.log(isSame);
+            // });
+            _.each($rootScope.drugList, function (drug) {
+                if ((code == '') || (code == null)) {
+                    if (drugName == drug.drugName)
+                        isSame = true;
+                }
+                else if (code == drug.ncitCode){
+                    isSame = true;
+                }
+            })
+            if(isSame){
+                return true;
+            }
+            return false;
+        };
+
         return {
             setIsoFormAndGeneType: setIsoFormAndGeneType,
             getCancerTypesName: getCancerTypesName,
@@ -595,6 +648,8 @@ angular.module('oncokbApp')
             getTimeStamp: getTimeStamp,
             calculateDiff: calculateDiff,
             getOldGeneType: getOldGeneType,
-            clearCollaboratorsByName: clearCollaboratorsByName
+            clearCollaboratorsByName: clearCollaboratorsByName,
+            drugUuidtoName: drugUuidtoName
+
         };
     });
