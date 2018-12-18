@@ -16,13 +16,14 @@ angular.module('oncokbApp')
                         var genes = _.without(_.keys($rootScope.mapData[key]));
                         _.each(genes, function (gindex) {
                             var mutations = _.without(_.keys($rootScope.mapData[key][gindex]));
-                            var informationtext = gindex + ":" + mutations.length + " mutations";
+                            var informationtext = gindex + ": " + mutations.length + " mutation(s)";
                             inforArray.push(informationtext);
                         });
+                        var inforString = inforArray.join('\n');
                         $scope.mapList[key] = {
                             key: key,
                             geneNumber: genes.length,
-                            inforArray: inforArray
+                            inforString: inforString
                         };
                     });
                 });

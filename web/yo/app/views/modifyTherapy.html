@@ -1,7 +1,7 @@
 <head>
     <link rel="stylesheet" href="styles/modifyWindow.css" type="text/css" >
 </head>
-
+<div class="modifyTherapy">
 <div class="modal-header">
     <h4 class="modal-title">
         Add Therapy</h4></div>
@@ -29,9 +29,12 @@
 
 <div class="modal-footer">
 
-    <div class="form-control-static pull-left">
-        <div class="form-inline">
+    <div style="width: 100%;float:left" class="form-control-static pull-left">
+        <div class="form-inline" style="float:left">
             <input type="text" class="form-control searchbox" ng-model="suggestedDrug" uib-typeahead="drug as drug.drugName for drug in processSearchDrugs($viewValue)" typeahead-min-length="1" typeahead-template-url="drugsDropdown.html"/>
+            <button class="btn btn-success" ng-click="addDrug(suggestedDrug, preferName)">Add Drug</button>
+        </div>
+        <div class="form-inline" style="float:left">
             <select chosen
                     ng-model="preferName"
                     data-placeholder="Choose a prefer name"
@@ -39,13 +42,12 @@
                     class="form-control searchbox"
                     data-placeholder="Prefer Name"
                     ng-options="synonyms for synonyms in suggestedDrug.synonyms"
-                    style="width: 500px">
-                <option value="suggetedDrug.drugName"></option>
+                    style="width: 500px;margin-top: 10px;">
+                    <option value="suggetedDrug.drugName"></option>
             </select>
-
-            <button class="btn btn-success" ng-click="addDrug(suggestedDrug, preferName)">Add Drug</button>
-            <div>{{addDrugMessage}}</div>
+            <i ng-hide="(suggestedDrug == null) || (suggestedDrug === '')">You could choose a prefer name or leave it blank.</i>
         </div>
+        <div style="color:red; font-size: 15px">{{addDrugMessage}}</div>
         <p class="errorReminder" ng-show="searchDrugsError">Sorry, suggested drugs are unavailable now.</p>
 
     </div>
@@ -53,6 +55,8 @@
     <p class="errorNote" ng-show="addTherapyError">{{therapyErrorMessage}}</p>
     <button type="button" class="btn btn-default" ng-click="cancel()">Cancel</button>
     <button type="button" class="btn btn-primary" ng-click="save()" ng-disabled="addTherapyError">Save</button>
+</div>
+
 </div>
 
 <script type="text/ng-template" id="drugsLibrary">

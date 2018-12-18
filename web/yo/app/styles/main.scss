@@ -884,27 +884,32 @@ input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:b
     }
 }
 
-.drugs {
+.drugsPage{
     .headerStyle {
         margin-bottom: 30px;
     }
     .table{
         .buttonStyle {
             padding: 5px;
-            font-size: 14px;
-            line-height: 14px;
+            font-size: 15px;
+            line-height: 15px;
             i {
-                width: 14px;
-                height: 14px;
+                width: 15px;
+                height: 15px;
             }
         }
     }
-
     table > tbody > tr > td, table > thead > tr > th {
-        padding: 5px;
+        padding: 12px;
     }
+    .popover{
+        white-space: pre-line;
+        word-break: break-all;
+        min-height: 20px;
+    }
+
     .searchbox {
-        width: 600px;
+        width: 500px;
         margin-right: 20px;
     }
 
@@ -920,20 +925,60 @@ input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:b
 
     .basicName {
         color: black;
-        font-size: 14px;
+        font-size: 15px;
     }
 
     .alsoKnownAs {
         display: inline;
         color: grey;
-        font-size: 11px;
+        font-size: 13px;
         font-style: italic;
     }
     .drugsDropdown {
-        width: 60%;
+        width: 100%;
     }
 
 }
+
+.modifyTherapy{
+    .searchbox {
+        width: 500px;
+        margin-right: 20px;
+    }
+
+    .errorReminderXL {
+        font-size: 24px;
+        color: red;
+    }
+
+    .errorReminder {
+        font-size: 15px;
+        color: red;
+    }
+
+    .basicName {
+        color: black;
+        font-size: 15px;
+    }
+
+    .alsoKnownAs {
+        display: inline;
+        color: grey;
+        font-size: 13px;
+        font-style: italic;
+    }
+    .drugsDropdown {
+        width: 100%;
+    }
+
+}
+
+
+
+
+
+
+
 
 .invalidPubIframe {
     color: red !important;

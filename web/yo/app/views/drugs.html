@@ -1,13 +1,14 @@
-<div class="drugs">
-        <h3 class="headerStyle">Curated Drugs</h3>
+
+<div class="drugsPage">
+        <h3 class="headerStyle">Curated Therapeutics</h3>
         <div ng-if="drugList!==undefined">
             <table class="table" datatable="ng" dt-options="dtOptions" dt-columns="dtColumns">
                 <thead>
                 <tr class="dashedHeader">
-                    <th>Name</th>
+                    <th>Therapeutic</th>
                     <th>NCI Thesaurus Code</th>
                     <th>Description</th>
-                    <th>Information</th>
+                    <th># of Genes</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -29,10 +30,7 @@
                     </td>
                     <td>{{ drug.ncitCode }}</td>
                     <td>{{ drug.description }}</td>
-                    <td ng-mouseover="hoverIn(drug)" ng-mouseleave="hoverOut(drug)">{{ drug.map.geneNumber }}
-                        <span style="float:right;">{{drug.map.inforArray}}</span>
-                    </td>
-
+                    <td uib-popover="{{drug.map.inforString}}">{{ drug.map.geneNumber }}</td>
                 </tr>
                 </tbody>
             </table>
@@ -42,6 +40,9 @@
         </div>
         <div class="form-inline">
             <input type="text" class="form-control searchbox" ng-model="suggestedDrug" uib-typeahead="drug as drug.drugName for drug in processSearchDrugs($viewValue)" typeahead-min-length="1" typeahead-template-url="drugsDropdown.html"/>
+            <button class="btn btn-success" ng-click="addDrug(suggestedDrug, preferName)">Add Drug</button>
+        </div>
+        <div style="display: inline">
             <select chosen
                     ng-model="preferName"
                     data-placeholder="Choose a prefer name"
@@ -49,13 +50,12 @@
                     class="form-control searchbox"
                     data-placeholder="Prefer Name"
                     ng-options="synonyms for synonyms in suggestedDrug.synonyms"
-                    style="width: 500px">
+                    style="width: 500px; margin-top: 10px;">
                 <option value="suggetedDrug.drugName"></option>
             </select>
-
-            <button class="btn btn-success" ng-click="addDrug(suggestedDrug, preferName)">Add Drug</button>
-            <div>{{addDrugMessage}}</div>
+            <i ng-hide="(suggestedDrug == null) || (suggestedDrug === '')">You could choose a prefer name or leave it blank.</i>
         </div>
+        <div style="color:red; font-size: 15px">{{addDrugMessage}}</div>
         <p class="errorReminder" ng-show="searchDrugsError">Sorry, suggested drugs are unavailable now.</p>
 </div>
 
