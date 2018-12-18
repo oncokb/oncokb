@@ -6,10 +6,10 @@
     <parent>
         <groupId>org.mskcc.cbio.oncokb</groupId>
         <artifactId>master</artifactId>
-        <version>0.3.7</version>
+        <version>0.3.8</version>
     </parent>
     <artifactId>web</artifactId>
-    <version>0.3.7</version>
+    <version>0.3.8</version>
     <packaging>war</packaging>
 
     <name>OncoKB Web</name>
