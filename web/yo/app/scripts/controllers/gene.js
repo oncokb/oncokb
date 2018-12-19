@@ -1864,6 +1864,7 @@ angular.module('oncokbApp')
                 var obj = '';
                 var uuid = '';
                 var indices = getIndexByPath(path);
+                var drugUuids = '';
                 if (type === 'mutation') {
                     obj = $scope.gene.mutations[indices[0]];
                     uuid = $scope.gene.mutations[indices[0]].name_uuid;
@@ -1873,6 +1874,21 @@ angular.module('oncokbApp')
                 } else if (type === 'treatment') {
                     obj = $scope.gene.mutations[indices[0]].tumors[indices[1]].TIs[indices[2]].treatments[indices[3]];
                     uuid = $scope.gene.mutations[indices[0]].tumors[indices[1]].TIs[indices[2]].treatments[indices[3]].name_uuid;
+                    drugUuids = $scope.gene.mutations[indices[0]].tumors[indices[1]].TIs[indices[2]].treatments[indices[3]].name;
+                    drugUuids = drugUuids.replace(" + ", " ");
+                    drugUuids = drugUuids.replace(", ", " ");
+                    var keys = new Array();
+                    if(drugUuids != undefined)
+                        keys = drugUuids.split(" ");
+                    console.log(keys);
+
+                    // var tumorRef = $scope.gene.mutations[indices[0]].tumors[indices[1]];
+                    var geneName = $scope.gene.name;
+                    var mutationUuid = $scope.gene.mutations[indices[0]].name_uuid;
+                    var cancerTypes = $scope.gene.mutations[indices[0]].tumors[indices[1]].cancerTypes;
+                    // var tiRef = $scope.gene.mutations[indices[0]].tumors[indices[1]].TIs[indices[2]];
+
+                    //mark
                 }
                 if (type === 'tumor') {
                     if (obj.cancerTypes_review && obj.cancerTypes_review.added) {
@@ -1888,7 +1904,21 @@ angular.module('oncokbApp')
                 dlg.result.then(function () {
                     if (directlyRemove) {
                         var uuids = collectUUIDs(type, obj, []);
+                        if(type === 'treatment'){
+
+                            // console.log(name);
+                            // console.log(path);
+                            // console.log(uuids);
+                            // var indices = getIndexByPath(path);
+                            // var tumorRef = $scope.gene.mutations[indices[0]].tumors[indices[1]];
+                            // var geneName = $scope.gene.name;
+                            // var mutationUuid = $scope.gene.mutations[indices[0]].name_uuid;
+                            // var cancerTypes = $scope.gene.mutations[indices[0]].tumors[indices[1]].cancerTypes;
+                            // var tiRef = $scope.gene.mutations[indices[0]].tumors[indices[1]].TIs[indices[2]];
+                            //mark
+                        }
                         removeModel({ type: type, path: path, uuids: uuids });
+
                     } else {
                         if (type === 'tumor') {
                             obj.cancerTypes_review = {
