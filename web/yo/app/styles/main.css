@@ -8441,10 +8441,8 @@ input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:b
     height: 15px; }
 .drugsPage table > tbody > tr > td, .drugsPage table > thead > tr > th {
   padding: 12px; }
-.drugsPage .popover {
-  white-space: pre-line;
-  word-break: break-all;
-  min-height: 20px; }
+.drugsPage .table > tbody > tr > td {
+  word-wrap: break-word; }
 .drugsPage .searchbox {
   width: 500px;
   margin-right: 20px; }

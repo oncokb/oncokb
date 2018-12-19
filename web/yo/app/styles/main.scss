@@ -902,10 +902,10 @@ input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:b
     table > tbody > tr > td, table > thead > tr > th {
         padding: 12px;
     }
-    .popover{
-        white-space: pre-line;
-        word-break: break-all;
-        min-height: 20px;
+    .table > tbody > tr > td{
+        //white-space: pre;
+        word-wrap:break-word;
+        //word-break: break-all;
     }
 
     .searchbox {

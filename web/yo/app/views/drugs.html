@@ -8,7 +8,7 @@
                     <th>Therapeutic</th>
                     <th>NCI Thesaurus Code</th>
                     <th>Description</th>
-                    <th># of Genes</th>
+                    <th>Genes</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -30,7 +30,9 @@
                     </td>
                     <td>{{ drug.ncitCode }}</td>
                     <td>{{ drug.description }}</td>
-                    <td uib-popover="{{drug.map.inforString}}">{{ drug.map.geneNumber }}</td>
+                    <td>
+                        <div ng-repeat="gene in drug.map.inforArray"><a ng-href="{{gene.geneLink}}">{{gene.geneName}}</a></div>
+                    </td>
                 </tr>
                 </tbody>
             </table>

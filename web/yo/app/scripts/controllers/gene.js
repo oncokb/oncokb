@@ -3223,19 +3223,15 @@ angular.module('oncokbApp')
             //The previous drugs?
             _.each(therapyuuid,function(element){
                 _.each(element,function(drug){
-                    // _.each(data.cancerTypes, function(cancerType) {
-                    //     if (cancerType.mainType) {
-                    //         firebase.database().ref('Map/' + drug + '/' + data.geneName + '/' + data.mutationName +'/').once('value', function(snapshot){
-                    //             if (snapshot.hasChild(cancerType.mainType) == false){
-                    //                 firebase.database().ref('Map/' + drug + '/' + data.geneName + '/' + data.mutationName + '/' + cancerType.mainType).set('');
-                    //             }
-                    //         });
-                    //     }
-                    //     if (cancerType.subtype) {
-                    //         firebase.database().ref('Map/' + drug + '/' + data.geneName + '/' + data.mutationName +'/' + cancerType.mainType + '/' + cancerType.subtype).set('');
-                    //     }
-                    // });
-                    firebase.database().ref('Map/' + drug + '/' + data.geneName + '/' + data.mutationUuid).set('');
+                    _.each(data.cancerTypes, function(cancerType) {
+                        if(cancerType.code!="")
+                            firebase.database().ref('Map/' + drug + '/' + data.geneName + '/' + data.mutationUuid + '/' + cancerType.code + '/' + treatment.name_uuid).set('');
+                        else{
+                            firebase.database().ref('Map/' + drug + '/' + data.geneName + '/' + data.mutationUuid + '/' + cancerType.mainType + '/' + treatment.name_uuid).set('');
+                        }
+                    });
+
+                    //firebase.database().ref('Map/' + drug + '/' + data.geneName + '/' + data.mutationUuid).set('');
                 });
             });
             // if (!data.tiRef.treatments) {
