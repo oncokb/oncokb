@@ -50,6 +50,21 @@ angular.module('oncokbApp')
         function addDrug(uuid, drug) {
             return set('Drugs/' + uuid, drug);
         }
+        function setDrugName(uuid, drugName) {
+            return set('Drugs/' + uuid + '/drugName', drugName);
+        }
+        function removeDrug(uuid){
+            return remove('Drugs/' + uuid);
+        }
+        function addTreatment(path, treatment){
+            return set(path + "/treatments/0", treatment);
+        }
+        function setMap(path, name){
+            return set('Map/' + path, name);
+        }
+        function removeMap(path){
+            return remove('Map/' + path);
+        }
         function createSetting(setting) {
             return set('Setting', setting);
         }
@@ -68,6 +83,11 @@ angular.module('oncokbApp')
             remove: remove,
             update: update,
             addDrug: addDrug,
+            setDrugName: setDrugName,
+            removeDrug: removeDrug,
+            addTreatment: addTreatment,
+            setMap: setMap,
+            removeMap: removeMap,
             createSetting: createSetting,
             addAttributeInSetting: addAttributeInSetting,
             removeAttributeFromSetting: removeAttributeFromSetting

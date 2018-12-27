@@ -154,7 +154,7 @@ angular.module('oncokbApp')
                                 added: true
                             };
                             if (!$scope.gene.mutations[indices[0]].tumors[indices[1]].TIs[indices[2]].treatments) {
-                                firebaseConnector.set($scope.path + "/treatments/0", treatment);
+                                firebaseConnector.addTreatment($scope.path, treatment);
                             }
                             else {
                                 $scope.gene.mutations[indices[0]].tumors[indices[1]].TIs[indices[2]].treatments.push(treatment);

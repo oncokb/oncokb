@@ -7,6 +7,7 @@
                 <th>Therapy</th>
                 <th>NCI Thesaurus Code</th>
                 <th>Description</th>
+                <th>Genes</th>
                 <th></th>
             </tr>
             </thead>
@@ -32,6 +33,11 @@
                 </td>
                 <td>{{ drug.ncitCode }}</td>
                 <td>{{ drug.description }}</td>
+                <td>
+                <div ng-repeat="gene in drugMap[drug.uuid]" uib-tooltip-placement="top"
+                uib-tooltip="{{gene.mutationNumber}} mutation(s): {{gene.mutationInfo}}"><a
+                ng-href="{{gene.geneLink}}">{{gene.geneName}}</a></div>
+                </td>
                 <td>
                     <button type="button" class="buttonStyle btn btn-danger" ng-click="removeDrug(drug)"
                             uib-tooltip-placement="top" uib-tooltip="Delete Drug"><i class="fa fa-trash"></i></button>
