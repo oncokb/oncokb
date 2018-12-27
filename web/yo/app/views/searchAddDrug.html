@@ -1,0 +1,38 @@
+<div class="searchAddDrug">
+    <div class="flexRow">
+        <h5 class="nameLabel">Default NCI Drug Name:</h5>
+        <input type="text" class="form-control searchbox" ng-model="suggestedDrug"
+               uib-typeahead="drug as drug.drugName for drug in processSearchDrugs($viewValue)" typeahead-min-length="1"
+               typeahead-template-url="drugsDropdown.html"/>
+        <button class="btn btn-success" ng-click="addDrug(suggestedDrug, preferName)">Add Drug</button>
+    </div>
+    <div class="flexRow" ng-hide="(suggestedDrug == null) || (suggestedDrug === '')">
+        <h5 class="nameLabel">Preferred Drug Name: </h5>
+        <select chosen
+                ng-model="preferName"
+                data-placeholder="Choose a prefer name or Leave it blank"
+                class="form-control searchbox"
+                data-placeholder="Prefer Name"
+                ng-options="synonyms for synonyms in suggestedDrug.synonyms"
+                class="preferNameDropdown">
+            <option value="suggetedDrug.drugName"></option>
+        </select>
+    </div>
+    <div class="errorReminder">
+        <div>{{addDrugMessage}}</div>
+        <p ng-show="searchDrugsError">Sorry, suggested drugs are unavailable now.</p>
+    </div>
+
+<script type="text/ng-template" id="drugsDropdown.html">
+    <a class="drugsDropdown">
+        <div class="basicName" ng-bind-html="match.model.drugName | uibTypeaheadHighlight:query"></div>
+        <div class="alsoKnownAs">Also known as:
+            <span ng-bind-html="match.model.synonyms | uibTypeaheadHighlight:query"></span>
+        </div>
+        <div class="alsoKnownAs">NcitCode:
+            <span ng-bind-html="match.model.ncitCode | uibTypeaheadHighlight:query"></span>
+        </div>
+    </a>
+</script>
+
+</div>

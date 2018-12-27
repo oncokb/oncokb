@@ -1,0 +1,18 @@
+<div class="modalError">
+    <div class="modal-header">
+        <h4 class="modal-title">
+            {{errorTitle}}</h4>
+    </div>
+    <div class="modal-body">
+        {{errorMessage}}
+    </div>
+    <div class="modal-footer">
+        <div ng-show="deleteDrug === false">
+            <button type="button" class="btn btn-default" ng-click="cancel()">OK</button>
+        </div>
+        <div ng-show="deleteDrug === true">
+            <button type="button" class="btn btn-primary" ng-click="confirm()">Delete</button>
+            <button type="button" class="btn btn-default" ng-click="cancel()">Cancel</button>
+        </div>
+    </div>
+</div>

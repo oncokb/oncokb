@@ -48,7 +48,7 @@ angular.module('oncokbApp')
             return defer.promise;
         }
         function addDrug(uuid, drug) {
-            return set('Drug/' + uuid, drug);
+            return set('Drugs/' + uuid, drug);
         }
         function createSetting(setting) {
             return set('Setting', setting);

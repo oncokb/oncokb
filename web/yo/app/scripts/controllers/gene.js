@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('oncokbApp')
-    .controller('GeneCtrl', ['_', 'S', '$resource', '$interval', '$timeout', '$scope', '$rootScope', '$location', '$route', '$routeParams', '$window', '$q', 'dialogs', 'OncoKB', 'DatabaseConnector', 'SecretEmptyKey', '$sce', 'jspdf', 'FindRegex', 'mainUtils', 'ReviewResource', 'loadFiles', '$firebaseObject', '$firebaseArray', 'FirebaseModel', 'user', 'numOfReviewItems', 'checkNameChange',
-        function (_, S, $resource, $interval, $timeout, $scope, $rootScope, $location, $route, $routeParams, $window, $q, dialogs, OncoKB, DatabaseConnector, SecretEmptyKey, $sce, jspdf, FindRegex, mainUtils, ReviewResource, loadFiles, $firebaseObject, $firebaseArray, FirebaseModel, user, numOfReviewItems, checkNameChange) {
+    .controller('GeneCtrl', ['_', 'S', '$resource', '$interval', '$timeout', '$scope', '$rootScope', '$location', '$route', '$routeParams', '$window', '$q', 'dialogs', 'OncoKB', 'DatabaseConnector', 'SecretEmptyKey', '$sce', 'jspdf', 'FindRegex', 'mainUtils', 'ReviewResource', 'loadFiles', '$firebaseObject', '$firebaseArray', 'FirebaseModel', 'firebaseConnector', 'user', 'numOfReviewItems', 'checkNameChange',
+        function (_, S, $resource, $interval, $timeout, $scope, $rootScope, $location, $route, $routeParams, $window, $q, dialogs, OncoKB, DatabaseConnector, SecretEmptyKey, $sce, jspdf, FindRegex, mainUtils, ReviewResource, loadFiles, $firebaseObject, $firebaseArray, FirebaseModel, firebaseConnector, user, numOfReviewItems, checkNameChange) {
             checkReadPermission();
             // Check permission for user who can only read and write specific genes.
             function checkReadPermission() {
@@ -1751,39 +1751,36 @@ angular.module('oncokbApp')
                         size: 'lg'
                 });
             };
-            function isValidTreatment(indices, newTreatmentName) {
-                var isValid = true;
-                var message = '';
-                _.some($scope.gene.mutations[indices[0]].tumors[indices[1]].TIs[indices[2]].treatments, function (treatment) {
-                    if (treatment.name.toLowerCase() === newTreatmentName.toLowerCase()) {
-                        isValid = false;
-                        message = 'This treament has already been added';
-                        return true;
-                    }
-                });
-                if (!isValid) {
-                    dialogs.notify('Warning', message);
-                }
-                return isValid;
-            }
-            $scope.addTreatment = function (newTreatmentName, path) {
-                newTreatmentName = newTreatmentName.trim();
+            var deferred1 = $q.defer();
+            $firebaseObject(firebaseConnector.ref("Drugs/")).$bindTo($scope, "drugList").then(function () {
+                deferred1.resolve();
+            }, function (error) {
+                deferred1.reject(error);
+            });
+            $scope.modifyTherapy = function (path) {
                 var indices = getIndexByPath(path);
-                var treatment = new FirebaseModel.Treatment(newTreatmentName);
-                treatment.name_review = {
-                    updatedBy: $rootScope.me.name,
-                    updateTime: new Date().getTime(),
-                    added: true
-                };
-                if (!$scope.gene.mutations[indices[0]].tumors[indices[1]].TIs[indices[2]].treatments) {
-                    $scope.gene.mutations[indices[0]].tumors[indices[1]].TIs[indices[2]].treatments = [];
-                }
-                if (isValidTreatment(indices, newTreatmentName)) {
-                    $scope.gene.mutations[indices[0]].tumors[indices[1]].TIs[indices[2]].treatments.push(treatment);
-                    $scope.indicateTumorContent($scope.gene.mutations[indices[0]].tumors[indices[1]]);
-                }
-                mainUtils.setUUIDInReview(treatment.name_uuid);
+                var tumorRef = $scope.gene.mutations[indices[0]].tumors[indices[1]];
+                var treatmentRef = $scope.gene.mutations[indices[0]].tumors[indices[1]].TIs[indices[2]].treatments[indices[3]];
+                var gene = $scope.gene;
+                var dlgfortherapy = dialogs.create('views/modifyTherapy.html', 'ModifyTherapyCtrl', {
+                    path: path,
+                    modifyMode: true,
+                    indices: indices,
+                    tumorRef: tumorRef,
+                    treatmentRef: treatmentRef,
+                    gene: gene
+                }, {
+                    size: 'lg'
+                });
+
             };
+
+            $scope.initAddModifyTherapy = function(path){
+                $scope.indices = getIndexByPath(path);
+                $scope.tumorRef = $scope.gene.mutations[$scope.indices[0]].tumors[$scope.indices[1]];
+                $scope.path = path;
+                $scope.modifyMode = false;
+            }
 
             $scope.onFocus = function (e) {
                 $timeout(function () {
@@ -1886,6 +1883,9 @@ angular.module('oncokbApp')
                 dlg.result.then(function () {
                     if (directlyRemove) {
                         var uuids = collectUUIDs(type, obj, []);
+                        if(type === 'treatment'){
+                            //TODO
+                        }
                         removeModel({ type: type, path: path, uuids: uuids });
                     } else {
                         if (type === 'tumor') {
@@ -3009,6 +3009,19 @@ angular.module('oncokbApp')
             getOncoTreeMainTypes();
         }]
     )
+
+    .controller('ModifyTherapyCtrl', function ($scope, $modalInstance, data, _, OncoKB, $rootScope, mainUtils, FirebaseModel) {
+        $scope.path = data.path;
+        $scope.modifyMode = data.modifyMode;
+        $scope.indices = data.indices;
+        $scope.tumorRef = data.tumorRef;
+        $scope.treatmentRef = data.treatmentRef;
+        $scope.gene = data.gene;
+        $scope.closeWindow = function () {
+            $modalInstance.dismiss('canceled');
+        }
+    })
+
     .controller('ModifyTumorTypeCtrl', function ($scope, $modalInstance, data, _, OncoKB, $rootScope, mainUtils, FirebaseModel, $timeout) {
         $scope.meta = {
             cancerTypes: data.tumor.cancerTypes,
