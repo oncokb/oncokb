@@ -284,7 +284,15 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         //Find Alternative Alleles for missense variant
         if (includeAlternativeAllele && alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant"))) {
             alterations.addAll(AlterationUtils.getAlleleAlterations(alteration, fullAlterations));
-            List<Alteration> includeRangeAlts = findMutationsByConsequenceAndPosition(alteration.getGene(), alteration.getConsequence(), alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations);
+            List<Alteration> includeRangeAlts = new ArrayList<>();
+
+            // Include the range mutation
+            List<Alteration> mutationsByConsequenceAndPosition = findMutationsByConsequenceAndPosition(alteration.getGene(), alteration.getConsequence(), alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations);
+            for (Alteration alt : mutationsByConsequenceAndPosition) {
+                if (!alt.getProteinStart().equals(alt.getProteinEnd())) {
+                    includeRangeAlts.add(alt);
+                }
+            }
 
             // For missense mutation, also include positioned
             includeRangeAlts.addAll(AlterationUtils.getPositionedAlterations(alteration, fullAlterations));

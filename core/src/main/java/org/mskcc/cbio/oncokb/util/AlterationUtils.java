@@ -684,6 +684,12 @@ public final class AlterationUtils {
             }
         }
 
+        // Special case for PDGFRA: don't match D842V as alternative allele to other alleles
+        if (alteration.getGene() != null && alteration.getGene().getEntrezGeneId() == 5156 && !alteration.getAlteration().equals("D842V")) {
+            Alteration d842v = AlterationUtils.findAlteration(alteration.getGene(), "D842V");
+            alleles.remove(d842v);
+        }
+
         sortAlternativeAlleles(alleles);
         return alleles;
     }
