@@ -1092,7 +1092,11 @@ public class SummaryUtils {
     private static String replaceSpecialCharacterInTumorTypeSummary(String summary, Gene gene, String queryAlteration, String queryTumorType) {
         String altName = getGeneMutationNameInTumorTypeSummary(gene, queryAlteration);
         String alterationName = getGeneMutationNameInVariantSummary(gene, queryAlteration);
-        summary = summary.replace("[[variant]]", altName + " " + queryTumorType);
+        String variantStr = altName + " " + queryTumorType;
+        if (queryAlteration.contains("deletion")) {
+            variantStr = queryTumorType + " harboring a " + altName;
+        }
+        summary = summary.replace("[[variant]]", variantStr);
         summary = summary.replace("[[gene]] [[mutation]] [[[mutation]]]", alterationName);
 
         // In case of miss typed
