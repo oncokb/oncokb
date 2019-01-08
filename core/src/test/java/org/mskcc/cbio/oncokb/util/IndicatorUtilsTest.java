@@ -87,9 +87,13 @@ public class IndicatorUtilsTest {
         assertEquals("The oncogenicity of BRAF-TMPRSS2 fusion should be Likely Oncogenic", "Likely Oncogenic", indicatorQueryResp.getOncogenic());
 
         // Test Intragenic Mutation
-        query = new Query(null, null, null, "CTCF", "CTCF-intragenic", null, null, "Ovarian Cancer", null, null, null, null);
+        query = new Query(null, null, null, "NOTCH1", "NOTCH1-intragenic", null, null, "Ovarian Cancer", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, true, null);
-        assertEquals("The oncogenicity of CTCF-intragenic should be Likely Oncogenic", "Likely Oncogenic", indicatorQueryResp.getOncogenic());
+        assertEquals("The oncogenicity of NOTCH1-intragenic should be Likely Oncogenic", "Likely Oncogenic", indicatorQueryResp.getOncogenic());
+
+        query = new Query(null, null, null, "NOTCH1", "NOTCH1 intragenic", null, null, "Ovarian Cancer", null, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, true, null);
+        assertEquals("The oncogenicity of NOTCH1 intragenic should be Likely Oncogenic", "Likely Oncogenic", indicatorQueryResp.getOncogenic());
 
         // Check other significant level
         query = new Query(null, null, null, "BRAF", "V600E", null, null, "Colorectal Cancer", null, null, null, null);
@@ -316,6 +320,15 @@ public class IndicatorUtilsTest {
         // Match Loss with Deletion
         query1 = new Query("PTEN", "Loss", null);
         query2 = new Query("PTEN", "Deletion", null);
+        resp1 = IndicatorUtils.processQuery(query1, null, null, null, false, null);
+        resp2 = IndicatorUtils.processQuery(query2, null, null, null, false, null);
+        assertTrue("The oncogenicities are not the same, but they should.", resp1.getOncogenic().equals(resp2.getOncogenic()));
+        assertTrue("The treatments are not the same, but they should.", resp1.getTreatments().equals(resp2.getTreatments()));
+
+
+        // Match intragenic to structural variant deletion
+        query1 = new Query("ESR1", "ESR1 intragenic", "Melanoma");
+        query2 = new Query(null, null, null, "ESR1", null, "structural_variant", StructuralVariantType.DELETION, "Melanoma", null, null, null, null);
         resp1 = IndicatorUtils.processQuery(query1, null, null, null, false, null);
         resp2 = IndicatorUtils.processQuery(query2, null, null, null, false, null);
         assertTrue("The oncogenicities are not the same, but they should.", resp1.getOncogenic().equals(resp2.getOncogenic()));

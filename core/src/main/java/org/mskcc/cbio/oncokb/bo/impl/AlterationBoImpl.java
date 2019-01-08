@@ -204,13 +204,6 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         Boolean addTruncatingMutations = false;
         Boolean addDeletion = false;
 
-        AlterationType daoAlterationType = alteration.getAlterationType();
-
-        // DAO only support MUTATION and intragenic fusion
-        if (daoAlterationType != null && !(org.apache.commons.lang3.StringUtils.containsIgnoreCase(alteration.getAlteration(), "intragenic") && daoAlterationType.equals(AlterationType.FUSION))) {
-            daoAlterationType = AlterationType.MUTATION;
-        }
-
         // Alteration should always has consequence attached.
         if (alteration.getConsequence() == null) {
             AlterationUtils.annotateAlteration(alteration, alteration.getAlteration());
@@ -257,29 +250,6 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
                 addTruncatingMutations = true;
             }
         }
-
-        // Map Truncating Mutations to Translocation and Inversion
-        // These two are all structural variants, need a better way to model them.
-//            if (alteration.getAlteration().toLowerCase().equals("translocation")
-//                || alteration.getAlteration().toLowerCase().equals("inversion")) {
-//                // If no fusions curated, check the Truncating Mutations.
-//                if (truncatingMutation != null && !alterations.contains(truncatingMutation)) {
-//                    alterations.add(truncatingMutation);
-//                }
-//            }
-
-        // Map intragenic to Deletion or Truncating Mutation
-        // If no Deletion curated, attach Truncating Mutations
-//            if (alteration.getAlteration().toLowerCase().contains("intragenic") ||
-//                alteration.getAlteration().toLowerCase().equals("deletion")) {
-//                if (deletion != null) {
-//                    if (!alterations.contains(deletion)) {
-//                        alterations.add(deletion);
-//                    }
-//                } else if (truncatingMutation != null && !alterations.contains(truncatingMutation)) {
-//                    alterations.add(truncatingMutation);
-//                }
-//            }
 
         //Find Alternative Alleles for missense variant
         if (includeAlternativeAllele && alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant"))) {

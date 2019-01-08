@@ -273,10 +273,6 @@ public final class AlterationUtils {
         if (alteration.getName() == null && alteration.getAlteration() != null) {
             alteration.setName(alteration.getAlteration());
         }
-
-        if (StringUtils.containsIgnoreCase(alteration.getAlteration(), "intragenic")) {
-            alteration.setAlterationType(AlterationType.FUSION);
-        }
     }
 
     public static Boolean isFusion(String variant) {
