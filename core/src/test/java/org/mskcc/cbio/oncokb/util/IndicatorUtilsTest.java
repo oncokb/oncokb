@@ -236,6 +236,12 @@ public class IndicatorUtilsTest {
         assertEquals("The variant summary is not expected.", "The EGFR kinase domain duplication (KDD) alteration is known to be oncogenic.", indicatorQueryResp.getVariantSummary());
         assertEquals("The highest sensitive level should be 1", LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
 
+        query = new Query(null, null, null, "EGFR", "KDD", "structural_variant", StructuralVariantType.DELETION, "NSCLC", null, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true, null);
+        assertEquals("The Oncogenicity is not oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The variant summary is not expected.", "The EGFR kinase domain duplication (KDD) alteration is known to be oncogenic.", indicatorQueryResp.getVariantSummary());
+        assertEquals("The highest sensitive level should be 1", LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
+
         query = new Query(null, null, null, "EGFR", "kinase domain duplication", null, null, "NSCLC", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true, null);
         assertEquals("The Oncogenicity is not oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
@@ -482,6 +488,15 @@ public class IndicatorUtilsTest {
         // When the structural variant is functional fusion, the alteration name if is fusion, it should be ignored.
         query1 = new Query(null, null, null, "KIF5B-MET", null, "structural_variant", StructuralVariantType.DELETION, "Lung Adenocarcinoma", "fusion", null, null, null);
         query2 = new Query(null, null, null, "KIF5B-MET", "FUSION", "structural_variant", StructuralVariantType.DELETION, "Lung Adenocarcinoma", "fusion", null, null, null);
+        resp1 = IndicatorUtils.processQuery(query1, null, null, null, true, null);
+        resp2 = IndicatorUtils.processQuery(query2, null, null, null, true, null);
+        pairComparison(resp1, resp2);
+
+
+
+        // handle mixed input for structural variant deletion
+        query1 = new Query(null, null, null, "EGFR", "KDD", "structural_variant", StructuralVariantType.DUPLICATION, "NSCLC", null, null, null, null);
+        query2 = new Query(null, null, null, "EGFR", "KDD", "structural_variant", StructuralVariantType.DUPLICATION, "NSCLC", "KDD", null, null, null);
         resp1 = IndicatorUtils.processQuery(query1, null, null, null, true, null);
         resp2 = IndicatorUtils.processQuery(query2, null, null, null, true, null);
         pairComparison(resp1, resp2);
