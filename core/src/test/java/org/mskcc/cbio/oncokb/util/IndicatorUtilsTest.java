@@ -340,6 +340,14 @@ public class IndicatorUtilsTest {
         assertTrue("The oncogenicities are not the same, but they should.", resp1.getOncogenic().equals(resp2.getOncogenic()));
         assertTrue("The treatments are not the same, but they should.", resp1.getTreatments().equals(resp2.getTreatments()));
 
+
+        query1 = new Query(null, null, 2099, null, null, "structural_variant", StructuralVariantType.DELETION, "Melanoma", null, null, null, null);
+        query2 = new Query(null, null, null, "ESR1", null, "structural_variant", StructuralVariantType.DELETION, "Melanoma", null, null, null, null);
+        resp1 = IndicatorUtils.processQuery(query1, null, null, null, false, null);
+        resp2 = IndicatorUtils.processQuery(query2, null, null, null, false, null);
+        assertTrue("The oncogenicities are not the same, but they should.", resp1.getOncogenic().equals(resp2.getOncogenic()));
+        assertTrue("The treatments are not the same, but they should.", resp1.getTreatments().equals(resp2.getTreatments()));
+
         // Match Truncating Mutations section to Deletion if no Deletion section specifically curated
         // In this test case, MAP3K1 does not have Deletion beening curated yet, but this may be changed due to
         // continue annotating process.
@@ -491,7 +499,6 @@ public class IndicatorUtilsTest {
         resp1 = IndicatorUtils.processQuery(query1, null, null, null, true, null);
         resp2 = IndicatorUtils.processQuery(query2, null, null, null, true, null);
         pairComparison(resp1, resp2);
-
 
 
         // handle mixed input for structural variant deletion
