@@ -87,9 +87,13 @@ public class IndicatorUtilsTest {
         assertEquals("The oncogenicity of BRAF-TMPRSS2 fusion should be Likely Oncogenic", "Likely Oncogenic", indicatorQueryResp.getOncogenic());
 
         // Test Intragenic Mutation
-        query = new Query(null, null, null, "CTCF", "CTCF-intragenic", null, null, "Ovarian Cancer", null, null, null, null);
+        query = new Query(null, null, null, "NOTCH1", "NOTCH1-intragenic", null, null, "Ovarian Cancer", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, true, null);
-        assertEquals("The oncogenicity of CTCF-intragenic should be Likely Oncogenic", "Likely Oncogenic", indicatorQueryResp.getOncogenic());
+        assertEquals("The oncogenicity of NOTCH1-intragenic should be Likely Oncogenic", "Likely Oncogenic", indicatorQueryResp.getOncogenic());
+
+        query = new Query(null, null, null, "NOTCH1", "NOTCH1 intragenic", null, null, "Ovarian Cancer", null, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, true, null);
+        assertEquals("The oncogenicity of NOTCH1 intragenic should be Likely Oncogenic", "Likely Oncogenic", indicatorQueryResp.getOncogenic());
 
         // Check other significant level
         query = new Query(null, null, null, "BRAF", "V600E", null, null, "Colorectal Cancer", null, null, null, null);
@@ -232,6 +236,12 @@ public class IndicatorUtilsTest {
         assertEquals("The variant summary is not expected.", "The EGFR kinase domain duplication (KDD) alteration is known to be oncogenic.", indicatorQueryResp.getVariantSummary());
         assertEquals("The highest sensitive level should be 1", LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
 
+        query = new Query(null, null, null, "EGFR", "KDD", "structural_variant", StructuralVariantType.DELETION, "NSCLC", null, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true, null);
+        assertEquals("The Oncogenicity is not oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The variant summary is not expected.", "The EGFR kinase domain duplication (KDD) alteration is known to be oncogenic.", indicatorQueryResp.getVariantSummary());
+        assertEquals("The highest sensitive level should be 1", LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
+
         query = new Query(null, null, null, "EGFR", "kinase domain duplication", null, null, "NSCLC", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true, null);
         assertEquals("The Oncogenicity is not oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
@@ -316,6 +326,23 @@ public class IndicatorUtilsTest {
         // Match Loss with Deletion
         query1 = new Query("PTEN", "Loss", null);
         query2 = new Query("PTEN", "Deletion", null);
+        resp1 = IndicatorUtils.processQuery(query1, null, null, null, false, null);
+        resp2 = IndicatorUtils.processQuery(query2, null, null, null, false, null);
+        assertTrue("The oncogenicities are not the same, but they should.", resp1.getOncogenic().equals(resp2.getOncogenic()));
+        assertTrue("The treatments are not the same, but they should.", resp1.getTreatments().equals(resp2.getTreatments()));
+
+
+        // Match intragenic to structural variant deletion
+        query1 = new Query("ESR1", "ESR1 intragenic", "Melanoma");
+        query2 = new Query(null, null, null, "ESR1", null, "structural_variant", StructuralVariantType.DELETION, "Melanoma", null, null, null, null);
+        resp1 = IndicatorUtils.processQuery(query1, null, null, null, false, null);
+        resp2 = IndicatorUtils.processQuery(query2, null, null, null, false, null);
+        assertTrue("The oncogenicities are not the same, but they should.", resp1.getOncogenic().equals(resp2.getOncogenic()));
+        assertTrue("The treatments are not the same, but they should.", resp1.getTreatments().equals(resp2.getTreatments()));
+
+
+        query1 = new Query(null, null, 2099, null, null, "structural_variant", StructuralVariantType.DELETION, "Melanoma", null, null, null, null);
+        query2 = new Query(null, null, null, "ESR1", null, "structural_variant", StructuralVariantType.DELETION, "Melanoma", null, null, null, null);
         resp1 = IndicatorUtils.processQuery(query1, null, null, null, false, null);
         resp2 = IndicatorUtils.processQuery(query2, null, null, null, false, null);
         assertTrue("The oncogenicities are not the same, but they should.", resp1.getOncogenic().equals(resp2.getOncogenic()));
@@ -469,6 +496,14 @@ public class IndicatorUtilsTest {
         // When the structural variant is functional fusion, the alteration name if is fusion, it should be ignored.
         query1 = new Query(null, null, null, "KIF5B-MET", null, "structural_variant", StructuralVariantType.DELETION, "Lung Adenocarcinoma", "fusion", null, null, null);
         query2 = new Query(null, null, null, "KIF5B-MET", "FUSION", "structural_variant", StructuralVariantType.DELETION, "Lung Adenocarcinoma", "fusion", null, null, null);
+        resp1 = IndicatorUtils.processQuery(query1, null, null, null, true, null);
+        resp2 = IndicatorUtils.processQuery(query2, null, null, null, true, null);
+        pairComparison(resp1, resp2);
+
+
+        // handle mixed input for structural variant deletion
+        query1 = new Query(null, null, null, "EGFR", "KDD", "structural_variant", StructuralVariantType.DUPLICATION, "NSCLC", null, null, null, null);
+        query2 = new Query(null, null, null, "EGFR", "KDD", "structural_variant", StructuralVariantType.DUPLICATION, "NSCLC", "KDD", null, null, null);
         resp1 = IndicatorUtils.processQuery(query1, null, null, null, true, null);
         resp2 = IndicatorUtils.processQuery(query2, null, null, null, true, null);
         pairComparison(resp1, resp2);

@@ -63,6 +63,14 @@ public class IndicatorUtils {
             query.setAlteration("vIII");
         }
 
+
+        // For intragenic annotation, convert it to structural variant and mark as Deletion
+        if (StringUtils.containsIgnoreCase(query.getAlteration(), "intragenic")) {
+            query.setAlterationType(AlterationType.STRUCTURAL_VARIANT.name());
+            query.setSvType(StructuralVariantType.DELETION);
+            query.setAlteration("");
+        }
+
         // Deal with fusion without primary gene, and this is only for legacy fusion event
         // The latest fusion event has been integrated with alteration type. Please see next if-else condition
         // for more info.

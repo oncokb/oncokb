@@ -41,10 +41,6 @@ public class FindRelevantAlterationsTest {
 
                 // Check Fusions
                 {"BRAF", "PAPSS1-BRAF Fusion", null, "PAPSS1-BRAF Fusion, Fusions, Oncogenic Mutations"},
-                {"CTCF", "CTCF-intragenic", null, "Truncating Mutations"},
-                {"CTCF", "CTCF intragenic", null, "Truncating Mutations"},
-                {"CTCF", "Intragenic", null, "Truncating Mutations"},
-                {"NOTCH1", "NOTCH1-intragenic", null, "Fusions"},
 
                 // Tumor suppressor should be mapped with Truncating Mutations. (The code does not check whether gene
                 // is tumor suppressor, just check whether Fusions is curated, is not, link Truncating Mutations)
@@ -79,7 +75,11 @@ public class FindRelevantAlterationsTest {
 //                {"MAP2K1", "N109_R113del", null, "N109_R113del, I99_R113del"},
 
                 // Range missense variant
-                {"PDGFRA", "D842I", null, "D842I, D842H, D842V, D842Y, D842_I843delinsIM, Oncogenic Mutations"},
+                {"PDGFRA", "D842I", null, "D842I, D842H, D842Y, D842_I843delinsIM, Oncogenic Mutations"},
+
+                // D842V should not be mapped as alternative allele
+                {"PDGFRA", "D842I", null, "D842I, D842H, D842Y, D842_I843delinsIM, Oncogenic Mutations"},
+                {"PDGFRA", "D842V", null, "D842V, D842H, D842I, D842Y, D842_I843delinsIM, Oncogenic Mutations"},
 
                 // Check whether the overlapped variants(with the same consequence) will be mapped
                 {"MAP2K1", "E41_F53del", null, "E41_F53del, E41_L54del, E51_Q58del, F53_Q58del, F53_Q58delinsL, Oncogenic Mutations"},
@@ -108,6 +108,12 @@ public class FindRelevantAlterationsTest {
                 {"EGFR", "C-terminal domain", null, "C-terminal domain, Oncogenic Mutations"},
                 {"EGFR", "vII", null, "vII, Oncogenic Mutations"},
                 {"EGFR", "vIII", null, "vIII, Oncogenic Mutations"},
+
+                // Do not map few special KIT variants as alternative alleles, "K642E", "V654A", "T670I"
+                {"KIT", "K652G", null, "P627_G663mut, Oncogenic Mutations"},
+                {"KIT", "V654G", null, "P627_G663mut, Oncogenic Mutations"},
+                {"KIT", "T670A", null, "IT669MI, G664_E714mut, Oncogenic Mutations"},
+
 
                 // Do not mapping Oncogenic Mutations to Amplification
                 {"KIT", "Amplification", null, "Amplification"},
