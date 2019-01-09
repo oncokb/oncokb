@@ -146,9 +146,11 @@ angular.module('oncokbApp')
                 mainTypes: {}
             };
             $scope.mappedTumorTypes = {};
+            $scope.newGenes = [];
 
             $scope.create = function() {
                 var promises = [];
+                $scope.createdGenes = [];
                 _.each($scope.newGenes.split(","), function (geneName) {
                     promises.push(createGene(geneName.trim()));
                 });
@@ -198,6 +200,7 @@ angular.module('oncokbApp')
                         firebase.database().ref('Genes/' + geneName).set(gene).then(function(result) {
                             var meta = new FirebaseModel.Meta();
                             firebase.database().ref('Meta/' + geneName).set(meta).then(function(result) {
+                                $scope.createdGenes.push(geneName);
                                 deferred.resolve();
                             }, function(error) {
                                 // Delete saved new gene from Genes collection

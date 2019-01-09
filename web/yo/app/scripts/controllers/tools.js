@@ -347,9 +347,7 @@ angular.module('oncokbApp')
                                     var drugs = [];
                                     if (item.treatments.length > 0) {
                                         _.each(item.treatments, function (treatment) {
-                                            _.each(treatment.drugs, function (drug) {
-                                                drugs.push(drug.drugName);
-                                            });
+                                            drugs.push(treatment.drugs.map(function(drug){ return drug.drugName}).join('+'));
                                         });
                                         var tempObj = {
                                             gene: item.gene.hugoSymbol,

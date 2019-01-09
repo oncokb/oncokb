@@ -6,7 +6,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - "JAVA_OPTS=-Djdbc.driverClassName=com.mysql.jdbc.Driver -Djdbc.url='jdbc:mysql://db:3306/oncokb?useUnicode=yes&characterEncoding=UTF-8' -Djdbc.username=root -Djdbc.password='test'"
+      - "JAVA_OPTS=-Djdbc.driverClassName=com.mysql.jdbc.Driver -Djdbc.url=jdbc:mysql://db:3306/oncokb?useUnicode=yes&characterEncoding=UTF-8&useSSL=false -Djdbc.username=root -Djdbc.password=test"
     depends_on:
       - db
   db:

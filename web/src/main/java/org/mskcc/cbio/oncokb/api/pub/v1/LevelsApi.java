@@ -25,13 +25,13 @@ public interface LevelsApi {
     ResponseEntity<Map<LevelOfEvidence, String>> levelsGet();
 
 
-    @ApiOperation(value = "", notes = "Get all resistence levels.", response = Map.class, tags = {"Levels",})
+    @ApiOperation(value = "", notes = "Get all resistance levels.", response = Map.class, tags = {"Levels",})
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = Map.class)})
-//    @RequestMapping(value = "/levels/resistence",
+//    @RequestMapping(value = "/levels/resistance",
 //        produces = {"application/json"},
 //        method = RequestMethod.GET)
-    ResponseEntity<Map<LevelOfEvidence, String>> levelsResistenceGet();
+    ResponseEntity<Map<LevelOfEvidence, String>> levelsResistanceGet();
 
 
     @ApiOperation(value = "", notes = "Get all sensitive levels.", response = Map.class, tags = {"Levels",})

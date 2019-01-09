@@ -62,7 +62,7 @@ public class DriveAnnotationParser {
                 String mutationStr = variant.has("name") ? variant.getString("name") : null;
                 JSONObject time = variant.has("time") ? variant.getJSONObject("time") : null;
                 Long lastEdit = null;
-                if(time != null) {
+                if (time != null) {
                     lastEdit = time.has("value") ? time.getLong("value") : null;
                 }
 //                JSONArray nameComments = variant.has("nameComments") ? variant.getJSONArray("nameComments") : null;
@@ -284,12 +284,6 @@ public class DriveAnnotationParser {
             String effect = mutationEffect.has("effect") ? mutationEffect.getString("effect") : null;
             addDateToSetFromObject(lastEditDatesEffect, mutationEffect, "effect_review");
             String effect_uuid = mutationEffect.has("effect_uuid") ? mutationEffect.getString("effect_uuid") : "";
-            // If both mutation effect and oncogenicity both unknown, ignore variant.
-            if (oncogenic != null && oncogenic.equals(Oncogenicity.INCONCLUSIVE)
-                && effect != null && effect.toLowerCase().equals("inconclusive")
-                && gene.getHugoSymbol().equals("EGFR")) {
-                return;
-            }
 
             Map<String, String> mutations = parseMutationString(mutationStr);
             for (Map.Entry<String, String> mutation : mutations.entrySet()) {
@@ -781,21 +775,26 @@ public class DriveAnnotationParser {
         Pattern abItemPattern = Pattern.compile("(.*?)\\.\\s*(http.*)", Pattern.CASE_INSENSITIVE);
         Matcher m = pmidPattern.matcher(str);
         int start = 0;
+        Set<String> pmidToSearch = new HashSet<>();
         while (m.find(start)) {
             String pmids = m.group(1).trim();
             for (String pmid : pmids.split(", *(PMID:)? *")) {
                 Article doc = articleBo.findArticleByPmid(pmid);
                 if (doc == null) {
-                    doc = NcbiEUtils.readPubmedArticle(pmid);
-                    if (doc != null) {
-                        articleBo.save(doc);
-                    }
+                    pmidToSearch.add(pmid);
                 }
                 if (doc != null) {
                     docs.add(doc);
                 }
             }
             start = m.end();
+        }
+
+        if (!pmidToSearch.isEmpty()) {
+            for (Article article : NcbiEUtils.readPubmedArticles(pmidToSearch)) {
+                docs.add(article);
+                articleBo.save(article);
+            }
         }
 
         Matcher abstractMatch = abstractPattern.matcher(str);

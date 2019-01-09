@@ -134,8 +134,7 @@ public class validation {
             System.out.println("\tOn level " + levelOfEvidence.getLevel());
 
             //Get published actionable genes
-            if(!levelOfEvidence.equals(LevelOfEvidence.LEVEL_R2))
-                printEvidences(getFeedUrl(WorkSheetEntryEnum.PUBLISHED_ACTIONABLE_GENES), getPublishedEvidencesByLevel(levelOfEvidence));
+            printEvidences(getFeedUrl(WorkSheetEntryEnum.PUBLISHED_ACTIONABLE_GENES), getPublishedEvidencesByLevel(levelOfEvidence));
 
             //Get latest actionable genes
             printEvidences(getFeedUrl(WorkSheetEntryEnum.LATEST_ACTIONABLE_GENES), getEvidencesByLevel(levelOfEvidence));

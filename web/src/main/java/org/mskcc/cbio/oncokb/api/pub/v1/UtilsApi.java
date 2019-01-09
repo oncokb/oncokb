@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.mskcc.cbio.oncokb.apiModels.ActionableGene;
 import org.mskcc.cbio.oncokb.apiModels.AnnotatedVariant;
+import org.mskcc.cbio.oncokb.apiModels.CuratedGene;
 import org.mskcc.cbio.oncokb.model.CancerGene;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -60,4 +61,18 @@ public interface UtilsApi {
     @RequestMapping(value = "/utils/cancerGeneList.txt",
         method = RequestMethod.GET)
     ResponseEntity<String> utilsCancerGeneListTxtGet();
+
+    @ApiOperation(value = "", notes = "Get list of genes OncoKB curated", tags = "Utils")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK")})
+    @RequestMapping(value = "/utils/allCuratedGenes",
+        method = RequestMethod.GET)
+    ResponseEntity<List<CuratedGene>> utilsAllCuratedGenesGet();
+
+    @ApiOperation(value = "", notes = "Get list of genes OncoKB curated in text file.", tags = "Utils")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK")})
+    @RequestMapping(value = "/utils/allCuratedGenes.txt",
+        method = RequestMethod.GET)
+    ResponseEntity<String> utilsAllCuratedGenesTxtGet();
 }

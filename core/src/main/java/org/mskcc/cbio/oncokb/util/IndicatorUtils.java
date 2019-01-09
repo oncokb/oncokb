@@ -63,6 +63,14 @@ public class IndicatorUtils {
             query.setAlteration("vIII");
         }
 
+
+        // For intragenic annotation, convert it to structural variant and mark as Deletion
+        if (StringUtils.containsIgnoreCase(query.getAlteration(), "intragenic")) {
+            query.setAlterationType(AlterationType.STRUCTURAL_VARIANT.name());
+            query.setSvType(StructuralVariantType.DELETION);
+            query.setAlteration("");
+        }
+
         // Deal with fusion without primary gene, and this is only for legacy fusion event
         // The latest fusion event has been integrated with alteration type. Please see next if-else condition
         // for more info.
@@ -182,24 +190,29 @@ public class IndicatorUtils {
 
             List<Alteration> nonVUSRelevantAlts = AlterationUtils.excludeVUS(relevantAlterations);
             Map<String, LevelOfEvidence> highestLevels = new HashMap<>();
-            List<Alteration> alleles = AlterationUtils.getAlleleAlterations(alteration);
             List<TumorType> oncoTreeTypes = new ArrayList<>();
 
             Alteration matchedAlt = AlterationUtils.findAlteration(alteration.getGene(), alteration.getAlteration());
             indicatorQuery.setVariantExist(matchedAlt != null);
 
+            if(matchedAlt == null) {
+                matchedAlt = alteration;
+            }
+
+            List<Alteration> alleles = AlterationUtils.getAlleleAlterations(matchedAlt);
+
             // Whether alteration is hotpot from Matt's list
             if (query.getProteinEnd() == null || query.getProteinStart() == null) {
-                indicatorQuery.setHotspot(HotspotUtils.isHotspot(alteration));
+                indicatorQuery.setHotspot(HotspotUtils.isHotspot(matchedAlt));
             } else {
-                indicatorQuery.setHotspot(HotspotUtils.isHotspot(alteration));
+                indicatorQuery.setHotspot(HotspotUtils.isHotspot(matchedAlt));
             }
 
             if (query.getTumorType() != null) {
                 oncoTreeTypes = TumorTypeUtils.getMappedOncoTreeTypesBySource(query.getTumorType(), source);
             }
 
-            indicatorQuery.setVUS(isVUS(matchedAlt == null ? alteration : matchedAlt));
+            indicatorQuery.setVUS(isVUS(matchedAlt));
 
             if (indicatorQuery.getVUS()) {
                 List<Evidence> vusEvidences = EvidenceUtils.getEvidence(Collections.singletonList(matchedAlt), Collections.singleton(EvidenceType.VUS), null);
@@ -218,7 +231,7 @@ public class IndicatorUtils {
 
             if (nonVUSRelevantAlts.size() > 0) {
                 if (hasOncogenicEvidence) {
-                    IndicatorQueryOncogenicity indicatorQueryOncogenicity = getOncogenicity(matchedAlt == null ? alteration : matchedAlt, alleles, query, source, geneStatus);
+                    IndicatorQueryOncogenicity indicatorQueryOncogenicity = getOncogenicity(matchedAlt, alleles, query, source, geneStatus);
 
                     if (indicatorQueryOncogenicity.getOncogenicityEvidence() != null) {
                         allQueryRelatedEvidences.add(indicatorQueryOncogenicity.getOncogenicityEvidence());
@@ -231,7 +244,7 @@ public class IndicatorUtils {
                 }
 
                 if (hasMutationEffectEvidence) {
-                    IndicatorQueryMutationEffect indicatorQueryMutationEffect = getMutationEffect(matchedAlt == null ? alteration : matchedAlt, alleles, query, source, geneStatus);
+                    IndicatorQueryMutationEffect indicatorQueryMutationEffect = getMutationEffect(matchedAlt, alleles, query, source, geneStatus);
 
                     if (indicatorQueryMutationEffect.getMutationEffectEvidence() != null) {
                         allQueryRelatedEvidences.add(indicatorQueryMutationEffect.getMutationEffectEvidence());

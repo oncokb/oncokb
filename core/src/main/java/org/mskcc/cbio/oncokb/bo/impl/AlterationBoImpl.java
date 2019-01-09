@@ -94,13 +94,13 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
     }
 
     @Override
-    public List<Alteration> findMutationsByConsequenceAndPosition(Gene gene, VariantConsequence consequence, int start, int end, Collection<Alteration> alterations) {
+    public List<Alteration> findMutationsByConsequenceAndPosition(Gene gene, VariantConsequence consequence, int start, int end, Set<Alteration> alterations) {
         Set<Alteration> result = new HashSet<>();
 
         // Don't search for NA cases
         if (gene != null && consequence != null && !consequence.getTerm().equals("NA")) {
             if (alterations != null && alterations.size() > 0) {
-                result.addAll(AlterationUtils.findOverlapAlteration(new HashSet<>(alterations), gene, consequence, start, end));
+                result.addAll(AlterationUtils.findOverlapAlteration(alterations, gene, consequence, start, end));
             } else {
                 Collection<Alteration> queryResult;
                 if (CacheUtils.isEnabled()) {
@@ -204,13 +204,6 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         Boolean addTruncatingMutations = false;
         Boolean addDeletion = false;
 
-        AlterationType daoAlterationType = alteration.getAlterationType();
-
-        // DAO only support MUTATION and intragenic fusion
-        if (daoAlterationType != null && !(org.apache.commons.lang3.StringUtils.containsIgnoreCase(alteration.getAlteration(), "intragenic") && daoAlterationType.equals(AlterationType.FUSION))) {
-            daoAlterationType = AlterationType.MUTATION;
-        }
-
         // Alteration should always has consequence attached.
         if (alteration.getConsequence() == null) {
             AlterationUtils.annotateAlteration(alteration, alteration.getAlteration());
@@ -258,33 +251,18 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             }
         }
 
-        // Map Truncating Mutations to Translocation and Inversion
-        // These two are all structural variants, need a better way to model them.
-//            if (alteration.getAlteration().toLowerCase().equals("translocation")
-//                || alteration.getAlteration().toLowerCase().equals("inversion")) {
-//                // If no fusions curated, check the Truncating Mutations.
-//                if (truncatingMutation != null && !alterations.contains(truncatingMutation)) {
-//                    alterations.add(truncatingMutation);
-//                }
-//            }
-
-        // Map intragenic to Deletion or Truncating Mutation
-        // If no Deletion curated, attach Truncating Mutations
-//            if (alteration.getAlteration().toLowerCase().contains("intragenic") ||
-//                alteration.getAlteration().toLowerCase().equals("deletion")) {
-//                if (deletion != null) {
-//                    if (!alterations.contains(deletion)) {
-//                        alterations.add(deletion);
-//                    }
-//                } else if (truncatingMutation != null && !alterations.contains(truncatingMutation)) {
-//                    alterations.add(truncatingMutation);
-//                }
-//            }
-
         //Find Alternative Alleles for missense variant
         if (includeAlternativeAllele && alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant"))) {
             alterations.addAll(AlterationUtils.getAlleleAlterations(alteration, fullAlterations));
-            List<Alteration> includeRangeAlts = findMutationsByConsequenceAndPosition(alteration.getGene(), alteration.getConsequence(), alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations);
+            List<Alteration> includeRangeAlts = new ArrayList<>();
+
+            // Include the range mutation
+            List<Alteration> mutationsByConsequenceAndPosition = findMutationsByConsequenceAndPosition(alteration.getGene(), alteration.getConsequence(), alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations);
+            for (Alteration alt : mutationsByConsequenceAndPosition) {
+                if (!alt.getProteinStart().equals(alt.getProteinEnd())) {
+                    includeRangeAlts.add(alt);
+                }
+            }
 
             // For missense mutation, also include positioned
             includeRangeAlts.addAll(AlterationUtils.getPositionedAlterations(alteration, fullAlterations));
@@ -308,7 +286,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         alterations.addAll(findMutationsByConsequenceAndPosition(alteration.getGene(), anyConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations));
 
         // Remove all range mutations as relevant for truncating mutations in oncogenes
-        oncogeneTruncMuts(alteration, alterations);
+        alterations = oncogeneTruncMuts(alteration, alterations);
 
         // Match Truncating Mutations section to Deletion if no Deletion section specifically curated
         if (alteration.getAlteration().toLowerCase().matches("deletion")) {
@@ -468,15 +446,17 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         return false;
     }
 
-    private void oncogeneTruncMuts(Alteration alteration, LinkedHashSet<Alteration> relevantAlts) {
+    private LinkedHashSet<Alteration> oncogeneTruncMuts(Alteration alteration, LinkedHashSet<Alteration> relevantAlts) {
         if (alteration.getGene().getOncogene() != null && alteration.getGene().getTSG() != null && alteration.getGene().getOncogene() && !alteration.getGene().getTSG() && alteration.getConsequence().getIsGenerallyTruncating()) {
-            Iterator<Alteration> iterator = relevantAlts.iterator();
-            while (iterator.hasNext()) {
-                Alteration relevantAlt = iterator.next();
-                if (!relevantAlt.getConsequence().getIsGenerallyTruncating() && !relevantAlt.getProteinEnd().equals(relevantAlt.getProteinStart()) && !relevantAlt.getProteinStart().equals(-1)) {
-                    iterator.remove();
+            LinkedHashSet<Alteration> filtered = new LinkedHashSet<>();
+            for (Alteration alt : relevantAlts) {
+                if (alt.getConsequence().getIsGenerallyTruncating() || alt.getProteinEnd().equals(alt.getProteinStart()) || alt.getProteinStart().equals(-1)) {
+                    filtered.add(alt);
                 }
             }
+            return filtered;
+        } else {
+            return relevantAlts;
         }
     }
 }
