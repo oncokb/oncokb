@@ -583,7 +583,15 @@ public class IndicatorUtils {
     }
 
     public static Map<String, Object> findFusionGeneAndRelevantAlts(Query query) {
-        List<String> geneStrsList = Arrays.asList(query.getHugoSymbol().split("-"));
+        List<String> geneStrsList = new ArrayList<>();
+        if (query.getEntrezGeneId() != null) {
+            Gene gene = GeneUtils.getGeneByEntrezId(query.getEntrezGeneId());
+            if (gene != null) {
+                geneStrsList.add(gene.getHugoSymbol());
+            }
+        } else {
+            geneStrsList.addAll(Arrays.asList(query.getHugoSymbol().split("-")));
+        }
         Set<String> geneStrsSet = new HashSet<>();
         Gene gene = null;
         List<Alteration> fusionPair = new ArrayList<>();
