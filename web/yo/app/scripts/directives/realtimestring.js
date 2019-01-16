@@ -223,7 +223,7 @@ angular.module('oncokbApp')
                             $scope.propagationOpts['4']
                         ];
                         if (!initial && !$scope.data.propagation) {
-                            $scope.data.propagation = '4';
+                            $scope.data.propagation = 'no';
                         }
                     } else {
                         $scope.data.propagation = null;
