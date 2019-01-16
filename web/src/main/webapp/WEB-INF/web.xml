@@ -9,6 +9,9 @@
 			org.springframework.web.context.support.AnnotationConfigWebApplicationContext
 		</param-value>
 	</context-param>
+    <welcome-file-list>
+        <welcome-file>/index.jsp</welcome-file>
+    </welcome-file-list>
 	<listener>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
@@ -62,6 +65,14 @@
 		<servlet-name>SpringDispatcher</servlet-name>
 		<url-pattern>/</url-pattern>
 	</servlet-mapping>
+    <servlet>
+        <servlet-name>PublicSinglePage</servlet-name>
+        <jsp-file>/index.jsp</jsp-file>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>PublicSinglePage</servlet-name>
+        <url-pattern>/gene/*</url-pattern>
+    </servlet-mapping>
     <servlet-mapping>
         <servlet-name>publicApiV1</servlet-name>
         <url-pattern>/api/v1/*</url-pattern>
