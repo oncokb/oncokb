@@ -1,8 +1,21 @@
-<%@ taglib uri = "http://java.sun.com/jsp/jstl/core" prefix = "c" %>
-<%@ taglib uri = "http://java.sun.com/jsp/jstl/functions" prefix = "fn" %>
+<%@ page import="java.io.BufferedReader" %>
+<%@ page import="java.io.FileReader" %>
+<%@ page import="java.io.IOException" %>
 
-<c:import var = "content" url = "index.html"/>
-<c:set var = "baseHref" value="<base href=\"${request.getContextPath()}/\" />" />
-<c:set var = "updatedContent" value = "${fn:replace(content, '<base href=\"/\">', baseHref)}" />
-"
-<c:out value = "${updatedContent}" escapeXml="false"/>
+<%!
+    private String replaceBaseTag(String content, String newPath) {
+        return content.replaceAll("<base[^>]*>", "<base href='" + newPath + "/'/>");
+    }
+
+    private String getIndexHtmlContent(String filePath) throws IOException {
+        BufferedReader reader = new BufferedReader(new FileReader(filePath));
+        StringBuilder sb = new StringBuilder();
+        String line;
+
+        while ((line = reader.readLine()) != null) {
+            sb.append(line + "\n");
+        }
+        return sb.toString();
+    }
+%>
+<%=replaceBaseTag(getIndexHtmlContent(application.getRealPath("/") + "index.html"), request.getContextPath())%>
