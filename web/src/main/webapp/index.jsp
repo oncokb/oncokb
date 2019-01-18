@@ -18,4 +18,7 @@
         return sb.toString();
     }
 %>
-<%=replaceBaseTag(getIndexHtmlContent(application.getRealPath("/") + "index.html"), request.getContextPath())%>
+<%
+    String realpath = this.getClass().getResource("/").getPath() + "../../";
+%>
+<%=replaceBaseTag(getIndexHtmlContent((realpath == null ? "" : realpath) + "index.html"), request.getContextPath())%>
