@@ -97,6 +97,9 @@ angular.module('oncokbApp')
                                     scope.initializeFE();
                                 }, 10*1000);
                             }
+                            if (scope.t === 'p' && scope.data[scope.key+'_review'] && scope.data[scope.key+'_review'].lastReviewed) {
+                                scope.calculateDiff();
+                            }
                         }
                     });
                     $rootScope.$watch('fileEditable', function(n, o) {
