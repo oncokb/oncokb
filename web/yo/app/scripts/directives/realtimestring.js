@@ -98,7 +98,9 @@ angular.module('oncokbApp')
                                 }, 10*1000);
                             }
                             // Check difference when user edits content in review mode.
-                            scope.calculateDiff();
+                            if ($rootScope.reviewMode) {
+                                scope.calculateDiff();
+                            }
                         }
                     });
                     $rootScope.$watch('fileEditable', function(n, o) {
@@ -233,7 +235,7 @@ angular.module('oncokbApp')
                     return $rootScope.reviewMode;
                 };
                 $scope.calculateDiff = function() {
-                    if (scope.t === 'p' && scope.data[scope.key+'_review'] && scope.data[scope.key+'_review'].lastReviewed) {
+                    if ($scope.t === 'p' && $scope.data[$scope.key+'_review'] && $scope.data[$scope.key+'_review'].lastReviewed) {
                         $scope.diffHTML = mainUtils.calculateDiff($scope.data[$scope.key + '_review'].lastReviewed, $scope.data[$scope.key]);
                     }
                 };
