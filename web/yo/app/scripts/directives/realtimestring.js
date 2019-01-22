@@ -34,7 +34,7 @@ angular.module('oncokbApp')
                         scope.cleanUpEditing();
                         scope.initializeFE();
                         $rootScope.$watch('reviewMode', function(n, o) {
-                            if (n && scope.t === 'p' && scope.data[scope.key+'_review'] && scope.data[scope.key+'_review'].lastReviewed) {
+                            if (n) {
                                 scope.calculateDiff();
                             }
                         });
@@ -97,9 +97,8 @@ angular.module('oncokbApp')
                                     scope.initializeFE();
                                 }, 10*1000);
                             }
-                            if (scope.t === 'p' && scope.data[scope.key+'_review'] && scope.data[scope.key+'_review'].lastReviewed) {
-                                scope.calculateDiff();
-                            }
+                            // Check difference when user edits content in review mode.
+                            scope.calculateDiff();
                         }
                     });
                     $rootScope.$watch('fileEditable', function(n, o) {
@@ -234,7 +233,9 @@ angular.module('oncokbApp')
                     return $rootScope.reviewMode;
                 };
                 $scope.calculateDiff = function() {
-                    $scope.diffHTML = mainUtils.calculateDiff($scope.data[$scope.key+'_review'].lastReviewed, $scope.data[$scope.key]);
+                    if (scope.t === 'p' && scope.data[scope.key+'_review'] && scope.data[scope.key+'_review'].lastReviewed) {
+                        $scope.diffHTML = mainUtils.calculateDiff($scope.data[$scope.key + '_review'].lastReviewed, $scope.data[$scope.key]);
+                    }
                 };
                 $scope.uncheck = function () {
                     if ($scope.preStringO === $scope.data[$scope.key] && $scope.preStringO !== '') {
