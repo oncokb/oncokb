@@ -109,8 +109,16 @@ public class EvidenceUtils {
     }
 
     public static Set<Evidence> getEvidenceByEvidenceTypesAndLevels(Set<EvidenceType> types, Set<LevelOfEvidence> levels) {
-        Set<Alteration> alterations = AlterationUtils.getAllAlterations();
-        List<Evidence> evidences = EvidenceUtils.getEvidence(new ArrayList<>(alterations), types, levels);
+        List<Evidence> evidences = new ArrayList<>();
+        for (Evidence evidence : CacheUtils.getAllEvidences()) {
+            if (types != null && types.size() > 0 && !types.contains(evidence.getEvidenceType())) {
+                continue;
+            }
+            if (levels != null && levels.size() > 0 && !levels.contains(evidence.getLevelOfEvidence())) {
+                continue;
+            }
+            evidences.add(evidence);
+        }
         return new HashSet<>(evidences);
     }
 
