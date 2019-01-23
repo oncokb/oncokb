@@ -2,6 +2,7 @@ package org.mskcc.cbio.oncokb.util;
 
 import org.mskcc.cbio.oncokb.model.Evidence;
 import org.mskcc.cbio.oncokb.model.IndicatorQueryTreatment;
+import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -17,12 +18,12 @@ public class CustomizeComparator {
     );
 
 
-    public static void sortEvidenceBasedOnPriority(List<Evidence> evidenceList) {
+    public static void sortEvidenceBasedOnPriority(List<Evidence> evidenceList, final List<LevelOfEvidence> levels) {
         if (evidenceList == null)
             return;
         Collections.sort(evidenceList, new Comparator<Evidence>() {
             public int compare(Evidence e1, Evidence e2) {
-                Integer comparison = LevelUtils.compareLevel(e1.getLevelOfEvidence(), e2.getLevelOfEvidence());
+                Integer comparison = LevelUtils.compareLevel(e1.getLevelOfEvidence(), e2.getLevelOfEvidence(), levels);
 
                 if (comparison != 0) {
                     return comparison;
@@ -47,6 +48,10 @@ public class CustomizeComparator {
                 return e1.getId() - e2.getId();
             }
         });
+    }
+
+    public static void sortEvidenceBasedOnPriority(List<Evidence> evidenceList) {
+        sortEvidenceBasedOnPriority(evidenceList, LevelUtils.LEVELS);
     }
 
     public static void sortKitTreatment(List<IndicatorQueryTreatment> treatments) {
