@@ -905,7 +905,7 @@ public class EvidenceUtils {
                 query.setEvidences(
                     new ArrayList<>(keepHighestLevelForSameTreatments(filterEvidence(evidences, query))));
             }
-            CustomizeComparator.sortEvidenceBasedOnPriority(query.getEvidences());
+            CustomizeComparator.sortEvidenceBasedOnPriority(query.getEvidences(), LevelUtils.TREATMENT_SORTING_LEVEL_PRIORITY);
             if (query.getGene() != null && query.getGene().getHugoSymbol().equals("KIT")) {
                 CustomizeComparator.sortKitTreatmentByEvidence(query.getEvidences());
             }

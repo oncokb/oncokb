@@ -14,6 +14,10 @@ public class LevelUtils {
         Arrays.asList(LevelOfEvidence.LEVEL_R3, LevelOfEvidence.LEVEL_R2, LevelOfEvidence.LEVEL_4, LevelOfEvidence.LEVEL_3B, LevelOfEvidence.LEVEL_3A,
             LevelOfEvidence.LEVEL_2B, LevelOfEvidence.LEVEL_2A, LevelOfEvidence.LEVEL_1, LevelOfEvidence.LEVEL_R1)
     );
+    public static final List<LevelOfEvidence> TREATMENT_SORTING_LEVEL_PRIORITY = Collections.unmodifiableList(
+        Arrays.asList(LevelOfEvidence.LEVEL_R3, LevelOfEvidence.LEVEL_R2, LevelOfEvidence.LEVEL_4, LevelOfEvidence.LEVEL_3B,
+            LevelOfEvidence.LEVEL_2B, LevelOfEvidence.LEVEL_3A, LevelOfEvidence.LEVEL_2A, LevelOfEvidence.LEVEL_1, LevelOfEvidence.LEVEL_R1)
+    );
 
     public static final List<LevelOfEvidence> SENSITIVE_LEVELS = Collections.unmodifiableList(
         Arrays.asList(LevelOfEvidence.LEVEL_4, LevelOfEvidence.LEVEL_3B, LevelOfEvidence.LEVEL_3A,
@@ -34,17 +38,21 @@ public class LevelUtils {
     );
 
     public static Integer compareLevel(LevelOfEvidence a, LevelOfEvidence b) {
-        if (!LEVELS.contains(a)) {
-            if (!LEVELS.contains(b)) {
+        return compareLevel(a, b, LEVELS);
+    }
+
+    public static Integer compareLevel(LevelOfEvidence a, LevelOfEvidence b, List<LevelOfEvidence> levels) {
+        if (!levels.contains(a)) {
+            if (!levels.contains(b)) {
                 return 0;
             }
             return 1;
         }
-        if (!LEVELS.contains(b)) {
+        if (!levels.contains(b)) {
             return -1;
         }
 
-        return LEVELS.indexOf(b) - LEVELS.indexOf(a);
+        return levels.indexOf(b) - levels.indexOf(a);
     }
 
     public static LevelOfEvidence getHighestLevelFromEvidence(Set<Evidence> evidences) {
