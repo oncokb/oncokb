@@ -95,6 +95,18 @@ angular.module('oncokbApp')
                 });
                 return historyDefer.promise;
             }
+            function loadSetting() {
+                var settingDefer = $q.defer();
+                // We need to update rootscope.setting when that is changed in firebase, so we call firebase.on
+                // directly instead of using firebaseconnector.on.
+                firebase.database().ref('Setting').on('value', function(doc) {
+                    $rootScope.setting = doc.val();
+                    settingDefer.resolve('success');
+                }, function(error) {
+                    settingDefer.reject('Fail to load setting file');
+                });
+                return settingDefer.promise;
+            }
             /**
              * Loop through api calls recorded in the meta file and update it to database every 5 mins
              * **/
@@ -139,6 +151,9 @@ angular.module('oncokbApp')
             }
             if (types.indexOf('movingSection') !== -1) {
                 apiCalls.push(loadMovingMeta(data));
+            }
+            if (types.indexOf('setting') !== -1) {
+                apiCalls.push(loadSetting());
             }
             if (apiCalls.length > 0) {
                 $q.all(apiCalls)

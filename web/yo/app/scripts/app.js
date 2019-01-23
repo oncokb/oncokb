@@ -169,6 +169,13 @@ angular.module('oncokbApp').run(
                 }
             };
 
+            // Load setting collection from firebase when the app is initialized.
+            loadFiles.load('setting').then(function(result) {
+            }, function(error) {
+                mainUtils.sendEmail('dev.oncokb@gmail.com', 'Failed to load setting file.',
+                    'Error: \n' + JSON.stringify(error));
+            });
+
             $rootScope.addError = function(error) {
                 $rootScope.errors.push(error);
             };
