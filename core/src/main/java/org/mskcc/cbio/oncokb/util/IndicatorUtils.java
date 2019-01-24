@@ -12,7 +12,7 @@ import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static org.mskcc.cbio.oncokb.util.LevelUtils.LEVELS;
+import static org.mskcc.cbio.oncokb.util.LevelUtils.TREATMENT_SORTING_LEVEL_PRIORITY;
 
 /**
  * Created by hongxinzhang on 4/5/16.
@@ -484,7 +484,7 @@ public class IndicatorUtils {
         if (evidences != null) {
             Map<LevelOfEvidence, Set<Evidence>> evidenceSetMap = EvidenceUtils.separateEvidencesByLevel(evidences);
 
-            ListIterator<LevelOfEvidence> li = LEVELS.listIterator(LEVELS.size());
+            ListIterator<LevelOfEvidence> li = TREATMENT_SORTING_LEVEL_PRIORITY.listIterator(TREATMENT_SORTING_LEVEL_PRIORITY.size());
             while (li.hasPrevious()) {
                 LevelOfEvidence level = li.previous();
                 if (evidenceSetMap.containsKey(level)) {
@@ -583,7 +583,15 @@ public class IndicatorUtils {
     }
 
     public static Map<String, Object> findFusionGeneAndRelevantAlts(Query query) {
-        List<String> geneStrsList = Arrays.asList(query.getHugoSymbol().split("-"));
+        List<String> geneStrsList = new ArrayList<>();
+        if (query.getEntrezGeneId() != null) {
+            Gene gene = GeneUtils.getGeneByEntrezId(query.getEntrezGeneId());
+            if (gene != null) {
+                geneStrsList.add(gene.getHugoSymbol());
+            }
+        } else {
+            geneStrsList.addAll(Arrays.asList(query.getHugoSymbol().split("-")));
+        }
         Set<String> geneStrsSet = new HashSet<>();
         Gene gene = null;
         List<Alteration> fusionPair = new ArrayList<>();
