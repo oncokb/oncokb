@@ -8,7 +8,7 @@
                         ng-class="getInputClass()"
                         ng-model="data[key]"
                         ng-paste="trimCSS()"
-                        ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 200, 'blur': 0 } }">
+                        ng-model-options="{ debounce: 500 }">
                      </p>
                     <pub-iframe
                             ng-model="pContent">
@@ -21,7 +21,7 @@
                         ng-model="data[key]"
                         ng-click="setTrackSignal()"
                         ng-paste="trimCSS()"
-                        ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 200, 'blur': 0 } }"
+                        ng-model-options="{ debounce: 500 }"
                         class="editEmpty">
                     </p>
                     <!-- <span style="color:red">{{getDuplicationMessage()}}</span> -->
@@ -86,7 +86,7 @@
                        ng-class="getInputClass()"
                        ng-model="data[key]"
                        ng-paste="trimCSS()"
-                       ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 200, 'blur': 0 } }">
+                       ng-model-options="{ debounce: 500 }">
                     </p>
                     <div ng-if="reviewLayout('regular')">
                         <h4>Difference comparing to the old content:</h4>
@@ -102,7 +102,7 @@
                           ng-class="editableBox"
                           ng-model="data[key]"
                           ng-paste="trimCSS()"
-                          ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 200, 'blur': 0 } }"
+                          ng-model-options="{ debounce: 500 }"
                           class="editEmpty">
                     </p>
                     <div ng-if="reviewLayout('name')" ng-class="getOldContentDivClass(data[key])">
