@@ -397,7 +397,7 @@ module.exports = function(grunt) {
                 }, {
                     expand: true,
                     cwd: '<%= oncokb.app %>/',
-                    src: 'data/config.json',
+                    src: ['data/config.json', 'data/isoformMskcc.json', 'data/isoformUniport.json', 'data/oncogeneTSG.json'],
                     dest: '<%= oncokb.dist %>'
                 }]
             },
