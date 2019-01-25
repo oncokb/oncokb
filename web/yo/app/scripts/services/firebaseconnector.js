@@ -14,7 +14,6 @@ angular.module('oncokbApp')
         function on(path) {
             var defer = $q.defer();
             firebase.database().ref(path).on('value', function(doc) {
-                console.log(doc.val());
                 defer.resolve(doc.val());
             }, function (error) {
                 defer.reject(error);
@@ -24,7 +23,6 @@ angular.module('oncokbApp')
         function once(path) {
             var defer = $q.defer();
             firebase.database().ref(path).once('value', function(doc) {
-                console.log(doc.val());
                 defer.resolve(doc.val());
             }, function (error) {
                 defer.reject(error);
