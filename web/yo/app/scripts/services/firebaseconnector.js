@@ -50,6 +50,12 @@ angular.module('oncokbApp')
         function addDrug(uuid, drug) {
             return set('Drug/' + uuid, drug);
         }
+        function createSetting(setting) {
+            return set('Setting', setting);
+        }
+        function addAttributeInSetting(path, attribute) {
+            return set('Setting/' + path, attribute);
+        }
 
         return {
             ref: ref,
@@ -58,6 +64,8 @@ angular.module('oncokbApp')
             once: once,
             remove: remove,
             update: update,
-            addDrug: addDrug
+            addDrug: addDrug,
+            createSetting: createSetting,
+            addAttributeInSetting: addAttributeInSetting
         };
     });

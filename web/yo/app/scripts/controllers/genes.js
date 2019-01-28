@@ -151,7 +151,7 @@ angular.module('oncokbApp')
                 var promises = [];
                 $scope.createdGenes = [];
                 _.each($scope.newGenes.split(","), function (geneName) {
-                    promises.push(createGene(geneName.trim()));
+                    promises.push(createGene(geneName.trim().toUpperCase()));
                 });
                 $q.all(promises).then(function() {
                     processMeta();

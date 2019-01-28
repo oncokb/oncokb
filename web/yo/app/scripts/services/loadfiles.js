@@ -11,7 +11,8 @@
  * Service in the oncokb.
  */
 angular.module('oncokbApp')
-    .service('loadFiles', function loadFiles($rootScope, $q, mainUtils, dialogs, $timeout, DatabaseConnector, $firebaseObject, FirebaseModel) {
+    .service('loadFiles', function loadFiles($rootScope, $q, mainUtils, dialogs, $timeout, DatabaseConnector,
+                                             $firebaseObject, FirebaseModel, firebaseConnector) {
         function load(types, data) {
             function loadMeta() {
                 var metaDefer = $q.defer();
@@ -101,11 +102,20 @@ angular.module('oncokbApp')
                 // directly instead of using firebaseconnector.on.
                 $rootScope.setting = new FirebaseModel.Setting();
                 firebase.database().ref('Setting').on('value', function(doc) {
-                    var fbSetting = doc.val();
-                    _.forEach(_.keys(fbSetting), function(key){
-                        $rootScope.setting[key] = fbSetting[key];
-                    });
-                    settingDefer.resolve('success');
+                    if (doc.exists()) {
+                        var fbSetting = doc.val();
+                        _.forEach(_.keys($rootScope.setting), function(key){
+                            if (fbSetting[key]) {
+                                $rootScope.setting[key] = fbSetting[key];
+                            } else {
+                                // Create newly added attribute in Firebase.
+                                firebaseConnector.addAttributeInSetting(key, $rootScope.setting[key]);
+                            }
+                        });
+                        settingDefer.resolve('success');
+                    } else {
+                        firebaseConnector.createSetting($rootScope.setting);
+                    }
                 }, function(error) {
                     settingDefer.reject('Fail to load setting file');
                 });
