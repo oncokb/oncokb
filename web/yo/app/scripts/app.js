@@ -247,19 +247,21 @@ angular.module('oncokbApp').run(
     /**
      * Get OncoKB configurations
      */
-    function fetchData() {
+    function fetchData(callback) {
         var initInjector = angular.injector(['ng']);
         var $http = initInjector.get('$http');
 
-        $http.get('data/config.json').then(function(response) {
-            if (_.isObject(response.data)) {
-                OncoKB.config = $.extend(true, OncoKB.config, response.data);
-                firebase.initializeApp(OncoKB.config.firebaseConfig);
-                bootstrapApplication();
-            }
-        }, function() {
-            console.error('Failed to load JSON configuration file.');
-        });
+        if (window.CurationPlatformConfigString) {
+            callback(JSON.parse(window.CurationPlatformConfigString));
+        } else {
+            $http.get('data/config.json').then(function(response) {
+                if (_.isObject(response.data)) {
+                    callback(response.data);
+                }
+            }, function() {
+                console.error('Failed to load JSON configuration file.');
+            });
+        }
     }
 
     /**
@@ -271,5 +273,9 @@ angular.module('oncokbApp').run(
         });
     }
 
-    fetchData();
+    fetchData(function(serverSideConfigs) {
+        OncoKB.config = $.extend(true, OncoKB.config, serverSideConfigs);
+        firebase.initializeApp(OncoKB.config.firebaseConfig);
+        bootstrapApplication();
+    });
 })(window._, window.angular, window.jQuery);
