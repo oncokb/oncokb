@@ -56,6 +56,9 @@ angular.module('oncokbApp')
         function addAttributeInSetting(path, attribute) {
             return set('Setting/' + path, attribute);
         }
+        function removeAttributeFromSetting(path) {
+            return remove('Setting/' + path);
+        }
 
         return {
             ref: ref,
@@ -66,6 +69,7 @@ angular.module('oncokbApp')
             update: update,
             addDrug: addDrug,
             createSetting: createSetting,
-            addAttributeInSetting: addAttributeInSetting
+            addAttributeInSetting: addAttributeInSetting,
+            removeAttributeFromSetting: removeAttributeFromSetting
         };
     });

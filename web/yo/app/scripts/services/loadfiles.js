@@ -104,11 +104,14 @@ angular.module('oncokbApp')
                 firebase.database().ref('Setting').on('value', function(doc) {
                     if (doc.exists()) {
                         var fbSetting = doc.val();
-                        _.forEach(_.keys($rootScope.setting), function(key){
-                            if (fbSetting[key]) {
-                                $rootScope.setting[key] = fbSetting[key];
-                            } else {
-                                // Create newly added attribute in Firebase.
+                        _.forEach(_.union(_.keys($rootScope.setting), _.keys(fbSetting)), function(key){
+                            if (fbSetting[key] ) {
+                                if ($rootScope.setting[key]) {
+                                    $rootScope.setting[key] = fbSetting[key];
+                                } else {
+                                    firebaseConnector.removeAttributeFromSetting(key);
+                                }
+                            } else if ($rootScope.setting[key]) {
                                 firebaseConnector.addAttributeInSetting(key, $rootScope.setting[key]);
                             }
                         });
