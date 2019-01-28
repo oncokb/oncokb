@@ -11,15 +11,6 @@
 
 angular.module('oncokbApp')
     .service('firebaseConnector', function firebaseConnector($q) {
-        function on(path) {
-            var defer = $q.defer();
-            firebase.database().ref(path).on('value', function(doc) {
-                defer.resolve(doc.val());
-            }, function (error) {
-                defer.reject(error);
-            });
-            return defer.promise;
-        }
         function once(path) {
             var defer = $q.defer();
             firebase.database().ref(path).once('value', function(doc) {
@@ -61,7 +52,6 @@ angular.module('oncokbApp')
         }
 
         return {
-            on: on,
             ref: ref,
             set: set,
             off: off,
