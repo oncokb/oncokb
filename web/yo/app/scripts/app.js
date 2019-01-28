@@ -252,7 +252,7 @@ angular.module('oncokbApp').run(
         var $http = initInjector.get('$http');
 
         if (window.CurationPlatformConfigString) {
-            callback(JSON.parse(window.CurationPlatformConfigString));
+            callback(_.isString(window.CurationPlatformConfigString) ? JSON.parse(window.CurationPlatformConfigString) : window.CurationPlatformConfigString);
         } else {
             $http.get('data/config.json').then(function(response) {
                 if (_.isObject(response.data)) {
