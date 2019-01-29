@@ -109,13 +109,15 @@ var oncokbApp = angular.module('oncokbApp', [
             attributePrefix: '$'
         };
 
-        $provide.decorator('$exceptionHandler', function($delegate, $injector) {
-            return function(exception, cause) {
-                Sentry.captureException(exception);
-            };
-        });
+        if(OncoKB.config.production) {
+            $provide.decorator('$exceptionHandler', function($delegate, $injector) {
+                return function(exception, cause) {
+                    Sentry.captureException(exception);
+                };
+            });
 
-        $httpProvider.interceptors.push('errorHttpInterceptor');
+            $httpProvider.interceptors.push('errorHttpInterceptor');
+        }
 
         $sceProvider.enabled(false);
     });
