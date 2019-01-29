@@ -130,12 +130,6 @@ public class SummaryUtils {
         // Get all tumor type summary evidences for the exact alteration + alternative alleles
         // Tumor type has high priority. Get relevant tumor type summary across all alternative alleles, then look for other tumor types summary
         if (tumorTypeSummary == null) {
-            // Special case for PDGFRA: don't match D842V as alternative allele
-            if (gene.getHugoSymbol().equals("PDGFRA") && alteration.getProteinStart() == 842) {
-                Alteration specialAllele = AlterationUtils.findAlteration(gene, "D842V");
-                alternativeAlleles.remove(specialAllele);
-            }
-
             for (TumorType tumorType : relevantTumorTypes) {
                 for (Alteration allele : alternativeAlleles) {
                     tumorTypeSummary = getRelevantTumorTypeSummaryByAlt(allele, Collections.singleton(tumorType));
@@ -1098,7 +1092,11 @@ public class SummaryUtils {
     private static String replaceSpecialCharacterInTumorTypeSummary(String summary, Gene gene, String queryAlteration, String queryTumorType) {
         String altName = getGeneMutationNameInTumorTypeSummary(gene, queryAlteration);
         String alterationName = getGeneMutationNameInVariantSummary(gene, queryAlteration);
-        summary = summary.replace("[[variant]]", altName + " " + queryTumorType);
+        String variantStr = altName + " " + queryTumorType;
+        if (queryAlteration.contains("deletion")) {
+            variantStr = queryTumorType + " harboring a " + altName;
+        }
+        summary = summary.replace("[[variant]]", variantStr);
         summary = summary.replace("[[gene]] [[mutation]] [[[mutation]]]", alterationName);
 
         // In case of miss typed

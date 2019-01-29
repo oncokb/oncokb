@@ -3,6 +3,7 @@ package org.mskcc.cbio.oncokb.util;
 import org.mskcc.cbio.oncokb.apiModels.ActionableGene;
 import org.mskcc.cbio.oncokb.apiModels.AnnotatedVariant;
 import org.mskcc.cbio.oncokb.apiModels.Citations;
+import org.mskcc.cbio.oncokb.apiModels.CuratedGene;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
 import org.w3c.dom.Document;
@@ -635,6 +636,15 @@ public class MainUtils {
                     }
                 }
                 return result;
+            }
+        });
+    }
+
+    public static void sortCuratedGenes(List<CuratedGene> genes){
+        Collections.sort(genes, new Comparator<CuratedGene>() {
+            @Override
+            public int compare(CuratedGene g1, CuratedGene g2) {
+                return g1.getHugoSymbol().compareTo(g2.getHugoSymbol());
             }
         });
     }

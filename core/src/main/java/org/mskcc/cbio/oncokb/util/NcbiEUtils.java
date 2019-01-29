@@ -9,8 +9,10 @@ package org.mskcc.cbio.oncokb.util;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.model.Article;
 
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * @author jgao
@@ -22,22 +24,58 @@ public final class NcbiEUtils {
 
     private static final String URL_NCBI_EUTILS = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/";
 
-    public static Article readPubmedArticle(String pmid) {
-        if (pmid != null) {
-            pmid = pmid.trim();
+    private static void purifyInput(Set<String> pmids) {
+        for (String pmid : pmids) {
+            if (pmid != null) {
+                pmid = pmid.trim();
+            }
+            if (!StringUtils.isNumeric(pmid)) {
+                System.out.println("pmid has to be a numeric string, but the input is '" + pmid + "'");
+            }
         }
-        if (!StringUtils.isNumeric(pmid)) {
-            System.out.println("pmid has to be a numeric string, but the input is '" + pmid + "'");
-            return null;
+    }
+
+    public static Set<Article> readPubmedArticles(Set<String> pmids) {
+        String apiKey = null;
+        try {
+            apiKey = PropertiesUtils.getProperties("ncbi.api.key");
+        } catch (IOException e) {
+            System.out.println("NCBI API KEY needs to be specified. Please see here for details: https://www.ncbi.nlm.nih.gov/books/NBK25497/");
+            e.printStackTrace();
         }
-        String url = URL_NCBI_EUTILS + "esummary.fcgi?db=pubmed&retmode=json&id=" + pmid;
+        String url = URL_NCBI_EUTILS + "esummary.fcgi?api_key=" + apiKey + "&db=pubmed&retmode=json&id=" + MainUtils.listToString(new ArrayList<>(pmids), ",");
 
-        Article article = new Article(pmid);
+        Set<Article> results = new HashSet<>();
 
+        if (pmids == null) {
+            return results;
+        }
+
+        purifyInput(pmids);
+
+        if (pmids.isEmpty()) {
+            return results;
+        }
+
+        DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+        Date date = new Date();
+        System.out.println("Making a NCBI request at " + dateFormat.format(date) + " " + url);
+
+        Map result = null;
         try {
             String json = FileUtils.readRemote(url);
+
             Map map = JsonUtils.jsonToMap(json);
-            Map result = (Map) (map.get("result"));
+            result = (Map) (map.get("result"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        if (result == null) {
+            return results;
+        }
+        for (String pmid : pmids) {
+            Article article = new Article(pmid);
             Map articleInfo = (Map) (result.get(pmid));
 
             if (articleInfo != null) {
@@ -55,7 +93,7 @@ public final class NcbiEUtils {
 
                 if (title == null) {
                     System.out.println("Warning: Article doesn't have a title for " + pmid);
-                    return null;
+                    continue;
                 }
 
                 article.setTitle(title);
@@ -74,23 +112,23 @@ public final class NcbiEUtils {
 
                 String elocationId = (String) (articleInfo.get("elocationid"));
                 article.setElocationId(elocationId);
+
+                results.add(article);
             } else {
-                System.out.println("Warning: No artical info for " + pmid);
-                return null;
+                System.out.println("Warning: No article info for " + pmid);
             }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            System.out.println(url);
         }
 
-        return article;
+        return results;
     }
 
     private static String formatAuthors(List<Map<String, String>> authors) {
         StringBuilder sb = new StringBuilder();
-        sb.append(authors.get(0).get("name"));
-        if (authors.size() > 1) {
-            sb.append(" et al");
+        if (authors != null && authors.size() > 0) {
+            sb.append(authors.get(0).get("name"));
+            if (authors.size() > 1) {
+                sb.append(" et al");
+            }
         }
         return sb.toString();
     }
