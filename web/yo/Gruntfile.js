@@ -198,7 +198,7 @@ module.exports = function(grunt) {
                 flow: {
                     html: {
                         steps: {
-                            js: ['concat', 'uglifyjs'],
+                            js: ['concat'],
                             css: ['cssmin']
                         },
                         post: {}
@@ -230,25 +230,25 @@ module.exports = function(grunt) {
             // }
         },
         uglify: {
-            // dist: {
-            //   files: {
-            //     '<%= oncokb.dist %>/scripts/scripts.js': [
-            //       '<%= oncokb.app %>/scripts/**/**.js'
-            //     ]
-            //   }
-            // }
-            // js: {
-            //   src: ['<%= oncokb.app %>/scripts/**/**.js'],
-            //   dest: '<%= oncokb.dist %>/scripts/scripts.js'
-            // }
-            // my_target: {
-            //   files: [{
-            //       expand: true,
-            //       cwd: '<%= oncokb.app %>/scripts',
-            //       src: '**/*.js',
-            //       dest: '<%= oncokb.dist %>/scripts'
-            //   }]
-            // }
+            dist: {
+                options: {
+                    mangle: {
+                        reserved: ['oncokb']
+                    }
+                },
+                files: [{
+                    expand: true,
+                    src: ['<%= oncokb.dist %>/scripts/common.js', '<%= oncokb.dist %>/scripts/pleaseWait.js'],
+                    dest: '<%= oncokb.dist %>/scripts/',
+                    cwd: '.',
+                    rename: function (dst, src) {
+                        // To keep the source js files and make new files as `*.min.js`:
+                        // return dst + '/' + src.replace('.js', '.min.js');
+                        // Or to override to src:
+                        return src;
+                    }
+                }]
+            }
         },
         concat: {
             // dist: {
@@ -453,7 +453,7 @@ module.exports = function(grunt) {
         'copy:dist',
         // 'cdnify',
         'cssmin',
-        'uglify',
+        'uglify:dist',
         'filerev',
         'usemin'
         // 'htmlmin',

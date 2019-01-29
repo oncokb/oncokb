@@ -55,10 +55,11 @@ var oncokbApp = angular.module('oncokbApp', [
     .constant('loadingScreen', window.loadingScreen)
     .constant('S', window.S)
     .constant('_', window._)
+    .constant('Sentry', window.Sentry)
     .constant('Levenshtein', window.Levenshtein)
     .constant('PDF', window.jsPDF)
     .constant('UUIDjs', window.UUIDjs)
-    .config(function($provide, $locationProvider, $routeProvider, $sceProvider, dialogsProvider, $animateProvider, x2jsProvider) {
+    .config(function($provide, $locationProvider, $routeProvider, $sceProvider, dialogsProvider, $animateProvider, x2jsProvider, $httpProvider) {
 
         $routeProvider
             .when('/', {
@@ -110,18 +111,11 @@ var oncokbApp = angular.module('oncokbApp', [
 
         $provide.decorator('$exceptionHandler', function($delegate, $injector) {
             return function(exception, cause) {
-                var $rootScope = $injector.get('$rootScope');
-                $rootScope.addError({
-                    message: 'Exception',
-                    reason: exception,
-                    case: cause
-                });
-                $rootScope.$emit('oncokbError', {message: 'Exception', reason: exception, case: cause});
-                if (!OncoKB.config.production && exception) {
-                    $delegate(exception, cause);
-                }
+                Sentry.captureException(exception);
             };
         });
+
+        $httpProvider.interceptors.push('errorHttpInterceptor');
 
         $sceProvider.enabled(false);
     });
@@ -129,7 +123,6 @@ var oncokbApp = angular.module('oncokbApp', [
 angular.module('oncokbApp').run(
     ['$window', '$timeout', '$rootScope', '$location', 'loadingScreen', 'DatabaseConnector', 'dialogs', 'mainUtils', 'user', 'loadFiles',
         function($window, $timeout, $rootScope, $location, loadingScreen, DatabaseConnector, dialogs, mainUtils, user, loadFiles) {
-            $rootScope.errors = [];
             $rootScope.internal = true;
             $rootScope.meta = {
                 levelsDesc: {
@@ -167,10 +160,6 @@ angular.module('oncokbApp').run(
                     Level_R2: '#F79A92',
                     Level_R3: '#FCD6D3'
                 }
-            };
-
-            $rootScope.addError = function(error) {
-                $rootScope.errors.push(error);
             };
 
             // Error loading the document, likely due revoked access. Redirect back to home/install page
@@ -231,12 +220,6 @@ angular.module('oncokbApp').run(
                     }
                     $location.path('/');
                 }
-            });
-            // Other unidentify error
-            $rootScope.$on('oncokbError', function(event, data) {
-                var subject = 'OncoKB Bug.  Case Number:' + mainUtils.getCaseNumber() + ' ' + data.reason;
-                var content = 'User: ' + JSON.stringify($rootScope.me) + '\n\nError message - reason:\n' + data.message;
-                mainUtils.notifyDeveloper(subject, content);
             });
         }]);
 
