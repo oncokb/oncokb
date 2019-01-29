@@ -14,6 +14,8 @@ module.exports = function(grunt) {
     // Time how long tasks take. Can help when optimizing build times
     require('time-grunt')(grunt);
 
+    var sass = require('node-sass');
+
     // Configurable paths for the application
     var appConfig = {
         app: require('./bower.json').appPath || 'app',
@@ -42,10 +44,6 @@ module.exports = function(grunt) {
             jsTest: {
                 files: ['test/spec/{,*/}*.js'],
                 tasks: ['newer:eslint:test', 'karma']
-            },
-            compass: {
-                files: ['<%= oncokb.app %>/styles/{,*/}*.{scss,sass}'],
-                tasks: ['compass:server', 'postcss']
             },
             gruntfile: {
                 files: ['Gruntfile.js']
@@ -167,32 +165,14 @@ module.exports = function(grunt) {
         },
 
         // Compiles Sass to CSS and generates necessary files if requested
-        compass: {
+        sass: {
             options: {
-                sassDir: '<%= oncokb.app %>/styles',
-                cssDir: '.tmp/styles',
-                generatedImagesDir: '.tmp/images/generated',
-                imagesDir: '<%= oncokb.app %>/images',
-                javascriptsDir: '<%= oncokb.app %>/scripts',
-                fontsDir: '<%= oncokb.app %>/styles/fonts',
-                importPath: '<%= oncokb.app %>/components',
-                httpImagesPath: '/images',
-                httpGeneratedImagesPath: '/images/generated',
-                httpFontsPath: '/styles/fonts',
-                relativeAssets: false,
-                assetCacheBuster: false,
-                raw: 'Sass::Script::Number.precision = 10\n'
+                implementation: sass,
+                sourcemap: true
             },
             dist: {
-                options: {
-                    generatedImagesDir: '<%= oncokb.dist %>/images/generated',
-                    environment: 'production'
-                }
-            },
-            server: {
-                options: {
-                    debugInfo: true,
-                    environment: 'development'
+                files: {
+                    '.tmp/styles/main.css': '<%= oncokb.app %>/styles/main.scss'
                 }
             }
         },
@@ -410,15 +390,8 @@ module.exports = function(grunt) {
         },
 
         // Run some tasks in parallel to speed up the build process
-        concurrent: {
-            server: [
-                'compass:server'
-            ],
-            test: [
-                'compass'
-            ],
-            dist: [
-                'compass:dist',
+        concurrent: {dist: [
+                'sass',
                 'imagemin',
                 'svgmin'
             ]
@@ -453,7 +426,7 @@ module.exports = function(grunt) {
         grunt.task.run([
             'clean:server',
             'wiredep',
-            'concurrent:server',
+            'sass',
             'postcss',
             'connect:livereload',
             'watch'
