@@ -22,7 +22,7 @@ install:
             wget -O - http://www-us.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz | \
                 tar -C ~/maven/$MAVEN_VERSION --strip-components=1 -xzf -; }
 script:
-    - mvn -Pbackend,docker -DskipTests clean install
+    - mvn -Pbackend -DskipTests clean install
 after_success:
     - |
         if [[ "$TRAVIS_TAG" ]]

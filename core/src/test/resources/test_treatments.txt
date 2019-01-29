@@ -72,3 +72,7 @@ KIT	D816A	Colorectal Cancer	3B: Avapritinib;
 KIT	D816A	Mastocytosis	3A: Avapritinib;
 KIT	D816A	Thymic Tumor	2A: Sunitinib; 2A: Sorafenib; 3B: Avapritinib;
 MTOR	L2427Q	Renal Clear Cell Carcinoma	3A: Temsirolimus;
+PDGFRA	D842I	GIST	2A: Imatinib;
+PDGFRA	D842I	Thymic Tumor	2B: Imatinib;
+PDGFRA	D842V	GIST	R1: Imatinib; 2A: Dasatinib;
+PDGFRA	D842V	Thymic Tumor	2B: Dasatinib; 2B: Imatinib;

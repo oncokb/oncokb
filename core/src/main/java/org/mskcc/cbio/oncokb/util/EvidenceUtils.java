@@ -109,8 +109,16 @@ public class EvidenceUtils {
     }
 
     public static Set<Evidence> getEvidenceByEvidenceTypesAndLevels(Set<EvidenceType> types, Set<LevelOfEvidence> levels) {
-        Set<Alteration> alterations = AlterationUtils.getAllAlterations();
-        List<Evidence> evidences = EvidenceUtils.getEvidence(new ArrayList<>(alterations), types, levels);
+        List<Evidence> evidences = new ArrayList<>();
+        for (Evidence evidence : CacheUtils.getAllEvidences()) {
+            if (types != null && types.size() > 0 && !types.contains(evidence.getEvidenceType())) {
+                continue;
+            }
+            if (levels != null && levels.size() > 0 && !levels.contains(evidence.getLevelOfEvidence())) {
+                continue;
+            }
+            evidences.add(evidence);
+        }
         return new HashSet<>(evidences);
     }
 
@@ -619,7 +627,7 @@ public class EvidenceUtils {
         map.put("exist", false);
         map.put("origin", false);
         map.put("result", query);
-        for(List<String> key : keys) {
+        for (List<String> key : keys) {
             // Check whether key has all elements in query;
             if (key.containsAll(query)) {
                 map.put("exist", true);
@@ -905,7 +913,7 @@ public class EvidenceUtils {
                 query.setEvidences(
                     new ArrayList<>(keepHighestLevelForSameTreatments(filterEvidence(evidences, query))));
             }
-            CustomizeComparator.sortEvidenceBasedOnPriority(query.getEvidences());
+            CustomizeComparator.sortEvidenceBasedOnPriority(query.getEvidences(), LevelUtils.TREATMENT_SORTING_LEVEL_PRIORITY);
             if (query.getGene() != null && query.getGene().getHugoSymbol().equals("KIT")) {
                 CustomizeComparator.sortKitTreatmentByEvidence(query.getEvidences());
             }
@@ -960,6 +968,7 @@ public class EvidenceUtils {
         if (articles != null && !articles.isEmpty()) {
             ArticleBo articleBo = ApplicationContextSingleton.getArticleBo();
             Set<Article> annotatedArticles = new HashSet<>();
+            Set<String> articlesToBeAdded = new HashSet<>();
             for (Article article : articles) {
                 String tempPMID = article.getPmid();
                 if (tempPMID == null) {
@@ -973,16 +982,20 @@ public class EvidenceUtils {
                 } else {
                     Article tempAT = articleBo.findArticleByPmid(tempPMID);
                     if (tempAT == null) {
-                        Article newArticle = NcbiEUtils.readPubmedArticle(tempPMID);
-                        if (newArticle != null) {
-                            articleBo.save(newArticle);
-                            annotatedArticles.add(newArticle);
-                        }
+                        articlesToBeAdded.add(tempPMID);
                     } else {
                         annotatedArticles.add(tempAT);
                     }
                 }
             }
+
+            if (!articlesToBeAdded.isEmpty()) {
+                for (Article article : NcbiEUtils.readPubmedArticles(articlesToBeAdded)) {
+                    articleBo.save(article);
+                    annotatedArticles.add(article);
+                }
+            }
+
             evidence.setArticles(annotatedArticles);
         }
     }

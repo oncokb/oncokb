@@ -273,10 +273,6 @@ public final class AlterationUtils {
         if (alteration.getName() == null && alteration.getAlteration() != null) {
             alteration.setName(alteration.getAlteration());
         }
-
-        if (StringUtils.containsIgnoreCase(alteration.getAlteration(), "intragenic")) {
-            alteration.setAlterationType(AlterationType.FUSION);
-        }
     }
 
     public static Boolean isFusion(String variant) {
@@ -682,6 +678,12 @@ public final class AlterationUtils {
                     }
                 }
             }
+        }
+
+        // Special case for PDGFRA: don't match D842V as alternative allele to other alleles
+        if (alteration.getGene() != null && alteration.getGene().getEntrezGeneId() == 5156 && !alteration.getAlteration().equals("D842V")) {
+            Alteration d842v = AlterationUtils.findAlteration(alteration.getGene(), "D842V");
+            alleles.remove(d842v);
         }
 
         sortAlternativeAlleles(alleles);

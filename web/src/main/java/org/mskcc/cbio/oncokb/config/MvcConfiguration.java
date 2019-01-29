@@ -96,11 +96,11 @@ public class MvcConfiguration extends WebMvcConfigurerAdapter {
                     rootCause = rootCause.getCause();
                 }
 
-                if (!rootCause.getMessage().contains("Broken pipe")
+                if (rootCause.getMessage() == null || (!rootCause.getMessage().contains("Broken pipe")
                     && !rootCause.getMessage().contains("Required request body content is missing")
                     && !rootCause.getMessage().contains("Required request body is missing")
                     && !rootCause.getMessage().contains("Failed to convert value of type 'java.lang.String' to required type 'java.lang.Integer'")
-                    && !rootCause.getMessage().contains("Required String parameter ")
+                    && !rootCause.getMessage().contains("Required String parameter "))
                     ) {
                     super.resolveException(request, response, handler, ex);
                 }

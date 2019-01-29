@@ -4,12 +4,15 @@
             <span class="btn-group btn-group-sm pull-left group" role="group">
                 <button type="button" class="btn btn-default" ng-if="developerCheck() && internal" ng-click="saveAllGenes()"><span ng-show="!!!status.saveAllGenes"><i class="fa fa-spinner fa-spin"></i></span><span ng-show="!!status.saveAllGenes">Save All Genes</span></button>
             </span>
-            <span class="input-group input-group-sm create group" role="group" ng-show="developerCheck()">
-                <input type="text" class="form-control" ng-model="newGenes" placeholder="Comma-separated gene names">
-                <span class="input-group-btn">
-                    <button type="button" class="btn btn-default  btn-secondary" ng-click="create()">Create Genes</button>
+            <div style="display: inline-block">
+                <span class="input-group input-group-sm create group" role="group" ng-show="me.admin">
+                    <input type="text" class="form-control" ng-model="newGenes" placeholder="Comma-separated gene names">
+                    <span class="input-group-btn">
+                        <button type="button" class="btn btn-default  btn-secondary" ng-click="create()">Create Genes</button>
+                    </span>
                 </span>
-            </span>
+                <span ng-if="createdGenes.length > 0" class="success-info">Create genes {{ createdGenes.join(', ') }} successfully.</span>
+            </div>
         </div>
         <table class="table" datatable="ng" dt-options="dtOptions" dt-columns="dtColumns">
             <thead>
@@ -17,7 +20,6 @@
                 <th>Gene</th>
                 <th>Last modified</th>
                 <th>Last modified by</th>
-                <th>Edit</th>
                 <th ng-if="me.admin">Needs to be reviewed</th>
                 <th ng-if="me.admin"># of articles to curate</th>
             </tr>
@@ -27,9 +29,6 @@
                     <td><strong><a ng-href="#!/gene/{{meta.hugoSymbol}}">{{ meta.hugoSymbol }}</a></strong></td>
                     <td>{{ meta.lastModifiedAt | date : 'MMM d, h:mm a yyyy'}}</a></td>
                     <td>{{ meta.lastModifiedBy }}</a></td>
-                    <td>
-                        <i class="fa " ng-class="{'fa-pencil': meta.editable, 'fa-eye': !meta.editable}" ng-click="redirect('/gene/' + meta.hugoSymbol)"><span style="display:none">1</span></i>
-                    </td>
                     <td ng-if="me.admin">{{ meta.review }}</td>
                     <td ng-if="me.admin">{{ meta.queues }}</td>
                 </tr>

@@ -101,7 +101,7 @@ angular.module('oncokbApp')
 
             var sorting = [[1, 'desc'], [0, 'asc'], [2, 'asc']];
             if ($rootScope.me.admin) {
-                sorting = [[4, 'desc'], [5, 'desc'], [1, 'desc'], [0, 'asc']];
+                sorting = [[3, 'desc'], [4, 'desc'], [1, 'desc'], [0, 'asc']];
             }
             jQuery.extend(jQuery.fn.dataTableExt.oSort, {
                 'date-html-asc': function(a, b) {
@@ -128,11 +128,10 @@ angular.module('oncokbApp')
                 DTColumnDefBuilder.newColumnDef(0),
                 DTColumnDefBuilder.newColumnDef(1).withOption('sType', 'date-html'),
                 DTColumnDefBuilder.newColumnDef(2),
-                DTColumnDefBuilder.newColumnDef(3)
             ];
             if ($rootScope.me.admin) {
+                $scope.dtColumns.push(DTColumnDefBuilder.newColumnDef(3));
                 $scope.dtColumns.push(DTColumnDefBuilder.newColumnDef(4));
-                $scope.dtColumns.push(DTColumnDefBuilder.newColumnDef(5));
             }
 
             $scope.status = {
@@ -146,9 +145,11 @@ angular.module('oncokbApp')
                 mainTypes: {}
             };
             $scope.mappedTumorTypes = {};
+            $scope.newGenes = [];
 
             $scope.create = function() {
                 var promises = [];
+                $scope.createdGenes = [];
                 _.each($scope.newGenes.split(","), function (geneName) {
                     promises.push(createGene(geneName.trim()));
                 });
@@ -198,6 +199,7 @@ angular.module('oncokbApp')
                         firebase.database().ref('Genes/' + geneName).set(gene).then(function(result) {
                             var meta = new FirebaseModel.Meta();
                             firebase.database().ref('Meta/' + geneName).set(meta).then(function(result) {
+                                $scope.createdGenes.push(geneName);
                                 deferred.resolve();
                             }, function(error) {
                                 // Delete saved new gene from Genes collection

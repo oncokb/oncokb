@@ -3,7 +3,7 @@ $fa-font-path: "../components/fontawesome/fonts";
 $chosen-sprite-path: "../components/bootstrap-chosen/chosen-sprite.png";
 $chosen-sprite-retina-path: "../components/bootstrap-chosen/chosen-sprite@2x.png";
 // bower:scss
-@import "../components/bootstrap-sass-official/assets/stylesheets/_bootstrap.scss";
+@import "../components/bootstrap-sass-official/assets/stylesheets/bootstrap.scss";
 @import "../components/bootstrap-chosen/bootstrap-chosen-variables.scss";
 @import "../components/bootstrap-chosen/bootstrap-chosen.scss";
 @import "../components/fontawesome/scss/font-awesome.scss";
@@ -154,7 +154,7 @@ table.colorHeader thead tr{
 .genes {
     .header-buttons {
         .group {
-            margin: 0 10px 0 0;
+            margin: 0 10px 5px 0;
         }
         .backup {
             width: 200px;
@@ -165,6 +165,9 @@ table.colorHeader thead tr{
     }
 }
 
+.success-info {
+    color: #428bca;
+}
 /* */
 
 div[contenteditable=true] {
