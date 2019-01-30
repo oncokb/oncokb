@@ -47,7 +47,8 @@ var oncokbApp = angular.module('oncokbApp', [
     'datatables.bootstrap',
     'ui.sortable',
     'firebase',
-    'daterangepicker'
+    'daterangepicker',
+    'ngTagsInput'
 ])
     .value('OncoKB', OncoKB)
     // This is used for typeahead

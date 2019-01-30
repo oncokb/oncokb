@@ -1,0 +1,58 @@
+<div class="addModifyTherapy">
+    <div class="modal-header">
+        <h4 class="modal-title">
+            Add Therapies</h4>
+    </div>
+    <div class="modal-body">
+        <h5 class="latestResultDiv">The result will be shown as <div class="latestResultFont"> {{therapyResult}} </div></h5>
+            <div>
+                <div ng-repeat="element in therapy">
+                    <div class="flexRow">
+                        <button class="btn btn-default addButton"><i class="fa fa-trash-o" ng-click="deleteTherapy($index)"></i></button>
+                        <h5 class="therapyLabel">Therapy {{$index+1}}:  </h5>
+                        <div ng-click="addTherapy($index)" class="inputDrugs">
+                            <tags-input ng-model="element" display-property="drugName"
+                                        replace-spaces-with-dashes="false" placeholder=" "
+                                        add-from-autocomplete-only="true" on-tag-added="addDruginTherapy($tag.uuid, $index)"
+                                        on-tag-removed="removeDruginTherapy($tag.uuid, $index)" min-length="1" class="tagsBox">
+                                <auto-complete source="loadDrugs($query)"
+                                               min-length="1"
+                                               load-on-focus="true"
+                                               load-on-empty="false"
+                                               template="drugsLibrary"></auto-complete>
+                            </tags-input>
+                        </div>
+                    </div>
+                </div>
+                <p class="errorNote" ng-show="addTherapyError">{{therapyErrorMessage}}</p>
+            </div>
+        <hr>
+        <div align="left">
+            To add a new drug not found in the drop-down list, <a ng-href="" ng-click="goToDrugs()">click here</a>
+        </div>
+    </div>
+
+    <div>
+        <div ng-show="modifyMode" align="right">
+            <button type="button" class="btn btn-default" ng-click="cancel()">Cancel</button>
+            <button type="button" class="btn btn-primary" ng-click="save()" ng-disabled="addTherapyError||noData">Save</button>
+        </div>
+        <div ng-show="!modifyMode" align="left">
+            <span class="input-group-btn">
+                <button type="button" class="btn btn-default btn-sm" style="border-radius:3px; margin-left:10px" ng-disabled="addTherapyError||noData" ng-click="save()">
+                    <i class="fa fa-plus"></i> Add Therapy and {{::(ti.type[0] === 'I' ? 'Investigational' : 'Standard')}} Implications
+                </button>
+            </span>
+        </div>
+    </div>
+</div>
+
+<script type="text/ng-template" id="drugsLibrary">
+    <div>
+        <div ng-bind-html="$highlight($getDisplayText())"></div>
+        <div>Also known as
+            <span ng-bind-html="$highlight(data.synonyms.join(', '))"></span>
+        </div>
+    </div>
+</script>
+

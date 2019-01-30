@@ -1,49 +1,50 @@
-<div class="drugs">
-        <h3 class="headerStyle">Curated Drugs</h3>
-        <div ng-if="drugList!==undefined">
-            <table class="table" datatable="ng" dt-options="dtOptions" dt-columns="dtColumns">
-                <thead>
-                <tr class="dashedHeader">
-                    <th>Name</th>
-                    <th>NCI Thesaurus Code</th>
-                    <th>Description</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr data-ng-repeat="drug in drugList">
-                    <td ng-init="editDrugName=false">
-                        <div ng-show="editDrugName===false">
-                            <button type="button" class="btn btn-warning buttonStyle " uib-tooltip-placement="top" uib-tooltip="Modify Name" ng-click="editDrugName=!editDrugName"><i class="fa fa-edit"></i>
-                            </button>
-                            {{ drug.drugName}}
-                        </div>
-                        <div ng-show="editDrugName===true">
-                            <button type="button" class="btn btn-success buttonStyle" uib-tooltip-placement="top" uib-tooltip="Save Name" ng-click="saveDrugName(drug,newDrugName);editDrugName=!editDrugName"><i class="fa fa-check"></i>
-                            </button>
-                            <input type="text" ng-model="newDrugName" placeholder="{{drug.drugName}}" uib-typeahead="name for name in drug.synonyms" typeahead-min-length="0"/>
-                        </div>
-                    </td>
-                    <td>{{ drug.NCI }}</td>
-                    <td>{{ drug.description }}</td>
-                </tr>
-                </tbody>
-            </table>
-            <div class="form-inline">
-                <input type="text" class="form-control searchbox" ng-model="suggestedDrug" uib-typeahead="drug as drug.drugName for drug in processSearchDrugs($viewValue)" typeahead-min-length="1" typeahead-template-url="drugsDropdown.html"/>
-                <button class="btn btn-success" ng-click="addDrug(suggestedDrug)">Add Drug</button>
-            </div>
-            <p class="errorReminder" ng-show="searchDrugsError">Sorry, suggested drugs are unavailable now.</p>
-        </div>
-        <div ng-if="drugList===undefined">
-            <p class="errorReminderXL">The page is unavailable now.</p>
-        </div>
+<div class="drugsPage">
+    <h3 class="headerStyle">Curated Therapies</h3>
+    <div ng-if="drugList!==undefined">
+        <table class="table" datatable="ng" dt-options="dtOptions" dt-columns="dtColumns">
+            <thead>
+            <tr class="dashedHeader">
+                <th>Therapy</th>
+                <th>NCI Thesaurus Code</th>
+                <th>Description</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr data-ng-repeat="drug in drugList">
+                <td ng-init="editDrugName=false">
+                    <div ng-show="editDrugName===false">
+                        <button type="button" class="btn btn-warning buttonStyle " uib-tooltip-placement="top"
+                                uib-tooltip="Modify Name" ng-click="editDrugName=!editDrugName"><i
+                            class="fa fa-edit"></i>
+                        </button>
+                        {{ drug.drugName}}
+                    </div>
+                    <div ng-show="editDrugName===true">
+                        <button type="button" class="btn btn-success buttonStyle" uib-tooltip-placement="top"
+                                uib-tooltip="Save Name"
+                                ng-click="saveDrugName(newDrugName, drug);editDrugName=!editDrugName"><i
+                            class="fa fa-check"></i>
+                        </button>
+                        <input type="text" ng-model="newDrugName" placeholder="{{drug.drugName}}"
+                               uib-typeahead="name for name in drug.synonyms" typeahead-min-length="0"/>
+                    </div>
+                </td>
+                <td>{{ drug.ncitCode }}</td>
+                <td>{{ drug.description }}</td>
+                <td>
+                    <button type="button" class="buttonStyle btn btn-danger" ng-click="removeDrug(drug)"
+                            uib-tooltip-placement="top" uib-tooltip="Delete Drug"><i class="fa fa-trash"></i></button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div ng-if="drugList===undefined">
+        <p class="errorReminderXL">The page is unavailable now.</p>
+    </div>
+    <div>
+        <search-add-drug></search-add-drug>
+    </div>
 </div>
 
-<script type="text/ng-template" id="drugsDropdown.html">
-    <a class="drugsDropdown">
-        <div class="basicName" ng-bind-html="match.model.drugName | uibTypeaheadHighlight:query"></div>
-        <div class="alsoKnownAs">Also known as:
-            <span ng-bind-html="match.model.synonyms | uibTypeaheadHighlight:query"></span>
-        </div>
-    </a>
-</script>

@@ -641,6 +641,29 @@ angular.module('oncokbApp')
                 console.log(error);
             });
         }
+        function therapyStrToArr(key){
+            return key.split(",").map(function(element){
+                return element.trim().split(" + ")
+            });
+        }
+        function getDrugNameByUuids(keys, drugList) {
+            return keys.map(function (element) {
+                return element.map(function (key) {
+                    return drugList[key].drugName;
+                }).join(" + ");
+            }).join(", ");
+        }
+        function drugUuidtoName(key, drugList){
+            if (key != undefined){
+                var keys = therapyStrToArr(key);
+                return getDrugNameByUuids(keys, drugList);
+            }
+        }
+        function getKeysWithoutFirebasePrefix(array){
+            return _.keys(array).filter(function (item) {
+                return item.indexOf("$") !== 0;
+            });
+        }
         return {
             setIsoFormAndGeneType: setIsoFormAndGeneType,
             getCancerTypesName: getCancerTypesName,
@@ -676,6 +699,10 @@ angular.module('oncokbApp')
             getTimeStamp: getTimeStamp,
             calculateDiff: calculateDiff,
             getOldGeneType: getOldGeneType,
-            clearCollaboratorsByName: clearCollaboratorsByName
+            clearCollaboratorsByName: clearCollaboratorsByName,
+            therapyStrToArr: therapyStrToArr,
+            getDrugNameByUuids: getDrugNameByUuids,
+            drugUuidtoName: drugUuidtoName,
+            getKeysWithoutFirebasePrefix: getKeysWithoutFirebasePrefix
         };
     });

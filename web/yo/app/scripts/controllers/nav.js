@@ -15,7 +15,7 @@ angular.module('oncokbApp')
             tools: 'Tools',
             feedback: 'Feedback',
             queues: 'Curation Queue',
-            drugs: 'Drugs'
+            drugs: 'Therapies'
         };
 
         function setParams() {

@@ -14,7 +14,10 @@
                             ng-model="pContent">
                     </pub-iframe>
                 </div>
-                <div ng-switch-when="MUTATION_NAME|TREATMENT_NAME" ng-switch-when-separator="|">
+                <!--Seperate Mutation_Name & Treatment_Name here. We may need to recombine them in the future.
+                    <div ng-switch-when="MUTATION_NAME|TREATMENT_NAME" ng-switch-when-seperator="|">
+                -->
+                <div ng-switch-when="MUTATION_NAME">
                     <p ng-if="!fe && editingMessage" style="font-style:italic;margin-top:-30px;margin-left:30%;color:orange">{{editingMessage}}</p>
                     <p contenteditable="{{fe}}"
                         ng-class="getInputClass()"
@@ -26,6 +29,16 @@
                     </p>
                     <!-- <span style="color:red">{{getDuplicationMessage()}}</span> -->
                     <!-- <br/> -->
+                </div>
+                <div ng-switch-when="TREATMENT_NAME">
+                    <p ng-if="!fe && editingMessage" style="font-style:italic;margin-top:-30px;margin-left:30%;color:orange">{{editingMessage}}</p>
+                    <p contenteditable="false"
+                       ng-class="getInputClass()"
+                       ng-click="setTrackSignal()"
+                       ng-paste="trimCSS()"
+                       ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 200, 'blur': 0 } }"
+                       class="editEmpty">{{uuidtoName(data[key])}}
+                    </p>
                 </div>
                 <div ng-switch-when="treatment-select" class="chosen-full-width">
                     <div style="margin-top:10px;margin-bottom:10px">
@@ -96,7 +109,9 @@
                             ng-model="data[key]">
                     </pub-iframe>
                 </div>
-                <div ng-switch-when="MUTATION_NAME|TREATMENT_NAME" ng-switch-when-separator="|">
+                <!--Seperate Mutation_Name & Treatment_Name here. We may need to recombine them in the future.
+                  <div ng-switch-when="MUTATION_NAME|TREATMENT_NAME" ng-switch-when-seperator="|">-->
+                <div ng-switch-when="MUTATION_NAME">
                     <h4 ng-if="reviewLayout('name')">New Content:</h4>
                     <p contenteditable="{{reviewContentEditable('regular')}}"
                           ng-class="editableBox"
@@ -110,6 +125,20 @@
                         <p ng-class="getOldContentClass(data[key+'_review'].lastReviewed)" contenteditable="false" >{{::data[key+'_review'].lastReviewed}}</p>
                     </div>
                 </div>
+                <div ng-switch-when="TREATMENT_NAME">
+                    <h4 ng-if="reviewLayout('name')">New Content:</h4>
+                    <p contenteditable="{{reviewContentEditable('regular')}}"
+                       ng-class="editableBox"
+                       ng-paste="trimCSS()"
+                       ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 200, 'blur': 0 } }"
+                       class="editEmpty">{{uuidtoName(data[key])}}
+                    </p>
+                    <div ng-if="reviewLayout('name')" ng-class="getOldContentDivClass(data[key])">
+                        <h4>Old Content:</h4>
+                        <p ng-class="getOldContentClass(data[key+'_review'].lastReviewed)" contenteditable="false" >{{::uuidtoName(data[key+'_review'].lastReviewed)}}</p>
+                    </div>
+                </div>
+
                 <div ng-switch-when="treatment-select" class="chosen-full-width">
                     <h4 ng-if="reviewLayout('regular') && data[key+'_review'].lastReviewed">New Content:</h4>
                     <select ng-disabled="!reviewContentEditable('regular')"
