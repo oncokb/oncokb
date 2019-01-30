@@ -329,3 +329,5 @@ __pycache__/
 OpenCover/
 
 .DS_Store
+
+web/yo/node

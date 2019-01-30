@@ -550,11 +550,7 @@ public class CacheUtils {
     }
 
     public static void updateGene(Integer entrezGeneId, Boolean propagate) {
-        try {
-            System.out.println("Update gene on instance " + PropertiesUtils.getProperties("app.name") + " at " + MainUtils.getCurrentTime());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        System.out.println("Update gene on instance " + PropertiesUtils.getProperties("app.name") + " at " + MainUtils.getCurrentTime());
         if (propagate == null) {
             propagate = false;
         }
@@ -565,21 +561,13 @@ public class CacheUtils {
     }
 
     public static void resetAll() {
-        try {
-            System.out.println("Reset all genes cache on instance " + PropertiesUtils.getProperties("app.name") + " at " + MainUtils.getCurrentTime());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        System.out.println("Reset all genes cache on instance " + PropertiesUtils.getProperties("app.name") + " at " + MainUtils.getCurrentTime());
         GeneObservable.getInstance().update("reset", null);
         notifyOtherServices("reset", null);
     }
 
     public static void resetAll(Boolean propagate) {
-        try {
-            System.out.println("Reset all genes cache on instance " + PropertiesUtils.getProperties("app.name") + " at " + MainUtils.getCurrentTime());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        System.out.println("Reset all genes cache on instance " + PropertiesUtils.getProperties("app.name") + " at " + MainUtils.getCurrentTime());
         GeneObservable.getInstance().update("reset", null);
         if (propagate == null) {
             propagate = false;

@@ -670,11 +670,7 @@ public class TumorTypeUtils {
 
     private static String getOncoTreeApiUrl() {
         if (ONCO_TREE_API_URL == null) {
-            try {
-                ONCO_TREE_API_URL = PropertiesUtils.getProperties("oncotree.api");
-            } catch (IOException e) {
-                System.out.print("No oncotree.api specified, will use default setting.");
-            }
+            ONCO_TREE_API_URL = PropertiesUtils.getProperties("oncotree.api");
             if (ONCO_TREE_API_URL != null) {
                 ONCO_TREE_API_URL = ONCO_TREE_API_URL.trim();
             }

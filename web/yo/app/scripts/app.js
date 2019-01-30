@@ -55,10 +55,11 @@ var oncokbApp = angular.module('oncokbApp', [
     .constant('loadingScreen', window.loadingScreen)
     .constant('S', window.S)
     .constant('_', window._)
+    .constant('Sentry', window.Sentry)
     .constant('Levenshtein', window.Levenshtein)
     .constant('PDF', window.jsPDF)
     .constant('UUIDjs', window.UUIDjs)
-    .config(function($provide, $locationProvider, $routeProvider, $sceProvider, dialogsProvider, $animateProvider, x2jsProvider) {
+    .config(function($provide, $locationProvider, $routeProvider, $sceProvider, dialogsProvider, $animateProvider, x2jsProvider, $httpProvider) {
 
         $routeProvider
             .when('/', {
@@ -108,20 +109,15 @@ var oncokbApp = angular.module('oncokbApp', [
             attributePrefix: '$'
         };
 
-        $provide.decorator('$exceptionHandler', function($delegate, $injector) {
-            return function(exception, cause) {
-                var $rootScope = $injector.get('$rootScope');
-                $rootScope.addError({
-                    message: 'Exception',
-                    reason: exception,
-                    case: cause
-                });
-                $rootScope.$emit('oncokbError', {message: 'Exception', reason: exception, case: cause});
-                if (!OncoKB.config.production && exception) {
-                    $delegate(exception, cause);
-                }
-            };
-        });
+        if(OncoKB.config.production) {
+            $provide.decorator('$exceptionHandler', function($delegate, $injector) {
+                return function(exception, cause) {
+                    Sentry.captureException(exception);
+                };
+            });
+
+            $httpProvider.interceptors.push('errorHttpInterceptor');
+        }
 
         $sceProvider.enabled(false);
     });
@@ -129,7 +125,6 @@ var oncokbApp = angular.module('oncokbApp', [
 angular.module('oncokbApp').run(
     ['$window', '$timeout', '$rootScope', '$location', 'loadingScreen', 'DatabaseConnector', 'dialogs', 'mainUtils', 'user', 'loadFiles',
         function($window, $timeout, $rootScope, $location, loadingScreen, DatabaseConnector, dialogs, mainUtils, user, loadFiles) {
-            $rootScope.errors = [];
             $rootScope.internal = true;
             $rootScope.meta = {
                 levelsDesc: {
@@ -167,10 +162,6 @@ angular.module('oncokbApp').run(
                     Level_R2: '#F79A92',
                     Level_R3: '#FCD6D3'
                 }
-            };
-
-            $rootScope.addError = function(error) {
-                $rootScope.errors.push(error);
             };
 
             // Error loading the document, likely due revoked access. Redirect back to home/install page
@@ -232,12 +223,6 @@ angular.module('oncokbApp').run(
                     $location.path('/');
                 }
             });
-            // Other unidentify error
-            $rootScope.$on('oncokbError', function(event, data) {
-                var subject = 'OncoKB Bug.  Case Number:' + mainUtils.getCaseNumber() + ' ' + data.reason;
-                var content = 'User: ' + JSON.stringify($rootScope.me) + '\n\nError message - reason:\n' + data.message;
-                mainUtils.notifyDeveloper(subject, content);
-            });
         }]);
 
 /**
@@ -247,19 +232,21 @@ angular.module('oncokbApp').run(
     /**
      * Get OncoKB configurations
      */
-    function fetchData() {
+    function fetchData(callback) {
         var initInjector = angular.injector(['ng']);
         var $http = initInjector.get('$http');
 
-        $http.get('data/config.json').then(function(response) {
-            if (_.isObject(response.data)) {
-                OncoKB.config = $.extend(true, OncoKB.config, response.data);
-                firebase.initializeApp(OncoKB.config.firebaseConfig);
-                bootstrapApplication();
-            }
-        }, function() {
-            console.error('Failed to load JSON configuration file.');
-        });
+        if (window.CurationPlatformConfigString) {
+            callback(_.isString(window.CurationPlatformConfigString) ? JSON.parse(window.CurationPlatformConfigString) : window.CurationPlatformConfigString);
+        } else {
+            $http.get('data/config.json').then(function(response) {
+                if (_.isObject(response.data)) {
+                    callback(response.data);
+                }
+            }, function() {
+                console.error('Failed to load JSON configuration file.');
+            });
+        }
     }
 
     /**
@@ -271,5 +258,9 @@ angular.module('oncokbApp').run(
         });
     }
 
-    fetchData();
+    fetchData(function(serverSideConfigs) {
+        OncoKB.config = $.extend(true, OncoKB.config, serverSideConfigs);
+        firebase.initializeApp(OncoKB.config.firebaseConfig);
+        bootstrapApplication();
+    });
 })(window._, window.angular, window.jQuery);
