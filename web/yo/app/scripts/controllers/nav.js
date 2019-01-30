@@ -23,7 +23,7 @@ angular.module('oncokbApp')
                 filterTabs = _.union(filterTabs, ['variant', 'tools', 'feedback']);
             }
 
-            if ($rootScope.internal) {
+            if (!$rootScope.internal) {
                 filterTabs = _.intersection(filterTabs, ['genes', 'queues', 'feedback']);
             }
 
