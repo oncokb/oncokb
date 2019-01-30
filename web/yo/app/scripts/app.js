@@ -89,7 +89,7 @@ var oncokbApp = angular.module('oncokbApp', [
             })
             .when('/feedback', {
                 templateUrl: 'views/feedback.html',
-                internalUse: true
+                internalUse: false
             })
             .when('/queues', {
                 templateUrl: 'views/queues.html'
@@ -215,7 +215,7 @@ angular.module('oncokbApp').run(
                         console.log(error);
                     });
                 }
-                if (!$rootScope.isAuthorizedUser) {
+                if (!$rootScope.isAuthorizedUser || (next.internalUse && !$rootScope.internal)) {
                     if (loading) {
                         loadingScreen.finish();
                         loading = false;
