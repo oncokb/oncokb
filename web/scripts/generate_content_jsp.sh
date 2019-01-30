@@ -26,3 +26,4 @@ if [[ $FRONTEND_PATH == *"yo"* ]]
 then
     cp "$FRONTEND_PATH"/dist/index.html "$FRONTEND_PATH"/dist/content.jsp
 fi
+rm "$FRONTEND_PATH"/dist/index.html
