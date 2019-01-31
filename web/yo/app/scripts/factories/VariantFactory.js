@@ -554,6 +554,9 @@ angular.module('oncokbApp')
                 currentReviewer: ''
             };
         }
+        function Setting() {
+            this.enableReview = true;
+        }
         return {
             Gene: Gene,
             Mutation: Mutation,
@@ -563,6 +566,7 @@ angular.module('oncokbApp')
             Cancertype: Cancertype,
             VUSItem: VUSItem,
             TimeStamp: TimeStamp,
-            Meta: Meta
+            Meta: Meta,
+            Setting: Setting
         };
     }]);

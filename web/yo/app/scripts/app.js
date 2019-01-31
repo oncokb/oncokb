@@ -164,6 +164,9 @@ angular.module('oncokbApp').run(
                 }
             };
 
+            // Load setting collection from firebase when the app is initialized.
+            loadFiles.load('setting').then(function(result) {}, function(error) {});
+
             // Error loading the document, likely due revoked access. Redirect back to home/install page
             $rootScope.$on('$routeChangeError', function() {
                 $location.url('/');
