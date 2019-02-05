@@ -20,4 +20,6 @@ User-agent: *
 Disallow: /
 </c:if>
 
+Secured?<%=request.isSecure()%>
+Protocol?<%=request.getProtocol()%>
 
