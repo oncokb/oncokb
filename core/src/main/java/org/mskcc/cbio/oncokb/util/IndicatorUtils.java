@@ -12,7 +12,7 @@ import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static org.mskcc.cbio.oncokb.util.LevelUtils.LEVELS;
+import static org.mskcc.cbio.oncokb.util.LevelUtils.TREATMENT_SORTING_LEVEL_PRIORITY;
 
 /**
  * Created by hongxinzhang on 4/5/16.
@@ -71,6 +71,8 @@ public class IndicatorUtils {
             query.setAlteration("");
         }
 
+
+        Boolean isStructuralVariantEvent = false;
         // Deal with fusion without primary gene, and this is only for legacy fusion event
         // The latest fusion event has been integrated with alteration type. Please see next if-else condition
         // for more info.
@@ -80,6 +82,7 @@ public class IndicatorUtils {
         if (query.getHugoSymbol() != null
             && alterationType != null &&
             alterationType.equals(AlterationType.FUSION)) {
+            isStructuralVariantEvent = true;
             fusionGeneAltsMap = findFusionGeneAndRelevantAlts(query);
 
             // Dup: For single gene deletion event. We should map to Deletion instead of Truncating Mutation when Deletion has been curated
@@ -102,6 +105,7 @@ public class IndicatorUtils {
             relevantAlterations = (List<Alteration>) fusionGeneAltsMap.get("relevantAlts");
             Set<Gene> allGenes = (LinkedHashSet<Gene>) fusionGeneAltsMap.get("allGenes");
         } else if (alterationType != null && alterationType.equals(AlterationType.STRUCTURAL_VARIANT)) {
+            isStructuralVariantEvent = true;
             VariantConsequence variantConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm(query.getConsequence());
             Boolean isFunctionalFusion = variantConsequence != null && variantConsequence.getTerm().equals("fusion");
 
@@ -193,6 +197,11 @@ public class IndicatorUtils {
             List<TumorType> oncoTreeTypes = new ArrayList<>();
 
             Alteration matchedAlt = AlterationUtils.findAlteration(alteration.getGene(), alteration.getAlteration());
+
+            if(matchedAlt == null && isStructuralVariantEvent) {
+                matchedAlt = AlterationUtils.getRevertFusions(alteration);
+            }
+
             indicatorQuery.setVariantExist(matchedAlt != null);
 
             if(matchedAlt == null) {
@@ -484,7 +493,7 @@ public class IndicatorUtils {
         if (evidences != null) {
             Map<LevelOfEvidence, Set<Evidence>> evidenceSetMap = EvidenceUtils.separateEvidencesByLevel(evidences);
 
-            ListIterator<LevelOfEvidence> li = LEVELS.listIterator(LEVELS.size());
+            ListIterator<LevelOfEvidence> li = TREATMENT_SORTING_LEVEL_PRIORITY.listIterator(TREATMENT_SORTING_LEVEL_PRIORITY.size());
             while (li.hasPrevious()) {
                 LevelOfEvidence level = li.previous();
                 if (evidenceSetMap.containsKey(level)) {

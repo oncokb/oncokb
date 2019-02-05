@@ -36,7 +36,17 @@ public final class NcbiEUtils {
     }
 
     public static Set<Article> readPubmedArticles(Set<String> pmids) {
-        String url = URL_NCBI_EUTILS + "esummary.fcgi?api_key=8ae6e22c6cc8adeb55eba851959c64f1ce09&db=pubmed&retmode=json&id=" + MainUtils.listToString(new ArrayList<>(pmids), ",");
+        String apiKey = PropertiesUtils.getProperties("ncbi.api.key");
+
+        try {
+            if (apiKey == null) {
+                throw new Exception();
+            }
+        } catch (Exception e) {
+            System.out.println("NCBI API KEY needs to be specified. Please see here for details: https://www.ncbi.nlm.nih.gov/books/NBK25497/");
+            e.printStackTrace();
+        }
+        String url = URL_NCBI_EUTILS + "esummary.fcgi?api_key=" + apiKey + "&db=pubmed&retmode=json&id=" + MainUtils.listToString(new ArrayList<>(pmids), ",");
 
         Set<Article> results = new HashSet<>();
 
@@ -117,9 +127,11 @@ public final class NcbiEUtils {
 
     private static String formatAuthors(List<Map<String, String>> authors) {
         StringBuilder sb = new StringBuilder();
-        sb.append(authors.get(0).get("name"));
-        if (authors.size() > 1) {
-            sb.append(" et al");
+        if (authors != null && authors.size() > 0) {
+            sb.append(authors.get(0).get("name"));
+            if (authors.size() > 1) {
+                sb.append(" et al");
+            }
         }
         return sb.toString();
     }
