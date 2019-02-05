@@ -4,13 +4,15 @@
 <%@ page import="javax.servlet.http.*" %>
 <%@ page import="org.mskcc.cbio.oncokb.util.PropertiesUtils"%>
 <%
-String protocol = (request.isSecure()) ? "https" : "http";
+String url = request.getRequestURL().toString();
+String baseUrl = url.substring(0, url.length() - request.getRequestURI().length()) + request.getContextPath();
+
 if (!PropertiesUtils.showSiteMaps()) {
     response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 }
 %>
 <c:if test = "${PropertiesUtils.showSiteMaps()}">
-Sitemap: <%=protocol%>://<%=request.getServerName()%>/sitemap_index.xml
+Sitemap: <%=baseUrl%>/sitemap_index.xml
 </c:if>
 
 <c:if test = "${!PropertiesUtils.showSiteMaps()}">
