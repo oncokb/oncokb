@@ -42,4 +42,12 @@ public final class PropertiesUtils {
         // use system property if available, otherwise get from file
         return System.getProperty(name, PROPERTIES.get(name) == null ? null : (String)PROPERTIES.get(name));
     }
+
+    public static boolean showSiteMaps() {
+        try {
+            return new Boolean(getProperties("show_sitemaps"));
+        } catch (IOException e) {
+            return false;
+        }
+    }
 }
