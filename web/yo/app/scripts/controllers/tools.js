@@ -2,10 +2,11 @@
 
 angular.module('oncokbApp')
     .controller('ToolsCtrl', ['$scope', 'dialogs', 'OncoKB', 'DatabaseConnector', '$timeout', '_', 'FindRegex',
-        'mainUtils', 'loadFiles', '$rootScope', 'DTColumnDefBuilder', 'DTOptionsBuilder',
+        'mainUtils', 'loadFiles', '$rootScope', 'DTColumnDefBuilder', 'DTOptionsBuilder', 'FirebaseModel', '$q',
         function($scope, dialogs, OncoKB, DatabaseConnector, $timeout, _, FindRegex, mainUtils, loadFiles, $rootScope,
-                 DTColumnDefBuilder, DTOptionsBuilder) {
+                 DTColumnDefBuilder, DTOptionsBuilder, FirebaseModel, $q) {
             $scope.init = function() {
+                $scope.newGenes = [];
                 $scope.loading = false;
                 $scope.typeCheckboxes = ['update', 'name change', 'add', 'delete'];
                 $scope.selectedTypeCheckboxes = [];
@@ -20,6 +21,11 @@ angular.module('oncokbApp')
                     $scope.geneNames = _.keys($rootScope.historyData);
                 }, function() {
                     dialogs.notify('Warning', 'Sorry, the system failed to load history. Please try again or search later.');
+                });
+                loadFiles.load('meta').then(function(result) {
+                    $scope.hugoSymbols = _.without(_.keys($rootScope.metaData), 'collaborators');
+                }, function() {
+                    dialogs.notify('Warning', 'Sorry, the system failed to load meta. Please try again or search later.');
                 });
             };
             var sorting = [[2, 'desc'], [1, 'asc'], [0, 'asc']];
@@ -600,4 +606,43 @@ angular.module('oncokbApp')
                     $scope.selectedTypeCheckboxes.push(checkbox);
                 }
             };
+
+            $scope.create = function() {
+                var promises = [];
+                $scope.createdGenes = [];
+                _.each($scope.newGenes.split(","), function (geneName) {
+                    promises.push(createGene(geneName.trim().toUpperCase()));
+                });
+                $q.all(promises).then(function() {});
+            };
+
+            function createGene(geneName) {
+                var deferred = $q.defer();
+                if ($scope.hugoSymbols.includes(geneName)) {
+                    dialogs.notify('Warning', 'Sorry, gene ' + geneName + ' has been created.');
+                } else {
+                    var gene = new FirebaseModel.Gene(geneName);
+                    mainUtils.setIsoFormAndGeneType(gene).then(function () {
+                        firebase.database().ref('Genes/' + geneName).set(gene).then(function(result) {
+                            var meta = new FirebaseModel.Meta();
+                            firebase.database().ref('Meta/' + geneName).set(meta).then(function(result) {
+                                $scope.createdGenes.push(geneName);
+                                deferred.resolve();
+                            }, function(error) {
+                                // Delete saved new gene from Genes collection
+                                firebase.database().ref('Genes/' + geneName).remove();
+                                dialogs.notify('Warning', 'Failed to create a Meta record for the new gene ' + geneName + '!');
+                                deferred.reject(error);
+                            });
+                        }, function(error) {
+                            dialogs.notify('Warning', 'Failed to create the  gene ' + geneName + '!');
+                            deferred.reject(error);
+                        });
+                    }, function(error) {
+                        dialogs.notify('Warning', 'Failed to create the  gene ' + geneName + '!');
+                        deferred.reject(error);
+                    });
+                }
+                return deferred.promise;
+            }
         }]);

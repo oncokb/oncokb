@@ -1,4 +1,16 @@
 <div class="reportGenerator" ng-init="init()">
+    <h3>Create Genes</h3>
+    <div style="max-width: 400px;">
+        <span class="input-group input-group-sm" role="group" ng-show="me.admin">
+            <input type="text" class="form-control" ng-model="newGenes" placeholder="Comma-separated gene names">
+            <span class="input-group-btn">
+                <button type="button" class="btn btn-default btn-secondary" ng-click="create()">Create Genes</button>
+            </span>
+        </span>
+        <span ng-if="createdGenes.length > 0" class="success-info">Create genes {{ createdGenes.join(', ') }} successfully.</span>
+    </div>
+    <hr/>
+
     <h3>Review History</h3>
     <div class="row first-row-margin">
         <div class="col-sm-1">Genes:</div>
