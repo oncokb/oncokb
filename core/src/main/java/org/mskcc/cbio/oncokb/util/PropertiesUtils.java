@@ -55,11 +55,7 @@ public final class PropertiesUtils {
     }
 
     public static boolean showSiteMaps() {
-        try {
-            return new Boolean(getProperties("show_sitemaps"));
-        } catch (IOException e) {
-            return false;
-        }
+        return new Boolean(getProperties("show_sitemaps"));
     }
 
     public static String getCurationPlatformConfigs() {
