@@ -145,18 +145,6 @@ angular.module('oncokbApp')
                 mainTypes: {}
             };
             $scope.mappedTumorTypes = {};
-            $scope.newGenes = [];
-
-            $scope.create = function() {
-                var promises = [];
-                $scope.createdGenes = [];
-                _.each($scope.newGenes.split(","), function (geneName) {
-                    promises.push(createGene(geneName.trim().toUpperCase()));
-                });
-                $q.all(promises).then(function() {
-                    processMeta();
-                });
-            };
 
             $scope.changeCacheStatus = function() {
                 if ($scope.status.cache === 'enabled') {
@@ -188,39 +176,6 @@ angular.module('oncokbApp')
             $scope.developerCheck = function() {
                 return mainUtils.developerCheck($rootScope.me.name);
             };
-
-            function createGene(geneName) {
-                var deferred = $q.defer();
-                if ($scope.hugoSymbols.includes(geneName)) {
-                    dialogs.notify('Warning', 'Sorry, gene ' + geneName + ' has been created.');
-                } else {
-                    var gene = new FirebaseModel.Gene(geneName);
-                    mainUtils.setIsoFormAndGeneType(gene).then(function () {
-                        firebase.database().ref('Genes/' + geneName).set(gene).then(function(result) {
-                            var meta = new FirebaseModel.Meta();
-                            firebase.database().ref('Meta/' + geneName).set(meta).then(function(result) {
-                                $scope.createdGenes.push(geneName);
-                                deferred.resolve();
-                            }, function(error) {
-                                // Delete saved new gene from Genes collection
-                                firebase.database().ref('Genes/' + geneName).remove();
-                                console.log(error);
-                                dialogs.notify('Warning', 'Failed to create a Meta record for the new gene ' + geneName + '!');
-                                deferred.reject(error);
-                            });
-                        }, function(error) {
-                            console.log(error);
-                            dialogs.notify('Warning', 'Failed to create the  gene ' + geneName + '!');
-                            deferred.reject(error);
-                        });
-                    }, function(error) {
-                        console.log(error);
-                        dialogs.notify('Warning', 'Failed to create the  gene ' + geneName + '!');
-                        deferred.reject(error);
-                    });
-                }
-                return deferred.promise;
-            }
 
             function getCacheStatus() {
                 DatabaseConnector.getCacheStatus().then(function(result) {
