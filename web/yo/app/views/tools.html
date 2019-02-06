@@ -118,12 +118,14 @@
                 <tr ng-repeat="item in reviewedData[evidenceType].body">
                     <td ng-repeat="key in reviewedData[evidenceType].keys">
                         <div ng-switch on="key">
-                                <div ng-switch-when="gene">
-                                    <strong><a href="#!/gene/{{item.gene}}">{{ item.gene }}</a></strong>
-                                </div>
+                            <div ng-switch-when="gene">
+                                <strong><a href="#!/gene/{{item.gene}}">{{ item.gene }}</a></strong>
+                            </div>
+                            <div ng-if="evidenceType !== 'drugs'">
                                 <div class="reviewedData" ng-switch-when="mutation">{{item.mutation}}</div>
                                 <div class="reviewedData" ng-switch-when="drugs">{{item.drugs}}</div>
-                                <div ng-switch-default>{{ item[key] }}</div>
+                            </div>
+                            <div ng-switch-default>{{ item[key] }}</div>
                         </div>
                     </td>
                 </tr>

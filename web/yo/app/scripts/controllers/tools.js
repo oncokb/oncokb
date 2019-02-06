@@ -186,6 +186,12 @@ angular.module('oncokbApp')
             };
             $scope.evidenceType = '';
             $scope.evidenceTypes = [{
+                label: 'Gene Summary',
+                value: 'geneSummary'
+            }, {
+                label: 'Gene Background',
+                value: 'geneBackground'
+            }, {
                 label: 'Oncogene/Tumor Suppressor',
                 value: 'geneType'
             }, {
@@ -202,6 +208,20 @@ angular.module('oncokbApp')
                 value: 'drugs'
             }];
             $scope.reviewedData = {
+                geneSummary: {
+                    header: ['Gene', 'Summary'],
+                    body: [],
+                    keys: ['gene', 'summary'],
+                    fileName: 'GeneSummary.xls',
+                    evidenceTypes: 'GENE_SUMMARY'
+                },
+                geneBackground: {
+                    header: ['Gene', 'Background'],
+                    body: [],
+                    keys: ['gene', 'background'],
+                    fileName: 'GeneBackground.xls',
+                    evidenceTypes: 'GENE_BACKGROUND'
+                },
                 geneType: {
                     header: ['Gene', 'Oncogene', 'Tumor Suppressor', 'Truncating Mutations', 'Deletion', 'Amplification'],
                     body: [],
@@ -231,9 +251,9 @@ angular.module('oncokbApp')
                     evidenceTypes: 'TUMOR_TYPE_SUMMARY,STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY,STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE,INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY,INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE'
                 },
                 drugs: {
-                    header: ['Gene', 'Mutation', 'Tumor Type', 'Drugs', 'Level', 'Description', 'Citations'],
+                    header: ['Gene', 'Mutation', 'Tumor Type', 'Drugs', 'Level', 'Propagation', 'Description', 'Citations'],
                     body: [],
-                    keys: ['gene', 'mutation', 'tumorType', 'drugs', 'level', 'description', 'citations'],
+                    keys: ['gene', 'mutation', 'tumorType', 'drugs', 'level', 'propagation', 'description', 'citations'],
                     fileName: 'Therapeutics.xls',
                     evidenceTypes: 'STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY,STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE,INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY,INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE'
                 }
@@ -250,13 +270,20 @@ angular.module('oncokbApp')
             }
             $scope.generateEvidences = function () {
                 $scope.loadingReviewed = true;
-                $scope.reviewedData.geneType.body = [];
-                $scope.reviewedData.mutationEffect.body = [];
-                $scope.reviewedData.tumorSummary.body = [];
-                $scope.reviewedData.drugs.body = [];
 
                 DatabaseConnector.getReviewedData($scope.reviewedData[$scope.evidenceType].evidenceTypes).then(function(response) {
-                    if ($scope.evidenceType === 'geneType') {
+                    if ($scope.evidenceType === 'geneSummary' || $scope.evidenceType === 'geneBackground') {
+                        // key = 'summary' or key = 'background'
+                        var key = $scope.reviewedData[$scope.evidenceType].keys[1];
+                        _.each(response.data, function(item) {
+                            var tempObj = {
+                                gene: item.gene.hugoSymbol
+                            };
+                            tempObj[key] = item.description;
+                            $scope.reviewedData[$scope.evidenceType].body.push(tempObj);
+                        });
+                        finishLoadingReviewedData();
+                    } else if ($scope.evidenceType === 'geneType') {
                         var variantLookupBody = _.map(response.data, function(item) {
                             return {
                                 hugoSymbol: item.hugoSymbol
@@ -360,6 +387,7 @@ angular.module('oncokbApp')
                                             mutation: getAlterations(item.alterations),
                                             drugs: drugs.join(),
                                             level: item.levelOfEvidence,
+                                            propagation: item.propagation,
                                             description: item.description,
                                             citations: getCitations(item.description)
                                         };
