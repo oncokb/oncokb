@@ -35,6 +35,9 @@
 
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+        <loc>${serverRoot}/gene/${hugoSymbol}</loc>
+    </url>
     <c:forEach items="${alterationList}" var="alteration">
         <url>
             <loc>${serverRoot}/gene/${hugoSymbol}/<c:out value="${alteration.get('name')}"/></loc>

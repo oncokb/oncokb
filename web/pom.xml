@@ -107,23 +107,6 @@
                         </executions>
                     </plugin>
                     <plugin>
-                        <artifactId>exec-maven-plugin</artifactId>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <executions>
-                            <execution>
-                                <id>Version Calculation</id>
-                                <goals>
-                                    <goal>exec</goal>
-                                </goals>
-                                <phase>process-resources</phase>
-                                <configuration>
-                                    <executable>bash</executable>
-                                    <commandlineArgs>generate_public_content_jsp.sh</commandlineArgs>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
                         <artifactId>maven-war-plugin</artifactId>
                         <version>2.3</version>
                         <configuration>
