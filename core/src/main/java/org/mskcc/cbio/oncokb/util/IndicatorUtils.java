@@ -71,6 +71,8 @@ public class IndicatorUtils {
             query.setAlteration("");
         }
 
+
+        Boolean isStructuralVariantEvent = false;
         // Deal with fusion without primary gene, and this is only for legacy fusion event
         // The latest fusion event has been integrated with alteration type. Please see next if-else condition
         // for more info.
@@ -80,6 +82,7 @@ public class IndicatorUtils {
         if (query.getHugoSymbol() != null
             && alterationType != null &&
             alterationType.equals(AlterationType.FUSION)) {
+            isStructuralVariantEvent = true;
             fusionGeneAltsMap = findFusionGeneAndRelevantAlts(query);
 
             // Dup: For single gene deletion event. We should map to Deletion instead of Truncating Mutation when Deletion has been curated
@@ -102,6 +105,7 @@ public class IndicatorUtils {
             relevantAlterations = (List<Alteration>) fusionGeneAltsMap.get("relevantAlts");
             Set<Gene> allGenes = (LinkedHashSet<Gene>) fusionGeneAltsMap.get("allGenes");
         } else if (alterationType != null && alterationType.equals(AlterationType.STRUCTURAL_VARIANT)) {
+            isStructuralVariantEvent = true;
             VariantConsequence variantConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm(query.getConsequence());
             Boolean isFunctionalFusion = variantConsequence != null && variantConsequence.getTerm().equals("fusion");
 
@@ -193,6 +197,11 @@ public class IndicatorUtils {
             List<TumorType> oncoTreeTypes = new ArrayList<>();
 
             Alteration matchedAlt = AlterationUtils.findAlteration(alteration.getGene(), alteration.getAlteration());
+
+            if(matchedAlt == null && isStructuralVariantEvent) {
+                matchedAlt = AlterationUtils.getRevertFusions(alteration);
+            }
+
             indicatorQuery.setVariantExist(matchedAlt != null);
 
             if(matchedAlt == null) {

@@ -510,6 +510,12 @@ public class IndicatorUtilsTest {
         resp2 = IndicatorUtils.processQuery(query2, null, null, null, true, null);
         pairComparison(resp1, resp2);
 
+        // When queried gene order is different, but one of the combinations exists, then the variantExist should be set to true
+        query1 = new Query(null, null, null, "BCR-ABL1", null, "structural_variant", StructuralVariantType.DELETION, "Lung Adenocarcinoma", "fusion", null, null, null);
+        query2 = new Query(null, null, null, "ABL1-BCR", null, "structural_variant", StructuralVariantType.DELETION, "Lung Adenocarcinoma", "fusion", null, null, null);
+        resp1 = IndicatorUtils.processQuery(query1, null, null, null, true, null);
+        resp2 = IndicatorUtils.processQuery(query2, null, null, null, true, null);
+        pairComparison(resp1, resp2);
 
         // handle mixed input for structural variant deletion
         query1 = new Query(null, null, null, "EGFR", "KDD", "structural_variant", StructuralVariantType.DUPLICATION, "NSCLC", null, null, null, null);
@@ -526,7 +532,12 @@ public class IndicatorUtilsTest {
     }
 
     private void pairComparison(IndicatorQueryResp resp1, IndicatorQueryResp resp2) {
+        pairComparison(resp1, resp1, false);
+    }
+
+    private void pairComparison(IndicatorQueryResp resp1, IndicatorQueryResp resp2, boolean skipSummary) {
         assertTrue("The gene exist should be the same.", resp1.getGeneExist().equals(resp2.getGeneExist()));
+        assertTrue("The variant exist should be the same.", resp1.getVariantExist().equals(resp2.getVariantExist()));
         assertTrue("The oncogenicity should be the same.", resp1.getOncogenic().equals(resp2.getOncogenic()));
         assertTrue("The VUS info should be the same", resp1.getVUS().equals(resp2.getVUS()));
 
@@ -542,9 +553,11 @@ public class IndicatorUtilsTest {
             assertTrue("The highest resistance level should be the same.", resp1.getHighestResistanceLevel().equals(resp2.getHighestResistanceLevel()));
         }
 
-        assertTrue("The gene summary should be the same.", resp1.getGeneSummary().equals(resp2.getGeneSummary()));
-        assertTrue("The variant summary should be the same.", resp1.getVariantSummary().equals(resp2.getVariantSummary()));
-        assertTrue("The tumor type summary should be the same.", resp1.getTumorTypeSummary().equals(resp2.getTumorTypeSummary()));
+        if (!skipSummary) {
+            assertTrue("The gene summary should be the same.", resp1.getGeneSummary().equals(resp2.getGeneSummary()));
+            assertTrue("The variant summary should be the same.", resp1.getVariantSummary().equals(resp2.getVariantSummary()));
+            assertTrue("The tumor type summary should be the same.", resp1.getTumorTypeSummary().equals(resp2.getTumorTypeSummary()));
+        }
     }
 
     private Boolean treatmentsContainLevel(List<IndicatorQueryTreatment> treatments, LevelOfEvidence level) {

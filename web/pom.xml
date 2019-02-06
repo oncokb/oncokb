@@ -6,10 +6,10 @@
     <parent>
         <groupId>org.mskcc.cbio.oncokb</groupId>
         <artifactId>master</artifactId>
-        <version>0.3.11</version>
+        <version>0.3.12</version>
     </parent>
     <artifactId>web</artifactId>
-    <version>0.3.11</version>
+    <version>0.3.12</version>
     <packaging>war</packaging>
 
     <name>OncoKB Web</name>
@@ -90,6 +90,23 @@
                         </configuration>
                     </plugin>
                     <plugin>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <executions>
+                            <execution>
+                                <id>Version Calculation</id>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <phase>process-resources</phase>
+                                <configuration>
+                                    <executable>bash</executable>
+                                    <commandlineArgs>scripts/generate_content_jsp.sh -p ${web.folder}</commandlineArgs>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
                         <artifactId>maven-war-plugin</artifactId>
                         <version>2.3</version>
                         <configuration>
@@ -146,6 +163,34 @@
             </build>
         </profile>
         <profile>
+            <id>production</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.spotify</groupId>
+                        <artifactId>dockerfile-maven-plugin</artifactId>
+                        <version>1.4.8</version>
+                        <executions>
+                            <execution>
+                                <id>default</id>
+                                <goals>
+                                    <goal>build</goal>
+                                    <goal>push</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <repository>cbioportal/oncokb</repository>
+                            <tag>${project.version}</tag>
+                            <buildArgs>
+                                <JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
+                            </buildArgs>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
             <id>curate</id>
             <properties>
                 <web.folder>yo</web.folder>
@@ -153,20 +198,84 @@
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>com.github.trecloux</groupId>
-                        <artifactId>yeoman-maven-plugin</artifactId>
-                        <version>0.5</version>
+                        <groupId>com.github.eirslett</groupId>
+                        <artifactId>frontend-maven-plugin</artifactId>
+                        <version>1.0</version>
+
                         <executions>
                             <execution>
+                                <id>install node and npm</id>
                                 <goals>
-                                    <goal>build</goal>
+                                    <goal>install-node-and-npm</goal>
                                 </goals>
+                                <configuration>
+                                    <!-- See https://nodejs.org/en/download/ for latest node and npm (lts) versions -->
+                                    <nodeVersion>v8.12.0</nodeVersion>
+                                    <npmVersion>6.4.1</npmVersion>
+                                </configuration>
+                            </execution>
+
+                            <execution>
+                                <id>npm install</id>
+                                <goals>
+                                    <goal>npm</goal>
+                                </goals>
+                                <configuration>
+                                    <arguments>ci</arguments>
+                                </configuration>
+                            </execution>
+
+                            <execution>
+                                <id>bower install</id>
+                                <goals>
+                                    <goal>bower</goal>
+                                </goals>
+
+                                <configuration>
+                                    <!-- optional: The default argument is actually
+                                    "install", so unless you need to run some other bower command,
+                                    you can remove this whole <configuration> section.
+                                    -->
+                                    <arguments>install</arguments>
+                                </configuration>
+                            </execution>
+
+                            <execution>
+                                <id>grunt build</id>
+                                <goals>
+                                    <goal>grunt</goal>
+                                </goals>
+
+                                <!-- optional: the default phase is "generate-resources" -->
+                                <phase>generate-resources</phase>
+
+                                <configuration>
+                                    <!-- optional: if not specified, it will run Grunt's default
+                                    task (and you can remove this whole <configuration> section.) -->
+                                    <arguments>build</arguments>
+                                </configuration>
                             </execution>
                         </executions>
                         <configuration>
-                            <skipTests>true</skipTests>
-                            <yeomanProjectDirectory>${web.folder}</yeomanProjectDirectory>
+                            <workingDirectory>${web.folder}</workingDirectory>
                         </configuration>
+                    </plugin>
+                    <plugin>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <executions>
+                            <execution>
+                                <id>Version Calculation</id>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <phase>process-resources</phase>
+                                <configuration>
+                                    <executable>bash</executable>
+                                    <commandlineArgs>scripts/generate_content_jsp.sh -p ${web.folder}</commandlineArgs>
+                                </configuration>
+                            </execution>
+                        </executions>
                     </plugin>
                     <plugin>
                         <artifactId>maven-war-plugin</artifactId>
