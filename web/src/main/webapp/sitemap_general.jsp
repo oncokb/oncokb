@@ -11,6 +11,7 @@
     if (!PropertiesUtils.showSiteMaps()) {
         response.setStatus(HttpServletResponse.SC_NOT_FOUND);
     } else {
+        response.setHeader("X-Robots-Tag", "noindex");
 
         String url = request.getRequestURL().toString();
         String baseUrl = url.substring(0, url.length() - request.getRequestURI().length()) + request.getContextPath();
@@ -29,7 +30,7 @@
         </url>
         <url>
             <loc>${serverRoot}/actionableGenes></loc>
-            <changefreq>monthly</changefreq>
+            <changefreq>weekly</changefreq>
             <priority>0.9</priority>
         </url>
         <url>
@@ -39,18 +40,13 @@
         </url>
         <url>
             <loc>${serverRoot}/news></loc>
-            <changefreq>monthly</changefreq>
+            <changefreq>weekly</changefreq>
             <priority>0.7</priority>
         </url>
         <url>
             <loc>${serverRoot}/cancerGenes></loc>
-            <changefreq>monthly</changefreq>
+            <changefreq>weekly</changefreq>
             <priority>0.6</priority>
-        </url>
-        <url>
-            <loc>${serverRoot}/api></loc>
-            <changefreq>monthly</changefreq>
-            <priority>0.5</priority>
         </url>
         <url>
             <loc>${serverRoot}/about></loc>

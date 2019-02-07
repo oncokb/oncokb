@@ -16,6 +16,7 @@
     if (!PropertiesUtils.showSiteMaps()) {
         response.setStatus(HttpServletResponse.SC_NOT_FOUND);
     } else {
+        response.setHeader("X-Robots-Tag", "noindex");
 
 %>
 

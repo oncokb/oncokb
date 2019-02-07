@@ -11,6 +11,7 @@
     if (!PropertiesUtils.showSiteMaps()) {
         response.setStatus(HttpServletResponse.SC_NOT_FOUND);
     } else {
+        response.setHeader("X-Robots-Tag", "noindex");
 
         String url = request.getRequestURL().toString();
         String baseUrl = url.substring(0, url.length() - request.getRequestURI().length()) + request.getContextPath();
