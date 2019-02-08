@@ -8,6 +8,8 @@ public enum EvidenceType {
     MUTATION_SUMMARY("Mutation summary"),
     TUMOR_TYPE_SUMMARY("Tumor type summary"),
     GENE_TUMOR_TYPE_SUMMARY("Gene tumor type summary"),
+    PROGNOSTIC_SUMMARY("Prognostic summary"),
+    DIAGNOSTIC_SUMMARY("Diagnostic summary"),
     GENE_BACKGROUND("Gene background"),
     ONCOGENIC("Oncogenic"),
     MUTATION_EFFECT("Mutation effect"),

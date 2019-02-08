@@ -17,32 +17,33 @@ import java.util.Set;
 public class LevelsApiController implements LevelsApi {
 
     public ResponseEntity<Map<LevelOfEvidence, String>> levelsGet() {
-        Set<LevelOfEvidence> levelOfEvidenceSet = LevelUtils.getAllLevels();
-        Map<LevelOfEvidence, String> map = new HashedMap();
-
-        for (LevelOfEvidence levelOfEvidence : levelOfEvidenceSet) {
-            map.put(levelOfEvidence, levelOfEvidence.getDescription());
-        }
-        return new ResponseEntity<>(map, HttpStatus.OK);
+        return new ResponseEntity<>(getMap(LevelUtils.getAllLevels()), HttpStatus.OK);
     }
 
     public ResponseEntity<Map<LevelOfEvidence, String>> levelsResistanceGet() {
-        Set<LevelOfEvidence> levelOfEvidenceSet = LevelUtils.getResistanceLevels();
-        Map<LevelOfEvidence, String> map = new HashedMap();
-
-        for (LevelOfEvidence levelOfEvidence : levelOfEvidenceSet) {
-            map.put(levelOfEvidence, levelOfEvidence.getDescription());
-        }
-        return new ResponseEntity<>(map, HttpStatus.OK);
+        return new ResponseEntity<>(getMap(LevelUtils.getResistanceLevels()), HttpStatus.OK);
     }
 
     public ResponseEntity<Map<LevelOfEvidence, String>> levelsSensitiveGet() {
-        Set<LevelOfEvidence> levelOfEvidenceSet = LevelUtils.getSensitiveLevels();
+        return new ResponseEntity<>(getMap(LevelUtils.getSensitiveLevels()), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<Map<LevelOfEvidence, String>> levelsPrognosticGet() {
+        return new ResponseEntity<>(getMap(LevelUtils.getPrognosticLevels()), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<Map<LevelOfEvidence, String>> levelsDiagnosticGet() {
+        return new ResponseEntity<>(getMap(LevelUtils.getDignosticLevels()), HttpStatus.OK);
+    }
+
+    private Map<LevelOfEvidence, String> getMap(Set<LevelOfEvidence> levels) {
         Map<LevelOfEvidence, String> map = new HashedMap();
 
-        for (LevelOfEvidence levelOfEvidence : levelOfEvidenceSet) {
+        for (LevelOfEvidence levelOfEvidence : levels) {
             map.put(levelOfEvidence, levelOfEvidence.getDescription());
         }
-        return new ResponseEntity<>(map, HttpStatus.OK);
+        return map;
     }
 }

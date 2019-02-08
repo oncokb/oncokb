@@ -201,6 +201,18 @@
                     </h5>
                     <realtime-string t="'p'" key="'summary'" path="path" uuid="getUUID({type: 'tumor', key: 'summary', path: path})" mutation="mutation" tumor="tumor" indicate-mutation-content="indicateMutationContent(mutation)" indicate-tumor-content="indicateTumorContent(tumor)"></realtime-string>
                   </div>
+                  <div ng-show="displayPrecisely(tumor.diagnosticSummary_uuid)">
+                      <h5><b>Diagnostic Summary (Optional): </b>
+                          <review-panel hugo-symbol="gene.name" uuid="tumor.diagnosticSummary_uuid" review-obj="tumor.diagnosticSummary_review" evidence-type="'DIAGNOSTIC_SUMMARY'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)" get-refs="getRefs(mutation, tumor)"></review-panel>
+                      </h5>
+                      <realtime-string t="'p'" key="'diagnosticSummary'" path="path" uuid="getUUID({type: 'tumor', key: 'diagnosticSummary', path: path})" mutation="mutation" tumor="tumor" indicate-mutation-content="indicateMutationContent(mutation)" indicate-tumor-content="indicateTumorContent(tumor)"></realtime-string>
+                  </div>
+                  <div ng-show="displayPrecisely(tumor.prognosticSummary_uuid)">
+                      <h5><b>Prognostic Summary (Optional): </b>
+                          <review-panel hugo-symbol="gene.name" uuid="tumor.prognosticSummary_uuid" review-obj="tumor.prognosticSummary_review" evidence-type="'PROGNOSTIC_SUMMARY'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)" get-refs="getRefs(mutation, tumor)"></review-panel>
+                      </h5>
+                      <realtime-string t="'p'" key="'prognosticSummary'" path="path" uuid="getUUID({type: 'tumor', key: 'prognosticSummary', path: path})" mutation="mutation" tumor="tumor" indicate-mutation-content="indicateMutationContent(mutation)" indicate-tumor-content="indicateTumorContent(tumor)"></realtime-string>
+                  </div>
                 <!-- Diagnostic -->
                 <div class="sectionStyle" ng-init="diagnosticPath=getObservePath({type:'diagnostic', path: path});" ng-show="displayCheck(tumor.diagnostic_uuid)">
                   <div class="headerLevel3">
