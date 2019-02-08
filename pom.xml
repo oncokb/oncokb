@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.mskcc.cbio.oncokb</groupId>
     <artifactId>master</artifactId>
-    <version>0.3.12</version>
+    <version>0.3.13</version>
     <packaging>pom</packaging>
     <modules>
         <module>web</module>
@@ -68,6 +68,11 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
             <version>1.6.1</version>
+        </dependency>
+        <dependency>
+            <groupId>jstl</groupId>
+            <artifactId>jstl</artifactId>
+            <version>1.2</version>
         </dependency>
     </dependencies>
 </project>
