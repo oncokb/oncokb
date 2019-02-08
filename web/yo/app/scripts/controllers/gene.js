@@ -555,6 +555,17 @@ angular.module('oncokbApp')
                             userNames.push(tumor.summary_review.updatedBy);
                             ReviewResource.updated.push(tumor.summary_uuid);
                         }
+                        if (isChangedSection([tumor.diagnosticSummary_uuid])) {
+                            tumorChanged = true;
+                            userNames.push(tumor.diagnosticSummary_review.updatedBy);
+                            ReviewResource.updated.push(tumor.diagnosticSummary_uuid);
+                        }
+                        if (isChangedSection([tumor.prognosticSummary_uuid])) {
+                            tumorChanged = true;
+                            userNames.push(tumor.prognosticSummary_review.updatedBy);
+                            ReviewResource.updated.push(tumor.prognosticSummary_uuid);
+                        }
+
                         _.each(tumor.TIs, function (ti) {
                             _.each(ti.treatments, function (treatment) {
                                 treatmentSectionChanged = false;

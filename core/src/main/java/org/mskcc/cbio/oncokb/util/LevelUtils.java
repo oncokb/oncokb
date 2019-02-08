@@ -5,6 +5,7 @@ import org.mskcc.cbio.oncokb.model.Evidence;
 import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
 
 import java.util.*;
+import java.util.logging.Level;
 
 /**
  * Created by hongxinzhang on 4/5/16.
@@ -35,6 +36,14 @@ public class LevelUtils {
 
     public static final List<LevelOfEvidence> OTHER_INDICATION_LEVELS = Collections.unmodifiableList(
         Arrays.asList(LevelOfEvidence.LEVEL_2B, LevelOfEvidence.LEVEL_3B)
+    );
+
+    public static final List<LevelOfEvidence> PROGNOSTIC_LEVELS = Collections.unmodifiableList(
+        Arrays.asList(LevelOfEvidence.LEVEL_Px3, LevelOfEvidence.LEVEL_Px2, LevelOfEvidence.LEVEL_Px1)
+    );
+
+    public static final List<LevelOfEvidence> DIAGNOSTIC_LEVELS = Collections.unmodifiableList(
+        Arrays.asList(LevelOfEvidence.LEVEL_Dx3, LevelOfEvidence.LEVEL_Dx2, LevelOfEvidence.LEVEL_Dx1)
     );
 
     public static Integer compareLevel(LevelOfEvidence a, LevelOfEvidence b) {
@@ -242,6 +251,14 @@ public class LevelUtils {
             add(LevelOfEvidence.LEVEL_R2);
             add(LevelOfEvidence.LEVEL_R3);
         }};
+    }
+
+    public static Set<LevelOfEvidence> getPrognosticLevels() {
+        return new HashSet<>(PROGNOSTIC_LEVELS);
+    }
+
+    public static Set<LevelOfEvidence> getDignosticLevels() {
+        return new HashSet<>(DIAGNOSTIC_LEVELS);
     }
 
     public static Boolean areSameLevels(LevelOfEvidence l1, LevelOfEvidence l2) {

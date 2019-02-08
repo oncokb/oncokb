@@ -346,6 +346,16 @@ public class IndicatorUtils {
                     new ArrayList<>(relevantAlterations), query));
             }
 
+            // Prognostic summary
+            if (evidenceTypes.contains(EvidenceType.PROGNOSTIC_SUMMARY)) {
+                // Todo: add prognostic summary
+            }
+
+            // Diagnostic summary
+            if (evidenceTypes.contains(EvidenceType.DIAGNOSTIC_SUMMARY)) {
+                // Todo: add diagnostic summary
+            }
+
             // This is special case for KRAS wildtype. May need to come up with a better plan for this.
             if (gene != null && (gene.getHugoSymbol().equals("KRAS") || gene.getHugoSymbol().equals("NRAS"))
                 && query.getAlteration() != null
