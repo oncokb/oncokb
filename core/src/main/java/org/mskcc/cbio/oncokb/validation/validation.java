@@ -328,7 +328,7 @@ public class validation {
     }
 
     private static Set<Evidence> getPublishedEvidencesByLevel(LevelOfEvidence levelOfEvidence) throws IOException {
-        String json = FileUtils.readRemote("http://oncokb.org/legacy-api/evidence.json?levels=" + levelOfEvidence.name());
+        String json = FileUtils.readRemote("https://oncokb.org/legacy-api/evidence.json?levels=" + levelOfEvidence.name());
 
         ObjectMapper mapper = new ObjectMapper()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);

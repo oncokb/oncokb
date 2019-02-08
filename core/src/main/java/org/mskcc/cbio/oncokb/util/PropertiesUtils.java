@@ -54,6 +54,10 @@ public final class PropertiesUtils {
         return System.getProperty(name, PROPERTIES.get(name) == null ? null : (String)PROPERTIES.get(name));
     }
 
+    public static boolean showSiteMaps() {
+        return new Boolean(getProperties("show_sitemaps"));
+    }
+
     public static String getCurationPlatformConfigs() {
         CurationPlatformConfigs curationPlatformConfigs = new CurationPlatformConfigs();
         curationPlatformConfigs.setApiLink(getProperties("curation_platform.api_link"));
