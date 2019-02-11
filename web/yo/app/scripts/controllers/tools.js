@@ -243,12 +243,26 @@ angular.module('oncokbApp')
                     fileName: 'TumorTypeSummary.xls',
                     evidenceTypes: 'TUMOR_TYPE_SUMMARY'
                 },
+                diagnosticSummary: {
+                    header: ['Gene', 'Mutation', 'Tumor Type', 'Tumor Summary'],
+                    body: [],
+                    keys: ['gene', 'mutation', 'tumorType', 'diagnosticSummary'],
+                    fileName: 'DiagnosticSummary.xls',
+                    evidenceTypes: 'DIAGNOSTIC_SUMMARY'
+                },
+                prognosticSummary: {
+                    header: ['Gene', 'Mutation', 'Tumor Type', 'Tumor Summary'],
+                    body: [],
+                    keys: ['gene', 'mutation', 'tumorType', 'prognosticSummary'],
+                    fileName: 'PrognosticSummary.xls',
+                    evidenceTypes: 'PROGNOSTIC_SUMMARY'
+                },
                 ttsDrugs: {
                     header: ['Gene', 'Mutation', 'Tumor Type', 'Tumor Summary', 'Drugs', 'Level'],
                     body: [],
                     keys: ['gene', 'mutation', 'tumorType', 'tumorSummary', 'drugs', 'level'],
                     fileName: 'TumorTypeSummaryDrugs.xls',
-                    evidenceTypes: 'TUMOR_TYPE_SUMMARY,STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY,STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE,INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY,INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE'
+                    evidenceTypes: 'TUMOR_TYPE_SUMMARY,DIAGNOSTIC_SUMMARY, PROGNOSTIC_SUMMARY, STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY,STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE,INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY,INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE'
                 },
                 drugs: {
                     header: ['Gene', 'Mutation', 'Tumor Type', 'Drugs', 'Level', 'Propagation', 'Description', 'Citations'],

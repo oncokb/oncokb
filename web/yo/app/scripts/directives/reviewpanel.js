@@ -297,6 +297,14 @@ angular.module('oncokbApp')
                                 var tumor =  $scope.getRefs($scope.mutation, $scope.tumor).tumor;
                                 rejectionItems.push({uuid: tumor.summary_uuid, key: 'summary', obj: tumor});
                                 break;
+                            case 'DIAGNOSTIC_SUMMARY':
+                                var tumor =  $scope.getRefs($scope.mutation, $scope.tumor).tumor;
+                                rejectionItems.push({uuid: tumor.diagnosticSummary_uuid, key: 'diagnosticSummary', obj: tumor});
+                                break;
+                            case 'PROGNOSTIC_SUMMARY':
+                                var tumor =  $scope.getRefs($scope.mutation, $scope.tumor).tumor;
+                                rejectionItems.push({uuid: tumor.prognosticSummary_uuid, key: 'prognosticSummary', obj: tumor});
+                                break;
                             case 'PROGNOSTIC_IMPLICATION':
                                 var tumor = $scope.getRefs($scope.mutation, $scope.tumor).tumor;
                                 _.each(['level', 'description'], function(key) {

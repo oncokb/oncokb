@@ -446,6 +446,33 @@ public class DriveAnnotationParser {
         return ret;
     }
 
+    private static void saveTumorLevelSummaries(JSONObject cancerObj, String summaryKey, Gene gene, Set<Alteration> alterations, TumorType oncoTreeType, EvidenceType evidenceType, Integer nestLevel) {
+        if (cancerObj.has(summaryKey) && !cancerObj.getString(summaryKey).isEmpty()) {
+            EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+            System.out.println(spaceStrByNestLevel(nestLevel + 1) + " " + summaryKey);
+            Date lastEdit = cancerObj.has(summaryKey + "_review") ? getUpdateTime(cancerObj.get(summaryKey + "_review")) : null;
+            Evidence evidence = new Evidence();
+            evidence.setEvidenceType(evidenceType);
+            evidence.setGene(gene);
+            evidence.setDescription(cancerObj.getString(summaryKey));
+            evidence.setUuid(cancerObj.has("summary_uuid") ? cancerObj.getString("summary_uuid") : "");
+            evidence.setAlterations(alterations);
+            evidence.setLastEdit(lastEdit);
+            if (lastEdit != null) {
+                System.out.println(spaceStrByNestLevel(nestLevel + 2) +
+                    "Last update on: " + MainUtils.getTimeByDate(lastEdit));
+            }
+            if (oncoTreeType.getMainType() != null) {
+                evidence.setCancerType(oncoTreeType.getMainType().getName());
+            }
+            evidence.setSubtype(oncoTreeType.getCode());
+            setDocuments(cancerObj.getString(summaryKey), evidence);
+            System.out.println(spaceStrByNestLevel(nestLevel + 2) +
+                "Has description.");
+            evidenceBo.save(evidence);
+        }
+    }
+
     private static void parseCancer(Gene gene, Set<Alteration> alterations, JSONObject cancerObj, String mainType, String code, Integer nestLevel) throws JSONException {
         if (mainType == null || mainType.equals("")) {
             return;
@@ -467,32 +494,12 @@ public class DriveAnnotationParser {
         System.out.println(spaceStrByNestLevel(nestLevel) + "Cancer type: " + mainType);
         System.out.println(spaceStrByNestLevel(nestLevel) + "Subtype code: " + code);
 
-        EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
-
         // cancer type summary
-        if (cancerObj.has("summary") && !cancerObj.getString("summary").isEmpty()) {
-            System.out.println(spaceStrByNestLevel(nestLevel + 1) + "Summary");
-            Date lastEdit = cancerObj.has("summary_review") ? getUpdateTime(cancerObj.get("summary_review")) : null;
-            Evidence evidence = new Evidence();
-            evidence.setEvidenceType(EvidenceType.TUMOR_TYPE_SUMMARY);
-            evidence.setGene(gene);
-            evidence.setDescription(cancerObj.getString("summary"));
-            evidence.setUuid(cancerObj.has("summary_uuid") ? cancerObj.getString("summary_uuid") : "");
-            evidence.setAlterations(alterations);
-            evidence.setLastEdit(lastEdit);
-            if (lastEdit != null) {
-                System.out.println(spaceStrByNestLevel(nestLevel + 2) +
-                    "Last update on: " + MainUtils.getTimeByDate(lastEdit));
-            }
-            if (oncoTreeType.getMainType() != null) {
-                evidence.setCancerType(oncoTreeType.getMainType().getName());
-            }
-            evidence.setSubtype(oncoTreeType.getCode());
-            setDocuments(cancerObj.getString("summary"), evidence);
-            System.out.println(spaceStrByNestLevel(nestLevel + 2) +
-                "Has description.");
-            evidenceBo.save(evidence);
-        }
+        saveTumorLevelSummaries(cancerObj, "summary", gene, alterations, oncoTreeType, EvidenceType.TUMOR_TYPE_SUMMARY, nestLevel);
+        // diagnostic summary
+        saveTumorLevelSummaries(cancerObj, "diagnosticSummary", gene, alterations, oncoTreeType, EvidenceType.DIAGNOSTIC_SUMMARY, nestLevel);
+        // prognostic summary
+        saveTumorLevelSummaries(cancerObj, "prognosticSummary", gene, alterations, oncoTreeType, EvidenceType.PROGNOSTIC_SUMMARY, nestLevel);
 
         // Prognostic implications
         parseImplication(gene, alterations, oncoTreeType,
