@@ -241,9 +241,13 @@ public class validation {
 
     private static void printTumorTypeSummary() {
         URL feedUrl = getFeedUrl(WorkSheetEntryEnum.TUMOR_SUMMARIES);
+        Set<EvidenceType> evidenceTypes = new HashSet<>();
+        evidenceTypes.add(EvidenceType.TUMOR_TYPE_SUMMARY);
+        evidenceTypes.add(EvidenceType.DIAGNOSTIC_SUMMARY);
+        evidenceTypes.add(EvidenceType.PROGNOSTIC_SUMMARY);
         if (feedUrl != null) {
             for (Gene gene : GeneUtils.getAllGenes()) {
-                Set<Evidence> evidences = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY));
+                Set<Evidence> evidences = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, evidenceTypes);
                 for (Evidence evidence : evidences) {
                     ListEntry row = new ListEntry();
                     setValue(row, "Gene", evidence.getGene().getHugoSymbol());

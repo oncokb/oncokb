@@ -152,7 +152,7 @@ angular.module('oncokbApp').run(
                     'Dx1': 'FDA and/or professional guideline-recognized biomarker required for diagnosis in this indication',
                     'Dx2': 'FDA and/or professional guideline-recognized biomarker that supports diagnosis in this indication',
                     'Dx3': 'Biomarker that may assist disease diagnosis in this indication based on clinical evidence',
-        },
+                },
                 levelsDescHtml: {
                     '0': '<span></span>',
                     '1': '<span><b>FDA-recognized</b> biomarker predictive of response to an <b>FDA-approved</b> drug <b>in this indication</b></span>',
