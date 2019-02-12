@@ -17,7 +17,7 @@ import java.util.Set;
 public class LevelsApiController implements LevelsApi {
 
     public ResponseEntity<Map<LevelOfEvidence, String>> levelsGet() {
-        return new ResponseEntity<>(getMap(LevelUtils.getAllLevels()), HttpStatus.OK);
+        return new ResponseEntity<>(getMap(LevelUtils.getPublicLevels()), HttpStatus.OK);
     }
 
     public ResponseEntity<Map<LevelOfEvidence, String>> levelsResistanceGet() {
@@ -35,7 +35,7 @@ public class LevelsApiController implements LevelsApi {
 
     @Override
     public ResponseEntity<Map<LevelOfEvidence, String>> levelsDiagnosticGet() {
-        return new ResponseEntity<>(getMap(LevelUtils.getDignosticLevels()), HttpStatus.OK);
+        return new ResponseEntity<>(getMap(LevelUtils.getDiagnosticLevels()), HttpStatus.OK);
     }
 
     private Map<LevelOfEvidence, String> getMap(Set<LevelOfEvidence> levels) {

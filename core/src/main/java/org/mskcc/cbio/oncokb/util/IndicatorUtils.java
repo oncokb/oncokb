@@ -12,7 +12,7 @@ import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static org.mskcc.cbio.oncokb.util.LevelUtils.TREATMENT_SORTING_LEVEL_PRIORITY;
+import static org.mskcc.cbio.oncokb.util.LevelUtils.getTherapeuticLevelsWithPriorityLIstIterator;
 
 /**
  * Created by hongxinzhang on 4/5/16.
@@ -24,8 +24,8 @@ public class IndicatorUtils {
         geneStatus = geneStatus != null ? geneStatus : "complete";
         highestLevelOnly = highestLevelOnly == null ? false : highestLevelOnly;
 
-        levels = levels == null ? LevelUtils.getPublicAndOtherIndicationLevels() :
-            new HashSet<>(CollectionUtils.intersection(levels, LevelUtils.getPublicAndOtherIndicationLevels()));
+        levels = levels == null ? LevelUtils.getPublicLevels() :
+            new HashSet<>(CollectionUtils.intersection(levels, LevelUtils.getPublicLevels()));
 
         Set<EvidenceType> selectedTreatmentEvidence = new HashSet<>();
         if (evidenceTypes == null || evidenceTypes.isEmpty()) {
@@ -503,7 +503,7 @@ public class IndicatorUtils {
         if (evidences != null) {
             Map<LevelOfEvidence, Set<Evidence>> evidenceSetMap = EvidenceUtils.separateEvidencesByLevel(evidences);
 
-            ListIterator<LevelOfEvidence> li = TREATMENT_SORTING_LEVEL_PRIORITY.listIterator(TREATMENT_SORTING_LEVEL_PRIORITY.size());
+            ListIterator<LevelOfEvidence> li = getTherapeuticLevelsWithPriorityLIstIterator();
             while (li.hasPrevious()) {
                 LevelOfEvidence level = li.previous();
                 if (evidenceSetMap.containsKey(level)) {
@@ -563,12 +563,12 @@ public class IndicatorUtils {
                 if (levelOfEvidence != null) {
                     int _index = -1;
                     if (LevelUtils.isSensitiveLevel(levelOfEvidence)) {
-                        _index = LevelUtils.SENSITIVE_LEVELS.indexOf(levelOfEvidence);
+                        _index = LevelUtils.getSensitiveLevelIndex(levelOfEvidence);
                         if (_index > levelSIndex) {
                             levelSIndex = _index;
                         }
                     } else if (LevelUtils.isResistanceLevel(levelOfEvidence)) {
-                        _index = LevelUtils.RESISTANCE_LEVELS.indexOf(levelOfEvidence);
+                        _index = LevelUtils.getResistanceLevelIndex(levelOfEvidence);
                         if (_index > levelRIndex) {
                             levelRIndex = _index;
                         }
@@ -576,8 +576,8 @@ public class IndicatorUtils {
                 }
             }
         }
-        levels.put("sensitive", levelSIndex > -1 ? LevelUtils.SENSITIVE_LEVELS.get(levelSIndex) : null);
-        levels.put("resistant", levelRIndex > -1 ? LevelUtils.RESISTANCE_LEVELS.get(levelRIndex) : null);
+        levels.put("sensitive", levelSIndex > -1 ? LevelUtils.getSensitiveLevelByIndex(levelSIndex) : null);
+        levels.put("resistant", levelRIndex > -1 ? LevelUtils.getResistanceLevelByIndex(levelRIndex) : null);
         return levels;
     }
 

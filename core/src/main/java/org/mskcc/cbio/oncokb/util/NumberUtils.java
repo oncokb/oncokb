@@ -21,8 +21,8 @@ public class NumberUtils {
 
             geneNumber.setGene(pair.getKey());
 
-            LevelOfEvidence highestSensitiveLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(pair.getValue(), LevelUtils.getPublicSensitiveLevels());
-            LevelOfEvidence highestResistanceLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(pair.getValue(), LevelUtils.getPublicResistanceLevels());
+            LevelOfEvidence highestSensitiveLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(pair.getValue(), LevelUtils.getSensitiveLevels());
+            LevelOfEvidence highestResistanceLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(pair.getValue(), LevelUtils.getResistanceLevels());
             geneNumber.setHighestSensitiveLevel(highestSensitiveLevel != null ? highestSensitiveLevel.name() : null);
             geneNumber.setHighestResistanceLevel(highestResistanceLevel != null ? highestResistanceLevel.name() : null);
 
@@ -49,8 +49,8 @@ public class NumberUtils {
 
             geneNumber.setGene(pair.getKey());
 
-            LevelOfEvidence highestSensitiveLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(pair.getValue(), new HashSet<>(CollectionUtils.intersection(levels, LevelUtils.getPublicSensitiveLevels())));
-            LevelOfEvidence highestResistanceLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(pair.getValue(), new HashSet<>(CollectionUtils.intersection(levels, LevelUtils.getPublicResistanceLevels())));
+            LevelOfEvidence highestSensitiveLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(pair.getValue(), new HashSet<LevelOfEvidence>(CollectionUtils.intersection(levels, LevelUtils.getSensitiveLevels())));
+            LevelOfEvidence highestResistanceLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(pair.getValue(), new HashSet<LevelOfEvidence>(CollectionUtils.intersection(levels, LevelUtils.getResistanceLevels())));
             geneNumber.setHighestSensitiveLevel(highestSensitiveLevel != null ? highestSensitiveLevel.name() : null);
             geneNumber.setHighestResistanceLevel(highestResistanceLevel != null ? highestResistanceLevel.name() : null);
 

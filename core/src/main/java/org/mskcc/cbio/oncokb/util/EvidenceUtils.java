@@ -814,8 +814,8 @@ public class EvidenceUtils {
             evidenceTypes = new HashSet<>(EvidenceTypeUtils.getAllEvidenceTypes());
         }
 
-        levelOfEvidences = levelOfEvidences == null ? LevelUtils.getPublicAndOtherIndicationLevels() :
-            new HashSet<>(CollectionUtils.intersection(levelOfEvidences, LevelUtils.getPublicAndOtherIndicationLevels()));
+        levelOfEvidences = levelOfEvidences == null ? LevelUtils.getPublicLevels() :
+            new HashSet<>(CollectionUtils.intersection(levelOfEvidences, LevelUtils.getPublicLevels()));
 
         if (requestQueries == null || requestQueries.size() == 0) {
             Set<Evidence> evidences = new HashSet<>();
@@ -913,7 +913,7 @@ public class EvidenceUtils {
                 query.setEvidences(
                     new ArrayList<>(keepHighestLevelForSameTreatments(filterEvidence(evidences, query))));
             }
-            CustomizeComparator.sortEvidenceBasedOnPriority(query.getEvidences(), LevelUtils.TREATMENT_SORTING_LEVEL_PRIORITY);
+            CustomizeComparator.sortEvidenceBasedOnPriority(query.getEvidences(), LevelUtils.getIndexedTherapeuticLevels());
             if (query.getGene() != null && query.getGene().getHugoSymbol().equals("KIT")) {
                 CustomizeComparator.sortKitTreatmentByEvidence(query.getEvidences());
             }

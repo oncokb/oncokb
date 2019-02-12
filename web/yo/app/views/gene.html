@@ -196,7 +196,7 @@
               </div>
               <div class="panelContent" ng-if="initialOpen[tumor.cancerTypes_uuid]" id="{{tumor.cancerTypes_uuid}}" ng-init="bindTIs({uuid: tumor.cancerTypes_uuid, path: path})">
                   <div ng-show="displayPrecisely(tumor.summary_uuid)">
-                    <h5><b>Tumor Type Summary (Optional): </b>
+                    <h5><b>Therapeutic Summary (Optional): </b>
                         <review-panel hugo-symbol="gene.name" uuid="tumor.summary_uuid" review-obj="tumor.summary_review" evidence-type="'TUMOR_TYPE_SUMMARY'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)" get-refs="getRefs(mutation, tumor)"></review-panel>
                     </h5>
                     <realtime-string t="'p'" key="'summary'" path="path" uuid="getUUID({type: 'tumor', key: 'summary', path: path})" mutation="mutation" tumor="tumor" indicate-mutation-content="indicateMutationContent(mutation)" indicate-tumor-content="indicateTumorContent(tumor)"></realtime-string>
