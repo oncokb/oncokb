@@ -76,3 +76,37 @@ PDGFRA	D842I	GIST	2A: Imatinib;
 PDGFRA	D842I	Thymic Tumor	2B: Imatinib;
 PDGFRA	D842V	GIST	R1: Imatinib; 2A: Dasatinib;
 PDGFRA	D842V	Thymic Tumor	2B: Dasatinib; 2B: Imatinib;
+
+#Test Heme
+FLT3	Internal Tandem Duplication	AML	1: Gliteritinib; 1: Midostaurin+Intensive chemotherapy
+FLT3	Internal Tandem Duplication	APLPMLRARA	1: Gliteritinib, 1: Midostaurin+Intensive chemotherapy
+FLT3	Internal Tandem Duplication	Colorectal Cancer	3B: Sorafenib;
+SF3B1	K700E	AML	4: H3B-8800;
+SF3B1	K700E	AMLNOS	4: H3B-8800;
+SF3B1	K700E	APLPMLRARA	4: H3B-8800;
+SF3B1	K700E	Colorectal Cancer
+DNMT3A	P904L	AML	3A: High dose daunorubicin;
+DNMT3A	P904L	APLPMLRARA	3A: High dose daunorubicin;
+DNMT3A	P904L	CMML
+DNMT3A	P904L	Colorectal Cancer
+ABL1	BCR-ABL1 Fusion	BLL	1: Imatinib, Dasatinib, Ponatinib
+ABL1	BCR-ABL1 Fusion	BLLNOS	1: Imatinib, Dasatinib, Ponatinib
+ABL1	BCR-ABL1 Fusion	BLLBCRABL1	1: Imatinib, Dasatinib, Ponatinib
+ABL1	BCR-ABL1 Fusion	Colorectal Cancer	2B: Dasatinib; 2B: Imatinib; 2B: Nilotinib;
+ABL1	E255K	CML	2A: Bosutinib; 2A: Dasatinib;
+ABL1	E255K	CMLBCRABL1	2A: Bosutinib; 2A: Dasatinib;
+ABL1	E255K	AML
+ABL1	E255K	Colorectal Cacner
+KMT2A	KMT2A-MLLT3 Fusion	AML	3A: Entospletinib; 3A: High dose daunorubicin;
+KMT2A	KMT2A-MLLT3 Fusion	APLPMLRARA	3A: Entospletinib; 3A: High dose daunorubicin;
+KMT2A	KMT2A-MLLT3 Fusion	Colorectal Cacner
+PDGFRB	PDGFRB-CSF1R Fusion	CMML	1: Imatinib;
+PDGFRB	PDGFRB-CSF1R Fusion	Colorectal Cancer	2B: Imatinib;
+BRAF	K601E	CMML	3B: Trametinib; 4: PLX8394;
+ARAF	S214A	HDCN	3A: Sorafenib;
+ARAF	S214A	ECD	3A: Sorafenib;
+ARAF	S214A	RDD	3B: Sorafenib;
+ARAF	S214A	Colorectal Cancer	3B: Sorafenib;
+TP53	K292T	AML	3A: Decitabine; 3A: Entospletinib+Decitabine;
+TP53	K292T	APLPMLRARA	3A: Decitabine; 3A: Entospletinib+Decitabine;
+TP53	K292T	Colorectal cancer
