@@ -30,6 +30,9 @@ public class LevelUtils {
         Arrays.asList(LevelOfEvidence.LEVEL_R2, LevelOfEvidence.LEVEL_R1)
     );
 
+    private static final List<LevelOfEvidence> ALLOWED_PRAPOGATION_LEVELS = Collections.unmodifiableList(
+        Arrays.asList(LevelOfEvidence.LEVEL_4, LevelOfEvidence.LEVEL_3B, LevelOfEvidence.LEVEL_2B)
+    );
 
     // This is for sorting treatments when all levels are in one array. The only difference at the moment is the level 3A will be prioritised over 2B.
     // But 2B is still higher level of 3A
@@ -280,6 +283,9 @@ public class LevelUtils {
         return levels;
     }
 
+    public static List<LevelOfEvidence> getAllowedPropagationLevels() {
+        return ALLOWED_PRAPOGATION_LEVELS;
+    }
     public static ListIterator getTherapeuticLevelsWithPriorityLIstIterator() {
         return THERAPEUTIC_LEVELS_WITH_PRIORITY.listIterator(THERAPEUTIC_LEVELS_WITH_PRIORITY.size());
     }

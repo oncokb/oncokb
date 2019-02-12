@@ -658,16 +658,16 @@ public class DriveAnnotationParser {
                     System.err.println(spaceStrByNestLevel(nestLevel + 2) + "Error: wrong level of evidence: " + level);
                     // TODO:
                     //throw new RuntimeException("wrong level of evidence: "+level);
-                } else {
+                    continue;
+                } else if (LevelUtils.getAllowedCurationLevels().contains(levelOfEvidence)) {
                     System.out.println(spaceStrByNestLevel(nestLevel + 2) +
                         "Level: " + levelOfEvidence.getLevel());
+                } else {
+                    System.err.println(spaceStrByNestLevel(nestLevel + 2) +
+                        "Level not allowed: " + levelOfEvidence.getLevel());
+                    continue;
                 }
                 evidence.setLevelOfEvidence(levelOfEvidence);
-
-                List<LevelOfEvidence> acceptablePropagationList = new ArrayList<>();
-                acceptablePropagationList.add(LevelOfEvidence.LEVEL_2B);
-                acceptablePropagationList.add(LevelOfEvidence.LEVEL_3B);
-                acceptablePropagationList.add(LevelOfEvidence.LEVEL_4);
 
                 if (drugObj.has("propagation")) {
                     String definedPropagation = drugObj.getString("propagation");
@@ -677,7 +677,7 @@ public class DriveAnnotationParser {
                     LevelOfEvidence definedLevel = LevelOfEvidence.getByLevel(definedPropagation);
 
                     // Validate level
-                    if (definedLevel != null && acceptablePropagationList.contains(definedLevel)) {
+                    if (definedLevel != null && LevelUtils.getAllowedPropagationLevels().contains(definedLevel)) {
                         evidence.setPropagation(definedLevel.name());
                     }
                     if (evidence.getPropagation() != null) {
