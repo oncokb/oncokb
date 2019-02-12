@@ -491,14 +491,16 @@ angular.module('oncokbApp')
             return result;
         }
         function processData(data, keys, excludeComments, onlyReviewedContent) {
-            _.each(keys, function(key) {
-                if (excludeComments) {
-                    delete data[key+'_comments'];
-                }
-                if (onlyReviewedContent && data[key+'_review'] && !_.isUndefined(data[key+'_review'].lastReviewed)) {
-                    data[key] = data[key+'_review'].lastReviewed;
-                }
-            });
+            if(data !== undefined) {
+                _.each(keys, function(key) {
+                    if (excludeComments) {
+                        delete data[key + '_comments'];
+                    }
+                    if (onlyReviewedContent && data[key + '_review'] && !_.isUndefined(data[key + '_review'].lastReviewed)) {
+                        data[key] = data[key + '_review'].lastReviewed;
+                    }
+                });
+            }
         }
         function shouldExclude(onlyReviewedContent, reviewObj) {
             return reviewObj && (onlyReviewedContent && reviewObj.added == true || !onlyReviewedContent && reviewObj.removed == true);
