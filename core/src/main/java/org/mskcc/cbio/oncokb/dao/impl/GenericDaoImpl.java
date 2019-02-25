@@ -7,7 +7,7 @@ package org.mskcc.cbio.oncokb.dao.impl;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.dao.GenericDao;
 import org.springframework.dao.support.DataAccessUtils;
-import org.springframework.orm.hibernate3.support.HibernateDaoSupport;
+import org.springframework.orm.hibernate4.support.HibernateDaoSupport;
 
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;

@@ -132,11 +132,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.cmo.cancerhotspots</groupId>
-            <artifactId>model</artifactId>
-            <version>0.1.2</version>
-        </dependency>
-        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.4</version>
@@ -149,7 +144,7 @@
         <dependency>
             <groupId>com.github.zhx828.genome-nexus</groupId>
             <artifactId>model</artifactId>
-            <version>1704a951e4</version>
+            <version>aa2a11c31d</version>
         </dependency>
     </dependencies>
 
