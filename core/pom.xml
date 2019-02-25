@@ -146,6 +146,11 @@
             <artifactId>commons-io</artifactId>
             <version>2.6</version>
         </dependency>
+        <dependency>
+            <groupId>com.github.zhx828.genome-nexus</groupId>
+            <artifactId>model</artifactId>
+            <version>1704a951e4</version>
+        </dependency>
     </dependencies>
 
     <build>

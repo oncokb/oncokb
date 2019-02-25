@@ -35,9 +35,9 @@ package org.mskcc.cbio.oncokb.genomenexus;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import io.swagger.annotations.ApiModelProperty;
+import org.cbioportal.genome_nexus.model.Hotspot;
 
 import java.util.List;
 
