@@ -243,6 +243,12 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
                 }
             } else {
                 relevantAlterations = alterationBo.findRelevantAlterations(exampleVariant, Collections.singleton(oncokbVariant), false);
+
+
+                // We should not do alternative allele rule in here
+                List<Alteration> alternativeAlleles = AlterationUtils.getAlleleAlterations(exampleVariant, Collections.singleton(oncokbVariant));
+                relevantAlterations.removeAll(alternativeAlleles);
+
                 isMatched = relevantAlterations.size() > 0;
             }
         }
