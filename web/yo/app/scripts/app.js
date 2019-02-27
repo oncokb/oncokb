@@ -24,6 +24,14 @@ function getString(string) {
     var _string = tmp.textContent || tmp.innerText || S(string).stripTags().s;
     string = S(_string).collapseWhitespace().s;
     string = string.replace(/<!--.*-->/g, '');
+
+    // Convert the html fragment again to trim the reserved text.
+    var tmp = window.document.createElement('DIV');
+    tmp.innerHTML = string;
+
+    var _string = tmp.textContent || tmp.innerText || S(string).stripTags().s;
+    string = S(_string).collapseWhitespace().s;
+
     return string;
 }
 OncoKB.utils = {
