@@ -4,7 +4,7 @@
 http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 
     <!-- Hibernate session factory -->
-    <bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
         <property name="dataSource">
             <ref bean="dataSource"/>
         </property>
@@ -12,5 +12,4 @@ http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
             <value>classpath:/hibernate/hibernate.cfg.xml</value>
         </property>
     </bean>
-
-</beans>    
+</beans>

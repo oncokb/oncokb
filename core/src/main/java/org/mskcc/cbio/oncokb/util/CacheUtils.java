@@ -204,10 +204,6 @@ public class CacheUtils {
             System.out.println("Cache all tumor types: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
             current = MainUtils.getCurrentTimestamp();
 
-            HotspotUtils.getHotspots();
-            System.out.println("Cache all hotspots: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
-            current = MainUtils.getCurrentTimestamp();
-
             NamingUtils.cacheAllAbbreviations();
             System.out.println("Cache abbreviation ontology: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
             current = MainUtils.getCurrentTimestamp();

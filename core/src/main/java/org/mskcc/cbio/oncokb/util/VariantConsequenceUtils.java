@@ -56,6 +56,13 @@ public class VariantConsequenceUtils {
         put("upstream", "5_prime_UTR_variant");
     }};
 
+    private static final Map<String, String> GNMapping = new HashMap<String, String>() {{
+        put("missense_variant", "Missense_Mutation");
+        put("inframe_insertion", "In_Frame_Ins");
+        put("inframe_deletion", "In_Frame_Del");
+        put("splice_region_variant", "Splice_Region");
+    }};
+
     private static void cacheVariantConsequencesMap() {
         if (VariantConsequencesMap == null) {
             try {
@@ -111,5 +118,12 @@ public class VariantConsequenceUtils {
             }
             return findVariantConsequenceBySoTerm(matchStr);
         }
+    }
+
+    public static String toGNMutationType(VariantConsequence consequence) {
+        if (consequence != null && GNMapping.containsKey(consequence.getTerm())) {
+            return GNMapping.get(consequence.getTerm());
+        }
+        return "";
     }
 }

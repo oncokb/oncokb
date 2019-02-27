@@ -4,9 +4,9 @@
     <parent>
         <groupId>org.mskcc.cbio.oncokb</groupId>
         <artifactId>master</artifactId>
-        <version>0.3.13</version>
+        <version>0.3.14</version>
     </parent>
-    <version>0.3.13</version>
+    <version>0.3.14</version>
     <artifactId>core</artifactId>
     <packaging>jar</packaging>
     <name>OncoKB Core</name>
@@ -132,11 +132,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.cmo.cancerhotspots</groupId>
-            <artifactId>model</artifactId>
-            <version>0.1.2</version>
-        </dependency>
-        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.4</version>
@@ -145,6 +140,11 @@
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>2.6</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.zhx828.genome-nexus</groupId>
+            <artifactId>model</artifactId>
+            <version>aa2a11c31d</version>
         </dependency>
     </dependencies>
 
