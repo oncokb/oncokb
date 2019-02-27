@@ -647,7 +647,7 @@ angular.module('oncokbApp')
             function createGene(geneName) {
                 var deferred = $q.defer();
                 if ($scope.hugoSymbols.includes(geneName)) {
-                    dialogs.notify('Warning', 'Sorry, gene ' + geneName + ' has been created.');
+                    dialogs.notify('Warning', 'Sorry, the ' + geneName + ' gene already exists.');
                 } else {
                     var gene = new FirebaseModel.Gene(geneName);
                     mainUtils.setIsoFormAndGeneType(gene).then(function () {
