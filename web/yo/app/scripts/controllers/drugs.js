@@ -17,7 +17,9 @@ angular.module('oncokbApp')
                     _.each(_.keys(mapList), function (drug) {
                         $scope.drugMap[drug] = [];
                         _.each(_.keys(mapList[drug]), function (gene) {
-                            var mutations = _.keys(mapList[drug][gene]);
+                            var mutations = _.map(_.keys(mapList[drug][gene]), function (mutationUuid) {
+                                return mapList[drug][gene][mutationUuid].mutationName;
+                            });
                             var mapInformation = {
                                 geneName: gene,
                                 geneLink: "#!/gene/" + gene,
