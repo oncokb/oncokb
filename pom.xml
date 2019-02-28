@@ -12,8 +12,8 @@
     <name>OncoKB Master</name>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <hibernate.version>4.3.11.Final</hibernate.version>
-        <spring.version>4.3.22.RELEASE</spring.version>
+        <hibernate.version>3.6.10.Final</hibernate.version>
+        <spring.version>4.1.9.RELEASE</spring.version>
     </properties>
     <repositories>
         <repository>
@@ -70,9 +70,14 @@
             <version>1.1</version>
         </dependency>
         <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>2.10.0</version>
+        </dependency>
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
-            <version>1.7.16</version>
+            <version>1.6.1</version>
         </dependency>
         <dependency>
             <groupId>jstl</groupId>
