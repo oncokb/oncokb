@@ -24,37 +24,37 @@
     <?xml version="1.0" encoding="UTF-8"?>
     <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
         <url>
-            <loc>${serverRoot}/levels></loc>
+            <loc>${serverRoot}/levels</loc>
             <changefreq>monthly</changefreq>
             <priority>1.0</priority>
         </url>
         <url>
-            <loc>${serverRoot}/actionableGenes></loc>
+            <loc>${serverRoot}/actionableGenes</loc>
             <changefreq>weekly</changefreq>
             <priority>0.9</priority>
         </url>
         <url>
-            <loc>${serverRoot}/terms></loc>
+            <loc>${serverRoot}/terms</loc>
             <changefreq>monthly</changefreq>
             <priority>0.8</priority>
         </url>
         <url>
-            <loc>${serverRoot}/news></loc>
+            <loc>${serverRoot}/news</loc>
             <changefreq>weekly</changefreq>
             <priority>0.7</priority>
         </url>
         <url>
-            <loc>${serverRoot}/cancerGenes></loc>
+            <loc>${serverRoot}/cancerGenes</loc>
             <changefreq>weekly</changefreq>
             <priority>0.6</priority>
         </url>
         <url>
-            <loc>${serverRoot}/about></loc>
+            <loc>${serverRoot}/about</loc>
             <changefreq>monthly</changefreq>
             <priority>0.4</priority>
         </url>
         <url>
-            <loc>${serverRoot}/team></loc>
+            <loc>${serverRoot}/team</loc>
             <changefreq>monthly</changefreq>
             <priority>0.3</priority>
         </url>
