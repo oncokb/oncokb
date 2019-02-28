@@ -3,9 +3,9 @@ package org.mskcc.cbio.oncokb.util;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.cbioportal.genome_nexus.model.Hotspot;
-import org.cbioportal.genome_nexus.model.IntegerRange;
-import org.cbioportal.genome_nexus.model.ProteinLocation;
+import org.mskcc.cbio.oncokb.genomenexus.Hotspot;
+import org.mskcc.cbio.oncokb.genomenexus.IntegerRange;
+import org.mskcc.cbio.oncokb.genomenexus.ProteinLocation;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.Gene;
 
