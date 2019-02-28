@@ -92,6 +92,7 @@
                     <plugin>
                         <artifactId>exec-maven-plugin</artifactId>
                         <groupId>org.codehaus.mojo</groupId>
+                        <version>1.6.0</version>
                         <executions>
                             <execution>
                                 <id>Version Calculation</id>
@@ -366,11 +367,6 @@
             <artifactId>jsp-api</artifactId>
             <version>2.1</version>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>apache-log4j-extras</artifactId>
-            <version>1.1</version>
         </dependency>
         <dependency>
             <groupId>mysql</groupId>
