@@ -30,10 +30,10 @@ KIT	Y553C	Gastrointestinal Stromal Tumor	1: Imatinib; 1: Sunitinib; 1: Regorafen
 KIT	Y553C	Melanoma	2A: Imatinib; 2B: Sunitinib; 2B: Regorafenib;
 KIT	Y553C	Colorectal Cancer	2B: Imatinib; 2B: Sunitinib; 2B: Regorafenib;
 KIT	Y553C	Thymic Tumor	2A: Sunitinib; 2A: Sorafenib; 2B: Imatinib; 2B: Regorafenib;
-KIT	R643W	Gastrointestinal Stromal Tumor	1: Imatinib; 1: Sunitinib; 1: Regorafenib;
-KIT	R643W	Melanoma	2A: Imatinib; 2B: Sunitinib; 2B: Regorafenib;
-KIT	R643W	Colorectal Cancer	2B: Imatinib; 2B: Sunitinib; 2B: Regorafenib;
-KIT	R643W	Thymic Tumor	2A: Sunitinib; 2A: Sorafenib; 2B: Imatinib; 2B: Regorafenib;
+KIT	R643W	Gastrointestinal Stromal Tumor
+KIT	R643W	Melanoma
+KIT	R643W	Colorectal Cancer
+KIT	R643W	Thymic Tumor
 KIT	D737N	Gastrointestinal Stromal Tumor
 KIT	D737N	Melanoma
 KIT	D737N	Colorectal Cancer
@@ -62,10 +62,10 @@ KIT	T670I	Gastrointestinal Stromal Tumor	1: Sunitinib; 1: Regorafenib; R2: Imati
 KIT	T670I	Melanoma	2A: Imatinib; 2B: Sunitinib; 2B: Regorafenib;
 KIT	T670I	Colorectal Cancer	2B: Sunitinib; 2B: Regorafenib;
 KIT	T670I	Thymic Tumor	2A: Sunitinib; 2A: Sorafenib; 2B: Regorafenib;
-KIT	T670C	Gastrointestinal Stromal Tumor	1: Imatinib; 1: Sunitinib; 1: Regorafenib;
-KIT	T670C	Melanoma	2A: Imatinib; 2B: Sunitinib; 2B: Regorafenib;
-KIT	T670C	Colorectal Cancer	2B: Imatinib; 2B: Sunitinib; 2B: Regorafenib;
-KIT	T670C	Thymic Tumor	2A: Sunitinib; 2A: Sorafenib; 2B: Imatinib; 2B: Regorafenib;
+KIT	T670C	Gastrointestinal Stromal Tumor
+KIT	T670C	Melanoma
+KIT	T670C	Colorectal Cancer
+KIT	T670C	Thymic Tumor
 KIT	D816A	Gastrointestinal Stromal Tumor	3B: Avapritinib;
 KIT	D816A	Melanoma	2A: Imatinib; 3B: Avapritinib;
 KIT	D816A	Colorectal Cancer	3B: Avapritinib;
