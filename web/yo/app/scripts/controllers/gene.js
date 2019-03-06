@@ -1512,6 +1512,13 @@ angular.module('oncokbApp')
                         });
                         break;
                     case 'treatment':
+                        var mapInfo = {
+                            'geneName': $scope.gene.$id,
+                            'mutationUuid': mutation.name_uuid,
+                            'mutationName': mutation.name,
+                            'cancerTypes': tumor.cancerTypes
+                        }
+                        $scope.updateDrugMap('accept', 'add', type, mutation, tumor, treatment, null, null, mapInfo);
                         ReviewResource.accepted.push(treatment.name_uuid);
                         delete treatment.name_review.added;
                         clearReview([treatment.name_review, treatment.level_review, treatment.propagation_review, treatment.indication_review, treatment.description_review]);
@@ -1522,7 +1529,7 @@ angular.module('oncokbApp')
                 }
             }
 
-            $scope.updateDrugMap = function(decision, type, dataType, mutation, tumor, treatment, mapPath, oldContent) {
+            $scope.updateDrugMap = function(decision, type, dataType, mutation, tumor, treatment, mapPath, oldContent, mapInfo) {
                 switch (dataType) {
                     case 'treatment':
                         var therapyUuids = _.flatten(mainUtils.therapyStrToArr(treatment.name));
@@ -1539,7 +1546,7 @@ angular.module('oncokbApp')
                                         break;
                                     case 'treatment':
                                         console.log('acceptAdd');
-                                        $scope.editMap('latestToReviewed', mapPath, treatment.name_uuid, therapyUuids);
+                                        $scope.editMap('latestToReviewed', mapPath, treatment.name_uuid, therapyUuids, null, mapInfo);
                                         break;
                                 }
                                 break;
@@ -1729,7 +1736,7 @@ angular.module('oncokbApp')
                 if (loadingUUID) {
                     ReviewResource.loading.push(loadingUUID);
                 }
-                $scope.updateDrugMap('accept', 'add', type, mutation, tumor, treatment, mapPath);
+                //$scope.updateDrugMap('accept', 'add', type, mutation, tumor, treatment, mapPath);
                 DatabaseConnector.updateEvidenceBatch(evidences, historyData, function (result) {
                     acceptSection(type, mutation, tumor, ti, treatment);
                     ReviewResource.loading = _.without(ReviewResource.loading, loadingUUID);
@@ -1740,7 +1747,6 @@ angular.module('oncokbApp')
                 });
             };
             $scope.rejectAdded = function (type, mutation, tumor, ti, treatment, updatedBy, mapPath) {
-                console.log('aha?');
                 var dlg = dialogs.confirm('Reminder', 'Are you sure you want to reject this change?');
                 dlg.result.then(function () {
                     var data = $scope.getRefs(mutation, tumor, ti, treatment);
@@ -2031,12 +2037,19 @@ angular.module('oncokbApp')
             //     }
             // }
 
-            $scope.editMap = function (type, mapPath, therapyUuid, therapyUuids, therapyObject){
-                var indices = getIndexByPath(mapPath);
-                var geneName = $scope.gene.name;
-                var mutationUuid = $scope.gene.mutations[indices[0]].name_uuid;
-                var mutationName = $scope.gene.mutations[indices[0]].name;
-                var cancerTypes = $scope.gene.mutations[indices[0]].tumors[indices[1]].cancerTypes;
+            $scope.editMap = function (type, mapPath, therapyUuid, therapyUuids, therapyObject, mapInfo){
+                if(!mapPath){
+                    var geneName = mapInfo.geneName;
+                    var mutationUuid =  mapInfo.mutationUuid;
+                    var mutationName =  mapInfo.mutationName;
+                    var cancerTypes = mapInfo.cancerTypes;
+                }else {
+                    var indices = getIndexByPath(mapPath);
+                    var geneName = $scope.gene.name;
+                    var mutationUuid = $scope.gene.mutations[indices[0]].name_uuid;
+                    var mutationName = $scope.gene.mutations[indices[0]].name;
+                    var cancerTypes = $scope.gene.mutations[indices[0]].tumors[indices[1]].cancerTypes;
+                }
                 var mapPath;
                 if (type === 'save'){
                     _.each(therapyUuids, function (drug) {
