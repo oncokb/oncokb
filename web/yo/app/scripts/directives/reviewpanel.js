@@ -30,6 +30,7 @@ angular.module('oncokbApp')
                 modelUpdateInGene: '&modelUpdate',
                 acceptAddedInGene: '&acceptAdded',
                 rejectAddedInGene: '&rejectAdded',
+                updateDrugMapInGene: '&updateDrugMap',
                 getRefsInGene: '&getRefs',
                 uuid: '=',
                 reviewObj: '='
@@ -51,7 +52,7 @@ angular.module('oncokbApp')
                         // For 'add' operation, there is only 'new' content. For 'delete' operation, there is only 'old' content.
                         switch($scope.panelType) {
                             case 'update':
-                                $scope.accept();
+                                 $scope.accept();
                                 break;
                             case 'name':
                                 $scope.accept();
@@ -69,13 +70,13 @@ angular.module('oncokbApp')
                                 $scope.reject();
                                 break;
                             case 'name':
-                                $scope.reject();
+                                $scope.reject($scope.path);
                                 break;
                             case 'delete':
                                 $scope.cancelDelete($scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment, $scope.updatedBy);
                                 break;
                             case 'add':
-                                $scope.rejectAdded($scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment, $scope.updatedBy);
+                                $scope.rejectAdded($scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment, $scope.updatedBy, $scope.path);
                                 break;
                         }
                     }
@@ -269,7 +270,7 @@ angular.module('oncokbApp')
                         }
                     });
                 }
-                $scope.reject = function() {
+                $scope.reject = function(mapPath) {
                     var dlg = dialogs.confirm('Reminder', 'Are you sure you want to reject this change?');
                     dlg.result.then(function() {
                         numOfReviewItems.minus($scope.updatedBy);
@@ -328,8 +329,12 @@ angular.module('oncokbApp')
                                 rejectionItems.push({uuid: tumor.cancerTypes_uuid, key: 'cancerTypes', obj: tumor});
                                 break;
                             case 'TREATMENT_NAME_CHANGE':
+                                console.log('???');
                                 var treatment = $scope.getRefs($scope.mutation, $scope.tumor, $scope.ti, $scope.treatment).treatment;
+                                $scope.updateDrugMap('reject', 'name', 'treatment', $scope.mutation, $scope.tumor, $scope.treatment, mapPath, treatment.name_review.lastReviewed);
                                 rejectionItems.push({uuid: treatment.name_uuid, key: 'name', obj: treatment});
+
+
                                 break;
                             default:
                                 break;
@@ -352,9 +357,9 @@ angular.module('oncokbApp')
                         type: type, mutation: mutation, tumor: tumor, therapyCategory: therapyCategory, treatment: treatment, updatedBy: updatedBy, path: path
                     });
                 };
-                $scope.rejectAdded = function(type, mutation, tumor, therapyCategory, treatment, updatedBy) {
+                $scope.rejectAdded = function(type, mutation, tumor, therapyCategory, treatment, updatedBy, path) {
                     $scope.rejectAddedInGene({
-                        type: type, mutation: mutation, tumor: tumor, therapyCategory: therapyCategory, treatment: treatment, updatedBy: updatedBy
+                        type: type, mutation: mutation, tumor: tumor, therapyCategory: therapyCategory, treatment: treatment, updatedBy: updatedBy, path: path
                     });
                 };
                 $scope.modelUpdate = function(type, mutation, tumor, therapyCategory, treatment, path) {
@@ -367,6 +372,11 @@ angular.module('oncokbApp')
                         mutationCopy: mutation, tumorCopy: tumor, tiCopy: therapyCategory, treatmentCopy: treatment
                     });
                 };
+                $scope.updateDrugMap = function (decision, type, dataType, mutation, tumor, treatment, mapPath, oldContent) {
+                    return $scope.updateDrugMapInGene({
+                        decision: decision, type: type, dataType: dataType, mutation: mutation, tumor: tumor, treatment: treatment, mapPath: mapPath, oldContent: oldContent
+                    });
+                }
                 $scope.inReviewMode = function () {
                     return $rootScope.reviewMode;
                 };

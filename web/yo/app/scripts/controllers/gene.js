@@ -817,15 +817,15 @@ angular.module('oncokbApp')
                                         evidencesAllUsers[userName].deletedEvidences = collectUUIDs('treatment', treatment, evidencesAllUsers[userName].deletedEvidences, 'evidenceOnly');
                                         evidencesAllUsers[userName].deletedEvidenceModels.push({type: 'treatment', mutation: mutation, tumor: tumor, ti: ti, treatment: treatment});
                                         evidencesAllUsers[userName].historyData.deletion.push({ operation: 'delete', lastEditBy: treatment.name_review.updatedBy, location: historyStr(mutation, tumor) + ', ' + ti.name + ', ' + treatment.name, old: treatment });
-                                        updateDrugMap('delete', 'treatment', mutation, tumor, treatment, mapPath);
+                                        $scope.updateDrugMap('accept', 'delete', 'treatment', mutation, tumor, treatment, mapPath);
                                         return true;
                                     } else if (mainUtils.processedInReview('add', treatment.name_uuid)) {
                                         processAddedSection(userName, 'treatment', mutation, tumor, ti, treatment);
-                                        updateDrugMap('add', 'treatment', mutation, tumor, treatment, mapPath);
+                                        $scope.updateDrugMap('accept', 'add', 'treatment', mutation, tumor, treatment, mapPath);
                                         return true;
                                     } else if (mainUtils.processedInReview('name', treatment.name_uuid)) {
                                         formEvidencesPerUser(userName, 'TREATMENT_NAME_CHANGE', mutation, tumor, ti, treatment);
-                                        updateDrugMap('name', 'treatment', mutation, tumor, treatment, mapPath, treatment.name_review.lastReviewed);
+                                        $scope.updateDrugMap('accept', 'name', 'treatment', mutation, tumor, treatment, mapPath, treatment.name_review.lastReviewed);
                                     }
                                 }
                                 if (isChangedBy('section', treatment.name_uuid, userName)) {
@@ -1340,16 +1340,16 @@ angular.module('oncokbApp')
                             { reviewObj: treatment.description_review, uuid: treatment.description_uuid }], treatment.name_uuid);
                         break;
                     case 'MUTATION_NAME_CHANGE':
-                        updateDrugMap('name', 'mutation', mutation, tumor, treatment, mapPath, mutation.name_review);
+                        $scope.updateDrugMap('accept', 'name', 'mutation', mutation, tumor, treatment, mapPath, mutation.name_review);
                         acceptItem([{ reviewObj: mutation.name_review, uuid: mutation.name_uuid }], mutation.name_uuid);
                         break;
                     case 'TUMOR_NAME_CHANGE':
-                        updateDrugMap('name', 'tumor', mutation, tumor, treatment, mapPath, tumor.cancerTypes_review);
+                        $scope.updateDrugMap('accept', 'name', 'tumor', mutation, tumor, treatment, mapPath, tumor.cancerTypes_review);
                         acceptItem([{ reviewObj: tumor.cancerTypes_review, uuid: tumor.cancerTypes_uuid }], tumor.cancerTypes_uuid);
                         break;
                     case 'TREATMENT_NAME_CHANGE':
                         if(mapPath !== undefined){
-                            updateDrugMap('name', 'treatment', mutation, tumor, treatment, mapPath, treatment.name_review.lastReviewed);
+                            $scope.updateDrugMap('accept', 'name', 'treatment', mutation, tumor, treatment, mapPath, treatment.name_review.lastReviewed);
                         }
                         acceptItem([{ reviewObj: treatment.name_review, uuid: treatment.name_uuid }], treatment.name_uuid);
                         break;
@@ -1522,104 +1522,120 @@ angular.module('oncokbApp')
                 }
             }
 
-            function updateDrugMap (type, dataType, mutation, tumor, treatment, mapPath, oldContent) {
+            $scope.updateDrugMap = function(decision, type, dataType, mutation, tumor, treatment, mapPath, oldContent) {
                 switch (dataType) {
                     case 'treatment':
-                        var TherapyUuids = _.flatten(mainUtils.therapyStrToArr(treatment.name));
+                        var therapyUuids = _.flatten(mainUtils.therapyStrToArr(treatment.name));
                         break;
                 };
-                switch (type) {
-                    case 'add':
-                        switch (dataType) {
-                            case 'mutation':
-                                break;
-                            case 'tumor':
-                                break;
-                            case 'treatment':
-                                $scope.editMap('latestToReviewed', mapPath, treatment.name_uuid, TherapyUuids);
-                                break;
-                        }
-                        break;
-                    case 'delete':
-                        switch (dataType) {
-                            case 'mutation':
-
-                                break;
-                            case 'tumor':
-
-                                break;
-                            case 'treatment':
-                                $scope.editMap('remove', mapPath, treatment.name_uuid, TherapyUuids);
-                                break;
-                        }
-                        break;
-                    case 'name':
-                        switch (dataType) {
-                            case 'mutation':
-
-                                break;
-                            case 'tumor':
-
-                                break;
-                            case 'treatment':
-                                var oldTherapyUuids = _.flatten(mainUtils.therapyStrToArr(oldContent));
-                                var therapyObject = {
-                                    'name': treatment.name,
-                                    'status': 'latest'
+                switch(decision){
+                    case 'accept':
+                        switch (type) {
+                            case 'add':
+                                switch (dataType) {
+                                    case 'mutation':
+                                        break;
+                                    case 'tumor':
+                                        break;
+                                    case 'treatment':
+                                        console.log('acceptAdd');
+                                        $scope.editMap('latestToReviewed', mapPath, treatment.name_uuid, therapyUuids);
+                                        break;
                                 }
-                                $scope.editMap('remove', mapPath, treatment.name_uuid, oldTherapyUuids);
-                                $scope.editMap('save', mapPath, treatment.name_uuid, TherapyUuids, therapyObject);
-                                $scope.editMap('latestToReviewed', mapPath, treatment.name_uuid, TherapyUuids);
+                                break;
+                            case 'delete':
+                                switch (dataType) {
+                                    case 'mutation':
+
+                                        break;
+                                    case 'tumor':
+
+                                        break;
+                                    case 'treatment':
+                                        console.log('acceptRemove');
+                                        $scope.editMap('remove', mapPath, treatment.name_uuid, therapyUuids);
+                                        break;
+                                }
+                                break;
+                            case 'name':
+                                switch (dataType) {
+                                    case 'mutation':
+
+                                        break;
+                                    case 'tumor':
+
+                                        break;
+                                    case 'treatment':
+                                        console.log('acceptName');
+                                        var oldTherapyUuids = _.flatten(mainUtils.therapyStrToArr(oldContent));
+                                        var therapyObject = {
+                                            'name': treatment.name,
+                                            'status': 'latest'
+                                        }
+                                        $scope.editMap('remove', mapPath, treatment.name_uuid, oldTherapyUuids);
+                                        $scope.editMap('save', mapPath, treatment.name_uuid, therapyUuids, therapyObject);
+                                        $scope.editMap('latestToReviewed', mapPath, treatment.name_uuid, therapyUuids);
+                                        break;
+                                }
+                                break;
+                            case 'update':
+                                // Currently, we don't record 'update' operation for treatments.
                                 break;
                         }
                         break;
-                    case 'update':
-                        // Currently, we don't record 'update' operation for treatments.
-                        break;
+                    case 'reject':
+                        switch (type) {
+                            case 'add':
+                                switch (dataType) {
+                                    case 'mutation':
+                                        break;
+                                    case 'tumor':
+                                        break;
+                                    case 'treatment':
+                                        console.log('rejectAdd');
+                                        $scope.editMap('remove', mapPath, treatment.name_uuid, therapyUuids);
+                                        break;
+                                }
+                                break;
+                            case 'delete':
+                                switch (dataType) {
+                                    case 'mutation':
+                                        break;
+                                    case 'tumor':
+                                        break;
+                                    case 'treatment':
+                                        break;
+                                }
+                                break;
+                            case 'name':
+                                switch (dataType) {
+                                    case 'mutation':
 
-                    // case 'name':
-                    //     switch (dataType) {
-                    //         case 'mutation':
-                    //             break;
-                    //         case 'tumor':
-                    //             break;
-                    //         case 'treatment':
-                    //             var therapyObject = {
-                    //                 'name': treatment.name,
-                    //                 'status': 'latest'
-                    //             }
-                    //             $scope.editMap('save', mapPath, treatment.name_uuid, TherapyUuids, therapyObject);
-                    //             break;
-                    //     }
-                    //     break;
-                    // case 'name'||'add':
-                    //     switch (dataType) {
-                    //         case 'mutation':
-                    //             break;
-                    //         case 'tumor':
-                    //             break;
-                    //         case 'treatment':
-                    //             $scope.editMap('accept', mapPath, treatment.name_uuid, TherapyUuids);
-                    //             break;
-                    //     }
-                    //     break;
-                    // case 'delete':
-                    //     switch (dataType) {
-                    //         case 'mutation':
-                    //
-                    //             break;
-                    //         case 'tumor':
-                    //
-                    //             break;
-                    //         case 'treatment':
-                    //             changeMap('remove', treatment.name_uuid, mapPath, TherapyUuids);
-                    //             break;
-                    //     }
-                    //     break;
-                    // case 'update':
-                    //     // Currently, we don't record 'update' operation for treatments.
-                    //     break;
-                };
+                                        break;
+                                    case 'tumor':
+
+                                        break;
+                                    case 'treatment':
+                                        console.log('rejectName');
+                                        var oldTherapyUuids = _.flatten(mainUtils.therapyStrToArr(oldContent));
+                                        var therapyObject = {
+                                            'name': treatment.name,
+                                            'status': 'latest'
+                                        }
+                                        $scope.editMap('remove', mapPath, treatment.name_uuid, therapyUuids);
+                                        $scope.editMap('save', mapPath, treatment.name_uuid, oldTherapyUuids, therapyObject);
+                                        $scope.editMap('latestToReviewed', mapPath, treatment.name_uuid, oldTherapyUuids)
+                                        break;
+                                }
+                                break;
+                            case 'update':
+                                // Currently, we don't record 'update' operation for treatments.
+                                break;
+
+                        };
+
+                }
+
             }
 
 
@@ -1713,7 +1729,7 @@ angular.module('oncokbApp')
                 if (loadingUUID) {
                     ReviewResource.loading.push(loadingUUID);
                 }
-                updateDrugMap('add', type, mutation, tumor, treatment, mapPath);
+                $scope.updateDrugMap('accept', 'add', type, mutation, tumor, treatment, mapPath);
                 DatabaseConnector.updateEvidenceBatch(evidences, historyData, function (result) {
                     acceptSection(type, mutation, tumor, ti, treatment);
                     ReviewResource.loading = _.without(ReviewResource.loading, loadingUUID);
@@ -1723,13 +1739,16 @@ angular.module('oncokbApp')
                     dialogs.error('Error', 'Failed to update to database! Please contact the developer.');
                 });
             };
-            $scope.rejectAdded = function (type, mutation, tumor, ti, treatment, updatedBy) {
+            $scope.rejectAdded = function (type, mutation, tumor, ti, treatment, updatedBy, mapPath) {
+                console.log('aha?');
                 var dlg = dialogs.confirm('Reminder', 'Are you sure you want to reject this change?');
                 dlg.result.then(function () {
                     var data = $scope.getRefs(mutation, tumor, ti, treatment);
                     var indicies = [data.mutationIndex, data.tumorIndex, data.tiIndex, data.treatmentIndex];
                     var tempUUIDs = getUUIDsByType(type, mutation, tumor, ti, treatment);
                     numOfReviewItems.minus(updatedBy);
+                    console.log(mapPath);
+                    $scope.updateDrugMap('reject', 'add', type, mutation, tumor, treatment, mapPath);
                     removeModel({type: type, uuids: tempUUIDs, indicies: indicies});
                 });
             };
@@ -2240,7 +2259,7 @@ angular.module('oncokbApp')
                     if (type === 'tumor') {
                         $scope.indicateMutationContent($scope.gene.mutations[indices[0]]);
                     } else if (type === 'treatment') {
-                        $scope.editMap('remove', path, uuid, mainUtils.therapyStrToArr(obj.name));
+                        //$scope.editMap('remove', path, uuid, mainUtils.therapyStrToArr(obj.name));
                         $scope.indicateTumorContent($scope.gene.mutations[indices[0]].tumors[indices[1]]);
                     }
                 }, function () {
@@ -2385,7 +2404,7 @@ angular.module('oncokbApp')
                 }
                 DatabaseConnector.deleteEvidences(evidenceUUIDs, historyData, function (result) {
                     removeModel({ type: type, indicies: indicies, uuids: allUUIDs });
-                    updateDrugMap('delete', type, mutation, tumor, treatment, mapPath);
+                    $scope.updateDrugMap('accept', 'delete', type, mutation, tumor, treatment, mapPath);
                     ReviewResource.loading = _.without(ReviewResource.loading, loadingUUID);
                     numOfReviewItems.minus(updatedBy);
                     if (type === 'mutation') {
