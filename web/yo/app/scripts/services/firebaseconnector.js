@@ -59,23 +59,20 @@ angular.module('oncokbApp')
         function addTreatment(path, treatment){
             return set(path + "/treatments/0", treatment);
         }
-        // function getMapRefContent(path){
-        //     var defer = $q.defer();
-        //     var result;
-        //     firebase.database().ref('Map/' + path).once('value', function(doc){
-        //         defer.resolve(doc.val());
-        //         result = doc.val();
-        //         console.log(result);
-        //     }, function (error) {
-        //         defer.reject(error);
-        //     })
-        //
-        //     return result;
-        // }
+        function mapOnce(path){
+            var defer = $q.defer();
+            firebase.database().ref('Map/' + path).once('value', function(doc) {
+                defer.resolve(doc.val());
+            }, function (error) {
+                defer.reject(error);
+            });
+            return defer.promise;
+        }
         function setMap(path, name){
             return set('Map/' + path, name);
         }
         function removeMap(path){
+            console.log(path);
             return remove('Map/' + path);
         }
         function createSetting(setting) {
@@ -99,7 +96,7 @@ angular.module('oncokbApp')
             setDrugName: setDrugName,
             removeDrug: removeDrug,
             addTreatment: addTreatment,
-            //getMapRefContent: getMapRefContent,
+            mapOnce:mapOnce,
             setMap: setMap,
             removeMap: removeMap,
             createSetting: createSetting,

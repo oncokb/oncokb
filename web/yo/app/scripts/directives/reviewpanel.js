@@ -59,6 +59,7 @@ angular.module('oncokbApp')
                                 break;
                             case 'delete':
                                 $scope.confirmDelete($scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment, $scope.updatedBy, $scope.path);
+
                                 break;
                             case 'add':
                                 $scope.acceptAdded($scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment, $scope.updatedBy, $scope.path);
@@ -329,7 +330,6 @@ angular.module('oncokbApp')
                                 rejectionItems.push({uuid: tumor.cancerTypes_uuid, key: 'cancerTypes', obj: tumor});
                                 break;
                             case 'TREATMENT_NAME_CHANGE':
-                                console.log('???');
                                 var treatment = $scope.getRefs($scope.mutation, $scope.tumor, $scope.ti, $scope.treatment).treatment;
                                 $scope.updateDrugMap('reject', 'name', 'treatment', $scope.mutation, $scope.tumor, $scope.treatment, mapPath, treatment.name_review.lastReviewed);
                                 rejectionItems.push({uuid: treatment.name_uuid, key: 'name', obj: treatment});

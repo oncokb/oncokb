@@ -1539,30 +1539,46 @@ angular.module('oncokbApp')
                     case 'accept':
                         switch (type) {
                             case 'add':
-                                switch (dataType) {
-                                    case 'mutation':
-                                        break;
-                                    case 'tumor':
-                                        break;
-                                    case 'treatment':
-                                        console.log('acceptAdd');
-                                        $scope.editMap('latestToReviewed', mapPath, treatment.name_uuid, therapyUuids, null, mapInfo);
-                                        break;
-                                }
+                                // switch (dataType) {
+                                //     case 'mutation':
+                                //         break;
+                                //     case 'tumor':
+                                //         break;
+                                //     case 'treatment':
+                                //         console.log('acceptAdd');
+                                //         $scope.editMap('latestToReviewed', mapPath, treatment.name_uuid, therapyUuids, null, mapInfo);
+                                //         break;
+                                // }
+                                addDrug();
                                 break;
                             case 'delete':
-                                switch (dataType) {
-                                    case 'mutation':
-
-                                        break;
-                                    case 'tumor':
-
-                                        break;
-                                    case 'treatment':
-                                        console.log('acceptRemove');
-                                        $scope.editMap('remove', mapPath, treatment.name_uuid, therapyUuids);
-                                        break;
-                                }
+                                // switch (dataType) {
+                                //     case 'mutation':
+                                //         _.each(mutation.tumors, function (tumor) {
+                                //             var mapInfo = {
+                                //                 'geneName': $scope.gene.name,
+                                //                 'mutationUuid': mutation.name_uuid,
+                                //                 'mutationName': mutation.name,
+                                //                 'cancerTypes': null
+                                //             };
+                                //             $scope.updateDrugMap('accept', 'delete', 'tumor', mutation, tumor, null, null, null, mapInfo);
+                                //         });
+                                //         break;
+                                //     case 'tumor':
+                                //         var mapInfo = mapInfo;
+                                //         mapInfo.cancerTypes = tumor.cancerTypes;
+                                //         _.each(tumor.TIs, function(ti){
+                                //             _.each(ti.treatments, function(treatment){
+                                //                 $scope.updateDrugMap('accept', 'delete', 'treatment', mutation, tumor, treatment, null, null, mapInfo);
+                                //             })
+                                //         });
+                                //         break;
+                                //     case 'treatment':
+                                //         console.log('acceptRemove');
+                                //         $scope.editMap('remove', mapPath, treatment.name_uuid, therapyUuids, null, mapInfo);
+                                //         break;
+                                // }
+                                deleteDrug();
                                 break;
                             case 'name':
                                 switch (dataType) {
@@ -1577,11 +1593,11 @@ angular.module('oncokbApp')
                                         var oldTherapyUuids = _.flatten(mainUtils.therapyStrToArr(oldContent));
                                         var therapyObject = {
                                             'name': treatment.name,
-                                            'status': 'latest'
+                                            'status': 'reviewed'
                                         }
                                         $scope.editMap('remove', mapPath, treatment.name_uuid, oldTherapyUuids);
                                         $scope.editMap('save', mapPath, treatment.name_uuid, therapyUuids, therapyObject);
-                                        $scope.editMap('latestToReviewed', mapPath, treatment.name_uuid, therapyUuids);
+                                        //$scope.editMap('latestToReviewed', mapPath, treatment.name_uuid, therapyUuids);
                                         break;
                                 }
                                 break;
@@ -1595,12 +1611,28 @@ angular.module('oncokbApp')
                             case 'add':
                                 switch (dataType) {
                                     case 'mutation':
+                                        _.each(mutation.tumors, function (tumor) {
+                                            var mapInfo = {
+                                                'geneName': $scope.gene.name,
+                                                'mutationUuid': mutation.name_uuid,
+                                                'mutationName': mutation.name,
+                                                'cancerTypes': null
+                                            };
+                                            $scope.updateDrugMap('reject', 'add', 'tumor', mutation, tumor, null, null, null, mapInfo);
+                                        });
                                         break;
                                     case 'tumor':
+                                        var mapInfo = mapInfo;
+                                        mapInfo.cancerTypes = tumor.cancerTypes;
+                                        _.each(tumor.TIs, function(ti){
+                                            _.each(ti.treatments, function(treatment){
+                                                $scope.updateDrugMap('reject', 'add', 'treatment', mutation, tumor, treatment, null, null, mapInfo);
+                                            })
+                                        });
                                         break;
                                     case 'treatment':
                                         console.log('rejectAdd');
-                                        $scope.editMap('remove', mapPath, treatment.name_uuid, therapyUuids);
+                                        $scope.editMap('remove', mapPath, treatment.name_uuid, therapyUuids, null, mapInfo);
                                         break;
                                 }
                                 break;
@@ -1753,7 +1785,6 @@ angular.module('oncokbApp')
                     var indicies = [data.mutationIndex, data.tumorIndex, data.tiIndex, data.treatmentIndex];
                     var tempUUIDs = getUUIDsByType(type, mutation, tumor, ti, treatment);
                     numOfReviewItems.minus(updatedBy);
-                    console.log(mapPath);
                     $scope.updateDrugMap('reject', 'add', type, mutation, tumor, treatment, mapPath);
                     removeModel({type: type, uuids: tempUUIDs, indicies: indicies});
                 });
@@ -2052,14 +2083,127 @@ angular.module('oncokbApp')
                 }
                 var mapPath;
                 if (type === 'save'){
+                    // _.each(therapyUuids, function (drug) {
+                    //     _.each(cancerTypes, function (cancerType) {
+                    //         if (cancerType.code != "") {
+                    //             mapPath = drug + '/' + geneName + '/' + mutationUuid + '/cancerTypes/' + cancerType.code + '/' + therapyUuid;
+                    //             firebaseConnector.setMap(mapPath, therapyObject);
+                    //         }
+                    //         else {
+                    //             mapPath = drug + '/' + geneName + '/' + mutationUuid + '/cancerTypes/' + cancerType.mainType + '/' + therapyUuid;
+                    //             firebaseConnector.setMap(mapPath, therapyObject);
+                    //         }
+                    //         mapPath = drug + '/' + geneName + '/' + mutationUuid + '/mutationName';
+                    //         firebaseConnector.setMap(mapPath, mutationName);
+                    //     });
+                    // });
+                    addDrugInMap();
+                }
+                else if (type === 'latestToReviewed'){
+                    // _.each(therapyUuids, function (drug) {
+                    //     _.each(cancerTypes, function (cancerType) {
+                    //         if (cancerType.code != "") {
+                    //             mapPath = drug + '/' + geneName + '/' + mutationUuid + '/cancerTypes/' + cancerType.code + '/' + therapyUuid + '/status';
+                    //             firebaseConnector.setMap(mapPath, 'reviewed');
+                    //         }
+                    //         else {
+                    //             mapPath = drug + '/' + geneName + '/' + mutationUuid + '/cancerTypes/' + cancerType.mainType + '/' + therapyUuid + '/status';
+                    //             firebaseConnector.setMap(mapPath, 'reviewed');
+                    //         }
+                    //     });
+                    // });
+                    updateDrugInMap();
+                }
+                else if (type === 'remove'){
+                    // _.each(therapyUuids, function (drug) {
+                    //     _.each(cancerTypes, function (cancerType) {
+                    //         if (cancerType.code != '') {
+                    //             mapPath = drug + '/' + geneName + '/' + mutationUuid + '/cancerTypes/' + cancerType.code + '/' + therapyUuid;
+                    //             firebaseConnector.removeMap(mapPath);
+                    //         }
+                    //         else {
+                    //             mapPath = drug + '/' + geneName + '/' + mutationUuid + '/cancerTypes/' + cancerType.mainType + '/' + therapyUuid;
+                    //             firebaseConnector.removeMap(mapPath);
+                    //         }
+                    //         firebaseConnector.ref('Map/' + drug + '/' + geneName + '/' + mutationUuid + '/cancerTypes').once('value', function (doc) {
+                    //             if (!doc.val()) {
+                    //                 mapPath = drug + '/' + geneName + '/' + mutationUuid + '/mutationName';
+                    //                 firebaseConnector.removeMap(mapPath);
+                    //             }
+                    //         })
+                    //     });
+                    // });
+                    removeDrugInMap();
+                }
+                else if (type === 'removeLatest'){
+                    _.each(therapyUuids, function (drug) {
+                        _.each(cancerTypes, function (cancerType) {
+                            if (cancerType.code != '') {
+                                mapPath = drug + '/' + geneName + '/' + mutationUuid + '/cancerTypes/' + cancerType.code + '/' + therapyUuid;
+                                firebaseConnector.mapOnce(mapPath + '/status').then(function (result){
+                                    console.log(result);
+                                    if (result === 'latest'){
+                                        firebaseConnector.removeMap(mapPath);
+                                    }
+                                    firebaseConnector.ref('Map/' + drug + '/' + geneName + '/' + mutationUuid + '/cancerTypes').once('value', function (doc) {
+                                        if (!doc.val()) {
+                                            mapPath = drug + '/' + geneName + '/' + mutationUuid + '/mutationName';
+                                            firebaseConnector.removeMap(mapPath);
+                                        }
+                                    })
+                                })
+                                //checkTherapyLatestStatus(type, mapPath);
+                            }
+                            else {
+                                mapPath = drug + '/' + geneName + '/' + mutationUuid + '/cancerTypes/' + cancerType.mainType + '/' + therapyUuid;
+                                firebaseConnector.mapOnce(mapPath + '/status').then(function (result){
+                                    console.log(result);
+                                    if (result === 'latest'){
+                                        firebaseConnector.removeMap(mapPath);
+                                    }
+                                    firebaseConnector.ref('Map/' + drug + '/' + geneName + '/' + mutationUuid + '/cancerTypes').once('value', function (doc) {
+                                        if (!doc.val()) {
+                                            mapPath = drug + '/' + geneName + '/' + mutationUuid + '/mutationName';
+                                            firebaseConnector.removeMap(mapPath);
+                                        }
+                                    })
+                                })
+                                //checkTherapyLatestStatus(type, mapPath);
+                            }
+
+                        });
+                    });
+                }
+                else if (type ==='saveLatest'){
+                    var thrapyObject = therapyObject;
                     _.each(therapyUuids, function (drug) {
                         _.each(cancerTypes, function (cancerType) {
                             if (cancerType.code != "") {
                                 mapPath = drug + '/' + geneName + '/' + mutationUuid + '/cancerTypes/' + cancerType.code + '/' + therapyUuid;
+                                firebaseConnector.mapOnce(mapPath + '/status').then(function (result){
+                                    console.log(result);
+                                    if (result === 'reviewed'){
+                                        therapyObject.status = 'reviewed';
+                                    }
+                                })
+                                //checkTherapyLatestStatus(type, mapPath, therapyObject);
+                                // if (checkTherapyLatestStatus(mapPath) === false){
+                                //     therapyObject.status = 'reviewed';
+                                // }
                                 firebaseConnector.setMap(mapPath, therapyObject);
                             }
                             else {
                                 mapPath = drug + '/' + geneName + '/' + mutationUuid + '/cancerTypes/' + cancerType.mainType + '/' + therapyUuid;
+                                firebaseConnector.mapOnce(mapPath + '/status').then(function (result){
+                                    console.log(result);
+                                    if (result === 'reviewed'){
+                                        therapyObject.status = 'reviewed';
+                                    }
+                                })
+                                //checkTherapyLatestStatus(type, mapPath, therapyObject);
+                                // if (checkTherapyLatestStatus(mapPath) === false){
+                                //     therapyObject.status = 'reviewed';
+                                // }
                                 firebaseConnector.setMap(mapPath, therapyObject);
                             }
                             mapPath = drug + '/' + geneName + '/' + mutationUuid + '/mutationName';
@@ -2067,69 +2211,121 @@ angular.module('oncokbApp')
                         });
                     });
                 }
-                else if (type === 'latestToReviewed'){
-                    _.each(therapyUuids, function (drug) {
-                        _.each(cancerTypes, function (cancerType) {
-                            if (cancerType.code != "") {
-                                mapPath = drug + '/' + geneName + '/' + mutationUuid + '/cancerTypes/' + cancerType.code + '/' + therapyUuid + '/status';
-                                firebaseConnector.setMap(mapPath, 'reviewed');
-                            }
-                            else {
-                                mapPath = drug + '/' + geneName + '/' + mutationUuid + '/cancerTypes/' + cancerType.mainType + '/' + therapyUuid + '/status';
-                                firebaseConnector.setMap(mapPath, 'reviewed');
-                            }
-                        });
-                    });
-                }
-                else if (type === 'remove'){
-                    _.each(therapyUuids, function (drug) {
-                        _.each(cancerTypes, function (cancerType) {
-                            if (cancerType.code != '') {
-                                mapPath = drug + '/' + geneName + '/' + mutationUuid + '/cancerTypes/' + cancerType.code + '/' + therapyUuid;
-                                firebaseConnector.removeMap(mapPath);
-                            }
-                            else {
-                                mapPath = drug + '/' + geneName + '/' + mutationUuid + '/cancerTypes/' + cancerType.mainType + '/' + therapyUuid;
-                                firebaseConnector.removeMap(mapPath);
-                            }
-                            firebaseConnector.ref('Map/' + drug + '/' + geneName + '/' + mutationUuid + '/cancerTypes').once('value', function (doc) {
-                                if (!doc.val()) {
-                                    mapPath = drug + '/' + geneName + '/' + mutationUuid + '/mutationName';
-                                    firebaseConnector.removeMap(mapPath);
-                                }
-                            })
-                        });
-                    });
-                }
-
-                //modify/delete操作都不动map
             }
 
-            $scope.checkTherapyLatestStatus = function(mapPath, therapyUuid, drug) {
+            $scope.editMapBeforeReview = function (mapPath, therapyUuid, oldTherapyUuids, therapyUuids, therapyObject){
                 var indices = getIndexByPath(mapPath);
                 var geneName = $scope.gene.name;
                 var mutationUuid = $scope.gene.mutations[indices[0]].name_uuid;
+                var mutationName = $scope.gene.mutations[indices[0]].name;
                 var cancerTypes = $scope.gene.mutations[indices[0]].tumors[indices[1]].cancerTypes;
-                var mapPath;
-                var result;
-                if (cancerTypes[0].code != '') {
-                    mapPath = drug + '/' + geneName + '/' + mutationUuid + '/cancerTypes/' + cancerTypes[0].code + '/' + therapyUuid;
-                }
-                else {
-                    mapPath = drug + '/' + geneName + '/' + mutationUuid + '/cancerTypes/' + cancerTypes[0].mainType + '/' + therapyUuid;
-                }
-                firebaseConnector.ref('Map/' + mapPath + '/status').once('value', function(doc){
-                    if (doc.val() === 'latest'){
-                        console.log('shiLatest');
-                        result = true;
-                    }
-                    else{
-                        console.log('no')
-                        result = false;
-                    }
+                var oldTherapyUuids = oldTherapyUuids;
+                var therapyUuids =  therapyUuids;
+                _.forEach(oldTherapyUuids, function (drug) {
+                    _.forEach(cancerTypes, function (cancerType) {
+                        if (cancerType.code != '') {
+                            // mapPath = drug + '/' + geneName + '/' + mutationUuid + '/cancerTypes/' + cancerType.code + '/' + therapyUuid;
+                            // firebaseConnector.mapOnce(mapPath + '/status').then(function (result){
+                            //     console.log(result);
+                            //     if (result === 'latest'){
+                            //         firebaseConnector.removeMap(mapPath);
+                            //     }
+                            //     // firebaseConnector.ref('Map/' + drug + '/' + geneName + '/' + mutationUuid + '/cancerTypes').once('value', function (doc) {
+                            //     //     if (!doc.val()) {
+                            //     //         mapPath = drug + '/' + geneName + '/' + mutationUuid + '/mutationName';
+                            //     //         firebaseConnector.removeMap(mapPath);
+                            //     //     }
+                            //     // })
+                            // })
+                            addDrugInMap();
+                        }
+                        else {
+                            mapPath = drug + '/' + geneName + '/' + mutationUuid + '/cancerTypes/' + cancerType.mainType + '/' + therapyUuid;
+                            firebaseConnector.mapOnce(mapPath + '/status').then(function (result){
+                                console.log(result);
+                                if (result === 'latest'){
+                                    firebaseConnector.removeMap(mapPath);
+                                }
+                                firebaseConnector.ref('Map/' + drug + '/' + geneName + '/' + mutationUuid + '/cancerTypes').once('value', function (doc) {
+                                    if (!doc.val()) {
+                                        mapPath = drug + '/' + geneName + '/' + mutationUuid + '/mutationName';
+                                        firebaseConnector.removeMap(mapPath);
+                                    }
+                                })
+                            })
+                        }
+                        firebaseConnector.ref('Map/' + drug + '/' + geneName + '/' + mutationUuid + '/cancerTypes').once('value', function (doc) {
+                            if (!doc.val()) {
+                                mapPath = drug + '/' + geneName + '/' + mutationUuid + '/mutationName';
+                                firebaseConnector.removeMap(mapPath);
+                            }
+                        });
+
+                    });
                 });
-                return result;
+                _.forEach(therapyUuids, function (drug) {
+                    _.forEach(cancerTypes, function (cancerType) {
+                        if (cancerType.code != "") {
+                            mapPath = drug + '/' + geneName + '/' + mutationUuid + '/cancerTypes/' + cancerType.code + '/' + therapyUuid;
+                            firebaseConnector.mapOnce(mapPath + '/status').then(function (result){
+                                console.log(result);
+                                if (result === 'reviewed'){
+                                    therapyObject.status = 'reviewed';
+                                }
+                            })
+                            //checkTherapyLatestStatus(type, mapPath, therapyObject);
+                            // if (checkTherapyLatestStatus(mapPath) === false){
+                            //     therapyObject.status = 'reviewed';
+                            // }
+                            firebaseConnector.setMap(mapPath, therapyObject);
+                        }
+                        else {
+                            mapPath = drug + '/' + geneName + '/' + mutationUuid + '/cancerTypes/' + cancerType.mainType + '/' + therapyUuid;
+                            firebaseConnector.mapOnce(mapPath + '/status').then(function (result){
+                                console.log(result);
+                                if (result === 'reviewed'){
+                                    therapyObject.status = 'reviewed';
+                                }
+                            })
+                            //checkTherapyLatestStatus(type, mapPath, therapyObject);
+                            // if (checkTherapyLatestStatus(mapPath) === false){
+                            //     therapyObject.status = 'reviewed';
+                            // }
+                            firebaseConnector.setMap(mapPath, therapyObject);
+                        }
+                        mapPath = drug + '/' + geneName + '/' + mutationUuid + '/mutationName';
+                        firebaseConnector.setMap(mapPath, mutationName);
+                    });
+                });
             }
+
+
+            // function checkTherapyLatestStatus(type, mapPath, therapyObject) {
+            //     console.log('check');
+            //     console.log(type);
+            //     console.log(mapPath);
+            //     console.log(therapyObject);
+            //     var mapPath = mapPath;
+            //     firebaseConnector.mapOnce(mapPath + '/status').then(function (result) {
+            //         switch (type){
+            //             case 'removeLatest':
+            //                 console.log('a');
+            //                 if (result === 'latest'){
+            //                     firebaseConnector.removeMap(mapPath);
+            //                 }
+            //                 break;
+            //             case 'saveLatest':
+            //                 console.log('b');
+            //                 var therapyObject = therapyObject;
+            //                 if (result === 'reviewed'){
+            //                     therapyObject.status = 'reviewed';
+            //                 }
+            //
+            //                 firebaseConnector.setMap(mapPath, therapyObject);
+            //                 break;
+            //         }
+            //     });
+            // }
 
             //All functions related to Map
             // $scope.checkMapAddedStatus = function(mapPath, therapyUuid, drug){

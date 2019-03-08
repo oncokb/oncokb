@@ -142,7 +142,7 @@ angular.module('oncokbApp')
                     if (isValidTreatment(indices, newTreatmentName)) {
                         therapyUuid = _.flatten(therapyUuid);
                         var therapyObject = {};
-                        if ($scope.modifyMode === true) {
+                        if ($scope.newTreatment === false) {
                             $scope.gene.mutations[indices[0]].tumors[indices[1]].TIs[indices[2]].treatments[indices[3]].name = newTreatmentName;
                             var name_uuid = $scope.gene.mutations[indices[0]].tumors[indices[1]].TIs[indices[2]].treatments[indices[3]].name_uuid;
                             mainUtils.setUUIDInReview(name_uuid);
@@ -151,13 +151,16 @@ angular.module('oncokbApp')
                                 'status': 'latest'
                             }
                             newTherapy = _.flatten(newTherapy);
-                            if ($scope.$$prevSibling.checkTherapyLatestStatus($scope.path, name_uuid, newTherapy[0])){
-                                $scope.$$prevSibling.editMap('remove', $scope.path, name_uuid, newTherapy);
-                                $scope.$$prevSibling.editMap('save', $scope.path, name_uuid, therapyUuid, therapyObject);
-                            }
-                            else{
-                                $scope.$$prevSibling.editMap('save', $scope.path, name_uuid, therapyUuid, therapyObject);
-                            }
+                            // $scope.$$prevSibling.editMap('removeLatest', $scope.path, name_uuid, newTherapy);
+                            // $scope.$$prevSibling.editMap('saveLatest', $scope.path, name_uuid, therapyUuid, therapyObject);
+                            $scope.$$prevSibling.editMapBeforeReview($scope.path, name_uuid, newTherapy, therapyUuid, therapyObject);
+                            // if ($scope.$$prevSibling.checkTherapyLatestStatus($scope.path, name_uuid, newTherapy[0])){
+                            //     $scope.$$prevSibling.editMap('removeLatest', $scope.path, name_uuid, newTherapy);
+                            //     $scope.$$prevSibling.editMap('save', $scope.path, name_uuid, therapyUuid, therapyObject);
+                            // }
+                            // else{
+                            //     $scope.$$prevSibling.editMap('save', $scope.path, name_uuid, therapyUuid, therapyObject);
+                            // }
                             $scope.$$prevSibling.indicateTumorContent($scope.tumorRef);
                             $scope.closeWindow();
                         }
