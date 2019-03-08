@@ -36,7 +36,7 @@ public class CancerGeneUtils {
 
                     Gene gene = GeneUtils.getGeneByEntrezId(Integer.parseInt(items[1]));
                     CancerGene cancerGene = new CancerGene();
-                    cancerGene.setEntrezGeneId(items[1]);
+                    cancerGene.setEntrezGeneId(Integer.parseInt(items[1]));
 
                     if (gene == null) {
                         cancerGene.setHugoSymbol(items[0]);

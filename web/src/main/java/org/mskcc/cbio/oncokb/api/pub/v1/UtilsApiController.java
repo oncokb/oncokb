@@ -212,7 +212,7 @@ public class UtilsApiController implements UtilsApi {
         for (CancerGene cancerGene : CancerGeneUtils.getCancerGeneList()) {
             List<String> row = new ArrayList<>();
             row.add(cancerGene.getHugoSymbol());
-            row.add(cancerGene.getEntrezGeneId());
+            row.add(cancerGene.getEntrezGeneId().toString());
             row.add(String.valueOf(cancerGene.getOccurrenceCount()));
             row.add(getStringByBoolean(cancerGene.getOncokbAnnotated()));
             row.add(getStringByBoolean(cancerGene.getmSKImpact()));
