@@ -42,7 +42,11 @@ angular.module('oncokbApp')
 
 
             function hasSameName(newDrugName, uuid) {
-                return _.some(mainUtils.getKeysWithoutFirebasePrefix($scope.drugList), (key) => ($scope.drugList[key].uuid !== uuid && (newDrugName === $scope.drugList[key].drugName || $scope.drugList[key].synonyms !== undefined && $scope.drugList[key].synonyms.indexOf(newDrugName) > -1)) === true);
+                return _.some(mainUtils.getKeysWithoutFirebasePrefix($scope.drugList), function(key){
+                    if(($scope.drugList[key].uuid !== uuid && (newDrugName === $scope.drugList[key].drugName || $scope.drugList[key].synonyms !== undefined && $scope.drugList[key].synonyms.indexOf(newDrugName) > -1)) === true){
+                        return key;
+                    }
+                });
             }
 
             function modalError(errorTitle, errorMessage, sameName, deleteDrug, drugUuid, genes) {
@@ -71,9 +75,7 @@ angular.module('oncokbApp')
 
             $scope.removeDrug = function (drug) {
                 if ($scope.drugMap[drug.uuid]) {
-                    var genes = _.map($scope.drugMap[drug.uuid], (gene) => {
-                        return gene.geneName
-                    });
+                    var genes = _.map($scope.drugMap[drug.uuid], 'geneName');
                     modalError("Sorry", "Can't delete this therapy, because it is found in the following gene pages.", false, false, drug.uuid, genes);
                 }
                 else {

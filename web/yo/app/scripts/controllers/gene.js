@@ -1833,7 +1833,7 @@ angular.module('oncokbApp')
 
             };
 
-            $scope.initAddModifyTherapy = function(path){
+            $scope.initAddTherapy = function(path){
                 $scope.indices = getIndexByPath(path);
                 $scope.tumorRef = $scope.gene.mutations[$scope.indices[0]].tumors[$scope.indices[1]];
                 $scope.path = path;
