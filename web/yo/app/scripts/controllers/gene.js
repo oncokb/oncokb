@@ -2029,6 +2029,7 @@ angular.module('oncokbApp')
                 var mutationName = $scope.gene.mutations[indices[0]].name;
                 var cancerTypeUuid = $scope.gene.mutations[indices[0]].tumors[indices[1]].cancerTypes_uuid;
                 switch (actionType) {
+                    case 'add':
                         changeMapWhenAdd(dataType, geneName, mutationUuid, mutationName, cancerTypeUuid, therapyUuid, null, content);
                         break;
                     case 'name':
