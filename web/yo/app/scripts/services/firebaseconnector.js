@@ -72,8 +72,7 @@ angular.module('oncokbApp')
             return set('Map/' + path, name);
         }
         function removeMap(path){
-            console.log(path);
-            return remove('Map/' + path);
+            return set('Map/' + path, null);
         }
         function createSetting(setting) {
             return set('Setting', setting);
