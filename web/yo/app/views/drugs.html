@@ -34,7 +34,7 @@
                 <td>{{ drug.ncitCode }}</td>
                 <td>{{ drug.description }}</td>
                 <td>
-                <div ng-repeat="gene in drugMap[drug.uuid]" uib-tooltip-placement="top"
+                <div ng-repeat="gene in drugMapReviewed[drug.uuid]" uib-tooltip-placement="top"
                 uib-tooltip="{{gene.mutationNumber}} mutation(s): {{gene.mutationInfo}}"><a
                 ng-href="{{gene.geneLink}}">{{gene.geneName}}</a></div>
                 </td>
