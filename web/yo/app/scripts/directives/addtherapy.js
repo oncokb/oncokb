@@ -1,8 +1,8 @@
 'use strict';
 angular.module('oncokbApp')
-    .directive('addModifyTherapy', function ($rootScope, DatabaseConnector, _, $q, FirebaseModel, firebaseConnector, mainUtils, $window) {
+    .directive('addTherapy', function ($rootScope, DatabaseConnector, _, $q, FirebaseModel, firebaseConnector, mainUtils, $window) {
         return {
-            templateUrl: 'views/addModifyTherapy.html',
+            templateUrl: 'views/addTherapy.html',
             restrict: 'E',
             controller: function ($scope) {
                 var drugs = [];
