@@ -668,8 +668,10 @@ angular.module('oncokbApp')
             var oldArray = _.flatten(therapyStrToArr(oldContent));
             var newArray = _.flatten(therapyStrToArr(newContent));
             var difference = {
+                'sameDrugs': _.intersection(oldArray, newArray),
                 'extraDrugsInOld': _.difference(oldArray, newArray),
-                'extraDrugsInNew': _.difference(newArray, oldArray)};
+                'extraDrugsInNew': _.difference(newArray, oldArray)
+            };
             return difference;
         }
         return {
