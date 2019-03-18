@@ -670,7 +670,8 @@ h5 {
 ,#subtypesDropDown_chosen
 ,#variantMutationDropDown_chosen
 ,#variantGeneNameDropDown_chosen
-,#curateTumorTypesDropdown_chosen {
+,#curateTumorTypesDropdown_chosen
+,#drugsDropdown_chosen{
   width: 100% !important;
 }
 #curationQueueEmailCuratorSelect_chosen {
@@ -686,6 +687,12 @@ h5 {
   border-left: 0;
 }
 
+#changeNameDropdown_chosen{
+    width: 300px !important;
+}
+#preferNameDropdownChosen_chosen{
+    width: 500px !important;
+}
 .chosen-full-width .chosen-container {
   width: 80% !important;
 }
@@ -914,7 +921,7 @@ input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:b
     }
 }
 
-.searchAddDrug {
+.createNewDrug {
     .nameLabel{
         width: 170px;
     }
@@ -923,12 +930,15 @@ input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:b
         margin-right: 20px;
     }
     .preferNameDropdown {
-        width: 500px;
         margin-top: 10px;
     }
     .errorReminder {
         font-size: 15px;
         color: red;
+    }
+    .infoReminder {
+        font-size: 15px;
+        color: green;
     }
     .basicName {
         color: black;
@@ -939,9 +949,6 @@ input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:b
         color: grey;
         font-size: 13px;
         font-style: italic;
-    }
-    .drugsDropdown {
-        width: 100%;
     }
 }
 

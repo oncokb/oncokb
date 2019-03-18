@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('oncokbApp')
-    .controller('DrugsCtrl', ['$window', '$scope', '$location', '$timeout', '$routeParams', '_', 'DTColumnDefBuilder', 'DTOptionsBuilder', '$firebaseObject', '$firebaseArray', 'FirebaseModel', 'firebaseConnector', '$q', 'dialogs', 'mainUtils',
-        function ($window, $scope, $location, $timeout, $routeParams, _, DTColumnDefBuilder, DTOptionsBuilder, $firebaseObject, $firebaseArray, FirebaseModel, firebaseConnector, $q, dialogs, mainUtils) {
+    .controller('DrugsCtrl', ['$window', '$scope', '$location', '$timeout', '$routeParams', '_', 'DTColumnDefBuilder', 'DTOptionsBuilder', '$firebaseObject', '$firebaseArray', 'FirebaseModel', 'firebaseConnector', '$q', 'dialogs', 'drugMapUtils',
+        function ($window, $scope, $location, $timeout, $routeParams, _, DTColumnDefBuilder, DTOptionsBuilder, $firebaseObject, $firebaseArray, FirebaseModel, firebaseConnector, $q, dialogs, drugMapUtils) {
             function loadDrugTable() {
                 var deferred1 = $q.defer();
                 $firebaseObject(firebaseConnector.ref("Drugs/")).$bindTo($scope, "drugList").then(function () {
@@ -11,20 +11,47 @@ angular.module('oncokbApp')
                     deferred1.reject(error);
                 });
                 var deferred2 = $q.defer();
-                $scope.drugMap = {};
+                var mutationsReviewed = [];
+                var mutationsLatest = [];
+                var geneReviewed = false;
+                $scope.drugMapReviewed = {};
+                $scope.drugMapLatest = {};
                 firebase.database().ref('Map').on('value', function (doc) {
                     var mapList = doc.val();
                     _.each(_.keys(mapList), function (drug) {
-                        $scope.drugMap[drug] = [];
+                        $scope.drugMapReviewed[drug] = [];
+                        $scope.drugMapLatest[drug] = [];
                         _.each(_.keys(mapList[drug]), function (gene) {
-                            var mutations = _.keys(mapList[drug][gene]);
+                            geneReviewed = false;
+                            mutationsReviewed = [];
+                            mutationsLatest = [];
+                            _.each(_.keys(mapList[drug][gene]), function (mutationUuid) {
+                                _.each(mapList[drug][gene][mutationUuid].cancerTypes, function(cancerType){
+                                    _.each(cancerType, function(therapy){
+                                        if(therapy.status == 'reviewed'){
+                                            geneReviewed = true;
+                                            mutationsReviewed.push(mapList[drug][gene][mutationUuid].mutationName);
+                                        }
+                                        else {
+                                            mutationsLatest.push(mapList[drug][gene][mutationUuid].mutationName);
+                                        }
+                                    })
+                                } )
+                            });
+                            mutationsReviewed = _.uniq(mutationsReviewed);
+                            mutationsLatest = _.uniq(mutationsLatest);
                             var mapInformation = {
                                 geneName: gene,
                                 geneLink: "#!/gene/" + gene,
-                                mutationNumber: mutations.length,
-                                mutationInfo: mutations
+                                mutationNumber: mutationsReviewed.length,
+                                mutationInfo: mutationsReviewed.join('; ')
                             };
-                            $scope.drugMap[drug].push(mapInformation);
+                            if(geneReviewed){
+                                $scope.drugMapReviewed[drug].push(mapInformation);
+                            }
+                            else{
+                                $scope.drugMapLatest[drug].push(mapInformation);
+                            }
                         });
                     });
                     deferred2.resolve();
@@ -42,7 +69,7 @@ angular.module('oncokbApp')
 
 
             function hasSameName(newDrugName, uuid) {
-                return _.some(mainUtils.getKeysWithoutFirebasePrefix($scope.drugList), function(key){
+                return _.some(drugMapUtils.getKeysWithoutFirebasePrefix($scope.drugList), function(key){
                     if(($scope.drugList[key].uuid !== uuid && (newDrugName === $scope.drugList[key].drugName || $scope.drugList[key].synonyms !== undefined && $scope.drugList[key].synonyms.indexOf(newDrugName) > -1)) === true){
                         return key;
                     }
@@ -73,9 +100,21 @@ angular.module('oncokbApp')
                 }
             };
 
+            $scope.checkDrugInUse = function (uuid) {
+                return !($scope.drugMapLatest[uuid] || $scope.drugMapReviewed[uuid]);
+            };
+
             $scope.removeDrug = function (drug) {
-                if ($scope.drugMap[drug.uuid]) {
-                    var genes = _.map($scope.drugMap[drug.uuid], 'geneName');
+                if ($scope.drugMapLatest[drug.uuid]) {
+                    var genes = _.map($scope.drugMapLatest[drug.uuid], function(gene){
+                        return gene.geneName
+                    });
+                    modalError("Sorry", "Can't delete this therapy, because it is found in the following gene pages, though therapies haven't been reviewed yet.", false, false, drug.uuid, genes);
+                }
+                else if ($scope.drugMapReviewed[drug.uuid]) {
+                    var genes = _.map($scope.drugMapReviewed[drug.uuid], function(gene){
+                        return gene.geneName
+                    });
                     modalError("Sorry", "Can't delete this therapy, because it is found in the following gene pages.", false, false, drug.uuid, genes);
                 }
                 else {

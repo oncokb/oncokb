@@ -33,11 +33,11 @@
     </div>
 
     <div>
-        <div ng-show="modifyMode" align="right">
+        <div ng-show="modifyName" align="right">
             <button type="button" class="btn btn-default" ng-click="cancel()">Cancel</button>
             <button type="button" class="btn btn-primary" ng-click="save()" ng-disabled="addTherapyError||noData">Save</button>
         </div>
-        <div ng-show="!modifyMode" align="left">
+        <div ng-show="!modifyName" align="left">
             <span class="input-group-btn">
                 <button type="button" class="btn btn-default btn-sm" style="border-radius:3px; margin-left:10px" ng-disabled="addTherapyError||noData" ng-click="save()">
                     <i class="fa fa-plus"></i> Add Therapy and {{::(ti.type[0] === 'I' ? 'Investigational' : 'Standard')}} Implications
@@ -50,7 +50,7 @@
 <script type="text/ng-template" id="drugsLibrary">
     <div>
         <div ng-bind-html="$highlight($getDisplayText())"></div>
-        <div>Also known as
+        <div ng-show="data.synonyms">Also known as
             <span ng-bind-html="$highlight(data.synonyms.join(', '))"></span>
         </div>
     </div>
