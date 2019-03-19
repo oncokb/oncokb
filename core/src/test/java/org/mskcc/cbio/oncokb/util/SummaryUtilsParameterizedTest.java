@@ -78,15 +78,15 @@ public class SummaryUtilsParameterizedTest {
             if (!line.startsWith("#") && line.trim().length() > 0) {
                 try {
                     String parts[] = line.split("\t");
-                    if (parts.length != 6) {
+                    if (parts.length < 4) {
                         throw new IllegalArgumentException("Missing a tumor type summary query attribute, parts: " + parts.length);
                     }
                     String gene = parts[0];
                     String variant = parts[1];
                     String tumorType = parts[2];
                     String geneSummary = parts[3];
-                    String variantSummary = parts[4];
-                    String tumorTypeSummary = parts[5];
+                    String variantSummary = parts.length > 4 ? parts[4] : "";
+                    String tumorTypeSummary = parts.length > 5 ? parts[5] : "";
                     String[] query = {gene, variant, tumorType, geneSummary, variantSummary, tumorTypeSummary};
                     queries.add(query);
                     count++;

@@ -36,10 +36,13 @@ public final class NcbiEUtils {
     }
 
     public static Set<Article> readPubmedArticles(Set<String> pmids) {
-        String apiKey = null;
+        String apiKey = PropertiesUtils.getProperties("ncbi.api.key");
+
         try {
-            apiKey = PropertiesUtils.getProperties("ncbi.api.key");
-        } catch (IOException e) {
+            if (apiKey == null) {
+                throw new Exception();
+            }
+        } catch (Exception e) {
             System.out.println("NCBI API KEY needs to be specified. Please see here for details: https://www.ncbi.nlm.nih.gov/books/NBK25497/");
             e.printStackTrace();
         }

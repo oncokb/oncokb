@@ -5,7 +5,7 @@ package org.mskcc.cbio.oncokb.model;
  */
 public class CancerGene {
     private String hugoSymbol;
-    private String entrezGeneId;
+    private Integer entrezGeneId;
     private Boolean oncokbAnnotated;
     private Integer occurrenceCount;
     private Boolean mSKImpact;
@@ -23,11 +23,11 @@ public class CancerGene {
         this.hugoSymbol = hugoSymbol;
     }
 
-    public String getEntrezGeneId() {
+    public Integer getEntrezGeneId() {
         return entrezGeneId;
     }
 
-    public void setEntrezGeneId(String entrezGeneId) {
+    public void setEntrezGeneId(Integer entrezGeneId) {
         this.entrezGeneId = entrezGeneId;
     }
 

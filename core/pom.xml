@@ -4,9 +4,9 @@
     <parent>
         <groupId>org.mskcc.cbio.oncokb</groupId>
         <artifactId>master</artifactId>
-        <version>0.3.11</version>
+        <version>0.3.14</version>
     </parent>
-    <version>0.3.11</version>
+    <version>0.3.14</version>
     <artifactId>core</artifactId>
     <packaging>jar</packaging>
     <name>OncoKB Core</name>
@@ -130,11 +130,6 @@
             <artifactId>junit</artifactId>
             <version>4.12</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.cmo.cancerhotspots</groupId>
-            <artifactId>model</artifactId>
-            <version>0.1.2</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>

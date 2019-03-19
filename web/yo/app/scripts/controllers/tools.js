@@ -2,10 +2,11 @@
 
 angular.module('oncokbApp')
     .controller('ToolsCtrl', ['$scope', 'dialogs', 'OncoKB', 'DatabaseConnector', '$timeout', '_', 'FindRegex',
-        'mainUtils', 'loadFiles', '$rootScope', 'DTColumnDefBuilder', 'DTOptionsBuilder',
+        'mainUtils', 'loadFiles', '$rootScope', 'DTColumnDefBuilder', 'DTOptionsBuilder', 'FirebaseModel', '$q',
         function($scope, dialogs, OncoKB, DatabaseConnector, $timeout, _, FindRegex, mainUtils, loadFiles, $rootScope,
-                 DTColumnDefBuilder, DTOptionsBuilder) {
+                 DTColumnDefBuilder, DTOptionsBuilder, FirebaseModel, $q) {
             $scope.init = function() {
+                $scope.newGenes = [];
                 $scope.loading = false;
                 $scope.typeCheckboxes = ['update', 'name change', 'add', 'delete'];
                 $scope.selectedTypeCheckboxes = [];
@@ -20,6 +21,11 @@ angular.module('oncokbApp')
                     $scope.geneNames = _.keys($rootScope.historyData);
                 }, function() {
                     dialogs.notify('Warning', 'Sorry, the system failed to load history. Please try again or search later.');
+                });
+                loadFiles.load('meta').then(function(result) {
+                    $scope.hugoSymbols = _.without(_.keys($rootScope.metaData), 'collaborators');
+                }, function() {
+                    dialogs.notify('Warning', 'Sorry, the system failed to load meta. Please try again or search later.');
                 });
             };
             var sorting = [[2, 'desc'], [1, 'asc'], [0, 'asc']];
@@ -180,6 +186,12 @@ angular.module('oncokbApp')
             };
             $scope.evidenceType = '';
             $scope.evidenceTypes = [{
+                label: 'Gene Summary',
+                value: 'geneSummary'
+            }, {
+                label: 'Gene Background',
+                value: 'geneBackground'
+            }, {
                 label: 'Oncogene/Tumor Suppressor',
                 value: 'geneType'
             }, {
@@ -196,6 +208,20 @@ angular.module('oncokbApp')
                 value: 'drugs'
             }];
             $scope.reviewedData = {
+                geneSummary: {
+                    header: ['Gene', 'Summary'],
+                    body: [],
+                    keys: ['gene', 'summary'],
+                    fileName: 'GeneSummary.xls',
+                    evidenceTypes: 'GENE_SUMMARY'
+                },
+                geneBackground: {
+                    header: ['Gene', 'Background'],
+                    body: [],
+                    keys: ['gene', 'background'],
+                    fileName: 'GeneBackground.xls',
+                    evidenceTypes: 'GENE_BACKGROUND'
+                },
                 geneType: {
                     header: ['Gene', 'Oncogene', 'Tumor Suppressor', 'Truncating Mutations', 'Deletion', 'Amplification'],
                     body: [],
@@ -225,9 +251,9 @@ angular.module('oncokbApp')
                     evidenceTypes: 'TUMOR_TYPE_SUMMARY,STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY,STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE,INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY,INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE'
                 },
                 drugs: {
-                    header: ['Gene', 'Mutation', 'Tumor Type', 'Drugs', 'Level', 'Description', 'Citations'],
+                    header: ['Gene', 'Mutation', 'Tumor Type', 'Drugs', 'Level', 'Propagation', 'Description', 'Citations'],
                     body: [],
-                    keys: ['gene', 'mutation', 'tumorType', 'drugs', 'level', 'description', 'citations'],
+                    keys: ['gene', 'mutation', 'tumorType', 'drugs', 'level', 'propagation', 'description', 'citations'],
                     fileName: 'Therapeutics.xls',
                     evidenceTypes: 'STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY,STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE,INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY,INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE'
                 }
@@ -244,13 +270,20 @@ angular.module('oncokbApp')
             }
             $scope.generateEvidences = function () {
                 $scope.loadingReviewed = true;
-                $scope.reviewedData.geneType.body = [];
-                $scope.reviewedData.mutationEffect.body = [];
-                $scope.reviewedData.tumorSummary.body = [];
-                $scope.reviewedData.drugs.body = [];
 
                 DatabaseConnector.getReviewedData($scope.reviewedData[$scope.evidenceType].evidenceTypes).then(function(response) {
-                    if ($scope.evidenceType === 'geneType') {
+                    if ($scope.evidenceType === 'geneSummary' || $scope.evidenceType === 'geneBackground') {
+                        // key = 'summary' or key = 'background'
+                        var key = $scope.reviewedData[$scope.evidenceType].keys[1];
+                        _.each(response.data, function(item) {
+                            var tempObj = {
+                                gene: item.gene.hugoSymbol
+                            };
+                            tempObj[key] = item.description;
+                            $scope.reviewedData[$scope.evidenceType].body.push(tempObj);
+                        });
+                        finishLoadingReviewedData();
+                    } else if ($scope.evidenceType === 'geneType') {
                         var variantLookupBody = _.map(response.data, function(item) {
                             return {
                                 hugoSymbol: item.hugoSymbol
@@ -354,6 +387,7 @@ angular.module('oncokbApp')
                                             mutation: getAlterations(item.alterations),
                                             drugs: drugs.join(),
                                             level: item.levelOfEvidence,
+                                            propagation: item.propagation,
                                             description: item.description,
                                             citations: getCitations(item.description)
                                         };
@@ -600,4 +634,43 @@ angular.module('oncokbApp')
                     $scope.selectedTypeCheckboxes.push(checkbox);
                 }
             };
+
+            $scope.create = function() {
+                var promises = [];
+                $scope.createdGenes = [];
+                _.each($scope.newGenes.split(","), function (geneName) {
+                    promises.push(createGene(geneName.trim().toUpperCase()));
+                });
+                $q.all(promises).then(function() {});
+            };
+
+            function createGene(geneName) {
+                var deferred = $q.defer();
+                if ($scope.hugoSymbols.includes(geneName)) {
+                    dialogs.notify('Warning', 'Sorry, the ' + geneName + ' gene already exists.');
+                } else {
+                    var gene = new FirebaseModel.Gene(geneName);
+                    mainUtils.setIsoFormAndGeneType(gene).then(function () {
+                        firebase.database().ref('Genes/' + geneName).set(gene).then(function(result) {
+                            var meta = new FirebaseModel.Meta();
+                            firebase.database().ref('Meta/' + geneName).set(meta).then(function(result) {
+                                $scope.createdGenes.push(geneName);
+                                deferred.resolve();
+                            }, function(error) {
+                                // Delete saved new gene from Genes collection
+                                firebase.database().ref('Genes/' + geneName).remove();
+                                dialogs.notify('Warning', 'Failed to create a Meta record for the new gene ' + geneName + '!');
+                                deferred.reject(error);
+                            });
+                        }, function(error) {
+                            dialogs.notify('Warning', 'Failed to create the  gene ' + geneName + '!');
+                            deferred.reject(error);
+                        });
+                    }, function(error) {
+                        dialogs.notify('Warning', 'Failed to create the  gene ' + geneName + '!');
+                        deferred.reject(error);
+                    });
+                }
+                return deferred.promise;
+            }
         }]);

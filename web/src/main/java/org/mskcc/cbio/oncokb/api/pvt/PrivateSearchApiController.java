@@ -266,7 +266,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
         typeaheadSearchResp.setQueryType("variant");
 
         // TODO: switch to variant page once it's ready.
-        typeaheadSearchResp.setLink("/gene/" + alteration.getGene().getHugoSymbol() + "/variant/" + alteration.getAlteration());
+        typeaheadSearchResp.setLink("/gene/" + alteration.getGene().getHugoSymbol() + "/" + alteration.getAlteration());
         return typeaheadSearchResp;
     }
 

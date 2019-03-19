@@ -1,4 +1,16 @@
 <div class="reportGenerator" ng-init="init()">
+    <h3>Create Genes</h3>
+    <div style="max-width: 400px;">
+        <span class="input-group input-group-sm" role="group" ng-show="me.admin">
+            <input type="text" class="form-control" ng-model="newGenes" placeholder="Comma-separated gene names">
+            <span class="input-group-btn">
+                <button type="button" class="btn btn-default btn-secondary" ng-click="create()">Create Genes</button>
+            </span>
+        </span>
+        <span ng-if="createdGenes.length > 0" class="success-info">Gene(s) {{ createdGenes.join(', ') }} have been successfully added to OncoKB.</span>
+    </div>
+    <hr/>
+
     <h3>Review History</h3>
     <div class="row first-row-margin">
         <div class="col-sm-1">Genes:</div>
@@ -106,12 +118,14 @@
                 <tr ng-repeat="item in reviewedData[evidenceType].body">
                     <td ng-repeat="key in reviewedData[evidenceType].keys">
                         <div ng-switch on="key">
-                                <div ng-switch-when="gene">
-                                    <strong><a href="#!/gene/{{item.gene}}">{{ item.gene }}</a></strong>
-                                </div>
+                            <div ng-switch-when="gene">
+                                <strong><a href="#!/gene/{{item.gene}}">{{ item.gene }}</a></strong>
+                            </div>
+                            <div ng-if="evidenceType !== 'drugs'">
                                 <div class="reviewedData" ng-switch-when="mutation">{{item.mutation}}</div>
                                 <div class="reviewedData" ng-switch-when="drugs">{{item.drugs}}</div>
-                                <div ng-switch-default>{{ item[key] }}</div>
+                            </div>
+                            <div ng-switch-default>{{ item[key] }}</div>
                         </div>
                     </td>
                 </tr>
