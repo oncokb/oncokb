@@ -76,3 +76,9 @@ PDGFRA	D842I	GIST	2A: Imatinib;
 PDGFRA	D842I	Thymic Tumor	2B: Imatinib;
 PDGFRA	D842V	GIST	R1: Imatinib; 2A: Dasatinib;
 PDGFRA	D842V	Thymic Tumor	2B: Dasatinib; 2B: Imatinib;
+EGFR	A763_Y764insFQEA	NSCLC	1: Afatinib; 1: Erlotinib; 1: Gefitinib; 3A: Poziotinib;
+# this one overlaps with A763_Y764insFQEA, but the rule only applies to exact match, so R1 will be used
+EGFR	Y764_D770dup	NSCLC	R1: Afatinib; R1: Erlotinib; R1: Gefitinib; 3A: Poziotinib;
+# this one does not overlap with A763_Y764insFQEA, so R1 for sure
+EGFR	N771delinsSTH	Lung Adenocarcinoma	R1: Afatinib; R1: Erlotinib; R1: Gefitinib; 3A: Poziotinib;
+

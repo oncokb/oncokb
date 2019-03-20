@@ -74,14 +74,25 @@ public class LevelUtils {
     }
 
     public static LevelOfEvidence getHighestLevel(Set<LevelOfEvidence> levels) {
+        return getHighestLevelByType(levels, LEVELS);
+    }
+
+    public static LevelOfEvidence getHighestSensitiveLevel(Set<LevelOfEvidence> levels) {
+        return getHighestLevelByType(levels, SENSITIVE_LEVELS);
+    }
+    public static LevelOfEvidence getHighestResistanceLevel(Set<LevelOfEvidence> levels) {
+        return getHighestLevelByType(levels, RESISTANCE_LEVELS);
+    }
+
+    public static LevelOfEvidence getHighestLevelByType(Set<LevelOfEvidence> levels, List<LevelOfEvidence> levelPool) {
         Integer highestLevelIndex = -1;
         for (LevelOfEvidence levelOfEvidence : levels) {
             if (levelOfEvidence != null) {
-                Integer _index = LEVELS.indexOf(levelOfEvidence);
+                Integer _index = levelPool.indexOf(levelOfEvidence);
                 highestLevelIndex = _index > highestLevelIndex ? _index : highestLevelIndex;
             }
         }
-        return highestLevelIndex > -1 ? LEVELS.get(highestLevelIndex) : null;
+        return highestLevelIndex > -1 ? levelPool.get(highestLevelIndex) : null;
     }
 
     public static LevelOfEvidence getHighestLevelFromEvidenceByLevels(Set<Evidence> evidences, Set<LevelOfEvidence> levels) {
