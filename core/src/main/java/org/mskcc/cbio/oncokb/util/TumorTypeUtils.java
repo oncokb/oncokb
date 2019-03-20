@@ -8,7 +8,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.model.SpecialTumorType;
 import org.mskcc.cbio.oncokb.model.TumorForm;
-import org.mskcc.cbio.oncokb.model.newoncotree.NewTumorType;
 import org.mskcc.cbio.oncokb.model.oncotree.MainType;
 import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
 
@@ -24,7 +23,7 @@ import java.util.*;
  * the difference, tumorType will be used to include both.
  */
 public class TumorTypeUtils {
-    private static final String ONCO_TREE_ONCOKB_VERSION = "oncotree_2018_06_15";
+    private static final String ONCO_TREE_ONCOKB_VERSION = "oncotree_2019_03_01";
     private static final String ACCESS_ERROR_ONCO_TREE_MESSAGE = "Error: Cannot access OncoTree service.";
     private static String ONCO_TREE_API_URL = null;
     private static List<TumorType> allOncoTreeCancerTypes = new ArrayList<TumorType>() {{
@@ -631,8 +630,8 @@ public class TumorTypeUtils {
         try {
             String json = IOUtils.toString(new InputStreamReader(TumorTypeUtils.class.getResourceAsStream("/data/oncotree-tumortypes.json")));
             Map map = JsonUtils.jsonToMap(json);
-            Map<String, NewTumorType> data = (Map<String, NewTumorType>) map;
-            NewTumorType tumorType = new ObjectMapper().convertValue(data.get("TISSUE"), NewTumorType.class);
+            Map<String, org.mskcc.oncotree.model.TumorType> data = (Map<String, org.mskcc.oncotree.model.TumorType>) map;
+            org.mskcc.oncotree.model.TumorType tumorType = new ObjectMapper().convertValue(data.get("TISSUE"), org.mskcc.oncotree.model.TumorType.class);
             result.put("TISSUE", new TumorType(tumorType));
         } catch (Exception e) {
             System.out.println("You need to include oncotree nested file. Endpoint: tumorTypes?version=" + ONCO_TREE_ONCOKB_VERSION + "&flat=false");
@@ -645,8 +644,8 @@ public class TumorTypeUtils {
         List<TumorType> tumorTypes = new ArrayList<>();
         try {
             Gson gson = new GsonBuilder().create();
-            NewTumorType[] tumorType = gson.fromJson(new BufferedReader(new InputStreamReader(TumorTypeUtils.class.getResourceAsStream("/data/oncotree-tumortypes-flat.json"))), NewTumorType[].class);
-            for (NewTumorType tt : Arrays.asList(tumorType)) {
+            org.mskcc.oncotree.model.TumorType[] tumorType = gson.fromJson(new BufferedReader(new InputStreamReader(TumorTypeUtils.class.getResourceAsStream("/data/oncotree-tumortypes-flat.json"))), org.mskcc.oncotree.model.TumorType[].class);
+            for (org.mskcc.oncotree.model.TumorType tt : Arrays.asList(tumorType)) {
                 tumorTypes.add(new TumorType(tt));
             }
         } catch (Exception e) {
