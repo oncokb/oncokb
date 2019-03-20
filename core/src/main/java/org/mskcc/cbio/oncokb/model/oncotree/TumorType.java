@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang3.StringUtils;
-import org.mskcc.cbio.oncokb.model.newoncotree.NewTumorType;
 
 import java.util.*;
 
@@ -234,7 +233,7 @@ public class TumorType {
     public TumorType() {
     }
 
-    public TumorType(NewTumorType newTumorType) {
+    public TumorType(org.mskcc.oncotree.model.TumorType newTumorType) {
         this.setName(newTumorType.getName());
         this.setTissue(newTumorType.getTissue());
         this.setCode(newTumorType.getCode());
@@ -246,7 +245,7 @@ public class TumorType {
         this.setHistory(newTumorType.getHistory());
         this.setLevel(newTumorType.getLevel());
         Map<String, TumorType> children = new HashMap<>();
-        for(Map.Entry<String, NewTumorType> entry: newTumorType.getChildren().entrySet()) {
+        for(Map.Entry<String, org.mskcc.oncotree.model.TumorType> entry: newTumorType.getChildren().entrySet()) {
             children.put(entry.getKey(), new TumorType(entry.getValue()));
         }
         this.setChildren(children);
