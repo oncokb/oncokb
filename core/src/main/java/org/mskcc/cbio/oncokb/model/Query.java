@@ -3,7 +3,6 @@ package org.mskcc.cbio.oncokb.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.text.WordUtils;
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
 import org.mskcc.cbio.oncokb.util.QueryUtils;
@@ -216,6 +215,9 @@ public class Query implements java.io.Serializable {
                 this.getEntrezGeneId() != null) {
                 Gene entrezGeneIdGene = GeneUtils.getGeneByEntrezId(this.getEntrezGeneId());
                 this.setHugoSymbol(entrezGeneIdGene.getHugoSymbol());
+            }
+            if (this.getAlteration() != null && !this.getAlteration().toLowerCase().contains("fusion") && this.getAlteration().toLowerCase().contains("-") && (alterationType.equals(AlterationType.FUSION) || (this.consequence != null && this.consequence.toLowerCase().equals("fusion")))) {
+                this.setAlteration(this.getAlteration() + " Fusion");
             }
         }
 
