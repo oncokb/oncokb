@@ -175,6 +175,14 @@ angular.module('oncokbApp')
                 $scope.setTrackSignal = function() {
                     mainUtils.updateMovingFlag(false);
                 };
+                $scope.getMutationName = function(key, oldKey, uuid){
+                    if(mainUtils.processedInReview('remove', uuid) && oldKey){
+                        return oldKey;
+                    }
+                    else{
+                        return key;
+                    }
+                };
                 $scope.initializeFE = function() {
                     if ($scope.data[$scope.key+'_editing']) {
                         if ($scope.data[$scope.key+'_editing'] === $rootScope.me.name) {

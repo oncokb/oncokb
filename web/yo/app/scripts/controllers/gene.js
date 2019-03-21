@@ -1848,6 +1848,14 @@ angular.module('oncokbApp')
                     return '';
                 }
             };
+            $scope.getCancerTypesNameInReview = function(tumor, uuid, reviewMode){
+                if(mainUtils.processedInReview('remove', uuid) && reviewMode && tumor.cancerTypes_review.lastReviewed){
+                    return $scope.getLastReviewedCancerTypesName(tumor);
+                }
+                else{
+                    return $scope.getCancerTypesName(tumor);
+                }
+            };
             $scope.getCancerTypesName = function (tumor) {
                 return mainUtils.getCancerTypesName(tumor.cancerTypes);
             };
@@ -1889,17 +1897,15 @@ angular.module('oncokbApp')
                         removeModel({ type: type, path: path, uuids: uuids });
                     } else {
                         if (type === 'tumor') {
-                            obj.cancerTypes_review = {
-                                updatedBy: $rootScope.me.name,
-                                updateTime: new Date().getTime(),
-                                removed: true
-                            }
+                            // Do not delete lastReviewed when curators delete a treatment.
+                            // If a reviewer reject this change, we can rollback to previous reviewed name.
+                            obj.cancerTypes_review.updatedBy = $rootScope.me.name;
+                            obj.cancerTypes_review.updateTime = new Date().getTime();
+                            obj.cancerTypes_review.removed = true;
                         } else {
-                            obj.name_review = {
-                                updatedBy: $rootScope.me.name,
-                                updateTime: new Date().getTime(),
-                                removed: true
-                            }
+                            obj.name_review.updatedBy = $rootScope.me.name;
+                            obj.name_review.updateTime = new Date().getTime();
+                            obj.name_review.removed = true;
                         }
                         $scope.geneMeta.review[uuid] = true;
                     }
@@ -2124,6 +2130,10 @@ angular.module('oncokbApp')
                 switch (type) {
                     case 'mutation':
                         cancelDeleteItem(mutation.name_review, mutation.name_uuid);
+                        if(mutation.name_review.lastReviewed){
+                            mutation.name = mutation.name_review.lastReviewed;
+                            delete mutation.name_review.lastReviewed;
+                        }
                         _.each(mutation.tumors, function (tumor) {
                             if (tumor.cancerTypes_review && tumor.cancerTypes_review.removed) {
                                 cancelDeleteSection('tumor', mutation, tumor, ti, treatment);
@@ -2132,6 +2142,10 @@ angular.module('oncokbApp')
                         break;
                     case 'tumor':
                         cancelDeleteItem(tumor.cancerTypes_review, tumor.cancerTypes_uuid);
+                        if(tumor.cancerTypes_review.lastReviewed){
+                            tumor.cancerTypes = tumor.cancerTypes_review.lastReviewed;
+                            delete tumor.cancerTypes_review.lastReviewed;
+                        }
                         _.each(tumor.TIs, function (ti) {
                             _.each(ti.treatments, function (treatment) {
                                 if (treatment.name_review.removed) {
@@ -2143,6 +2157,10 @@ angular.module('oncokbApp')
                         break;
                     case 'treatment':
                         cancelDeleteItem(treatment.name_review, treatment.name_uuid);
+                        if(treatment.name_review.lastReviewed){
+                            treatment.name = treatment.name_review.lastReviewed;
+                            delete treatment.name_review.lastReviewed;
+                        }
                         $scope.indicateMutationContent(mutation);
                         $scope.indicateTumorContent(tumor);
                         break;

@@ -100,10 +100,9 @@
                     <h4 ng-if="reviewLayout('name')">New Content:</h4>
                     <p contenteditable="{{reviewContentEditable('regular')}}"
                           ng-class="editableBox"
-                          ng-model="data[key]"
                           ng-paste="trimCSS()"
                           ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 200, 'blur': 0 } }"
-                          class="editEmpty">
+                          class="editEmpty">{{getMutationName(data[key], data[key+'_review'].lastReviewed, uuid)}}
                     </p>
                     <div ng-if="reviewLayout('name')" ng-class="getOldContentDivClass(data[key])">
                         <h4>Old Content:</h4>

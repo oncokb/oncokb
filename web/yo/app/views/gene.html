@@ -167,7 +167,7 @@
                         <br/>
                         <p>New Content: </p>
                     </span>
-                  <span>{{getCancerTypesName(tumor)}}</span>
+                  <span>{{getCancerTypesNameInReview(tumor, tumor.cancerTypes_uuid, reviewMode)}}</span>
                 </span>
                 <span ng-show="!reviewMode">
                     <i class="fa fa-edit" ng-if="fileEditable" ng-click="modifyTumorType(mutation, tumor, path)"></i>
