@@ -815,6 +815,16 @@ public final class AlterationUtils {
             getAllAlterations(gene));
     }
 
+    public static List<Alteration> removeAlterationsFromList(List<Alteration> list, List<Alteration> alterationsToBeRemoved) {
+        List<Alteration> cleanedList = new ArrayList<>();
+        for (Alteration alt : list) {
+            if (!alterationsToBeRemoved.contains(alt)) {
+                cleanedList.add(alt);
+            }
+        }
+        return cleanedList;
+    }
+
     public static Boolean hasAlleleAlterations(Alteration alteration) {
         List<Alteration> alleles = AlterationUtils.getAlleleAlterations(alteration);
 
