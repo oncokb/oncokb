@@ -921,7 +921,7 @@ public class EvidenceUtils {
                         query.setAlterations(new ArrayList<Alteration>(AlterationUtils.getAllAlterations(query.getGene())));
                     }
                 }
-                query.setLevelOfEvidences(new ArrayList<LevelOfEvidence>(levelOfEvidences));
+                query.setLevelOfEvidences(levelOfEvidences == null ? null : new ArrayList<LevelOfEvidence>(levelOfEvidences));
                 evidenceQueries.add(query);
             }
         }
