@@ -845,8 +845,22 @@ public class EvidenceUtils {
             evidenceTypes = new HashSet<>(EvidenceTypeUtils.getAllEvidenceTypes());
         }
 
-        levelOfEvidences = levelOfEvidences == null ? LevelUtils.getPublicAndOtherIndicationLevels() :
+        levelOfEvidences = levelOfEvidences == null ? levelOfEvidences :
             new HashSet<>(CollectionUtils.intersection(levelOfEvidences, LevelUtils.getPublicAndOtherIndicationLevels()));
+
+        // when the LoE and ET are empty, no info should be returned
+        if ((levelOfEvidences != null && levelOfEvidences.size() == 0) || evidenceTypes.size() == 0) {
+            if (requestQueries == null || requestQueries.size() == 0) {
+                EvidenceQueryRes query = new EvidenceQueryRes();
+                return Collections.singletonList(query);
+            } else {
+                List<EvidenceQueryRes> evidenceQueryRes = new ArrayList<>();
+                for (Query query : requestQueries) {
+                    evidenceQueries.add(new EvidenceQueryRes());
+                }
+                return evidenceQueryRes;
+            }
+        }
 
         if (requestQueries == null || requestQueries.size() == 0) {
             Set<Evidence> evidences = new HashSet<>();
