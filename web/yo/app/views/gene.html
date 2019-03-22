@@ -10,8 +10,9 @@
       <span ng-if="me.admin && geneMeta.lastSavedAt" class="geneLastModify">Last update to database was made on {{geneMeta.lastSavedAt  | date : 'MMM d, h:mm a'}} by {{geneMeta.lastSavedBy}}</span>
       <span ng-if="geneMeta.review.currentReviewer" class="geneLastModify" style="color:red">{{geneMeta.review.currentReviewer}} is reviewing this gene</span>
       <span class="btn-group btn-group-sm pull-right top-tools-menu" uib-dropdown>
-        <button type="button" class="btn btn-default" ng-if="::(me.admin && internal)" ng-disabled="!fileEditable"
-          ng-click="review()">{{reviewMode ? 'Review Complete' : 'Review'}}</button>
+        <button type="button" class="btn btn-default" ng-if="::(me.admin && internal)"
+                ng-disabled="!fileEditable || !setting.enableReview"
+                ng-click="review()">{{reviewMode ? 'Review Complete' : 'Review'}}</button>
         <button type="button" class="btn btn-default" ng-if="developerCheck()" ng-click="exitReview()">Exit Review</button>
         <button type="button" class="btn btn-default" ng-click="getAllCitations()">Citations</button>
         <!-- <button type="button" class="btn btn-default" ng-click="getData()">Get Data</button> -->

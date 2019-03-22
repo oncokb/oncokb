@@ -30,12 +30,17 @@ angular.module('oncokbApp')
             // Remove current collaborator when user closes tab.
             $window.onbeforeunload = function () {
                 removeCollaborator();
-            }
-            checkNameChange.clear();
+            };
             function checkValidUrl() {
                 $scope.hugoSymbols = _.without(_.keys($rootScope.metaData), 'collaborators');
                 if (!$scope.hugoSymbols.includes($routeParams.geneName)) {
                     $location.url('/genes');
+                } else {
+                    checkNameChange.clear();
+                    window.localStorage.geneName = $routeParams.geneName;
+                    populateBindings();
+                    getSuggestedMutations();
+                    getOncoTreeMainTypes();
                 }
             }
             function removeCollaborator() {
@@ -46,7 +51,6 @@ angular.module('oncokbApp')
                     console.log(error);
                 });
             }
-            window.localStorage.geneName = $routeParams.geneName;
             function isValidVariant(originalVariantName) {
                 var variantName = originalVariantName.trim().toLowerCase();
                 var validMutation = true;
@@ -2519,7 +2523,6 @@ angular.module('oncokbApp')
                         }
                     });
             }
-            getSuggestedMutations();
             function getLevels() {
                 var desS = {
                     '': '',
@@ -2983,7 +2986,7 @@ angular.module('oncokbApp')
                 }
                 return obj[data.key + '_uuid'];
             };
-            populateBindings();
+
             $scope.subIsSameWithMain = function(cancerType, type) {
                 cancerType.message = '';
                 if (type === 'sub' || !cancerType.mainType) {
@@ -3024,7 +3027,6 @@ angular.module('oncokbApp')
                 }, function(error) {
                 });
             }
-            getOncoTreeMainTypes();
         }]
     )
     .controller('ModifyTumorTypeCtrl', function ($scope, $modalInstance, data, _, OncoKB, $rootScope, mainUtils, FirebaseModel, $timeout) {

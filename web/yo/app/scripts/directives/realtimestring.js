@@ -34,7 +34,7 @@ angular.module('oncokbApp')
                         scope.cleanUpEditing();
                         scope.initializeFE();
                         $rootScope.$watch('reviewMode', function(n, o) {
-                            if (n !== o && n === true) {
+                            if (n) {
                                 scope.calculateDiff();
                             }
                         });
@@ -97,7 +97,8 @@ angular.module('oncokbApp')
                                     scope.initializeFE();
                                 }, 10*1000);
                             }
-                            if ($rootScope.reviewMode && ['p', 'MUTATION_NAME', 'TREATMENT_NAME'].indexOf(scope.t) !== -1) {
+                            // Check difference when user edits content in review mode.
+                            if ($rootScope.reviewMode) {
                                 scope.calculateDiff();
                             }
                         }
@@ -231,7 +232,7 @@ angular.module('oncokbApp')
                             $scope.propagationOpts['4']
                         ];
                         if (!initial && !$scope.data.propagation) {
-                            $scope.data.propagation = '4';
+                            $scope.data.propagation = 'no';
                         }
                     } else {
                         $scope.data.propagation = null;
@@ -242,12 +243,8 @@ angular.module('oncokbApp')
                     return $rootScope.reviewMode;
                 };
                 $scope.calculateDiff = function() {
-                    if ($rootScope.reviewMode && $scope.t === 'p') {
-                        var oldContent = '';
-                        if ($scope.data[$scope.key+'_review'] && $scope.data[$scope.key+'_review'].lastReviewed) {
-                            oldContent = $scope.data[$scope.key+'_review'].lastReviewed;
-                        }
-                        $scope.diffHTML = mainUtils.calculateDiff(oldContent, $scope.data[$scope.key])
+                    if ($scope.t === 'p' && $scope.data[$scope.key+'_review'] && $scope.data[$scope.key+'_review'].lastReviewed) {
+                        $scope.diffHTML = mainUtils.calculateDiff($scope.data[$scope.key + '_review'].lastReviewed, $scope.data[$scope.key]);
                     }
                 };
                 $scope.uncheck = function () {

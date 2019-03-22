@@ -1,5 +1,5 @@
 package org.mskcc.cbio.oncokb.model;
-// Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA
+
 
 import org.mskcc.cbio.oncokb.model.oncotree.TumorType;;
 
@@ -14,6 +14,7 @@ public class EvidenceQueryRes implements java.io.Serializable {
     private String id; //Optional, This id is passed from request. The identifier used to distinguish the query
     private Query query;
     private Gene gene;
+    private Alteration exactMatchedAlteration;
     private List<Alteration> alterations = new ArrayList<>();
     private List<Alteration> alleles = new ArrayList<>();
     private List<TumorType> tumorTypes = new ArrayList<>();
@@ -45,6 +46,14 @@ public class EvidenceQueryRes implements java.io.Serializable {
 
     public void setGene(Gene gene) {
         this.gene = gene;
+    }
+
+    public Alteration getExactMatchedAlteration() {
+        return exactMatchedAlteration;
+    }
+
+    public void setExactMatchedAlteration(Alteration exactMatchedAlteration) {
+        this.exactMatchedAlteration = exactMatchedAlteration;
     }
 
     public List<Alteration> getAlterations() {

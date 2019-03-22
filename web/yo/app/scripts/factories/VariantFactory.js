@@ -1,5 +1,19 @@
 var $ = window.$;
 
+angular.module('oncokbApp').factory('errorHttpInterceptor', ['$q', function($q) {
+    return {
+        responseError: function responseError(rejection) {
+            Sentry.captureException(new Error('HTTP response error'), {
+                extra: {
+                    config: rejection.config,
+                    status: rejection.status
+                }
+            });
+            return $q.reject(rejection);
+        }
+    };
+}]);
+
 angular.module('oncokbApp').factory('TumorType', ['$http', 'OncoKB', function($http, OncoKB) {
     'use strict';
 
@@ -540,6 +554,9 @@ angular.module('oncokbApp')
                 currentReviewer: ''
             };
         }
+        function Setting() {
+            this.enableReview = true;
+        }
         return {
             Gene: Gene,
             Mutation: Mutation,
@@ -549,6 +566,7 @@ angular.module('oncokbApp')
             Cancertype: Cancertype,
             VUSItem: VUSItem,
             TimeStamp: TimeStamp,
-            Meta: Meta
+            Meta: Meta,
+            Setting: Setting
         };
     }]);

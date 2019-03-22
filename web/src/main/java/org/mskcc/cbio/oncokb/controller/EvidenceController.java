@@ -58,7 +58,7 @@ public class EvidenceController {
         List<EvidenceQueryRes> evidenceQueries = EvidenceUtils.processRequest(
             (List<Query>) requestQueries.get("queries"),
             new HashSet<>((List<EvidenceType>) requestQueries.get("evidenceTypes")),
-            geneStatus, source, new HashSet<>((List<LevelOfEvidence>) requestQueries.get("levels")), highestLevelOnly);
+            geneStatus, source, requestQueries.get("levels") == null ? null : new HashSet<>((List<LevelOfEvidence>) requestQueries.get("levels")), highestLevelOnly);
 
         if (evidenceQueries != null) {
             for (EvidenceQueryRes query : evidenceQueries) {

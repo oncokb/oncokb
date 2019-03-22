@@ -30,10 +30,10 @@ KIT	Y553C	Gastrointestinal Stromal Tumor	1: Imatinib; 1: Sunitinib; 1: Regorafen
 KIT	Y553C	Melanoma	2A: Imatinib; 2B: Sunitinib; 2B: Regorafenib;
 KIT	Y553C	Colorectal Cancer	2B: Imatinib; 2B: Sunitinib; 2B: Regorafenib;
 KIT	Y553C	Thymic Tumor	2A: Sunitinib; 2A: Sorafenib; 2B: Imatinib; 2B: Regorafenib;
-KIT	R643W	Gastrointestinal Stromal Tumor	1: Imatinib; 1: Sunitinib; 1: Regorafenib;
-KIT	R643W	Melanoma	2A: Imatinib; 2B: Sunitinib; 2B: Regorafenib;
-KIT	R643W	Colorectal Cancer	2B: Imatinib; 2B: Sunitinib; 2B: Regorafenib;
-KIT	R643W	Thymic Tumor	2A: Sunitinib; 2A: Sorafenib; 2B: Imatinib; 2B: Regorafenib;
+KIT	R643W	Gastrointestinal Stromal Tumor
+KIT	R643W	Melanoma
+KIT	R643W	Colorectal Cancer
+KIT	R643W	Thymic Tumor
 KIT	D737N	Gastrointestinal Stromal Tumor
 KIT	D737N	Melanoma
 KIT	D737N	Colorectal Cancer
@@ -62,13 +62,23 @@ KIT	T670I	Gastrointestinal Stromal Tumor	1: Sunitinib; 1: Regorafenib; R2: Imati
 KIT	T670I	Melanoma	2A: Imatinib; 2B: Sunitinib; 2B: Regorafenib;
 KIT	T670I	Colorectal Cancer	2B: Sunitinib; 2B: Regorafenib;
 KIT	T670I	Thymic Tumor	2A: Sunitinib; 2A: Sorafenib; 2B: Regorafenib;
-KIT	T670C	Gastrointestinal Stromal Tumor	1: Imatinib; 1: Sunitinib; 1: Regorafenib;
-KIT	T670C	Melanoma	2A: Imatinib; 2B: Sunitinib; 2B: Regorafenib;
-KIT	T670C	Colorectal Cancer	2B: Imatinib; 2B: Sunitinib; 2B: Regorafenib;
-KIT	T670C	Thymic Tumor	2A: Sunitinib; 2A: Sorafenib; 2B: Imatinib; 2B: Regorafenib;
+KIT	T670C	Gastrointestinal Stromal Tumor
+KIT	T670C	Melanoma
+KIT	T670C	Colorectal Cancer
+KIT	T670C	Thymic Tumor
 KIT	D816A	Gastrointestinal Stromal Tumor	3B: Avapritinib;
 KIT	D816A	Melanoma	2A: Imatinib; 3B: Avapritinib;
 KIT	D816A	Colorectal Cancer	3B: Avapritinib;
 KIT	D816A	Mastocytosis	3A: Avapritinib;
 KIT	D816A	Thymic Tumor	2A: Sunitinib; 2A: Sorafenib; 3B: Avapritinib;
 MTOR	L2427Q	Renal Clear Cell Carcinoma	3A: Temsirolimus;
+PDGFRA	D842I	GIST	2A: Imatinib;
+PDGFRA	D842I	Thymic Tumor	2B: Imatinib;
+PDGFRA	D842V	GIST	R1: Imatinib; 2A: Dasatinib;
+PDGFRA	D842V	Thymic Tumor	2B: Dasatinib; 2B: Imatinib;
+EGFR	A763_Y764insFQEA	NSCLC	1: Afatinib; 1: Erlotinib; 1: Gefitinib; 3A: Poziotinib;
+# this one overlaps with A763_Y764insFQEA, but the rule only applies to exact match, so R1 will be used
+EGFR	Y764_D770dup	NSCLC	R1: Afatinib; R1: Erlotinib; R1: Gefitinib; 3A: Poziotinib;
+# this one does not overlap with A763_Y764insFQEA, so R1 for sure
+EGFR	N771delinsSTH	Lung Adenocarcinoma	R1: Afatinib; R1: Erlotinib; R1: Gefitinib; 3A: Poziotinib;
+

@@ -41,6 +41,9 @@ public class HotspotUtilsTest extends TestCase {
         alteration = AlterationUtils.getAlteration("EGFR", "L747Rfs*13", null, null, null, null);
         assertFalse(HotspotUtils.isHotspot(alteration));
 
+        alteration = AlterationUtils.getAlteration("MET", "X1010splice", null, null, null, null);
+        assertTrue(HotspotUtils.isHotspot(alteration));
+
         // PAK7 is an alias of PAK5
         alteration = AlterationUtils.getAlteration("PAK7", "M173I", null, null, null, null);
         assertTrue(HotspotUtils.isHotspot(alteration));

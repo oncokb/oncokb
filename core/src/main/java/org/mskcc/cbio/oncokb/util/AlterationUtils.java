@@ -273,10 +273,6 @@ public final class AlterationUtils {
         if (alteration.getName() == null && alteration.getAlteration() != null) {
             alteration.setName(alteration.getAlteration());
         }
-
-        if (StringUtils.containsIgnoreCase(alteration.getAlteration(), "intragenic")) {
-            alteration.setAlterationType(AlterationType.FUSION);
-        }
     }
 
     public static Boolean isFusion(String variant) {
@@ -534,6 +530,19 @@ public final class AlterationUtils {
         return isLikelyInferredAlt;
     }
 
+    public static Set<Alteration> getEvidencesAlterations(Set<Evidence> evidences) {
+        Set<Alteration> alterations = new HashSet<>();
+        if (evidences == null) {
+            return alterations;
+        }
+        for (Evidence evidence : evidences) {
+            if (evidence.getAlterations() != null) {
+                alterations.addAll(evidence.getAlterations());
+            }
+        }
+        return alterations;
+    }
+
     public static Set<Alteration> getAlterationsByKnownEffectInGene(Gene gene, String knownEffect, Boolean includeLikely) {
         Set<Alteration> alterations = new HashSet<>();
         if (includeLikely == null) {
@@ -684,6 +693,12 @@ public final class AlterationUtils {
             }
         }
 
+        // Special case for PDGFRA: don't match D842V as alternative allele to other alleles
+        if (alteration.getGene() != null && alteration.getGene().getEntrezGeneId() == 5156 && !alteration.getAlteration().equals("D842V")) {
+            Alteration d842v = AlterationUtils.findAlteration(alteration.getGene(), "D842V");
+            alleles.remove(d842v);
+        }
+
         sortAlternativeAlleles(alleles);
         return alleles;
     }
@@ -798,6 +813,16 @@ public final class AlterationUtils {
             gene, alteration.getAlteration(), alteration.getAlterationType(), term,
             proteinStart, proteinEnd,
             getAllAlterations(gene));
+    }
+
+    public static List<Alteration> removeAlterationsFromList(List<Alteration> list, List<Alteration> alterationsToBeRemoved) {
+        List<Alteration> cleanedList = new ArrayList<>();
+        for (Alteration alt : list) {
+            if (!alterationsToBeRemoved.contains(alt)) {
+                cleanedList.add(alt);
+            }
+        }
+        return cleanedList;
     }
 
     public static Boolean hasAlleleAlterations(Alteration alteration) {

@@ -231,6 +231,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
                 // it into the list for mapping.
                 Alteration exactMatch = AlterationUtils.findAlteration(gene, variant);
                 if (exactMatch == null) {
+                    allAlterations = new HashSet<>(allAlterations);
                     allAlterations.add(oncokbVariant);
                 }
                 relevantAlterations = alterationBo.findRelevantAlterations(exampleVariant, allAlterations, true);
@@ -242,9 +243,35 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
                 }
             } else {
                 relevantAlterations = alterationBo.findRelevantAlterations(exampleVariant, Collections.singleton(oncokbVariant), false);
+
+
+                // We should not do alternative allele rule in here
+                List<Alteration> alternativeAlleles = AlterationUtils.getAlleleAlterations(exampleVariant, Collections.singleton(oncokbVariant));
+                relevantAlterations.removeAll(alternativeAlleles);
+
                 isMatched = relevantAlterations.size() > 0;
             }
         }
         return isMatched;
+    }
+
+    @Override
+    public ResponseEntity<Map<LevelOfEvidence, Set<Evidence>>> utilsEvidencesByLevelsGet() {
+        Map<Gene, Set<Evidence>> evidences = EvidenceUtils.getAllGeneBasedEvidences();
+
+        Map<LevelOfEvidence, Set<Evidence>> result = new HashMap<>();
+
+        for (Map.Entry<Gene, Set<Evidence>> entry : evidences.entrySet()) {
+            for (Evidence evidence : entry.getValue()) {
+                LevelOfEvidence level = evidence.getLevelOfEvidence();
+                if (level != null) {
+                    if (!result.containsKey(level)) {
+                        result.put(level, new HashSet<Evidence>());
+                    }
+                    result.get(level).add(evidence);
+                }
+            }
+        }
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 }

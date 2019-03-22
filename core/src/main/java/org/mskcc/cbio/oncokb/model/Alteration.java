@@ -1,5 +1,5 @@
 package org.mskcc.cbio.oncokb.model;
-// Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA
+
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.StringUtils;
@@ -213,6 +213,10 @@ public class Alteration implements java.io.Serializable {
         if (!(o instanceof Alteration)) return false;
 
         Alteration that = (Alteration) o;
+
+        if(getId() != null && that.getId() != null) {
+            return getId().equals(that.getId());
+        }
 
         if (getUuid() != null ? !getUuid().equals(that.getUuid()) : that.getUuid() != null) return false;
         if (getGene() != null ? !getGene().equals(that.getGene()) : that.getGene() != null) return false;

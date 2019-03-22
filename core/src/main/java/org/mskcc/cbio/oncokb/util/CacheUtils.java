@@ -204,10 +204,6 @@ public class CacheUtils {
             System.out.println("Cache all tumor types: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
             current = MainUtils.getCurrentTimestamp();
 
-            HotspotUtils.getHotspots();
-            System.out.println("Cache all hotspots: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
-            current = MainUtils.getCurrentTimestamp();
-
             NamingUtils.cacheAllAbbreviations();
             System.out.println("Cache abbreviation ontology: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
             current = MainUtils.getCurrentTimestamp();
@@ -293,13 +289,13 @@ public class CacheUtils {
             return new HashSet<>();
         }
         if (VUS.containsKey(entrezGeneId)) {
-            return VUS.get(entrezGeneId) == null ? new HashSet<Alteration>() : new HashSet<>(VUS.get(entrezGeneId));
+            return VUS.get(entrezGeneId) == null ? new HashSet<Alteration>() : Collections.unmodifiableSet(VUS.get(entrezGeneId));
         } else {
             Gene gene = GeneUtils.getGeneByEntrezId(entrezGeneId);
             if (gene != null) {
                 synEvidences();
             }
-            return VUS.get(entrezGeneId) == null ? new HashSet<Alteration>() : new HashSet<>(VUS.get(entrezGeneId));
+            return VUS.get(entrezGeneId) == null ? new HashSet<Alteration>() : Collections.unmodifiableSet(VUS.get(entrezGeneId));
         }
     }
 
@@ -317,7 +313,7 @@ public class CacheUtils {
         if (result == null) {
             return new HashSet<>();
         }else {
-            return new HashSet<>(result);
+            return Collections.unmodifiableSet(result);
         }
     }
 
@@ -438,7 +434,7 @@ public class CacheUtils {
         synEvidences();
 
         if (evidences.containsKey(gene.getEntrezGeneId())) {
-            return evidences.get(gene.getEntrezGeneId()) == null ? new HashSet<Evidence>() : new HashSet<>(evidences.get(gene.getEntrezGeneId()));
+            return evidences.get(gene.getEntrezGeneId()) == null ? new HashSet<Evidence>() : Collections.unmodifiableSet(evidences.get(gene.getEntrezGeneId()));
         } else {
             return new HashSet<>();
         }
@@ -550,11 +546,7 @@ public class CacheUtils {
     }
 
     public static void updateGene(Integer entrezGeneId, Boolean propagate) {
-        try {
-            System.out.println("Update gene on instance " + PropertiesUtils.getProperties("app.name") + " at " + MainUtils.getCurrentTime());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        System.out.println("Update gene on instance " + PropertiesUtils.getProperties("app.name") + " at " + MainUtils.getCurrentTime());
         if (propagate == null) {
             propagate = false;
         }
@@ -565,21 +557,13 @@ public class CacheUtils {
     }
 
     public static void resetAll() {
-        try {
-            System.out.println("Reset all genes cache on instance " + PropertiesUtils.getProperties("app.name") + " at " + MainUtils.getCurrentTime());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        System.out.println("Reset all genes cache on instance " + PropertiesUtils.getProperties("app.name") + " at " + MainUtils.getCurrentTime());
         GeneObservable.getInstance().update("reset", null);
         notifyOtherServices("reset", null);
     }
 
     public static void resetAll(Boolean propagate) {
-        try {
-            System.out.println("Reset all genes cache on instance " + PropertiesUtils.getProperties("app.name") + " at " + MainUtils.getCurrentTime());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        System.out.println("Reset all genes cache on instance " + PropertiesUtils.getProperties("app.name") + " at " + MainUtils.getCurrentTime());
         GeneObservable.getInstance().update("reset", null);
         if (propagate == null) {
             propagate = false;

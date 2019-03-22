@@ -2,11 +2,10 @@ package org.mskcc.cbio.oncokb.api.pub.v1;
 
 import org.mskcc.cbio.oncokb.apiModels.ActionableGene;
 import org.mskcc.cbio.oncokb.apiModels.AnnotatedVariant;
+import org.mskcc.cbio.oncokb.apiModels.CuratedGene;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
-import org.mskcc.cbio.oncokb.util.CancerGeneUtils;
-import org.mskcc.cbio.oncokb.util.GeneUtils;
-import org.mskcc.cbio.oncokb.util.MainUtils;
+import org.mskcc.cbio.oncokb.util.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -213,7 +212,7 @@ public class UtilsApiController implements UtilsApi {
         for (CancerGene cancerGene : CancerGeneUtils.getCancerGeneList()) {
             List<String> row = new ArrayList<>();
             row.add(cancerGene.getHugoSymbol());
-            row.add(cancerGene.getEntrezGeneId());
+            row.add(cancerGene.getEntrezGeneId().toString());
             row.add(String.valueOf(cancerGene.getOccurrenceCount()));
             row.add(getStringByBoolean(cancerGene.getOncokbAnnotated()));
             row.add(getStringByBoolean(cancerGene.getmSKImpact()));
@@ -228,6 +227,79 @@ public class UtilsApiController implements UtilsApi {
         return new ResponseEntity<>(sb.toString(), HttpStatus.OK);
     }
 
+
+    @Override
+    public ResponseEntity<List<CuratedGene>> utilsAllCuratedGenesGet() {
+        return new ResponseEntity<>(getCuratedGenes(), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<String> utilsAllCuratedGenesTxtGet() {
+        String separator = "\t";
+        String newLine = "\n";
+        StringBuilder sb = new StringBuilder();
+        List<String> header = new ArrayList<>();
+        header.add("Hugo Symbol");
+        header.add("Entrez Gene ID");
+        header.add("Is Tumor Suppressor");
+        header.add("Is Oncogene");
+        header.add("Isoform");
+        header.add("RefSeq");
+        header.add("Highest Level of Evidence(sensitivity)");
+        header.add("Highest Level of Evidence(resistance)");
+        header.add("Summary");
+        sb.append(MainUtils.listToString(header, separator));
+        sb.append(newLine);
+
+        List<CuratedGene> genes = getCuratedGenes();
+        for (CuratedGene gene : genes) {
+            List<String> row = new ArrayList<>();
+            row.add(gene.getHugoSymbol());
+            row.add(String.valueOf(gene.getEntrezGeneId()));
+            row.add(getStringByBoolean(gene.getTSG()));
+            row.add(getStringByBoolean(gene.getOncogene()));
+            row.add(gene.getIsoform());
+            row.add(gene.getRefSeq());
+            row.add(gene.getHighestSensitiveLevel());
+            row.add(gene.getHighestResistancLevel());
+            sb.append(MainUtils.listToString(row, separator));
+            sb.append(newLine);
+        }
+
+        return new ResponseEntity<>(sb.toString(), HttpStatus.OK);
+    }
+
+    private static List<CuratedGene> getCuratedGenes() {
+        List<CuratedGene> genes = new ArrayList<>();
+        for (Gene gene : GeneUtils.getAllGenes()) {
+            // Skip all genes without entrez gene id
+            if(gene.getEntrezGeneId() == null) {
+                continue;
+            }
+            String summary = "";
+            Set<Evidence> summaryEvidences = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Collections.singleton(EvidenceType.GENE_SUMMARY));
+            // evidences should only have one item, but just in case
+            if (!summaryEvidences.isEmpty()) {
+                summary = summaryEvidences.iterator().next().getDescription();
+            }
+
+            String highestSensitiveLevel = "";
+            String highestResistanceLevel = "";
+            Set<Evidence> therapeuticEvidences = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, EvidenceTypeUtils.getTreatmentEvidenceTypes());
+            Set<Evidence> highestSensitiveLevelEvidences = EvidenceUtils.getOnlyHighestLevelEvidences(EvidenceUtils.getSensitiveEvidences(therapeuticEvidences), null);
+            Set<Evidence> highestResistanceLevelEvidences = EvidenceUtils.getOnlyHighestLevelEvidences(EvidenceUtils.getResistanceEvidences(therapeuticEvidences), null);
+            if (!highestSensitiveLevelEvidences.isEmpty()) {
+                highestSensitiveLevel = highestSensitiveLevelEvidences.iterator().next().getLevelOfEvidence().getLevel();
+            }
+            if (!highestResistanceLevelEvidences.isEmpty()) {
+                highestResistanceLevel = highestResistanceLevelEvidences.iterator().next().getLevelOfEvidence().getLevel();
+            }
+
+            genes.add(new CuratedGene(gene.getCuratedIsoform(), gene.getCuratedRefSeq(), gene.getEntrezGeneId(), gene.getHugoSymbol(), gene.getTSG(), gene.getOncogene(), highestSensitiveLevel, highestResistanceLevel, summary));
+        }
+        MainUtils.sortCuratedGenes(genes);
+        return genes;
+    }
     private String getStringByBoolean(Boolean val) {
         return val ? "Yes" : "No";
     }

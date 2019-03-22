@@ -41,10 +41,6 @@ public class FindRelevantAlterationsTest {
 
                 // Check Fusions
                 {"BRAF", "PAPSS1-BRAF Fusion", null, "PAPSS1-BRAF Fusion, Fusions, Oncogenic Mutations"},
-                {"CTCF", "CTCF-intragenic", null, "Truncating Mutations"},
-                {"CTCF", "CTCF intragenic", null, "Truncating Mutations"},
-                {"CTCF", "Intragenic", null, "Truncating Mutations"},
-                {"NOTCH1", "NOTCH1-intragenic", null, "Fusions"},
 
                 // Tumor suppressor should be mapped with Truncating Mutations. (The code does not check whether gene
                 // is tumor suppressor, just check whether Fusions is curated, is not, link Truncating Mutations)
@@ -71,7 +67,7 @@ public class FindRelevantAlterationsTest {
                 // Check range
                 {"MED12", "G44S", null, "G44S, G44A, G44C, G44D, G44V, 34_68mut"},
                 {"MED12", "G44D", null, "G44D, G44A, G44C, G44S, G44V, 34_68mut"},
-                {"NOTCH1", "Q2405Rfs*17", null, "Q2405Rfs*17, T2375_K2555trunc"},
+                {"NOTCH1", "Q2405Rfs*17", null, "Q2405Rfs*17, T2375_K2555trunc, Truncating Mutations"},
 
                 // VUS should get mapped to hotspot VUS, but should not get Oncogenic Mutations from the hotspot VUS.
                 // In this case VUS N109_R113del is covered by VUS I99_R113del, and I99_R113del is a hotpot.
@@ -79,7 +75,11 @@ public class FindRelevantAlterationsTest {
 //                {"MAP2K1", "N109_R113del", null, "N109_R113del, I99_R113del"},
 
                 // Range missense variant
-                {"PDGFRA", "D842I", null, "D842I, D842H, D842V, D842Y, D842_I843delinsIM, Oncogenic Mutations"},
+                {"PDGFRA", "D842I", null, "D842I, D842H, D842Y, D842_I843delinsIM, Oncogenic Mutations"},
+
+                // D842V should not be mapped as alternative allele
+                {"PDGFRA", "D842I", null, "D842I, D842H, D842Y, D842_I843delinsIM, Oncogenic Mutations"},
+                {"PDGFRA", "D842V", null, "D842V, D842H, D842I, D842Y, D842_I843delinsIM, Oncogenic Mutations"},
 
                 // Check whether the overlapped variants(with the same consequence) will be mapped
                 {"MAP2K1", "E41_F53del", null, "E41_F53del, E41_L54del, E51_Q58del, F53_Q58del, F53_Q58delinsL, Oncogenic Mutations"},
@@ -93,7 +93,7 @@ public class FindRelevantAlterationsTest {
                 // But we do map if gene is oncogene and TSG. TSG here is a Oncogene+TSG
                 {"MED12", "A34*", null, "34_68mut, Truncating Mutations"},
 
-                {"NOTCH1", "Q2405Rfs*17", null, "Q2405Rfs*17, T2375_K2555trunc"},
+                {"NOTCH1", "Q2405Rfs*17", null, "Q2405Rfs*17, T2375_K2555trunc, Truncating Mutations"},
 
                 // Deletion
                 // With specific Deletion curated
@@ -108,6 +108,14 @@ public class FindRelevantAlterationsTest {
                 {"EGFR", "C-terminal domain", null, "C-terminal domain, Oncogenic Mutations"},
                 {"EGFR", "vII", null, "vII, Oncogenic Mutations"},
                 {"EGFR", "vIII", null, "vIII, Oncogenic Mutations"},
+
+                // Do not map few special KIT variants as alternative alleles, "K642E", "V654A", "T670I"
+                {"KIT", "K652G", null, ""},
+
+                // 654 is a hotspot position
+                {"KIT", "V654G", null, "Oncogenic Mutations"},
+                {"KIT", "T670A", null, "IT669MI"},
+
 
                 // Do not mapping Oncogenic Mutations to Amplification
                 {"KIT", "Amplification", null, "Amplification"},

@@ -1,10 +1,10 @@
 package org.mskcc.cbio.oncokb.model;
-// Generated Dec 19, 2013 1:33:26 AM by Hibernate Tools 3.2.1.GA
+
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.text.WordUtils;
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
+import org.mskcc.cbio.oncokb.util.GeneUtils;
 import org.mskcc.cbio.oncokb.util.QueryUtils;
 
 import java.util.ArrayList;
@@ -205,6 +205,20 @@ public class Query implements java.io.Serializable {
         if (this.getEntrezGeneId() == null && this.getHugoSymbol() == null
             && this.getAlteration() != null && !this.getAlteration().isEmpty()) {
             this.setEntrezGeneId(-2);
+        }
+
+        // For structural variant, if the entrezGeneId is specified which means this is probably a intragenic event. In this case, the hugoSymbol should be ignore.
+        if(this.getAlterationType() != null) {
+            AlterationType alterationType = AlterationType.getByName(this.getAlterationType());
+            if ((alterationType.equals(AlterationType.FUSION) ||
+                alterationType.equals(AlterationType.STRUCTURAL_VARIANT)) &&
+                this.getEntrezGeneId() != null) {
+                Gene entrezGeneIdGene = GeneUtils.getGeneByEntrezId(this.getEntrezGeneId());
+                this.setHugoSymbol(entrezGeneIdGene.getHugoSymbol());
+            }
+            if (this.getAlteration() != null && !this.getAlteration().toLowerCase().contains("fusion") && this.getAlteration().toLowerCase().contains("-") && (alterationType.equals(AlterationType.FUSION) || (this.consequence != null && this.consequence.toLowerCase().equals("fusion")))) {
+                this.setAlteration(this.getAlteration() + " Fusion");
+            }
         }
 
         // Set the alteration to empty string in order to get relevant variants.

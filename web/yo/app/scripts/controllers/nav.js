@@ -8,7 +8,7 @@
  * Controller of the oncokbApp
  */
 angular.module('oncokbApp')
-    .controller('NavCtrl', function($scope, $location, $rootScope, $q, DatabaseConnector, $firebaseAuth, $firebaseObject, user, dialogs) {
+    .controller('NavCtrl', function($scope, $location, $rootScope, $q, DatabaseConnector, $firebaseAuth, $firebaseObject, user, dialogs, mainUtils) {
         var tabs = {
             variant: 'Variant Annotation',
             genes: 'Genes',
@@ -18,16 +18,18 @@ angular.module('oncokbApp')
         };
 
         function setParams() {
-            var filterTabs = [];
-            filterTabs.push({key: 'genes', value: tabs.genes});
-            filterTabs.push({key: 'queues', value: tabs.queues});
+            var filterTabs = ['genes', 'queues'];
             if ($rootScope.me.admin) {
-                var keys = ['variant', 'tools', 'feedback'];
-                keys.forEach(function(e) {
-                    filterTabs.push({key: e, value: tabs[e]});
-                });
+                filterTabs = _.union(filterTabs, ['variant', 'tools', 'feedback']);
             }
-            $scope.tabs = filterTabs;
+
+            if (!$rootScope.internal) {
+                filterTabs = _.intersection(filterTabs, ['genes', 'queues', 'feedback']);
+            }
+
+            $scope.tabs = filterTabs.map(function(tabKey) {
+                return {key: tabKey, value: tabs[tabKey]}
+            });
         }
         $scope.setLocalStorage = function(key) {
             if (key !== 'gene') {

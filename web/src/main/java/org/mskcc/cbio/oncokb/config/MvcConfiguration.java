@@ -69,10 +69,10 @@ public class MvcConfiguration extends WebMvcConfigurerAdapter {
             "OncoKB APIs",
             "OncoKB, a comprehensive and curated precision oncology knowledge base, offers oncologists detailed, evidence-based information about individual somatic mutations and structural alterations present in patient tumors with the goal of supporting optimal treatment decisions.",
             "v1.0.0",
-            "http://oncokb.org/#/terms",
-            new Contact("OncoKB", "http://www.oncokb.org", "team@oncokb.org"),
+            "https://oncokb.org/terms",
+            new Contact("OncoKB", "https://oncokb.org", "team@oncokb.org"),
             "Usage Terms",
-            "http://oncokb.org/#/terms");
+            "https://oncokb.org/terms");
         return apiInfo;
     }
 
@@ -96,11 +96,11 @@ public class MvcConfiguration extends WebMvcConfigurerAdapter {
                     rootCause = rootCause.getCause();
                 }
 
-                if (!rootCause.getMessage().contains("Broken pipe")
+                if (rootCause.getMessage() == null || (!rootCause.getMessage().contains("Broken pipe")
                     && !rootCause.getMessage().contains("Required request body content is missing")
                     && !rootCause.getMessage().contains("Required request body is missing")
                     && !rootCause.getMessage().contains("Failed to convert value of type 'java.lang.String' to required type 'java.lang.Integer'")
-                    && !rootCause.getMessage().contains("Required String parameter ")
+                    && !rootCause.getMessage().contains("Required String parameter "))
                     ) {
                     super.resolveException(request, response, handler, ex);
                 }

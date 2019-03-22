@@ -32,87 +32,121 @@
 
 package org.mskcc.cbio.oncokb.genomenexus;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import io.swagger.annotations.ApiModelProperty;
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Hotspot
 {
-    // TODO transcriptId is not a unique identifier, we may need a composite id...
-    private String transcriptId;
+    private String id;
 
     private String hugoSymbol;
+
+    private String transcriptId;
+
     private String residue;
 
-    private String proteinStart;
-    private String proteinEnd;
-    private String geneId;
+    private Integer tumorCount;
 
-    @ApiModelProperty(value = "Transcript id", required = true)
-    public String getTranscriptId()
-    {
-        return transcriptId;
-    }
+    private String type;
 
-    public void setTranscriptId(String transcriptId)
-    {
-        this.transcriptId = transcriptId;
-    }
+    private Integer missenseCount;
 
-    @ApiModelProperty(value = "Protein start position", required = false)
-    public String getProteinStart()
-    {
-        return proteinStart;
-    }
+    private Integer truncatingCount;
 
-    public void setProteinStart(String proteinStart)
-    {
-        this.proteinStart = proteinStart;
-    }
+    private Integer inframeCount;
 
-    @ApiModelProperty(value = "Protein end position", required = false)
-    public String getProteinEnd()
-    {
-        return proteinEnd;
-    }
+    private Integer spliceCount;
 
-    public void setProteinEnd(String proteinEnd)
-    {
-        this.proteinEnd = proteinEnd;
-    }
-
-    @ApiModelProperty(value = "Ensembl gene id", required = false)
-    public String getGeneId()
-    {
-        return geneId;
-    }
-
-    public void setGeneId(String geneId)
-    {
-        this.geneId = geneId;
-    }
-
-    @ApiModelProperty(value = "Hugo gene symbol", required = false)
-    public String getHugoSymbol()
-    {
+    public String getHugoSymbol() {
         return hugoSymbol;
     }
 
-    public void setHugoSymbol(String hugoSymbol)
-    {
+    public void setHugoSymbol(String hugoSymbol) {
         this.hugoSymbol = hugoSymbol;
     }
 
-    @ApiModelProperty(value = "Hotspot Residue", required = false)
-    public String getResidue()
-    {
+    public String getTranscriptId() {
+        return this.transcriptId;
+    }
+
+    public void setTranscriptId(String transcriptId) {
+        this.transcriptId = transcriptId;
+    }
+
+    public String getResidue() {
         return residue;
     }
 
-    public void setResidue(String residue)
-    {
+    public void setResidue(String residue) {
         this.residue = residue;
+    }
+
+    public Integer getTumorCount() {
+        return tumorCount;
+    }
+
+    public void setTumorCount(Integer tumorCount) {
+        this.tumorCount = tumorCount;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public Integer getMissenseCount() {
+        return missenseCount;
+    }
+
+    public void setMissenseCount(Integer missenseCount) {
+        this.missenseCount = missenseCount;
+    }
+
+    public Integer getTruncatingCount() {
+        return truncatingCount;
+    }
+
+    public void setTruncatingCount(Integer truncatingCount) {
+        this.truncatingCount = truncatingCount;
+    }
+
+    public Integer getInframeCount() {
+        return inframeCount;
+    }
+
+    public void setInframeCount(Integer inframeCount) {
+        this.inframeCount = inframeCount;
+    }
+
+    public Integer getSpliceCount() {
+        return spliceCount;
+    }
+
+    public void setSpliceCount(Integer spliceCount) {
+        this.spliceCount = spliceCount;
+    }
+
+    @Override
+    public int hashCode() {
+        return (hugoSymbol + residue + type + tumorCount).hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (obj instanceof Hotspot) {
+            return this.hashCode() == obj.hashCode();
+        }
+        else {
+            return super.equals(obj);
+        }
     }
 }

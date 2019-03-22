@@ -3,6 +3,7 @@ package org.mskcc.cbio.oncokb.util;
 import org.mskcc.cbio.oncokb.apiModels.ActionableGene;
 import org.mskcc.cbio.oncokb.apiModels.AnnotatedVariant;
 import org.mskcc.cbio.oncokb.apiModels.Citations;
+import org.mskcc.cbio.oncokb.apiModels.CuratedGene;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
 import org.w3c.dom.Document;
@@ -77,8 +78,12 @@ public class MainUtils {
 
         if (evidenceType != null) {
             for (String type : evidenceType.trim().split("\\s*,\\s*")) {
-                EvidenceType et = EvidenceType.valueOf(type);
-                evidenceTypes.add(et);
+                try {
+                    EvidenceType et = EvidenceType.valueOf(type);
+                    evidenceTypes.add(et);
+                } catch (Exception e) {
+                    // nothing needs to be done
+                }
             }
         } else {
             evidenceTypes = EvidenceTypeUtils.getAllEvidenceTypes();
@@ -123,6 +128,8 @@ public class MainUtils {
                     levelOfEvidences.add(level);
                 }
             }
+        } else {
+            levelOfEvidences = null;
         }
 
         requestQueries.put("queries", queries);
@@ -635,6 +642,15 @@ public class MainUtils {
                     }
                 }
                 return result;
+            }
+        });
+    }
+
+    public static void sortCuratedGenes(List<CuratedGene> genes){
+        Collections.sort(genes, new Comparator<CuratedGene>() {
+            @Override
+            public int compare(CuratedGene g1, CuratedGene g2) {
+                return g1.getHugoSymbol().compareTo(g2.getHugoSymbol());
             }
         });
     }
