@@ -272,7 +272,7 @@ public class IndicatorUtils {
                 if (hasTreatmentEvidence) {
                     treatmentEvidences = EvidenceUtils.keepHighestLevelForSameTreatments(
                         EvidenceUtils.getRelevantEvidences(query, source, geneStatus, matchedAlt,
-                            selectedTreatmentEvidence, levels));
+                            selectedTreatmentEvidence, levels), matchedAlt);
                 }
             }
 
@@ -288,7 +288,7 @@ public class IndicatorUtils {
                         treatmentEvidences.addAll(EvidenceUtils.keepHighestLevelForSameTreatments(
                             EvidenceUtils.convertEvidenceLevel(
                                 EvidenceUtils.getEvidence(Collections.singletonList(oncogenicMutation),
-                                    selectedTreatmentEvidence, levels), new HashSet<>(oncoTreeTypes))));
+                                    selectedTreatmentEvidence, levels), new HashSet<>(oncoTreeTypes)), matchedAlt));
                     }
                 }
             }
@@ -302,7 +302,7 @@ public class IndicatorUtils {
 
                     // Get highest resistance evidences
                     Set<Evidence> resistanceEvidences = EvidenceUtils.getResistanceEvidences(treatmentEvidences);
-                    filteredEvis.addAll(EvidenceUtils.getOnlyHighestLevelEvidences(resistanceEvidences));
+                    filteredEvis.addAll(EvidenceUtils.getOnlyHighestLevelEvidences(resistanceEvidences, matchedAlt));
 
                     treatmentEvidences = filteredEvis;
                 }
