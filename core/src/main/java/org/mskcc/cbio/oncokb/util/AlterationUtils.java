@@ -530,6 +530,19 @@ public final class AlterationUtils {
         return isLikelyInferredAlt;
     }
 
+    public static Set<Alteration> getEvidencesAlterations(Set<Evidence> evidences) {
+        Set<Alteration> alterations = new HashSet<>();
+        if (evidences == null) {
+            return alterations;
+        }
+        for (Evidence evidence : evidences) {
+            if (evidence.getAlterations() != null) {
+                alterations.addAll(evidence.getAlterations());
+            }
+        }
+        return alterations;
+    }
+
     public static Set<Alteration> getAlterationsByKnownEffectInGene(Gene gene, String knownEffect, Boolean includeLikely) {
         Set<Alteration> alterations = new HashSet<>();
         if (includeLikely == null) {
@@ -800,6 +813,16 @@ public final class AlterationUtils {
             gene, alteration.getAlteration(), alteration.getAlterationType(), term,
             proteinStart, proteinEnd,
             getAllAlterations(gene));
+    }
+
+    public static List<Alteration> removeAlterationsFromList(List<Alteration> list, List<Alteration> alterationsToBeRemoved) {
+        List<Alteration> cleanedList = new ArrayList<>();
+        for (Alteration alt : list) {
+            if (!alterationsToBeRemoved.contains(alt)) {
+                cleanedList.add(alt);
+            }
+        }
+        return cleanedList;
     }
 
     public static Boolean hasAlleleAlterations(Alteration alteration) {

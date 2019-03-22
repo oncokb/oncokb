@@ -579,12 +579,40 @@ public class EvidenceUtils {
         return filtered;
     }
 
-    public static Set<Evidence> getOnlyHighestLevelEvidences(Set<Evidence> evidences) {
+    public static Set<Evidence> getOnlyHighestLevelEvidences(Set<Evidence> evidences, Alteration exactMatch) {
         Map<LevelOfEvidence, Set<Evidence>> levels = separateEvidencesByLevel(evidences);
-
         Set<LevelOfEvidence> keys = levels.keySet();
 
         LevelOfEvidence highestLevel = LevelUtils.getHighestLevel(keys);
+        LevelOfEvidence highestSensitiveLevel = LevelUtils.getHighestSensitiveLevel(keys);
+
+        // When resistance level is not null, we need to consider whether the sensitive/resistance level is alteration specific
+        // if so the resistance level is broader
+        if (highestLevel != highestSensitiveLevel && highestSensitiveLevel != null) {
+            LevelOfEvidence highestResistanceLevel = LevelUtils.getHighestResistanceLevel(keys);
+            Set<Alteration> sensitiveAlterations = AlterationUtils.getEvidencesAlterations(levels.get(highestSensitiveLevel));
+            Set<Alteration> resistanceAlterations = AlterationUtils.getEvidencesAlterations(levels.get(highestResistanceLevel));
+            Set<Alteration> resistanceRelevantAlts = new HashSet<>();
+            for (Alteration alteration : resistanceAlterations) {
+                List<Alteration> relevantAlterations = AlterationUtils.getRelevantAlterations(alteration);
+
+                // we need to remove the ranges that overlap but not fully cover the alteration
+                Iterator<Alteration> i = relevantAlterations.iterator();
+                while (i.hasNext()) {
+                    Alteration relAlt = i.next();
+                    if (relAlt.getConsequence().equals(alteration.getConsequence())) {
+                        if (relAlt.getProteinStart() > alteration.getProteinStart() || relAlt.getProteinEnd() < alteration.getProteinEnd()) {
+                            i.remove();
+                        }
+                    }
+                }
+                resistanceRelevantAlts.addAll(relevantAlterations);
+            }
+            if (exactMatch != null && Collections.disjoint(resistanceRelevantAlts, sensitiveAlterations) && sensitiveAlterations.contains(exactMatch)) {
+                highestLevel = highestSensitiveLevel;
+            }
+        }
+
         if (highestLevel != null) {
             return levels.get(highestLevel);
         } else {
@@ -646,7 +674,7 @@ public class EvidenceUtils {
         return map;
     }
 
-    public static Set<Evidence> keepHighestLevelForSameTreatments(Set<Evidence> evidences) {
+    public static Set<Evidence> keepHighestLevelForSameTreatments(Set<Evidence> evidences, Alteration exactMatch) {
         Map<List<String>, Set<Evidence>> maps = new HashedMap();
         Set<Evidence> filtered = new HashSet<>();
 
@@ -673,38 +701,41 @@ public class EvidenceUtils {
         }
 
         for (Map.Entry<List<String>, Set<Evidence>> entry : maps.entrySet()) {
-            Set<Evidence> highestEvis = EvidenceUtils.getOnlyHighestLevelEvidences(entry.getValue());
+            Set<Evidence> highestEvis = EvidenceUtils.getOnlyHighestLevelEvidences(entry.getValue(), exactMatch);
 
             // If highestEvis has more than 1 items, find highest original level if the level is 2B, 3B
             if (highestEvis.size() > 1) {
                 Set<LevelOfEvidence> checkLevels = new HashSet<>();
                 checkLevels.add(LevelOfEvidence.LEVEL_2B);
                 checkLevels.add(LevelOfEvidence.LEVEL_3B);
-                if (checkLevels.contains(highestEvis.iterator().next().getLevelOfEvidence())) {
-                    Set<Integer> evidenceIds = new HashSet<>();
-                    Set<Gene> genes = new HashSet<>();
 
-                    for (Evidence evidence : highestEvis) {
-                        evidenceIds.add(evidence.getId());
-                        genes.add(evidence.getGene());
-                    }
+                for (Evidence highestEvi : highestEvis) {
+                    if (checkLevels.contains(highestEvi.getLevelOfEvidence())) {
+                        Set<Integer> evidenceIds = new HashSet<>();
+                        Set<Gene> genes = new HashSet<>();
 
-                    Set<Evidence> originalEvis = EvidenceUtils.getEvidencesByGenesAndIds(genes, evidenceIds);
-
-                    Set<Evidence> highestOriginalEvis = EvidenceUtils.getOnlyHighestLevelEvidences(originalEvis);
-                    Set<Integer> filteredIds = new HashSet<>();
-                    for (Evidence evidence : highestOriginalEvis) {
-                        filteredIds.add(evidence.getId());
-                    }
-                    for (Evidence evidence : highestEvis) {
-                        if (filteredIds.contains(evidence.getId())) {
-                            filtered.add(evidence);
-                            // Only add one
-                            break;
+                        for (Evidence evidence : highestEvis) {
+                            evidenceIds.add(evidence.getId());
+                            genes.add(evidence.getGene());
                         }
+
+                        Set<Evidence> originalEvis = EvidenceUtils.getEvidencesByGenesAndIds(genes, evidenceIds);
+
+                        Set<Evidence> highestOriginalEvis = EvidenceUtils.getOnlyHighestLevelEvidences(originalEvis, exactMatch);
+                        Set<Integer> filteredIds = new HashSet<>();
+                        for (Evidence evidence : highestOriginalEvis) {
+                            filteredIds.add(evidence.getId());
+                        }
+                        for (Evidence evidence : highestEvis) {
+                            if (filteredIds.contains(evidence.getId())) {
+                                filtered.add(evidence);
+                                // Only add one
+                                break;
+                            }
+                        }
+                    } else {
+                        filtered.add(highestEvi);
                     }
-                } else {
-                    filtered.add(highestEvis.iterator().next());
                 }
             } else {
                 filtered.addAll(highestEvis);
@@ -814,8 +845,22 @@ public class EvidenceUtils {
             evidenceTypes = new HashSet<>(EvidenceTypeUtils.getAllEvidenceTypes());
         }
 
-        levelOfEvidences = levelOfEvidences == null ? LevelUtils.getPublicAndOtherIndicationLevels() :
+        levelOfEvidences = levelOfEvidences == null ? levelOfEvidences :
             new HashSet<>(CollectionUtils.intersection(levelOfEvidences, LevelUtils.getPublicAndOtherIndicationLevels()));
+
+        // when the LoE and ET are empty, no info should be returned
+        if ((levelOfEvidences != null && levelOfEvidences.size() == 0) || evidenceTypes.size() == 0) {
+            if (requestQueries == null || requestQueries.size() == 0) {
+                EvidenceQueryRes query = new EvidenceQueryRes();
+                return Collections.singletonList(query);
+            } else {
+                List<EvidenceQueryRes> evidenceQueryRes = new ArrayList<>();
+                for (Query query : requestQueries) {
+                    evidenceQueries.add(new EvidenceQueryRes());
+                }
+                return evidenceQueryRes;
+            }
+        }
 
         if (requestQueries == null || requestQueries.size() == 0) {
             Set<Evidence> evidences = new HashSet<>();
@@ -850,6 +895,8 @@ public class EvidenceUtils {
                                 requestQuery.getAlteration(), null, requestQuery.getConsequence(),
                                 requestQuery.getProteinStart(), requestQuery.getProteinEnd());
                             AlterationUtils.annotateAlteration(alt, alt.getAlteration());
+                        }else{
+                            query.setExactMatchedAlteration(alt);
                         }
                         List<Alteration> relevantAlts = AlterationUtils.getRelevantAlterations(alt);
 
@@ -894,11 +941,11 @@ public class EvidenceUtils {
 
                 // Get highest sensitive evidences
                 Set<Evidence> sensitiveEvidences = EvidenceUtils.getSensitiveEvidences(allEvidences);
-                filteredEvidences.addAll(EvidenceUtils.getOnlyHighestLevelEvidences(sensitiveEvidences));
+                filteredEvidences.addAll(EvidenceUtils.getOnlyHighestLevelEvidences(sensitiveEvidences, query.getExactMatchedAlteration()));
 
                 // Get highest resistance evidences
                 Set<Evidence> resistanceEvidences = EvidenceUtils.getResistanceEvidences(allEvidences);
-                filteredEvidences.addAll(EvidenceUtils.getOnlyHighestLevelEvidences(resistanceEvidences));
+                filteredEvidences.addAll(EvidenceUtils.getOnlyHighestLevelEvidences(resistanceEvidences, query.getExactMatchedAlteration()));
 
 
                 // Also include all non-treatment evidences
@@ -911,7 +958,7 @@ public class EvidenceUtils {
                 query.setEvidences(filteredEvidences);
             } else {
                 query.setEvidences(
-                    new ArrayList<>(keepHighestLevelForSameTreatments(filterEvidence(evidences, query))));
+                    new ArrayList<>(keepHighestLevelForSameTreatments(filterEvidence(evidences, query), query.getExactMatchedAlteration())));
             }
             CustomizeComparator.sortEvidenceBasedOnPriority(query.getEvidences(), LevelUtils.TREATMENT_SORTING_LEVEL_PRIORITY);
             if (query.getGene() != null && query.getGene().getHugoSymbol().equals("KIT")) {

@@ -240,7 +240,7 @@ public class IndicatorUtils {
 
             if (nonVUSRelevantAlts.size() > 0) {
                 if (hasOncogenicEvidence) {
-                    IndicatorQueryOncogenicity indicatorQueryOncogenicity = getOncogenicity(matchedAlt, alleles, query, source, geneStatus);
+                    IndicatorQueryOncogenicity indicatorQueryOncogenicity = getOncogenicity(matchedAlt, alleles, nonVUSRelevantAlts);
 
                     if (indicatorQueryOncogenicity.getOncogenicityEvidence() != null) {
                         allQueryRelatedEvidences.add(indicatorQueryOncogenicity.getOncogenicityEvidence());
@@ -253,7 +253,7 @@ public class IndicatorUtils {
                 }
 
                 if (hasMutationEffectEvidence) {
-                    IndicatorQueryMutationEffect indicatorQueryMutationEffect = getMutationEffect(matchedAlt, alleles, query, source, geneStatus);
+                    IndicatorQueryMutationEffect indicatorQueryMutationEffect = getMutationEffect(matchedAlt, alleles, nonVUSRelevantAlts);
 
                     if (indicatorQueryMutationEffect.getMutationEffectEvidence() != null) {
                         allQueryRelatedEvidences.add(indicatorQueryMutationEffect.getMutationEffectEvidence());
@@ -263,8 +263,10 @@ public class IndicatorUtils {
                     if (indicatorQuery.getMutationEffect() == null && indicatorQueryMutationEffect.getMutationEffect() != null) {
                         MutationEffectResp mutationEffectResp = new MutationEffectResp();
                         mutationEffectResp.setKnownEffect(indicatorQueryMutationEffect.getMutationEffect().getMutationEffect());
-                        mutationEffectResp.setDescription(indicatorQueryMutationEffect.getMutationEffectEvidence().getDescription());
-                        mutationEffectResp.setCitations(MainUtils.getCitationsByEvidence(indicatorQueryMutationEffect.getMutationEffectEvidence()));
+                        if (indicatorQueryMutationEffect.getMutationEffectEvidence() != null) {
+                            mutationEffectResp.setDescription(indicatorQueryMutationEffect.getMutationEffectEvidence().getDescription());
+                            mutationEffectResp.setCitations(MainUtils.getCitationsByEvidence(indicatorQueryMutationEffect.getMutationEffectEvidence()));
+                        }
                         indicatorQuery.setMutationEffect(mutationEffectResp);
                     }
                 }
@@ -272,7 +274,7 @@ public class IndicatorUtils {
                 if (hasTreatmentEvidence) {
                     treatmentEvidences = EvidenceUtils.keepHighestLevelForSameTreatments(
                         EvidenceUtils.getRelevantEvidences(query, source, geneStatus, matchedAlt,
-                            selectedTreatmentEvidence, levels));
+                            selectedTreatmentEvidence, levels), matchedAlt);
                 }
             }
 
@@ -288,7 +290,7 @@ public class IndicatorUtils {
                         treatmentEvidences.addAll(EvidenceUtils.keepHighestLevelForSameTreatments(
                             EvidenceUtils.convertEvidenceLevel(
                                 EvidenceUtils.getEvidence(Collections.singletonList(oncogenicMutation),
-                                    selectedTreatmentEvidence, levels), new HashSet<>(oncoTreeTypes))));
+                                    selectedTreatmentEvidence, levels), new HashSet<>(oncoTreeTypes)), matchedAlt));
                     }
                 }
             }
@@ -302,7 +304,7 @@ public class IndicatorUtils {
 
                     // Get highest resistance evidences
                     Set<Evidence> resistanceEvidences = EvidenceUtils.getResistanceEvidences(treatmentEvidences);
-                    filteredEvis.addAll(EvidenceUtils.getOnlyHighestLevelEvidences(resistanceEvidences));
+                    filteredEvis.addAll(EvidenceUtils.getOnlyHighestLevelEvidences(resistanceEvidences, matchedAlt));
 
                     treatmentEvidences = filteredEvis;
                 }
@@ -378,7 +380,7 @@ public class IndicatorUtils {
         return indicatorQuery;
     }
 
-    private static IndicatorQueryOncogenicity getOncogenicity(Alteration alteration, List<Alteration> alternativeAllele, Query query, String source, String geneStatus) {
+    private static IndicatorQueryOncogenicity getOncogenicity(Alteration alteration, List<Alteration> alternativeAllele, List<Alteration> relevantAlterations) {
         Oncogenicity oncogenicity = null;
         Evidence oncogenicityEvidence = null;
 
@@ -407,9 +409,12 @@ public class IndicatorUtils {
 
         // If there is no oncogenic info available for this variant, find oncogenicity from relevant variants
         if (oncogenicity == null || oncogenicity.equals(Oncogenicity.INCONCLUSIVE)) {
+            List<Alteration> listToBeRemoved = new ArrayList<>(alternativeAllele);
+            listToBeRemoved.add(alteration);
+
             oncogenicityEvidence = MainUtils.findHighestOncogenicEvidenceByEvidences(
-                EvidenceUtils.getRelevantEvidences(query, source, geneStatus, alteration,
-                    Collections.singleton(EvidenceType.ONCOGENIC), null));
+                new HashSet<>(EvidenceUtils.getEvidence(new ArrayList<>(AlterationUtils.removeAlterationsFromList(relevantAlterations, listToBeRemoved)), Collections.singleton(EvidenceType.ONCOGENIC), null))
+            );
             if (oncogenicityEvidence != null) {
                 Oncogenicity tmpOncogenicity = Oncogenicity.getByEffect(oncogenicityEvidence.getKnownEffect());
                 if (tmpOncogenicity != null) {
@@ -417,10 +422,14 @@ public class IndicatorUtils {
                 }
             }
         }
+
+        if (oncogenicity == null) {
+            oncogenicity = Oncogenicity.UNKNOWN;
+        }
         return new IndicatorQueryOncogenicity(oncogenicity, oncogenicityEvidence);
     }
 
-    private static IndicatorQueryMutationEffect getMutationEffect(Alteration alteration, List<Alteration> alternativeAllele, Query query, String source, String geneStatus) {
+    private static IndicatorQueryMutationEffect getMutationEffect(Alteration alteration, List<Alteration> alternativeAllele, List<Alteration> relevantAlterations) {
         IndicatorQueryMutationEffect indicatorQueryMutationEffect = new IndicatorQueryMutationEffect();
         // Find alteration specific mutation effect
         List<Evidence> selfAltMEEvis = EvidenceUtils.getEvidence(Collections.singletonList(alteration),
@@ -448,9 +457,16 @@ public class IndicatorUtils {
 
         // If there is no mutation effect info available for this variant, find mutation effect from relevant variants
         if (indicatorQueryMutationEffect.getMutationEffect() == null || indicatorQueryMutationEffect.getMutationEffect().equals(MutationEffect.INCONCLUSIVE)) {
+            List<Alteration> listToBeRemoved = new ArrayList<>(alternativeAllele);
+            listToBeRemoved.add(alteration);
+
             indicatorQueryMutationEffect = MainUtils.findHighestMutationEffectByEvidence(
-                EvidenceUtils.getRelevantEvidences(query, source, geneStatus, alteration,
-                    Collections.singleton(EvidenceType.MUTATION_EFFECT), null));
+                new HashSet<>(EvidenceUtils.getEvidence(AlterationUtils.removeAlterationsFromList(relevantAlterations, listToBeRemoved), Collections.singleton(EvidenceType.MUTATION_EFFECT), null))
+            );
+        }
+
+        if (indicatorQueryMutationEffect.getMutationEffect() == null) {
+            indicatorQueryMutationEffect.setMutationEffect(MutationEffect.UNKNOWN);
         }
         return indicatorQueryMutationEffect;
     }
