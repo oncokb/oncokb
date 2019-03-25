@@ -11,10 +11,10 @@ import java.util.List;
 
 @javax.annotation.Generated(value = "class io.swagger.codegen.languages.SpringCodegen", date = "2016-10-14T18:47:53.991Z")
 
-@Api(value = "drugs", description = "the drugs API")
+@Api(tags = "Drugs", description = "OncoKB Drugs")
 public interface DrugsApi {
 
-    @ApiOperation(value = "", notes = "Get all curated drugs.", response = Drug.class, responseContainer = "List", tags = {"Drugs",})
+    @ApiOperation(value = "", notes = "Get all curated drugs.", response = Drug.class, responseContainer = "List")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = Drug.class, responseContainer = "List")})
     @RequestMapping(value = "/drugs",
@@ -23,7 +23,7 @@ public interface DrugsApi {
     ResponseEntity<List<Drug>> drugsGet();
 
 
-    @ApiOperation(value = "", notes = "Search drugs.", response = Drug.class, responseContainer = "List", tags = {"Drugs", "Search",})
+    @ApiOperation(value = "", notes = "Search drugs.", response = Drug.class, responseContainer = "List")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = Drug.class, responseContainer = "List")})
     @RequestMapping(value = "/drugs/lookup",

@@ -2,6 +2,7 @@ package org.mskcc.cbio.oncokb.api.pub.v1;
 
 import io.swagger.annotations.ApiParam;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
+import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.AlterationType;
 import org.mskcc.cbio.oncokb.model.Gene;
@@ -68,7 +69,7 @@ public class VariantsApiController implements VariantsApi {
         List<Alteration> alterationList = new ArrayList<>();
         if (query != null) {
             if (query.getHgvs() != null && !query.getHgvs().isEmpty()) {
-                Alteration alteration = AlterationUtils.getAlterationByHGVS(query.getHgvs());
+                Alteration alteration = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, query.getHgvs());
                 if (alteration != null && alteration.getGene() != null) {
                     Set<Alteration> allAlterations = AlterationUtils.getAllAlterations(alteration.getGene());
                     alterationList.addAll(ApplicationContextSingleton.getAlterationBo().findRelevantAlterations(alteration, allAlterations, true));
