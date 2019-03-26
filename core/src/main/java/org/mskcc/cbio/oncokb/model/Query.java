@@ -3,6 +3,8 @@ package org.mskcc.cbio.oncokb.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.StringUtils;
+import org.mskcc.cbio.oncokb.apiModels.annotation.*;
+import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
 import org.mskcc.cbio.oncokb.util.QueryUtils;
@@ -29,6 +31,53 @@ public class Query implements java.io.Serializable {
     private String hgvs;
 
     public Query() {
+    }
+
+    public Query(AnnotateMutationByProteinChangeQuery mutationQuery) {
+        this.id = mutationQuery.getId();
+        this.type = AnnotationQueryType.REGULAR.getName();
+        this.setTumorType(mutationQuery.getTumorType());
+
+        this.hugoSymbol = mutationQuery.getGene().getHugoSymbol();
+        this.entrezGeneId = mutationQuery.getGene().getEntrezGeneId();
+
+        setAlteration(mutationQuery.getAlteration());
+        this.consequence = mutationQuery.getConsequence();
+        this.proteinStart = mutationQuery.getProteinStart();
+        this.proteinEnd = mutationQuery.getProteinEnd();
+    }
+
+    public Query(AnnotateMutationByHGVSgQuery mutationQuery) {
+        this.id = mutationQuery.getId();
+        this.type = AnnotationQueryType.REGULAR.getName();
+        this.setTumorType(mutationQuery.getTumorType());
+
+        this.hgvs = mutationQuery.getHgvsg();
+    }
+
+    public Query(AnnotateStructuralVariantQuery svQuery) {
+        this.id = svQuery.getId();
+        this.type = AnnotationQueryType.REGULAR.getName();
+        this.setTumorType(svQuery.getTumorType());
+
+        Gene geneA = GeneUtils.getGene(svQuery.getGeneA().getEntrezGeneId(), svQuery.getGeneA().getHugoSymbol());
+        Gene geneB = GeneUtils.getGene(svQuery.getGeneB().getEntrezGeneId(), svQuery.getGeneB().getHugoSymbol());
+
+        this.hugoSymbol = geneA.getHugoSymbol() + "-" + geneB.getHugoSymbol();
+
+        this.alterationType = AlterationType.STRUCTURAL_VARIANT.name();
+        this.svType = svQuery.getStructuralVariantType();
+        this.consequence = svQuery.getFunctionalFusion() ? "fusion" : "";
+    }
+
+    public Query(AnnotateCopyNumberAlterationQuery cnaQuery) {
+        this.id = cnaQuery.getId();
+        this.type = AnnotationQueryType.REGULAR.getName();
+        this.setTumorType(cnaQuery.getTumorType());
+
+        this.hugoSymbol = cnaQuery.getGene().getHugoSymbol();
+
+        setAlteration(StringUtils.capitalize(cnaQuery.getCopyNameAlterationType().name().toLowerCase()));
     }
 
     public Query(Alteration alt) {
@@ -185,7 +234,7 @@ public class Query implements java.io.Serializable {
     public void setHgvs(String hgvs) {
         this.hgvs = hgvs;
         if (hgvs != null && !hgvs.trim().isEmpty()) {
-            Alteration alteration = AlterationUtils.getAlterationByHGVS(hgvs);
+            Alteration alteration = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, hgvs);
             if (alteration != null) {
                 if (alteration.getGene() != null) {
                     this.hugoSymbol = alteration.getGene().getHugoSymbol();
@@ -208,7 +257,7 @@ public class Query implements java.io.Serializable {
         }
 
         // For structural variant, if the entrezGeneId is specified which means this is probably a intragenic event. In this case, the hugoSymbol should be ignore.
-        if(this.getAlterationType() != null) {
+        if (this.getAlterationType() != null) {
             AlterationType alterationType = AlterationType.getByName(this.getAlterationType());
             if ((alterationType.equals(AlterationType.FUSION) ||
                 alterationType.equals(AlterationType.STRUCTURAL_VARIANT)) &&

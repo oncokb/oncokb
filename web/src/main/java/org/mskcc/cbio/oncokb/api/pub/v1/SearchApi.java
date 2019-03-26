@@ -14,10 +14,10 @@ import java.util.List;
 
 @javax.annotation.Generated(value = "class io.swagger.codegen.languages.SpringCodegen", date = "2016-10-19T19:28:21.941Z")
 
-@Api(value = "search", description = "The search API")
+@Api(tags = "Search", description = "The search endpoints")
 public interface SearchApi {
 
-    @ApiOperation(value = "", notes = "General search for possible combinations.", response = IndicatorQueryResp.class, tags = {"Search",})
+    @ApiOperation(value = "", notes = "General search for possible combinations.", response = IndicatorQueryResp.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = IndicatorQueryResp.class),
         @ApiResponse(code = 400, message = "Error, error message will be given.", response = IndicatorQueryResp.class)})
@@ -45,7 +45,7 @@ public interface SearchApi {
     );
 
 
-    @ApiOperation(value = "", notes = "General search for possible combinations.", response = IndicatorQueryResp.class, responseContainer = "List", tags = {"Evidences", "Search",})
+    @ApiOperation(value = "", notes = "General search for possible combinations.", response = IndicatorQueryResp.class, responseContainer = "List")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = IndicatorQueryResp.class, responseContainer = "List"),
         @ApiResponse(code = 400, message = "Error, error message will be given.", response = IndicatorQueryResp.class)})

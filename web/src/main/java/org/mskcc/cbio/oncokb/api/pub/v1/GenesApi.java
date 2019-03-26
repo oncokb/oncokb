@@ -14,10 +14,10 @@ import java.util.List;
 
 @javax.annotation.Generated(value = "class io.swagger.codegen.languages.SpringCodegen", date = "2016-10-19T19:28:21.941Z")
 
-@Api(value = "genes", description = "The genes API")
+@Api(tags = "Genes", description = "OncoKB Genes")
 public interface GenesApi {
 
-    @ApiOperation(value = "", notes = "Get list of evidences for specific gene.", response = GeneEvidence.class, responseContainer = "List", tags = {"Evidences"})
+    @ApiOperation(value = "", notes = "Get list of evidences for specific gene.", response = GeneEvidence.class, responseContainer = "List")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = GeneEvidence.class, responseContainer = "List")})
     @RequestMapping(value = "/genes/{entrezGeneId}/evidences",
@@ -29,7 +29,7 @@ public interface GenesApi {
     );
 
 
-    @ApiOperation(value = "", notes = "Get specific gene information.", response = Gene.class, tags = {"Genes",})
+    @ApiOperation(value = "", notes = "Get specific gene information.", response = Gene.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = Gene.class)})
     @RequestMapping(value = "/genes/{entrezGeneId}",
@@ -41,7 +41,7 @@ public interface GenesApi {
     );
 
 
-    @ApiOperation(value = "", notes = "Get list of variants for specific gene.", response = Alteration.class, responseContainer = "List", tags = {"Variants"})
+    @ApiOperation(value = "", notes = "Get list of variants for specific gene.", response = Alteration.class, responseContainer = "List")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = Alteration.class, responseContainer = "List")})
     @RequestMapping(value = "/genes/{entrezGeneId}/variants",
@@ -53,7 +53,7 @@ public interface GenesApi {
     );
 
 
-    @ApiOperation(value = "", notes = "Get list of currently curated genes.", response = Gene.class, responseContainer = "List", tags = {"Genes",})
+    @ApiOperation(value = "", notes = "Get list of currently curated genes.", response = Gene.class, responseContainer = "List")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = Gene.class, responseContainer = "List")})
     @RequestMapping(value = "/genes",
@@ -64,7 +64,7 @@ public interface GenesApi {
     );
 
 
-    @ApiOperation(value = "", notes = "Search gene.", response = Gene.class, responseContainer = "List", tags = {"Genes", "Search",})
+    @ApiOperation(value = "", notes = "Search gene.", response = Gene.class, responseContainer = "List")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = Gene.class, responseContainer = "List")})
     @RequestMapping(value = "/genes/lookup",

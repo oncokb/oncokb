@@ -12,10 +12,10 @@ import java.util.Set;
 
 @javax.annotation.Generated(value = "class io.swagger.codegen.languages.SpringCodegen", date = "2016-10-19T19:28:21.941Z")
 
-@Api(value = "evidences", description = "The evidences API")
+@Api(tags = "Evidences", description = "OncoKB Evidence")
 public interface EvidencesApi {
 
-    @ApiOperation(value = "", notes = "Get specific evidence.", response = Evidence.class, tags = {"Evidences",})
+    @ApiOperation(value = "", notes = "Get specific evidence.", response = Evidence.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = Evidence.class),
         @ApiResponse(code = 400, message = "Error, error message will be given.", response = ResponseEntity.class)})
@@ -27,7 +27,7 @@ public interface EvidencesApi {
         , @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
     );
 
-    @ApiOperation(value = "", notes = "Get specific evidences.", response = Evidence.class, tags = {"Evidences",})
+    @ApiOperation(value = "", notes = "Get specific evidences.", response = Evidence.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = Evidence.class),
         @ApiResponse(code = 400, message = "Error, error message will be given.", response = ResponseEntity.class)})
@@ -40,7 +40,7 @@ public interface EvidencesApi {
     );
 
 
-    @ApiOperation(value = "", notes = "Search evidences. Multi-queries are supported.", response = Evidence.class, responseContainer = "List", tags = {"Evidences", "Search",})
+    @ApiOperation(value = "", notes = "Search evidences. Multi-queries are supported.", response = Evidence.class, responseContainer = "List")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = Evidence.class, responseContainer = "List")})
     @RequestMapping(value = "/evidences/lookup",
@@ -61,7 +61,7 @@ public interface EvidencesApi {
         , @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
     );
 
-    @ApiOperation(value = "", notes = "Search evidences.", response = EvidenceQueryRes.class, responseContainer = "List", tags = {"Evidences", "Search",})
+    @ApiOperation(value = "", notes = "Search evidences.", response = EvidenceQueryRes.class, responseContainer = "List")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = EvidenceQueryRes.class, responseContainer = "List")})
     @RequestMapping(value = "/evidences/lookup",
@@ -73,7 +73,7 @@ public interface EvidencesApi {
         , @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
     );
 
-//    @ApiOperation(value = "", notes = "Get specific evidences.", response = Evidence.class, responseContainer = "List", tags = {"Evidences",})
+//    @ApiOperation(value = "", notes = "Get specific evidences.", response = Evidence.class, responseContainer = "List")
 //    @ApiResponses(value = {
 //        @ApiResponse(code = 200, message = "OK", response = Evidence.class, responseContainer = "List"),
 //        @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiErrorResp.class)})

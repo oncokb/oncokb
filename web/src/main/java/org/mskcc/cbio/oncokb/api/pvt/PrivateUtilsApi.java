@@ -20,16 +20,16 @@ import java.util.Set;
  * Created by Hongxin on 12/12/16.
  */
 
-@Api(value = "/utils", description = "The utils API")
+@Api(tags = "Utils", description = "The utils API")
 public interface PrivateUtilsApi {
-    @ApiOperation(value = "", notes = "Get All Suggested Variants.", response = String.class, responseContainer = "List", tags = "Utils")
+    @ApiOperation(value = "", notes = "Get All Suggested Variants.", response = String.class, responseContainer = "List")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = AnnotatedVariant.class, responseContainer = "List")})
     @RequestMapping(value = "/utils/suggestedVariants", produces = {"application/json"},
         method = RequestMethod.GET)
     ResponseEntity<List<String>> utilsSuggestedVariantsGet();
 
-    @ApiOperation(value = "", notes = "Determine whether variant is hotspot mutation.", response = Boolean.class, tags = "Utils")
+    @ApiOperation(value = "", notes = "Determine whether variant is hotspot mutation.", response = Boolean.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = Boolean.class)})
     @RequestMapping(value = "/utils/isHotspot", produces = {"application/json"},
@@ -39,7 +39,7 @@ public interface PrivateUtilsApi {
         , @ApiParam(value = "Variant name") @RequestParam(value = "variant") String variant
     );
 
-    @ApiOperation(value = "", notes = "Get gene related numbers", response = GeneNumber.class, tags = "Numbers")
+    @ApiOperation(value = "", notes = "Get gene related numbers", response = GeneNumber.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK")})
     @RequestMapping(value = "/utils/numbers/gene/{hugoSymbol}",
@@ -49,7 +49,7 @@ public interface PrivateUtilsApi {
         @ApiParam(value = "The gene symbol used in Human Genome Organisation.", required = true) @PathVariable("hugoSymbol") String hugoSymbol
     );
 
-    @ApiOperation(value = "", notes = "Get gene related numbers of all genes. This is for main page word cloud.", response = GeneNumber.class, responseContainer = "Set", tags = "Numbers")
+    @ApiOperation(value = "", notes = "Get gene related numbers of all genes. This is for main page word cloud.", response = GeneNumber.class, responseContainer = "Set")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK")})
     @RequestMapping(value = "/utils/numbers/genes/",
@@ -57,7 +57,7 @@ public interface PrivateUtilsApi {
         method = RequestMethod.GET)
     ResponseEntity<Set<GeneNumber>> utilsNumbersGenesGet();
 
-    @ApiOperation(value = "", notes = "Get numbers served for the main page dashboard.", response = MainNumber.class, tags = "Numbers")
+    @ApiOperation(value = "", notes = "Get numbers served for the main page dashboard.", response = MainNumber.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK")})
     @RequestMapping(value = "/utils/numbers/main/",
@@ -65,7 +65,7 @@ public interface PrivateUtilsApi {
         method = RequestMethod.GET)
     ResponseEntity<MainNumber> utilsNumbersMainGet();
 
-    @ApiOperation(value = "", notes = "Get gene related numbers of all genes. This is for main page word cloud.", response = LevelNumber.class, responseContainer = "Set", tags = "Numbers")
+    @ApiOperation(value = "", notes = "Get gene related numbers of all genes. This is for main page word cloud.", response = LevelNumber.class, responseContainer = "Set")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK")})
     @RequestMapping(value = "/utils/numbers/levels/",
@@ -73,7 +73,7 @@ public interface PrivateUtilsApi {
         method = RequestMethod.GET)
     ResponseEntity<Set<LevelNumber>> utilsNumbersLevelsGet();
 
-    @ApiOperation(value = "", notes = "Check if clinical trials are valid or not by nctId.", response = Map.class, tags = "Utils")
+    @ApiOperation(value = "", notes = "Check if clinical trials are valid or not by nctId.", response = Map.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK")})
     @RequestMapping(value = "/utils/validation/trials",
@@ -81,7 +81,7 @@ public interface PrivateUtilsApi {
             method = RequestMethod.GET)
     ResponseEntity<Map<String, Boolean>> validateTrials(@ApiParam(value = "NCT ID list") @RequestParam(value = "nctIds") List<String> nctIds) throws ParserConfigurationException, SAXException, IOException;
 
-    @ApiOperation(value = "", notes = "Check if the genomic example will be mapped to OncoKB variant.", response = Map.class, tags = "Utils")
+    @ApiOperation(value = "", notes = "Check if the genomic example will be mapped to OncoKB variant.", response = Map.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK")})
     @RequestMapping(value = "/utils/match/variant",
@@ -93,7 +93,7 @@ public interface PrivateUtilsApi {
         , @ApiParam(value = "The genomic examples.") @RequestParam(value = "examples") String examples
     ) throws ParserConfigurationException, SAXException, IOException;
 
-    @ApiOperation(value = "", notes = "Check which OncoKB variants can be mapped on genomic examples.", response = List.class, tags = "Utils")
+    @ApiOperation(value = "", notes = "Check which OncoKB variants can be mapped on genomic examples.", response = List.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK")})
     @RequestMapping(value = "/utils/match/variant",
@@ -103,7 +103,7 @@ public interface PrivateUtilsApi {
     ResponseEntity<List<MatchVariantResult>> validateVariantExamplePost(@ApiParam(value = "List of queries. Please see swagger.json for request body format.", required = true) @RequestBody(required = true) MatchVariantRequest body
     );
 
-    @ApiOperation(value = "", notes = "Get the full list of OncoTree Maintype.", response = List.class, tags = "TumorTypes")
+    @ApiOperation(value = "", notes = "Get the full list of OncoTree Maintype.", response = List.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK")})
     @RequestMapping(value = "/utils/oncotree/mainTypes",
@@ -111,7 +111,7 @@ public interface PrivateUtilsApi {
         method = RequestMethod.GET)
     ResponseEntity<List<String>> utilsOncoTreeMainTypesGet();
 
-    @ApiOperation(value = "", notes = "Get the full list of OncoTree Subtypes.", response = List.class, tags = "TumorTypes")
+    @ApiOperation(value = "", notes = "Get the full list of OncoTree Subtypes.", response = List.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK")})
     @RequestMapping(value = "/utils/oncotree/subtypes",
@@ -119,7 +119,7 @@ public interface PrivateUtilsApi {
         method = RequestMethod.GET)
     ResponseEntity<List<TumorType>> utilsOncoTreeSubtypesGet();
 
-    @ApiOperation(value = "", notes = "Get the list of evidences by levels.", response = List.class, tags = "Evidences")
+    @ApiOperation(value = "", notes = "Get the list of evidences by levels.", response = List.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK")})
     @RequestMapping(value = "/utils/evidences/levels",

@@ -9,6 +9,7 @@ package org.mskcc.cbio.oncokb.util;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
+import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.genomenexus.TranscriptConsequence;
 import org.mskcc.cbio.oncokb.model.*;
 
@@ -355,10 +356,10 @@ public final class AlterationUtils {
         return alt;
     }
 
-    public static Alteration getAlterationByHGVS(String hgvs) {
+    public static Alteration getAlterationFromGenomeNexus(GNVariantAnnotationType type, String query) {
         Alteration alteration = null;
-        if (hgvs != null && !hgvs.trim().isEmpty()) {
-            TranscriptConsequence transcriptConsequence = GenomeNexusUtils.getTranscriptConsequence(hgvs);
+        if (query != null && !query.trim().isEmpty()) {
+            TranscriptConsequence transcriptConsequence = GenomeNexusUtils.getTranscriptConsequence(type, query);
             if (transcriptConsequence != null) {
                 String hugoSymbol = transcriptConsequence.getGeneSymbol();
                 Gene gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
