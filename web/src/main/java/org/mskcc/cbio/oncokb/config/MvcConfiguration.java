@@ -23,6 +23,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 
+@Configuration
+@ComponentScan(basePackages = "org.mskcc.cbio.oncokb")
+@EnableWebMvc
 public class MvcConfiguration extends WebMvcConfigurerAdapter {
 
     @Bean

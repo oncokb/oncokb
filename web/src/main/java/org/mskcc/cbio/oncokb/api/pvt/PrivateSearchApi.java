@@ -17,9 +17,9 @@ import java.util.Set;
  * Created by Hongxin on 12/12/16.
  */
 
-@Api(value = "/search", description = "The utils API")
+@Api(tags = "Search", description = "The utils API")
 public interface PrivateSearchApi {
-    @ApiOperation(value = "", notes = "Get annotated variants information for specified gene.", response = BiologicalVariant.class, responseContainer = "Set", tags = "Variants")
+    @ApiOperation(value = "", notes = "Get annotated variants information for specified gene.", response = BiologicalVariant.class, responseContainer = "Set")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK")})
     @RequestMapping(value = "/search/variants/biological",
@@ -29,7 +29,7 @@ public interface PrivateSearchApi {
     );
 
 
-    @ApiOperation(value = "", notes = "Get list of variant clinical information for specified gene.", response = ClinicalVariant.class, responseContainer = "Set", tags = "Variants")
+    @ApiOperation(value = "", notes = "Get list of variant clinical information for specified gene.", response = ClinicalVariant.class, responseContainer = "Set")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK")})
     @RequestMapping(value = "/search/variants/clinical",
@@ -39,7 +39,7 @@ public interface PrivateSearchApi {
 
     );
 
-    @ApiOperation(value = "", notes = "Search to find treatments.", response = Treatment.class, responseContainer = "Set", tags = "Treatments")
+    @ApiOperation(value = "", notes = "Search to find treatments.", response = Treatment.class, responseContainer = "Set")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK")})
     @RequestMapping(value = "/search/treatments",
@@ -50,7 +50,7 @@ public interface PrivateSearchApi {
         @ApiParam(value = "The level of evidence.", defaultValue = "false") @RequestParam(value = "level", required = false) String queryLevel
     );
 
-    @ApiOperation(value = "", notes = "Find matches based on blur query.", response = Treatment.class, responseContainer = "LinkedHashSet", tags = "")
+    @ApiOperation(value = "", notes = "Find matches based on blur query.", response = Treatment.class, responseContainer = "LinkedHashSet")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK")})
     @RequestMapping(value = "/search/typeahead",
