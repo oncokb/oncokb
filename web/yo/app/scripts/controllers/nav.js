@@ -24,12 +24,16 @@ angular.module('oncokbApp')
             filterTabs.push({key: 'queues', value: tabs.queues});
             filterTabs.push({key: 'drugs', value: tabs.drugs});
             if ($rootScope.me.admin) {
-                var keys = ['variant', 'tools', 'feedback'];
-                keys.forEach(function(e) {
-                    filterTabs.push({key: e, value: tabs[e]});
-                });
+                filterTabs = _.union(filterTabs, ['variant', 'tools', 'feedback']);
             }
-            $scope.tabs = filterTabs;
+
+            if (!$rootScope.internal) {
+                filterTabs = _.intersection(filterTabs, ['genes', 'queues', 'feedback']);
+            }
+
+            $scope.tabs = filterTabs.map(function(tabKey) {
+                return {key: tabKey, value: tabs[tabKey]}
+            });
         }
         $scope.setLocalStorage = function(key) {
             if (key !== 'gene') {

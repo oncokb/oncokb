@@ -110,9 +110,11 @@ public class FindRelevantAlterationsTest {
                 {"EGFR", "vIII", null, "vIII, Oncogenic Mutations"},
 
                 // Do not map few special KIT variants as alternative alleles, "K642E", "V654A", "T670I"
-                {"KIT", "K652G", null, "P627_G663mut, Oncogenic Mutations"},
-                {"KIT", "V654G", null, "P627_G663mut, Oncogenic Mutations"},
-                {"KIT", "T670A", null, "IT669MI, G664_E714mut, Oncogenic Mutations"},
+                {"KIT", "K652G", null, ""},
+
+                // 654 is a hotspot position
+                {"KIT", "V654G", null, "Oncogenic Mutations"},
+                {"KIT", "T670A", null, "IT669MI"},
 
 
                 // Do not mapping Oncogenic Mutations to Amplification

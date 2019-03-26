@@ -125,11 +125,13 @@ public class IndicatorUtilsTest {
         assertEquals("The oncogenicity should be 'Predicted Oncogenic'", Oncogenicity.PREDICTED.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The isHotspot is not true, but it should be.", Boolean.TRUE, indicatorQueryResp.getHotspot());
 
+        // ALK R401Q should not be hotspot. It later was removed from the hotspot list.
+        // The position has high truncating rate
         query = new Query(null, null, null, "ALK", "R401Q", null, null, "Colon Adenocarcinoma", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, false, null);
-        assertEquals("The oncogenicity should be 'Predicted Oncogenic'", Oncogenicity.PREDICTED.getOncogenic(), indicatorQueryResp.getOncogenic());
-        assertEquals("The variant summary is not expected.", "As of 10/06/2017, there was no available functional data about the ALK R401Q mutation. However, it has been identified as a statistically significant hotspot and is predicted to be oncogenic.", indicatorQueryResp.getVariantSummary());
-        assertEquals("The isHotspot is not true, but it should be.", Boolean.TRUE, indicatorQueryResp.getHotspot());
+        assertEquals("The oncogenicity should not be 'Predicted Oncogenic'", "", indicatorQueryResp.getOncogenic());
+        assertEquals("The variant summary is not expected.", "As of 10/06/2017, there was no available functional data about the ALK R401Q mutation.", indicatorQueryResp.getVariantSummary());
+        assertEquals("The isHotspot is not false, but it should be.", Boolean.FALSE, indicatorQueryResp.getHotspot());
 
         // No longer test 3A. KRAS has been downgraded to level 4
 //        assertEquals("The highest sensitive level should be null, the level 3A evidence under Colorectal Cancer has been maked as NO propagation.",
@@ -211,6 +213,12 @@ public class IndicatorUtilsTest {
         assertEquals("The highest sensitive level of BRAF R462I should be null.", null, indicatorQueryResp.getHighestSensitiveLevel());
         assertEquals("The highest resistance level of BRAF R462I should be null.", null, indicatorQueryResp.getHighestResistanceLevel());
         assertEquals("The tumor type summary does not match.", "There are no FDA-approved or NCCN-compendium listed treatments specifically for patients with BRAF R462I mutant gastrointestinal stromal tumors.", indicatorQueryResp.getTumorTypeSummary());
+
+        // Likely Neutral oncogenicity should not be propagated to alternative allele
+        query = new Query(null, null, null, "AKT1", "P42I", null, null, "Anaplastic Astrocytoma", null, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true, null);
+        assertEquals("The Oncogenicity is not unknown, but it should be.", Oncogenicity.UNKNOWN.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The mutation effect is not unknown, but it should be.", MutationEffect.UNKNOWN.getMutationEffect(), indicatorQueryResp.getMutationEffect().getKnownEffect());
 
         // Check EGFR vIII vII vIV
         query = new Query(null, null, null, "EGFR", "EGFRvIII", null, null, "Gastrointestinal Stromal Tumor", null, null, null, null);
@@ -310,6 +318,15 @@ public class IndicatorUtilsTest {
         assertEquals("The Oncogenicity is not Oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The mutation effect is not expected.", "Loss-of-function", indicatorQueryResp.getMutationEffect().getKnownEffect());
         assertEquals("The highest level of sensitive treatment is not level 1, but it should be.", LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
+
+        // For special case in cBioPortal
+        // The fusion event may not have the keyword `fusion` in the protein change, but the mutation type correctly added as Fusion
+        query = new Query(null, null, null, "ETV6", "ETV6-NTRK3", AlterationType.FUSION.label(), null, "Ovarian Cancer", null, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true, null);
+        assertEquals("The Oncogenicity is not likly Oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
+        query = new Query(null, null, null, "ETV6", "ETV6-NTRK3", "Mutation", null, "Ovarian Cancer", "Fusion", null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true, null);
+        assertEquals("The Oncogenicity is not likly Oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
 
         // Oncogenicity of Alternative Allele overwrites Inconclusive
         // C24Y is annotated as Inconclusive but C24R is Likely Oncogenic
@@ -510,6 +527,12 @@ public class IndicatorUtilsTest {
         resp2 = IndicatorUtils.processQuery(query2, null, null, null, true, null);
         pairComparison(resp1, resp2);
 
+        // When queried gene order is different, but one of the combinations exists, then the variantExist should be set to true
+        query1 = new Query(null, null, null, "BCR-ABL1", null, "structural_variant", StructuralVariantType.DELETION, "Lung Adenocarcinoma", "fusion", null, null, null);
+        query2 = new Query(null, null, null, "ABL1-BCR", null, "structural_variant", StructuralVariantType.DELETION, "Lung Adenocarcinoma", "fusion", null, null, null);
+        resp1 = IndicatorUtils.processQuery(query1, null, null, null, true, null);
+        resp2 = IndicatorUtils.processQuery(query2, null, null, null, true, null);
+        pairComparison(resp1, resp2);
 
         // handle mixed input for structural variant deletion
         query1 = new Query(null, null, null, "EGFR", "KDD", "structural_variant", StructuralVariantType.DUPLICATION, "NSCLC", null, null, null, null);
@@ -526,7 +549,12 @@ public class IndicatorUtilsTest {
     }
 
     private void pairComparison(IndicatorQueryResp resp1, IndicatorQueryResp resp2) {
+        pairComparison(resp1, resp1, false);
+    }
+
+    private void pairComparison(IndicatorQueryResp resp1, IndicatorQueryResp resp2, boolean skipSummary) {
         assertTrue("The gene exist should be the same.", resp1.getGeneExist().equals(resp2.getGeneExist()));
+        assertTrue("The variant exist should be the same.", resp1.getVariantExist().equals(resp2.getVariantExist()));
         assertTrue("The oncogenicity should be the same.", resp1.getOncogenic().equals(resp2.getOncogenic()));
         assertTrue("The VUS info should be the same", resp1.getVUS().equals(resp2.getVUS()));
 
@@ -542,9 +570,11 @@ public class IndicatorUtilsTest {
             assertTrue("The highest resistance level should be the same.", resp1.getHighestResistanceLevel().equals(resp2.getHighestResistanceLevel()));
         }
 
-        assertTrue("The gene summary should be the same.", resp1.getGeneSummary().equals(resp2.getGeneSummary()));
-        assertTrue("The variant summary should be the same.", resp1.getVariantSummary().equals(resp2.getVariantSummary()));
-        assertTrue("The tumor type summary should be the same.", resp1.getTumorTypeSummary().equals(resp2.getTumorTypeSummary()));
+        if (!skipSummary) {
+            assertTrue("The gene summary should be the same.", resp1.getGeneSummary().equals(resp2.getGeneSummary()));
+            assertTrue("The variant summary should be the same.", resp1.getVariantSummary().equals(resp2.getVariantSummary()));
+            assertTrue("The tumor type summary should be the same.", resp1.getTumorTypeSummary().equals(resp2.getTumorTypeSummary()));
+        }
     }
 
     private Boolean treatmentsContainLevel(List<IndicatorQueryTreatment> treatments, LevelOfEvidence level) {

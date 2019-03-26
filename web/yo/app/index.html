@@ -22,7 +22,6 @@
     <link rel="stylesheet" href="_components/jquery.qtip.min.css">
     <!-- endbuild -->
     <!-- build:css styles/main.css -->
-    <link rel="stylesheet" href="components/fontawesome/css/font-awesome.css" />
     <link rel="stylesheet" href="styles/main.css">
     <!-- endbuild -->
 
@@ -184,6 +183,11 @@
 
     <script src="//apis.google.com/js/api.js"></script>
     <script src="//apis.google.com/js/client:platform.js"></script>
+    <script src="https://browser.sentry-cdn.com/4.5.3/bundle.min.js" crossorigin="anonymous"></script>
+    <script>
+        Sentry.init({ dsn: 'https://d4930217d3be47e7aa0cbb8f11a817c4@sentry.io/1382330' });
+    </script>
+
     <!-- build:js scripts/oncokb.js -->
     <script src="components/chosen/chosen.jquery.min.js"></script>
     <script src="_components/jquery.qtip.min.js"></script>

@@ -78,8 +78,12 @@ public class MainUtils {
 
         if (evidenceType != null) {
             for (String type : evidenceType.trim().split("\\s*,\\s*")) {
-                EvidenceType et = EvidenceType.valueOf(type);
-                evidenceTypes.add(et);
+                try {
+                    EvidenceType et = EvidenceType.valueOf(type);
+                    evidenceTypes.add(et);
+                } catch (Exception e) {
+                    // nothing needs to be done
+                }
             }
         } else {
             evidenceTypes = EvidenceTypeUtils.getAllEvidenceTypes();
@@ -124,6 +128,8 @@ public class MainUtils {
                     levelOfEvidences.add(level);
                 }
             }
+        } else {
+            levelOfEvidences = null;
         }
 
         requestQueries.put("queries", queries);

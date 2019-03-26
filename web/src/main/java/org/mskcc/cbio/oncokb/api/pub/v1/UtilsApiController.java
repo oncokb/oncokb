@@ -212,7 +212,7 @@ public class UtilsApiController implements UtilsApi {
         for (CancerGene cancerGene : CancerGeneUtils.getCancerGeneList()) {
             List<String> row = new ArrayList<>();
             row.add(cancerGene.getHugoSymbol());
-            row.add(cancerGene.getEntrezGeneId());
+            row.add(cancerGene.getEntrezGeneId().toString());
             row.add(String.valueOf(cancerGene.getOccurrenceCount()));
             row.add(getStringByBoolean(cancerGene.getOncokbAnnotated()));
             row.add(getStringByBoolean(cancerGene.getmSKImpact()));
@@ -286,8 +286,8 @@ public class UtilsApiController implements UtilsApi {
             String highestSensitiveLevel = "";
             String highestResistanceLevel = "";
             Set<Evidence> therapeuticEvidences = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, EvidenceTypeUtils.getTreatmentEvidenceTypes());
-            Set<Evidence> highestSensitiveLevelEvidences = EvidenceUtils.getOnlyHighestLevelEvidences(EvidenceUtils.getSensitiveEvidences(therapeuticEvidences));
-            Set<Evidence> highestResistanceLevelEvidences = EvidenceUtils.getOnlyHighestLevelEvidences(EvidenceUtils.getResistanceEvidences(therapeuticEvidences));
+            Set<Evidence> highestSensitiveLevelEvidences = EvidenceUtils.getOnlyHighestLevelEvidences(EvidenceUtils.getSensitiveEvidences(therapeuticEvidences), null);
+            Set<Evidence> highestResistanceLevelEvidences = EvidenceUtils.getOnlyHighestLevelEvidences(EvidenceUtils.getResistanceEvidences(therapeuticEvidences), null);
             if (!highestSensitiveLevelEvidences.isEmpty()) {
                 highestSensitiveLevel = highestSensitiveLevelEvidences.iterator().next().getLevelOfEvidence().getLevel();
             }

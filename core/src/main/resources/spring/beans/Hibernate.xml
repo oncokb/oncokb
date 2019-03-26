@@ -12,5 +12,4 @@ http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
             <value>classpath:/hibernate/hibernate.cfg.xml</value>
         </property>
     </bean>
-
-</beans>    
+</beans>

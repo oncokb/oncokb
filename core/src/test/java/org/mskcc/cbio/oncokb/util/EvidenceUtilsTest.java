@@ -129,6 +129,14 @@ public class EvidenceUtilsTest extends TestCase {
         Evidence e4 = new Evidence();
         Evidence e5 = new Evidence();
 
+        Alteration alteration = AlterationUtils.findAlteration(GeneUtils.getGeneByHugoSymbol("BRAF"), "V600E");
+
+        e1.setAlterations(Collections.singleton(alteration));
+        e2.setAlterations(Collections.singleton(alteration));
+        e3.setAlterations(Collections.singleton(alteration));
+        e4.setAlterations(Collections.singleton(alteration));
+        e5.setAlterations(Collections.singleton(alteration));
+
         e1.setId(1);
         e2.setId(2);
         e3.setId(3);
@@ -190,21 +198,21 @@ public class EvidenceUtilsTest extends TestCase {
         sets.add(e1);
         sets.add(e2);
 
-        Set<Evidence> filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets);
+        Set<Evidence> filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets, alteration);
         assertEquals("1,2", getIds(filtered));
 
         sets.add(e3);
-        filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets);
+        filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets, alteration);
         assertEquals("1,2,3", getIds(filtered));
 
         sets = new HashSet<>();
         sets.add(e1);
         sets.add(e4);
-        filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets);
+        filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets, alteration);
         assertEquals("1", getIds(filtered));
 
         e1.setLevelOfEvidence(LevelOfEvidence.LEVEL_3A);
-        filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets);
+        filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets, alteration);
         assertEquals("4", getIds(filtered));
 
         sets = new HashSet<>();
@@ -213,17 +221,17 @@ public class EvidenceUtilsTest extends TestCase {
 
         e1.setLevelOfEvidence(LevelOfEvidence.LEVEL_1);
         e5.setLevelOfEvidence(LevelOfEvidence.LEVEL_R1);
-        filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets);
+        filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets, alteration);
         assertEquals("5", getIds(filtered));
 
         e1.setLevelOfEvidence(LevelOfEvidence.LEVEL_2A);
         e5.setLevelOfEvidence(LevelOfEvidence.LEVEL_R1);
-        filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets);
+        filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets, alteration);
         assertEquals("5", getIds(filtered));
 
         e1.setLevelOfEvidence(LevelOfEvidence.LEVEL_2A);
         e5.setLevelOfEvidence(LevelOfEvidence.LEVEL_R2);
-        filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets);
+        filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets, alteration);
         assertEquals("1", getIds(filtered));
     }
 

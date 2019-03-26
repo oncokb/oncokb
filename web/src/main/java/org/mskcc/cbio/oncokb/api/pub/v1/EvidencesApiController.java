@@ -75,7 +75,7 @@ public class EvidencesApiController implements EvidencesApi {
         List<EvidenceQueryRes> evidenceQueries = EvidenceUtils.processRequest(
             (List<Query>) requestQueries.get("queries"),
             new HashSet<>((List<EvidenceType>) requestQueries.get("evidenceTypes")),
-            null, source, new HashSet<>((List<LevelOfEvidence>) requestQueries.get("levels")), highestLevelOnly);
+            null, source, requestQueries.get("levels") == null ? null : new HashSet<>((List<LevelOfEvidence>) requestQueries.get("levels")), highestLevelOnly);
 
         if (evidenceQueries != null) {
             for (EvidenceQueryRes query : evidenceQueries) {

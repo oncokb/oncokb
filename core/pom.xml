@@ -132,11 +132,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.cmo.cancerhotspots</groupId>
-            <artifactId>model</artifactId>
-            <version>0.1.2</version>
-        </dependency>
-        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.4</version>
@@ -145,6 +140,11 @@
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>2.6</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.zhx828.oncotree</groupId>
+            <artifactId>model</artifactId>
+            <version>c6bcf44943</version>
         </dependency>
     </dependencies>
 

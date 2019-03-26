@@ -52,7 +52,8 @@ public interface UtilsApi {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK")})
     @RequestMapping(value = "/utils/cancerGeneList",
-            method = RequestMethod.GET)
+        produces = {"application/json"},
+        method = RequestMethod.GET)
     ResponseEntity<List<CancerGene>> utilsCancerGeneListGet();
 
     @ApiOperation(value = "", notes = "Get cancer gene list in text file.", tags = "Utils")
@@ -66,6 +67,7 @@ public interface UtilsApi {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK")})
     @RequestMapping(value = "/utils/allCuratedGenes",
+        produces = {"application/json"},
         method = RequestMethod.GET)
     ResponseEntity<List<CuratedGene>> utilsAllCuratedGenesGet();
 

@@ -18,6 +18,7 @@ public enum MutationEffect {
     LIKELY_LOSS_OF_FUNCTION("Likely Loss-of-function"),
     LIKELY_GAIN_OF_FUNCTION("Likely Gain-of-function"),
     NEUTRAL("Neutral"),
+    UNKNOWN("Unknown"),
     LIKELY_SWITCH_OF_FUNCTION("Likely Switch-of-function"),
     SWITCH_OF_FUNCTION("Switch-of-function"),
     LIKELY_NEUTRAL("Likely Neutral");
