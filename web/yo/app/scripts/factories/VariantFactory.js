@@ -57,6 +57,18 @@ angular.module('oncokbApp').factory('DataSummary', ['$http', function($http) {
     };
 }]);
 
+angular.module('oncokbApp').factory('Drugs', ['$http', 'OncoKB', function ($http, OncoKB) {
+    'use strict';
+
+    function searchDrugs(keyword) {
+        return $http.get(OncoKB.config.privateApiLink + 'search/drugs?query=' + keyword);
+    }
+
+    return {
+        searchDrugs: searchDrugs
+    }
+}]);
+
 angular.module('oncokbApp').factory('Alteration', ['$http', 'OncoKB', function($http, OncoKB) {
     'use strict';
 
@@ -557,6 +569,14 @@ angular.module('oncokbApp')
         function Setting() {
             this.enableReview = true;
         }
+        function Drug(drugName, ncitCode, synonyms, ncitName){
+            this.drugName = drugName;
+            this.ncitCode = ncitCode;
+            this.uuid = getUUID();
+            this.description = '';
+            this.ncitName = ncitName;
+            this.synonyms = synonyms;
+        }
         return {
             Gene: Gene,
             Mutation: Mutation,
@@ -567,6 +587,7 @@ angular.module('oncokbApp')
             VUSItem: VUSItem,
             TimeStamp: TimeStamp,
             Meta: Meta,
-            Setting: Setting
+            Setting: Setting,
+            Drug: Drug
         };
     }]);

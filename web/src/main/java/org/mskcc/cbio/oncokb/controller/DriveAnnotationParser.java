@@ -611,7 +611,14 @@ public class DriveAnnotationParser {
                     drugName = drugName.trim();
                     Drug drug = drugBo.guessUnambiguousDrug(drugName);
                     if (drug == null) {
-                        drug = new Drug(drugName);
+                        LinkedHashSet<Drug> ncitDrugs = NCITDrugUtils.findDrugs(drugName);
+                        if (ncitDrugs.isEmpty()) {
+                            drug = new Drug(drugName);
+                            System.out.println("Cannot find a NCIT drug...");
+                        } else {
+                            drug = ncitDrugs.iterator().next();
+                            System.out.println("Use NCIT drug..." + drug.getDrugName() + " " + drug.getNcitCode() + " " + StringUtils.join(drug.getSynonyms(), ","));
+                        }
                         drugBo.save(drug);
                     }
                     drugs.add(drug);

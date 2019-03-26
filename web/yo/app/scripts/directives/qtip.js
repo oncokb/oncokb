@@ -45,6 +45,8 @@ angular.module('oncokbApp')
                     at = 'bottom right';
                 } else if (attrs.type === 'vusItem') {
                     content = '<span>Last edit: ' + new Date(scope.time).toLocaleDateString() + '</span><br/><span>By: ' + scope.by + '</span>';
+                } else if (attrs.type === 'map'){
+                    content = attrs.content;
                 }
 
                 if (!attrs.type) {
@@ -69,7 +71,8 @@ angular.module('oncokbApp')
                         delay: 500
                     }
                 };
-                if (attrs.type === 'vusItem' || (attrs.number !== undefined && attrs.number.length > 0)) {
+
+                if (attrs.type === 'vusItem' || (attrs.number !== undefined && attrs.number.length > 0) || attrs.type === 'map') {
                     $(element).qtip(options);
                 }
 
