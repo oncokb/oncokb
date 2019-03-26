@@ -59,11 +59,20 @@ angular.module('oncokbApp')
         function addTreatment(path, treatment){
             return set(path + "/treatments/0", treatment);
         }
+        function mapOnce(path){
+            var defer = $q.defer();
+            firebase.database().ref('Map/' + path).once('value', function(doc) {
+                defer.resolve(doc.val());
+            }, function (error) {
+                defer.reject(error);
+            });
+            return defer.promise;
+        }
         function setMap(path, name){
             return set('Map/' + path, name);
         }
         function removeMap(path){
-            return remove('Map/' + path);
+            return set('Map/' + path, null);
         }
         function createSetting(setting) {
             return set('Setting', setting);
@@ -86,6 +95,7 @@ angular.module('oncokbApp')
             setDrugName: setDrugName,
             removeDrug: removeDrug,
             addTreatment: addTreatment,
+            mapOnce:mapOnce,
             setMap: setMap,
             removeMap: removeMap,
             createSetting: createSetting,

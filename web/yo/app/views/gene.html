@@ -168,7 +168,7 @@
                         <br/>
                         <p>New Content: </p>
                     </span>
-                  <span>{{getCancerTypesName(tumor)}}</span>
+                    <span>{{getCancerTypesNameInReview(tumor, tumor.cancerTypes_uuid, reviewMode)}}</span>
                 </span>
                 <span ng-show="!reviewMode">
                     <i class="fa fa-edit" ng-if="fileEditable" ng-click="modifyTumorType(mutation, tumor, path)"></i>
@@ -289,10 +289,10 @@
                             </div>
                             <div style="margin-top:-45px;margin-bottom:45px;">
                                   <review-panel hugo-symbol="gene.name" uuid="treatment.name_uuid" review-obj="treatment.name_review" evidence-type="ti.name" mutation="mutation"
-                                    path="path" tumor="tumor" therapy-category="ti" treatment="treatment" get-evidence="getEvidence(type, mutation, tumor, ti, treatment)"
-                                    model-update="modelUpdate(type, mutation, tumor, ti, treatment, path)" confirm-delete="confirmDelete(type, mutation, tumor, ti, treatment, updatedBy, path)"
-                                    cancel-delete="cancelDelete(type, mutation, tumor, ti, treatment, updatedBy)" accept-added="acceptAdded(type, mutation, tumor, ti, treatment, updatedBy, path)"
-                                    reject-added="rejectAdded(type, mutation, tumor, ti, treatment, updatedBy)" update-priority="updatePriority(treatments)" get-refs="getRefs(mutation, tumor, ti, treatment)"></review-panel>
+                                    tumor="tumor" therapy-category="ti" treatment="treatment" get-evidence="getEvidence(type, mutation, tumor, ti, treatment)"
+                                    model-update="modelUpdate(type, mutation, tumor, ti, treatment)" confirm-delete="confirmDelete(type, mutation, tumor, ti, treatment, updatedBy)"
+                                    cancel-delete="cancelDelete(type, mutation, tumor, ti, treatment, updatedBy)" accept-added="acceptAdded(type, mutation, tumor, ti, treatment, updatedBy)"
+                                    reject-added="rejectAdded(type, mutation, tumor, ti, treatment, updatedBy)" update-drug-map="updateDrugMap(decision, type, dataType, mutation, tumor, treatment, oldContent)" update-priority="updatePriority(treatments)" get-refs="getRefs(mutation, tumor, ti, treatment)"></review-panel>
                             </div>
                           </div>
                           <div class="panelContent" ng-if="initialOpen[treatment.name_uuid]" id="{{treatment.name_uuid}}">
@@ -333,8 +333,8 @@
                           </div>
                         </div>
                       </div>
-                      <div ng-show="!reviewMode && fileEditable" class="input-group input-group-sm accordionMarginTop">
-                          <add-therapy ng-click="initAddTherapy(path)"></add-therapy>
+                      <div ng-click="initTherapyComponent(path)" ng-show="!reviewMode && fileEditable" class="input-group input-group-sm accordionMarginTop">
+                          <add-therapy ti-ref="tiRef" modify-name="modifyName" save-callback="saveCallback(newTreatmentName)"></add-therapy>
                       </div>
                     </div>
                   </div>
