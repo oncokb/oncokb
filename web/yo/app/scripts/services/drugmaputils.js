@@ -44,13 +44,55 @@ angular.module('oncokbApp')
                     break;
                 case 'name':
                     var difference = checkDifferenceBetweenTherapies(oldContent, content);
-                    changeMapWhenRemove(dataType, geneName, mutationUuid, mutationName, cancerTypeUuid, therapyUuid, difference.extraDrugsInOld);
+                    changeMapWhenRemove(dataType, geneName, mutationUuid, cancerTypeUuid, therapyUuid, difference.extraDrugsInOld);
                     changeTherapyNameInMapWithValidatingStatus(dataType, geneName, mutationUuid, mutationName, cancerTypeUuid, therapyUuid, difference.sameDrugs, content);
                     changeMapWhenAdd(dataType, geneName, mutationUuid, mutationName, cancerTypeUuid, therapyUuid, difference.extraDrugsInNew, content);
                     break;
                 case 'remove':
-                    var drugArray = _.flatten(therapyStrToArr(content));
-                    changeMapWhenRemove(dataType, geneName, mutationUuid, mutationName, cancerTypeUuid, therapyUuid, drugArray);
+                    //Map will be handled by changeMapWhenDeleteSection Function.
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        function changeMapWhenDeleteSection(dataType, geneName, mutation, tumor, treatment, mapInfo){
+            switch (dataType){
+                case 'mutation':
+                    _.each(mutation.tumors, function (tumor){
+                        var mapInfo = {
+                            'mutationUuid': mutation.name_uuid,
+                            'cancerTypeUuid': null
+                        }
+                        changeMapWhenDeleteSection('tumor', geneName, mutation, tumor, null, mapInfo);
+                    });
+                    break;
+                case 'tumor':
+                    if(!mapInfo){
+                        var mapInfo = {
+                            'mutationUuid': mutation.name_uuid,
+                            'cancerTypeUuid': tumor.cancerTypes_uuid
+                        }
+                    }
+                    else{
+                        var mapInfo = mapInfo;
+                        mapInfo.cancerTypeUuid = tumor.cancerTypes_uuid;
+                    }
+                    _.each(tumor.TIs, function(ti){
+                        _.each(ti.treatments, function(treatment){
+                            changeMapWhenDeleteSection('treatment', geneName, mutation, tumor, treatment, mapInfo);
+                        })
+                    });
+                    break;
+                case 'treatment':
+                    if(!mapInfo){
+                        var mapInfo = {
+                            'mutationUuid': mutation.name_uuid,
+                            'cancerTypeUuid': tumor.cancerTypes_uuid
+                        }
+                    }
+                    var therapyUuids = _.flatten(therapyStrToArr(treatment.name));
+                    changeMapWhenRemove('treatment', geneName, mapInfo.mutationUuid, mapInfo.cancerTypeUuid, treatment.name_uuid, therapyUuids);
                     break;
                 default:
                     break;
@@ -114,7 +156,7 @@ angular.module('oncokbApp')
                     break;
             }
         }
-        function changeMapWhenRemove(dataType, geneName, mutationUuid, mutationName, cancerTypeUuid, name_uuid, drugArray){
+        function changeMapWhenRemove(dataType, geneName, mutationUuid, cancerTypeUuid, name_uuid, drugArray){
             switch (dataType){
                 case 'mutation':
                     break;
@@ -177,7 +219,8 @@ angular.module('oncokbApp')
             drugUuidtoDrug: drugUuidtoDrug,
             getKeysWithoutFirebasePrefix: getKeysWithoutFirebasePrefix,
             checkDifferenceBetweenTherapies: checkDifferenceBetweenTherapies,
-            changeMapByCurator: changeMapByCurator
+            changeMapByCurator: changeMapByCurator,
+            changeMapWhenDeleteSection: changeMapWhenDeleteSection
         };
 
     });

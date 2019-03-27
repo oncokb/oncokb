@@ -789,6 +789,7 @@ angular.module('oncokbApp')
                             evidencesAllUsers[userName].deletedEvidences = collectUUIDs('mutation', mutation, evidencesAllUsers[userName].deletedEvidences, 'evidenceOnly');
                             evidencesAllUsers[userName].deletedEvidenceModels.push({type: 'mutation', mutation: mutation});
                             evidencesAllUsers[userName].historyData.deletion.push({ operation: 'delete', lastEditBy: mutation.name_review.updatedBy, location: mutation.name, old: mutation });
+                            $scope.updateDrugMap('accept', 'delete', 'mutation', mutation);
                             return true;
                         } else if (mainUtils.processedInReview('add', mutation.name_uuid)) {
                             processAddedSection(userName, 'mutation', mutation);
@@ -808,6 +809,7 @@ angular.module('oncokbApp')
                                 evidencesAllUsers[userName].deletedEvidences = collectUUIDs('tumor', tumor, evidencesAllUsers[userName].deletedEvidences, 'evidenceOnly');
                                 evidencesAllUsers[userName].deletedEvidenceModels.push({type: 'tumor', mutation: mutation, tumor: tumor});
                                 evidencesAllUsers[userName].historyData.deletion.push({ operation: 'delete', lastEditBy: tumor.cancerTypes_review.updatedBy, location: historyStr(mutation, tumor), old: tumor });
+                                $scope.updateDrugMap('accept', 'delete', 'tumor', mutation, tumor);
                                 return true;
                             } else if (mainUtils.processedInReview('add', tumor.cancerTypes_uuid)) {
                                 processAddedSection(userName, 'tumor', mutation, tumor);
@@ -2170,15 +2172,21 @@ angular.module('oncokbApp')
                         }
                         $scope.geneMeta.review[uuid] = true;
                     }
+                    var geneName = $scope.gene.name;
+                    var mutation = $scope.gene.mutations[indices[0]];
                     if (type === 'tumor') {
+                        if(obj.cancerTypes_review.added){
+                            drugMapUtils.changeMapWhenDeleteSection('tumor', geneName, mutation, obj);
+                        }
                         $scope.indicateMutationContent($scope.gene.mutations[indices[0]]);
                     } else if (type === 'treatment') {
-                        var geneName = $scope.gene.name;
-                        var mutationUuid = $scope.gene.mutations[indices[0]].name_uuid;
-                        var mutationName = $scope.gene.mutations[indices[0]].name;
-                        var cancerTypeUuid = $scope.gene.mutations[indices[0]].tumors[indices[1]].cancerTypes_uuid;
-                        drugMapUtils.changeMapByCurator('remove', 'treatment', geneName, mutationUuid, mutationName, cancerTypeUuid, uuid, obj.name);
+                        var tumor = $scope.gene.mutations[indices[0]].tumors[indices[1]];
+                        drugMapUtils.changeMapWhenDeleteSection('treatment', geneName, mutation, tumor, obj);
                         $scope.indicateTumorContent($scope.gene.mutations[indices[0]].tumors[indices[1]]);
+                    } else if (type === 'mutation') {
+                        if(obj.name_review.added){
+                            drugMapUtils.changeMapWhenDeleteSection('mutation', geneName, obj);
+                        }
                     }
                 }, function () {
                 });

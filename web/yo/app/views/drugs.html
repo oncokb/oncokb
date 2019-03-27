@@ -16,7 +16,7 @@
                 <td ng-init="editDrugName=false">
                     <div ng-show="editDrugName===false">
                         <button type="button" class="btn btn-warning buttonStyle " uib-tooltip-placement="top"
-                                uib-tooltip="Modify Name" ng-click="editDrugName=!editDrugName"><i
+                                uib-tooltip="Modify Name" ng-click="editDrugName=!editDrugName" ng-disabled="!drug.synonyms"><i
                             class="fa fa-edit"></i>
                         </button>
                         {{ drug.drugName}}
@@ -31,7 +31,7 @@
                                 ng-model="newDrugName"
                                 id="changeNameDropdown"
                                 data-placeholder="{{drug.drugName}}"
-                                ng-options="name for name in drug.synonyms">
+                                ng-options="name for name in generateSynonyms(drug)">
                         </select>
 
                     </div>
