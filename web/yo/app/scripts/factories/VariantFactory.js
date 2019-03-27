@@ -492,6 +492,10 @@ angular.module('oncokbApp')
             this.cancerTypes_uuid = getUUID();
             this.summary = '';
             this.summary_uuid = getUUID();
+            this.diagnosticSummary = '';
+            this.diagnosticSummary_uuid = getUUID();
+            this.prognosticSummary = '';
+            this.prognosticSummary_uuid = getUUID();
             this.prognostic = {
                 level: '',
                 level_uuid: getUUID(),
@@ -588,6 +592,7 @@ angular.module('oncokbApp')
             TimeStamp: TimeStamp,
             Meta: Meta,
             Setting: Setting,
-            Drug: Drug
+            Drug: Drug,
+            generateUUID: getUUID
         };
     }]);

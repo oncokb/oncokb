@@ -559,6 +559,17 @@ angular.module('oncokbApp')
                             userNames.push(tumor.summary_review.updatedBy);
                             ReviewResource.updated.push(tumor.summary_uuid);
                         }
+                        if (isChangedSection([tumor.diagnosticSummary_uuid])) {
+                            tumorChanged = true;
+                            userNames.push(tumor.diagnosticSummary_review.updatedBy);
+                            ReviewResource.updated.push(tumor.diagnosticSummary_uuid);
+                        }
+                        if (isChangedSection([tumor.prognosticSummary_uuid])) {
+                            tumorChanged = true;
+                            userNames.push(tumor.prognosticSummary_review.updatedBy);
+                            ReviewResource.updated.push(tumor.prognosticSummary_uuid);
+                        }
+
                         _.each(tumor.TIs, function (ti) {
                             _.each(ti.treatments, function (treatment) {
                                 treatmentSectionChanged = false;
@@ -840,6 +851,12 @@ angular.module('oncokbApp')
                         if (isChangedBy('precise', tumor.summary_uuid, userName, tumor.summary_review)) {
                             formEvidencesPerUser(userName, 'TUMOR_TYPE_SUMMARY', mutation, tumor, null, null);
                         }
+                        if (isChangedBy('precise', tumor.diagnosticSummary_uuid, userName, tumor.diagnosticSummary_review)) {
+                            formEvidencesPerUser(userName, 'DIAGNOSTIC_SUMMARY', mutation, tumor, null, null);
+                        }
+                        if (isChangedBy('precise', tumor.prognosticSummary_uuid, userName, tumor.prognosticSummary_review)) {
+                            formEvidencesPerUser(userName, 'PROGNOSTIC_SUMMARY', mutation, tumor, null, null);
+                        }
                     });
                 });
             }
@@ -942,7 +959,6 @@ angular.module('oncokbApp')
                     'Px1': 'LEVEL_Px1',
                     'Px2': 'LEVEL_Px2',
                     'Px3': 'LEVEL_Px3',
-                    'Px4': 'LEVEL_Px4',
                     'Dx1': 'LEVEL_Dx1',
                     'Dx2': 'LEVEL_Dx2',
                     'Dx3': 'LEVEL_Dx3'
@@ -1020,6 +1036,28 @@ angular.module('oncokbApp')
                             historyData.new = tumor.summary;
                             historyData.old = tumor.summary_review.lastReviewed;
                             reviewObj = tumor.summary_review;
+                        }
+                        break;
+                    case 'DIAGNOSTIC_SUMMARY':
+                        if ($scope.geneMeta.review[tumor.diagnosticSummary_uuid]) {
+                            data.description = tumor.diagnosticSummary;
+                            dataUUID = tumor.diagnosticSummary_uuid;
+                            data.lastEdit = tumor.diagnosticSummary_review.updateTime;
+                            historyData.location = historyStr(mutation, tumor) + ', Diagnostic Summary';
+                            historyData.new = tumor.diagnosticSummary;
+                            historyData.old = tumor.diagnosticSummary_review.lastReviewed;
+                            reviewObj = tumor.diagnosticSummary_review;
+                        }
+                        break;
+                    case 'PROGNOSTIC_SUMMARY':
+                        if ($scope.geneMeta.review[tumor.prognosticSummary_uuid]) {
+                            data.description = tumor.prognosticSummary;
+                            dataUUID = tumor.prognosticSummary_uuid;
+                            data.lastEdit = tumor.prognosticSummary_review.updateTime;
+                            historyData.location = historyStr(mutation, tumor) + ', Prognostic Summary';
+                            historyData.new = tumor.prognosticSummary;
+                            historyData.old = tumor.prognosticSummary_review.lastReviewed;
+                            reviewObj = tumor.prognosticSummary_review;
                         }
                         break;
                     case 'PROGNOSTIC_IMPLICATION':
@@ -1325,6 +1363,12 @@ angular.module('oncokbApp')
                     case 'TUMOR_TYPE_SUMMARY':
                         acceptItem([{ reviewObj: tumor.summary_review, uuid: tumor.summary_uuid }], tumor.summary_uuid);
                         break;
+                    case 'DIAGNOSTIC_SUMMARY':
+                        acceptItem([{ reviewObj: tumor.diagnosticSummary_review, uuid: tumor.diagnosticSummary_uuid }], tumor.diagnosticSummary_uuid);
+                        break;
+                    case 'PROGNOSTIC_SUMMARY':
+                        acceptItem([{ reviewObj: tumor.prognosticSummary_review, uuid: tumor.prognosticSummary_uuid }], tumor.prognosticSummary_uuid);
+                        break;
                     case 'PROGNOSTIC_IMPLICATION':
                         acceptItem([{ reviewObj: tumor.prognostic.description_review, uuid: tumor.prognostic.description_uuid },
                         { reviewObj: tumor.prognostic.level_review, uuid: tumor.prognostic.level_uuid }], tumor.prognostic_uuid);
@@ -1438,7 +1482,7 @@ angular.module('oncokbApp')
                     tempType = 'tumor';
                 }
                 if (type === 'tumor') {
-                    typeArr = ['TUMOR_TYPE_SUMMARY', 'PROGNOSTIC_IMPLICATION', 'DIAGNOSTIC_IMPLICATION'];
+                    typeArr = ['TUMOR_TYPE_SUMMARY', 'DIAGNOSTIC_SUMMARY', 'PROGNOSTIC_SUMMARY', 'PROGNOSTIC_IMPLICATION', 'DIAGNOSTIC_IMPLICATION'];
                     dataArr = tumor.TIs;
                     tempType = 'TI';
                 }

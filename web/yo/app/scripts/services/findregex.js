@@ -19,8 +19,8 @@ angular.module('oncokbApp')
                 link: 'https://clinicaltrials.gov/show/'
             },
             abstract: {
-                regex: /\(\s*Abstract\s*:([^\)]*\s*);?\s*\)/ig,
-                localRegex: /\(\s*Abstract\s*:([^\)]*\s*);?\s*\)/i
+                regex: /\(?\s*Abstract\s*:([^\)]*\s*);?\s*\)?/ig,
+                localRegex: /\(?\s*Abstract\s*:([^\)]*\s*);?\s*\)?/i
             }
         };
 

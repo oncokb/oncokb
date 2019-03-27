@@ -77,7 +77,7 @@ angular.module('oncokbApp')
                                         scope.setReviewRelatedContent(n, o, false);
                                     }
                                 }
-                                if (n !== o && (scope.key === 'level' || scope.key === 'summary' && scope.mutation && scope.tumor)) {
+                                if (n !== o && (scope.key === 'level' || ['summary', 'diagnosticSummary', 'prognosticSummary'].includes(scope.key)  && scope.mutation && scope.tumor)) {
                                     $timeout(function() {
                                         scope.indicateMutationContent(scope.mutation);
                                         scope.indicateTumorContent(scope.tumor);

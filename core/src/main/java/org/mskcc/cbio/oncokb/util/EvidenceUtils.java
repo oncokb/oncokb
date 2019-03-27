@@ -846,7 +846,7 @@ public class EvidenceUtils {
         }
 
         levelOfEvidences = levelOfEvidences == null ? levelOfEvidences :
-            new HashSet<>(CollectionUtils.intersection(levelOfEvidences, LevelUtils.getPublicAndOtherIndicationLevels()));
+            new HashSet<>(CollectionUtils.intersection(levelOfEvidences, LevelUtils.getPublicLevels()));
 
         // when the LoE and ET are empty, no info should be returned
         if ((levelOfEvidences != null && levelOfEvidences.size() == 0) || evidenceTypes.size() == 0) {
@@ -960,7 +960,7 @@ public class EvidenceUtils {
                 query.setEvidences(
                     new ArrayList<>(keepHighestLevelForSameTreatments(filterEvidence(evidences, query), query.getExactMatchedAlteration())));
             }
-            CustomizeComparator.sortEvidenceBasedOnPriority(query.getEvidences(), LevelUtils.TREATMENT_SORTING_LEVEL_PRIORITY);
+            CustomizeComparator.sortEvidenceBasedOnPriority(query.getEvidences(), LevelUtils.getIndexedTherapeuticLevels());
             if (query.getGene() != null && query.getGene().getHugoSymbol().equals("KIT")) {
                 CustomizeComparator.sortKitTreatmentByEvidence(query.getEvidences());
             }

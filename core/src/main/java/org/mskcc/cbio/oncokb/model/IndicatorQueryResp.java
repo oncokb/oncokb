@@ -24,9 +24,11 @@ public class IndicatorQueryResp implements java.io.Serializable {
     private List<LevelOfEvidence> otherSignificantResistanceLevels;
     private Boolean VUS;
     private Boolean hotspot;
-    private String geneSummary;
-    private String variantSummary;
-    private String tumorTypeSummary;
+    private String geneSummary = "";
+    private String variantSummary = "";
+    private String tumorTypeSummary = "";
+    private String prognosticSummary = "";
+    private String diagnosticSummary = "";
     private List<IndicatorQueryTreatment> treatments = new ArrayList<>();
     private String dataVersion;
     private String lastUpdate;
@@ -152,6 +154,22 @@ public class IndicatorQueryResp implements java.io.Serializable {
 
     public void setTumorTypeSummary(String tumorTypeSummary) {
         this.tumorTypeSummary = tumorTypeSummary;
+    }
+
+    public String getPrognosticSummary() {
+        return prognosticSummary;
+    }
+
+    public void setPrognosticSummary(String prognosticSummary) {
+        this.prognosticSummary = prognosticSummary;
+    }
+
+    public String getDiagnosticSummary() {
+        return diagnosticSummary;
+    }
+
+    public void setDiagnosticSummary(String diagnosticSummary) {
+        this.diagnosticSummary = diagnosticSummary;
     }
 
     public List<IndicatorQueryTreatment> getTreatments() {

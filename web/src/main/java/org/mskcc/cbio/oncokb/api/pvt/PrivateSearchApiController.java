@@ -219,8 +219,8 @@ public class PrivateSearchApiController implements PrivateSearchApi {
                 typeaheadSearchResp.setQueryType("gene");
 
                 if (evidences.containsKey(gene)) {
-                    LevelOfEvidence highestSensitiveLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(evidences.get(gene), LevelUtils.getPublicSensitiveLevels());
-                    LevelOfEvidence highestResistanceLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(evidences.get(gene), LevelUtils.getPublicResistanceLevels());
+                    LevelOfEvidence highestSensitiveLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(evidences.get(gene), LevelUtils.getSensitiveLevels());
+                    LevelOfEvidence highestResistanceLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(evidences.get(gene), LevelUtils.getResistanceLevels());
                     typeaheadSearchResp.setHighestSensitiveLevel(highestSensitiveLevel == null ? "" : highestSensitiveLevel.getLevel());
                     typeaheadSearchResp.setHighestResistanceLevel(highestResistanceLevel == null ? "" : highestResistanceLevel.getLevel());
                 }
@@ -257,8 +257,8 @@ public class PrivateSearchApiController implements PrivateSearchApi {
         // TODO: populate treatment info.
 
         Set<Evidence> evidenceList = new HashSet<>(EvidenceUtils.getEvidence(AlterationUtils.getRelevantAlterations(alteration), null, null, null));
-        LevelOfEvidence highestSensitiveLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(evidenceList, LevelUtils.getPublicSensitiveLevels());
-        LevelOfEvidence highestResistanceLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(evidenceList, LevelUtils.getPublicResistanceLevels());
+        LevelOfEvidence highestSensitiveLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(evidenceList, LevelUtils.getSensitiveLevels());
+        LevelOfEvidence highestResistanceLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(evidenceList, LevelUtils.getResistanceLevels());
 
         if (highestSensitiveLevel != null) {
             typeaheadSearchResp.setHighestSensitiveLevel(highestSensitiveLevel.getLevel());
