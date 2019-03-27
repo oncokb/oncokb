@@ -39,7 +39,7 @@ public class Drug implements java.io.Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(length = 20, name = "ncit_code", nullable = false)
+    @Column(length = 20, name = "ncit_code")
     private String ncitCode;
 
     @Column(length = 1000, name = "drug_name", nullable = false)
