@@ -15,7 +15,7 @@ import java.util.Set;
 @NamedQueries({
     @NamedQuery(
         name = "findDrugByName",
-        query = "select d from Drug d where d.drugName=?"
+        query = "select d from Drug d where d.drugName=? and d.type = 'DRUG'"
     ),
     @NamedQuery(
         name = "findDrugById",
@@ -23,11 +23,11 @@ import java.util.Set;
     ),
     @NamedQuery(
         name = "findDrugBySynonym",
-        query = "select d from Drug d join d.synonyms s where s=?"
+        query = "select d from Drug d join d.synonyms s where s=? and d.type = 'DRUG'"
     ),
     @NamedQuery(
         name = "findDrugByNcitCode",
-        query = "select d from Drug d where d.ncitCode=?"
+        query = "select d from Drug d where d.ncitCode=? and d.type = 'DRUG'"
     )
 })
 
@@ -45,6 +45,9 @@ public class Drug implements java.io.Serializable {
     @Column(length = 1000, name = "drug_name", nullable = false)
     private String drugName;
 
+    @Column(length = 20, name = "type")
+    private DrugTableItemType type = DrugTableItemType.DRUG;
+
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "drug_synonym", joinColumns = @JoinColumn(name = "drug_id", nullable = false))
     @Column(length = 1000, name = "synonym")
@@ -54,6 +57,15 @@ public class Drug implements java.io.Serializable {
     @CollectionTable(name = "drug_atccode", joinColumns = @JoinColumn(name = "drug_id", nullable = false))
     @Column(name = "atccode")
     private Set<String> atcCodes;
+
+    @ManyToMany(cascade={CascadeType.ALL})
+    @JoinTable(name="drug_family",
+        joinColumns={@JoinColumn(name="drug_id")},
+        inverseJoinColumns={@JoinColumn(name="drug_family_id")})
+    private Set<Drug> drugFamlilies = new HashSet<>();
+
+    @ManyToMany(mappedBy="drugFamlilies")
+    private Set<Drug> drugs = new HashSet<>();
 
     @JsonIgnore
     @Column(length = 65535)
@@ -90,6 +102,14 @@ public class Drug implements java.io.Serializable {
         this.drugName = drugName;
     }
 
+    public DrugTableItemType getType() {
+        return type;
+    }
+
+    public void setType(DrugTableItemType type) {
+        this.type = type;
+    }
+
     public Set<String> getSynonyms() {
         return this.synonyms;
     }
@@ -104,6 +124,31 @@ public class Drug implements java.io.Serializable {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+   public Set<String> getAtcCodes() {
+        return atcCodes;
+    }
+
+    public void setAtcCodes(Set<String> atcCodes) {
+        this.atcCodes = atcCodes;
+    }
+
+    @JsonIgnore
+    public Set<Drug> getDrugFamlilies() {
+        return drugFamlilies;
+    }
+
+    public void setDrugFamlilies(Set<Drug> drugFamlilies) {
+        this.drugFamlilies = drugFamlilies;
+    }
+
+    public Set<Drug> getDrugs() {
+        return drugs;
+    }
+
+    public void setDrugs(Set<Drug> drugs) {
+        this.drugs = drugs;
     }
 
     @Override
