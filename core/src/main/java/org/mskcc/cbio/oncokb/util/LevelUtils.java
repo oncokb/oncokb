@@ -92,14 +92,14 @@ public class LevelUtils {
     }
 
     public static LevelOfEvidence getHighestLevel(Set<LevelOfEvidence> levels) {
-        return getHighestLevelByType(levels, LEVELS);
+        return getHighestLevelByType(levels, PUBLIC_LEVELS);
     }
 
     public static LevelOfEvidence getHighestSensitiveLevel(Set<LevelOfEvidence> levels) {
-        return getHighestLevelByType(levels, SENSITIVE_LEVELS);
+        return getHighestLevelByType(levels, THERAPEUTIC_SENSITIVE_LEVELS);
     }
     public static LevelOfEvidence getHighestResistanceLevel(Set<LevelOfEvidence> levels) {
-        return getHighestLevelByType(levels, RESISTANCE_LEVELS);
+        return getHighestLevelByType(levels, THERAPEUTIC_RESISTANCE_LEVELS);
     }
 
     public static LevelOfEvidence getHighestLevelByType(Set<LevelOfEvidence> levels, List<LevelOfEvidence> levelPool) {
