@@ -18,7 +18,7 @@ import java.util.*;
  */
 @Controller
 public class PrivateSearchApiController implements PrivateSearchApi {
-    private Integer TYPEAHEAD_RETURN_LIMIT = 5;
+    private Integer DEFAULT_RETURN_LIMIT = 5;
 
     @Override
     public ResponseEntity<Set<BiologicalVariant>> searchVariantsBiologicalGet(
@@ -83,7 +83,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
         @ApiParam(value = "The limit of returned result.") @RequestParam(value = "limit", defaultValue = "5", required = false) Integer limit) {
         LinkedHashSet<TypeaheadSearchResp> result = new LinkedHashSet<>();
         if (limit == null) {
-            limit = TYPEAHEAD_RETURN_LIMIT;
+            limit = DEFAULT_RETURN_LIMIT;
         }
         if (query != null) {
             List<String> keywords = Arrays.asList(query.trim().split("\\s+"));
@@ -153,6 +153,14 @@ public class PrivateSearchApiController implements PrivateSearchApi {
             }
         }
         return new ResponseEntity<>(getLimit(result, limit), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<LinkedHashSet<Drug>> searchDrugGet(String query, Integer limit) {
+        if (limit == null) {
+            limit = DEFAULT_RETURN_LIMIT;
+        }
+        return new ResponseEntity<>(getLimit(NCITDrugUtils.findDrugs(query), limit), HttpStatus.OK);
     }
 
     private LinkedHashSet<TypeaheadSearchResp> getMatch(Map<String, Set<Gene>> map, List<String> keywords, Boolean exactMatch) {
@@ -270,12 +278,12 @@ public class PrivateSearchApiController implements PrivateSearchApi {
         return typeaheadSearchResp;
     }
 
-    private LinkedHashSet<TypeaheadSearchResp> getLimit(LinkedHashSet<TypeaheadSearchResp> result, Integer limit) {
+    private <T> LinkedHashSet<T> getLimit(LinkedHashSet<T> result, Integer limit) {
         if (limit == null)
-            limit = TYPEAHEAD_RETURN_LIMIT;
+            limit = DEFAULT_RETURN_LIMIT;
         Integer count = 0;
-        LinkedHashSet<TypeaheadSearchResp> firstFew = new LinkedHashSet<>();
-        Iterator<TypeaheadSearchResp> itr = result.iterator();
+        LinkedHashSet<T> firstFew = new LinkedHashSet<>();
+        Iterator<T> itr = result.iterator();
         while (itr.hasNext() && count < limit) {
             firstFew.add(itr.next());
             count++;

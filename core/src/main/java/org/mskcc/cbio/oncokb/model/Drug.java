@@ -18,12 +18,16 @@ import java.util.Set;
         query = "select d from Drug d where d.drugName=?"
     ),
     @NamedQuery(
+        name = "findDrugById",
+        query = "select d from Drug d where d.id=?"
+    ),
+    @NamedQuery(
         name = "findDrugBySynonym",
         query = "select d from Drug d join d.synonyms s where s=?"
     ),
     @NamedQuery(
-        name = "findDrugByAtcCode",
-        query = "select d from Drug d join d.atcCodes a where a=?"
+        name = "findDrugByNcitCode",
+        query = "select d from Drug d where d.ncitCode=?"
     )
 })
 
@@ -33,18 +37,17 @@ public class Drug implements java.io.Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonIgnore
     private Integer id;
 
-    @JsonIgnore
-    @Column(length = 40)
-    private String uuid;
+    @Column(length = 20, name = "ncit_code", nullable = false)
+    private String ncitCode;
 
-    @Column(name = "drug_name", nullable = false)
+    @Column(length = 1000, name = "drug_name", nullable = false)
     private String drugName;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "drug_synonym", joinColumns = @JoinColumn(name = "drug_id", nullable = false))
+    @Column(length = 1000, name = "synonym")
     private Set<String> synonyms = new HashSet<String>(0);
 
     @ElementCollection(fetch = FetchType.EAGER)
@@ -71,12 +74,12 @@ public class Drug implements java.io.Serializable {
         this.id = id;
     }
 
-    public String getUuid() {
-        return uuid;
+    public String getNcitCode() {
+        return ncitCode;
     }
 
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
+    public void setNcitCode(String ncitCode) {
+        this.ncitCode = ncitCode;
     }
 
     public String getDrugName() {
@@ -95,21 +98,6 @@ public class Drug implements java.io.Serializable {
         this.synonyms = synonyms;
     }
 
-    @Override
-    public int hashCode() {
-        int hash = 5;
-        hash = 29 * hash + (this.drugName != null ? this.drugName.hashCode() : 0);
-        return hash;
-    }
-
-    public Set<String> getAtcCodes() {
-        return atcCodes;
-    }
-
-    public void setAtcCodes(Set<String> atcCodes) {
-        this.atcCodes = atcCodes;
-    }
-
     public String getDescription() {
         return description;
     }
@@ -118,20 +106,22 @@ public class Drug implements java.io.Serializable {
         this.description = description;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Drug)) return false;
+
+        Drug drug = (Drug) o;
+
+        if (ncitCode != null ? !ncitCode.equals(drug.ncitCode) : drug.ncitCode != null) return false;
+        return getDrugName().equals(drug.getDrugName());
+    }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final Drug other = (Drug) obj;
-        if ((this.drugName == null) ? (other.drugName != null) : !this.drugName.equals(other.drugName)) {
-            return false;
-        }
-        return true;
+    public int hashCode() {
+        int result = ncitCode != null ? ncitCode.hashCode() : 0;
+        result = 31 * result + getDrugName().hashCode();
+        return result;
     }
 }
 

@@ -7,7 +7,7 @@
  * # driveRealtimeString
  */
 angular.module('oncokbApp')
-    .directive('realtimeString', function ($timeout, _, $rootScope, mainUtils, ReviewResource, $firebaseObject, checkNameChange) {
+    .directive('realtimeString', function ($timeout, _, $rootScope, mainUtils, ReviewResource, $firebaseObject, checkNameChange, drugMapUtils) {
         return {
             templateUrl: 'views/realtimeString.html',
             restrict: 'AE',
@@ -175,6 +175,22 @@ angular.module('oncokbApp')
                 };
                 $scope.setTrackSignal = function() {
                     mainUtils.updateMovingFlag(false);
+                };
+                $scope.uuidtoName = function(key, oldKey, uuid){
+                    if(mainUtils.processedInReview('remove', uuid) && oldKey){
+                        return drugMapUtils.drugUuidtoName(oldKey, $scope.$parent.drugList);
+                    }
+                    else{
+                        return drugMapUtils.drugUuidtoName(key, $scope.$parent.drugList);
+                    }
+                };
+                $scope.getMutationName = function(key, oldKey, uuid){
+                    if(mainUtils.processedInReview('remove', uuid) && oldKey){
+                        return oldKey;
+                    }
+                    else{
+                        return key;
+                    }
                 };
                 $scope.initializeFE = function() {
                     if ($scope.data[$scope.key+'_editing']) {
