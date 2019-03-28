@@ -1,6 +1,7 @@
 package org.mskcc.cbio.oncokb.api.pvt;
 
 import io.swagger.annotations.*;
+import org.mskcc.cbio.oncokb.apiModels.NCITDrug;
 import org.mskcc.cbio.oncokb.model.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -61,10 +62,10 @@ public interface PrivateSearchApi {
     @ApiOperation(value = "", notes = "Find NCIT matches based on blur query. This is not for search OncoKB curated drugs. Please use drugs/lookup for that purpose.", response = Treatment.class, responseContainer = "LinkedHashSet", tags = "Drugs")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK")})
-    @RequestMapping(value = "/search/drugs",
+    @RequestMapping(value = "/search/ncitDrugs",
         produces = {"application/json"},
         method = RequestMethod.GET)
-    ResponseEntity<LinkedHashSet<Drug>> searchDrugGet(
+    ResponseEntity<LinkedHashSet<NCITDrug>> searchDrugGet(
         @ApiParam(value = "The search query, it could be drug name, NCIT code", required = true) @RequestParam(value = "query") String query,
         @ApiParam(value = "The limit of returned result.") @RequestParam(value = "limit", defaultValue = "5", required = false) Integer limit
     );

@@ -1,15 +1,10 @@
 'use strict';
 
 angular.module('oncokbApp')
-    .controller('DrugsCtrl', ['$window', '$scope', '$location', '$timeout', '$routeParams', '_', 'DTColumnDefBuilder', 'DTOptionsBuilder', '$firebaseObject', '$firebaseArray', 'FirebaseModel', 'firebaseConnector', '$q', 'dialogs', 'drugMapUtils',
-        function ($window, $scope, $location, $timeout, $routeParams, _, DTColumnDefBuilder, DTOptionsBuilder, $firebaseObject, $firebaseArray, FirebaseModel, firebaseConnector, $q, dialogs, drugMapUtils) {
+    .controller('DrugsCtrl', ['$window', '$scope', '$location', '$timeout', '$routeParams', '_', 'DTColumnDefBuilder', 'DTOptionsBuilder', '$firebaseArray', 'FirebaseModel', 'firebaseConnector', '$q', 'dialogs', 'drugMapUtils', '$rootScope', 'DatabaseConnector',
+        function ($window, $scope, $location, $timeout, $routeParams, _, DTColumnDefBuilder, DTOptionsBuilder, $firebaseArray, FirebaseModel, firebaseConnector, $q, dialogs, drugMapUtils, $rootScope, DatabaseConnector) {
             function loadDrugTable() {
                 var deferred1 = $q.defer();
-                $firebaseObject(firebaseConnector.ref("Drugs/")).$bindTo($scope, "drugList").then(function () {
-                    deferred1.resolve();
-                }, function (error) {
-                    deferred1.reject(error);
-                });
                 var deferred2 = $q.defer();
                 var mutationsReviewed = [];
                 var mutationsLatest = [];
@@ -69,8 +64,8 @@ angular.module('oncokbApp')
 
 
             function hasSameName(newDrugName, uuid) {
-                return _.some(drugMapUtils.getKeysWithoutFirebasePrefix($scope.drugList), function(key){
-                    if(($scope.drugList[key].uuid !== uuid && (newDrugName === $scope.drugList[key].drugName || $scope.drugList[key].synonyms !== undefined && $scope.drugList[key].synonyms.indexOf(newDrugName) > -1)) === true){
+                return _.some(drugMapUtils.getKeysWithoutFirebasePrefix($rootScope.drugList), function(key){
+                    if(($rootScope.drugList[key].uuid !== uuid && (newDrugName === $rootScope.drugList[key].drugName || $rootScope.drugList[key].synonyms !== undefined && $rootScope.drugList[key].synonyms.indexOf(newDrugName) > -1)) === true){
                         return key;
                     }
                 });
@@ -94,9 +89,14 @@ angular.module('oncokbApp')
                 if (hasSameName(newDrugName, drug.uuid)) {
                     modalError("Sorry", "Same name exists.", true, false, drug.uuid);
                 } else {
-                    if (!newDrugName)
+                    if (!newDrugName) {
                         newDrugName = drug.drugName;
-                    firebaseConnector.setDrugName(drug.uuid, newDrugName);
+                    }
+                    firebaseConnector.setDrugName(drug.uuid, newDrugName).then(function() {
+                        DatabaseConnector.updateDrugPreferredName(drug.ncitCode, newDrugName);
+                    }, function(reason) {
+                        // something goes wrong then the data in database should not be updated.
+                    });
                 }
             };
 

@@ -4,6 +4,7 @@ import io.swagger.annotations.ApiParam;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
+import org.mskcc.cbio.oncokb.apiModels.NCITDrug;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.*;
 import org.springframework.http.HttpStatus;
@@ -156,7 +157,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
     }
 
     @Override
-    public ResponseEntity<LinkedHashSet<Drug>> searchDrugGet(String query, Integer limit) {
+    public ResponseEntity<LinkedHashSet<NCITDrug>> searchDrugGet(String query, Integer limit) {
         if (limit == null) {
             limit = DEFAULT_RETURN_LIMIT;
         }

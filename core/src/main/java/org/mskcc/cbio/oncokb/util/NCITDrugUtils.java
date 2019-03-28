@@ -1,7 +1,7 @@
 package org.mskcc.cbio.oncokb.util;
 
 import com.mysql.jdbc.StringUtils;
-import org.mskcc.cbio.oncokb.model.Drug;
+import org.mskcc.cbio.oncokb.apiModels.NCITDrug;
 
 import java.io.IOException;
 import java.util.*;
@@ -11,15 +11,15 @@ import java.util.*;
  */
 public class NCITDrugUtils {
     private static boolean allNcitDrugsInitialized = false;
-    private static Set<Drug> allNcitDrugs = new HashSet<>();
+    private static Set<NCITDrug> allNcitDrugs = new HashSet<>();
 
-    public static Drug findDrugByNcitCode(String ncitCode) {
+    public static NCITDrug findDrugByNcitCode(String ncitCode) {
         if (!allNcitDrugsInitialized) {
             cacheDrugs();
             allNcitDrugsInitialized = true;
         }
 
-        for (Drug drug : allNcitDrugs) {
+        for (NCITDrug drug : allNcitDrugs) {
             if (drug.getNcitCode().equals(ncitCode)) {
                 return drug;
             }
@@ -27,8 +27,8 @@ public class NCITDrugUtils {
         return null;
     }
 
-    public static LinkedHashSet<Drug> findDrugs(String query) {
-        LinkedHashSet<Drug> matches = new LinkedHashSet<>();
+    public static LinkedHashSet<NCITDrug> findDrugs(String query) {
+        LinkedHashSet<NCITDrug> matches = new LinkedHashSet<>();
         if (!allNcitDrugsInitialized) {
             cacheDrugs();
             allNcitDrugsInitialized = true;
@@ -36,13 +36,13 @@ public class NCITDrugUtils {
         return findMatches(query);
     }
 
-    private static LinkedHashSet<Drug> findMatches(String query) {
-        TreeSet<Drug> matches = new TreeSet<>(new NCTIDrugComp(query));
+    private static LinkedHashSet<NCITDrug> findMatches(String query) {
+        TreeSet<NCITDrug> matches = new TreeSet<>(new NCTIDrugComp(query));
 
         if (query == null) {
             return new LinkedHashSet<>();
         }
-        for (Drug drug : allNcitDrugs) {
+        for (NCITDrug drug : allNcitDrugs) {
             if (drug.getNcitCode().contains(query)) {
                 matches.add(drug);
                 continue;
@@ -130,7 +130,7 @@ public class NCITDrugUtils {
                 synonymsList = new ArrayList<>(Arrays.asList((synonyms.split("\\|"))));
             }
 
-            Drug drug = new Drug();
+            NCITDrug drug = new NCITDrug();
             drug.setNcitCode(code);
             if (!synonymsList.isEmpty()) {
                 drug.setDrugName(synonymsList.get(0));
@@ -158,7 +158,7 @@ public class NCITDrugUtils {
     }
 }
 
-class NCTIDrugComp implements Comparator<Drug> {
+class NCTIDrugComp implements Comparator<NCITDrug> {
     private String keyword;
 
     public NCTIDrugComp(String keyword) {
@@ -166,7 +166,7 @@ class NCTIDrugComp implements Comparator<Drug> {
     }
 
     @Override
-    public int compare(Drug e1, Drug e2) {
+    public int compare(NCITDrug e1, NCITDrug e2) {
         if (e1.getDrugName().equalsIgnoreCase(keyword)) {
             return -1;
         }
