@@ -46,6 +46,7 @@ public class Drug implements java.io.Serializable {
     private String drugName;
 
     @Column(length = 20, name = "type")
+    @Enumerated(EnumType.STRING)
     private DrugTableItemType type = DrugTableItemType.DRUG;
 
     @ElementCollection(fetch = FetchType.EAGER)
