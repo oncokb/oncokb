@@ -618,7 +618,13 @@ public class DriveAnnotationParser {
                     JSONObject drugObject = drugsArray.getJSONObject(k);
 
                     String ncitCode = drugObject.has("ncitCode") ? drugObject.getString("ncitCode").trim() : null;
+                    if (ncitCode != null && ncitCode.isEmpty()) {
+                        ncitCode = null;
+                    }
                     String drugName = drugObject.has("drugName") ? drugObject.getString("drugName").trim() : null;
+                    if (drugName != null && drugName.isEmpty()) {
+                        drugName = null;
+                    }
                     String drugUuid = drugObject.has("uuid") ? drugObject.getString("uuid").trim() : null;
                     Drug drug = null;
                     if (ncitCode != null) {
@@ -632,14 +638,15 @@ public class DriveAnnotationParser {
                             NCITDrug ncitDrug = NCITDrugUtils.findDrugByNcitCode(ncitCode);
                             if (ncitDrug == null) {
                                 System.out.println("ERROR: the NCIT code cannot be found... Code:" + ncitCode);
+                            } else {
+                                if (drugName != null) {
+                                    ncitDrug.setDrugName(drugName);
+                                }
+                                drug = new Drug();
+                                drug.setDrugName(ncitDrug.getDrugName());
+                                drug.setSynonyms(ncitDrug.getSynonyms());
+                                drug.setNcitCode(ncitDrug.getNcitCode());
                             }
-                            if (drugName != null) {
-                                ncitDrug.setDrugName(drugName);
-                            }
-                            drug = new Drug();
-                            drug.setDrugName(ncitDrug.getDrugName());
-                            drug.setSynonyms(ncitDrug.getSynonyms());
-                            drug.setNcitCode(ncitDrug.getNcitCode());
                         }
                         if (drug == null) {
                             drug = new Drug();

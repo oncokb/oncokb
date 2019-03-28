@@ -34,6 +34,7 @@ public class DrugController {
             drug.setDrugName(preferredName);
             drugBo.update(drug);
         }
+        CacheUtils.resetAll();
 
         return new ResponseEntity(HttpStatus.OK);
     }
