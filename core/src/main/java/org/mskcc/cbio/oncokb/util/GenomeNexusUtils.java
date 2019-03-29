@@ -17,7 +17,7 @@ import java.util.List;
  * Created by Hongxin on 6/26/17.
  */
 public class GenomeNexusUtils {
-    private static final String HGVS_ENDPOINT = "hgvs";
+    private static final String HGVS_ENDPOINT = "annotation";
     private static final String GENOMIC_LOCATION_ENDPOINT = "annotation/genomic";
     private static final String GENOME_NEXUS_DEFAULT_API = "http://genomenexus.org/";
 
@@ -39,16 +39,14 @@ public class GenomeNexusUtils {
             }
             try {
                 String response = null;
+                String url = null;
                 if (type.equals(GNVariantAnnotationType.HGVS_G)) {
-                    response = HttpUtils.getRequest(genomeNexusApi + HGVS_ENDPOINT + "/" + encodedQuery);
-                    VariantAnnotation[] variantAnnotations = new Gson().fromJson(response, VariantAnnotation[].class);
-                    if (variantAnnotations != null && variantAnnotations.length >= 1) {
-                        variantAnnotation = variantAnnotations[0];
-                    }
+                    url = genomeNexusApi + HGVS_ENDPOINT + "/" + encodedQuery;
                 } else {
-                    response = HttpUtils.getRequest(genomeNexusApi + GENOMIC_LOCATION_ENDPOINT + "/" + encodedQuery);
-                    variantAnnotation = new Gson().fromJson(response, VariantAnnotation.class);
+                    url = genomeNexusApi + GENOMIC_LOCATION_ENDPOINT + "/" + encodedQuery;
                 }
+                response = HttpUtils.getRequest(url);
+                variantAnnotation = new Gson().fromJson(response, VariantAnnotation.class);
                 if (variantAnnotation != null) {
                     VEPDetailedEnrichmentService service = new VEPDetailedEnrichmentService();
                     variantAnnotation = service.enrich(variantAnnotation);
