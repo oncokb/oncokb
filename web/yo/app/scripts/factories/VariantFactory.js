@@ -59,13 +59,30 @@ angular.module('oncokbApp').factory('DataSummary', ['$http', function($http) {
 
 angular.module('oncokbApp').factory('Drugs', ['$http', 'OncoKB', function ($http, OncoKB) {
     'use strict';
+    var transform = function(data) {
+        return $.param(data);
+    };
 
-    function searchDrugs(keyword) {
-        return $http.get(OncoKB.config.privateApiLink + 'search/drugs?query=' + keyword);
+    function searchNCITDrugs(keyword) {
+        return $http.get(OncoKB.config.privateApiLink + 'search/ncitDrugs?query=' + keyword);
+    }
+
+    function updatePreferredName(ncitCode, preferredName) {
+
+        return $http.post(
+            OncoKB.config.curationLink + 'drugs/update/' + ncitCode,
+            {
+                preferredName: preferredName
+            },
+            {
+                headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
+                transformRequest: transform
+            });
     }
 
     return {
-        searchDrugs: searchDrugs
+        updatePreferredName: updatePreferredName,
+        searchNCITDrugs: searchNCITDrugs
     }
 }]);
 

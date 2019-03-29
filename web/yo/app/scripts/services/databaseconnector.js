@@ -45,9 +45,9 @@ angular.module('oncokbApp')
             var testing = OncoKB.config.testing || false;
             var inProduction = OncoKB.config.production || false;
 
-            function searchDrugs(keyword) {
+            function searchNCITDrugs(keyword) {
                 var deferred = $q.defer();
-                Drugs.searchDrugs(keyword)
+                Drugs.searchNCITDrugs(keyword)
                     .then(function(data) {
                         deferred.resolve(data.data);
                     }, function(error) {
@@ -61,6 +61,17 @@ angular.module('oncokbApp')
                                 console.log('fail to send searchDrugs Error to oncokb dev account', error);
                             }
                         );
+                        deferred.reject(error);
+                    });
+                return deferred.promise;
+            }
+
+            function updateDrugPreferredName(ncitCode, newPreferredName) {
+                var deferred = $q.defer();
+                Drugs.updatePreferredName(ncitCode, newPreferredName)
+                    .then(function(data) {
+                        deferred.resolve(data.data);
+                    }, function(error) {
                         deferred.reject(error);
                     });
                 return deferred.promise;
@@ -542,7 +553,8 @@ angular.module('oncokbApp')
             }
             // Public API here
             return {
-                searchDrugs: searchDrugs,
+                searchNCITDrugs: searchNCITDrugs,
+                updateDrugPreferredName: updateDrugPreferredName,
                 getGeneTumorType: getGeneTumorType,
                 searchAnnotation: searchVariant,
                 updateGene: updateGene,

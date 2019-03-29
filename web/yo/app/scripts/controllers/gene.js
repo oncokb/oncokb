@@ -1208,10 +1208,14 @@ angular.module('oncokbApp')
                         var drugs = treatments[i].split('+');
                         var drugList = [];
                         for (var j = 0; j < drugs.length; j++) {
-                            drugList.push({
-                                drugName: drugs[j].trim(),
-                                priority: j + 1
-                            });
+                            var drugName = drugs[j].trim();
+                            var drugObj = $rootScope.drugList[drugName];
+                            if (drugObj) {
+                                drugObj.priority = j + 1;
+                                drugList.push(drugObj);
+                            } else {
+                                throw new Error('Drug is not available.' + drugName);
+                            }
                         }
                         data.treatments.push({
                             approvedIndications: [treatment.indication],
@@ -1858,7 +1862,7 @@ angular.module('oncokbApp')
             };
             $scope.updateGene = function () {
                 $scope.status.savedGene = false;
-                var gene = mainUtils.getGeneData($scope.gene, true, true);
+                var gene = mainUtils.getGeneData($scope.gene, true, true, $rootScope.drugList);
                 var vus = mainUtils.getVUSData($scope.vusItems, true);
                 var params = {};
 
@@ -1987,12 +1991,6 @@ angular.module('oncokbApp')
                         size: 'lg'
                 });
             };
-            var deferred1 = $q.defer();
-            $firebaseObject(firebaseConnector.ref("Drugs/")).$bindTo($scope, "drugList").then(function () {
-                deferred1.resolve();
-            }, function (error) {
-                deferred1.reject(error);
-            });
             $scope.modifyTherapy = function (path) {
                 var indices = getIndexByPath(path);
                 var mutationRef = $scope.gene.mutations[indices[0]];
@@ -2663,7 +2661,7 @@ angular.module('oncokbApp')
                 });
             };
             $scope.generatePDF = function () {
-                jspdf.create(mainUtils.getGeneData(this.gene, true, false));
+                jspdf.create(mainUtils.getGeneData(this.gene, true, false, $rootScope.drugList));
             };
             // emptySectionsUUIDs is still TBD in terms of where it should be used
             var emptySectionsUUIDs = {};

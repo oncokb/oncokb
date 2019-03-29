@@ -45,9 +45,14 @@ public class Drug implements java.io.Serializable {
     @Column(length = 1000, name = "drug_name", nullable = false)
     private String drugName;
 
+    @JsonIgnore
     @Column(length = 20, name = "type")
     @Enumerated(EnumType.STRING)
     private DrugTableItemType type = DrugTableItemType.DRUG;
+
+    @Column(length = 40)
+    @JsonIgnore
+    private String uuid;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "drug_synonym", joinColumns = @JoinColumn(name = "drug_id", nullable = false))
@@ -109,6 +114,14 @@ public class Drug implements java.io.Serializable {
 
     public void setType(DrugTableItemType type) {
         this.type = type;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public Set<String> getSynonyms() {

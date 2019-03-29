@@ -21,6 +21,12 @@ angular.module('oncokbApp')
                 return getDrugNameByUuids(keys, drugList);
             }
         }
+        function drugUuidtoDrug(key, drugList){
+            if (key != undefined){
+                var keys = therapyStrToArr(key);
+                return getDrugsByUuids(keys, drugList);
+            }
+        }
         function getKeysWithoutFirebasePrefix(array){
             return _.keys(array).filter(function (item) {
                 return item.indexOf("$") !== 0;
@@ -58,6 +64,15 @@ angular.module('oncokbApp')
                 }).join(" + ");
             }).join(", ");
         }
+
+        function getDrugsByUuids(keys, drugList) {
+            return keys.map(function (element) {
+                return element.map(function (key) {
+                    return drugList[key];
+                });
+            });
+        }
+
         function checkDifferenceBetweenTwoArrays(oldArray, newArray){
             var difference = {
                 'sameDrugs': _.intersection(oldArray, newArray),
@@ -159,6 +174,7 @@ angular.module('oncokbApp')
         return {
             therapyStrToArr: therapyStrToArr,
             drugUuidtoName: drugUuidtoName,
+            drugUuidtoDrug: drugUuidtoDrug,
             getKeysWithoutFirebasePrefix: getKeysWithoutFirebasePrefix,
             checkDifferenceBetweenTherapies: checkDifferenceBetweenTherapies,
             changeMapByCurator: changeMapByCurator

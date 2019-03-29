@@ -8,7 +8,7 @@
  * Service in the oncokbApp.
  */
 angular.module('oncokbApp')
-    .factory('mainUtils', function(OncoKB, _, $q, DatabaseConnector, $rootScope, ReviewResource, S, UUIDjs, $routeParams) {
+    .factory('mainUtils', function(OncoKB, _, $q, DatabaseConnector, $rootScope, ReviewResource, S, UUIDjs, $routeParams, drugMapUtils) {
         var isoforms = {};
         var oncogeneTSG = {};
 
@@ -505,7 +505,7 @@ angular.module('oncokbApp')
         function shouldExclude(onlyReviewedContent, reviewObj) {
             return reviewObj && (onlyReviewedContent && reviewObj.added == true || !onlyReviewedContent && reviewObj.removed == true);
         }
-        function getGeneData(geneData, excludeComments, onlyReviewedContent) {
+        function getGeneData(geneData, excludeComments, onlyReviewedContent, drugList) {
             var gene = angular.copy(geneData);
             excludeComments = _.isBoolean(excludeComments) ? excludeComments : false;
             onlyReviewedContent = _.isBoolean(onlyReviewedContent) ? onlyReviewedContent : false;
@@ -539,7 +539,8 @@ angular.module('oncokbApp')
                                 tempTreatments.push(treatment);
                                 return true;
                             }
-                            processData(treatment, ['name', 'level', 'propagation', 'indication', 'description'], excludeComments, onlyReviewedContent);
+                            treatment.name = drugMapUtils.drugUuidtoDrug(treatment.name, drugList);
+                            processData(treatment, ['level', 'propagation', 'indication', 'description'], excludeComments, onlyReviewedContent);
                         });
                         _.each(tempTreatments, function(item) {
                             var index = ti.treatments.indexOf(item);

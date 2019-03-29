@@ -16,7 +16,7 @@ angular.module('oncokbApp')
                     var gene = $scope.allFiles.gene[hugoSymbol];
                     var vus = $scope.allFiles.vus[hugoSymbol];
                     if (gene) {
-                        var geneData = mainUtils.getGeneData(gene, true, true);
+                        var geneData = mainUtils.getGeneData(gene, true, true, $rootScope.drugList);
                         params.gene = JSON.stringify(geneData);
                     }
                     if (vus) {

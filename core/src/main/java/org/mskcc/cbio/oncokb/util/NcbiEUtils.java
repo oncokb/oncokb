@@ -24,15 +24,30 @@ public final class NcbiEUtils {
 
     private static final String URL_NCBI_EUTILS = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/";
 
-    private static void purifyInput(Set<String> pmids) {
+    private static Set<String> purifyInput(Set<String> pmids) {
+        Set<String> purified = pmids;
         for (String pmid : pmids) {
-            if (pmid != null) {
-                pmid = pmid.trim();
-            }
-            if (!StringUtils.isNumeric(pmid)) {
-                System.out.println("pmid has to be a numeric string, but the input is '" + pmid + "'");
+            if (pmid == null)
+                continue;
+
+            pmid = pmid.trim();
+
+            if (pmid.isEmpty())
+                continue;
+
+            for (String subitem : pmid.split(" ")) {
+                subitem = subitem.trim();
+                if (subitem.isEmpty())
+                    continue;
+
+                if (!StringUtils.isNumeric(pmid)) {
+                    System.out.println("pmid has to be a numeric string, but the input is '" + pmid + "'");
+                } else {
+                    purified.add(subitem);
+                }
             }
         }
+        return purified;
     }
 
     public static Set<Article> readPubmedArticles(Set<String> pmids) {
@@ -54,7 +69,7 @@ public final class NcbiEUtils {
             return results;
         }
 
-        purifyInput(pmids);
+        pmids = purifyInput(pmids);
 
         if (pmids.isEmpty()) {
             return results;

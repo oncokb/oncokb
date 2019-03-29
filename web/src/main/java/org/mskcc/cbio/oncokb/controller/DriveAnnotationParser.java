@@ -4,10 +4,12 @@
  */
 package org.mskcc.cbio.oncokb.controller;
 
+import com.google.gson.JsonArray;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.mskcc.cbio.oncokb.apiModels.NCITDrug;
 import org.mskcc.cbio.oncokb.bo.*;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
@@ -574,17 +576,17 @@ public class DriveAnnotationParser {
 
         // specific evidence
         DrugBo drugBo = ApplicationContextSingleton.getDrugBo();
-        JSONArray drugsArray = implicationObj.has("treatments") ? implicationObj.getJSONArray("treatments") : new JSONArray();
+        JSONArray treatmentsArray = implicationObj.has("treatments") ? implicationObj.getJSONArray("treatments") : new JSONArray();
         int priorityCount = 1;
-        for (int i = 0; i < drugsArray.length(); i++) {
-            JSONObject drugObj = drugsArray.getJSONObject(i);
-            if (!drugObj.has("name") || drugObj.getString("name").trim().isEmpty()) {
+        for (int i = 0; i < treatmentsArray.length(); i++) {
+            JSONObject drugObj = treatmentsArray.getJSONObject(i);
+            if (!drugObj.has("name") || drugObj.getJSONArray("name").length() == 0) {
                 System.out.println(spaceStrByNestLevel(nestLevel + 1) + "Drug does not have name, skip... " + drugObj.toString());
                 continue;
             }
 
-            String drugNameStr = drugObj.getString("name").trim();
-            System.out.println(spaceStrByNestLevel(nestLevel + 1) + "Drug(s): " + drugNameStr);
+            JSONArray therapiesArray = drugObj.getJSONArray("name");
+            System.out.println(spaceStrByNestLevel(nestLevel + 1) + "Drug(s): " + therapiesArray.length());
 
             Set<Date> lastEditDates = new HashSet<>();
             addDateToSetFromObject(lastEditDates, drugObj, "name_review");
@@ -607,24 +609,52 @@ public class DriveAnnotationParser {
                 addDateToSetFromObject(lastEditDates, drugObj, "indication_review");
             }
 
-            String[] drugTxts = drugNameStr.replaceAll("(\\([^\\)]*\\))|(\\[[^\\]]*\\])", "").split(",");
-
             List<Treatment> treatments = new ArrayList<>();
-            for (int j = 0; j < drugTxts.length; j++) {
-                String[] drugNames = drugTxts[j].split(" ?\\+ ?");
+            for (int j = 0; j < therapiesArray.length(); j++) {
+                JSONArray drugsArray = therapiesArray.getJSONArray(j);
 
                 List<Drug> drugs = new ArrayList<>();
-                for (String drugName : drugNames) {
-                    drugName = drugName.trim();
-                    Drug drug = drugBo.guessUnambiguousDrug(drugName);
+                for (int k = 0; k < drugsArray.length(); k++) {
+                    JSONObject drugObject = drugsArray.getJSONObject(k);
+
+                    String ncitCode = drugObject.has("ncitCode") ? drugObject.getString("ncitCode").trim() : null;
+                    if (ncitCode != null && ncitCode.isEmpty()) {
+                        ncitCode = null;
+                    }
+                    String drugName = drugObject.has("drugName") ? drugObject.getString("drugName").trim() : null;
+                    if (drugName != null && drugName.isEmpty()) {
+                        drugName = null;
+                    }
+                    String drugUuid = drugObject.has("uuid") ? drugObject.getString("uuid").trim() : null;
+                    Drug drug = null;
+                    if (ncitCode != null) {
+                        drug = drugBo.findDrugsByNcitCode(ncitCode);
+                    }
+                    if (drug == null && drugName != null) {
+                        drug = drugBo.findDrugByName(drugName);
+                    }
                     if (drug == null) {
-                        LinkedHashSet<Drug> ncitDrugs = NCITDrugUtils.findDrugs(drugName);
-                        if (ncitDrugs.isEmpty()) {
-                            drug = new Drug(drugName);
-                            System.out.println("Cannot find a NCIT drug...");
-                        } else {
-                            drug = ncitDrugs.iterator().next();
-                            System.out.println("Use NCIT drug..." + drug.getDrugName() + " " + drug.getNcitCode() + " " + StringUtils.join(drug.getSynonyms(), ","));
+                        if (ncitCode != null) {
+                            NCITDrug ncitDrug = NCITDrugUtils.findDrugByNcitCode(ncitCode);
+                            if (ncitDrug == null) {
+                                System.out.println("ERROR: the NCIT code cannot be found... Code:" + ncitCode);
+                            } else {
+                                if (drugName != null) {
+                                    ncitDrug.setDrugName(drugName);
+                                }
+                                drug = new Drug();
+                                drug.setDrugName(ncitDrug.getDrugName());
+                                drug.setSynonyms(ncitDrug.getSynonyms());
+                                drug.setNcitCode(ncitDrug.getNcitCode());
+                            }
+                        }
+                        if (drug == null) {
+                            drug = new Drug();
+                            drug.setNcitCode(ncitCode);
+                            drug.setDrugName(drugName);
+                        }
+                        if (drugUuid != null) {
+                            drug.setUuid(drugUuid);
                         }
                         drugBo.save(drug);
                     }

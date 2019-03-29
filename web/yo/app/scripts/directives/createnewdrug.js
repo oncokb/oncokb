@@ -68,7 +68,7 @@ angular.module('oncokbApp')
                 $scope.processSearchDrugs = function (keyword) {
                     $scope.addDrugMessage = '';
                     $scope.addDrugErrorMessage = '';
-                    return DatabaseConnector.searchDrugs(keyword)
+                    return DatabaseConnector.searchNCITDrugs(keyword)
                         .then(
                             function (result) {
                                 $scope.searchDrugsError = false;
