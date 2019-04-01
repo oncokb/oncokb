@@ -347,6 +347,20 @@ public class validation {
         insertRowToEntry(feedUrl, row);
     }
 
+    private static void printEvidencePmids(URL feedUrl, Evidence Evidence, String type, Set<String> pmids) {
+        ListEntry row = new ListEntry();
+        setValue(row, "Type", type);
+        setValue(row, "Gene", Evidence.getGene().getHugoSymbol());
+        setValue(row, "EvidenceID", Evidence.getId().toString());
+        List<String> alterations = new ArrayList<>();
+        for (Alteration alteration : Evidence.getAlterations()) {
+            alterations.add(alteration.getAlteration());
+        }
+        setValue(row, "Alteration", org.apache.commons.lang3.StringUtils.join(alterations, ", "));
+        setValue(row, "PMIDs", org.apache.commons.lang3.StringUtils.join(pmids, ", "));
+        insertRowToEntry(feedUrl, row);
+    }
+
     private static void checkUnsupportedAlterationType() {
         URL feedUrl = getFeedUrl(WorkSheetEntryEnum.UNSUPPORTED_ALTERATION_TYPE);
         if (feedUrl != null) {
@@ -396,15 +410,18 @@ public class validation {
                     while (m.find(start)) {
                         String pmids = m.group(1).trim();
                         for (String pmid : pmids.split(", *(PMID:)? *")) {
-                            Article doc = articleBo.findArticleByPmid(pmid);
-                            if (doc == null) {
-                                pmidToSearch.add(pmid);
+                            if(!pmid.isEmpty()) {
+                                Article doc = articleBo.findArticleByPmid(pmid);
+                                if (doc == null) {
+                                    pmidToSearch.add(pmid);
+                                }
                             }
                         }
                         start = m.end();
                     }
 
                     if (!pmidToSearch.isEmpty()) {
+                        printEvidencePmids(feedUrl, evidence, "PMID is not stored", pmidToSearch);
                         try {
                             NcbiEUtils.readPubmedArticles(pmidToSearch);
                         } catch (Exception e) {
