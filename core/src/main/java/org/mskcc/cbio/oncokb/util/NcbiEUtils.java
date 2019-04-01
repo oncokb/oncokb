@@ -25,7 +25,7 @@ public final class NcbiEUtils {
     private static final String URL_NCBI_EUTILS = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/";
 
     private static Set<String> purifyInput(Set<String> pmids) {
-        Set<String> purified = pmids;
+        Set<String> purified = new HashSet<>();
         for (String pmid : pmids) {
             if (pmid == null)
                 continue;
@@ -55,8 +55,6 @@ public final class NcbiEUtils {
             System.out.println("NCBI API KEY needs to be specified. Please see here for details: https://www.ncbi.nlm.nih.gov/books/NBK25497/");
             e.printStackTrace();
         }
-        String url = URL_NCBI_EUTILS + "esummary.fcgi?api_key=" + apiKey + "&db=pubmed&retmode=json&id=" + MainUtils.listToString(new ArrayList<>(pmids), ",");
-
         Set<Article> results = new HashSet<>();
 
         if (pmids == null) {
@@ -71,6 +69,7 @@ public final class NcbiEUtils {
 
         DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
         Date date = new Date();
+        String url = URL_NCBI_EUTILS + "esummary.fcgi?api_key=" + apiKey + "&db=pubmed&retmode=json&id=" + MainUtils.listToString(new ArrayList<>(pmids), ",");
         System.out.println("Making a NCBI request at " + dateFormat.format(date) + " " + url);
 
         Map result = null;
