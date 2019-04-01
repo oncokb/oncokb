@@ -121,6 +121,13 @@ angular.module('oncokbApp')
                     modalError("Attention", drug.drugName + " will be deleted.", false, true, drug.uuid);
                 }
             };
+
+            $scope.generateSynonyms = function (drug) {
+                if (_.indexOf(drug.synonyms, drug.ncitName) > -1){
+                    return drug.synonyms;
+                }
+                else return _.concat(drug.ncitName, drug.synonyms);
+            };
         }]
     )
     .controller('ModalErrorCtrl', function ($scope, $modalInstance, data, firebaseConnector) {
