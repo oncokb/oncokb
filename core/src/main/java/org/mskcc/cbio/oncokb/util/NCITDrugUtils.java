@@ -93,37 +93,26 @@ public class NCITDrugUtils {
 
             String[] parts = line.split("\t");
 
-            if (parts.length != 8) {
-                continue;
-            }
             String code = parts[0] == null ? null : parts[0].trim();
-            String synonyms = parts[3] == null ? null : parts[3].trim();
-            String definition = parts[4] == null ? null : parts[4].trim();
-            String conceptStatus = parts[6] == null ? null : parts[6].trim();
-            String semanticType = parts[7] == null ? null : parts[7].trim();
+            String preferredName = parts[1] == null ? null : parts[1].trim();
+            String synonyms = parts.length >= 3 ? (parts[2] == null ? null : parts[2].trim()) : null;
+            String description = parts.length >= 4 ? (parts[3] == null ? null : parts[3].trim()) : null;
             List<String> synonymsList = new ArrayList<>();
 
             if (StringUtils.isNullOrEmpty(code)) {
+                System.out.println("code is empty: " + line);
                 continue;
             } else if (!code.startsWith("C")) {
                 continue;
             }
 
-            if (StringUtils.isNullOrEmpty(semanticType)) {
-                continue;
-            } else {
-                Set<String> semanticTypes = new HashSet(Arrays.asList((semanticType.split("\\|"))));
-                boolean disjoint = Collections.disjoint(semanticTypes, acceptedSemanticTypes);
-                if (disjoint) {
-                    continue;
-                }
-            }
-
-            if (!StringUtils.isNullOrEmpty(conceptStatus)) {
+            if (StringUtils.isNullOrEmpty(preferredName)) {
+                System.out.println("Preferred name is empty: " + line);
                 continue;
             }
 
-            if (StringUtils.isNullOrEmpty(synonyms)) {
+            if (synonyms == null) {
+                System.out.println("Synonyms is empty: " + line);
                 continue;
             } else {
                 // Arrays.asList returning a fixed-size list, you cannot remove item from the list, need to reinitialize a new array list
@@ -132,13 +121,14 @@ public class NCITDrugUtils {
 
             NCITDrug drug = new NCITDrug();
             drug.setNcitCode(code);
+            drug.setDrugName(preferredName);
             if (!synonymsList.isEmpty()) {
-                drug.setDrugName(synonymsList.get(0));
-                synonymsList.remove(0);
+                synonymsList.remove(preferredName);
                 drug.setSynonyms(new HashSet<>(synonymsList));
-                if (!StringUtils.isNullOrEmpty(definition)) {
-                    drug.setDescription(definition);
-                }
+
+            }
+            if (!StringUtils.isNullOrEmpty(description)) {
+                drug.setDescription(description);
             }
             allNcitDrugs.add(drug);
         }
