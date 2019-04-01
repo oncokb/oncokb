@@ -35,16 +35,10 @@ public final class NcbiEUtils {
             if (pmid.isEmpty())
                 continue;
 
-            for (String subitem : pmid.split(" ")) {
-                subitem = subitem.trim();
-                if (subitem.isEmpty())
-                    continue;
-
-                if (!StringUtils.isNumeric(pmid)) {
-                    System.out.println("pmid has to be a numeric string, but the input is '" + pmid + "'");
-                } else {
-                    purified.add(subitem);
-                }
+            if (!StringUtils.isNumeric(pmid)) {
+                System.out.println("pmid has to be a numeric string, but the input is '" + pmid + "'");
+            } else {
+                purified.add(pmid);
             }
         }
         return purified;
