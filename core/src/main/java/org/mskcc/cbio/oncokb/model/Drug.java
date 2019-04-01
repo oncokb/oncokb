@@ -36,6 +36,7 @@ import java.util.Set;
 public class Drug implements java.io.Serializable {
 
     @Id
+    @JsonIgnore
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
@@ -60,17 +61,20 @@ public class Drug implements java.io.Serializable {
     private Set<String> synonyms = new HashSet<String>(0);
 
     @ElementCollection(fetch = FetchType.EAGER)
+    @JsonIgnore
     @CollectionTable(name = "drug_atccode", joinColumns = @JoinColumn(name = "drug_id", nullable = false))
     @Column(name = "atccode")
     private Set<String> atcCodes;
 
-    @ManyToMany(cascade={CascadeType.ALL})
+    @JsonIgnore
+    @ManyToMany(cascade={CascadeType.ALL}, fetch = FetchType.EAGER)
     @JoinTable(name="drug_family",
         joinColumns={@JoinColumn(name="drug_id")},
         inverseJoinColumns={@JoinColumn(name="drug_family_id")})
     private Set<Drug> drugFamlilies = new HashSet<>();
 
-    @ManyToMany(mappedBy="drugFamlilies")
+    @JsonIgnore
+    @ManyToMany(mappedBy="drugFamlilies", fetch = FetchType.EAGER)
     private Set<Drug> drugs = new HashSet<>();
 
     @JsonIgnore
