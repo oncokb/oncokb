@@ -9,6 +9,7 @@ import org.mskcc.cbio.oncokb.bo.GeneBo;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.service.JsonResultFactory;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
+import org.mskcc.cbio.oncokb.util.CacheUtils;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -68,6 +69,36 @@ public class GeneController {
             gene.setTSG(queryGene.getTSG());
             gene.setOncogene(queryGene.getOncogene());
             geneBo.update(gene);
+        }
+        return "success";
+    }
+
+    @RequestMapping(value = "/legacy-api/genes/create", method = RequestMethod.POST)
+    public @ResponseBody
+    String updateGene(@RequestBody(required = true) Gene queryGene) {
+        if (queryGene == null) {
+            return "error";
+        }
+        Gene gene = GeneUtils.getGene(queryGene.getEntrezGeneId(), queryGene.getHugoSymbol());
+        if (gene == null) {
+            GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
+            geneBo.save(queryGene);
+            CacheUtils.resetAll();
+        }
+        return "success";
+    }
+
+    @RequestMapping(value = "/legacy-api/genes/remove/{hugoSymbol}", method = RequestMethod.POST)
+    public @ResponseBody
+    String updateGene(@ApiParam(value = "hugoSymbol", required = true) @PathVariable("hugoSymbol") String hugoSymbol) {
+        if (hugoSymbol == null) {
+            return "error";
+        }
+        Gene gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
+        if (gene != null) {
+            GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
+            geneBo.delete(gene);
+            CacheUtils.resetAll();
         }
         return "success";
     }
