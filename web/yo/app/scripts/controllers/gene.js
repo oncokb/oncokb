@@ -2022,7 +2022,7 @@ angular.module('oncokbApp')
                 $scope.modifyName = false;
             }
 
-            $scope.saveCallback = function(newTreatmentName){
+            $scope.saveTherapiesCallback = function(newTreatmentName){
                 var indices = $scope.indices;
                 var geneName = $scope.gene.name;
                 var mutationUuid = $scope.mutationRef.name_uuid;
@@ -3310,14 +3310,25 @@ angular.module('oncokbApp')
         $scope.treatmentRef = data.treatmentRef;
         var geneName = data.geneName;
 
-        $scope.saveCallback = function(newTreatmentName, oldContent){
-            $scope.treatmentRef.name = newTreatmentName;
+        $scope.saveTherapiesCallback = function(newTreatmentName, oldContent){
             var name_uuid = $scope.treatmentRef.name_uuid;
-            mainUtils.setUUIDInReview(name_uuid);
-            var therapyObject = {
-                'name': newTreatmentName,
-                'status': 'latest'
-            };
+            if(!_.isEmpty($scope.treatmentRef.name)) {
+                if (_.isUndefined($scope.treatmentRef.name_review)) {
+                    $scope.treatmentRef.name_review = {
+                        'updatedBy' : $rootScope.me.name,
+                        'updateTime':  new Date().getTime(),
+                    };
+                }
+                else if (_.isUndefined($scope.treatmentRef.name_review.updatedBy) || _.isUndefined($scope.treatmentRef.name_review.updateTime)) {
+                    $scope.treatmentRef.name_review.updatedBy = $rootScope.me.name;
+                    $scope.treatmentRef.name_review.updateTime = new Date().getTime();
+                }
+                if (_.isUndefined($scope.treatmentRef.name_review.lastReviewed)&&_.isUndefined($scope.treatmentRef.name_review.added)) {
+                    $scope.treatmentRef.name_review.lastReviewed = $scope.treatmentRef.name;
+                }
+                mainUtils.setUUIDInReview(name_uuid);
+            }
+            $scope.treatmentRef.name = newTreatmentName;
             var mutationUuid = $scope.mutationRef.name_uuid;
             var mutationName = $scope.mutationRef.name;
             var cancerTypeUuid = $scope.tumorRef.cancerTypes_uuid;
