@@ -347,7 +347,8 @@ angular.module('oncokbApp')
                 $scope.isChangedByOthers = function() {
                     var changedByOthers = false;
                     firebase.database().ref($scope.path).on('value', function(doc) {
-                        if (doc.val()[$scope.key] === $scope.data[$scope.key]) {
+                        if (_.isUndefined(doc.val()[$scope.key]) || _.isEmpty(doc.val()[$scope.key])
+                            || doc.val()[$scope.key] === $scope.data[$scope.key]) {
                             changedByOthers = true;
                             return;
                         }
