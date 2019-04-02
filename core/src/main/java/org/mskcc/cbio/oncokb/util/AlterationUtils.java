@@ -271,8 +271,13 @@ public final class AlterationUtils {
             }
         }
 
-        if (alteration.getName() == null && alteration.getAlteration() != null) {
-            alteration.setName(alteration.getAlteration());
+        if (com.mysql.jdbc.StringUtils.isNullOrEmpty(alteration.getName()) && alteration.getAlteration() != null) {
+            // Change the positional name
+            if (isPositionedAlteration(alteration)) {
+                alteration.setName(alteration.getAlteration() + " Missense Mutations");
+            } else {
+                alteration.setName(alteration.getAlteration());
+            }
         }
     }
 
