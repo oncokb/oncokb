@@ -34,7 +34,7 @@ public final class GeneAnnotatorMyGeneInfo2 {
         }
         
         Gene gene = genes.get(0);
-        annotateGene(gene);
+        includeGeneAlias(gene);
         
         return gene;
     }
@@ -54,7 +54,7 @@ public final class GeneAnnotatorMyGeneInfo2 {
         }
         
         Gene gene = genes.get(0);
-        annotateGene(gene);
+        includeGeneAlias(gene);
         
         return gene;
     }
@@ -65,7 +65,7 @@ public final class GeneAnnotatorMyGeneInfo2 {
         
         List<Gene> genes = parseGenes(json);
         for (Gene gene : genes) {
-            annotateGene(gene);
+            includeGeneAlias(gene);
         }
         
         return genes;
@@ -95,7 +95,7 @@ public final class GeneAnnotatorMyGeneInfo2 {
         return genes;
     }
     
-    private static void annotateGene(Gene gene) throws IOException {
+    public static void includeGeneAlias(Gene gene) throws IOException {
         String url = URL_MY_GENE_INFO_2 + "gene/" + gene.getEntrezGeneId()
                 + "?fields=summary,alias";
         String json = FileUtils.readRemote(url);
