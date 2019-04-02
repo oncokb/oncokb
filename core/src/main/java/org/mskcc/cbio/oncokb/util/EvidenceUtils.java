@@ -378,6 +378,14 @@ public class EvidenceUtils {
     private static Set<Evidence> filterEvidence(Set<Evidence> evidences, EvidenceQueryRes evidenceQuery) {
         Set<Evidence> filtered = new HashSet<>();
 
+        boolean isSolidTumorQuery = false;
+        for (TumorType tumorType : evidenceQuery.getOncoTreeTypes()) {
+            if (TumorTypeUtils.isSolidTumor(tumorType)) {
+                isSolidTumorQuery = true;
+                break;
+            }
+        }
+
         if (evidenceQuery.getGene() != null) {
             for (Evidence evidence : evidences) {
 
@@ -414,6 +422,9 @@ public class EvidenceUtils {
                                     if (evidence.getLevelOfEvidence() != null && evidence.getPropagation() != null) {
                                         LevelOfEvidence propagationLevel = LevelOfEvidence.getByName(evidence.getPropagation());
 
+                                        if (isSolidTumorQuery && TumorTypeUtils.isLiquidTumor(evidence.getOncoTreeType())) {
+                                            propagationLevel = null;
+                                        }
                                         if (propagationLevel != null) {
                                             if (evidenceQuery.getLevelOfEvidences() == null
                                                 || evidenceQuery.getLevelOfEvidences().size() == 0
