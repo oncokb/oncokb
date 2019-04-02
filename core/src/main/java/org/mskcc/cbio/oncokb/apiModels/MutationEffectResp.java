@@ -6,7 +6,7 @@ package org.mskcc.cbio.oncokb.apiModels;
 public class MutationEffectResp {
     String knownEffect = "";
     String description = "";
-    Citations citations;
+    Citations citations = new Citations();
 
     public String getKnownEffect() {
         return knownEffect;
