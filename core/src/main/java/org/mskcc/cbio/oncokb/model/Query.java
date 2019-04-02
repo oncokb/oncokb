@@ -259,7 +259,7 @@ public class Query implements java.io.Serializable {
         // For structural variant, if the entrezGeneId is specified which means this is probably a intragenic event. In this case, the hugoSymbol should be ignore.
         if (this.getAlterationType() != null) {
             AlterationType alterationType = AlterationType.getByName(this.getAlterationType());
-            if ((alterationType.equals(AlterationType.FUSION) ||
+            if (alterationType != null && (alterationType.equals(AlterationType.FUSION) ||
                 alterationType.equals(AlterationType.STRUCTURAL_VARIANT)) &&
                 this.getEntrezGeneId() != null) {
                 Gene entrezGeneIdGene = GeneUtils.getGeneByEntrezId(this.getEntrezGeneId());

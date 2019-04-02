@@ -294,7 +294,7 @@ public class EvidenceUtils {
 
     public static Map<Gene, Set<Evidence>> getEvidenceByGenesAndEvidenceTypes(Set<Gene> genes, Set<EvidenceType> evidenceTypes) {
         Map<Gene, Set<Evidence>> result = new HashMap<>();
-        if (evidenceTypes == null && evidenceTypes.isEmpty())
+        if (evidenceTypes == null || evidenceTypes.isEmpty())
             return result;
         if (CacheUtils.isEnabled()) {
             for (Gene gene : genes) {
