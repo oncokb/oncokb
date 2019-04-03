@@ -66,11 +66,11 @@ KIT	T670C	Gastrointestinal Stromal Tumor
 KIT	T670C	Melanoma
 KIT	T670C	Colorectal Cancer
 KIT	T670C	Thymic Tumor
-KIT	D816A	Gastrointestinal Stromal Tumor	3B: Avapritinib;
-KIT	D816A	Melanoma	2A: Imatinib; 3B: Avapritinib;
-KIT	D816A	Colorectal Cancer	3B: Avapritinib;
+KIT	D816A	Gastrointestinal Stromal Tumor
+KIT	D816A	Melanoma	2A: Imatinib;
+KIT	D816A	Colorectal Cancer
 KIT	D816A	Mastocytosis	3A: Avapritinib;
-KIT	D816A	Thymic Tumor	2A: Sunitinib; 2A: Sorafenib; 3B: Avapritinib;
+KIT	D816A	Thymic Tumor	2A: Sunitinib; 2A: Sorafenib;
 MTOR	L2427Q	Renal Clear Cell Carcinoma	3A: Temsirolimus;
 PDGFRA	D842I	GIST	2A: Imatinib;
 PDGFRA	D842I	Thymic Tumor	2B: Imatinib;
@@ -84,35 +84,36 @@ EGFR	N771delinsSTH	Lung Adenocarcinoma	R1: Afatinib; R1: Erlotinib; R1: Gefitini
 
 
 # Test Heme
-# FLT3	Internal Tandem Duplication	AML	1: Gilteritinib; 1: Midostaurin+Intensive chemotherapy; 3A: Crenolanib; 3A: Entospletinib; 3A: High dose daunorubicin; 3A: Quizartinib; 3A: Sorafenib;
-# FLT3	Internal Tandem Duplication	APLPMLRARA	1: Gilteritinib; 1: Midostaurin+Intensive chemotherapy; 3A: Crenolanib; 3A: Entospletinib; 3A: High dose daunorubicin; 3A: Quizartinib; 3A: Sorafenib;
-# FLT3	Internal Tandem Duplication	Colorectal Cancer	3B: Sorafenib;
-# SF3B1	K700E	AML	4: H3B-8800;
-# SF3B1	K700E	AMLNOS	4: H3B-8800;
-# SF3B1	K700E	APLPMLRARA	4: H3B-8800;
-# SF3B1	K700E	Colorectal Cancer
-# DNMT3A	P904L	AML	3A: High dose daunorubicin;
-# DNMT3A	P904L	APLPMLRARA	3A: High dose daunorubicin;
-# DNMT3A	P904L	CMML
-# DNMT3A	P904L	Colorectal Cancer
-# ABL1	BCR-ABL1 Fusion	BLL	1: Dasatinib; 1: Imatinib; 1: Ponatinib; 2A: Bosutinib; 2A: MOpAD regimen; 2A: Nilotinib;
-# ABL1	BCR-ABL1 Fusion	BLLNOS	1: Dasatinib; 1: Imatinib; 1: Ponatinib; 2A: Bosutinib; 2A: MOpAD regimen; 2A: Nilotinib;
-# ABL1	BCR-ABL1 Fusion	BLLBCRABL1	1: Dasatinib; 1: Imatinib; 1: Ponatinib; 2A: Bosutinib; 2A: MOpAD regimen; 2A: Nilotinib;
-# ABL1	BCR-ABL1 Fusion	Colorectal Cancer	2B: Dasatinib; 2B: Imatinib; 2B: Nilotinib;
-# ABL1	E255K	CML	2A: Bosutinib; 2A: Dasatinib;
-# ABL1	E255K	CMLBCRABL1	2A: Bosutinib; 2A: Dasatinib;
-# ABL1	E255K	AML
-# ABL1	E255K	Colorectal Cacner
-# KMT2A	KMT2A-MLLT3 Fusion	AML	3A: Entospletinib; 3A: High dose daunorubicin;
-# KMT2A	KMT2A-MLLT3 Fusion	APLPMLRARA	3A: Entospletinib; 3A: High dose daunorubicin;
-# KMT2A	KMT2A-MLLT3 Fusion	Colorectal Cacner
-# PDGFRB	PDGFRB-CSF1R Fusion	CMML	1: Imatinib;
-# PDGFRB	PDGFRB-CSF1R Fusion	Colorectal Cancer	2B: Imatinib;
-# BRAF	K601E	CMML	3B: Trametinib; 4: PLX8394;
-# ARAF	S214A	HDCN	3A: Sorafenib;
-# ARAF	S214A	ECD	3A: Sorafenib;
-# ARAF	S214A	RDD	3B: Sorafenib;
-# ARAF	S214A	Colorectal Cancer	3B: Sorafenib;
-# TP53	K292T	AML	3A: Decitabine; 3A: Entospletinib+Decitabine;
-# TP53	K292T	APLPMLRARA	3A: Decitabine; 3A: Entospletinib+Decitabine;
-# TP53	K292T	Colorectal cancer
+FLT3	Internal Tandem Duplication	AML	1: Gilteritinib; 1: Midostaurin+High Dose Chemotherapy; 3A: Crenolanib; 3A: Daunorubicin; 3A: Entospletinib; 3A: Quizartinib; 3A: Sorafenib;
+FLT3	Internal Tandem Duplication	APLPMLRARA	1: Gilteritinib; 1: Midostaurin+High Dose Chemotherapy; 3A: Crenolanib; 3A: Daunorubicin; 3A: Entospletinib; 3A: Quizartinib; 3A: Sorafenib;
+FLT3	Internal Tandem Duplication	Colorectal Cancer
+SF3B1	K700E	AML	4: H3B-8800;
+SF3B1	K700E	AMLNOS	4: H3B-8800;
+SF3B1	K700E	APLPMLRARA	4: H3B-8800;
+SF3B1	K700E	Colorectal Cancer
+DNMT3A	P904L	AML	3A: Daunorubicin;
+DNMT3A	P904L	APLPMLRARA	3A: Daunorubicin;
+DNMT3A	P904L	CMML
+DNMT3A	P904L	Colorectal Cancer
+ABL1	BCR-ABL1 Fusion	BLL	1: Dasatinib; 1: Imatinib; 1: Ponatinib; 2A: Bosutinib; 2A: Methotrexate+Vincristine+Pegylated Recombinant L-asparaginase Erwinia chrysanthemi+Dexamethasone; 2A: Nilotinib;
+ABL1	BCR-ABL1 Fusion	BLLNOS	1: Dasatinib; 1: Imatinib; 1: Ponatinib; 2A: Bosutinib; 2A: Methotrexate+Vincristine+Pegylated Recombinant L-asparaginase Erwinia chrysanthemi+Dexamethasone; 2A: Nilotinib;
+ABL1	BCR-ABL1 Fusion	BLLBCRABL1	1: Dasatinib; 1: Imatinib; 1: Ponatinib; 2A: Bosutinib; 2A: Methotrexate+Vincristine+Pegylated Recombinant L-asparaginase Erwinia chrysanthemi+Dexamethasone; 2A: Nilotinib;
+ABL1	BCR-ABL1 Fusion	Colorectal Cancer
+ABL1	E255K	CML	2A: Bosutinib; 2A: Dasatinib;
+ABL1	E255K	CMLBCRABL1	2A: Bosutinib; 2A: Dasatinib;
+ABL1	E255K	AML
+ABL1	E255K	Colorectal Cacner
+KMT2A	KMT2A-MLLT3 Fusion	AML	3A: Daunorubicin; 3A: Entospletinib;
+KMT2A	KMT2A-MLLT3 Fusion	APLPMLRARA	3A: Daunorubicin; 3A: Entospletinib;
+KMT2A	KMT2A-MLLT3 Fusion	Colorectal Cacner
+PDGFRB	PDGFRB-CSF1R Fusion	CMML	1: Imatinib;
+PDGFRB	PDGFRB-CSF1R Fusion	Colorectal Cancer
+BRAF	K601E	CMML	3B: Trametinib; 4: PLX8394;
+ARAF	S214A	HDCN	3A: Sorafenib;
+ARAF	S214A	ECD	3A: Sorafenib;
+ARAF	S214A	RDD	3B: Sorafenib;
+ARAF	S214A	Colorectal Cancer	3B: Sorafenib;
+TP53	K292T	AML	3A: Decitabine; 3A: Entospletinib+Decitabine;
+TP53	K292T	APLPMLRARA	3A: Decitabine; 3A: Entospletinib+Decitabine;
+TP53	K292T	Colorectal cancer
+
