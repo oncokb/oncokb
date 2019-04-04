@@ -196,13 +196,6 @@ angular.module('oncokbApp').run(
             $rootScope.$on('$routeChangeError', function() {
                 $location.url('/');
             });
-
-            // Loading all drugs info
-            $firebaseObject(firebaseConnector.ref("Drugs/")).$bindTo($rootScope, "drugList").then(function () {
-            }, function (error) {
-                dialogs.error('Error', 'Failed to drugs information. Please Contact developer and stop curation.');
-            });
-
             var loading = true;
             $rootScope.$on('$routeChangeStart', function(event, next) {
                 var fromIndex = window.location.href.indexOf('/gene/');
