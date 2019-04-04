@@ -1666,7 +1666,8 @@ angular.module('oncokbApp')
                         }
                         var therapyUuids = _.flatten(drugMapUtils.therapyStrToArr(treatment.name));
                         if(treatment.name_review.lastReviewed){
-                            removeMapWithoutValidatingStatus(mapInfo.geneName, mapInfo.mutationUuid, mapInfo.cancerTypeUuid, treatment.name_review.lastReviewed, therapyUuids);
+                            var reviewedTherapyUuids = _.flatten(drugMapUtils.therapyStrToArr(treatment.name_review.lastReviewed));
+                            removeMapWithoutValidatingStatus(mapInfo.geneName, mapInfo.mutationUuid, mapInfo.cancerTypeUuid, treatment.name_uuid, reviewedTherapyUuids);
                         }
                         removeMapWithoutValidatingStatus(mapInfo.geneName, mapInfo.mutationUuid, mapInfo.cancerTypeUuid, treatment.name_uuid, therapyUuids);
                         break;
