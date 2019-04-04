@@ -289,7 +289,7 @@
                                       <comments-dict key="'name'" path="path"></comments-dict>
                                       <span class="curationNoEntry" ng-if="isEmptySection(treatment, 'treatment')">No Entry</span>
                                   </div>
-                                  <i class="fa fa-edit ng-scope" style="margin-top: 5px; margin-left: 5px" ng-click="modifyTherapy(path)"></i>
+                                  <i class="fa fa-edit ng-scope" style="margin-top: 5px; margin-left: 5px" ng-show="fileEditable" ng-click="modifyTherapy(path)"></i>
 
                               <span style="float:right" ng-show="!reviewMode && fileEditable">
                                   <span ng-if="me.admin && internal">
@@ -346,7 +346,7 @@
                         </div>
                       </div>
                       <div ng-click="initTherapyComponent(path)" ng-show="!reviewMode && fileEditable" class="input-group input-group-sm accordionMarginTop">
-                          <add-therapy ti-ref="tiRef" modify-name="modifyName" save-callback="saveCallback(newTreatmentName)"></add-therapy>
+                          <add-therapy ti-ref="tiRef" modify-name="modifyName" save-callback="saveTherapiesCallback(newTreatmentName)"></add-therapy>
                       </div>
                     </div>
                   </div>

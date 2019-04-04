@@ -8,7 +8,7 @@ angular.module('oncokbApp')
                 modifyName: '=',
                 tiRef: '=',
                 treatmentRef: '=',
-                saveCallbackToController: '&saveCallback',
+                saveCallbackToController: '&saveTherapiesCallback',
                 cancelCallback: '&closeWindow'
             },
             controller: function ($scope) {
@@ -152,11 +152,11 @@ angular.module('oncokbApp')
                         drugUuids = _.flatten(drugUuids);
                         var therapyObject = {};
                         if ($scope.modifyName === true) {
-                            $scope.saveCallback(newTreatmentName, oldContent);
+                            $scope.saveTherapiesCallback(newTreatmentName, oldContent);
                             $scope.closeWindow();
                         }
                         else {
-                            $scope.saveCallback(newTreatmentName);
+                            $scope.saveTherapiesCallback(newTreatmentName);
                         }
                         clearData();
                     }
@@ -166,7 +166,7 @@ angular.module('oncokbApp')
                     $scope.closeWindow();
                 };
 
-                $scope.saveCallback = function (newTreatmentName, oldContent) {
+                $scope.saveTherapiesCallback = function (newTreatmentName, oldContent) {
                     $scope.saveCallbackToController({
                         newTreatmentName: newTreatmentName,
                         oldContent: oldContent
