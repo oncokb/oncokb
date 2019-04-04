@@ -36,6 +36,7 @@ public class DriveAnnotationParser {
     @ResponseBody
     synchronized void getEvidence(
         @RequestParam(value = "gene") String gene,
+        @RequestParam(value = "releaseGene", defaultValue = "FALSE") Boolean releaseGene,
         @RequestParam(value = "vus", required = false) String vus
     ) throws IOException, JSONException {
 
@@ -47,7 +48,7 @@ public class DriveAnnotationParser {
             if (vus != null) {
                 jsonArray = new JSONArray(vus);
             }
-            parseGene(jsonObj, jsonArray);
+            parseGene(jsonObj, releaseGene, jsonArray);
         }
     }
 
@@ -110,7 +111,38 @@ public class DriveAnnotationParser {
         }
     }
 
-    private static void parseGene(JSONObject geneInfo, JSONArray vus) throws IOException, JSONException {
+    private static void updateGeneInfo(JSONObject geneInfo, Gene gene) {
+        JSONObject geneType = geneInfo.has("type") ? geneInfo.getJSONObject("type") : null;
+        String oncogene = geneType == null ? null : (geneType.has("ocg") ? geneType.getString("ocg").trim() : null);
+        String tsg = geneType == null ? null : (geneType.has("tsg") ? geneType.getString("tsg").trim() : null);
+
+        if (oncogene != null) {
+            if (oncogene.equals("Oncogene")) {
+                gene.setOncogene(true);
+            } else {
+                gene.setOncogene(false);
+            }
+        }
+        if (tsg != null) {
+            if (tsg.equals("Tumor Suppressor")) {
+                gene.setTSG(true);
+            } else {
+                gene.setTSG(false);
+            }
+        }
+
+        String isoform = geneInfo.has("isoform_override") ? geneInfo.getString("isoform_override") : null;
+        String refSeq = geneInfo.has("dmp_refseq_id") ? geneInfo.getString("dmp_refseq_id") : null;
+
+        if (isoform != null) {
+            gene.setCuratedIsoform(isoform);
+        }
+        if (refSeq != null) {
+            gene.setCuratedRefSeq(refSeq);
+        }
+    }
+
+    private static void parseGene(JSONObject geneInfo, Boolean releaseGene, JSONArray vus) throws IOException, JSONException {
         GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
         Integer nestLevel = 1;
         if (geneInfo.has("name") && !geneInfo.getString("name").trim().isEmpty()) {
@@ -121,49 +153,24 @@ public class DriveAnnotationParser {
 
                 if (gene == null) {
                     System.out.println(spaceStrByNestLevel(nestLevel) + "Gene " + hugo + " is not in the released list.");
-                    return;
-//                    System.out.println("Could not find gene " + hugo + ". Loading from MyGene.Info...");
-//                    gene = GeneAnnotatorMyGeneInfo2.readByHugoSymbol(hugo);
-//                    if (gene == null) {
-////                    throw new RuntimeException("Could not find gene "+hugo+" either.");
-//                        System.out.println("!!!!!!!!!Could not find gene " + hugo + " either.");
-//                    } else {
-//                        geneBo.save(gene);
-//                    }
+                    if (releaseGene) {
+                        gene = GeneAnnotatorMyGeneInfo2.findGeneFromCBioPortal(hugo);
+                        if (gene == null) {
+                            System.out.println("!!!!!!!!!Could not find gene " + hugo + " either.");
+                            return;
+                        } else {
+                            updateGeneInfo(geneInfo, gene);
+                            geneBo.save(gene);
+                        }
+                    } else {
+                        return;
+                    }
                 }
 
                 if (gene != null) {
                     System.out.println(spaceStrByNestLevel(nestLevel) + "Gene: " + gene.getHugoSymbol());
-                    // Get gene type info
-                    JSONObject geneType = geneInfo.has("type") ? geneInfo.getJSONObject("type") : null;
-                    String oncogene = geneType == null ? null : (geneType.has("ocg") ? geneType.getString("ocg").trim() : null);
-                    String tsg = geneType == null ? null : (geneType.has("tsg") ? geneType.getString("tsg").trim() : null);
-
-                    if (oncogene != null) {
-                        if (oncogene.equals("Oncogene")) {
-                            gene.setOncogene(true);
-                        } else {
-                            gene.setOncogene(false);
-                        }
-                    }
-                    if (tsg != null) {
-                        if (tsg.equals("Tumor Suppressor")) {
-                            gene.setTSG(true);
-                        } else {
-                            gene.setTSG(false);
-                        }
-                    }
-
-                    String isoform = geneInfo.has("isoform_override") ? geneInfo.getString("isoform_override") : null;
-                    String refSeq = geneInfo.has("dmp_refseq_id") ? geneInfo.getString("dmp_refseq_id") : null;
-
-                    if (isoform != null) {
-                        gene.setCuratedIsoform(isoform);
-                    }
-                    if (refSeq != null) {
-                        gene.setCuratedRefSeq(refSeq);
-                    }
-                    geneBo.saveOrUpdate(gene);
+                    updateGeneInfo(geneInfo, gene);
+                    geneBo.update(gene);
 
                     EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
                     AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();

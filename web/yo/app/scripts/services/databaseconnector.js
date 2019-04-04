@@ -91,6 +91,16 @@ angular.module('oncokbApp')
                         callback();
                     });
             }
+
+            function removeGeneFromDB(hugoSymbol, callback) {
+                Gene.remove(hugoSymbol)
+                    .then(function(data) {
+                        callback(data);
+                    }, function() {
+                        callback();
+                    });
+            }
+
             function getAllTumorType(callback, timestamp) {
                 TumorType.getFromServer()
                     .then(function(data) {
@@ -559,6 +569,7 @@ angular.module('oncokbApp')
                 searchAnnotation: searchVariant,
                 updateGene: updateGene,
                 updateGeneType: updateGeneType,
+                removeGeneFromDB: removeGeneFromDB,
                 deleteEvidences: deleteEvidences,
                 updateVUS: updateVUS,
                 updateEvidenceBatch: updateEvidenceBatch,
