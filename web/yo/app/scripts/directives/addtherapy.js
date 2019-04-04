@@ -178,7 +178,7 @@ angular.module('oncokbApp')
                 };
 
                 $scope.goToDrugs = function () {
-                    $window.open('#!/drugs', '_blank');
+                    $window.open('#!/therapies', '_blank');
                 };
             }
         }
