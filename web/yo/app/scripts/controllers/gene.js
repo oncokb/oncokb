@@ -409,11 +409,6 @@ angular.module('oncokbApp')
                     return {'margin-top': '20px'};
                 }
             };
-            $scope.removeGeneFromDB = function() {
-                DatabaseConnector.removeGeneFromDB($scope.gene.name, function(data) {
-                    console.log(data);
-                });
-            };
             /**
              * This function is used to find the most recent update from a section change. e.g. There are 3 items under Prognostic section, and they might get changed at very different time.
              * And we will find the one changed most recently and store them in ReviewResource.mostRecent mapping, so it could be shared across directives and controllers
@@ -1915,17 +1910,30 @@ angular.module('oncokbApp')
                     dialogs.error('Error', errorMessage);
                 });
             };
+            $scope.removeGeneFromDB = function() {
+                $scope.status.removingGene = true;
+                DatabaseConnector.removeGeneFromDB($scope.gene.name, function(data) {
+                    $scope.status.removingGene = false;
+                    $scope.status.geneIsNotReleased = true;
+                }, function() {
+                    $scope.status.removingGene = false;
+                });
+            };
             $scope.releaseGene = function() {
                 function confirmCallback() {
                     var defer = $q.defer();
+                    $scope.status.releasingGene = true;
                     var params = collectingGeneInfo();
                     params.releaseGene = true;
                     DatabaseConnector.updateGene(params, function(result) {
                         mainUtils.updateLastSavedToDB();
+                        $scope.status.geneIsNotReleased = false;
+                        $scope.status.releasingGene = false;
                         defer.resolve();
                     }, function(error) {
                         var errorMessage = 'An error has occurred when saving data.' + error;
                         dialogs.error('Error', errorMessage);
+                        $scope.status.releasingGene = false;
                         defer.reject(error);
                     });
                     return defer.promise;
@@ -3030,8 +3038,20 @@ angular.module('oncokbApp')
                 numAccordion: 0,
                 processing: false,
                 fileEditable : false,
+                geneIsNotReleased: false,
+                releasingGene: false,
+                removingGene: false,
                 savedGene: true
             };
+
+            DatabaseConnector.getAllInternalGenes().then(function(genes) {
+                $scope.status.geneIsNotReleased = _.find(genes.data, function(gene) {
+                    return gene.hugoSymbol = $scope.gene.name;
+                }) === undefined;
+            }, function(reason) {
+                // nothing really needs to be done
+            });
+
             $scope.$watch('meta.newCancerTypes', function (n) {
                 if (n.length > 0 && (n[n.length - 1].mainType || n[n.length - 1].subtype)) {
                     $scope.meta.newCancerTypes.push({

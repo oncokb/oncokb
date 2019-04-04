@@ -33,6 +33,10 @@ angular.module('oncokbApp').factory('Gene', ['$http', 'OncoKB', function($http, 
         return $http.get(OncoKB.config.curationLink + 'gene.json');
     }
 
+    function getAllInternalGenes() {
+        return $http.get(OncoKB.config.apiLink + 'gene.json');
+    }
+
     function remove(hugoSymbol) {
         return $http.post(OncoKB.config.apiLink + 'genes/remove/' + hugoSymbol, {},
             {
@@ -45,6 +49,7 @@ angular.module('oncokbApp').factory('Gene', ['$http', 'OncoKB', function($http, 
 
     return {
         getFromServer: getFromServer,
+        getAllInternalGenes: getAllInternalGenes,
         remove: remove
     };
 }]);

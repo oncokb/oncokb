@@ -92,6 +92,10 @@ angular.module('oncokbApp')
                     });
             }
 
+            function getAllInternalGenes() {
+                return Gene.getAllInternalGenes();
+            }
+
             function removeGeneFromDB(hugoSymbol, callback) {
                 Gene.remove(hugoSymbol)
                     .then(function(data) {
@@ -589,6 +593,7 @@ angular.module('oncokbApp')
                 updateGeneCache: function(hugoSymbol) {
                     return updateGeneCache(hugoSymbol);
                 },
+                getAllInternalGenes: getAllInternalGenes,
                 getOncoTreeTumorTypesByMainType: getOncoTreeTumorTypesByMainType,
                 testAccess: testAccess,
                 getIsoforms: getIsoforms,

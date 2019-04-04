@@ -3,8 +3,14 @@
     <h2>
       <span>Gene: {{::gene.name}}</span>
       <span class="btn-group btn-group-sm" uib-dropdown>
-        <button type="button" class="btn btn-default" ng-click="releaseGene()"ng-if="::(me.admin && internal)">Release Gene</button>
-        <button type="button" class="btn btn-default" ng-click="removeGeneFromDB()" ng-if="developerCheck() && internal" >Remove Gene From DB</button>
+        <button type="button" class="btn btn-default" ng-click="releaseGene()"ng-if="me.admin && internal && status.geneIsNotReleased">
+            <span ng-show="status.releasingGene"><i class="fa fa-spinner fa-spin"></i></span>
+            <span ng-show="!status.releasingGene">Release Gene</span>
+        </button>
+        <button type="button" class="btn btn-default" ng-click="removeGeneFromDB()" ng-if="developerCheck() && internal && !status.geneIsNotReleased" >
+            <span ng-show="status.removingGene"><i class="fa fa-spinner fa-spin"></i></span>
+            <span ng-show="!status.removingGene">Remove Gene From DB</span>
+        </button>
       </span>
       <span ng-show="!reviewMode"><comments-dict key="'name'" path="getObservePath({type: 'gene'})"></comments-dict></span>
       <span ng-repeat="collaborator in collaborators">
