@@ -56,7 +56,7 @@ angular.module('oncokbApp')
                         if (n !== o && !_.isUndefined(n) && scope.fe) {
                             if (!scope.data || !scope.data[scope.key+'_editing'] || scope.data[scope.key+'_editing'] === $rootScope.me.name) {
                                 if (_.keys($rootScope.collaborators).length > 1) { // Multiple users on the same gene
-                                    if (scope.isChangedByOthers()) {
+                                    if (scope.isChangedByOthers(o)) {
                                         return;
                                     }
                                 }
@@ -310,13 +310,11 @@ angular.module('oncokbApp')
                     }
                 };
                 $scope.updateThePath = function() {
-                    console.log($scope.uuid, $scope.path);
                     var tempArr = $scope.path.split('/');
                     var lastEle = Number(tempArr[tempArr.length-1]);
                     if (_.isNumber(lastEle) && !_.isNaN(lastEle)) {
                         tempArr[tempArr.length-1] = $rootScope.indiciesByUUID[$scope.uuid];
                         $scope.path = tempArr.join('/');
-                        console.log($scope.path);
                     }
                 };
                 $scope.getOldContentClass = function(content) {
@@ -344,11 +342,14 @@ angular.module('oncokbApp')
                 $scope.trimCSS = function() {
                     $scope.pasting = true;
                 };
-                $scope.isChangedByOthers = function() {
+                $scope.isChangedByOthers = function(oldContent) {
                     var changedByOthers = false;
-                    firebase.database().ref($scope.path).on('value', function(doc) {
-                        if (_.isUndefined(doc.val()[$scope.key]) || _.isEmpty(doc.val()[$scope.key])
-                            || doc.val()[$scope.key] === $scope.data[$scope.key]) {
+                    // Do not use firebaseConnector at here,
+                    // otherwise the function will be async which means return false directly.
+                    firebase.database().ref($scope.path).once('value', function(doc) {
+                        var data = doc.val();
+                        if (!_.isUndefined(data[$scope.key]) && !_.isEmpty(data[$scope.key])
+                            && data[$scope.key] === oldContent) {
                             changedByOthers = true;
                             return;
                         }
