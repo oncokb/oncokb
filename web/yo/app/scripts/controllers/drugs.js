@@ -3,6 +3,13 @@
 angular.module('oncokbApp')
     .controller('DrugsCtrl', ['$window', '$scope', '$location', '$timeout', '$routeParams', '_', 'DTColumnDefBuilder', 'DTOptionsBuilder', '$firebaseArray', 'FirebaseModel', 'firebaseConnector', '$q', 'dialogs', 'drugMapUtils', '$rootScope', 'DatabaseConnector',
         function ($window, $scope, $location, $timeout, $routeParams, _, DTColumnDefBuilder, DTOptionsBuilder, $firebaseArray, FirebaseModel, firebaseConnector, $q, dialogs, drugMapUtils, $rootScope, DatabaseConnector) {
+            if(!$rootScope.drugList){
+                // Loading all drugs info
+                $firebaseObject(firebaseConnector.ref("Drugs/")).$bindTo($rootScope, "drugList").then(function () {
+                }, function (error) {
+                    dialogs.error('Error', 'Failed to load drugs information. Please Contact developer and stop curation.');
+                });
+            }
             function loadDrugTable() {
                 var deferred1 = $q.defer();
                 var deferred2 = $q.defer();

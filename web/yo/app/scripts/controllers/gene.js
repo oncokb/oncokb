@@ -5,6 +5,13 @@ angular.module('oncokbApp')
         function (_, S, $resource, $interval, $timeout, $scope, $rootScope, $location, $route, $routeParams, $window, $q, dialogs, OncoKB, DatabaseConnector, SecretEmptyKey, $sce, jspdf, FindRegex, mainUtils, ReviewResource, loadFiles, $firebaseObject, $firebaseArray, FirebaseModel, firebaseConnector, user, numOfReviewItems, checkNameChange, drugMapUtils, firebasePathUtils) {
             checkReadPermission();
             // Check permission for user who can only read and write specific genes.
+            if(!$rootScope.drugList){
+                // Loading all drugs info
+                $firebaseObject(firebaseConnector.ref("Drugs/")).$bindTo($rootScope, "drugList").then(function () {
+                }, function (error) {
+                    dialogs.error('Error', 'Failed to load drugs information. Please Contact developer and stop curation.');
+                });
+            }
             function checkReadPermission() {
                 if (_.isUndefined($rootScope.metaData)) {
                     loadFiles.load(['meta']).then(function() {
