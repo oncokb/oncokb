@@ -178,10 +178,10 @@ angular.module('oncokbApp')
                 };
                 $scope.uuidtoName = function(key, oldKey, uuid){
                     if(mainUtils.processedInReview('remove', uuid) && oldKey){
-                        return drugMapUtils.drugUuidtoName(oldKey, $scope.$parent.drugList);
+                        return drugMapUtils.drugUuidtoName(oldKey, $rootScope.drugList);
                     }
                     else{
-                        return drugMapUtils.drugUuidtoName(key, $scope.$parent.drugList);
+                        return drugMapUtils.drugUuidtoName(key, $rootScope.drugList);
                     }
                 };
                 $scope.getMutationName = function(key, oldKey, uuid){

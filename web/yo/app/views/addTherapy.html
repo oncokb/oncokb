@@ -8,7 +8,6 @@
             <div>
                 <div ng-repeat="element in therapy">
                     <div class="flexRow">
-                        <button class="btn btn-default addButton"><i class="fa fa-trash-o" ng-click="deleteTherapy($index)"></i></button>
                         <h5 class="therapyLabel">Therapy {{$index+1}}:  </h5>
                         <div ng-click="addTherapy($index)" class="inputDrugs">
                             <tags-input ng-model="element" display-property="drugName"
@@ -23,6 +22,7 @@
                                                max-results-to-show="100"></auto-complete>
                             </tags-input>
                         </div>
+                        <button ng-show="$index>0" class="btn btn-default addButton"><i class="fa fa-trash-o" ng-click="deleteTherapy($index)"></i></button>
                     </div>
                 </div>
                 <p class="errorNote" ng-show="addTherapyError">{{therapyErrorMessage}}</p>

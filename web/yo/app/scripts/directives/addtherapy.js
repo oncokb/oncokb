@@ -47,7 +47,10 @@ angular.module('oncokbApp')
                 }
 
                 function reformatTherapyResult() {
-                    $scope.therapyResult = _.map($scope.therapy, function (element) {
+                    var therapy = _.filter($scope.therapy, function (item) {
+                        return item != ''
+                    });
+                    $scope.therapyResult = _.map(therapy, function (element) {
                         return (_.map(element, function (name) {
                             return name.drugName;
                         }).join(" + "));
@@ -120,6 +123,9 @@ angular.module('oncokbApp')
                 }
 
                 $scope.deleteTherapy = function (index) {
+                    if(!_.isEmpty($scope.therapy[index])){
+                        $scope.noData = false;
+                    }
                     if (index > 0) {
                         $scope.therapy.splice(index, 1);
                         drugUuids.splice(index, 1);
