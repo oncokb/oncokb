@@ -194,25 +194,15 @@ angular.module('oncokbApp')
         }
         function validatePubmed(pubmedArticles) {
             var deferred = $q.defer();
-            var pmids = _.map(pubmedArticles, function(item) {
-                return item.id;
-            });
+            var pmids = _.map(pubmedArticles, 'id');
             DatabaseConnector.getPubMedArticle(pmids, function(data) {
-                var invalidPmids = [];
                 var articleData = data.result;
                 if (articleData && articleData.uids) {
-                    _.each(articleData.uids, function(pmid) {
+                    _.each(articleData.uids, function(pmid, index) {
                         if (!articleData[pmid] || articleData[pmid].error) {
-                            invalidPmids.push(pmid);
+                            pubmedArticles[index].invalid = true;
                         }
                     });
-                    if (invalidPmids.length > 0) {
-                        _.each(pubmedArticles, function(item) {
-                            if (invalidPmids.indexOf(item.id) !== -1) {
-                                item.invalid = true;
-                            }
-                        });
-                    }
                 }
                 deferred.resolve(pubmedArticles);
             }, function(error) {

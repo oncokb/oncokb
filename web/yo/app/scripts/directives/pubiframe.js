@@ -23,15 +23,13 @@ angular.module('oncokbApp')
                     modelValue = S(modelValue).collapseWhitespace().s;
                     var pubs = FindRegex.result(modelValue);
                     scope.pubs = pubs;
-                    // if (pubs.length === 0) {
-                    //     scope.pubs = [];
-                    // } else {
-                    //     FindRegex.validation(pubs).then(function(result) {
-                    //         scope.pubs = result;
-                    //     }, function (error) {
-                    //         console.log('Error happened', error);
-                    //     });
-                    // }
+                    if (pubs.length > 0) {
+                        FindRegex.validation(scope.pubs).then(function(result) {
+                            scope.pubs = result;
+                        }, function (error) {
+                            console.log('Error happened', error);
+                        });
+                    }
                 }
 
                 scope.pubs = [];
