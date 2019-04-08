@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('oncokbApp')
-    .controller('DrugsCtrl', ['$window', '$scope', '$location', '$timeout', '$routeParams', '_', 'DTColumnDefBuilder', 'DTOptionsBuilder', '$firebaseArray', 'FirebaseModel', 'firebaseConnector', '$q', 'dialogs', 'drugMapUtils', '$rootScope', 'DatabaseConnector',
-        function ($window, $scope, $location, $timeout, $routeParams, _, DTColumnDefBuilder, DTOptionsBuilder, $firebaseArray, FirebaseModel, firebaseConnector, $q, dialogs, drugMapUtils, $rootScope, DatabaseConnector) {
+    .controller('DrugsCtrl', ['$window', '$scope', '$location', '$timeout', '$routeParams', '_', 'DTColumnDefBuilder', 'DTOptionsBuilder', '$firebaseArray', 'FirebaseModel', 'firebaseConnector', '$q', 'dialogs', 'drugMapUtils', '$rootScope', 'DatabaseConnector', '$firebaseObject',
+        function ($window, $scope, $location, $timeout, $routeParams, _, DTColumnDefBuilder, DTOptionsBuilder, $firebaseArray, FirebaseModel, firebaseConnector, $q, dialogs, drugMapUtils, $rootScope, DatabaseConnector, $firebaseObject) {
             if(!$rootScope.drugList){
                 // Loading all drugs info
                 $firebaseObject(firebaseConnector.ref("Drugs/")).$bindTo($rootScope, "drugList").then(function () {
