@@ -152,7 +152,7 @@ angular.module('oncokbApp')
                 }
             }
 
-            return _.uniq(uniqueResultA, 'id');
+            return _.uniqBy(uniqueResultA, 'id');
         }
 
         function validation(articles) {

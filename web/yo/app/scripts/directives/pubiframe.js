@@ -7,7 +7,7 @@
  * # pubIframe
  */
 angular.module('oncokbApp')
-    .directive('pubIframe', function(FindRegex, S, $timeout, pubUtils) {
+    .directive('pubIframe', function(FindRegex, S, $timeout, pubCache) {
         return {
             templateUrl: 'views/pubIframe.html',
             restrict: 'E',
@@ -23,17 +23,9 @@ angular.module('oncokbApp')
                     modelValue = S(modelValue).collapseWhitespace().s;
                     var pubs = FindRegex.result(modelValue);
                     if (pubs.length > 0) {
-                        var pubsCache = pubUtils.get(pubs);
-                        if (pubsCache.notValidatedPuds.length > 0) {
-                            FindRegex.validation(pubsCache.notValidatedPuds).then(function(result) {
-                                pubUtils.set(result);
-                                scope.pubs = _.union(pubsCache.validatedPuds, result);
-                            }, function (error) {
-                                console.log('Error happened', error);
-                            });
-                        } else {
-                            scope.pubs = pubsCache.validatedPuds;
-                        }
+                        pubCache.get(pubs).then(function(result){
+                            scope.pubs = result;
+                        });
                     } else {
                         scope.pubs = [];
                     }
