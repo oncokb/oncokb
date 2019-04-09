@@ -15,7 +15,6 @@ angular.module('oncokbApp')
             validatedPubs = {};
         }
         function get(pubs) {
-            var deferred = $q.defer();
             var validatedPubsArray = [];
             var notValidatedPubs = [];
             _.each(pubs, function(pub){
@@ -25,14 +24,10 @@ angular.module('oncokbApp')
                     notValidatedPubs.push(pub);
                 }
             });
-            if (notValidatedPubs.length > 0) {
-                validatePub(notValidatedPubs).then(function(newlyValidatedPubs){
-                    deferred.resolve(_.concat(validatedPubsArray, newlyValidatedPubs));
-                });
-            } else {
-                deferred.resolve(validatedPubsArray);
-            }
-            return deferred.promise;
+            return {
+                validatedPubs: validatedPubsArray,
+                notValidatedPubs: notValidatedPubs
+            };
         }
         function set(pubs) {
             _.each(pubs, function(pub){

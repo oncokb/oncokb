@@ -23,9 +23,16 @@ angular.module('oncokbApp')
                     modelValue = S(modelValue).collapseWhitespace().s;
                     var pubs = FindRegex.result(modelValue);
                     if (pubs.length > 0) {
-                        pubCache.get(pubs).then(function(result){
-                            scope.pubs = result;
-                        });
+                        var cachedPubs = pubCache.get(pubs);
+                        if (cachedPubs.notValidatedPubs.length > 0) {
+                            pubCache.validatePub(cachedPubs.notValidatedPubs).then(function(result) {
+                                scope.pubs = _.concat(cachedPubs.validatedPubs, result);
+                            }, function (error) {
+                                console.log('Error happened', error);
+                            });
+                        } else {
+                            scope.pubs = cachedPubs.validatedPubs;
+                        }
                     } else {
                         scope.pubs = [];
                     }
