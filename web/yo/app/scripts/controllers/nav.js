@@ -8,7 +8,7 @@
  * Controller of the oncokbApp
  */
 angular.module('oncokbApp')
-    .controller('NavCtrl', function($scope, $location, $rootScope, $q, DatabaseConnector, $firebaseAuth, $firebaseObject, user, dialogs, mainUtils) {
+    .controller('NavCtrl', function($scope, $location, $rootScope, $q, DatabaseConnector, firebaseConnector, $firebaseAuth, $firebaseObject, user, dialogs, mainUtils) {
         var tabs = {
             variant: 'Variant Annotation',
             genes: 'Genes',
@@ -58,6 +58,13 @@ angular.module('oncokbApp')
                 user.setRole(firebaseUser).then(function() {
                     $rootScope.isAuthorizedUser = true;
                     $rootScope.signedInUser = $rootScope.me;
+                    if(!$rootScope.drugList){
+                        // Loading all drugs info
+                        $firebaseObject(firebaseConnector.ref("Drugs/")).$bindTo($rootScope, "drugList").then(function () {
+                        }, function (error) {
+                            dialogs.error('Error', 'Failed to load drugs information. Please Contact developer and stop curation.');
+                        });
+                    }
                     setParams();
                     testInternal().then(function() {
                         if (window.localStorage.geneName) {
