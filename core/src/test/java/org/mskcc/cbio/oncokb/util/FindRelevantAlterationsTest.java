@@ -49,7 +49,7 @@ public class FindRelevantAlterationsTest {
                 // General truncating consequence should be associated with Truncating Mutations
                 // Check splice
                 // TP53 Oncogenic Mutations does not have any information we are ready to relase
-                {"TP53", "X33_splice", null, "X33_splice, Truncating Mutations, Oncogenic Mutations"},
+                {"TP53", "X33_splice", null, "X33_splice, Truncating Mutations"},
                 {"MET", "X1010_splice", null, "X1010_splice, 963_D1010splice, 981_1028splice, 963_1028splice, Oncogenic Mutations"},
                 {"MET", "X1010splice", null, "X1010_splice, 963_D1010splice, 981_1028splice, 963_1028splice, Oncogenic Mutations"},
 
