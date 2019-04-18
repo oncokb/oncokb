@@ -284,13 +284,13 @@ angular.module('oncokbApp')
                 for (var i = 0; i < parts.length; i++) {
                     if (!parts[i]) continue;
                     if (parts[i].indexOf('[') === -1) {
-                        proteinChange = parts[i];
-                        displayName = parts[i];
+                        proteinChange = parts[i].trim();
+                        displayName = parts[i].trim();
                     } else {
                         var l = parts[i].indexOf('[');
                         var r = parts[i].indexOf(']');
-                        proteinChange = parts[i].substring(0, l);
-                        displayName = parts[i].substring(l + 1, r);
+                        proteinChange = parts[i].substring(0, l).trim();
+                        displayName = parts[i].substring(l + 1, r).trim();
                     }
 
                     if (proteinChange.indexOf('/') === -1) {

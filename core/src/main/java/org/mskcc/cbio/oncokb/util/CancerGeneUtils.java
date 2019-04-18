@@ -5,9 +5,7 @@ import org.mskcc.cbio.oncokb.model.CancerGene;
 import org.mskcc.cbio.oncokb.model.Gene;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by jiaojiao on 6/9/17.
@@ -23,6 +21,7 @@ public class CancerGeneUtils {
                 List<String> lines = FileUtils.readTrimedLinesStream(
                     CancerGeneUtils.class.getResourceAsStream(CANCER_GENE_FILE_PATH));
                 Iterator itr = lines.iterator();
+                Set<String> allHugoSymbolsFromFile = new HashSet<>();
 
                 while (itr.hasNext()) {
                     String line = itr.next().toString().trim();
@@ -34,19 +33,23 @@ public class CancerGeneUtils {
                     String[] items = line.split("\t");
                     if (items.length != 9) continue;
 
+                    String hugoSymbol = items[0];
+                    allHugoSymbolsFromFile.add(hugoSymbol);
+
                     Gene gene = GeneUtils.getGeneByEntrezId(Integer.parseInt(items[1]));
                     CancerGene cancerGene = new CancerGene();
                     cancerGene.setEntrezGeneId(Integer.parseInt(items[1]));
 
                     if (gene == null) {
-                        cancerGene.setHugoSymbol(items[0]);
-                        cancerGene.setOncokbAnnotated(false);
+                        cancerGene.setHugoSymbol(hugoSymbol);
                     } else {
-                        if (!gene.getHugoSymbol().equals(items[0])) {
-                            System.out.println("The gene hugo does not match, expect " + gene.getHugoSymbol() + ", but got: " + items[0]);
+                        if (!gene.getHugoSymbol().equals(hugoSymbol)) {
+                            System.out.println("The gene hugo does not match, expect " + gene.getHugoSymbol() + ", but got: " + hugoSymbol);
                         }
                         cancerGene.setHugoSymbol(gene.getHugoSymbol());
                         cancerGene.setOncokbAnnotated(true);
+                        cancerGene.setOncogene(gene.getOncogene());
+                        cancerGene.setTSG(gene.getTSG());
                     }
                     int occurence = NumberUtils.isNumber(items[2].trim()) ? Integer.parseInt(items[2].trim()) : 0;
                     if (cancerGene.getOncokbAnnotated()) {
@@ -61,6 +64,21 @@ public class CancerGeneUtils {
                     cancerGene.setSangerCGC(items[8].trim().equals("1"));
                     CancerGeneList.add(cancerGene);
                 }
+
+                // We also need to include genes that not in the initial list
+                Set<Gene> allAnnotatedGenes = GeneUtils.getAllGenes();
+                allAnnotatedGenes
+                    .stream()
+                    .filter(gene -> !allHugoSymbolsFromFile.contains(gene.getHugoSymbol()))
+                    .forEach(gene -> {
+                        CancerGene cancerGene = new CancerGene();
+                        cancerGene.setEntrezGeneId(gene.getEntrezGeneId());
+                        cancerGene.setHugoSymbol(gene.getHugoSymbol());
+                        cancerGene.setOccurrenceCount(1);
+                        cancerGene.setOncogene(gene.getOncogene());
+                        cancerGene.setTSG(gene.getTSG());
+                        CancerGeneList.add(cancerGene);
+                    });
             } catch (IOException e) {
                 e.printStackTrace();
             }
