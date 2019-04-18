@@ -215,9 +215,15 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
 
         // Find exact match
         Alteration matchedAlt = findAlteration(alteration.getAlteration(), fullAlterations);
+
+        if(matchedAlt == null && AlterationUtils.isFusion(alteration.getAlteration())) {
+            matchedAlt = AlterationUtils.getRevertFusions(alteration);
+        }
+
         if (matchedAlt != null) {
             alterations.add(matchedAlt);
         }
+
 
         if (addEGFRCTD(alteration)) {
             Alteration alt = findAlteration("CTD", fullAlterations);

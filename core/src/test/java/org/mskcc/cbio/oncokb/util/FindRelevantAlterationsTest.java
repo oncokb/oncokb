@@ -42,6 +42,10 @@ public class FindRelevantAlterationsTest {
                 // Check Fusions
                 {"BRAF", "PAPSS1-BRAF Fusion", null, "PAPSS1-BRAF Fusion, Fusions, Oncogenic Mutations"},
 
+                // The revert fusion should get picked
+                {"ABL1", "ABL1-BCR fusion", null, "BCR-ABL1 Fusion, Fusions"},
+                {"ABL1", "BCR-ABL1 fusion", null, "BCR-ABL1 Fusion, Fusions"},
+
                 // Tumor suppressor should be mapped with Truncating Mutations. (The code does not check whether gene
                 // is tumor suppressor, just check whether Fusions is curated, is not, link Truncating Mutations)
                 {"PIK3R1", "KCTD16-PIK3R1 fusion", null, "KCTD16-PIK3R1 fusion, Truncating Mutations"},
