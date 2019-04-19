@@ -376,6 +376,12 @@ public class validation {
                     if (alteration.getAlteration().contains("indel")) {
                         printUnsupportedAlteration(feedUrl, alteration, "Indel is not supported");
                     }
+                    if (alteration.getAlteration().contains("exon")) {
+                        printUnsupportedAlteration(feedUrl, alteration, "Exon should have a range");
+                    }
+                    if (alteration.getAlteration().contains("-") && !alteration.getAlteration().toLowerCase().contains("fusion")) {
+                        printUnsupportedAlteration(feedUrl, alteration, "Fusion format error");
+                    }
                     if (alteration.getConsequence() == null) {
                         printUnsupportedAlteration(feedUrl, alteration, "Variant should have a consequence attached");
                     } else {
