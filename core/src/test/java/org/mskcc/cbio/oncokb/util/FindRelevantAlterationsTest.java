@@ -125,6 +125,12 @@ public class FindRelevantAlterationsTest {
 
                 // Do not mapping Oncogenic Mutations to Amplification
                 {"KIT", "Amplification", null, "Amplification"},
+
+
+                // Check non_truncating_variant
+//                {"MED12", "A22*", null, "1_33mut, Truncating Mutations"},
+//                {"MED12", "G22D", null, "1_33nontrunc, 1_33mut"},
+
             });
     }
 

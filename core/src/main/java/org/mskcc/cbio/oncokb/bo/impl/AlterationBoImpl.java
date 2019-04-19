@@ -285,6 +285,10 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
 
         if (alteration.getConsequence().getIsGenerallyTruncating()) {
             addTruncatingMutations = true;
+        }else{
+            // Match non_truncating_variant for non truncating variant
+            VariantConsequence nonTruncatingVariant = VariantConsequenceUtils.findVariantConsequenceByTerm("non_truncating_variant");
+            alterations.addAll(findMutationsByConsequenceAndPosition(alteration.getGene(), nonTruncatingVariant, alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations));
         }
 
         // Match all variants with `any` as consequence. Currently, only format start_end mut is supported.
