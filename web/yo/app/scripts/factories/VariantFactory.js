@@ -612,7 +612,7 @@ angular.module('oncokbApp')
             this.uuid = getUUID();
             this.description = '';
             this.ncitName = ncitName;
-            this.synonyms = synonyms;
+            this.synonyms = synonyms || [];
         }
         return {
             Gene: Gene,
