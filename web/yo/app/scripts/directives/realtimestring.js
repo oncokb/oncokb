@@ -53,7 +53,11 @@ angular.module('oncokbApp')
                         });
                     }
                     scope.$watch('data[key]', function (n, o) {
-                        if (n !== o && !_.isUndefined(n) && scope.fe) {
+                        // 1) Do not run the function when no data change(n===o).
+                        // 2) Do not run the function when there is no new content(_.isUndefined(n)).
+                        // 3) Do not run the function when just click panel without any change(_.isEmpty(n) && _.isUndefined(o)).
+                        // 4) Do not run the function when file is not editable(scope.fe===false).
+                        if (n !== o && !_.isUndefined(n) && !(_.isEmpty(n) && _.isUndefined(o)) && scope.fe) {
                             if (!scope.data || !scope.data[scope.key+'_editing'] || scope.data[scope.key+'_editing'] === $rootScope.me.name) {
                                 if (_.keys($rootScope.collaborators).length > 1) { // Multiple users on the same gene
                                     if (scope.isChangedByOthers(o)) {

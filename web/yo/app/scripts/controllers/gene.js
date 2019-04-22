@@ -476,7 +476,7 @@ angular.module('oncokbApp')
                             changeHappened = true;
                         }
                     } else {
-                        if ($scope.geneMeta.review[$scope.gene[item + '_uuid']]) {
+                        if ($scope.geneMeta.review[$scope.gene[item + '_uuid']] && $scope.gene[item + '_review'].updatedBy) {
                             userName = $scope.gene[item + '_review'].updatedBy;
                             changeHappened = true;
                         }
