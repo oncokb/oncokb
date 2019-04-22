@@ -23,12 +23,13 @@ angular.module('oncokbApp')
             filterTabs.push('genes');
             filterTabs.push('queues');
             filterTabs.push('therapies');
-            if ($rootScope.me.admin) {
+            filterTabs.push('tools');
+            if ($rootScope.me && $rootScope.me.admin) {
                 filterTabs = _.union(filterTabs, ['variant', 'tools', 'feedback']);
             }
 
             if (!$rootScope.internal) {
-                filterTabs = _.intersection(filterTabs, ['genes', 'queues', 'feedback']);
+                filterTabs = _.intersection(filterTabs, ['genes', 'queues', 'feedback', 'therapies', 'tools']);
             }
 
             $scope.tabs = filterTabs.map(function(tabKey) {
@@ -40,18 +41,6 @@ angular.module('oncokbApp')
                 delete window.localStorage.geneName;
             }
             window.localStorage.tab = key;
-        }
-
-        function testInternal() {
-            var defer = $q.defer();
-            DatabaseConnector.testAccess(function() {
-                $rootScope.internal = true;
-                defer.resolve();
-            }, function(data, status, headers, config) {
-                $rootScope.internal = false;
-                defer.resolve();
-            });
-            return defer.promise;
         }
         $firebaseAuth().$onAuthStateChanged(function(firebaseUser) {
             if (firebaseUser) {
@@ -66,15 +55,13 @@ angular.module('oncokbApp')
                         });
                     }
                     setParams();
-                    testInternal().then(function() {
-                        if (window.localStorage.geneName) {
-                            $location.url('/gene/' + window.localStorage.geneName);
-                        } else if (window.localStorage.tab){
-                            $location.url('/' + window.localStorage.tab);
-                        } else {
-                            $location.url('/genes');
-                        }
-                    });
+                    if (window.localStorage.geneName) {
+                        $location.url('/gene/' + window.localStorage.geneName);
+                    } else if (window.localStorage.tab) {
+                        $location.url('/' + window.localStorage.tab);
+                    } else{
+                        $location.url('/genes');
+                    }
                 }, function(error) {
                     mainUtils.sendEmail('dev.oncokb@gmail.com', 'Failed to set user role.',
                         'Content: \n' + JSON.stringify(firebaseUser) + '\n\nError: \n' + JSON.stringify(error));
@@ -95,6 +82,10 @@ angular.module('oncokbApp')
                 }
             });
         };
+
+        $scope.$on('internalStateChange', function() {
+            setParams();
+        });
 
         $scope.signOut = function() {
             user.logout().then(function() {

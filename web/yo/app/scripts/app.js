@@ -84,7 +84,7 @@ var oncokbApp = angular.module('oncokbApp', [
             .when('/tools', {
                 templateUrl: 'views/tools.html',
                 controller: 'ToolsCtrl',
-                internalUse: true
+                internalUse: false
             })
             .when('/genes', {
                 templateUrl: 'views/genes.html',
@@ -101,11 +101,13 @@ var oncokbApp = angular.module('oncokbApp', [
                 internalUse: false
             })
             .when('/queues', {
-                templateUrl: 'views/queues.html'
+                templateUrl: 'views/queues.html',
+                internalUse: false
             })
             .when('/therapies', {
                 templateUrl: 'views/drugs.html',
-                controller: 'DrugsCtrl'
+                controller: 'DrugsCtrl',
+                internalUse: false
             })
             .otherwise({
                 redirectTo: '/genes'
@@ -136,8 +138,8 @@ var oncokbApp = angular.module('oncokbApp', [
     });
 
 angular.module('oncokbApp').run(
-    ['$window', '$timeout', '$rootScope', '$location', 'loadingScreen', 'DatabaseConnector', 'dialogs', 'mainUtils', 'user', 'loadFiles', '$firebaseObject', 'firebaseConnector',
-        function($window, $timeout, $rootScope, $location, loadingScreen, DatabaseConnector, dialogs, mainUtils, user, loadFiles, $firebaseObject, firebaseConnector) {
+    ['$window', '$timeout', '$rootScope', '$location', '$q', 'loadingScreen', 'DatabaseConnector', 'dialogs', 'mainUtils', 'user', 'loadFiles', '$firebaseObject', 'firebaseConnector',
+        function($window, $timeout, $rootScope, $location, $q, loadingScreen, DatabaseConnector, dialogs, mainUtils, user, loadFiles, $firebaseObject, firebaseConnector) {
             $rootScope.internal = true;
             $rootScope.meta = {
                 levelsDesc: {
@@ -197,6 +199,23 @@ angular.module('oncokbApp').run(
                 $location.url('/');
             });
             var loading = true;
+
+            function testInternal() {
+                var defer = $q.defer();
+                DatabaseConnector.testAccess(function() {
+                    $rootScope.internal = true;
+                    defer.resolve();
+                }, function(data, status, headers, config) {
+                    $rootScope.internal = false;
+                    defer.resolve();
+                });
+                return defer.promise;
+            }
+
+            testInternal().finally(function() {
+                $rootScope.$broadcast('internalStateChange');
+            });
+
             $rootScope.$on('$routeChangeStart', function(event, next) {
                 var fromIndex = window.location.href.indexOf('/gene/');
                 var hugoSymbol = '';

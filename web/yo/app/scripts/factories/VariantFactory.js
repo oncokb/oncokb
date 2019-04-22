@@ -86,7 +86,7 @@ angular.module('oncokbApp').factory('Drugs', ['$http', 'OncoKB', function ($http
     function updatePreferredName(ncitCode, preferredName) {
 
         return $http.post(
-            OncoKB.config.curationLink + 'drugs/update/' + ncitCode,
+            OncoKB.config.apiLink + 'drugs/update/' + ncitCode,
             {
                 preferredName: preferredName
             },

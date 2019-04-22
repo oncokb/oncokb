@@ -90,6 +90,7 @@
     <div class="result-margin" ng-if="errorMessage.length > 0">
         <h4 class="invalidResult">{{ errorMessage }}</h4>
     </div>
+    <div ng-if="internal">
     <hr/>
     <h3>Query Reviewed Data</h3>
     <div class="row" style="margin-top:30px; margin-bottom:30px;">
@@ -151,4 +152,5 @@
         {{ tsgValidation.result }}
     </h4>
     <br/><br/>
+    </div>
 </div>

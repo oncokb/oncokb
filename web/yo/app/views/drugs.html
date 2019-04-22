@@ -1,4 +1,4 @@
-<div class="drugsPage">
+<div class="drugsPage" ng-show="!status.updatingDrugName">
     <h3 class="headerStyle">Curated Therapies</h3>
     <div ng-if="drugList!==undefined">
         <table class="table" datatable="ng" dt-options="dtOptions" dt-columns="dtColumns">
@@ -15,13 +15,13 @@
             <tr data-ng-repeat="drug in drugList">
                 <td ng-init="editDrugName=false">
                     <div ng-show="editDrugName===false">
-                        <button type="button" class="btn btn-warning buttonStyle " uib-tooltip-placement="top"
+                        <button ng-show="internal" type="button" class="btn btn-warning buttonStyle " uib-tooltip-placement="top"
                                 uib-tooltip="Modify Name" ng-click="editDrugName=!editDrugName" ng-disabled="!drug.synonyms"><i
                             class="fa fa-edit"></i>
                         </button>
                         {{ drug.drugName}}
                     </div>
-                    <div ng-show="editDrugName===true">
+                    <div ng-show="internal && editDrugName===true">
                         <button type="button" class="btn btn-success buttonStyle" uib-tooltip-placement="top"
                                 uib-tooltip="Save Name"
                                 ng-click="saveDrugName(newDrugName, drug);editDrugName=!editDrugName"><i
@@ -60,4 +60,5 @@
         <create-new-drug></create-new-drug>
     </div>
 </div>
+<loading ng-model="status.updatingDrugName" content="Please wait, we are updating drug preferred name."></loading>
 
