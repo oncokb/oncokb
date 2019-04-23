@@ -23,7 +23,6 @@ angular.module('oncokbApp')
             filterTabs.push('genes');
             filterTabs.push('queues');
             filterTabs.push('therapies');
-            filterTabs.push('tools');
             if ($rootScope.me && $rootScope.me.admin) {
                 filterTabs = _.union(filterTabs, ['variant', 'tools', 'feedback']);
             }
