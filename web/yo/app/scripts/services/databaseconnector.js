@@ -68,12 +68,16 @@ angular.module('oncokbApp')
 
             function updateDrugPreferredName(ncitCode, newPreferredName) {
                 var deferred = $q.defer();
-                Drugs.updatePreferredName(ncitCode, newPreferredName)
-                    .then(function(data) {
-                        deferred.resolve(data.data);
-                    }, function(error) {
-                        deferred.reject(error);
-                    });
+                if (testing) {
+                    deferred.resolve();
+                } else {
+                    Drugs.updatePreferredName(ncitCode, newPreferredName)
+                        .then(function(data) {
+                            deferred.resolve(data.data);
+                        }, function(error) {
+                            deferred.reject(error);
+                        });
+                }
                 return deferred.promise;
             }
 
