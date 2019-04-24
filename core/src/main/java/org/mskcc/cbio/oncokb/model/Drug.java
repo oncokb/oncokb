@@ -60,12 +60,6 @@ public class Drug implements java.io.Serializable {
     @Column(length = 1000, name = "synonym")
     private Set<String> synonyms = new HashSet<String>(0);
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @JsonIgnore
-    @CollectionTable(name = "drug_atccode", joinColumns = @JoinColumn(name = "drug_id", nullable = false))
-    @Column(name = "atccode")
-    private Set<String> atcCodes;
-
     @JsonIgnore
     @ManyToMany(cascade={CascadeType.ALL}, fetch = FetchType.EAGER)
     @JoinTable(name="drug_family",
@@ -144,14 +138,6 @@ public class Drug implements java.io.Serializable {
         this.description = description;
     }
 
-   public Set<String> getAtcCodes() {
-        return atcCodes;
-    }
-
-    public void setAtcCodes(Set<String> atcCodes) {
-        this.atcCodes = atcCodes;
-    }
-
     @JsonIgnore
     public Set<Drug> getDrugFamlilies() {
         return drugFamlilies;
@@ -176,13 +162,13 @@ public class Drug implements java.io.Serializable {
 
         Drug drug = (Drug) o;
 
-        if (ncitCode != null ? !ncitCode.equals(drug.ncitCode) : drug.ncitCode != null) return false;
+        if (synonyms != null ? !synonyms.equals(drug.synonyms) : drug.synonyms != null) return false;
         return getDrugName().equals(drug.getDrugName());
     }
 
     @Override
     public int hashCode() {
-        int result = ncitCode != null ? ncitCode.hashCode() : 0;
+        int result = synonyms != null ? synonyms.hashCode() : 0;
         result = 31 * result + getDrugName().hashCode();
         return result;
     }
