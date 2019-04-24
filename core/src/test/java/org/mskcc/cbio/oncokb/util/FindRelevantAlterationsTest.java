@@ -54,8 +54,8 @@ public class FindRelevantAlterationsTest {
                 // Check splice
                 // TP53 Oncogenic Mutations does not have any information we are ready to relase
                 {"TP53", "X33_splice", null, "X33_splice, Truncating Mutations"},
-                {"MET", "X1010_splice", null, "X1010_splice, 963_D1010splice, 981_1028splice, 963_1028splice, Oncogenic Mutations"},
-                {"MET", "X1010splice", null, "X1010_splice, 963_D1010splice, 981_1028splice, 963_1028splice, Oncogenic Mutations"},
+                {"MET", "X1010_splice", null, "X1010_splice, 963_1010splice, 981_1028splice, Oncogenic Mutations"},
+                {"MET", "X1010splice", null, "X1010_splice, 963_1010splice, 981_1028splice, Oncogenic Mutations"},
 
                 // Check stop_gained
                 {"MAP2K4", "R304*", null, "R304*, Truncating Mutations"},
