@@ -74,8 +74,7 @@ public class MvcConfiguration extends WebMvcConfigurerAdapter {
             "https://oncokb.org/terms",
             new Contact("OncoKB", "https://oncokb.org", "contact@oncokb.org"),
             "Usage Terms",
-            "https://oncokb.org/terms",
-            new ArrayList<VendorExtension>()
+            "https://oncokb.org/terms"
         );
         return apiInfo;
     }

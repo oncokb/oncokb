@@ -34,7 +34,7 @@ public class UtilsApiController implements UtilsApi {
         header.add("Isoform");
         header.add("RefSeq");
         header.add("Entrez Gene ID");
-        header.add("Gene");
+        header.add("Hugo Symbol");
         header.add("Alteration");
         header.add("Protein Change");
         header.add("Oncogenicity");
@@ -110,7 +110,7 @@ public class UtilsApiController implements UtilsApi {
         header.add("Isoform");
         header.add("RefSeq");
         header.add("Entrez Gene ID");
-        header.add("Gene");
+        header.add("Hugo Symbol");
         header.add("Alteration");
         header.add("Protein Change");
         header.add("Cancer Type");
@@ -200,6 +200,8 @@ public class UtilsApiController implements UtilsApi {
         header.add("Entrez Gene ID");
         header.add("# of occurrence within resources (Column D-J)");
         header.add("OncoKB Annotated");
+        header.add("Is Oncogene");
+        header.add("Is Tumor Suppressor Gene");
         header.add("MSK-IMPACT");
         header.add("MSK-HEME");
         header.add("FOUNDATION ONE");
@@ -215,6 +217,8 @@ public class UtilsApiController implements UtilsApi {
             row.add(cancerGene.getEntrezGeneId().toString());
             row.add(String.valueOf(cancerGene.getOccurrenceCount()));
             row.add(getStringByBoolean(cancerGene.getOncokbAnnotated()));
+            row.add(getStringByBoolean(cancerGene.getOncogene()));
+            row.add(getStringByBoolean(cancerGene.getTSG()));
             row.add(getStringByBoolean(cancerGene.getmSKImpact()));
             row.add(getStringByBoolean(cancerGene.getmSKHeme()));
             row.add(getStringByBoolean(cancerGene.getFoundation()));
@@ -241,8 +245,8 @@ public class UtilsApiController implements UtilsApi {
         List<String> header = new ArrayList<>();
         header.add("Hugo Symbol");
         header.add("Entrez Gene ID");
-        header.add("Is Tumor Suppressor");
         header.add("Is Oncogene");
+        header.add("Is Tumor Suppressor Gene");
         header.add("Isoform");
         header.add("RefSeq");
         header.add("Highest Level of Evidence(sensitivity)");
@@ -256,8 +260,8 @@ public class UtilsApiController implements UtilsApi {
             List<String> row = new ArrayList<>();
             row.add(gene.getHugoSymbol());
             row.add(String.valueOf(gene.getEntrezGeneId()));
-            row.add(getStringByBoolean(gene.getTSG()));
             row.add(getStringByBoolean(gene.getOncogene()));
+            row.add(getStringByBoolean(gene.getTSG()));
             row.add(gene.getIsoform());
             row.add(gene.getRefSeq());
             row.add(gene.getHighestSensitiveLevel());
