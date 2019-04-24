@@ -243,12 +243,12 @@ public class UtilsApiController implements UtilsApi {
         String newLine = "\n";
         StringBuilder sb = new StringBuilder();
         List<String> header = new ArrayList<>();
-        header.add("Hugo Symbol");
-        header.add("Entrez Gene ID");
-        header.add("Is Oncogene");
-        header.add("Is Tumor Suppressor Gene");
         header.add("Isoform");
         header.add("RefSeq");
+        header.add("Entrez Gene ID");
+        header.add("Hugo Symbol");
+        header.add("Is Oncogene");
+        header.add("Is Tumor Suppressor Gene");
         header.add("Highest Level of Evidence(sensitivity)");
         header.add("Highest Level of Evidence(resistance)");
         header.add("Summary");
@@ -258,12 +258,12 @@ public class UtilsApiController implements UtilsApi {
         List<CuratedGene> genes = getCuratedGenes();
         for (CuratedGene gene : genes) {
             List<String> row = new ArrayList<>();
-            row.add(gene.getHugoSymbol());
-            row.add(String.valueOf(gene.getEntrezGeneId()));
-            row.add(getStringByBoolean(gene.getOncogene()));
-            row.add(getStringByBoolean(gene.getTSG()));
             row.add(gene.getIsoform());
             row.add(gene.getRefSeq());
+            row.add(String.valueOf(gene.getEntrezGeneId()));
+            row.add(gene.getHugoSymbol());
+            row.add(getStringByBoolean(gene.getOncogene()));
+            row.add(getStringByBoolean(gene.getTSG()));
             row.add(gene.getHighestSensitiveLevel());
             row.add(gene.getHighestResistancLevel());
             sb.append(MainUtils.listToString(row, separator));
