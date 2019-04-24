@@ -1,10 +1,13 @@
 package org.mskcc.cbio.oncokb.util;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.mskcc.cbio.oncokb.apiModels.InfoLevel;
 import org.mskcc.cbio.oncokb.model.Evidence;
 import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
 
+import javax.sound.sampled.Line;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by Hongxin Zhang
@@ -298,5 +301,14 @@ public class LevelUtils {
         } else {
             return false;
         }
+    }
+
+    public static List<InfoLevel> getInfoLevels() {
+        List<LevelOfEvidence> levels = new ArrayList<>();
+        levels.addAll(CollectionUtils.intersection(PUBLIC_LEVELS, THERAPEUTIC_RESISTANCE_LEVELS));
+        levels.addAll(CollectionUtils.intersection(PUBLIC_LEVELS, THERAPEUTIC_SENSITIVE_LEVELS));
+        levels.sort(Comparator.comparing(LevelOfEvidence::getLevel));
+
+        return levels.stream().map(levelOfEvidence -> new InfoLevel(levelOfEvidence)).collect(Collectors.toList());
     }
 }
