@@ -57,7 +57,6 @@ public class Drug implements java.io.Serializable {
     private DrugTableItemType type = DrugTableItemType.DRUG;
 
     @Column(length = 40)
-    @JsonIgnore
     private String uuid;
 
     @ElementCollection(fetch = FetchType.EAGER)

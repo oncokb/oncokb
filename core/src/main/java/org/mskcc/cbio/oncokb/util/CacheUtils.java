@@ -65,6 +65,10 @@ public class CacheUtils {
             if (operation.get("cmd") == "update") {
                 Integer entrezGeneId = Integer.parseInt(operation.get("val"));
                 VUS.remove(entrezGeneId);
+                Gene gene = ApplicationContextSingleton.getGeneBo().findGeneByEntrezGeneId(entrezGeneId);
+                if (gene != null) {
+                    setVUS(entrezGeneId, getEvidences(gene));
+                }
             } else if (operation.get("cmd") == "reset") {
                 VUS.clear();
             }
@@ -106,6 +110,10 @@ public class CacheUtils {
             if (operation.get("cmd") == "update") {
                 Integer entrezGeneId = Integer.parseInt(operation.get("val"));
                 evidences.remove(entrezGeneId);
+                Gene gene = ApplicationContextSingleton.getGeneBo().findGeneByEntrezGeneId(entrezGeneId);
+                if (gene != null) {
+                    setEvidences(gene);
+                }
             } else if (operation.get("cmd") == "reset") {
                 evidences.clear();
                 cacheAllEvidencesByGenes();
@@ -592,15 +600,6 @@ public class CacheUtils {
         Long current = MainUtils.getCurrentTimestamp();
         if (evidences == null || evidences.size() == 0) {
             cacheAllEvidencesByGenes();
-        }
-
-        if (evidences.keySet().size() != genes.size()) {
-            for (Gene gene : genes) {
-                if (!evidences.containsKey(gene.getEntrezGeneId())) {
-                    setEvidences(gene);
-                    setVUS(gene.getEntrezGeneId(), getEvidences(gene));
-                }
-            }
         }
     }
 
