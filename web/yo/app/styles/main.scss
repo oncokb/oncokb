@@ -984,7 +984,8 @@ input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:b
         float: left;
     }
     .tagsBox{
-        width:650px;
+        width: 650px;
+        height: fit-content;
     }
 }
 
