@@ -489,7 +489,7 @@ public class EvidenceController {
         // The sample solution for now is updating all gene related evidences.
         for (Gene gene : genes) {
             ApplicationContextSingleton.getAlterationBo().deleteMutationsWithoutEvidenceAssociatedByGene(gene);
-            CacheUtils.updateGene(gene.getEntrezGeneId(), true);
+            CacheUtils.updateGene(Collections.singleton(gene.getEntrezGeneId()), true);
         }
     }
 

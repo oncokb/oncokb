@@ -13,6 +13,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 /**
  * @author Hongxin Zhang
  */
@@ -31,10 +34,11 @@ public class DrugController {
         DrugBo drugBo = ApplicationContextSingleton.getDrugBo();
         Drug drug = drugBo.findDrugsByNcitCode(ncitCode);
         if (drug != null) {
+            Set<Gene> genes = GeneUtils.getGenesWithDrug(drug);
             drug.setDrugName(preferredName);
             drugBo.update(drug);
+            CacheUtils.updateGene(genes.stream().map(gene -> gene.getEntrezGeneId()).collect(Collectors.toSet()), true);
         }
-        CacheUtils.resetAll();
 
         return new ResponseEntity(HttpStatus.OK);
     }

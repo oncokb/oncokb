@@ -79,7 +79,7 @@ public class GeneController {
         if (gene == null) {
             GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
             geneBo.save(queryGene);
-            CacheUtils.resetAll();
+            CacheUtils.updateGene(Collections.singleton(gene.getEntrezGeneId()), true);
         }
         return "success";
     }
@@ -95,7 +95,7 @@ public class GeneController {
             ApplicationContextSingleton.getEvidenceBo().deleteAll(new ArrayList<>(CacheUtils.getEvidences(gene)));
             ApplicationContextSingleton.getAlterationBo().deleteAll(new ArrayList<>(AlterationUtils.getAllAlterations(gene)));
             ApplicationContextSingleton.getGeneBo().delete(gene);
-            CacheUtils.updateGene(gene.getEntrezGeneId(), true);
+            CacheUtils.updateGene(Collections.singleton(gene.getEntrezGeneId()), true);
         }
         return "success";
     }

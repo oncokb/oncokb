@@ -2,6 +2,7 @@ package org.mskcc.cbio.oncokb.util;
 
 import com.mysql.jdbc.StringUtils;
 import org.apache.commons.collections.map.HashedMap;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
 
@@ -27,6 +28,9 @@ import java.util.*;
 public class CacheUtils {
     private static Map<Integer, Gene> genesByEntrezId = new HashMap<>();
     private static Map<String, Integer> hugoSymbolToEntrez = new HashMap<>();
+
+    private static final String CANCER_GENE_FILE_PATH = "/data/cancer-gene.txt";
+    private static List<CancerGene> cancerGeneList = null;
 
     private static Map<String, List<TumorType>> mappedTumorTypes = new HashMap<>();
     private static Map<String, List<TumorType>> allOncoTreeTypes = new HashMap<>(); //Tag by different categories. main or subtype
@@ -61,6 +65,10 @@ public class CacheUtils {
             if (operation.get("cmd") == "update") {
                 Integer entrezGeneId = Integer.parseInt(operation.get("val"));
                 VUS.remove(entrezGeneId);
+                Gene gene = ApplicationContextSingleton.getGeneBo().findGeneByEntrezGeneId(entrezGeneId);
+                if (gene != null) {
+                    setVUS(entrezGeneId, getEvidences(gene));
+                }
             } else if (operation.get("cmd") == "reset") {
                 VUS.clear();
             }
@@ -102,6 +110,10 @@ public class CacheUtils {
             if (operation.get("cmd") == "update") {
                 Integer entrezGeneId = Integer.parseInt(operation.get("val"));
                 evidences.remove(entrezGeneId);
+                Gene gene = ApplicationContextSingleton.getGeneBo().findGeneByEntrezGeneId(entrezGeneId);
+                if (gene != null) {
+                    setEvidences(gene);
+                }
             } else if (operation.get("cmd") == "reset") {
                 evidences.clear();
                 cacheAllEvidencesByGenes();
@@ -117,22 +129,19 @@ public class CacheUtils {
         }
     };
 
-    private static void notifyOtherServices(String cmd, Integer entrezGeneId) {
+    private static void notifyOtherServices(String cmd, Set<Integer> entrezGeneIds) {
         if (cmd == null) {
             cmd = "";
         }
         System.out.println("Notify other services..." + " at " + MainUtils.getCurrentTime());
-        if (cmd == "update" && entrezGeneId != null) {
-            Gene gene = GeneUtils.getGeneByEntrezId(entrezGeneId);
-            if (gene != null) {
-                for (String service : otherServices) {
-                    if (!StringUtils.isNullOrEmpty(service)) {
-                        try {
-                            HttpUtils.postRequest(service + "?cmd=updateGene&hugoSymbol=" +
-                                gene.getHugoSymbol(), "");
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+        if (cmd == "update" && entrezGeneIds != null) {
+            for (String service : otherServices) {
+                if (!StringUtils.isNullOrEmpty(service)) {
+                    try {
+                        HttpUtils.postRequest(service + "?cmd=updateGene&entrezGeneIds=" +
+                            org.apache.commons.lang3.StringUtils.join(entrezGeneIds, ","), "");
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
                 }
             }
@@ -253,8 +262,85 @@ public class CacheUtils {
             genesByEntrezId.put(gene.getEntrezGeneId(), gene);
             hugoSymbolToEntrez.put(gene.getHugoSymbol(), gene.getEntrezGeneId());
         }
-
+        cancerGeneList = null;
         System.out.println("Cache all genes: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
+    }
+
+    public static List<CancerGene> getCancerGeneList() {
+        if(cancerGeneList == null) {
+            updateCancerGeneList();
+        }
+        return cancerGeneList;
+    }
+
+    private static void updateCancerGeneList() {
+        cancerGeneList = new ArrayList<>();
+        try {
+            List<String> lines = FileUtils.readTrimedLinesStream(
+                CancerGeneUtils.class.getResourceAsStream(CANCER_GENE_FILE_PATH));
+            Iterator itr = lines.iterator();
+            Set<String> allHugoSymbolsFromFile = new HashSet<>();
+
+            while (itr.hasNext()) {
+                String line = itr.next().toString().trim();
+                // skip comments
+                if (line.startsWith("#")) {
+                    continue;
+                }
+
+                String[] items = line.split("\t");
+                if (items.length != 9) continue;
+
+                String hugoSymbol = items[0];
+                allHugoSymbolsFromFile.add(hugoSymbol);
+
+                Gene gene = GeneUtils.getGeneByEntrezId(Integer.parseInt(items[1]));
+                CancerGene cancerGene = new CancerGene();
+                cancerGene.setEntrezGeneId(Integer.parseInt(items[1]));
+
+                if (gene == null) {
+                    cancerGene.setHugoSymbol(hugoSymbol);
+                } else {
+                    if (!gene.getHugoSymbol().equals(hugoSymbol)) {
+                        System.out.println("The gene hugo does not match, expect " + gene.getHugoSymbol() + ", but got: " + hugoSymbol);
+                    }
+                    cancerGene.setHugoSymbol(gene.getHugoSymbol());
+                    cancerGene.setOncokbAnnotated(true);
+                    cancerGene.setOncogene(gene.getOncogene());
+                    cancerGene.setTSG(gene.getTSG());
+                }
+                int occurence = NumberUtils.isNumber(items[2].trim()) ? Integer.parseInt(items[2].trim()) : 0;
+                if (cancerGene.getOncokbAnnotated()) {
+                    occurence++;
+                }
+                cancerGene.setOccurrenceCount(occurence);
+                cancerGene.setmSKImpact(items[3].trim().equals("1"));
+                cancerGene.setmSKHeme(items[4].trim().equals("1"));
+                cancerGene.setFoundation(items[5].trim().equals("1"));
+                cancerGene.setFoundationHeme(items[6].trim().equals("1"));
+                cancerGene.setVogelstein(items[7].trim().equals("1"));
+                cancerGene.setSangerCGC(items[8].trim().equals("1"));
+                cancerGeneList.add(cancerGene);
+            }
+
+            // We also need to include genes that not in the initial list
+            Set<Gene> allAnnotatedGenes = GeneUtils.getAllGenes();
+            allAnnotatedGenes
+                .stream()
+                .filter(gene -> !allHugoSymbolsFromFile.contains(gene.getHugoSymbol()))
+                .forEach(gene -> {
+                    CancerGene cancerGene = new CancerGene();
+                    cancerGene.setEntrezGeneId(gene.getEntrezGeneId());
+                    cancerGene.setHugoSymbol(gene.getHugoSymbol());
+                    cancerGene.setOncokbAnnotated(true);
+                    cancerGene.setOccurrenceCount(1);
+                    cancerGene.setOncogene(gene.getOncogene());
+                    cancerGene.setTSG(gene.getTSG());
+                    cancerGeneList.add(cancerGene);
+                });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public static Gene getGeneByHugoSymbol(String hugoSymbol) {
@@ -515,15 +601,6 @@ public class CacheUtils {
         if (evidences == null || evidences.size() == 0) {
             cacheAllEvidencesByGenes();
         }
-
-        if (evidences.keySet().size() != genes.size()) {
-            for (Gene gene : genes) {
-                if (!evidences.containsKey(gene.getEntrezGeneId())) {
-                    setEvidences(gene);
-                    setVUS(gene.getEntrezGeneId(), getEvidences(gene));
-                }
-            }
-        }
     }
 
     private static void synAlterations() {
@@ -545,14 +622,17 @@ public class CacheUtils {
         alterations.remove(entrezGeneId);
     }
 
-    public static void updateGene(Integer entrezGeneId, Boolean propagate) {
+    public static void updateGene(Set<Integer> entrezGeneIds, Boolean propagate) {
         System.out.println("Update gene on instance " + PropertiesUtils.getProperties("app.name") + " at " + MainUtils.getCurrentTime());
         if (propagate == null) {
             propagate = false;
         }
-        GeneObservable.getInstance().update("update", entrezGeneId.toString());
+        if(entrezGeneIds == null){
+            return;
+        }
+        entrezGeneIds.forEach(entrezGeneId -> GeneObservable.getInstance().update("update", entrezGeneId.toString()));
         if (propagate) {
-            notifyOtherServices("update", entrezGeneId);
+            notifyOtherServices("update", entrezGeneIds);
         }
     }
 

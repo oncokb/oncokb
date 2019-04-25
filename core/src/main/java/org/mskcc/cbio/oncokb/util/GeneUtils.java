@@ -2,7 +2,10 @@ package org.mskcc.cbio.oncokb.util;
 
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.bo.GeneBo;
+import org.mskcc.cbio.oncokb.model.Drug;
+import org.mskcc.cbio.oncokb.model.Evidence;
 import org.mskcc.cbio.oncokb.model.Gene;
+import org.mskcc.cbio.oncokb.model.Treatment;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -148,6 +151,21 @@ public class GeneUtils {
             GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
             return new HashSet<>(geneBo.findAll());
         }
+    }
+
+    public static Set<Gene> getGenesWithDrug(Drug drug) {
+        Set<Gene> relatedGenes = new HashSet<>();
+        if (drug == null)
+            return relatedGenes;
+        for (Evidence evidence : CacheUtils.getAllEvidences()) {
+            for (Treatment treatment : evidence.getTreatments()) {
+                if (treatment.getDrugs().contains(drug)) {
+                    relatedGenes.add(evidence.getGene());
+                    break;
+                }
+            }
+        }
+        return relatedGenes;
     }
 
     public static Boolean isSameGene(Integer entrezGeneId, String hugoSymbol) {

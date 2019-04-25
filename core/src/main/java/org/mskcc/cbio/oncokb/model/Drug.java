@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 
@@ -20,6 +21,10 @@ import java.util.Set;
     @NamedQuery(
         name = "findDrugById",
         query = "select d from Drug d where d.id=?"
+    ),
+    @NamedQuery(
+        name = "findDrugByUuid",
+        query = "select d from Drug d where d.uuid=?"
     ),
     @NamedQuery(
         name = "findDrugBySynonym",
@@ -52,7 +57,6 @@ public class Drug implements java.io.Serializable {
     private DrugTableItemType type = DrugTableItemType.DRUG;
 
     @Column(length = 40)
-    @JsonIgnore
     private String uuid;
 
     @ElementCollection(fetch = FetchType.EAGER)
@@ -159,18 +163,21 @@ public class Drug implements java.io.Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Drug)) return false;
-
         Drug drug = (Drug) o;
-
-        if (synonyms != null ? !synonyms.equals(drug.synonyms) : drug.synonyms != null) return false;
-        return getDrugName().equals(drug.getDrugName());
+        return Objects.equals(getId(), drug.getId()) &&
+            Objects.equals(getNcitCode(), drug.getNcitCode()) &&
+            Objects.equals(getDrugName(), drug.getDrugName()) &&
+            getType() == drug.getType() &&
+            Objects.equals(getUuid(), drug.getUuid()) &&
+            Objects.equals(getSynonyms(), drug.getSynonyms()) &&
+            Objects.equals(getDrugFamlilies(), drug.getDrugFamlilies()) &&
+            Objects.equals(getDrugs(), drug.getDrugs()) &&
+            Objects.equals(getDescription(), drug.getDescription());
     }
 
     @Override
     public int hashCode() {
-        int result = synonyms != null ? synonyms.hashCode() : 0;
-        result = 31 * result + getDrugName().hashCode();
-        return result;
+        return Objects.hash(getId(), getNcitCode(), getDrugName(), getType(), getUuid(), getSynonyms(), getDrugFamlilies(), getDrugs(), getDescription());
     }
 }
 

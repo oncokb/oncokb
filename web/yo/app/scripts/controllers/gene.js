@@ -1922,7 +1922,7 @@ angular.module('oncokbApp')
                 $scope.status.removingGene = true;
                 DatabaseConnector.removeGeneFromDB($scope.gene.name, function(data) {
                     $scope.status.removingGene = false;
-                    $scope.status.geneIsNotReleased = true;
+                    $scope.status.geneReleased = 'no';
                 }, function() {
                     $scope.status.removingGene = false;
                 });
@@ -1935,7 +1935,7 @@ angular.module('oncokbApp')
                     params.releaseGene = true;
                     DatabaseConnector.updateGene(params, function(result) {
                         mainUtils.updateLastSavedToDB();
-                        $scope.status.geneIsNotReleased = false;
+                        $scope.status.geneReleased = 'yes';
                         $scope.status.releasingGene = false;
                         defer.resolve();
                     }, function(error) {
@@ -3046,19 +3046,11 @@ angular.module('oncokbApp')
                 numAccordion: 0,
                 processing: false,
                 fileEditable : false,
-                geneIsNotReleased: false,
+                geneReleased: '',
                 releasingGene: false,
                 removingGene: false,
                 savedGene: true
             };
-
-            DatabaseConnector.getAllInternalGenes().then(function(genes) {
-                $scope.status.geneIsNotReleased = _.find(genes.data, function(gene) {
-                    return gene.hugoSymbol = $scope.gene.name;
-                }) === undefined;
-            }, function(reason) {
-                // nothing really needs to be done
-            });
 
             $scope.$watch('meta.newCancerTypes', function (n) {
                 if (n.length > 0 && (n[n.length - 1].mainType || n[n.length - 1].subtype)) {
@@ -3278,6 +3270,13 @@ angular.module('oncokbApp')
                 $scope.mapScope = {};
                 var deferred1 = $q.defer();
                 $firebaseObject(firebase.database().ref("Genes/" + $routeParams.geneName)).$bindTo($scope, "gene").then(function () {
+                    DatabaseConnector.getAllInternalGenes().then(function(genes) {
+                        $scope.status.geneReleased = (_.find(genes.data, function(gene) {
+                            return gene.hugoSymbol === $scope.gene.name;
+                        }) === undefined) ? 'no' : 'yes';
+                    }, function(reason) {
+                        // nothing really needs to be done
+                    });
                     deferred1.resolve();
                 }, function (error) {
                     deferred1.reject(error);
@@ -3445,6 +3444,7 @@ angular.module('oncokbApp')
 
     .controller('ReleaseGeneDialogCtrl', function($scope, $modalInstance, data) {
         $scope.statusChecks = data.statusChecks || [];
+        $scope.confirmingRelease = false;
         $scope.error='';
 
         _.each($scope.statusChecks, function(statusCheck) {
@@ -3474,15 +3474,20 @@ angular.module('oncokbApp')
         };
 
         $scope.confirm = function() {
-            if (data.confirmCallback) {
-                data.confirmCallback().then(function() {
+            $scope.confirmingRelease = true;
+            setTimeout(function() {
+                if (data.confirmCallback) {
+                    data.confirmCallback().then(function() {
+                        $modalInstance.dismiss('canceled');
+                    }, function(error) {
+                        $scope.error = 'Some error happened: ' + error.message;
+                    }).finally(function() {
+                        $scope.confirmingRelease = false;
+                    })
+                } else {
                     $modalInstance.dismiss('canceled');
-                }, function(error) {
-                    $scope.error = 'Some error happened: ' + error.message;
-                })
-            } else {
-                $modalInstance.dismiss('canceled');
-            }
+                }
+            }, 200);
         };
 
         $scope.confirmButtonDisabled = function() {
