@@ -96,14 +96,11 @@ angular.module('oncokbApp')
             }
 
             $scope.saveDrugName = function (newDrugName, drug) {
-                if(newDrugName !== drug.drugName){
+                if(newDrugName && (newDrugName !== drug.drugName)){
                     if (hasSameName(newDrugName, drug.uuid)) {
                         modalError("Sorry", "Same name exists.", true, false, drug.uuid);
                     } else {
                         $scope.status.updatingDrugName = true;
-                        if (!newDrugName) {
-                            newDrugName = drug.drugName;
-                        }
                         firebaseConnector.setDrugName(drug.uuid, newDrugName).then(function() {
                             DatabaseConnector.updateDrugPreferredName(drug.ncitCode, newDrugName)
                                 .then(function(value) {
