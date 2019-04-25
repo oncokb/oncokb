@@ -35,7 +35,7 @@ public class DrugController {
         Drug drug = drugBo.findDrugsByNcitCode(ncitCode);
         if (drug != null) {
             Set<Gene> genes = GeneUtils.getGenesWithDrug(drug);
-            drug.setDrugName(preferredName);
+            DrugUtils.updateDrugName(drug, preferredName);
             drugBo.update(drug);
             CacheUtils.updateGene(genes.stream().map(gene -> gene.getEntrezGeneId()).collect(Collectors.toSet()), true);
         }
