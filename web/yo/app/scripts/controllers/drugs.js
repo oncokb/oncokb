@@ -96,25 +96,27 @@ angular.module('oncokbApp')
             }
 
             $scope.saveDrugName = function (newDrugName, drug) {
-                if (hasSameName(newDrugName, drug.uuid)) {
-                    modalError("Sorry", "Same name exists.", true, false, drug.uuid);
-                } else {
-                    $scope.status.updatingDrugName = true;
-                    if (!newDrugName) {
-                        newDrugName = drug.drugName;
+                if(newDrugName !== drug.drugName){
+                    if (hasSameName(newDrugName, drug.uuid)) {
+                        modalError("Sorry", "Same name exists.", true, false, drug.uuid);
+                    } else {
+                        $scope.status.updatingDrugName = true;
+                        if (!newDrugName) {
+                            newDrugName = drug.drugName;
+                        }
+                        firebaseConnector.setDrugName(drug.uuid, newDrugName).then(function() {
+                            DatabaseConnector.updateDrugPreferredName(drug.ncitCode, newDrugName)
+                                .then(function(value) {
+                                }, function() {
+                                    dialogs.error('Error', 'System cannot update the drug preferred name. Please Contact developer and stop curation.');
+                                })
+                                .finally(function() {
+                                    $scope.status.updatingDrugName = false;
+                                });
+                        }, function(reason) {
+                            // something goes wrong then the data in database should not be updated.
+                        });
                     }
-                    firebaseConnector.setDrugName(drug.uuid, newDrugName).then(function() {
-                        DatabaseConnector.updateDrugPreferredName(drug.ncitCode, newDrugName)
-                            .then(function(value) {
-                            }, function() {
-                                dialogs.error('Error', 'System cannot update the drug preferred name. Please Contact developer and stop curation.');
-                            })
-                            .finally(function() {
-                                $scope.status.updatingDrugName = false;
-                            });
-                    }, function(reason) {
-                        // something goes wrong then the data in database should not be updated.
-                    });
                 }
             };
 
