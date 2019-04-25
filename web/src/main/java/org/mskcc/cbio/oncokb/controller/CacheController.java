@@ -83,7 +83,7 @@ public class CacheController {
     Map<String, String> postAlteration(
         HttpMethod method,
         @RequestParam(value = "cmd", required = false) String cmd,
-        @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol,
+        @RequestParam(value = "entrezGeneIds", required = false) Set<Integer> entrezGeneIds,
         @RequestParam(value = "propagation", required = false, defaultValue = "false") Boolean propagation
     ) {
         Map<String, String> result = new HashMap<>();
@@ -99,10 +99,7 @@ public class CacheController {
                     disableCache(true);
                     break;
                 case "updateGene":
-                    Gene gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
-                    if (gene != null) {
-                        CacheUtils.updateGene(gene.getEntrezGeneId(), propagation);
-                    }
+                    CacheUtils.updateGene(entrezGeneIds, propagation);
                     break;
                 case "updateAbbreviationOntology":
                     NamingUtils.cacheAllAbbreviations();
