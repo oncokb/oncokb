@@ -134,7 +134,7 @@ public class CacheUtils {
             cmd = "";
         }
         System.out.println("Notify other services..." + " at " + MainUtils.getCurrentTime());
-        if (cmd == "update" && entrezGeneIds != null) {
+        if (cmd == "update" && entrezGeneIds != null && entrezGeneIds.size() > 0) {
             for (String service : otherServices) {
                 if (!StringUtils.isNullOrEmpty(service)) {
                     try {
@@ -627,7 +627,7 @@ public class CacheUtils {
         if (propagate == null) {
             propagate = false;
         }
-        if(entrezGeneIds == null){
+        if(entrezGeneIds == null || entrezGeneIds.size() > 0){
             return;
         }
         entrezGeneIds.forEach(entrezGeneId -> GeneObservable.getInstance().update("update", entrezGeneId.toString()));
