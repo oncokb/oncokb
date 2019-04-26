@@ -646,13 +646,15 @@ public class DriveAnnotationParser {
                             if (ncitDrug == null) {
                                 System.out.println("ERROR: the NCIT code cannot be found... Code:" + ncitCode);
                             } else {
-                                if (drugName != null) {
-                                    ncitDrug.setDrugName(drugName);
-                                }
                                 drug = new Drug();
                                 drug.setDrugName(ncitDrug.getDrugName());
                                 drug.setSynonyms(ncitDrug.getSynonyms());
                                 drug.setNcitCode(ncitDrug.getNcitCode());
+                                drug.setDrugName(ncitDrug.getDrugName());
+
+                                if (drugName != null) {
+                                    DrugUtils.updateDrugName(drug, drugName);
+                                }
                             }
                         }
                         if (drug == null) {

@@ -164,20 +164,15 @@ public class Drug implements java.io.Serializable {
         if (this == o) return true;
         if (!(o instanceof Drug)) return false;
         Drug drug = (Drug) o;
-        return Objects.equals(getId(), drug.getId()) &&
-            Objects.equals(getNcitCode(), drug.getNcitCode()) &&
+        return Objects.equals(getNcitCode(), drug.getNcitCode()) &&
             Objects.equals(getDrugName(), drug.getDrugName()) &&
             getType() == drug.getType() &&
-            Objects.equals(getUuid(), drug.getUuid()) &&
-            Objects.equals(getSynonyms(), drug.getSynonyms()) &&
-            Objects.equals(getDrugFamlilies(), drug.getDrugFamlilies()) &&
-            Objects.equals(getDrugs(), drug.getDrugs()) &&
-            Objects.equals(getDescription(), drug.getDescription());
+            getUuid().equals(drug.getUuid());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getNcitCode(), getDrugName(), getType(), getUuid(), getSynonyms(), getDrugFamlilies(), getDrugs(), getDescription());
+        return Objects.hash(getNcitCode(), getDrugName(), getType(), getUuid());
     }
 }
 

@@ -89,4 +89,10 @@ public class DrugUtils {
         }
         return false;
     }
+
+    public static void updateDrugName(Drug drug, String newDrugName) {
+        drug.getSynonyms().remove(newDrugName);
+        drug.getSynonyms().add(drug.getDrugName());
+        drug.setDrugName(newDrugName);
+    }
 }
