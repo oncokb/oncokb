@@ -627,7 +627,7 @@ public class CacheUtils {
         if (propagate == null) {
             propagate = false;
         }
-        if(entrezGeneIds == null || entrezGeneIds.size() > 0){
+        if(entrezGeneIds == null || entrezGeneIds.size() == 0){
             return;
         }
         entrezGeneIds.forEach(entrezGeneId -> GeneObservable.getInstance().update("update", entrezGeneId.toString()));

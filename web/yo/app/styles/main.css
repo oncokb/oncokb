@@ -8376,7 +8376,10 @@ input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:b
   color: red;
   float: left; }
 .addTherapy .tagsBox {
-  width: 650px; }
+  width: 650px;
+  height: -webkit-fit-content;
+  height: -moz-fit-content;
+  height: fit-content; }
 
 .invalidPubIframe {
   color: red !important; }
