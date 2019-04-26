@@ -37,7 +37,7 @@
                        ng-click="setTrackSignal()"
                        ng-paste="trimCSS()"
                        ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 200, 'blur': 0 } }"
-                       class="editEmpty">{{uuidtoName(data[key])}}
+                       class="editEmpty" style="height:auto;">{{uuidtoName(data[key])}}
                     </p>
                 </div>
                 <div ng-switch-when="treatment-select" class="chosen-full-width">
@@ -130,7 +130,7 @@
                        ng-class="editableBox"
                        ng-paste="trimCSS()"
                        ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 200, 'blur': 0 } }"
-                       class="editEmpty">{{uuidtoName(data[key], data[key+'_review'].lastReviewed, uuid)}}
+                       class="editEmpty" style="height:auto;">{{uuidtoName(data[key], data[key+'_review'].lastReviewed, uuid)}}
                     </p>
                     <div ng-if="reviewLayout('name')" ng-class="getOldContentDivClass(data[key])">
                         <h4>Old Content:</h4>

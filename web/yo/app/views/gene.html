@@ -295,11 +295,14 @@
                                       <realtime-string t="'TREATMENT_NAME'" key="'name'" path="path"
                                                        uuid="getUUID({type: 'treatment', key: 'name', path: path})"></realtime-string>
                                   </div>
+                                  <span>
                                   <div style="float:left;margin-left:10px;" ng-show="!reviewMode">
                                       <comments-dict key="'name'" path="path"></comments-dict>
                                       <span class="curationNoEntry" ng-if="isEmptySection(treatment, 'treatment')">No Entry</span>
                                   </div>
-                                  <i class="fa fa-edit ng-scope" style="margin-top: 5px; margin-left: 5px" ng-show="fileEditable" ng-click="modifyTherapy(path)"></i>
+                                  <i class="fa fa-edit ng-scope" style="margin-top: 5px; margin-left: 5px"
+                                     ng-show="fileEditable" ng-click="modifyTherapy(path)"></i>
+                                  </span>
 
                               <span style="float:right" ng-show="!reviewMode && fileEditable">
                                   <span ng-if="me.admin && internal">
