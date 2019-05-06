@@ -77,10 +77,11 @@ angular.module('oncokbApp')
 
                 $scope.loadDrugs = function($query) {
                     $scope.addTherapyError = false;
-                    return drugs.filter(function (drug) {
-                        var lowerCaseQuery = $query.toLowerCase();
-                        return drug.drugName.toLowerCase().indexOf(lowerCaseQuery) != -1 || (!drug.synonyms ? false : drug.synonyms.join(',').toLowerCase().indexOf(lowerCaseQuery) != -1);
+                    var lowerCaseQuery = $query.toLowerCase();
+                    var filteredDrugs = drugs.filter(function (drug){
+                        return drug.drugName.toLowerCase().indexOf(lowerCaseQuery) !== -1 || (!drug.synonyms ? false : drug.synonyms.join(',').toLowerCase().indexOf(lowerCaseQuery) !== -1);
                     })
+                    return getDrugsInOrder(lowerCaseQuery, filteredDrugs);
                 };
 
                 $scope.addDruginTherapy = function (uuid, index) {
@@ -96,6 +97,29 @@ angular.module('oncokbApp')
                     validateTherapies();
                     addTherapy(index);
                 };
+
+                function getDrugsInOrder(lowerCaseQuery, filteredDrugs) {
+                    _.map(filteredDrugs, function(drug){
+                        var lowerCaseDrugName = drug.drugName.toLowerCase();
+                        if(lowerCaseDrugName===lowerCaseQuery){
+                            return drug.weight = 1.0;
+                        }
+                        else if(lowerCaseDrugName.startsWith(lowerCaseQuery)){
+                            return drug.weight = 1.5;
+                        }
+                        else if(lowerCaseDrugName.indexOf(lowerCaseQuery) !== -1){
+                            return drug.weight = 2.0;
+                        }
+                        else if(_.find(drug.synonyms, function (synonyms) {return synonyms.toLowerCase() === lowerCaseQuery}) !== -1)
+                        {
+                            return drug.weight = 2.5;
+                        }
+                        else if(_.find(drug.synonyms, function (synonyms) {return synonyms.toLowerCase().indexOf(lowerCaseQuery) !== -1 }) !== -1){
+                            return drug.weight = 3.0;
+                        }
+                    });
+                    return _.sortBy(filteredDrugs, 'weight');
+                }
 
                 function addTherapy(index) {
                     if ($scope.therapy.length === index + 1) {

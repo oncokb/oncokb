@@ -1,9 +1,7 @@
 <div class="addTherapy">
-    <div class="modal-header">
-        <h4 class="modal-title">
+    <h4 class="modal-title" style="margin: 5px;">
             Add Therapies</h4>
-    </div>
-    <div class="modal-body">
+    <div style="margin:5px">
         <h5 class="latestResultDiv">The result will be shown as <div class="latestResultFont"> {{therapyResult}} </div></h5>
             <div>
                 <div ng-repeat="element in therapy">
@@ -27,7 +25,6 @@
                 </div>
                 <p class="errorNote" ng-show="addTherapyError">{{therapyErrorMessage}}</p>
             </div>
-        <hr>
         <div align="left">
             To add a new drug not found in the drop-down list, <a ng-href="" ng-click="goToDrugs()">click here</a>
         </div>
@@ -40,8 +37,8 @@
         </div>
         <div ng-show="!modifyName" align="left">
             <span class="input-group-btn">
-                <button type="button" class="btn btn-default btn-sm" style="border-radius:3px; margin-left:10px" ng-disabled="addTherapyError||noData" ng-click="save()">
-                    <i class="fa fa-plus"></i> Add Therapy and {{::(ti.type[0] === 'I' ? 'Investigational' : 'Standard')}} Implications
+                <button type="button" class="btn btn-default btn-sm" style="border-radius:3px; margin:5px" ng-disabled="addTherapyError||noData" ng-click="save()">
+                    <i class="fa fa-plus"></i> Add Therapy
                 </button>
             </span>
         </div>
