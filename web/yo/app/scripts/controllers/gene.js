@@ -453,7 +453,7 @@ angular.module('oncokbApp')
             function isChangedSection(uuids) {
                 var result = false;
                 _.some(uuids, function (uuid) {
-                    if ($scope.geneMeta.review[uuid]) {
+                    if (uuid && $scope.geneMeta.review[uuid]) {
                         result = true;
                         return true;
                     }
