@@ -19,7 +19,7 @@ public class DrugMatch {
      private LevelOfEvidence levelOfEvidence;
      private Drug drug;
      private Set<TumorType> tumorTypes = new HashSet<>();
-     private int weight;
+     private Double weight = 0.0;
 
     public Gene getGene() {
         return gene;
@@ -61,11 +61,11 @@ public class DrugMatch {
         this.tumorTypes = tumorTypes;
     }
 
-    public int getWeight() {
+    public Double getWeight() {
         return weight;
     }
 
-    public void setWeight(int weight) {
+    public void setWeight(Double weight) {
         this.weight = weight;
     }
 
