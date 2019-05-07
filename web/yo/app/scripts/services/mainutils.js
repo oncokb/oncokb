@@ -528,7 +528,7 @@ angular.module('oncokbApp')
                         return true;
                     }
                     // process tumor cancerTypes
-                    processData(tumor, ['summary'], excludeComments, onlyReviewedContent);
+                    processData(tumor, ['summary', 'diagnosticSummary', 'prognosticSummary'], excludeComments, onlyReviewedContent);
                     processData(tumor.diagnostic, ['level', 'description'], excludeComments, onlyReviewedContent);
                     processData(tumor.prognostic, ['level', 'description'], excludeComments, onlyReviewedContent);
                     _.each(tumor.TIs, function(ti) {
