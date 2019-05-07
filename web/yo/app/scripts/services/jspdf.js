@@ -116,18 +116,21 @@ angular.module('oncokbApp')
         function drawFuncImplications(tumor) {            
             var keys = ['diagnostic', 'prognostic'];
             _.each(keys, function(key) {
-                drawFunc(key[0].toUpperCase() + key.slice(1) + ' implications:', '4', 'Bold');
-                if (tumor[key].level) {
-                    drawFunc('Level:', '4', 'Bold');
-                    drawFunc(tumor[key].level);
-                }
-                if (tumor[key].description) {
-                    drawFunc('description:', '4', 'Bold');
-                    drawFunc(tumor[key].description);
-                }
-                if (tumor[key].short) {
-                    drawFunc('Additional information:', '4', 'Bold');
-                    drawFunc(tumor[key].short);
+                var hasContent = tumor[key].level && tumor[key].description && tumor[key].short;
+                if (hasContent) {
+                    drawFunc(key[0].toUpperCase() + key.slice(1) + ' implications:', '4', 'Bold');
+                    if (tumor[key].level) {
+                        drawFunc('Level:', '4', 'Bold');
+                        drawFunc(tumor[key].level);
+                    }
+                    if (tumor[key].description) {
+                        drawFunc('description:', '4', 'Bold');
+                        drawFunc(tumor[key].description);
+                    }
+                    if (tumor[key].short) {
+                        drawFunc('Additional information:', '4', 'Bold');
+                        drawFunc(tumor[key].short);
+                    }
                 }
             });
             
@@ -137,6 +140,14 @@ angular.module('oncokbApp')
             if (tumor.summary) {
                 drawFunc('Summary:', '4', 'Bold');
                 drawFunc(tumor.summary);
+            }
+            if (tumor.diagnosticSummary) {
+                drawFunc('Diagnostic Summary:', '4', 'Bold');
+                drawFunc(tumor.diagnosticSummary);
+            }
+            if (tumor.prognosticSummary) {
+                drawFunc('Prognostic Summary:', '4', 'Bold');
+                drawFunc(tumor.prognosticSummary);
             }
             drawFuncImplications(tumor);
             tumor.TIs.forEach(function(e) {
@@ -164,15 +175,21 @@ angular.module('oncokbApp')
         }
 
         function therapyFunc(therapy, title) {
-            drawFunc(title + ': ' + therapy.name, '4', 'Bold');
-            drawFunc('Highest level of evidence: ' + therapy.level, '4', 'Bold');
-            if (therapy.short) {
-                drawFunc('Short description of evidence: ', '4', 'Bold');
-                drawFunc(therapy.short);
-            }
-            if (therapy.description) {
-                drawFunc('Description of evidence: ', '4', 'Bold');
-                drawFunc(therapy.description);
+            if (therapy.name && therapy.name.length > 0) {
+                drawFunc(title + ': ' + therapy.name.map(function(therapy) {
+                    return therapy.map(function(drug) {
+                        return drug.drugName;
+                    }).join(' + ');
+                }).join(', '), '4', 'Bold');
+                drawFunc('Highest level of evidence: ' + therapy.level, '4', 'Bold');
+                if (therapy.short) {
+                    drawFunc('Short description of evidence: ', '4', 'Bold');
+                    drawFunc(therapy.short);
+                }
+                if (therapy.description) {
+                    drawFunc('Description of evidence: ', '4', 'Bold');
+                    drawFunc(therapy.description);
+                }
             }
         }
 
