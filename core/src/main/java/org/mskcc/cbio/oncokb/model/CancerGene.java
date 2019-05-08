@@ -1,5 +1,7 @@
 package org.mskcc.cbio.oncokb.model;
 
+import java.util.Objects;
+
 /**
  * Created by jiaojiao on 6/8/17.
  */
@@ -7,7 +9,7 @@ public class CancerGene {
     private String hugoSymbol;
     private Integer entrezGeneId;
     private Boolean oncokbAnnotated = false;
-    private Integer occurrenceCount;
+    private Integer occurrenceCount = 0;
     private Boolean mSKImpact = false;
     private Boolean mSKHeme = false;
     private Boolean foundation = false;
@@ -111,5 +113,18 @@ public class CancerGene {
 
     public void setTSG(Boolean TSG) {
         isTSG = TSG;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof CancerGene)) return false;
+        CancerGene that = (CancerGene) o;
+        return getEntrezGeneId().equals(that.getEntrezGeneId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getEntrezGeneId());
     }
 }
