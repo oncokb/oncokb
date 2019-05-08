@@ -31,6 +31,9 @@ public class EvidenceTypeUtils {
         Set<EvidenceType> evidenceTypes = new HashSet<>();
 
         evidenceTypes.add(EvidenceType.TUMOR_TYPE_SUMMARY);
+        evidenceTypes.add(EvidenceType.DIAGNOSTIC_SUMMARY);
+        evidenceTypes.add(EvidenceType.PROGNOSTIC_SUMMARY);
+
 
         evidenceTypes.add(EvidenceType.DIAGNOSTIC_IMPLICATION);
         evidenceTypes.add(EvidenceType.PROGNOSTIC_IMPLICATION);

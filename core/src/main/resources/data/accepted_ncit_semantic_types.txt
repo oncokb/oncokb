@@ -1,0 +1,15 @@
+Amino Acid, Peptide, or Protein
+Antibiotic
+Biologically Active Substance
+Biomedical or Dental Material
+Chemical Viewed Functionally
+Chemical Viewed Structurally
+Hormone
+Immunologic Factor
+Indicator, Reagent, or Diagnostic Acid
+Inorganic Chemical
+Nucleic Acid, Nucleoside, or Nucleotide
+Organic Chemical
+Pharmacologic Substance
+Receptor
+Vitamin

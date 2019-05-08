@@ -17,9 +17,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.Contact;
+import springfox.documentation.service.VendorExtension;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
 
 @Configuration
 @ComponentScan(basePackages = "org.mskcc.cbio.oncokb")
@@ -70,9 +72,10 @@ public class MvcConfiguration extends WebMvcConfigurerAdapter {
             "OncoKB, a comprehensive and curated precision oncology knowledge base, offers oncologists detailed, evidence-based information about individual somatic mutations and structural alterations present in patient tumors with the goal of supporting optimal treatment decisions.",
             "v1.0.0",
             "https://oncokb.org/terms",
-            new Contact("OncoKB", "https://oncokb.org", "team@oncokb.org"),
+            new Contact("OncoKB", "https://oncokb.org", "contact@oncokb.org"),
             "Usage Terms",
-            "https://oncokb.org/terms");
+            "https://oncokb.org/terms"
+        );
         return apiInfo;
     }
 

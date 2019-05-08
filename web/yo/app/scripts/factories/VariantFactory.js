@@ -33,8 +33,24 @@ angular.module('oncokbApp').factory('Gene', ['$http', 'OncoKB', function($http, 
         return $http.get(OncoKB.config.curationLink + 'gene.json');
     }
 
+    function getAllInternalGenes() {
+        return $http.get(OncoKB.config.apiLink + 'gene.json');
+    }
+
+    function remove(hugoSymbol) {
+        return $http.post(OncoKB.config.apiLink + 'genes/remove/' + hugoSymbol, {},
+            {
+                headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
+                transformRequest: function(data) {
+                    return $.param(data);
+                }
+            });
+    }
+
     return {
-        getFromServer: getFromServer
+        getFromServer: getFromServer,
+        getAllInternalGenes: getAllInternalGenes,
+        remove: remove
     };
 }]);
 
@@ -55,6 +71,35 @@ angular.module('oncokbApp').factory('DataSummary', ['$http', function($http) {
         getGeneType: getGeneType,
         getEvidenceByType: getEvidenceByType
     };
+}]);
+
+angular.module('oncokbApp').factory('Drugs', ['$http', 'OncoKB', function ($http, OncoKB) {
+    'use strict';
+    var transform = function(data) {
+        return $.param(data);
+    };
+
+    function searchNCITDrugs(keyword) {
+        return $http.get(OncoKB.config.privateApiLink + 'search/ncitDrugs?query=' + keyword);
+    }
+
+    function updatePreferredName(ncitCode, preferredName) {
+
+        return $http.post(
+            OncoKB.config.apiLink + 'drugs/update/' + ncitCode,
+            {
+                preferredName: preferredName
+            },
+            {
+                headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
+                transformRequest: transform
+            });
+    }
+
+    return {
+        updatePreferredName: updatePreferredName,
+        searchNCITDrugs: searchNCITDrugs
+    }
 }]);
 
 angular.module('oncokbApp').factory('Alteration', ['$http', 'OncoKB', function($http, OncoKB) {
@@ -480,6 +525,10 @@ angular.module('oncokbApp')
             this.cancerTypes_uuid = getUUID();
             this.summary = '';
             this.summary_uuid = getUUID();
+            this.diagnosticSummary = '';
+            this.diagnosticSummary_uuid = getUUID();
+            this.prognosticSummary = '';
+            this.prognosticSummary_uuid = getUUID();
             this.prognostic = {
                 level: '',
                 level_uuid: getUUID(),
@@ -557,6 +606,14 @@ angular.module('oncokbApp')
         function Setting() {
             this.enableReview = true;
         }
+        function Drug(drugName, ncitCode, synonyms, ncitName){
+            this.drugName = drugName;
+            this.ncitCode = ncitCode;
+            this.uuid = getUUID();
+            this.description = '';
+            this.ncitName = ncitName;
+            this.synonyms = synonyms || [];
+        }
         return {
             Gene: Gene,
             Mutation: Mutation,
@@ -567,6 +624,8 @@ angular.module('oncokbApp')
             VUSItem: VUSItem,
             TimeStamp: TimeStamp,
             Meta: Meta,
-            Setting: Setting
+            Setting: Setting,
+            Drug: Drug,
+            generateUUID: getUUID
         };
     }]);

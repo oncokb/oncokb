@@ -1,19 +1,23 @@
 package org.mskcc.cbio.oncokb.model;
 
+import java.util.Objects;
+
 /**
  * Created by jiaojiao on 6/8/17.
  */
 public class CancerGene {
     private String hugoSymbol;
     private Integer entrezGeneId;
-    private Boolean oncokbAnnotated;
-    private Integer occurrenceCount;
-    private Boolean mSKImpact;
-    private Boolean mSKHeme;
-    private Boolean foundation;
-    private Boolean foundationHeme;
-    private Boolean vogelstein;
-    private Boolean sangerCGC;
+    private Boolean oncokbAnnotated = false;
+    private Integer occurrenceCount = 0;
+    private Boolean mSKImpact = false;
+    private Boolean mSKHeme = false;
+    private Boolean foundation = false;
+    private Boolean foundationHeme = false;
+    private Boolean vogelstein = false;
+    private Boolean sangerCGC = false;
+    private Boolean isOncogene = false;
+    private Boolean isTSG = false;
 
     public String getHugoSymbol() {
         return hugoSymbol;
@@ -93,5 +97,34 @@ public class CancerGene {
 
     public void setSangerCGC(Boolean sangerCGC) {
         this.sangerCGC = sangerCGC;
+    }
+
+    public Boolean getOncogene() {
+        return isOncogene;
+    }
+
+    public void setOncogene(Boolean oncogene) {
+        isOncogene = oncogene;
+    }
+
+    public Boolean getTSG() {
+        return isTSG;
+    }
+
+    public void setTSG(Boolean TSG) {
+        isTSG = TSG;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof CancerGene)) return false;
+        CancerGene that = (CancerGene) o;
+        return getEntrezGeneId().equals(that.getEntrezGeneId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getEntrezGeneId());
     }
 }

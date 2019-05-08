@@ -6,17 +6,14 @@ package org.mskcc.cbio.oncokb.controller;
 
 import io.swagger.annotations.ApiParam;
 import org.mskcc.cbio.oncokb.bo.GeneBo;
+import org.mskcc.cbio.oncokb.model.Evidence;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.service.JsonResultFactory;
-import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
-import org.mskcc.cbio.oncokb.util.GeneUtils;
+import org.mskcc.cbio.oncokb.util.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author jgao
@@ -68,6 +65,37 @@ public class GeneController {
             gene.setTSG(queryGene.getTSG());
             gene.setOncogene(queryGene.getOncogene());
             geneBo.update(gene);
+        }
+        return "success";
+    }
+
+    @RequestMapping(value = "/legacy-api/genes/create", method = RequestMethod.POST)
+    public @ResponseBody
+    String updateGene(@RequestBody(required = true) Gene queryGene) {
+        if (queryGene == null) {
+            return "error";
+        }
+        Gene gene = GeneUtils.getGene(queryGene.getEntrezGeneId(), queryGene.getHugoSymbol());
+        if (gene == null) {
+            GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
+            geneBo.save(queryGene);
+            CacheUtils.updateGene(Collections.singleton(gene.getEntrezGeneId()), true);
+        }
+        return "success";
+    }
+
+    @RequestMapping(value = "/legacy-api/genes/remove/{hugoSymbol}", method = RequestMethod.POST)
+    public @ResponseBody
+    String updateGene(@ApiParam(value = "hugoSymbol", required = true) @PathVariable("hugoSymbol") String hugoSymbol) {
+        if (hugoSymbol == null) {
+            return "error";
+        }
+        Gene gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
+        if (gene != null) {
+            ApplicationContextSingleton.getEvidenceBo().deleteAll(new ArrayList<>(CacheUtils.getEvidences(gene)));
+            ApplicationContextSingleton.getAlterationBo().deleteAll(new ArrayList<>(AlterationUtils.getAllAlterations(gene)));
+            ApplicationContextSingleton.getGeneBo().delete(gene);
+            CacheUtils.updateGene(Collections.singleton(gene.getEntrezGeneId()), true);
         }
         return "success";
     }

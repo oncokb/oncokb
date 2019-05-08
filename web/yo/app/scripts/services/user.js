@@ -11,7 +11,7 @@
  * gmail.com will be used as standard email format, googlemail address will be converted to gmail
  */
 angular.module('oncokbApp')
-    .service('user', function user($routeParams, $q, $firebaseAuth, $firebaseObject, $rootScope, mainUtils) {
+    .service('user', function user($routeParams, $q, $firebaseAuth, $firebaseObject, $rootScope, mainUtils, firebaseConnector) {
         // me is used only inside user.js to share user information
         var me = {
             admin: false,
@@ -48,6 +48,11 @@ angular.module('oncokbApp')
                             $rootScope.isAuthorizedUser = true;
                             defer.resolve();
                         }
+                        // Loading all drugs info
+                        $firebaseObject(firebaseConnector.ref("Drugs/")).$bindTo($rootScope, "drugList").then(function () {
+                        }, function (error) {
+                            dialogs.error('Error', 'Failed to load drugs information. Please Contact developer and stop curation.');
+                        });
                     }
                 }, function(error) {
                     defer.reject(error);

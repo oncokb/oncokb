@@ -264,7 +264,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         for (Map.Entry<Gene, Set<Evidence>> entry : evidences.entrySet()) {
             for (Evidence evidence : entry.getValue()) {
                 LevelOfEvidence level = evidence.getLevelOfEvidence();
-                if (level != null) {
+                if (level != null && LevelUtils.getPublicLevels().contains(level)) {
                     if (!result.containsKey(level)) {
                         result.put(level, new HashSet<Evidence>());
                     }

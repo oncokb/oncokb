@@ -2,6 +2,7 @@ package org.mskcc.cbio.oncokb.api.pub.v1;
 
 import org.mskcc.cbio.oncokb.model.OncoKBInfo;
 import org.mskcc.cbio.oncokb.model.Version;
+import org.mskcc.cbio.oncokb.util.LevelUtils;
 import org.mskcc.cbio.oncokb.util.MainUtils;
 import org.mskcc.cbio.oncokb.util.TumorTypeUtils;
 import org.springframework.http.HttpStatus;
@@ -22,6 +23,7 @@ public class InfoApiController implements InfoApi {
         version.setDate(MainUtils.getDataVersionDate());
         version.setVersion(MainUtils.getDataVersion());
 
+        oncoKBInfo.setLevels(LevelUtils.getInfoLevels());
         oncoKBInfo.setDataVersion(version);
 
         return new ResponseEntity<>(oncoKBInfo, HttpStatus.OK);

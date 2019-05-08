@@ -1,44 +1,65 @@
 package org.mskcc.cbio.oncokb.util;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.mskcc.cbio.oncokb.apiModels.InfoLevel;
 import org.mskcc.cbio.oncokb.model.Evidence;
 import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
 
+import javax.sound.sampled.Line;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
- * Created by hongxinzhang on 4/5/16.
+ * Created by Hongxin Zhang
  */
 public class LevelUtils {
-    public static final List<LevelOfEvidence> LEVELS = Collections.unmodifiableList(
-        Arrays.asList(LevelOfEvidence.LEVEL_R3, LevelOfEvidence.LEVEL_R2, LevelOfEvidence.LEVEL_4, LevelOfEvidence.LEVEL_3B, LevelOfEvidence.LEVEL_3A,
-            LevelOfEvidence.LEVEL_2B, LevelOfEvidence.LEVEL_2A, LevelOfEvidence.LEVEL_1, LevelOfEvidence.LEVEL_R1)
-    );
-    public static final List<LevelOfEvidence> TREATMENT_SORTING_LEVEL_PRIORITY = Collections.unmodifiableList(
-        Arrays.asList(LevelOfEvidence.LEVEL_R3, LevelOfEvidence.LEVEL_R2, LevelOfEvidence.LEVEL_4, LevelOfEvidence.LEVEL_3B,
-            LevelOfEvidence.LEVEL_2B, LevelOfEvidence.LEVEL_3A, LevelOfEvidence.LEVEL_2A, LevelOfEvidence.LEVEL_1, LevelOfEvidence.LEVEL_R1)
+    private static final List<LevelOfEvidence> PUBLIC_LEVELS = Collections.unmodifiableList(
+        Arrays.asList(
+            LevelOfEvidence.LEVEL_Px3, LevelOfEvidence.LEVEL_Px2, LevelOfEvidence.LEVEL_Px1,
+            LevelOfEvidence.LEVEL_Dx3, LevelOfEvidence.LEVEL_Dx2, LevelOfEvidence.LEVEL_Dx1,
+            LevelOfEvidence.LEVEL_R2, LevelOfEvidence.LEVEL_4, LevelOfEvidence.LEVEL_3B, LevelOfEvidence.LEVEL_3A,
+            LevelOfEvidence.LEVEL_2B, LevelOfEvidence.LEVEL_2A, LevelOfEvidence.LEVEL_1, LevelOfEvidence.LEVEL_R1
+            )
     );
 
-    public static final List<LevelOfEvidence> SENSITIVE_LEVELS = Collections.unmodifiableList(
+    // Levels related to therapy
+
+    private static final List<LevelOfEvidence> THERAPEUTIC_SENSITIVE_LEVELS = Collections.unmodifiableList(
         Arrays.asList(LevelOfEvidence.LEVEL_4, LevelOfEvidence.LEVEL_3B, LevelOfEvidence.LEVEL_3A,
             LevelOfEvidence.LEVEL_2B, LevelOfEvidence.LEVEL_2A, LevelOfEvidence.LEVEL_1)
     );
 
-    public static final List<LevelOfEvidence> RESISTANCE_LEVELS = Collections.unmodifiableList(
+    private static final List<LevelOfEvidence> THERAPEUTIC_RESISTANCE_LEVELS = Collections.unmodifiableList(
         Arrays.asList(LevelOfEvidence.LEVEL_R2, LevelOfEvidence.LEVEL_R1)
     );
 
-    public static final List<LevelOfEvidence> PUBLIC_LEVELS = Collections.unmodifiableList(
-        Arrays.asList(LevelOfEvidence.LEVEL_1, LevelOfEvidence.LEVEL_R1, LevelOfEvidence.LEVEL_2A,
-            LevelOfEvidence.LEVEL_3A, LevelOfEvidence.LEVEL_4, LevelOfEvidence.LEVEL_R2)
+    private static final List<LevelOfEvidence> ALLOWED_PRAPOGATION_LEVELS = Collections.unmodifiableList(
+        Arrays.asList(LevelOfEvidence.LEVEL_4, LevelOfEvidence.LEVEL_3B, LevelOfEvidence.LEVEL_2B)
     );
 
-    public static final List<LevelOfEvidence> OTHER_INDICATION_LEVELS = Collections.unmodifiableList(
+    // This is for sorting treatments when all levels are in one array. The only difference at the moment is the level 3A will be prioritised over 2B.
+    // But 2B is still higher level of 3A
+    private static final List<LevelOfEvidence> THERAPEUTIC_LEVELS_WITH_PRIORITY = Collections.unmodifiableList(
+        Arrays.asList(LevelOfEvidence.LEVEL_R2, LevelOfEvidence.LEVEL_4, LevelOfEvidence.LEVEL_3B,
+            LevelOfEvidence.LEVEL_2B, LevelOfEvidence.LEVEL_3A, LevelOfEvidence.LEVEL_2A, LevelOfEvidence.LEVEL_1, LevelOfEvidence.LEVEL_R1)
+    );
+
+    private static final List<LevelOfEvidence> THERAPEUTIC_OTHER_INDICATION_LEVELS = Collections.unmodifiableList(
         Arrays.asList(LevelOfEvidence.LEVEL_2B, LevelOfEvidence.LEVEL_3B)
     );
 
+    // Levels related to therapy
+    private static final List<LevelOfEvidence> PROGNOSTIC_LEVELS = Collections.unmodifiableList(
+        Arrays.asList(LevelOfEvidence.LEVEL_Px3, LevelOfEvidence.LEVEL_Px2, LevelOfEvidence.LEVEL_Px1)
+    );
+
+    // Levels related to therapy
+    private static final List<LevelOfEvidence> DIAGNOSTIC_LEVELS = Collections.unmodifiableList(
+        Arrays.asList(LevelOfEvidence.LEVEL_Dx3, LevelOfEvidence.LEVEL_Dx2, LevelOfEvidence.LEVEL_Dx1)
+    );
+
     public static Integer compareLevel(LevelOfEvidence a, LevelOfEvidence b) {
-        return compareLevel(a, b, LEVELS);
+        return compareLevel(a, b, PUBLIC_LEVELS);
     }
 
     public static Integer compareLevel(LevelOfEvidence a, LevelOfEvidence b, List<LevelOfEvidence> levels) {
@@ -62,26 +83,26 @@ public class LevelUtils {
             for (Evidence evidence : evidences) {
                 LevelOfEvidence level = evidence.getLevelOfEvidence();
                 if (level != null) {
-                    Integer _index = LEVELS.indexOf(level);
+                    Integer _index = PUBLIC_LEVELS.indexOf(level);
                     highestLevelIndex = _index > highestLevelIndex ? _index : highestLevelIndex;
                 }
             }
 
-            return highestLevelIndex > -1 ? LEVELS.get(highestLevelIndex) : null;
+            return highestLevelIndex > -1 ? PUBLIC_LEVELS.get(highestLevelIndex) : null;
 
         }
         return null;
     }
 
     public static LevelOfEvidence getHighestLevel(Set<LevelOfEvidence> levels) {
-        return getHighestLevelByType(levels, LEVELS);
+        return getHighestLevelByType(levels, PUBLIC_LEVELS);
     }
 
     public static LevelOfEvidence getHighestSensitiveLevel(Set<LevelOfEvidence> levels) {
-        return getHighestLevelByType(levels, SENSITIVE_LEVELS);
+        return getHighestLevelByType(levels, THERAPEUTIC_SENSITIVE_LEVELS);
     }
     public static LevelOfEvidence getHighestResistanceLevel(Set<LevelOfEvidence> levels) {
-        return getHighestLevelByType(levels, RESISTANCE_LEVELS);
+        return getHighestLevelByType(levels, THERAPEUTIC_RESISTANCE_LEVELS);
     }
 
     public static LevelOfEvidence getHighestLevelByType(Set<LevelOfEvidence> levels, List<LevelOfEvidence> levelPool) {
@@ -106,13 +127,13 @@ public class LevelUtils {
                 LevelOfEvidence level = evidence.getLevelOfEvidence();
                 if (levels.contains(level)) {
                     if (level != null) {
-                        Integer _index = LEVELS.indexOf(level);
+                        Integer _index = PUBLIC_LEVELS.indexOf(level);
                         highestLevelIndex = _index > highestLevelIndex ? _index : highestLevelIndex;
                     }
                 }
             }
 
-            return highestLevelIndex > -1 ? LEVELS.get(highestLevelIndex) : null;
+            return highestLevelIndex > -1 ? PUBLIC_LEVELS.get(highestLevelIndex) : null;
 
         }
         return null;
@@ -144,25 +165,6 @@ public class LevelUtils {
 
         }
         return result;
-    }
-
-    public static Set<LevelOfEvidence> getPublicLevels() {
-        return new HashSet<>(PUBLIC_LEVELS);
-    }
-
-    public static Set<LevelOfEvidence> getPublicSensitiveLevels() {
-        return new HashSet<>(CollectionUtils.intersection(PUBLIC_LEVELS, SENSITIVE_LEVELS));
-    }
-
-    public static Set<LevelOfEvidence> getPublicResistanceLevels() {
-        return new HashSet<>(CollectionUtils.intersection(PUBLIC_LEVELS, RESISTANCE_LEVELS));
-    }
-
-    public static Set<LevelOfEvidence> getPublicAndOtherIndicationLevels() {
-        Set<LevelOfEvidence> levels = new HashSet<>();
-        levels.addAll(PUBLIC_LEVELS);
-        levels.addAll(OTHER_INDICATION_LEVELS);
-        return levels;
     }
 
     // This is specifically designed to change level if it is for alternative allele.
@@ -218,7 +220,7 @@ public class LevelUtils {
 
     public static Boolean isSensitiveLevel(LevelOfEvidence levelOfEvidence) {
         Boolean flag = false;
-        if (levelOfEvidence != null && SENSITIVE_LEVELS.contains(levelOfEvidence)) {
+        if (levelOfEvidence != null && THERAPEUTIC_SENSITIVE_LEVELS.contains(levelOfEvidence)) {
             flag = true;
         }
         return flag;
@@ -226,33 +228,69 @@ public class LevelUtils {
 
     public static Boolean isResistanceLevel(LevelOfEvidence levelOfEvidence) {
         Boolean flag = false;
-        if (levelOfEvidence != null && RESISTANCE_LEVELS.contains(levelOfEvidence)) {
+        if (levelOfEvidence != null && THERAPEUTIC_RESISTANCE_LEVELS.contains(levelOfEvidence)) {
             flag = true;
         }
         return flag;
     }
 
-    public static Set<LevelOfEvidence> getAllLevels() {
-        return new HashSet<>(LEVELS);
+    public static Set<LevelOfEvidence> getPublicLevels() {
+        return new HashSet<>(PUBLIC_LEVELS);
     }
 
     public static Set<LevelOfEvidence> getSensitiveLevels() {
-        return new HashSet<LevelOfEvidence>() {{
-            add(LevelOfEvidence.LEVEL_1);
-            add(LevelOfEvidence.LEVEL_2A);
-            add(LevelOfEvidence.LEVEL_2B);
-            add(LevelOfEvidence.LEVEL_3A);
-            add(LevelOfEvidence.LEVEL_3B);
-            add(LevelOfEvidence.LEVEL_4);
-        }};
+        return new HashSet<>(CollectionUtils.intersection(PUBLIC_LEVELS, THERAPEUTIC_SENSITIVE_LEVELS));
     }
 
     public static Set<LevelOfEvidence> getResistanceLevels() {
-        return new HashSet<LevelOfEvidence>() {{
-            add(LevelOfEvidence.LEVEL_R1);
-            add(LevelOfEvidence.LEVEL_R2);
-            add(LevelOfEvidence.LEVEL_R3);
-        }};
+        return new HashSet<>(CollectionUtils.intersection(PUBLIC_LEVELS, THERAPEUTIC_RESISTANCE_LEVELS));
+    }
+
+    public static int getSensitiveLevelIndex(LevelOfEvidence levelOfEvidence) {
+        return THERAPEUTIC_SENSITIVE_LEVELS.indexOf(levelOfEvidence);
+    }
+
+    public static int getResistanceLevelIndex(LevelOfEvidence levelOfEvidence) {
+        return THERAPEUTIC_RESISTANCE_LEVELS.indexOf(levelOfEvidence);
+    }
+
+    public static LevelOfEvidence getSensitiveLevelByIndex(int index) {
+        return THERAPEUTIC_SENSITIVE_LEVELS.get(index);
+    }
+
+    public static LevelOfEvidence getResistanceLevelByIndex(int index) {
+        return THERAPEUTIC_RESISTANCE_LEVELS.get(index);
+    }
+
+    public static List<LevelOfEvidence> getIndexedPublicLevels() {
+        return new ArrayList<>(PUBLIC_LEVELS);
+    }
+
+    public static List<LevelOfEvidence> getIndexedTherapeuticLevels() {
+        return new ArrayList<>(THERAPEUTIC_LEVELS_WITH_PRIORITY);
+    }
+
+    public static Set<LevelOfEvidence> getPrognosticLevels() {
+        return new HashSet<>(CollectionUtils.intersection(PUBLIC_LEVELS, PROGNOSTIC_LEVELS));
+    }
+
+    public static Set<LevelOfEvidence> getDiagnosticLevels() {
+        return new HashSet<>(CollectionUtils.intersection(PUBLIC_LEVELS, DIAGNOSTIC_LEVELS));
+    }
+
+    public static Set<LevelOfEvidence> getAllowedCurationLevels() {
+        Set levels = new HashSet<>(PUBLIC_LEVELS);
+        levels.remove(LevelOfEvidence.LEVEL_0);
+        levels.remove(LevelOfEvidence.LEVEL_2B);
+        levels.remove(LevelOfEvidence.LEVEL_3B);
+        return levels;
+    }
+
+    public static List<LevelOfEvidence> getAllowedPropagationLevels() {
+        return ALLOWED_PRAPOGATION_LEVELS;
+    }
+    public static ListIterator getTherapeuticLevelsWithPriorityLIstIterator() {
+        return THERAPEUTIC_LEVELS_WITH_PRIORITY.listIterator(THERAPEUTIC_LEVELS_WITH_PRIORITY.size());
     }
 
     public static Boolean areSameLevels(LevelOfEvidence l1, LevelOfEvidence l2) {
@@ -263,5 +301,14 @@ public class LevelUtils {
         } else {
             return false;
         }
+    }
+
+    public static List<InfoLevel> getInfoLevels() {
+        List<LevelOfEvidence> levels = new ArrayList<>();
+        levels.addAll(CollectionUtils.intersection(PUBLIC_LEVELS, THERAPEUTIC_RESISTANCE_LEVELS));
+        levels.addAll(CollectionUtils.intersection(PUBLIC_LEVELS, THERAPEUTIC_SENSITIVE_LEVELS));
+        levels.sort(Comparator.comparing(LevelOfEvidence::getLevel));
+
+        return levels.stream().map(levelOfEvidence -> new InfoLevel(levelOfEvidence)).collect(Collectors.toList());
     }
 }

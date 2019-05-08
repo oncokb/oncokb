@@ -1,0 +1,65 @@
+<div class="drugsPage" ng-show="!status.updatingDrugName">
+    <h3 class="headerStyle">Curated Therapies</h3>
+    <div ng-if="drugList!==undefined">
+        <table class="table" datatable="ng" dt-options="dtOptions" dt-columns="dtColumns">
+            <thead>
+            <tr class="dashedHeader">
+                <th>Therapy</th>
+                <th>NCI Thesaurus Code</th>
+                <th>Description</th>
+                <th>Genes</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr data-ng-repeat="drug in drugList">
+                <td ng-init="editDrugName=false">
+                    <div ng-show="editDrugName===false">
+                        <button ng-show="internal" type="button" class="btn btn-warning buttonStyle " uib-tooltip-placement="top"
+                                uib-tooltip="Modify Name" ng-click="editDrugName=!editDrugName" ng-disabled="!drug.synonyms"><i
+                            class="fa fa-edit"></i>
+                        </button>
+                        {{ drug.drugName}}
+                    </div>
+                    <div ng-show="internal && editDrugName===true">
+                        <button type="button" class="btn btn-success buttonStyle" uib-tooltip-placement="top"
+                                uib-tooltip="Save Name"
+                                ng-click="saveDrugName(newDrugName, drug);editDrugName=!editDrugName"><i
+                            class="fa fa-check"></i>
+                        </button>
+                        <select chosen
+                                ng-model="newDrugName"
+                                id="changeNameDropdown"
+                                data-placeholder="{{drug.drugName}}"
+                                ng-options="name for name in generateSynonyms(drug)">
+                                <option value=""></option>
+                        </select>
+
+                    </div>
+                </td>
+                <td>{{ drug.ncitCode }}</td>
+                <td>{{ drug.description }}</td>
+                <td>
+                    <div ng-repeat = "gene in drugMapReviewed[drug.uuid]" qtip type="map" content="{{gene.mutationNumber}} mutation(s): {{gene.mutationInfo}}"><a
+                        ng-href="{{gene.geneLink}}">{{gene.geneName}}</a></div>
+                </td>
+                <td>
+                    <div ng-show="checkDrugInUse(drug.uuid)">
+                        <button type="button" class="buttonStyle btn btn-danger" ng-click="removeDrug(drug)"
+                                uib-tooltip-placement="top" uib-tooltip="Delete Drug"><i class="fa fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div ng-if="drugList===undefined">
+        <p class="errorReminderXL">The page is unavailable now.</p>
+    </div>
+    <div style="margin: 10px 0">
+        <create-new-drug></create-new-drug>
+    </div>
+</div>
+<loading ng-model="status.updatingDrugName" content="Please wait, we are updating drug preferred name."></loading>
+

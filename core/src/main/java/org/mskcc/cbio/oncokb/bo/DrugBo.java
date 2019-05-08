@@ -21,6 +21,10 @@ public interface DrugBo extends GenericBo<Drug> {
      * @return 
      */
     List<Drug> findDrugsByNames(Collection<String> drugNames);
+
+
+    Drug findDrugById(Integer id);
+
     
     /**
      * 
@@ -38,10 +42,10 @@ public interface DrugBo extends GenericBo<Drug> {
 
     /**
      *
-     * @param atcCode
+     * @param ncitCode
      * @return
      */
-    List<Drug> findDrugsByAtcCode(String atcCode);
+    Drug findDrugsByNcitCode(String ncitCode);
     
     /**
      * 

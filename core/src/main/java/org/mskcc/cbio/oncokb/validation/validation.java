@@ -18,6 +18,7 @@ import com.google.gdata.data.spreadsheet.WorksheetEntry;
 import com.google.gdata.data.spreadsheet.WorksheetFeed;
 import com.google.gdata.util.ServiceException;
 import com.mysql.jdbc.StringUtils;
+import org.mskcc.cbio.oncokb.bo.ArticleBo;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
 import org.mskcc.cbio.oncokb.util.*;
@@ -33,6 +34,8 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author jiaojiao
@@ -117,6 +120,15 @@ public class validation {
 
         System.out.println("Checking gene summary and background");
         checkGeneSummaryBackground();
+
+        System.out.println("Validate evidence description content");
+        validateEvidenceDescriptionContent();
+
+        System.out.println("Checking unsupported alteration type");
+        checkUnsupportedAlterationType();
+
+        System.out.println("Checking unappropriated citation format");
+        checkInappropriateCitation();
 
     }
 
@@ -241,9 +253,13 @@ public class validation {
 
     private static void printTumorTypeSummary() {
         URL feedUrl = getFeedUrl(WorkSheetEntryEnum.TUMOR_SUMMARIES);
+        Set<EvidenceType> evidenceTypes = new HashSet<>();
+        evidenceTypes.add(EvidenceType.TUMOR_TYPE_SUMMARY);
+        evidenceTypes.add(EvidenceType.DIAGNOSTIC_SUMMARY);
+        evidenceTypes.add(EvidenceType.PROGNOSTIC_SUMMARY);
         if (feedUrl != null) {
             for (Gene gene : GeneUtils.getAllGenes()) {
-                Set<Evidence> evidences = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY));
+                Set<Evidence> evidences = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, evidenceTypes);
                 for (Evidence evidence : evidences) {
                     ListEntry row = new ListEntry();
                     setValue(row, "Gene", evidence.getGene().getHugoSymbol());
@@ -291,6 +307,133 @@ public class validation {
                     setValue(row, "Summary", "Has summary, but it should not.");
                     setValue(row, "Background", "Has background, but it should not.");
                     insertRowToEntry(feedUrl, row);
+                }
+            }
+        }
+    }
+
+    private static void validateEvidenceDescriptionContent() {
+        URL feedUrl = getFeedUrl(WorkSheetEntryEnum.INAPPROPRIATE_CONTENT_IN_DESCRIPTION);
+        Pattern reservedCharsRegex = Pattern.compile("&[\\w]{4};");
+        Pattern htmlFragmentRegex = Pattern.compile("<\\s*a[^>]*>");
+
+        if (feedUrl != null) {
+            for (Evidence evidence : CacheUtils.getAllEvidences()) {
+                if (evidence.getDescription() != null) {
+                    Matcher matcher = reservedCharsRegex.matcher(evidence.getDescription());
+                    if(matcher.find()) {
+                        printEvidenceDescriptionContent(feedUrl, evidence, "HTML reserved characters exist");
+                    }
+
+                    matcher = htmlFragmentRegex.matcher(evidence.getDescription());
+                    if(matcher.find()) {
+                        printEvidenceDescriptionContent(feedUrl, evidence, "HTML tag exists");
+                    }
+                }
+            }
+        }
+    }
+
+    private static void printEvidenceDescriptionContent(URL feedUrl, Evidence Evidence, String type) {
+        ListEntry row = new ListEntry();
+        setValue(row, "Type", type);
+        setValue(row, "Gene", Evidence.getGene().getHugoSymbol());
+        setValue(row, "EvidenceID", Evidence.getId().toString());
+        List<String> alterations = new ArrayList<>();
+        for (Alteration alteration : Evidence.getAlterations()) {
+            alterations.add(alteration.getAlteration());
+        }
+        setValue(row, "Alteration", org.apache.commons.lang3.StringUtils.join(alterations, ", "));
+        insertRowToEntry(feedUrl, row);
+    }
+
+    private static void printEvidencePmids(URL feedUrl, Evidence Evidence, String type, Set<String> pmids) {
+        ListEntry row = new ListEntry();
+        setValue(row, "Type", type);
+        setValue(row, "Gene", Evidence.getGene().getHugoSymbol());
+        setValue(row, "EvidenceID", Evidence.getId().toString());
+        List<String> alterations = new ArrayList<>();
+        for (Alteration alteration : Evidence.getAlterations()) {
+            alterations.add(alteration.getAlteration());
+        }
+        setValue(row, "Alteration", org.apache.commons.lang3.StringUtils.join(alterations, ", "));
+        setValue(row, "PMIDs", org.apache.commons.lang3.StringUtils.join(pmids, ", "));
+        insertRowToEntry(feedUrl, row);
+    }
+
+    private static void checkUnsupportedAlterationType() {
+        URL feedUrl = getFeedUrl(WorkSheetEntryEnum.UNSUPPORTED_ALTERATION_TYPE);
+        if (feedUrl != null) {
+            Pattern unsupportedAlterationNameRegex = Pattern.compile("[^\\w\\s\\*-]");
+            for (Alteration alteration : AlterationUtils.getAllAlterations()) {
+                if (alteration.getAlteration() == null || alteration.getAlteration().isEmpty()) {
+                    printUnsupportedAlteration(feedUrl, alteration, "Alteration is empty");
+                } else {
+                    Matcher matcher = unsupportedAlterationNameRegex.matcher(alteration.getAlteration());
+                    if (matcher.find()) {
+                        printUnsupportedAlteration(feedUrl, alteration, "Unsupported alteration name");
+                    }
+                    if (alteration.getAlteration().contains("indel")) {
+                        printUnsupportedAlteration(feedUrl, alteration, "Indel is not supported");
+                    }
+                    if (alteration.getAlteration().contains("exon")) {
+                        printUnsupportedAlteration(feedUrl, alteration, "Exon should have a range");
+                    }
+                    if (alteration.getAlteration().contains("-") && !alteration.getAlteration().toLowerCase().contains("fusion")) {
+                        printUnsupportedAlteration(feedUrl, alteration, "Fusion format error");
+                    }
+                    if (alteration.getConsequence() == null) {
+                        printUnsupportedAlteration(feedUrl, alteration, "Variant should have a consequence attached");
+                    } else {
+                        if (alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm("any")) && !alteration.getAlteration().contains("mut")) {
+                            printUnsupportedAlteration(feedUrl, alteration, "Only mut supports any consequence");
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private static void printUnsupportedAlteration(URL feedUrl, Alteration alteration, String type) {
+        ListEntry row = new ListEntry();
+        setValue(row, "Type", type);
+        setValue(row, "Gene", alteration.getGene().getHugoSymbol());
+        setValue(row, "AlterationID", alteration.getId().toString());
+        setValue(row, "Alteration", alteration.getAlteration());
+        insertRowToEntry(feedUrl, row);
+    }
+
+    private static void checkInappropriateCitation() {
+        URL feedUrl = getFeedUrl(WorkSheetEntryEnum.INAPPROPRIATE_CITATION_FORMAT);
+        ArticleBo articleBo = ApplicationContextSingleton.getArticleBo();
+        if (feedUrl != null) {
+            for (Evidence evidence : CacheUtils.getAllEvidences()) {
+                if (evidence.getDescription() != null) {
+                    Pattern pmidPattern = Pattern.compile("PMIDs?:\\s*([\\d,\\s*]+)", Pattern.CASE_INSENSITIVE);
+                    Matcher m = pmidPattern.matcher(evidence.getDescription());
+                    int start = 0;
+                    Set<String> pmidToSearch = new HashSet<>();
+                    while (m.find(start)) {
+                        String pmids = m.group(1).trim();
+                        for (String pmid : pmids.split(", *(PMID:)? *")) {
+                            if(!pmid.isEmpty()) {
+                                Article doc = articleBo.findArticleByPmid(pmid);
+                                if (doc == null) {
+                                    pmidToSearch.add(pmid);
+                                }
+                            }
+                        }
+                        start = m.end();
+                    }
+
+                    if (!pmidToSearch.isEmpty()) {
+                        printEvidencePmids(feedUrl, evidence, "PMID is not stored", pmidToSearch);
+                        try {
+                            NcbiEUtils.readPubmedArticles(pmidToSearch);
+                        } catch (Exception e) {
+                            printEvidenceDescriptionContent(feedUrl, evidence, "PMID is not supported");
+                        }
+                    }
                 }
             }
         }

@@ -3,6 +3,7 @@
 /**
  * @ngdoc factory
  * @name oncokbApp.checkNameChange
+ * @author Jing Su
  * @description
  * # checkNameChange
  * This factory is used for checking if mutations are deleted in Review mode.

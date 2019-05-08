@@ -4,7 +4,10 @@ import io.swagger.annotations.ApiParam;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
+import org.mskcc.cbio.oncokb.apiModels.DrugMatch;
+import org.mskcc.cbio.oncokb.apiModels.NCITDrug;
 import org.mskcc.cbio.oncokb.model.*;
+import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
 import org.mskcc.cbio.oncokb.util.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,13 +15,14 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by Hongxin on 10/28/16.
  */
 @Controller
 public class PrivateSearchApiController implements PrivateSearchApi {
-    private Integer TYPEAHEAD_RETURN_LIMIT = 5;
+    private Integer DEFAULT_RETURN_LIMIT = 5;
 
     @Override
     public ResponseEntity<Set<BiologicalVariant>> searchVariantsBiologicalGet(
@@ -83,7 +87,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
         @ApiParam(value = "The limit of returned result.") @RequestParam(value = "limit", defaultValue = "5", required = false) Integer limit) {
         LinkedHashSet<TypeaheadSearchResp> result = new LinkedHashSet<>();
         if (limit == null) {
-            limit = TYPEAHEAD_RETURN_LIMIT;
+            limit = DEFAULT_RETURN_LIMIT;
         }
         if (query != null) {
             List<String> keywords = Arrays.asList(query.trim().split("\\s+"));
@@ -94,6 +98,9 @@ public class PrivateSearchApiController implements PrivateSearchApi {
 
                 // Blur search variant
                 result.addAll(convertVariant(AlterationUtils.lookupVariant(keywords.get(0), false, AlterationUtils.getAllAlterations()), keywords.get(0)));
+
+                // Blur search drug
+                result.addAll(findEvidencesWithDrugAssociated(keywords.get(0), false));
 
                 // If the keyword contains dash and result is empty, then we should return both fusion genes
                 if (keywords.get(0).contains("-") && result.isEmpty()) {
@@ -155,6 +162,14 @@ public class PrivateSearchApiController implements PrivateSearchApi {
         return new ResponseEntity<>(getLimit(result, limit), HttpStatus.OK);
     }
 
+    @Override
+    public ResponseEntity<LinkedHashSet<NCITDrug>> searchDrugGet(String query, Integer limit) {
+        if (limit == null) {
+            limit = DEFAULT_RETURN_LIMIT;
+        }
+        return new ResponseEntity<>(getLimit(NCITDrugUtils.findDrugs(query), limit), HttpStatus.OK);
+    }
+
     private LinkedHashSet<TypeaheadSearchResp> getMatch(Map<String, Set<Gene>> map, List<String> keywords, Boolean exactMatch) {
         LinkedHashSet<TypeaheadSearchResp> result = new LinkedHashSet<>();
         if (map == null || keywords == null) {
@@ -211,8 +226,8 @@ public class PrivateSearchApiController implements PrivateSearchApi {
                 typeaheadSearchResp.setQueryType("gene");
 
                 if (evidences.containsKey(gene)) {
-                    LevelOfEvidence highestSensitiveLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(evidences.get(gene), LevelUtils.getPublicSensitiveLevels());
-                    LevelOfEvidence highestResistanceLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(evidences.get(gene), LevelUtils.getPublicResistanceLevels());
+                    LevelOfEvidence highestSensitiveLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(evidences.get(gene), LevelUtils.getSensitiveLevels());
+                    LevelOfEvidence highestResistanceLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(evidences.get(gene), LevelUtils.getResistanceLevels());
                     typeaheadSearchResp.setHighestSensitiveLevel(highestSensitiveLevel == null ? "" : highestSensitiveLevel.getLevel());
                     typeaheadSearchResp.setHighestResistanceLevel(highestResistanceLevel == null ? "" : highestResistanceLevel.getLevel());
                 }
@@ -232,10 +247,119 @@ public class PrivateSearchApiController implements PrivateSearchApi {
         return result;
     }
 
+    private static TypeaheadSearchResp newTypeaheadDrug(DrugMatch drugMatch) {
+        TypeaheadSearchResp typeaheadSearchResp = new TypeaheadSearchResp();
+        typeaheadSearchResp.setGene(drugMatch.getGene());
+        typeaheadSearchResp.setVariants(drugMatch.getAlterations());
+        typeaheadSearchResp.setDrug(drugMatch.getDrug());
+        typeaheadSearchResp.setTumorTypes(drugMatch.getTumorTypes());
+
+        if (LevelUtils.isSensitiveLevel(drugMatch.getLevelOfEvidence())) {
+            typeaheadSearchResp.setHighestSensitiveLevel(drugMatch.getLevelOfEvidence().getLevel());
+        } else {
+            typeaheadSearchResp.setHighestResistanceLevel(drugMatch.getLevelOfEvidence().getLevel());
+        }
+        typeaheadSearchResp.setQueryType("drug");
+
+        if (drugMatch.getAlterations().size() > 1 || drugMatch.getAlterations().size() == 0) {
+            typeaheadSearchResp.setLink("/gene/" + drugMatch.getGene().getHugoSymbol());
+        } else {
+            typeaheadSearchResp.setLink("/gene/" + drugMatch.getGene().getHugoSymbol() + "/" + drugMatch.getAlterations().iterator().next().getAlteration());
+        }
+        return typeaheadSearchResp;
+    }
+
+    private static String getDrugMatchKey(Gene gene, Drug drug, LevelOfEvidence level) {
+        return gene.getHugoSymbol() + drug.getDrugName() + level.getLevel();
+    }
+
+    private static void updateMap( Map<String, DrugMatch> map, String key, Gene gene, Set<Alteration> alterations, Drug drug, LevelOfEvidence level, TumorType tumorType, Double weight ) {
+        if(!map.containsKey(key)) {
+            DrugMatch drugMatch = new DrugMatch();
+            drugMatch.setGene(gene);
+            drugMatch.setLevelOfEvidence(level);
+            drugMatch.setDrug(drug);
+            drugMatch.setWeight(weight);
+            map.put(key, drugMatch);
+        }
+        map.get(key).getAlterations().addAll(alterations);
+        map.get(key).getTumorTypes().add(tumorType);
+    }
+    private static List<TypeaheadSearchResp> findEvidencesWithDrugAssociated(String query, Boolean exactMatch) {
+        Set<Evidence> evidences = EvidenceUtils.getEvidenceByEvidenceTypesAndLevels(EvidenceTypeUtils.getTreatmentEvidenceTypes(), LevelUtils.getPublicLevels());
+        Map<String, DrugMatch> result = new HashMap<>();
+
+        if (exactMatch == null) {
+            exactMatch = false;
+        }
+
+        query = query.toLowerCase();
+
+        for (Evidence evidence : evidences) {
+            boolean isMatch = false;
+            for (Treatment treatment : evidence.getTreatments()) {
+                if (isMatch) {
+                    break;
+                }
+                for (Drug drug : treatment.getDrugs()) {
+                    String matchKey = getDrugMatchKey(evidence.getGene(), drug, evidence.getLevelOfEvidence());
+                    if (isMatch) {
+                        break;
+                    }
+                    if (drug.getDrugName().toLowerCase().equals(query)) {
+                        updateMap(result, matchKey, evidence.getGene(), evidence.getAlterations(), drug, evidence.getLevelOfEvidence(), evidence.getOncoTreeType(), 4.0);
+                        isMatch = true;
+                    } else if (drug.getNcitCode() != null && drug.getNcitCode().toLowerCase().equals(query)) {
+                        updateMap(result, matchKey, evidence.getGene(), evidence.getAlterations(), drug, evidence.getLevelOfEvidence(), evidence.getOncoTreeType(), 4.0);
+                        isMatch = true;
+                    } else {
+                        for (String synonym : drug.getSynonyms()) {
+                            if (synonym.toLowerCase().equals(query)) {
+                                updateMap(result, matchKey, evidence.getGene(), evidence.getAlterations(), drug, evidence.getLevelOfEvidence(), evidence.getOncoTreeType(), 3.0);
+                                isMatch = true;
+                                break;
+                            }
+                        }
+                    }
+                    if(!exactMatch) {
+                        String lowerCaseDrugName = drug.getDrugName().toLowerCase();
+                        if (lowerCaseDrugName.startsWith(query)) {
+                            updateMap(result, matchKey, evidence.getGene(), evidence.getAlterations(), drug, evidence.getLevelOfEvidence(), evidence.getOncoTreeType(), 2.0);
+                            isMatch = true;
+                        } else if (lowerCaseDrugName.contains(query)) {
+                            updateMap(result, matchKey, evidence.getGene(), evidence.getAlterations(), drug, evidence.getLevelOfEvidence(), evidence.getOncoTreeType(), 1.5);
+                            isMatch = true;
+                        } else {
+                            for (String synonym : drug.getSynonyms()) {
+                                String lower = synonym.toLowerCase();
+
+                                if(lower.startsWith(query)) {
+                                    updateMap(result, matchKey, evidence.getGene(), evidence.getAlterations(), drug, evidence.getLevelOfEvidence(), evidence.getOncoTreeType(), 1.0);
+                                    isMatch = true;
+                                    break;
+                                } else if (lower.contains(query)) {
+                                    updateMap(result, matchKey, evidence.getGene(), evidence.getAlterations(), drug, evidence.getLevelOfEvidence(), evidence.getOncoTreeType(), 0.5);
+                                    isMatch = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        TreeSet<DrugMatch> drugMatches = new TreeSet<>(new DrugMatchComp());
+        for(Map.Entry<String, DrugMatch> entry : result.entrySet()) {
+            drugMatches.add(entry.getValue());
+        }
+        return drugMatches.stream().map(drugMatch -> newTypeaheadDrug(drugMatch)).collect(Collectors.toList());
+    }
+
     private TypeaheadSearchResp newTypeaheadVariant(Alteration alteration) {
         TypeaheadSearchResp typeaheadSearchResp = new TypeaheadSearchResp();
         typeaheadSearchResp.setGene(alteration.getGene());
-        typeaheadSearchResp.setVariant(alteration);
+        typeaheadSearchResp.setVariants(Collections.singleton(alteration));
         typeaheadSearchResp.setVariantExist(true);
 
         Query query = new Query();
@@ -249,8 +373,8 @@ public class PrivateSearchApiController implements PrivateSearchApi {
         // TODO: populate treatment info.
 
         Set<Evidence> evidenceList = new HashSet<>(EvidenceUtils.getEvidence(AlterationUtils.getRelevantAlterations(alteration), null, null, null));
-        LevelOfEvidence highestSensitiveLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(evidenceList, LevelUtils.getPublicSensitiveLevels());
-        LevelOfEvidence highestResistanceLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(evidenceList, LevelUtils.getPublicResistanceLevels());
+        LevelOfEvidence highestSensitiveLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(evidenceList, LevelUtils.getSensitiveLevels());
+        LevelOfEvidence highestResistanceLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(evidenceList, LevelUtils.getResistanceLevels());
 
         if (highestSensitiveLevel != null) {
             typeaheadSearchResp.setHighestSensitiveLevel(highestSensitiveLevel.getLevel());
@@ -270,12 +394,12 @@ public class PrivateSearchApiController implements PrivateSearchApi {
         return typeaheadSearchResp;
     }
 
-    private LinkedHashSet<TypeaheadSearchResp> getLimit(LinkedHashSet<TypeaheadSearchResp> result, Integer limit) {
+    private <T> LinkedHashSet<T> getLimit(LinkedHashSet<T> result, Integer limit) {
         if (limit == null)
-            limit = TYPEAHEAD_RETURN_LIMIT;
+            limit = DEFAULT_RETURN_LIMIT;
         Integer count = 0;
-        LinkedHashSet<TypeaheadSearchResp> firstFew = new LinkedHashSet<>();
-        Iterator<TypeaheadSearchResp> itr = result.iterator();
+        LinkedHashSet<T> firstFew = new LinkedHashSet<>();
+        Iterator<T> itr = result.iterator();
         while (itr.hasNext() && count < limit) {
             firstFew.add(itr.next());
             count++;
@@ -312,17 +436,19 @@ class VariantComp implements Comparator<TypeaheadSearchResp> {
 
     @Override
     public int compare(TypeaheadSearchResp e1, TypeaheadSearchResp e2) {
-        if (e1 == null || e1.getVariant() == null) {
+        if (e1 == null || e1.getVariants() == null || e1.getVariants().size() == 0) {
             return 1;
         }
-        if (e2 == null || e2.getVariant() == null) {
+        if (e2 == null || e2.getVariants() == null || e2.getVariants().size() == 0) {
             return -1;
         }
-        String name1 = e1.getVariant().getAlteration().toLowerCase();
-        String name2 = e2.getVariant().getAlteration().toLowerCase();
-        if (e1.getVariant().getName() != null && e2.getVariant().getName() != null) {
-            name1 = e1.getVariant().getName().toLowerCase();
-            name2 = e2.getVariant().getName().toLowerCase();
+        Alteration a1 = e1.getVariants().iterator().next();
+        Alteration a2 = e2.getVariants().iterator().next();
+        String name1 = a1.getAlteration().toLowerCase();
+        String name2 = a2.getAlteration().toLowerCase();
+        if (a1.getName() != null && a2.getName() != null) {
+            name1 = a1.getName().toLowerCase();
+            name2 = a2.getName().toLowerCase();
         }
         Integer index1 = name1.indexOf(this.keyword);
         Integer index2 = name2.indexOf(this.keyword);
@@ -360,5 +486,19 @@ class VariantComp implements Comparator<TypeaheadSearchResp> {
                 return -1;
             return index1 - index2;
         }
+    }
+}
+
+class DrugMatchComp implements Comparator<DrugMatch> {
+    @Override
+    public int compare(DrugMatch d1, DrugMatch d2) {
+        int result = d2.getWeight().compareTo(d1.getWeight()) ;
+        if(result == 0) {
+            result = LevelUtils.compareLevel(d1.getLevelOfEvidence(), d2.getLevelOfEvidence());
+            if(result == 0) {
+                result = d1.getGene().getHugoSymbol().compareTo(d2.getGene().getHugoSymbol());
+            }
+        }
+        return result;
     }
 }

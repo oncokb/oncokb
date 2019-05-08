@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+
+import org.json.JSONObject;
 import org.mskcc.cbio.oncokb.model.Gene;
 
 /**
@@ -18,6 +20,7 @@ public final class GeneAnnotatorMyGeneInfo2 {
     }
     
     private static final String URL_MY_GENE_INFO_2 = "http://mygene.info/v2/";
+    private static final String CBIOPORTAL_GENES_ENDPOINT = "https://www.cbioportal.org/api/genes/";
     
     public static Gene readByEntrezId(int entrezId) throws IOException {
         String url = URL_MY_GENE_INFO_2 + "query?species=human&q=entrezgene:" + entrezId;
@@ -34,11 +37,32 @@ public final class GeneAnnotatorMyGeneInfo2 {
         }
         
         Gene gene = genes.get(0);
-        annotateGene(gene);
+        includeGeneAlias(gene);
         
         return gene;
     }
-    
+
+    public static Gene findGeneFromCBioPortal(String symbol) {
+        try {
+            String response = HttpUtils.getRequest(CBIOPORTAL_GENES_ENDPOINT + symbol);
+            JSONObject jsonObj = new JSONObject(response);
+            if (!jsonObj.has("hugoGeneSymbol") || !jsonObj.has("entrezGeneId")) {
+                System.out.println("The gene model is not appropriate from cBioPortal" + response);
+                return null;
+            } else {
+                Gene gene = new Gene();
+                gene.setHugoSymbol(jsonObj.getString("hugoGeneSymbol"));
+                gene.setEntrezGeneId(jsonObj.getInt("entrezGeneId"));
+                return gene;
+            }
+        } catch (IOException e) {
+            System.out.println("Something goes wrong while fetching cBioPortal service");
+            System.out.println(e);
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public static Gene readByHugoSymbol(String symbol) throws IOException {
         String url = URL_MY_GENE_INFO_2 + "query?species=human&q=symbol:" + symbol;
         String json = FileUtils.readRemote(url);
@@ -54,7 +78,7 @@ public final class GeneAnnotatorMyGeneInfo2 {
         }
         
         Gene gene = genes.get(0);
-        annotateGene(gene);
+        includeGeneAlias(gene);
         
         return gene;
     }
@@ -65,7 +89,7 @@ public final class GeneAnnotatorMyGeneInfo2 {
         
         List<Gene> genes = parseGenes(json);
         for (Gene gene : genes) {
-            annotateGene(gene);
+            includeGeneAlias(gene);
         }
         
         return genes;
@@ -95,7 +119,7 @@ public final class GeneAnnotatorMyGeneInfo2 {
         return genes;
     }
     
-    private static void annotateGene(Gene gene) throws IOException {
+    public static void includeGeneAlias(Gene gene) throws IOException {
         String url = URL_MY_GENE_INFO_2 + "gene/" + gene.getEntrezGeneId()
                 + "?fields=summary,alias";
         String json = FileUtils.readRemote(url);

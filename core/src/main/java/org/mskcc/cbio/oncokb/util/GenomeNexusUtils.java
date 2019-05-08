@@ -1,6 +1,8 @@
 package org.mskcc.cbio.oncokb.util;
 
 import com.google.gson.Gson;
+import org.apache.commons.lang3.StringUtils;
+import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.genomenexus.TranscriptConsequence;
 import org.mskcc.cbio.oncokb.genomenexus.VEPDetailedEnrichmentService;
 import org.mskcc.cbio.oncokb.genomenexus.VariantAnnotation;
@@ -15,30 +17,37 @@ import java.util.List;
  * Created by Hongxin on 6/26/17.
  */
 public class GenomeNexusUtils {
-    private static final String HGVS_ENDPOINT = "hgvs";
+    private static final String HGVS_ENDPOINT = "annotation";
+    private static final String GENOMIC_LOCATION_ENDPOINT = "annotation/genomic";
+    private static final String GENOME_NEXUS_DEFAULT_API = "http://genomenexus.org/";
 
-    public static TranscriptConsequence getTranscriptConsequence(String hgvs) {
-        VariantAnnotation annotation = hgvsCall(hgvs);
+    public static TranscriptConsequence getTranscriptConsequence(GNVariantAnnotationType type, String query) {
+        VariantAnnotation annotation = getVariantAnnotation(type, query);
         return getConsequence(annotation);
     }
 
-    private static VariantAnnotation hgvsCall(String hgvs) {
+    private static VariantAnnotation getVariantAnnotation(GNVariantAnnotationType type, String query) {
         VariantAnnotation variantAnnotation = null;
-        if (hgvs != null) {
-            String encodedHgvs = "";
-            String genomeNexusApi = "http://genomenexus.org/";
+        if (query != null && type != null) {
+            String encodedQuery = "";
+            String genomeNexusApi = GENOME_NEXUS_DEFAULT_API;
             try {
                 genomeNexusApi = PropertiesUtils.getProperties("genomenexus.api");
-                encodedHgvs = URLEncoder.encode(hgvs, "UTF-8");
+                encodedQuery = URLEncoder.encode(query, "UTF-8");
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            String response = null;
             try {
-                response = HttpUtils.getRequest(genomeNexusApi + HGVS_ENDPOINT + "/" + encodedHgvs);
-                VariantAnnotation[] variantAnnotations = new Gson().fromJson(response, VariantAnnotation[].class);
-                if (variantAnnotations != null && variantAnnotations.length >= 1) {
-                    variantAnnotation = variantAnnotations[0];
+                String response = null;
+                String url = null;
+                if (type.equals(GNVariantAnnotationType.HGVS_G)) {
+                    url = genomeNexusApi + HGVS_ENDPOINT + "/" + encodedQuery;
+                } else {
+                    url = genomeNexusApi + GENOMIC_LOCATION_ENDPOINT + "/" + encodedQuery;
+                }
+                response = HttpUtils.getRequest(url);
+                variantAnnotation = new Gson().fromJson(response, VariantAnnotation.class);
+                if (variantAnnotation != null) {
                     VEPDetailedEnrichmentService service = new VEPDetailedEnrichmentService();
                     variantAnnotation = service.enrich(variantAnnotation);
                 }

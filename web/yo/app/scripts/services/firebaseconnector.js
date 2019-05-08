@@ -48,7 +48,31 @@ angular.module('oncokbApp')
             return defer.promise;
         }
         function addDrug(uuid, drug) {
-            return set('Drug/' + uuid, drug);
+            return set('Drugs/' + uuid, drug);
+        }
+        function setDrugName(uuid, drugName) {
+            return set('Drugs/' + uuid + '/drugName', drugName);
+        }
+        function removeDrug(uuid){
+            return remove('Drugs/' + uuid);
+        }
+        function addTreatment(path, treatment){
+            return set(path + "/treatments/0", treatment);
+        }
+        function mapOnce(path){
+            var defer = $q.defer();
+            firebase.database().ref('Map/' + path).once('value', function(doc) {
+                defer.resolve(doc.val());
+            }, function (error) {
+                defer.reject(error);
+            });
+            return defer.promise;
+        }
+        function setMap(path, name){
+            return set('Map/' + path, name);
+        }
+        function removeMap(path){
+            return set('Map/' + path, null);
         }
         function createSetting(setting) {
             return set('Setting', setting);
@@ -68,6 +92,12 @@ angular.module('oncokbApp')
             remove: remove,
             update: update,
             addDrug: addDrug,
+            setDrugName: setDrugName,
+            removeDrug: removeDrug,
+            addTreatment: addTreatment,
+            mapOnce:mapOnce,
+            setMap: setMap,
+            removeMap: removeMap,
             createSetting: createSetting,
             addAttributeInSetting: addAttributeInSetting,
             removeAttributeFromSetting: removeAttributeFromSetting

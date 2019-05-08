@@ -15,6 +15,7 @@ angular.module('oncokbApp')
             scope: {
                 data: '=',
                 key: '=',
+                path: '=',
                 evidenceType: '=',  // evidence type
                 mutation: '=', // mutation
                 tumor: '=', // tumor
@@ -29,6 +30,7 @@ angular.module('oncokbApp')
                 modelUpdateInGene: '&modelUpdate',
                 acceptAddedInGene: '&acceptAdded',
                 rejectAddedInGene: '&rejectAdded',
+                updateDrugMapInGene: '&updateDrugMap',
                 getRefsInGene: '&getRefs',
                 uuid: '=',
                 reviewObj: '='
@@ -57,6 +59,7 @@ angular.module('oncokbApp')
                                 break;
                             case 'delete':
                                 $scope.confirmDelete($scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment, $scope.updatedBy);
+
                                 break;
                             case 'add':
                                 $scope.acceptAdded($scope.adjustedEvidenceType, $scope.mutation, $scope.tumor, $scope.therapyCategory, $scope.treatment, $scope.updatedBy);
@@ -297,6 +300,14 @@ angular.module('oncokbApp')
                                 var tumor =  $scope.getRefs($scope.mutation, $scope.tumor).tumor;
                                 rejectionItems.push({uuid: tumor.summary_uuid, key: 'summary', obj: tumor});
                                 break;
+                            case 'DIAGNOSTIC_SUMMARY':
+                                var tumor =  $scope.getRefs($scope.mutation, $scope.tumor).tumor;
+                                rejectionItems.push({uuid: tumor.diagnosticSummary_uuid, key: 'diagnosticSummary', obj: tumor});
+                                break;
+                            case 'PROGNOSTIC_SUMMARY':
+                                var tumor =  $scope.getRefs($scope.mutation, $scope.tumor).tumor;
+                                rejectionItems.push({uuid: tumor.prognosticSummary_uuid, key: 'prognosticSummary', obj: tumor});
+                                break;
                             case 'PROGNOSTIC_IMPLICATION':
                                 var tumor = $scope.getRefs($scope.mutation, $scope.tumor).tumor;
                                 _.each(['level', 'description'], function(key) {
@@ -328,6 +339,7 @@ angular.module('oncokbApp')
                                 break;
                             case 'TREATMENT_NAME_CHANGE':
                                 var treatment = $scope.getRefs($scope.mutation, $scope.tumor, $scope.ti, $scope.treatment).treatment;
+                                $scope.updateDrugMap('reject', 'name', 'treatment', $scope.mutation, $scope.tumor, $scope.treatment, treatment.name_review.lastReviewed);
                                 rejectionItems.push({uuid: treatment.name_uuid, key: 'name', obj: treatment});
                                 break;
                             default:
@@ -366,6 +378,11 @@ angular.module('oncokbApp')
                         mutationCopy: mutation, tumorCopy: tumor, tiCopy: therapyCategory, treatmentCopy: treatment
                     });
                 };
+                $scope.updateDrugMap = function (decision, type, dataType, mutation, tumor, treatment, oldContent) {
+                    return $scope.updateDrugMapInGene({
+                        decision: decision, type: type, dataType: dataType, mutation: mutation, tumor: tumor, treatment: treatment, oldContent: oldContent
+                    });
+                }
                 $scope.inReviewMode = function () {
                     return $rootScope.reviewMode;
                 };

@@ -3,14 +3,19 @@ package org.mskcc.cbio.oncokb.api.pub.v1;
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.collections.CollectionUtils;
 import org.mskcc.cbio.oncokb.bo.DrugBo;
+import org.mskcc.cbio.oncokb.dao.DrugDao;
 import org.mskcc.cbio.oncokb.model.Drug;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 import org.mskcc.cbio.oncokb.util.DrugUtils;
+import org.mskcc.cbio.oncokb.util.NCITDrugUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.io.IOException;
 import java.util.*;
 
 
@@ -28,8 +33,7 @@ public class DrugsApiController implements DrugsApi {
 
     public ResponseEntity<List<Drug>> drugsLookupGet(
         @ApiParam(value = "Drug Name") @RequestParam(value = "name", required = false) String name
-//        , @ApiParam(value = "") @RequestParam(value = "fdaApproved", required = false) String fdaApproved
-        , @ApiParam(value = "ATC Code") @RequestParam(value = "atcCode", required = false) String atcCode
+        , @ApiParam(value = "NCI Thesaurus Code") @RequestParam(value = "ncitCode", required = false) String ncitCode
         , @ApiParam(value = "Drug Synonyms") @RequestParam(value = "synonym", required = false) String synonym
         , @ApiParam(value = "Exactly Match", required = true) @RequestParam(value = "exactMatch", required = true, defaultValue = "true") Boolean exactMatch
     ) {
@@ -44,14 +48,10 @@ public class DrugsApiController implements DrugsApi {
             drugs = DrugUtils.getDrugsByNames(Collections.singleton(name), !exactMatch);
         }
 
-        if (atcCode != null) {
-            Set<Drug> result = DrugUtils.getDrugsBySAtcCodes(Collections.singleton(atcCode), !exactMatch);
-            if (result != null) {
-                if (drugs == null) {
-                    drugs = result;
-                } else {
-                    drugs = new HashSet<>(CollectionUtils.intersection(drugs, result));
-                }
+        if (ncitCode != null) {
+            Drug drug = DrugUtils.getDrugByNcitCode(ncitCode);
+            if (drug != null) {
+                drugs = new HashSet<>(Collections.singleton(drug));
             }
         }
 
@@ -72,5 +72,4 @@ public class DrugsApiController implements DrugsApi {
         }
         return new ResponseEntity<>(drugList, HttpStatus.OK);
     }
-
 }

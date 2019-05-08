@@ -13,10 +13,10 @@ import java.util.List;
 
 @javax.annotation.Generated(value = "class io.swagger.codegen.languages.SpringCodegen", date = "2016-10-19T19:28:21.941Z")
 
-@Api(value = "variants", description = "The variants API")
+@Api(tags = "Variants", description = "Endpoints related to OncoKB variants")
 public interface VariantsApi {
 
-    @ApiOperation(value = "", notes = "Get all annotated variants.", response = Alteration.class, responseContainer = "List", tags = {"Variants",})
+    @ApiOperation(value = "", notes = "Get all annotated variants.", response = Alteration.class, responseContainer = "List")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = Alteration.class, responseContainer = "List")})
     @RequestMapping(value = "/variants",
@@ -27,7 +27,7 @@ public interface VariantsApi {
     );
 
 
-    @ApiOperation(value = "", notes = "Search for variants.", response = Alteration.class, responseContainer = "List", tags = {"Variants", "Search",})
+    @ApiOperation(value = "", notes = "Search for variants.", response = Alteration.class, responseContainer = "List")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = Alteration.class, responseContainer = "List")})
     @RequestMapping(value = "/variants/lookup",
@@ -45,7 +45,7 @@ public interface VariantsApi {
         , @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
     );
 
-    @ApiOperation(value = "", notes = "Search for variants.", response = List.class, responseContainer = "List", tags = {"Variants", "Search",})
+    @ApiOperation(value = "", notes = "Search for variants.", response = List.class, responseContainer = "List")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = List.class, responseContainer = "List")})
     @RequestMapping(value = "/variants/lookup",
@@ -69,7 +69,7 @@ public interface VariantsApi {
 //    );
 //
 //
-//    @ApiOperation(value = "", notes = "Get the sepecific variant.", response = Alteration.class, tags = {"Variant",})
+//    @ApiOperation(value = "", notes = "Get the sepecific variant.", response = Alteration.class)
 //    @ApiResponses(value = {
 //        @ApiResponse(code = 200, message = "OK", response = Alteration.class),
 //        @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiErrorResp.class)})
@@ -81,7 +81,7 @@ public interface VariantsApi {
 //    );
 //
 //
-//    @ApiOperation(value = "", notes = "Get list of treatments for specific variant.", response = Treatment.class, responseContainer = "List", tags = {"Treatment",})
+//    @ApiOperation(value = "", notes = "Get list of treatments for specific variant.", response = Treatment.class, responseContainer = "List")
 //    @ApiResponses(value = {
 //        @ApiResponse(code = 200, message = "OK", response = Treatment.class, responseContainer = "List"),
 //        @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiErrorResp.class)})
@@ -93,7 +93,7 @@ public interface VariantsApi {
 //    );
 //
 //
-//    @ApiOperation(value = "", notes = "Get list of annotated tumor types for specific variant.", response = TumorType.class, responseContainer = "List", tags = {"TumorType",})
+//    @ApiOperation(value = "", notes = "Get list of annotated tumor types for specific variant.", response = TumorType.class, responseContainer = "List")
 //    @ApiResponses(value = {
 //        @ApiResponse(code = 200, message = "OK", response = TumorType.class, responseContainer = "List"),
 //        @ApiResponse(code = 400, message = "variant is not available.", response = ApiErrorResp.class)})
@@ -105,7 +105,7 @@ public interface VariantsApi {
 //    );
 //
 //
-//    @ApiOperation(value = "", notes = "Get list of treatments for specific variant, tumor type.", response = Treatment.class, responseContainer = "List", tags = {"Treatment",})
+//    @ApiOperation(value = "", notes = "Get list of treatments for specific variant, tumor type.", response = Treatment.class, responseContainer = "List")
 //    @ApiResponses(value = {
 //        @ApiResponse(code = 200, message = "OK", response = Treatment.class, responseContainer = "List"),
 //        @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiErrorResp.class)})

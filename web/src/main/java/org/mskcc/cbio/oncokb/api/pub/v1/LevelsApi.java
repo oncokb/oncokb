@@ -13,10 +13,10 @@ import java.util.Map;
 
 @javax.annotation.Generated(value = "class io.swagger.codegen.languages.SpringCodegen", date = "2016-10-19T19:28:21.941Z")
 
-@Api(value = "levels", description = "The levels API")
+@Api(tags = "Levels", description = "OncoKB Levels")
 public interface LevelsApi {
 
-    @ApiOperation(value = "", notes = "Get all levels.", response = Map.class, tags = {"Levels",})
+    @ApiOperation(value = "", notes = "Get all levels.", response = Map.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = Map.class)})
     @RequestMapping(value = "/levels",
@@ -25,7 +25,7 @@ public interface LevelsApi {
     ResponseEntity<Map<LevelOfEvidence, String>> levelsGet();
 
 
-    @ApiOperation(value = "", notes = "Get all resistance levels.", response = Map.class, tags = {"Levels",})
+    @ApiOperation(value = "", notes = "Get all resistance levels.", response = Map.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = Map.class)})
     @RequestMapping(value = "/levels/resistance",
@@ -34,12 +34,30 @@ public interface LevelsApi {
     ResponseEntity<Map<LevelOfEvidence, String>> levelsResistanceGet();
 
 
-    @ApiOperation(value = "", notes = "Get all sensitive levels.", response = Map.class, tags = {"Levels",})
+    @ApiOperation(value = "", notes = "Get all sensitive levels.", response = Map.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = Map.class)})
     @RequestMapping(value = "/levels/sensitive",
         produces = {"application/json"},
         method = RequestMethod.GET)
     ResponseEntity<Map<LevelOfEvidence, String>> levelsSensitiveGet();
+
+
+//    @ApiOperation(value = "", notes = "Get all prognostic levels.", response = Map.class, tags = {"Levels",})
+//    @ApiResponses(value = {
+//        @ApiResponse(code = 200, message = "OK", response = Map.class)})
+//    @RequestMapping(value = "/levels/prognostic",
+//        produces = {"application/json"},
+//        method = RequestMethod.GET)
+    ResponseEntity<Map<LevelOfEvidence, String>> levelsPrognosticGet();
+
+
+//    @ApiOperation(value = "", notes = "Get all diagnostic levels.", response = Map.class, tags = {"Levels",})
+//    @ApiResponses(value = {
+//        @ApiResponse(code = 200, message = "OK", response = Map.class)})
+//    @RequestMapping(value = "/levels/diagnostic",
+//        produces = {"application/json"},
+//        method = RequestMethod.GET)
+    ResponseEntity<Map<LevelOfEvidence, String>> levelsDiagnosticGet();
 
 }

@@ -4,10 +4,12 @@
  */
 package org.mskcc.cbio.oncokb.controller;
 
+import com.google.gson.JsonArray;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.mskcc.cbio.oncokb.apiModels.NCITDrug;
 import org.mskcc.cbio.oncokb.bo.*;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
@@ -34,6 +36,7 @@ public class DriveAnnotationParser {
     @ResponseBody
     synchronized void getEvidence(
         @RequestParam(value = "gene") String gene,
+        @RequestParam(value = "releaseGene", defaultValue = "FALSE") Boolean releaseGene,
         @RequestParam(value = "vus", required = false) String vus
     ) throws IOException, JSONException {
 
@@ -45,7 +48,7 @@ public class DriveAnnotationParser {
             if (vus != null) {
                 jsonArray = new JSONArray(vus);
             }
-            parseGene(jsonObj, jsonArray);
+            parseGene(jsonObj, releaseGene, jsonArray);
         }
     }
 
@@ -108,7 +111,38 @@ public class DriveAnnotationParser {
         }
     }
 
-    private static void parseGene(JSONObject geneInfo, JSONArray vus) throws IOException, JSONException {
+    private static void updateGeneInfo(JSONObject geneInfo, Gene gene) {
+        JSONObject geneType = geneInfo.has("type") ? geneInfo.getJSONObject("type") : null;
+        String oncogene = geneType == null ? null : (geneType.has("ocg") ? geneType.getString("ocg").trim() : null);
+        String tsg = geneType == null ? null : (geneType.has("tsg") ? geneType.getString("tsg").trim() : null);
+
+        if (oncogene != null) {
+            if (oncogene.equals("Oncogene")) {
+                gene.setOncogene(true);
+            } else {
+                gene.setOncogene(false);
+            }
+        }
+        if (tsg != null) {
+            if (tsg.equals("Tumor Suppressor")) {
+                gene.setTSG(true);
+            } else {
+                gene.setTSG(false);
+            }
+        }
+
+        String isoform = geneInfo.has("isoform_override") ? geneInfo.getString("isoform_override") : null;
+        String refSeq = geneInfo.has("dmp_refseq_id") ? geneInfo.getString("dmp_refseq_id") : null;
+
+        if (isoform != null) {
+            gene.setCuratedIsoform(isoform);
+        }
+        if (refSeq != null) {
+            gene.setCuratedRefSeq(refSeq);
+        }
+    }
+
+    private static void parseGene(JSONObject geneInfo, Boolean releaseGene, JSONArray vus) throws IOException, JSONException {
         GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
         Integer nestLevel = 1;
         if (geneInfo.has("name") && !geneInfo.getString("name").trim().isEmpty()) {
@@ -119,49 +153,24 @@ public class DriveAnnotationParser {
 
                 if (gene == null) {
                     System.out.println(spaceStrByNestLevel(nestLevel) + "Gene " + hugo + " is not in the released list.");
-                    return;
-//                    System.out.println("Could not find gene " + hugo + ". Loading from MyGene.Info...");
-//                    gene = GeneAnnotatorMyGeneInfo2.readByHugoSymbol(hugo);
-//                    if (gene == null) {
-////                    throw new RuntimeException("Could not find gene "+hugo+" either.");
-//                        System.out.println("!!!!!!!!!Could not find gene " + hugo + " either.");
-//                    } else {
-//                        geneBo.save(gene);
-//                    }
+                    if (releaseGene) {
+                        gene = GeneAnnotatorMyGeneInfo2.findGeneFromCBioPortal(hugo);
+                        if (gene == null) {
+                            System.out.println("!!!!!!!!!Could not find gene " + hugo + " either.");
+                            return;
+                        } else {
+                            updateGeneInfo(geneInfo, gene);
+                            geneBo.save(gene);
+                        }
+                    } else {
+                        return;
+                    }
                 }
 
                 if (gene != null) {
                     System.out.println(spaceStrByNestLevel(nestLevel) + "Gene: " + gene.getHugoSymbol());
-                    // Get gene type info
-                    JSONObject geneType = geneInfo.has("type") ? geneInfo.getJSONObject("type") : null;
-                    String oncogene = geneType == null ? null : (geneType.has("ocg") ? geneType.getString("ocg").trim() : null);
-                    String tsg = geneType == null ? null : (geneType.has("tsg") ? geneType.getString("tsg").trim() : null);
-
-                    if (oncogene != null) {
-                        if (oncogene.equals("Oncogene")) {
-                            gene.setOncogene(true);
-                        } else {
-                            gene.setOncogene(false);
-                        }
-                    }
-                    if (tsg != null) {
-                        if (tsg.equals("Tumor Suppressor")) {
-                            gene.setTSG(true);
-                        } else {
-                            gene.setTSG(false);
-                        }
-                    }
-
-                    String isoform = geneInfo.has("isoform_override") ? geneInfo.getString("isoform_override") : null;
-                    String refSeq = geneInfo.has("dmp_refseq_id") ? geneInfo.getString("dmp_refseq_id") : null;
-
-                    if (isoform != null) {
-                        gene.setCuratedIsoform(isoform);
-                    }
-                    if (refSeq != null) {
-                        gene.setCuratedRefSeq(refSeq);
-                    }
-                    geneBo.saveOrUpdate(gene);
+                    updateGeneInfo(geneInfo, gene);
+                    geneBo.update(gene);
 
                     EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
                     AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
@@ -176,7 +185,7 @@ public class DriveAnnotationParser {
                         alterationBo.delete(alteration);
                     }
 
-                    CacheUtils.updateGene(gene.getEntrezGeneId(), false);
+                    CacheUtils.updateGene(Collections.singleton(gene.getEntrezGeneId()), false);
 
                     // summary
                     parseSummary(gene, geneInfo.has("summary") ? geneInfo.getString("summary").trim() : null, geneInfo.has("summary_uuid") ? geneInfo.getString("summary_uuid") : null, (geneInfo.has("summary_review") ? getUpdateTime(geneInfo.get("summary_review")) : null), nestLevel + 1);
@@ -190,7 +199,7 @@ public class DriveAnnotationParser {
                     // Variants of unknown significance
                     parseVUS(gene, vus, nestLevel + 1);
 
-                    CacheUtils.updateGene(gene.getEntrezGeneId(), true);
+                    CacheUtils.updateGene(Collections.singleton(gene.getEntrezGeneId()), true);
                 } else {
                     System.out.print(spaceStrByNestLevel(nestLevel) + "No info about " + hugo);
                 }
@@ -446,6 +455,33 @@ public class DriveAnnotationParser {
         return ret;
     }
 
+    private static void saveTumorLevelSummaries(JSONObject cancerObj, String summaryKey, Gene gene, Set<Alteration> alterations, TumorType oncoTreeType, EvidenceType evidenceType, Integer nestLevel) {
+        if (cancerObj.has(summaryKey) && !cancerObj.getString(summaryKey).isEmpty()) {
+            EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+            System.out.println(spaceStrByNestLevel(nestLevel + 1) + " " + summaryKey);
+            Date lastEdit = cancerObj.has(summaryKey + "_review") ? getUpdateTime(cancerObj.get(summaryKey + "_review")) : null;
+            Evidence evidence = new Evidence();
+            evidence.setEvidenceType(evidenceType);
+            evidence.setGene(gene);
+            evidence.setDescription(cancerObj.getString(summaryKey));
+            evidence.setUuid(cancerObj.has("summary_uuid") ? cancerObj.getString("summary_uuid") : "");
+            evidence.setAlterations(alterations);
+            evidence.setLastEdit(lastEdit);
+            if (lastEdit != null) {
+                System.out.println(spaceStrByNestLevel(nestLevel + 2) +
+                    "Last update on: " + MainUtils.getTimeByDate(lastEdit));
+            }
+            if (oncoTreeType.getMainType() != null) {
+                evidence.setCancerType(oncoTreeType.getMainType().getName());
+            }
+            evidence.setSubtype(oncoTreeType.getCode());
+            setDocuments(cancerObj.getString(summaryKey), evidence);
+            System.out.println(spaceStrByNestLevel(nestLevel + 2) +
+                "Has description.");
+            evidenceBo.save(evidence);
+        }
+    }
+
     private static void parseCancer(Gene gene, Set<Alteration> alterations, JSONObject cancerObj, String mainType, String code, Integer nestLevel) throws JSONException {
         if (mainType == null || mainType.equals("")) {
             return;
@@ -467,32 +503,12 @@ public class DriveAnnotationParser {
         System.out.println(spaceStrByNestLevel(nestLevel) + "Cancer type: " + mainType);
         System.out.println(spaceStrByNestLevel(nestLevel) + "Subtype code: " + code);
 
-        EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
-
         // cancer type summary
-        if (cancerObj.has("summary") && !cancerObj.getString("summary").isEmpty()) {
-            System.out.println(spaceStrByNestLevel(nestLevel + 1) + "Summary");
-            Date lastEdit = cancerObj.has("summary_review") ? getUpdateTime(cancerObj.get("summary_review")) : null;
-            Evidence evidence = new Evidence();
-            evidence.setEvidenceType(EvidenceType.TUMOR_TYPE_SUMMARY);
-            evidence.setGene(gene);
-            evidence.setDescription(cancerObj.getString("summary"));
-            evidence.setUuid(cancerObj.has("summary_uuid") ? cancerObj.getString("summary_uuid") : "");
-            evidence.setAlterations(alterations);
-            evidence.setLastEdit(lastEdit);
-            if (lastEdit != null) {
-                System.out.println(spaceStrByNestLevel(nestLevel + 2) +
-                    "Last update on: " + MainUtils.getTimeByDate(lastEdit));
-            }
-            if (oncoTreeType.getMainType() != null) {
-                evidence.setCancerType(oncoTreeType.getMainType().getName());
-            }
-            evidence.setSubtype(oncoTreeType.getCode());
-            setDocuments(cancerObj.getString("summary"), evidence);
-            System.out.println(spaceStrByNestLevel(nestLevel + 2) +
-                "Has description.");
-            evidenceBo.save(evidence);
-        }
+        saveTumorLevelSummaries(cancerObj, "summary", gene, alterations, oncoTreeType, EvidenceType.TUMOR_TYPE_SUMMARY, nestLevel);
+        // diagnostic summary
+        saveTumorLevelSummaries(cancerObj, "diagnosticSummary", gene, alterations, oncoTreeType, EvidenceType.DIAGNOSTIC_SUMMARY, nestLevel);
+        // prognostic summary
+        saveTumorLevelSummaries(cancerObj, "prognosticSummary", gene, alterations, oncoTreeType, EvidenceType.PROGNOSTIC_SUMMARY, nestLevel);
 
         // Prognostic implications
         parseImplication(gene, alterations, oncoTreeType,
@@ -567,17 +583,17 @@ public class DriveAnnotationParser {
 
         // specific evidence
         DrugBo drugBo = ApplicationContextSingleton.getDrugBo();
-        JSONArray drugsArray = implicationObj.has("treatments") ? implicationObj.getJSONArray("treatments") : new JSONArray();
+        JSONArray treatmentsArray = implicationObj.has("treatments") ? implicationObj.getJSONArray("treatments") : new JSONArray();
         int priorityCount = 1;
-        for (int i = 0; i < drugsArray.length(); i++) {
-            JSONObject drugObj = drugsArray.getJSONObject(i);
-            if (!drugObj.has("name") || drugObj.getString("name").trim().isEmpty()) {
+        for (int i = 0; i < treatmentsArray.length(); i++) {
+            JSONObject drugObj = treatmentsArray.getJSONObject(i);
+            if (!drugObj.has("name") || drugObj.getJSONArray("name").length() == 0) {
                 System.out.println(spaceStrByNestLevel(nestLevel + 1) + "Drug does not have name, skip... " + drugObj.toString());
                 continue;
             }
 
-            String drugNameStr = drugObj.getString("name").trim();
-            System.out.println(spaceStrByNestLevel(nestLevel + 1) + "Drug(s): " + drugNameStr);
+            JSONArray therapiesArray = drugObj.getJSONArray("name");
+            System.out.println(spaceStrByNestLevel(nestLevel + 1) + "Drug(s): " + therapiesArray.length());
 
             Set<Date> lastEditDates = new HashSet<>();
             addDateToSetFromObject(lastEditDates, drugObj, "name_review");
@@ -600,18 +616,55 @@ public class DriveAnnotationParser {
                 addDateToSetFromObject(lastEditDates, drugObj, "indication_review");
             }
 
-            String[] drugTxts = drugNameStr.replaceAll("(\\([^\\)]*\\))|(\\[[^\\]]*\\])", "").split(",");
-
             List<Treatment> treatments = new ArrayList<>();
-            for (int j = 0; j < drugTxts.length; j++) {
-                String[] drugNames = drugTxts[j].split(" ?\\+ ?");
+            for (int j = 0; j < therapiesArray.length(); j++) {
+                JSONArray drugsArray = therapiesArray.getJSONArray(j);
 
                 List<Drug> drugs = new ArrayList<>();
-                for (String drugName : drugNames) {
-                    drugName = drugName.trim();
-                    Drug drug = drugBo.guessUnambiguousDrug(drugName);
+                for (int k = 0; k < drugsArray.length(); k++) {
+                    JSONObject drugObject = drugsArray.getJSONObject(k);
+
+                    String ncitCode = drugObject.has("ncitCode") ? drugObject.getString("ncitCode").trim() : null;
+                    if (ncitCode != null && ncitCode.isEmpty()) {
+                        ncitCode = null;
+                    }
+                    String drugName = drugObject.has("drugName") ? drugObject.getString("drugName").trim() : null;
+                    if (drugName != null && drugName.isEmpty()) {
+                        drugName = null;
+                    }
+                    String drugUuid = drugObject.has("uuid") ? drugObject.getString("uuid").trim() : null;
+                    Drug drug = null;
+                    if (ncitCode != null) {
+                        drug = drugBo.findDrugsByNcitCode(ncitCode);
+                    }
+                    if (drug == null && drugName != null) {
+                        drug = drugBo.findDrugByName(drugName);
+                    }
                     if (drug == null) {
-                        drug = new Drug(drugName);
+                        if (ncitCode != null) {
+                            NCITDrug ncitDrug = NCITDrugUtils.findDrugByNcitCode(ncitCode);
+                            if (ncitDrug == null) {
+                                System.out.println("ERROR: the NCIT code cannot be found... Code:" + ncitCode);
+                            } else {
+                                drug = new Drug();
+                                drug.setDrugName(ncitDrug.getDrugName());
+                                drug.setSynonyms(ncitDrug.getSynonyms());
+                                drug.setNcitCode(ncitDrug.getNcitCode());
+                                drug.setDrugName(ncitDrug.getDrugName());
+
+                                if (drugName != null) {
+                                    DrugUtils.updateDrugName(drug, drugName);
+                                }
+                            }
+                        }
+                        if (drug == null) {
+                            drug = new Drug();
+                            drug.setNcitCode(ncitCode);
+                            drug.setDrugName(drugName);
+                        }
+                        if (drugUuid != null) {
+                            drug.setUuid(drugUuid);
+                        }
                         drugBo.save(drug);
                     }
                     drugs.add(drug);
@@ -651,16 +704,16 @@ public class DriveAnnotationParser {
                     System.err.println(spaceStrByNestLevel(nestLevel + 2) + "Error: wrong level of evidence: " + level);
                     // TODO:
                     //throw new RuntimeException("wrong level of evidence: "+level);
-                } else {
+                    continue;
+                } else if (LevelUtils.getAllowedCurationLevels().contains(levelOfEvidence)) {
                     System.out.println(spaceStrByNestLevel(nestLevel + 2) +
                         "Level: " + levelOfEvidence.getLevel());
+                } else {
+                    System.err.println(spaceStrByNestLevel(nestLevel + 2) +
+                        "Level not allowed: " + levelOfEvidence.getLevel());
+                    continue;
                 }
                 evidence.setLevelOfEvidence(levelOfEvidence);
-
-                List<LevelOfEvidence> acceptablePropagationList = new ArrayList<>();
-                acceptablePropagationList.add(LevelOfEvidence.LEVEL_2B);
-                acceptablePropagationList.add(LevelOfEvidence.LEVEL_3B);
-                acceptablePropagationList.add(LevelOfEvidence.LEVEL_4);
 
                 if (drugObj.has("propagation")) {
                     String definedPropagation = drugObj.getString("propagation");
@@ -670,7 +723,7 @@ public class DriveAnnotationParser {
                     LevelOfEvidence definedLevel = LevelOfEvidence.getByLevel(definedPropagation);
 
                     // Validate level
-                    if (definedLevel != null && acceptablePropagationList.contains(definedLevel)) {
+                    if (definedLevel != null && LevelUtils.getAllowedPropagationLevels().contains(definedLevel)) {
                         evidence.setPropagation(definedLevel.name());
                     }
                     if (evidence.getPropagation() != null) {
@@ -771,7 +824,7 @@ public class DriveAnnotationParser {
         Set<Article> docs = new HashSet<>();
         ArticleBo articleBo = ApplicationContextSingleton.getArticleBo();
         Pattern pmidPattern = Pattern.compile("PMIDs?:\\s*([\\d,\\s*]+)", Pattern.CASE_INSENSITIVE);
-        Pattern abstractPattern = Pattern.compile("\\(\\s*Abstract\\s*:([^\\)]*);?\\s*\\)", Pattern.CASE_INSENSITIVE);
+        Pattern abstractPattern = Pattern.compile("\\(?\\s*Abstract\\s*:([^\\)]*);?\\s*\\)?", Pattern.CASE_INSENSITIVE);
         Pattern abItemPattern = Pattern.compile("(.*?)\\.\\s*(http.*)", Pattern.CASE_INSENSITIVE);
         Matcher m = pmidPattern.matcher(str);
         int start = 0;

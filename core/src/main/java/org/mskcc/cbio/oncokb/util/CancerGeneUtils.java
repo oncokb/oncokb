@@ -5,66 +5,167 @@ import org.mskcc.cbio.oncokb.model.CancerGene;
 import org.mskcc.cbio.oncokb.model.Gene;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by jiaojiao on 6/9/17.
  */
 public class CancerGeneUtils {
-    private static final String CANCER_GENE_FILE_PATH = "/data/cancer-gene.txt";
-    private static List<CancerGene> CancerGeneList;
+    private static final String MSKIMPACT_GENES = "msk_impact_505_genes.csv";
+    private static final String MSKIMPACT_HEME_GENES = "msk_impact_heme_400_heme_pact_v4_575_genes.csv";
+    private static final String FOUNDATION_GENES = "foundation_one_cdx_324_genes.csv";
+    private static final String FOUNDATION_HEME_GENES = "foundation_one_heme_593_genes.csv";
+    private static final String VOGELSTEIN_GENES = "vogelstein_125_genes.csv";
+    private static final String CGC_GENES = "cancer_gene_census_05072019_723_genes.csv";
 
     public static List<CancerGene> getCancerGeneList() {
-        if (CancerGeneList == null) {
-            CancerGeneList = new ArrayList<>();
-            try {
-                List<String> lines = FileUtils.readTrimedLinesStream(
-                    CancerGeneUtils.class.getResourceAsStream(CANCER_GENE_FILE_PATH));
-                Iterator itr = lines.iterator();
+        return CacheUtils.getCancerGeneList();
+    }
 
-                while (itr.hasNext()) {
-                    String line = itr.next().toString().trim();
-                    // skip comments
-                    if (line.startsWith("#")) {
-                        continue;
-                    }
+    public static List<CancerGene> populateCancerGeneList() {
+        Set<CancerGene> cancerGenes = new HashSet<>();
 
-                    String[] items = line.split("\t");
-                    if (items.length != 9) continue;
+        // We need to include all annotated genes
+        Set<Gene> allAnnotatedGenes = GeneUtils.getAllGenes();
+        allAnnotatedGenes
+            .forEach(gene -> {
+                CancerGene cancerGene = new CancerGene();
+                cancerGene.setEntrezGeneId(gene.getEntrezGeneId());
+                cancerGene.setHugoSymbol(gene.getHugoSymbol());
+                cancerGene.setOncokbAnnotated(true);
+                cancerGene.setOccurrenceCount(1);
+                cancerGene.setOncogene(gene.getOncogene());
+                cancerGene.setTSG(gene.getTSG());
+                cancerGenes.add(cancerGene);
+            });
 
-                    Gene gene = GeneUtils.getGeneByEntrezId(Integer.parseInt(items[1]));
-                    CancerGene cancerGene = new CancerGene();
-                    cancerGene.setEntrezGeneId(Integer.parseInt(items[1]));
-
-                    if (gene == null) {
-                        cancerGene.setHugoSymbol(items[0]);
-                        cancerGene.setOncokbAnnotated(false);
-                    } else {
-                        if (!gene.getHugoSymbol().equals(items[0])) {
-                            System.out.println("The gene hugo does not match, expect " + gene.getHugoSymbol() + ", but got: " + items[0]);
-                        }
-                        cancerGene.setHugoSymbol(gene.getHugoSymbol());
-                        cancerGene.setOncokbAnnotated(true);
-                    }
-                    int occurence = NumberUtils.isNumber(items[2].trim()) ? Integer.parseInt(items[2].trim()) : 0;
-                    if (cancerGene.getOncokbAnnotated()) {
-                        occurence++;
-                    }
-                    cancerGene.setOccurrenceCount(occurence);
-                    cancerGene.setmSKImpact(items[3].trim().equals("1"));
-                    cancerGene.setmSKHeme(items[4].trim().equals("1"));
-                    cancerGene.setFoundation(items[5].trim().equals("1"));
-                    cancerGene.setFoundationHeme(items[6].trim().equals("1"));
-                    cancerGene.setVogelstein(items[7].trim().equals("1"));
-                    cancerGene.setSangerCGC(items[8].trim().equals("1"));
-                    CancerGeneList.add(cancerGene);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+        for (Gene gene : getGenes(MSKIMPACT_GENES)) {
+            Optional<CancerGene> match = cancerGenes.stream().filter(cancerGene -> cancerGene.getEntrezGeneId().equals(gene.getEntrezGeneId())).findFirst();
+            if (match.isPresent()) {
+                match.get().setmSKImpact(true);
+                match.get().setOccurrenceCount(match.get().getOccurrenceCount() + 1);
+            } else {
+                CancerGene cancerGene = new CancerGene();
+                cancerGene.setHugoSymbol(gene.getHugoSymbol());
+                cancerGene.setEntrezGeneId(gene.getEntrezGeneId());
+                cancerGene.setOccurrenceCount(1);
+                cancerGene.setmSKImpact(true);
+                cancerGenes.add(cancerGene);
             }
         }
-        return CancerGeneList;
+
+        for (Gene gene : getGenes(MSKIMPACT_HEME_GENES)) {
+            Optional<CancerGene> match = cancerGenes.stream().filter(cancerGene -> cancerGene.getEntrezGeneId().equals(gene.getEntrezGeneId())).findFirst();
+            if (match.isPresent()) {
+                match.get().setmSKHeme(true);
+                match.get().setOccurrenceCount(match.get().getOccurrenceCount() + 1);
+            } else {
+                CancerGene cancerGene = new CancerGene();
+                cancerGene.setHugoSymbol(gene.getHugoSymbol());
+                cancerGene.setEntrezGeneId(gene.getEntrezGeneId());
+                cancerGene.setOccurrenceCount(1);
+                cancerGene.setmSKHeme(true);
+                cancerGenes.add(cancerGene);
+            }
+        }
+
+        for (Gene gene : getGenes(FOUNDATION_GENES)) {
+            Optional<CancerGene> match = cancerGenes.stream().filter(cancerGene -> cancerGene.getEntrezGeneId().equals(gene.getEntrezGeneId())).findFirst();
+            if (match.isPresent()) {
+                match.get().setFoundation(true);
+                match.get().setOccurrenceCount(match.get().getOccurrenceCount() + 1);
+            } else {
+                CancerGene cancerGene = new CancerGene();
+                cancerGene.setHugoSymbol(gene.getHugoSymbol());
+                cancerGene.setEntrezGeneId(gene.getEntrezGeneId());
+                cancerGene.setOccurrenceCount(1);
+                cancerGene.setFoundation(true);
+                cancerGenes.add(cancerGene);
+            }
+        }
+
+        for (Gene gene : getGenes(FOUNDATION_HEME_GENES)) {
+            Optional<CancerGene> match = cancerGenes.stream().filter(cancerGene -> cancerGene.getEntrezGeneId().equals(gene.getEntrezGeneId())).findFirst();
+            if (match.isPresent()) {
+                match.get().setFoundationHeme(true);
+                match.get().setOccurrenceCount(match.get().getOccurrenceCount() + 1);
+            } else {
+                CancerGene cancerGene = new CancerGene();
+                cancerGene.setHugoSymbol(gene.getHugoSymbol());
+                cancerGene.setEntrezGeneId(gene.getEntrezGeneId());
+                cancerGene.setOccurrenceCount(1);
+                cancerGene.setFoundationHeme(true);
+                cancerGenes.add(cancerGene);
+            }
+        }
+
+        for (Gene gene : getGenes(VOGELSTEIN_GENES)) {
+            Optional<CancerGene> match = cancerGenes.stream().filter(cancerGene -> cancerGene.getEntrezGeneId().equals(gene.getEntrezGeneId())).findFirst();
+            if (match.isPresent()) {
+                match.get().setVogelstein(true);
+                match.get().setOccurrenceCount(match.get().getOccurrenceCount() + 1);
+            } else {
+                CancerGene cancerGene = new CancerGene();
+                cancerGene.setHugoSymbol(gene.getHugoSymbol());
+                cancerGene.setEntrezGeneId(gene.getEntrezGeneId());
+                cancerGene.setOccurrenceCount(1);
+                cancerGene.setVogelstein(true);
+                cancerGenes.add(cancerGene);
+            }
+        }
+
+        for (Gene gene : getGenes(CGC_GENES)) {
+            Optional<CancerGene> match = cancerGenes.stream().filter(cancerGene -> cancerGene.getEntrezGeneId().equals(gene.getEntrezGeneId())).findFirst();
+            if (match.isPresent()) {
+                match.get().setSangerCGC(true);
+                match.get().setOccurrenceCount(match.get().getOccurrenceCount() + 1);
+            } else {
+                CancerGene cancerGene = new CancerGene();
+                cancerGene.setHugoSymbol(gene.getHugoSymbol());
+                cancerGene.setEntrezGeneId(gene.getEntrezGeneId());
+                cancerGene.setOccurrenceCount(1);
+                cancerGene.setSangerCGC(true);
+                cancerGenes.add(cancerGene);
+            }
+        }
+
+        return new ArrayList<>(cancerGenes);
+    }
+
+    private static Set<Gene> getGenes(String file) {
+        try {
+            List<String> lines = FileUtils.readTrimedLinesStream(
+                CancerGeneUtils.class.getResourceAsStream("/data/cancerGenes/" + file));
+
+            Iterator itr = lines.iterator();
+            Set<Gene> allGenes = new HashSet<>();
+            // Skip the first line
+            itr.next();
+            while (itr.hasNext()) {
+                String line = itr.next().toString().trim();
+
+                String[] items = line.split(",");
+                if (items.length != 2) {
+                    System.out.println("ERROR line format: " + line);
+                    continue;
+                }
+
+                String hugoSymbol = items[0].trim().replaceAll("\"", "");
+                Integer entrezGeneId = Integer.parseInt(items[1].trim());
+
+                if (entrezGeneId != null && hugoSymbol != null) {
+                    Gene gene = new Gene();
+                    gene.setHugoSymbol(hugoSymbol);
+                    gene.setEntrezGeneId(entrezGeneId);
+                    allGenes.add(gene);
+                } else {
+                    System.out.println("ERROR line content: " + items[0] + " " + items[1]);
+                }
+            }
+            return allGenes;
+        } catch (IOException e) {
+            return Collections.emptySet();
+        }
     }
 }

@@ -3,6 +3,7 @@
 /**
  * @ngdoc factory
  * @name oncokbApp.numOfReviewItems
+ * @author Jing Su
  * @description
  * # numOfReviewItems
  * This factory is used for record number of changes in Review mode.
