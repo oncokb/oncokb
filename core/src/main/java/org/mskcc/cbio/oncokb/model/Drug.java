@@ -167,7 +167,7 @@ public class Drug implements java.io.Serializable {
         return Objects.equals(getNcitCode(), drug.getNcitCode()) &&
             Objects.equals(getDrugName(), drug.getDrugName()) &&
             getType() == drug.getType() &&
-            getUuid().equals(drug.getUuid());
+            Objects.equals(getUuid(), drug.getUuid());
     }
 
     @Override
