@@ -1,0 +1,32 @@
+<div class="release-gene-content">
+    <div class="modal-header">
+        <h4 class="modal-title">Release Gene Status Check</h4></div>
+    <div class="modal-body" style="margin: 10px; display: flex; flex-direction: column;">
+        <div ng-show="!confirmingRelease">
+            <div ng-repeat="statusCheck in statusChecks">
+                <div>
+                    <span ng-show="statusCheck.status === 'checking'"><i class="fa fa-spinner fa-spin" style="margin-right: 5px"></i></span>
+                    <span ng-show="statusCheck.status === 'success'"><i class="fa fa-check-circle-o text-success"></i></span>
+                    <span ng-show="statusCheck.status === 'error'"><i class="fa fa-times-circle-o text-danger"></i></span>
+                    <span ng-show="statusCheck.status === 'warning'"><i class="fa fa-exclamation-circle text-warning"></i></span>
+                    <span><b>{{statusCheck.message}}</b></span>
+                </div>
+            </div>
+            <div ng-if="error" class="text-danger">{{error}}</div>
+        </div>
+        <div ng-show="confirmingRelease" style="display: flex">
+            <div class='sk-spinner sk-spinner-wave mskcc'>
+                <div class='sk-rect1'></div>
+                <div class='sk-rect2'></div>
+                <div class='sk-rect3'></div>
+                <div class='sk-rect4'></div>
+                <div class='sk-rect5'></div>
+            </div>
+            <span>Please wait, we are releasing gene.</span>
+        </div>
+    </div>
+    <div class="modal-footer" ng-show="!confirmingRelease">
+        <button type="button" class="btn btn-default" ng-click="cancel()">Cancel</button>
+        <button type="button" class="btn btn-primary" ng-click="confirm()" ng-disabled="confirmButtonDisabled()">Confirm</button>
+    </div>
+</div>

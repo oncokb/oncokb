@@ -48,22 +48,16 @@ public class DrugUtils {
         return result;
     }
 
-    public static Set<Drug> getDrugsBySAtcCodes(Set<String> atcCodes, Boolean fuzzy) {
-        Set<Drug> result = new HashSet<>();
-        if (fuzzy == null) {
-            fuzzy = false;
-        }
-        if (atcCodes != null) {
+    public static Drug getDrugByNcitCode(String code) {
+        if (code != null) {
             Set<Drug> drugs = getAllDrugs();
             for (Drug drug : drugs) {
-                for (String actCode : atcCodes) {
-                    if (stringInSet(drug.getAtcCodes(), actCode, fuzzy)) {
-                        result.add(drug);
-                    }
+                if (drug.getNcitCode() != null && drug.getNcitCode().equals(code)) {
+                    return drug;
                 }
             }
         }
-        return result;
+        return null;
     }
 
     public static Set<Drug> getAllDrugs() {
@@ -94,5 +88,11 @@ public class DrugUtils {
             }
         }
         return false;
+    }
+
+    public static void updateDrugName(Drug drug, String newDrugName) {
+        drug.getSynonyms().remove(newDrugName);
+        drug.getSynonyms().add(drug.getDrugName());
+        drug.setDrugName(newDrugName);
     }
 }

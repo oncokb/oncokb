@@ -260,6 +260,10 @@ p.editableBox.doubleH {
   right: 0;
   top: 20px;
 }
+.pageReminder {
+    font-size: 16px;
+    color:red;
+}
 .reportGenerator .row{
     margin-left: 0px;
     margin-right:0px;
@@ -669,7 +673,8 @@ h5 {
 ,#subtypesDropDown_chosen
 ,#variantMutationDropDown_chosen
 ,#variantGeneNameDropDown_chosen
-,#curateTumorTypesDropdown_chosen {
+,#curateTumorTypesDropdown_chosen
+,#drugsDropdown_chosen{
   width: 100% !important;
 }
 #curationQueueEmailCuratorSelect_chosen {
@@ -685,6 +690,12 @@ h5 {
   border-left: 0;
 }
 
+#changeNameDropdown_chosen{
+    width: 300px !important;
+}
+#preferNameDropdownChosen_chosen{
+    width: 500px !important;
+}
 .chosen-full-width .chosen-container {
   width: 80% !important;
 }
@@ -827,7 +838,7 @@ input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:b
 }
 
 .pub-iframe {
-    margin-bottom: 10px
+    margin-bottom: 10px;
 }
 
 .curationQueue {
@@ -883,6 +894,98 @@ input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:b
     }
     .tableStyle {
       margin-top:20px;
+    }
+}
+
+.drugsPage {
+    .headerStyle {
+        margin-bottom: 30px;
+    }
+    .table {
+        .buttonStyle {
+            padding: 5px;
+            font-size: 15px;
+            line-height: 15px;
+            i {
+                width: 15px;
+                height: 15px;
+            }
+        }
+    }
+    table > tbody > tr > td, table > thead > tr > th {
+        padding: 12px;
+    }
+    .table > tbody > tr > td {
+        word-wrap: break-word;
+    }
+    .errorReminderXL {
+        font-size: 24px;
+        color: red;
+    }
+}
+
+.createNewDrug {
+    .nameLabel{
+        width: 170px;
+    }
+    .searchbox {
+        width: 500px;
+        margin-right: 20px;
+    }
+    .preferNameDropdown {
+        margin-top: 10px;
+    }
+    .errorReminder {
+        font-size: 15px;
+        color: red;
+    }
+    .infoReminder {
+        font-size: 15px;
+        color: green;
+    }
+    .basicName {
+        color: black;
+        font-size: 15px;
+    }
+    .alsoKnownAs {
+        display: inline;
+        color: grey;
+        font-size: 13px;
+        font-style: italic;
+    }
+}
+
+.flexRow {
+    display: flex;
+}
+
+.addTherapy {
+    .latestResultDiv{
+        margin-bottom: 10px;
+    }
+    .latestResultFont{
+        font-weight: bold;
+        display: inline;
+    }
+    .therapyLabel{
+        width: 80px;
+    }
+    .addButton {
+        border-style: none;
+        font-size: 16px;
+        margin-top: -6px;
+    }
+    .inputDrugs {
+        flex-grow: 1;
+        flex-basis: 70%;
+    }
+    .errorNote {
+        color: red;
+        float: left;
+    }
+    .tagsBox{
+        width: 650px;
+        height: fit-content;
     }
 }
 

@@ -2,6 +2,16 @@
   <div id="gene" style="margin-bottom:50px">
     <h2>
       <span>Gene: {{::gene.name}}</span>
+      <span class="btn-group btn-group-sm" uib-dropdown>
+        <button type="button" class="btn btn-default" ng-click="releaseGene()"ng-if="me.admin && internal && status.geneReleased === 'no'">
+            <span ng-show="status.releasingGene"><i class="fa fa-spinner fa-spin"></i></span>
+            <span ng-show="!status.releasingGene">Release Gene</span>
+        </button>
+        <button type="button" class="btn btn-default" ng-click="removeGeneFromDB()" ng-if="developerCheck() && internal && status.geneReleased === 'yes'" >
+            <span ng-show="status.removingGene"><i class="fa fa-spinner fa-spin"></i></span>
+            <span ng-show="!status.removingGene">Remove Gene From DB</span>
+        </button>
+      </span>
       <span ng-show="!reviewMode"><comments-dict key="'name'" path="getObservePath({type: 'gene'})"></comments-dict></span>
       <span ng-repeat="collaborator in collaborators">
         <img style="height:30px" ng-src="{{collaborator.photoURL}}" uib-tooltip-placement="top" uib-tooltip="{{::collaborator.name}}">
@@ -168,7 +178,7 @@
                         <br/>
                         <p>New Content: </p>
                     </span>
-                  <span>{{getCancerTypesName(tumor)}}</span>
+                    <span>{{getCancerTypesNameInReview(tumor, tumor.cancerTypes_uuid, reviewMode)}}</span>
                 </span>
                 <span ng-show="!reviewMode">
                     <i class="fa fa-edit" ng-if="fileEditable" ng-click="modifyTumorType(mutation, tumor, path)"></i>
@@ -196,10 +206,22 @@
               </div>
               <div class="panelContent" ng-if="initialOpen[tumor.cancerTypes_uuid]" id="{{tumor.cancerTypes_uuid}}" ng-init="bindTIs({uuid: tumor.cancerTypes_uuid, path: path})">
                   <div ng-show="displayPrecisely(tumor.summary_uuid)">
-                    <h5><b>Tumor Type Summary (Optional): </b>
+                    <h5><b>Therapeutic Summary (Optional): </b>
                         <review-panel hugo-symbol="gene.name" uuid="tumor.summary_uuid" review-obj="tumor.summary_review" evidence-type="'TUMOR_TYPE_SUMMARY'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)" get-refs="getRefs(mutation, tumor)"></review-panel>
                     </h5>
                     <realtime-string t="'p'" key="'summary'" path="path" uuid="getUUID({type: 'tumor', key: 'summary', path: path})" mutation="mutation" tumor="tumor" indicate-mutation-content="indicateMutationContent(mutation)" indicate-tumor-content="indicateTumorContent(tumor)"></realtime-string>
+                  </div>
+                  <div ng-show="displayPrecisely(tumor.diagnosticSummary_uuid)">
+                      <h5><b>Diagnostic Summary (Optional): </b>
+                          <review-panel hugo-symbol="gene.name" uuid="tumor.diagnosticSummary_uuid" review-obj="tumor.diagnosticSummary_review" evidence-type="'DIAGNOSTIC_SUMMARY'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)" get-refs="getRefs(mutation, tumor)"></review-panel>
+                      </h5>
+                      <realtime-string t="'p'" key="'diagnosticSummary'" path="path" uuid="getUUID({type: 'tumor', key: 'diagnosticSummary', path: path})" mutation="mutation" tumor="tumor" indicate-mutation-content="indicateMutationContent(mutation)" indicate-tumor-content="indicateTumorContent(tumor)"></realtime-string>
+                  </div>
+                  <div ng-show="displayPrecisely(tumor.prognosticSummary_uuid)">
+                      <h5><b>Prognostic Summary (Optional): </b>
+                          <review-panel hugo-symbol="gene.name" uuid="tumor.prognosticSummary_uuid" review-obj="tumor.prognosticSummary_review" evidence-type="'PROGNOSTIC_SUMMARY'" mutation="mutation" tumor="tumor" get-evidence="getEvidence(type, mutation, tumor)" model-update="modelUpdate(type, mutation, tumor)" get-refs="getRefs(mutation, tumor)"></review-panel>
+                      </h5>
+                      <realtime-string t="'p'" key="'prognosticSummary'" path="path" uuid="getUUID({type: 'tumor', key: 'prognosticSummary', path: path})" mutation="mutation" tumor="tumor" indicate-mutation-content="indicateMutationContent(mutation)" indicate-tumor-content="indicateTumorContent(tumor)"></realtime-string>
                   </div>
                 <!-- Diagnostic -->
                 <div class="sectionStyle" ng-init="diagnosticPath=getObservePath({type:'diagnostic', path: path});" ng-show="displayCheck(tumor.diagnostic_uuid)">
@@ -268,12 +290,19 @@
                         <div class="sectionStyle">
                           <div ng-style="movingInfo[treatment.name_uuid]" class="headerLevel4">
                             <div ng-click="toggleSection(treatment.name_uuid)"><i ng-class="getAngleClass(treatment.name_uuid)"></i> Therapy:</div>
-                            <div style="margin-left:90px;margin-top:-22px">
-                              <div ng-style="getNameStyle()"><realtime-string t="'TREATMENT_NAME'" key="'name'" path="path" uuid="getUUID({type: 'treatment', key: 'name', path: path})"></realtime-string></div>
-                              <div style="float:left;margin-left:10px;" ng-show="!reviewMode">
-                                <comments-dict key="'name'" path="path"></comments-dict>
-                                <span class="curationNoEntry" ng-if="isEmptySection(treatment, 'treatment')">No Entry</span>
-                              </div>
+                              <div style="margin-left:90px;margin-top:-22px;overflow: hidden">
+                                  <div ng-style="getNameStyle()">
+                                      <realtime-string t="'TREATMENT_NAME'" key="'name'" path="path"
+                                                       uuid="getUUID({type: 'treatment', key: 'name', path: path})"></realtime-string>
+                                  </div>
+                                  <span>
+                                  <div style="float:left;margin-left:10px;" ng-show="!reviewMode">
+                                      <comments-dict key="'name'" path="path"></comments-dict>
+                                      <span class="curationNoEntry" ng-if="isEmptySection(treatment, 'treatment')">No Entry</span>
+                                  </div>
+                                  <i class="fa fa-edit ng-scope" style="margin-top: 5px; margin-left: 5px"
+                                     ng-show="fileEditable" ng-click="modifyTherapy(path)"></i>
+                                  </span>
 
                               <span style="float:right" ng-show="!reviewMode && fileEditable">
                                   <span ng-if="me.admin && internal">
@@ -288,7 +317,7 @@
                                     tumor="tumor" therapy-category="ti" treatment="treatment" get-evidence="getEvidence(type, mutation, tumor, ti, treatment)"
                                     model-update="modelUpdate(type, mutation, tumor, ti, treatment)" confirm-delete="confirmDelete(type, mutation, tumor, ti, treatment, updatedBy)"
                                     cancel-delete="cancelDelete(type, mutation, tumor, ti, treatment, updatedBy)" accept-added="acceptAdded(type, mutation, tumor, ti, treatment, updatedBy)"
-                                    reject-added="rejectAdded(type, mutation, tumor, ti, treatment, updatedBy)" update-priority="updatePriority(treatments)" get-refs="getRefs(mutation, tumor, ti, treatment)"></review-panel>
+                                    reject-added="rejectAdded(type, mutation, tumor, ti, treatment, updatedBy)" update-drug-map="updateDrugMap(decision, type, dataType, mutation, tumor, treatment, oldContent)" update-priority="updatePriority(treatments)" get-refs="getRefs(mutation, tumor, ti, treatment)"></review-panel>
                             </div>
                           </div>
                           <div class="panelContent" ng-if="initialOpen[treatment.name_uuid]" id="{{treatment.name_uuid}}">
@@ -329,13 +358,8 @@
                           </div>
                         </div>
                       </div>
-                      <div ng-show="!reviewMode && fileEditable" class="input-group input-group-sm accordionMarginTop">
-                        <input type="text" class="form-control" ng-model="newTIName" placeholder="Therapy name" />
-                        <span class="input-group-btn">
-                          <button type="button" class="btn btn-default" ng-disabled="!(!!newTIName)" ng-click="addTreatment(newTIName, path); newTIName=''">
-                            <i class="fa fa-plus"></i> Add Therapy and {{::(ti.type[0] === 'I' ? 'Investigational' : 'Standard')}} implications
-                          </button>
-                        </span>
+                      <div ng-click="initTherapyComponent(path)" ng-show="!reviewMode && fileEditable" class="input-group input-group-sm accordionMarginTop">
+                          <add-therapy ti-ref="tiRef" modify-name="modifyName" save-therapies-callback="saveTherapiesCallback(newTreatmentName)"></add-therapy>
                       </div>
                     </div>
                   </div>

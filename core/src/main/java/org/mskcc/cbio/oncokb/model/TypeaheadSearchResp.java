@@ -1,11 +1,18 @@
 package org.mskcc.cbio.oncokb.model;
 
+import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
+
+import java.util.Objects;
+import java.util.Set;
+
 /**
  * Created by Hongxin on 6/7/17.
  */
 public class TypeaheadSearchResp {
     private Gene gene;
-    private Alteration variant;
+    private Set<Alteration> variants;
+    private Set<TumorType> tumorTypes;
+    private Drug drug;
     private String oncogenicity;
     private String highestSensitiveLevel;
     private String highestResistanceLevel;
@@ -23,12 +30,28 @@ public class TypeaheadSearchResp {
         this.gene = gene;
     }
 
-    public Alteration getVariant() {
-        return variant;
+    public Set<Alteration> getVariants() {
+        return variants;
     }
 
-    public void setVariant(Alteration variant) {
-        this.variant = variant;
+    public void setVariants(Set<Alteration> variants) {
+        this.variants = variants;
+    }
+
+    public Set<TumorType> getTumorTypes() {
+        return tumorTypes;
+    }
+
+    public void setTumorTypes(Set<TumorType> tumorTypes) {
+        this.tumorTypes = tumorTypes;
+    }
+
+    public Drug getDrug() {
+        return drug;
+    }
+
+    public void setDrug(Drug drug) {
+        this.drug = drug;
     }
 
     public String getOncogenicity() {
@@ -99,39 +122,23 @@ public class TypeaheadSearchResp {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof TypeaheadSearchResp)) return false;
-
         TypeaheadSearchResp that = (TypeaheadSearchResp) o;
-
-        if (getGene() != null ? !getGene().equals(that.getGene()) : that.getGene() != null) return false;
-        if (getVariant() != null ? !getVariant().equals(that.getVariant()) : that.getVariant() != null) return false;
-        if (getOncogenicity() != null ? !getOncogenicity().equals(that.getOncogenicity()) : that.getOncogenicity() != null)
-            return false;
-        if (getHighestSensitiveLevel() != null ? !getHighestSensitiveLevel().equals(that.getHighestSensitiveLevel()) : that.getHighestSensitiveLevel() != null)
-            return false;
-        if (getHighestResistanceLevel() != null ? !getHighestResistanceLevel().equals(that.getHighestResistanceLevel()) : that.getHighestResistanceLevel() != null)
-            return false;
-        if (getVariantExist() != null ? !getVariantExist().equals(that.getVariantExist()) : that.getVariantExist() != null)
-            return false;
-        if (isVUS != null ? !isVUS.equals(that.isVUS) : that.isVUS != null) return false;
-        if (getAnnotation() != null ? !getAnnotation().equals(that.getAnnotation()) : that.getAnnotation() != null)
-            return false;
-        if (getQueryType() != null ? !getQueryType().equals(that.getQueryType()) : that.getQueryType() != null)
-            return false;
-        return getLink() != null ? getLink().equals(that.getLink()) : that.getLink() == null;
+        return Objects.equals(getGene(), that.getGene()) &&
+            Objects.equals(getVariants(), that.getVariants()) &&
+            Objects.equals(getTumorTypes(), that.getTumorTypes()) &&
+            Objects.equals(getDrug(), that.getDrug()) &&
+            Objects.equals(getOncogenicity(), that.getOncogenicity()) &&
+            Objects.equals(getHighestSensitiveLevel(), that.getHighestSensitiveLevel()) &&
+            Objects.equals(getHighestResistanceLevel(), that.getHighestResistanceLevel()) &&
+            Objects.equals(getVariantExist(), that.getVariantExist()) &&
+            Objects.equals(isVUS, that.isVUS) &&
+            Objects.equals(getAnnotation(), that.getAnnotation()) &&
+            Objects.equals(getQueryType(), that.getQueryType()) &&
+            Objects.equals(getLink(), that.getLink());
     }
 
     @Override
     public int hashCode() {
-        int result = getGene() != null ? getGene().hashCode() : 0;
-        result = 31 * result + (getVariant() != null ? getVariant().hashCode() : 0);
-        result = 31 * result + (getOncogenicity() != null ? getOncogenicity().hashCode() : 0);
-        result = 31 * result + (getHighestSensitiveLevel() != null ? getHighestSensitiveLevel().hashCode() : 0);
-        result = 31 * result + (getHighestResistanceLevel() != null ? getHighestResistanceLevel().hashCode() : 0);
-        result = 31 * result + (getVariantExist() != null ? getVariantExist().hashCode() : 0);
-        result = 31 * result + (isVUS != null ? isVUS.hashCode() : 0);
-        result = 31 * result + (getAnnotation() != null ? getAnnotation().hashCode() : 0);
-        result = 31 * result + (getQueryType() != null ? getQueryType().hashCode() : 0);
-        result = 31 * result + (getLink() != null ? getLink().hashCode() : 0);
-        return result;
+        return Objects.hash(getGene(), getVariants(), getTumorTypes(), getDrug(), getOncogenicity(), getHighestSensitiveLevel(), getHighestResistanceLevel(), getVariantExist(), isVUS, getAnnotation(), getQueryType(), getLink());
     }
 }

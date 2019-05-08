@@ -8,7 +8,7 @@
  * Service in the oncokbApp.
  */
 angular.module('oncokbApp')
-    .factory('mainUtils', function(OncoKB, _, $q, DatabaseConnector, $rootScope, ReviewResource, S, UUIDjs, $routeParams) {
+    .factory('mainUtils', function(OncoKB, _, $q, DatabaseConnector, $rootScope, ReviewResource, S, UUIDjs, $routeParams, drugMapUtils) {
         var isoforms = {};
         var oncogeneTSG = {};
 
@@ -491,19 +491,21 @@ angular.module('oncokbApp')
             return result;
         }
         function processData(data, keys, excludeComments, onlyReviewedContent) {
-            _.each(keys, function(key) {
-                if (excludeComments) {
-                    delete data[key+'_comments'];
-                }
-                if (onlyReviewedContent && data[key+'_review'] && !_.isUndefined(data[key+'_review'].lastReviewed)) {
-                    data[key] = data[key+'_review'].lastReviewed;
-                }
-            });
+            if(data !== undefined) {
+                _.each(keys, function(key) {
+                    if (excludeComments) {
+                        delete data[key + '_comments'];
+                    }
+                    if (onlyReviewedContent && data[key + '_review'] && !_.isUndefined(data[key + '_review'].lastReviewed)) {
+                        data[key] = data[key + '_review'].lastReviewed;
+                    }
+                });
+            }
         }
         function shouldExclude(onlyReviewedContent, reviewObj) {
             return reviewObj && (onlyReviewedContent && reviewObj.added == true || !onlyReviewedContent && reviewObj.removed == true);
         }
-        function getGeneData(geneData, excludeComments, onlyReviewedContent) {
+        function getGeneData(geneData, excludeComments, onlyReviewedContent, drugList) {
             var gene = angular.copy(geneData);
             excludeComments = _.isBoolean(excludeComments) ? excludeComments : false;
             onlyReviewedContent = _.isBoolean(onlyReviewedContent) ? onlyReviewedContent : false;
@@ -526,7 +528,7 @@ angular.module('oncokbApp')
                         return true;
                     }
                     // process tumor cancerTypes
-                    processData(tumor, ['summary'], excludeComments, onlyReviewedContent);
+                    processData(tumor, ['summary', 'diagnosticSummary', 'prognosticSummary'], excludeComments, onlyReviewedContent);
                     processData(tumor.diagnostic, ['level', 'description'], excludeComments, onlyReviewedContent);
                     processData(tumor.prognostic, ['level', 'description'], excludeComments, onlyReviewedContent);
                     _.each(tumor.TIs, function(ti) {
@@ -537,7 +539,8 @@ angular.module('oncokbApp')
                                 tempTreatments.push(treatment);
                                 return true;
                             }
-                            processData(treatment, ['name', 'level', 'propagation', 'indication', 'description'], excludeComments, onlyReviewedContent);
+                            treatment.name = drugMapUtils.drugUuidtoDrug(treatment.name, drugList);
+                            processData(treatment, ['level', 'propagation', 'indication', 'description'], excludeComments, onlyReviewedContent);
                         });
                         _.each(tempTreatments, function(item) {
                             var index = ti.treatments.indexOf(item);

@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
  * Created by Hongxin Zhang on 7/13/18.
  */
 
-@Api(value = "/info", description = "This includes all OncoKB general information")
+@Api(tags = "Info", description = "OncoKB General Information")
 public interface InfoApi {
-    @ApiOperation(value = "", response = OncoKBInfo.class, tags = "Info")
+    @ApiOperation(value = "", response = OncoKBInfo.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = OncoKBInfo.class)})
     @RequestMapping(value = "/info", produces = {"application/json"},

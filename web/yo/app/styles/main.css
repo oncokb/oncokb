@@ -7743,6 +7743,10 @@ p.editableBox.doubleH {
   right: 0;
   top: 20px; }
 
+.pageReminder {
+  font-size: 16px;
+  color: red; }
+
 .reportGenerator .row {
   margin-left: 0px;
   margin-right: 0px; }
@@ -8106,7 +8110,8 @@ h5 {
 , #subtypesDropDown_chosen
 , #variantMutationDropDown_chosen
 , #variantGeneNameDropDown_chosen
-, #curateTumorTypesDropdown_chosen {
+, #curateTumorTypesDropdown_chosen
+, #drugsDropdown_chosen {
   width: 100% !important; }
 
 #curationQueueEmailCuratorSelect_chosen {
@@ -8118,6 +8123,12 @@ h5 {
 #consequencesDropDown_chosen > a {
   border-radius: 0 4px 4px 0;
   border-left: 0; }
+
+#changeNameDropdown_chosen {
+  width: 300px !important; }
+
+#preferNameDropdownChosen_chosen {
+  width: 500px !important; }
 
 .chosen-full-width .chosen-container {
   width: 80% !important; }
@@ -8301,6 +8312,74 @@ input[type=radio]:checked + label:before, input[type=checkbox]:checked + label:b
     display: inline-block; }
   .curationQueue .tableStyle {
     margin-top: 20px; }
+
+.drugsPage .headerStyle {
+  margin-bottom: 30px; }
+.drugsPage .table .buttonStyle {
+  padding: 5px;
+  font-size: 15px;
+  line-height: 15px; }
+  .drugsPage .table .buttonStyle i {
+    width: 15px;
+    height: 15px; }
+.drugsPage table > tbody > tr > td, .drugsPage table > thead > tr > th {
+  padding: 12px; }
+.drugsPage .table > tbody > tr > td {
+  word-wrap: break-word; }
+.drugsPage .errorReminderXL {
+  font-size: 24px;
+  color: red; }
+
+.createNewDrug .nameLabel {
+  width: 170px; }
+.createNewDrug .searchbox {
+  width: 500px;
+  margin-right: 20px; }
+.createNewDrug .preferNameDropdown {
+  margin-top: 10px; }
+.createNewDrug .errorReminder {
+  font-size: 15px;
+  color: red; }
+.createNewDrug .infoReminder {
+  font-size: 15px;
+  color: green; }
+.createNewDrug .basicName {
+  color: black;
+  font-size: 15px; }
+.createNewDrug .alsoKnownAs {
+  display: inline;
+  color: grey;
+  font-size: 13px;
+  font-style: italic; }
+
+.flexRow {
+  display: -ms-flexbox;
+  display: flex; }
+
+.addTherapy .latestResultDiv {
+  margin-bottom: 10px; }
+.addTherapy .latestResultFont {
+  font-weight: bold;
+  display: inline; }
+.addTherapy .therapyLabel {
+  width: 80px; }
+.addTherapy .addButton {
+  border-style: none;
+  font-size: 16px;
+  margin-top: -6px; }
+.addTherapy .inputDrugs {
+  -ms-flex-positive: 1;
+      flex-grow: 1;
+  -ms-flex-preferred-size: 70%;
+      flex-basis: 70%; }
+.addTherapy .errorNote {
+  color: red;
+  float: left; }
+.addTherapy .tagsBox {
+  width: 650px;
+  height: -webkit-fit-content;
+  height: -moz-fit-content;
+  height: fit-content; }
 
 .invalidPubIframe {
   color: red !important; }

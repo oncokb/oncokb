@@ -1,10 +1,17 @@
 'use strict';
 
 angular.module('oncokbApp')
-    .controller('GeneCtrl', ['_', 'S', '$resource', '$interval', '$timeout', '$scope', '$rootScope', '$location', '$route', '$routeParams', '$window', '$q', 'dialogs', 'OncoKB', 'DatabaseConnector', 'SecretEmptyKey', '$sce', 'jspdf', 'FindRegex', 'mainUtils', 'ReviewResource', 'loadFiles', '$firebaseObject', '$firebaseArray', 'FirebaseModel', 'user', 'numOfReviewItems', 'checkNameChange',
-        function (_, S, $resource, $interval, $timeout, $scope, $rootScope, $location, $route, $routeParams, $window, $q, dialogs, OncoKB, DatabaseConnector, SecretEmptyKey, $sce, jspdf, FindRegex, mainUtils, ReviewResource, loadFiles, $firebaseObject, $firebaseArray, FirebaseModel, user, numOfReviewItems, checkNameChange) {
+    .controller('GeneCtrl', ['_', 'S', '$resource', '$interval', '$timeout', '$scope', '$rootScope', '$location', '$route', '$routeParams', '$window', '$q', 'dialogs', 'OncoKB', 'DatabaseConnector', 'SecretEmptyKey', '$sce', 'jspdf', 'FindRegex', 'mainUtils', 'ReviewResource', 'loadFiles', '$firebaseObject', '$firebaseArray', 'FirebaseModel', 'firebaseConnector', 'user', 'numOfReviewItems', 'checkNameChange', 'drugMapUtils', 'firebasePathUtils',
+        function (_, S, $resource, $interval, $timeout, $scope, $rootScope, $location, $route, $routeParams, $window, $q, dialogs, OncoKB, DatabaseConnector, SecretEmptyKey, $sce, jspdf, FindRegex, mainUtils, ReviewResource, loadFiles, $firebaseObject, $firebaseArray, FirebaseModel, firebaseConnector, user, numOfReviewItems, checkNameChange, drugMapUtils, firebasePathUtils) {
             checkReadPermission();
             // Check permission for user who can only read and write specific genes.
+            if(!$rootScope.drugList){
+                // Loading all drugs info
+                $firebaseObject(firebaseConnector.ref("Drugs/")).$bindTo($rootScope, "drugList").then(function () {
+                }, function (error) {
+                    dialogs.error('Error', 'Failed to load drugs information. Please Contact developer and stop curation.');
+                });
+            }
             function checkReadPermission() {
                 if (_.isUndefined($rootScope.metaData)) {
                     loadFiles.load(['meta']).then(function() {
@@ -128,7 +135,9 @@ angular.module('oncokbApp')
                 $scope.mutationContent[uuid] = {
                     TT: 0,
                     levels: [],
-                    TTS: 0
+                    TTS: 0,
+                    DxS: 0,
+                    PxS: 0
                 };
                 if (mutation.tumors) {
                     for (var j = 0; j < mutation.tumors.length; j++) {
@@ -137,6 +146,12 @@ angular.module('oncokbApp')
                             $scope.mutationContent[uuid].TT++;
                             if (tumor.summary) {
                                 $scope.mutationContent[uuid].TTS++;
+                            }
+                            if (tumor.diagnosticSummary) {
+                                $scope.mutationContent[uuid].DxS++;
+                            }
+                            if (tumor.prognosticSummary) {
+                                $scope.mutationContent[uuid].PxS++;
                             }
                             for (var m = 0; m < tumor.TIs.length; m++) {
                                 var ti = tumor.TIs[m];
@@ -159,6 +174,12 @@ angular.module('oncokbApp')
                     $scope.mutationContent[uuid].result = $scope.mutationContent[uuid].TT + 'x TT';
                     if ($scope.mutationContent[uuid].TTS > 0) {
                         $scope.mutationContent[uuid].result += ', ' + $scope.mutationContent[uuid].TTS + 'x TTS';
+                    }
+                    if ($scope.mutationContent[uuid].DxS > 0) {
+                        $scope.mutationContent[uuid].result += ', ' + $scope.mutationContent[uuid].DxS + 'x DxS';
+                    }
+                    if ($scope.mutationContent[uuid].PxS > 0) {
+                        $scope.mutationContent[uuid].result += ', ' + $scope.mutationContent[uuid].PxS + 'x PxS';
                     }
                     if ($scope.mutationContent[uuid].levels.length > 0) {
                         $scope.mutationContent[uuid].levels = _.map(_.uniq($scope.mutationContent[uuid].levels), function (level) {
@@ -190,6 +211,12 @@ angular.module('oncokbApp')
                 };
                 if (tumor.summary) {
                     $scope.tumorContent[uuid].result = '1x TTS';
+                }
+                if (tumor.diagnosticSummary) {
+                    $scope.tumorContent[uuid].result += $scope.tumorContent[uuid].result.length > 0 ? ', 1x DxS' : '1x DxS';
+                }
+                if (tumor.prognosticSummary) {
+                    $scope.tumorContent[uuid].result += $scope.tumorContent[uuid].result.length > 0 ? ', 1x PxS' : '1x PxS';
                 }
                 for (var m = 0; m < tumor.TIs.length; m++) {
                     var ti = tumor.TIs[m];
@@ -277,13 +304,13 @@ angular.module('oncokbApp')
                 for (var i = 0; i < parts.length; i++) {
                     if (!parts[i]) continue;
                     if (parts[i].indexOf('[') === -1) {
-                        proteinChange = parts[i];
-                        displayName = parts[i];
+                        proteinChange = parts[i].trim();
+                        displayName = parts[i].trim();
                     } else {
                         var l = parts[i].indexOf('[');
                         var r = parts[i].indexOf(']');
-                        proteinChange = parts[i].substring(0, l);
-                        displayName = parts[i].substring(l + 1, r);
+                        proteinChange = parts[i].substring(0, l).trim();
+                        displayName = parts[i].substring(l + 1, r).trim();
                     }
 
                     if (proteinChange.indexOf('/') === -1) {
@@ -446,7 +473,7 @@ angular.module('oncokbApp')
             function isChangedSection(uuids) {
                 var result = false;
                 _.some(uuids, function (uuid) {
-                    if ($scope.geneMeta.review[uuid]) {
+                    if (uuid && $scope.geneMeta.review[uuid]) {
                         result = true;
                         return true;
                     }
@@ -454,11 +481,10 @@ angular.module('oncokbApp')
                 return result;
             }
             var userNames = [];
-            function prepareReviewItems() {
-                resetReviewResources();
-                $scope.sectionUUIDs = []; // sectionUUIDs is used to store uuid per section.
-                $scope.status.hasReviewContent = false;
-                $scope.status.mutationChanged = false;
+            function getReviewInfo() {
+                var sectionUUIDs_ = [];
+                var hasReviewContent_ = false;
+                var mutationChanged_ = false;
                 userNames = [];
                 var geneEviKeys = ['summary', 'type', 'background'];
                 _.each(geneEviKeys, function (item) {
@@ -470,15 +496,15 @@ angular.module('oncokbApp')
                             changeHappened = true;
                         }
                     } else {
-                        if ($scope.geneMeta.review[$scope.gene[item + '_uuid']]) {
+                        if ($scope.geneMeta.review[$scope.gene[item + '_uuid']] && $scope.gene[item + '_review'].updatedBy) {
                             userName = $scope.gene[item + '_review'].updatedBy;
                             changeHappened = true;
                         }
                     }
                     if (changeHappened === true) {
-                        $scope.status.hasReviewContent = true;
+                        hasReviewContent_ = true;
                         userNames.push(userName);
-                        $scope.sectionUUIDs.push($scope.gene[item + '_uuid']);
+                        sectionUUIDs_.push($scope.gene[item + '_uuid']);
                         ReviewResource.updated.push($scope.gene[item + '_uuid']);
                     }
                 });
@@ -503,18 +529,22 @@ angular.module('oncokbApp')
                         }
                     }
                     if (mutationSectionChanged) {
-                        $scope.status.hasReviewContent = true;
+                        hasReviewContent_ = true;
                         userNames.push(mutation.name_review.updatedBy);
                         tempArr = collectUUIDs('mutation', mutation, [], 'sectionOnly');
-                        $scope.sectionUUIDs = _.union($scope.sectionUUIDs, tempArr);
+                        sectionUUIDs_ = _.union(sectionUUIDs_, tempArr);
                         tempArr = collectUUIDs('mutation', mutation, [], 'insideOnly');
                         ReviewResource.inside = _.union(ReviewResource.inside, tempArr);
-                        $scope.status.mutationChanged = true;
-                        return true;
+                        mutationChanged_ = true;
+                        return {
+                            sectionUUIDs: sectionUUIDs_,
+                            hasReviewContent: hasReviewContent_,
+                            mutationChanged: mutationChanged_
+                        };
                     }
                     if (isChangedSection([mutation.mutation_effect.oncogenic_uuid, mutation.mutation_effect.effect_uuid, mutation.mutation_effect.description_uuid])) {
                         tempArr = [mutation.mutation_effect.oncogenic_review, mutation.mutation_effect.effect_review, mutation.mutation_effect.description_review];
-                        $scope.sectionUUIDs.push(mutation.mutation_effect_uuid);
+                        sectionUUIDs_.push(mutation.mutation_effect_uuid);
                         ReviewResource.updated.push(mutation.mutation_effect_uuid);
                         mutationChanged = true;
                         setUpdatedSignature(tempArr, mutation.mutation_effect_uuid);
@@ -535,21 +565,25 @@ angular.module('oncokbApp')
                             mutationChanged = true;
                             userNames.push(tumor.cancerTypes_review.updatedBy);
                             tempArr = collectUUIDs('tumor', tumor, [], 'sectionOnly');
-                            $scope.sectionUUIDs = _.union($scope.sectionUUIDs, tempArr);
+                            sectionUUIDs_ = _.union(sectionUUIDs_, tempArr);
                             tempArr = collectUUIDs('tumor', tumor, [], 'insideOnly');
                             ReviewResource.inside = _.union(ReviewResource.inside, tempArr);
-                            return true;
+                            return {
+                                sectionUUIDs: sectionUUIDs_,
+                                hasReviewContent: hasReviewContent_,
+                                mutationChanged: mutationChanged_
+                            };
                         }
                         if (isChangedSection([tumor.prognostic.level_uuid, tumor.prognostic.description_uuid])) {
                             tempArr = [tumor.prognostic.description_review, tumor.prognostic.level_review];
-                            $scope.sectionUUIDs.push(tumor.prognostic_uuid);
+                            sectionUUIDs_.push(tumor.prognostic_uuid);
                             ReviewResource.updated.push(tumor.prognostic_uuid);
                             tumorChanged = true;
                             setUpdatedSignature(tempArr, tumor.prognostic_uuid);
                         }
                         if (isChangedSection([tumor.diagnostic.level_uuid, tumor.diagnostic.description_uuid])) {
                             tempArr = [tumor.diagnostic.description_review, tumor.diagnostic.level_review];
-                            $scope.sectionUUIDs.push(tumor.diagnostic_uuid);
+                            sectionUUIDs_.push(tumor.diagnostic_uuid);
                             ReviewResource.updated.push(tumor.diagnostic_uuid);
                             tumorChanged = true;
                             setUpdatedSignature(tempArr, tumor.diagnostic_uuid);
@@ -559,6 +593,17 @@ angular.module('oncokbApp')
                             userNames.push(tumor.summary_review.updatedBy);
                             ReviewResource.updated.push(tumor.summary_uuid);
                         }
+                        if (isChangedSection([tumor.diagnosticSummary_uuid])) {
+                            tumorChanged = true;
+                            userNames.push(tumor.diagnosticSummary_review.updatedBy);
+                            ReviewResource.updated.push(tumor.diagnosticSummary_uuid);
+                        }
+                        if (isChangedSection([tumor.prognosticSummary_uuid])) {
+                            tumorChanged = true;
+                            userNames.push(tumor.prognosticSummary_review.updatedBy);
+                            ReviewResource.updated.push(tumor.prognosticSummary_uuid);
+                        }
+
                         _.each(tumor.TIs, function (ti) {
                             _.each(ti.treatments, function (treatment) {
                                 treatmentSectionChanged = false;
@@ -578,10 +623,14 @@ angular.module('oncokbApp')
                                 }
                                 if (treatmentSectionChanged) {
                                     tempArr = collectUUIDs('treatment', treatment, [], 'sectionOnly');
-                                    $scope.sectionUUIDs = _.union($scope.sectionUUIDs, tempArr);
+                                    sectionUUIDs_ = _.union(sectionUUIDs_, tempArr);
                                     tempArr = collectUUIDs('treatment', treatment, [], 'insideOnly');
                                     ReviewResource.inside = _.union(ReviewResource.inside, tempArr);
-                                    return true;
+                                    return {
+                                        sectionUUIDs: sectionUUIDs_,
+                                        hasReviewContent: hasReviewContent_,
+                                        mutationChanged: mutationChanged_
+                                    };
                                 }
                                 if (isChangedSection([treatment.level_uuid, treatment.propagation_uuid, treatment.indication_uuid, treatment.description_uuid])) {
                                     tempArr = [treatment.name_review, treatment.level_review, treatment.propagation_review, treatment.indication_review, treatment.description_review];
@@ -594,13 +643,13 @@ angular.module('oncokbApp')
                                     ReviewResource.nameChanged.push(treatment.name_uuid);
                                 }
                                 if (treatmentChanged) {
-                                    $scope.sectionUUIDs.push(treatment.name_uuid);
+                                    sectionUUIDs_.push(treatment.name_uuid);
                                     tiChanged = true;
                                 }
                                 treatmentChanged = false;
                             });
                             if (tiChanged) {
-                                $scope.sectionUUIDs.push(ti.name_uuid);
+                                sectionUUIDs_.push(ti.name_uuid);
                                 tumorChanged = true;
                             }
                             tiChanged = false;
@@ -611,7 +660,7 @@ angular.module('oncokbApp')
                             ReviewResource.nameChanged.push(tumor.cancerTypes_uuid);
                         }
                         if (tumorChanged) {
-                            $scope.sectionUUIDs.push(tumor.cancerTypes_uuid);
+                            sectionUUIDs_.push(tumor.cancerTypes_uuid);
                             mutationChanged = true;
                         }
                         tumorChanged = false;
@@ -622,13 +671,24 @@ angular.module('oncokbApp')
                         ReviewResource.nameChanged.push(mutation.name_uuid);
                     }
                     if (mutationChanged) {
-                        $scope.sectionUUIDs.push(mutation.name_uuid);
-                        $scope.status.hasReviewContent = true;
-                        $scope.status.mutationChanged = true;
+                        sectionUUIDs_.push(mutation.name_uuid);
+                        hasReviewContent_ = true;
+                        mutationChanged_ = true;
                     }
                     mutationChanged = false;
                 });
-                if ($scope.status.hasReviewContent === false) {
+                return {
+                    sectionUUIDs: sectionUUIDs_,
+                    hasReviewContent: hasReviewContent_,
+                    mutationChanged: mutationChanged_
+                };
+            }
+
+            function prepareReviewItems() {
+                resetReviewResources();
+                var reviewInfo = getReviewInfo();
+                $scope.sectionUUIDs = reviewInfo.sectionUUIDs;
+                if (reviewInfo.hasReviewContent === false) {
                     $scope.geneMeta.review.currentReviewer = '';
                     // This is to increase the fault tolerance of the platform. UUIDs are supposed to be cleaned up after acception or rejection.
                     // If after scaning whole gene document and found nothing need to be reviewed, then we clean up everything in the review EXCEPT currentReviewer
@@ -643,8 +703,8 @@ angular.module('oncokbApp')
                 } else {
                     $scope.geneMeta.review.currentReviewer = $rootScope.me.name;
                     $rootScope.reviewMode = true;
-                    if ($scope.status.mutationChanged) {
-                        $scope.setSectionOpenStatus('open', $scope.sectionUUIDs);
+                    if (reviewInfo.mutationChanged) {
+                        $scope.setSectionOpenStatus('open', reviewInfo.sectionUUIDs);
                     }
                     var validUsers = [];
                     _.each(_.uniq(userNames), function (userName) {
@@ -778,6 +838,7 @@ angular.module('oncokbApp')
                             evidencesAllUsers[userName].deletedEvidences = collectUUIDs('mutation', mutation, evidencesAllUsers[userName].deletedEvidences, 'evidenceOnly');
                             evidencesAllUsers[userName].deletedEvidenceModels.push({type: 'mutation', mutation: mutation});
                             evidencesAllUsers[userName].historyData.deletion.push({ operation: 'delete', lastEditBy: mutation.name_review.updatedBy, location: mutation.name, old: mutation });
+                            $scope.updateDrugMap('accept', 'delete', 'mutation', mutation);
                             return true;
                         } else if (mainUtils.processedInReview('add', mutation.name_uuid)) {
                             processAddedSection(userName, 'mutation', mutation);
@@ -797,6 +858,7 @@ angular.module('oncokbApp')
                                 evidencesAllUsers[userName].deletedEvidences = collectUUIDs('tumor', tumor, evidencesAllUsers[userName].deletedEvidences, 'evidenceOnly');
                                 evidencesAllUsers[userName].deletedEvidenceModels.push({type: 'tumor', mutation: mutation, tumor: tumor});
                                 evidencesAllUsers[userName].historyData.deletion.push({ operation: 'delete', lastEditBy: tumor.cancerTypes_review.updatedBy, location: historyStr(mutation, tumor), old: tumor });
+                                $scope.updateDrugMap('accept', 'delete', 'tumor', mutation, tumor);
                                 return true;
                             } else if (mainUtils.processedInReview('add', tumor.cancerTypes_uuid)) {
                                 processAddedSection(userName, 'tumor', mutation, tumor);
@@ -815,16 +877,21 @@ angular.module('oncokbApp')
                         _.each(tumor.TIs, function (ti) {
                             _.each(ti.treatments, function (treatment) {
                                 if (treatment.name_review && treatment.name_review.updatedBy === userName) {
+                                    var refContent = $scope.getRefs(mutation, tumor, ti ,treatment);
+                                    var mapPath = 'Genes/' + $scope.gene.name + '/mutations/' + refContent.mutationIndex + '/tumors/' + refContent.tumorIndex + '/TIs/' + refContent.tiIndex + '/treatments/' + refContent.treatmentIndex;
                                     if (mainUtils.processedInReview('remove', treatment.name_uuid)) {
                                         evidencesAllUsers[userName].deletedEvidences = collectUUIDs('treatment', treatment, evidencesAllUsers[userName].deletedEvidences, 'evidenceOnly');
                                         evidencesAllUsers[userName].deletedEvidenceModels.push({type: 'treatment', mutation: mutation, tumor: tumor, ti: ti, treatment: treatment});
                                         evidencesAllUsers[userName].historyData.deletion.push({ operation: 'delete', lastEditBy: treatment.name_review.updatedBy, location: historyStr(mutation, tumor) + ', ' + ti.name + ', ' + treatment.name, old: treatment });
+                                        $scope.updateDrugMap('accept', 'delete', 'treatment', mutation, tumor, treatment);
                                         return true;
                                     } else if (mainUtils.processedInReview('add', treatment.name_uuid)) {
                                         processAddedSection(userName, 'treatment', mutation, tumor, ti, treatment);
+                                        $scope.updateDrugMap('accept', 'add', 'treatment', mutation, tumor, treatment);
                                         return true;
                                     } else if (mainUtils.processedInReview('name', treatment.name_uuid)) {
                                         formEvidencesPerUser(userName, 'TREATMENT_NAME_CHANGE', mutation, tumor, ti, treatment);
+                                        $scope.updateDrugMap('accept', 'name', 'treatment', mutation, tumor, treatment, treatment.name_review.lastReviewed);
                                     }
                                 }
                                 if (isChangedBy('section', treatment.name_uuid, userName)) {
@@ -834,6 +901,12 @@ angular.module('oncokbApp')
                         });
                         if (isChangedBy('precise', tumor.summary_uuid, userName, tumor.summary_review)) {
                             formEvidencesPerUser(userName, 'TUMOR_TYPE_SUMMARY', mutation, tumor, null, null);
+                        }
+                        if (isChangedBy('precise', tumor.diagnosticSummary_uuid, userName, tumor.diagnosticSummary_review)) {
+                            formEvidencesPerUser(userName, 'DIAGNOSTIC_SUMMARY', mutation, tumor, null, null);
+                        }
+                        if (isChangedBy('precise', tumor.prognosticSummary_uuid, userName, tumor.prognosticSummary_review)) {
+                            formEvidencesPerUser(userName, 'PROGNOSTIC_SUMMARY', mutation, tumor, null, null);
                         }
                     });
                 });
@@ -937,7 +1010,6 @@ angular.module('oncokbApp')
                     'Px1': 'LEVEL_Px1',
                     'Px2': 'LEVEL_Px2',
                     'Px3': 'LEVEL_Px3',
-                    'Px4': 'LEVEL_Px4',
                     'Dx1': 'LEVEL_Dx1',
                     'Dx2': 'LEVEL_Dx2',
                     'Dx3': 'LEVEL_Dx3'
@@ -1015,6 +1087,28 @@ angular.module('oncokbApp')
                             historyData.new = tumor.summary;
                             historyData.old = tumor.summary_review.lastReviewed;
                             reviewObj = tumor.summary_review;
+                        }
+                        break;
+                    case 'DIAGNOSTIC_SUMMARY':
+                        if ($scope.geneMeta.review[tumor.diagnosticSummary_uuid]) {
+                            data.description = tumor.diagnosticSummary;
+                            dataUUID = tumor.diagnosticSummary_uuid;
+                            data.lastEdit = tumor.diagnosticSummary_review.updateTime;
+                            historyData.location = historyStr(mutation, tumor) + ', Diagnostic Summary';
+                            historyData.new = tumor.diagnosticSummary;
+                            historyData.old = tumor.diagnosticSummary_review.lastReviewed;
+                            reviewObj = tumor.diagnosticSummary_review;
+                        }
+                        break;
+                    case 'PROGNOSTIC_SUMMARY':
+                        if ($scope.geneMeta.review[tumor.prognosticSummary_uuid]) {
+                            data.description = tumor.prognosticSummary;
+                            dataUUID = tumor.prognosticSummary_uuid;
+                            data.lastEdit = tumor.prognosticSummary_review.updateTime;
+                            historyData.location = historyStr(mutation, tumor) + ', Prognostic Summary';
+                            historyData.new = tumor.prognosticSummary;
+                            historyData.old = tumor.prognosticSummary_review.lastReviewed;
+                            reviewObj = tumor.prognosticSummary_review;
                         }
                         break;
                     case 'PROGNOSTIC_IMPLICATION':
@@ -1165,10 +1259,14 @@ angular.module('oncokbApp')
                         var drugs = treatments[i].split('+');
                         var drugList = [];
                         for (var j = 0; j < drugs.length; j++) {
-                            drugList.push({
-                                drugName: drugs[j].trim(),
-                                priority: j + 1
-                            });
+                            var drugName = drugs[j].trim();
+                            var drugObj = $rootScope.drugList[drugName];
+                            if (drugObj) {
+                                drugObj.priority = j + 1;
+                                drugList.push(drugObj);
+                            } else {
+                                throw new Error('Drug is not available.' + drugName);
+                            }
                         }
                         data.treatments.push({
                             approvedIndications: [treatment.indication],
@@ -1320,6 +1418,12 @@ angular.module('oncokbApp')
                     case 'TUMOR_TYPE_SUMMARY':
                         acceptItem([{ reviewObj: tumor.summary_review, uuid: tumor.summary_uuid }], tumor.summary_uuid);
                         break;
+                    case 'DIAGNOSTIC_SUMMARY':
+                        acceptItem([{ reviewObj: tumor.diagnosticSummary_review, uuid: tumor.diagnosticSummary_uuid }], tumor.diagnosticSummary_uuid);
+                        break;
+                    case 'PROGNOSTIC_SUMMARY':
+                        acceptItem([{ reviewObj: tumor.prognosticSummary_review, uuid: tumor.prognosticSummary_uuid }], tumor.prognosticSummary_uuid);
+                        break;
                     case 'PROGNOSTIC_IMPLICATION':
                         acceptItem([{ reviewObj: tumor.prognostic.description_review, uuid: tumor.prognostic.description_uuid },
                         { reviewObj: tumor.prognostic.level_review, uuid: tumor.prognostic.level_uuid }], tumor.prognostic_uuid);
@@ -1345,6 +1449,7 @@ angular.module('oncokbApp')
                         acceptItem([{ reviewObj: tumor.cancerTypes_review, uuid: tumor.cancerTypes_uuid }], tumor.cancerTypes_uuid);
                         break;
                     case 'TREATMENT_NAME_CHANGE':
+                        $scope.updateDrugMap('accept', 'name', 'treatment', mutation, tumor, treatment, treatment.name_review.lastReviewed);
                         acceptItem([{ reviewObj: treatment.name_review, uuid: treatment.name_uuid }], treatment.name_uuid);
                         break;
                     case 'mutation':
@@ -1432,7 +1537,7 @@ angular.module('oncokbApp')
                     tempType = 'tumor';
                 }
                 if (type === 'tumor') {
-                    typeArr = ['TUMOR_TYPE_SUMMARY', 'PROGNOSTIC_IMPLICATION', 'DIAGNOSTIC_IMPLICATION'];
+                    typeArr = ['TUMOR_TYPE_SUMMARY', 'DIAGNOSTIC_SUMMARY', 'PROGNOSTIC_SUMMARY', 'PROGNOSTIC_IMPLICATION', 'DIAGNOSTIC_IMPLICATION'];
                     dataArr = tumor.TIs;
                     tempType = 'TI';
                 }
@@ -1506,6 +1611,7 @@ angular.module('oncokbApp')
                         });
                         break;
                     case 'treatment':
+                        $scope.updateDrugMap('accept', 'add', type, mutation, tumor, treatment);
                         ReviewResource.accepted.push(treatment.name_uuid);
                         delete treatment.name_review.added;
                         clearReview([treatment.name_review, treatment.level_review, treatment.propagation_review, treatment.indication_review, treatment.description_review]);
@@ -1515,6 +1621,187 @@ angular.module('oncokbApp')
                         break;
                 }
             }
+
+            function changeTherapyNameInMap(dataType, geneName, mutationUuid, mutationName, cancerTypeUuid, therapyUuid, drugArray, content){
+                switch (dataType){
+                    case 'mutation':
+                        break;
+                    case 'tumor':
+                        break;
+                    case 'treatment':
+                        var mapPath = '';
+                        var chainDrug = $q.when();
+                        _.forEach(drugArray, function (drug) {
+                            chainDrug = chainDrug.then(function(){
+                                mapPath = firebasePathUtils.getTherapyNameMapPath(drug, geneName, mutationUuid, cancerTypeUuid, therapyUuid);
+                                firebaseConnector.setMap(mapPath, content);
+                            });
+                        });
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            function removeMapWithoutValidatingStatus (geneName, mutationUuid, cancerTypeUuid, therapyUuid, therapyUuids){
+                var mapPath = '';
+                _.each(therapyUuids, function (drug) {
+                    mapPath = firebasePathUtils.getTherapyMapPath(drug, geneName, mutationUuid, cancerTypeUuid, therapyUuid);
+                    firebaseConnector.removeMap(mapPath).then(function(){
+                        firebaseConnector.ref(firebasePathUtils.getCancerTypesMapPath(drug, geneName, mutationUuid)).once('value', function (doc) {
+                            if (!doc.val()) {
+                                mapPath = firebasePathUtils.getMutationNameMapPath(drug, geneName, mutationUuid);
+                                firebaseConnector.removeMap(mapPath);
+                            }
+                        })
+                    })
+                });
+            }
+
+            function changeTherapyStatusInMap(dataType, geneName, mutationUuid, cancerTypeUuid, therapyUuid, therapyUuids) {
+                switch (dataType) {
+                    case 'mutation':
+                        break;
+                    case 'tumor':
+                        break;
+                    case 'treatment':
+                        _.each(therapyUuids, function (drug) {
+                            var mapPath = firebasePathUtils.getTherapyMapPath(drug, geneName, mutationUuid, cancerTypeUuid, therapyUuid) + '/status';
+                            firebaseConnector.setMap(mapPath, 'reviewed');
+                        });
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            function updateDrugMapWhenAcceptDeletionOrRejectAddition(dataType, mutation, tumor, treatment, mapInfo){
+                switch (dataType) {
+                    case 'mutation':
+                        _.each(mutation.tumors, function (tumor) {
+                            var mapInfo = {
+                                'geneName': $scope.gene.name,
+                                'mutationUuid': mutation.name_uuid,
+                                'cancerTypeUuid': null
+                            };
+                            updateDrugMapWhenAcceptDeletionOrRejectAddition('tumor', mutation, tumor, null, mapInfo);
+                        });
+                        break;
+                    case 'tumor':
+                        if(!mapInfo){
+                            var mapInfo = {
+                                'geneName': $scope.gene.name,
+                                'mutationUuid': mutation.name_uuid,
+                                'cancerTypeUuid': tumor.cancerTypes_uuid
+                            }
+                        }
+                        else{
+                            var mapInfo = mapInfo;
+                            mapInfo.cancerTypeUuid = tumor.cancerTypes_uuid;
+                        }
+                        _.each(tumor.TIs, function(ti){
+                            _.each(ti.treatments, function(treatment){
+                                updateDrugMapWhenAcceptDeletionOrRejectAddition('treatment', mutation, tumor, treatment, mapInfo);
+                            })
+                        });
+                        break;
+                    case 'treatment':
+                        if(!mapInfo){
+                            var mapInfo = {
+                                'geneName': $scope.gene.name,
+                                'mutationUuid': mutation.name_uuid,
+                                'cancerTypeUuid': tumor.cancerTypes_uuid
+                            }
+                        }
+                        var therapyUuids = _.flatten(drugMapUtils.therapyStrToArr(treatment.name));
+                        if(treatment.name_review.lastReviewed){
+                            var reviewedTherapyUuids = _.flatten(drugMapUtils.therapyStrToArr(treatment.name_review.lastReviewed));
+                            removeMapWithoutValidatingStatus(mapInfo.geneName, mapInfo.mutationUuid, mapInfo.cancerTypeUuid, treatment.name_uuid, reviewedTherapyUuids);
+                        }
+                        removeMapWithoutValidatingStatus(mapInfo.geneName, mapInfo.mutationUuid, mapInfo.cancerTypeUuid, treatment.name_uuid, therapyUuids);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            function updateDrugMapWhenAcceptName(dataType, mutation, tumor, treatment, difference) {
+                switch (dataType) {
+                    case 'mutation':
+                        break;
+                    case 'tumor':
+                        break;
+                    case 'treatment':
+                        removeMapWithoutValidatingStatus($scope.gene.name, mutation.name_uuid, tumor.cancerTypes_uuid, treatment.name_uuid, difference.extraDrugsInOld);
+                        changeTherapyStatusInMap(dataType, $scope.gene.name, mutation.name_uuid, tumor.cancerTypes_uuid, treatment.name_uuid, difference.extraDrugsInNew);
+                        changeTherapyNameInMap(dataType, $scope.gene.name, mutation.name_uuid, mutation.name, tumor.cancerTypes_uuid, treatment.name_uuid, difference.sameDrugs, treatment.name);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            function updateDrugMapWhenRejectName(dataType, mutation, tumor, treatment, difference){
+                switch (dataType) {
+                    case 'mutation':
+                        break;
+                    case 'tumor':
+                        break;
+                    case 'treatment':
+                        removeMapWithoutValidatingStatus($scope.gene.name, mutation.name_uuid, tumor.cancerTypes_uuid, treatment.name_uuid, difference.extraDrugsInNew);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            $scope.updateDrugMap = function (reviewerDecision, actionType, dataType, mutation, tumor, treatment, oldContent) {
+                switch (dataType) {
+                    case 'treatment':
+                        var therapyUuids = _.flatten(drugMapUtils.therapyStrToArr(treatment.name));
+                        break;
+                }
+                switch (reviewerDecision) {
+                    case 'accept':
+                        switch (actionType) {
+                            case 'add':
+                                changeTherapyStatusInMap(dataType, $scope.gene.name, mutation.name_uuid, tumor.cancerTypes_uuid, treatment.name_uuid, therapyUuids);
+                                break;
+                            case 'delete':
+                                updateDrugMapWhenAcceptDeletionOrRejectAddition(dataType, mutation, tumor, treatment);
+                                break;
+                            case 'name':
+                                var difference = drugMapUtils.checkDifferenceBetweenTherapies(oldContent, treatment.name);
+                                updateDrugMapWhenAcceptName(dataType, mutation, tumor, treatment, difference);
+                                break;
+                            case 'update':
+                                // Currently, we don't record 'update' operation for treatments.
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    case 'reject':
+                        switch (actionType) {
+                            case 'add':
+                                updateDrugMapWhenAcceptDeletionOrRejectAddition(dataType, mutation, tumor, treatment);
+                                break;
+                            case 'delete':
+                                //Map won't be changed when reviewer reject deletion.
+                                break;
+                            case 'name':
+                                var difference = drugMapUtils.checkDifferenceBetweenTherapies(oldContent, treatment.name);
+                                updateDrugMapWhenRejectName(dataType, mutation, tumor, treatment, difference);
+                                break;
+                            case 'update':
+                                // Currently, we don't record 'update' operation for treatments.
+                                break;
+                            default:
+                                break;
+
+                        }
+                }
+            };
 
             $scope.getRefs = function(mutationCopy, tumorCopy, tiCopy, treatmentCopy) {
                 if (!mutationCopy) {
@@ -1621,12 +1908,12 @@ angular.module('oncokbApp')
                     var indicies = [data.mutationIndex, data.tumorIndex, data.tiIndex, data.treatmentIndex];
                     var tempUUIDs = getUUIDsByType(type, mutation, tumor, ti, treatment);
                     numOfReviewItems.minus(updatedBy);
+                    $scope.updateDrugMap('reject', 'add', type, mutation, tumor, treatment);
                     removeModel({type: type, uuids: tempUUIDs, indicies: indicies});
                 });
             };
-            $scope.updateGene = function () {
-                $scope.status.savedGene = false;
-                var gene = mainUtils.getGeneData($scope.gene, true, true);
+            function collectingGeneInfo() {
+                var gene = mainUtils.getGeneData($scope.gene, true, true, $rootScope.drugList);
                 var vus = mainUtils.getVUSData($scope.vusItems, true);
                 var params = {};
 
@@ -1636,6 +1923,12 @@ angular.module('oncokbApp')
                 if (vus) {
                     params.vus = JSON.stringify(vus);
                 }
+                return params;
+            }
+
+            $scope.updateGene = function () {
+                $scope.status.savedGene = false;
+                var params = collectingGeneInfo();
                 DatabaseConnector.updateGene(params, function (result) {
                     $scope.status.savedGene = true;
                     mainUtils.updateLastSavedToDB();
@@ -1645,6 +1938,102 @@ angular.module('oncokbApp')
                     dialogs.error('Error', errorMessage);
                 });
             };
+            $scope.removeGeneFromDB = function() {
+                $scope.status.removingGene = true;
+                DatabaseConnector.removeGeneFromDB($scope.gene.name, function(data) {
+                    $scope.status.removingGene = false;
+                    $scope.status.geneReleased = 'no';
+                }, function() {
+                    $scope.status.removingGene = false;
+                });
+            };
+            $scope.releaseGene = function() {
+                function confirmCallback() {
+                    var defer = $q.defer();
+                    $scope.status.releasingGene = true;
+                    var params = collectingGeneInfo();
+                    params.releaseGene = true;
+                    DatabaseConnector.updateGene(params, function(result) {
+                        mainUtils.updateLastSavedToDB();
+                        $scope.status.geneReleased = 'yes';
+                        $scope.status.releasingGene = false;
+                        defer.resolve();
+                    }, function(error) {
+                        var errorMessage = 'An error has occurred when saving data.' + error;
+                        dialogs.error('Error', errorMessage);
+                        $scope.status.releasingGene = false;
+                        defer.reject(error);
+                    });
+                    return defer.promise;
+                }
+
+                var statusChecks = [];
+
+                // Check gene summary
+                var reviewInfo = getReviewInfo();
+                var check = reviewInfo.hasReviewContent;
+                if (check) {
+                    statusChecks.push({
+                        message: 'Please review all content before releasing',
+                        status: 'error'
+                    });
+                } else {
+                    statusChecks.push({
+                        message: 'No content needs to be reviewed',
+                        status: 'success'
+                    });
+                }
+
+                check = _.isEmpty($scope.gene.summary);
+                if (check) {
+                    statusChecks.push({
+                        message: 'Gene summary is empty',
+                        status: 'error'
+                    });
+                } else {
+                    statusChecks.push({
+                        message: 'Gene summary is not empty',
+                        status: 'success'
+                    });
+                }
+
+                // Check gene background
+                check = _.isEmpty($scope.gene.background);
+                if (check) {
+                    statusChecks.push({
+                        message: 'Gene background is empty',
+                        status: 'error'
+                    });
+                } else {
+                    statusChecks.push({
+                        message: 'Gene background is not empty',
+                        status: 'success'
+                    });
+                }
+
+                // Check gene summary
+                check = _.isEmpty($scope.gene.type.tsg) && _.isEmpty($scope.gene.type.ocg);
+                if (check) {
+                    statusChecks.push({
+                        message: 'Gene type is not specified',
+                        status: 'warning'
+                    });
+                } else {
+                    statusChecks.push({
+                        message: 'Gene type is specified',
+                        status: 'success'
+                    });
+                }
+
+                dialogs.create('views/releaseGeneDialog.html', 'ReleaseGeneDialogCtrl', {
+                    statusChecks: statusChecks,
+                    confirmCallback: confirmCallback
+                }, {
+                    size: 'sm'
+                });
+
+            };
+
             $scope.validateTumor = function (mutation, tumor) {
                 var exists = false;
                 var removed = false;
@@ -1755,39 +2144,57 @@ angular.module('oncokbApp')
                         size: 'lg'
                 });
             };
-            function isValidTreatment(indices, newTreatmentName) {
-                var isValid = true;
-                var message = '';
-                _.some($scope.gene.mutations[indices[0]].tumors[indices[1]].TIs[indices[2]].treatments, function (treatment) {
-                    if (treatment.name.toLowerCase() === newTreatmentName.toLowerCase()) {
-                        isValid = false;
-                        message = 'This treament has already been added';
-                        return true;
-                    }
-                });
-                if (!isValid) {
-                    dialogs.notify('Warning', message);
-                }
-                return isValid;
-            }
-            $scope.addTreatment = function (newTreatmentName, path) {
-                newTreatmentName = newTreatmentName.trim();
+            $scope.modifyTherapy = function (path) {
                 var indices = getIndexByPath(path);
+                var mutationRef = $scope.gene.mutations[indices[0]];
+                var tumorRef = $scope.gene.mutations[indices[0]].tumors[indices[1]];
+                var tiRef = $scope.gene.mutations[indices[0]].tumors[indices[1]].TIs[indices[2]];
+                var treatmentRef = $scope.gene.mutations[indices[0]].tumors[indices[1]].TIs[indices[2]].treatments[indices[3]];
+                var geneName = $scope.gene.name;
+                var dlgfortherapy = dialogs.create('views/modifyTherapy.html', 'ModifyTherapyCtrl', {
+                    modifyName: true,
+                    geneName: geneName,
+                    mutationRef: mutationRef,
+                    tumorRef: tumorRef,
+                    tiRef: tiRef,
+                    treatmentRef: treatmentRef
+                }, {
+                    size: 'lg'
+                });
+
+            };
+
+            $scope.initTherapyComponent = function(path){
+                var indices = getIndexByPath(path) ;
+                $scope.mutationRef = $scope.gene.mutations[indices[0]];
+                $scope.tumorRef = $scope.gene.mutations[indices[0]].tumors[indices[1]];
+                $scope.tiRef = $scope.gene.mutations[indices[0]].tumors[indices[1]].TIs[indices[2]];
+                $scope.path = path;
+                $scope.modifyName = false;
+            }
+
+            $scope.saveTherapiesCallback = function(newTreatmentName){
+                var indices = $scope.indices;
+                var geneName = $scope.gene.name;
+                var mutationUuid = $scope.mutationRef.name_uuid;
+                var mutationName = $scope.mutationRef.name;
+                var cancerTypeUuid = $scope.tumorRef.cancerTypes_uuid;
                 var treatment = new FirebaseModel.Treatment(newTreatmentName);
                 treatment.name_review = {
                     updatedBy: $rootScope.me.name,
                     updateTime: new Date().getTime(),
                     added: true
                 };
-                if (!$scope.gene.mutations[indices[0]].tumors[indices[1]].TIs[indices[2]].treatments) {
-                    $scope.gene.mutations[indices[0]].tumors[indices[1]].TIs[indices[2]].treatments = [];
+                if (!$scope.tiRef.treatments) {
+                    firebaseConnector.addTreatment($scope.path, treatment);
                 }
-                if (isValidTreatment(indices, newTreatmentName)) {
-                    $scope.gene.mutations[indices[0]].tumors[indices[1]].TIs[indices[2]].treatments.push(treatment);
-                    $scope.indicateTumorContent($scope.gene.mutations[indices[0]].tumors[indices[1]]);
+                else {
+                    $scope.tiRef.treatments.push(treatment);
                 }
+                drugMapUtils.changeMapByCurator('add', 'treatment', geneName, mutationUuid, mutationName, cancerTypeUuid, treatment.name_uuid, treatment.name);
+                $scope.indicateTumorContent($scope.tumorRef);
                 mainUtils.setUUIDInReview(treatment.name_uuid);
-            };
+            }
 
             $scope.onFocus = function (e) {
                 $timeout(function () {
@@ -1852,6 +2259,16 @@ angular.module('oncokbApp')
                     return '';
                 }
             };
+
+            $scope.getCancerTypesNameInReview = function(tumor, uuid, reviewMode){
+                if(mainUtils.processedInReview('remove', uuid) && reviewMode && tumor.cancerTypes_review.lastReviewed){
+                    return $scope.getLastReviewedCancerTypesName(tumor);
+                }
+                else{
+                    return $scope.getCancerTypesName(tumor);
+                }
+            };
+
             $scope.getCancerTypesName = function (tumor) {
                 return mainUtils.getCancerTypesName(tumor.cancerTypes);
             };
@@ -1859,6 +2276,7 @@ angular.module('oncokbApp')
             $scope.getLastReviewedCancerTypesName = function (tumor) {
                 return mainUtils.getCancerTypesName(tumor.cancerTypes_review.lastReviewed);
             };
+
             $scope.remove = function (type, path) {
                 $scope.status.processing = true;
                 var deletionMessage = 'Are you sure you want to delete this entry?';
@@ -1893,24 +2311,33 @@ angular.module('oncokbApp')
                         removeModel({ type: type, path: path, uuids: uuids });
                     } else {
                         if (type === 'tumor') {
-                            obj.cancerTypes_review = {
-                                updatedBy: $rootScope.me.name,
-                                updateTime: new Date().getTime(),
-                                removed: true
-                            }
+                            // Do not delete lastReviewed when curators delete a treatment.
+                            // If a reviewer reject this change, we can rollback to previous reviewed name.
+                            obj.cancerTypes_review.updatedBy = $rootScope.me.name;
+                            obj.cancerTypes_review.updateTime = new Date().getTime();
+                            obj.cancerTypes_review.removed = true;
                         } else {
-                            obj.name_review = {
-                                updatedBy: $rootScope.me.name,
-                                updateTime: new Date().getTime(),
-                                removed: true
-                            }
+                            obj.name_review.updatedBy = $rootScope.me.name;
+                            obj.name_review.updateTime = new Date().getTime();
+                            obj.name_review.removed = true;
                         }
                         $scope.geneMeta.review[uuid] = true;
                     }
+                    var geneName = $scope.gene.name;
+                    var mutation = $scope.gene.mutations[indices[0]];
                     if (type === 'tumor') {
+                        if(obj.cancerTypes_review.added){
+                            drugMapUtils.changeMapWhenDeleteSection('tumor', geneName, mutation, obj);
+                        }
                         $scope.indicateMutationContent($scope.gene.mutations[indices[0]]);
                     } else if (type === 'treatment') {
+                        var tumor = $scope.gene.mutations[indices[0]].tumors[indices[1]];
+                        drugMapUtils.changeMapWhenDeleteSection('treatment', geneName, mutation, tumor, obj);
                         $scope.indicateTumorContent($scope.gene.mutations[indices[0]].tumors[indices[1]]);
+                    } else if (type === 'mutation') {
+                        if(obj.name_review.added){
+                            drugMapUtils.changeMapWhenDeleteSection('mutation', geneName, obj);
+                        }
                     }
                 }, function () {
                 });
@@ -2054,6 +2481,7 @@ angular.module('oncokbApp')
                 }
                 DatabaseConnector.deleteEvidences(evidenceUUIDs, historyData, function (result) {
                     removeModel({ type: type, indicies: indicies, uuids: allUUIDs });
+                    $scope.updateDrugMap('accept', 'delete', type, mutation, tumor, treatment);
                     ReviewResource.loading = _.without(ReviewResource.loading, loadingUUID);
                     numOfReviewItems.minus(updatedBy);
                     if (type === 'mutation') {
@@ -2128,6 +2556,10 @@ angular.module('oncokbApp')
                 switch (type) {
                     case 'mutation':
                         cancelDeleteItem(mutation.name_review, mutation.name_uuid);
+                        if(mutation.name_review.lastReviewed){
+                            mutation.name = mutation.name_review.lastReviewed;
+                            delete mutation.name_review.lastReviewed;
+                        }
                         _.each(mutation.tumors, function (tumor) {
                             if (tumor.cancerTypes_review && tumor.cancerTypes_review.removed) {
                                 cancelDeleteSection('tumor', mutation, tumor, ti, treatment);
@@ -2136,6 +2568,10 @@ angular.module('oncokbApp')
                         break;
                     case 'tumor':
                         cancelDeleteItem(tumor.cancerTypes_review, tumor.cancerTypes_uuid);
+                        if(tumor.cancerTypes_review.lastReviewed){
+                            tumor.cancerTypes = tumor.cancerTypes_review.lastReviewed;
+                            delete tumor.cancerTypes_review.lastReviewed;
+                        }
                         _.each(tumor.TIs, function (ti) {
                             _.each(ti.treatments, function (treatment) {
                                 if (treatment.name_review.removed) {
@@ -2147,6 +2583,10 @@ angular.module('oncokbApp')
                         break;
                     case 'treatment':
                         cancelDeleteItem(treatment.name_review, treatment.name_uuid);
+                        if(treatment.name_review.lastReviewed){
+                            treatment.name = treatment.name_review.lastReviewed;
+                            delete treatment.name_review.lastReviewed;
+                        }
                         $scope.indicateMutationContent(mutation);
                         $scope.indicateTumorContent(tumor);
                         break;
@@ -2380,7 +2820,7 @@ angular.module('oncokbApp')
                 });
             };
             $scope.generatePDF = function () {
-                jspdf.create(mainUtils.getGeneData(this.gene, true, false));
+                jspdf.create(mainUtils.getGeneData(this.gene, true, false, $rootScope.drugList));
             };
             // emptySectionsUUIDs is still TBD in terms of where it should be used
             var emptySectionsUUIDs = {};
@@ -2624,12 +3064,14 @@ angular.module('oncokbApp')
                 expandAll: false,
                 rendering: true,
                 numAccordion: 0,
-                hasReviewContent: false, // indicate if any changes need to be reviewed
-                mutationChanged: false, // indicate there are changes in mutation section
                 processing: false,
                 fileEditable : false,
+                geneReleased: '',
+                releasingGene: false,
+                removingGene: false,
                 savedGene: true
             };
+
             $scope.$watch('meta.newCancerTypes', function (n) {
                 if (n.length > 0 && (n[n.length - 1].mainType || n[n.length - 1].subtype)) {
                     $scope.meta.newCancerTypes.push({
@@ -2845,8 +3287,16 @@ angular.module('oncokbApp')
             $scope.initialOpen = {};
             $scope.mutIndexByUUID = {};
             function populateBindings() {
+                $scope.mapScope = {};
                 var deferred1 = $q.defer();
                 $firebaseObject(firebase.database().ref("Genes/" + $routeParams.geneName)).$bindTo($scope, "gene").then(function () {
+                    DatabaseConnector.getAllInternalGenes().then(function(genes) {
+                        $scope.status.geneReleased = (_.find(genes.data, function(gene) {
+                            return gene.hugoSymbol === $scope.gene.name;
+                        }) === undefined) ? 'no' : 'yes';
+                    }, function(reason) {
+                        // nothing really needs to be done
+                    });
                     deferred1.resolve();
                 }, function (error) {
                     deferred1.reject(error);
@@ -3011,6 +3461,100 @@ angular.module('oncokbApp')
             }
         }]
     )
+
+    .controller('ReleaseGeneDialogCtrl', function($scope, $modalInstance, data) {
+        $scope.statusChecks = data.statusChecks || [];
+        $scope.confirmingRelease = false;
+        $scope.error='';
+
+        _.each($scope.statusChecks, function(statusCheck) {
+            if (!statusCheck.status) {
+                if (statusCheck.promise) {
+                    statusCheck.status = 'checking';
+                    statusCheck.promise.then(function(message) {
+                        statusCheck.status = 'success';
+                        if (message) {
+                            statusCheck.message = message;
+                        }
+                    }, function(message) {
+                        statusCheck.status = 'error';
+                        if (message) {
+                            statusCheck.message = message;
+                        }
+                    });
+                } else {
+                    statusCheck.status = 'warning';
+                }
+            }
+        });
+
+        $scope.cancel = function () {
+            $modalInstance.dismiss('canceled');
+            (data.cancelCallback || function(){})();
+        };
+
+        $scope.confirm = function() {
+            $scope.confirmingRelease = true;
+            setTimeout(function() {
+                if (data.confirmCallback) {
+                    data.confirmCallback().then(function() {
+                        $modalInstance.dismiss('canceled');
+                    }, function(error) {
+                        $scope.error = 'Some error happened: ' + error.message;
+                    }).finally(function() {
+                        $scope.confirmingRelease = false;
+                    })
+                } else {
+                    $modalInstance.dismiss('canceled');
+                }
+            }, 200);
+        };
+
+        $scope.confirmButtonDisabled = function() {
+            return !_.every($scope.statusChecks, function(statusCheck) {
+                return statusCheck.status === 'success' || statusCheck.status === 'warning';
+            }) || $scope.error;
+        };
+
+    })
+    .controller('ModifyTherapyCtrl', function ($scope, $modalInstance, data, _, OncoKB, $rootScope, drugMapUtils, mainUtils) {
+        $scope.modifyName = data.modifyName;
+        $scope.mutationRef = data.mutationRef;
+        $scope.tiRef = data.tiRef;
+        $scope.tumorRef = data.tumorRef;
+        $scope.treatmentRef = data.treatmentRef;
+        var geneName = data.geneName;
+
+        $scope.saveTherapiesCallback = function(newTreatmentName, oldContent){
+            var name_uuid = $scope.treatmentRef.name_uuid;
+            if(!_.isEmpty($scope.treatmentRef.name)) {
+                if (_.isUndefined($scope.treatmentRef.name_review)) {
+                    $scope.treatmentRef.name_review = {
+                        'updatedBy' : $rootScope.me.name,
+                        'updateTime':  new Date().getTime(),
+                    };
+                }
+                else if (_.isUndefined($scope.treatmentRef.name_review.updatedBy) || _.isUndefined($scope.treatmentRef.name_review.updateTime)) {
+                    $scope.treatmentRef.name_review.updatedBy = $rootScope.me.name;
+                    $scope.treatmentRef.name_review.updateTime = new Date().getTime();
+                }
+                if (_.isUndefined($scope.treatmentRef.name_review.lastReviewed)&&_.isUndefined($scope.treatmentRef.name_review.added)) {
+                    $scope.treatmentRef.name_review.lastReviewed = $scope.treatmentRef.name;
+                }
+                mainUtils.setUUIDInReview(name_uuid);
+            }
+            $scope.treatmentRef.name = newTreatmentName;
+            var mutationUuid = $scope.mutationRef.name_uuid;
+            var mutationName = $scope.mutationRef.name;
+            var cancerTypeUuid = $scope.tumorRef.cancerTypes_uuid;
+            drugMapUtils.changeMapByCurator('name', 'treatment', geneName, mutationUuid, mutationName, cancerTypeUuid, name_uuid, newTreatmentName, oldContent);
+        }
+
+        $scope.closeWindow = function () {
+            $modalInstance.dismiss('canceled');
+        }
+    })
+
     .controller('ModifyTumorTypeCtrl', function ($scope, $modalInstance, data, _, OncoKB, $rootScope, mainUtils, FirebaseModel, $timeout) {
         $scope.meta = {
             cancerTypes: data.tumor.cancerTypes,

@@ -12,10 +12,10 @@ import java.util.Set;
 
 @javax.annotation.Generated(value = "class io.swagger.codegen.languages.SpringCodegen", date = "2016-10-19T19:28:21.941Z")
 
-@Api(value = "evidences", description = "The evidences API")
+@Api(tags = "Evidences", description = "OncoKB Evidence")
 public interface EvidencesApi {
 
-    @ApiOperation(value = "", notes = "Get specific evidence.", response = Evidence.class, tags = {"Evidences",})
+    @ApiOperation(value = "", notes = "Get specific evidence.", response = Evidence.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = Evidence.class),
         @ApiResponse(code = 400, message = "Error, error message will be given.", response = ResponseEntity.class)})
@@ -27,7 +27,7 @@ public interface EvidencesApi {
         , @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
     );
 
-    @ApiOperation(value = "", notes = "Get specific evidences.", response = Evidence.class, tags = {"Evidences",})
+    @ApiOperation(value = "", notes = "Get specific evidences.", response = Evidence.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = Evidence.class),
         @ApiResponse(code = 400, message = "Error, error message will be given.", response = ResponseEntity.class)})
@@ -40,7 +40,7 @@ public interface EvidencesApi {
     );
 
 
-    @ApiOperation(value = "", notes = "Search evidences. Multi-queries are supported.", response = Evidence.class, responseContainer = "List", tags = {"Evidences", "Search",})
+    @ApiOperation(value = "", notes = "Search evidences. Multi-queries are supported.", response = Evidence.class, responseContainer = "List")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = Evidence.class, responseContainer = "List")})
 //    @RequestMapping(value = "/evidences/lookup",
@@ -57,11 +57,11 @@ public interface EvidencesApi {
         , @ApiParam(value = "Tumor type source. OncoTree tumor types are the default setting. We may have customized version, like Quest.", defaultValue = "oncotree") @RequestParam(value = "source", required = false, defaultValue = "oncotree") String source
         , @ApiParam(value = "Only show highest level evidences") @RequestParam(value = "highestLevelOnly", required = false, defaultValue = "FALSE") Boolean highestLevelOnly
         , @ApiParam(value = "Separate by comma. LEVEL_1, LEVEL_2A, LEVEL_2B, LEVEL_3A, LEVEL_3B, LEVEL_4, LEVEL_R1, LEVEL_R2, LEVEL_R3") @RequestParam(value = "levelOfEvidence", required = false) String levels
-        , @ApiParam(value = "Separate by comma. Evidence type includes GENE_SUMMARY, GENE_BACKGROUND, MUTATION_SUMMARY, ONCOGENIC, MUTATION_EFFECT, VUS, PROGNOSTIC_IMPLICATION, DIAGNOSTIC_IMPLICATION, TUMOR_TYPE_SUMMARY, STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY, STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE, INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY, INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE") @RequestParam(value = "evidenceTypes", required = false) String evidenceTypes
+        , @ApiParam(value = "Separate by comma. Evidence type includes GENE_SUMMARY, GENE_BACKGROUND, MUTATION_SUMMARY, ONCOGENIC, MUTATION_EFFECT, VUS, PROGNOSTIC_IMPLICATION, DIAGNOSTIC_IMPLICATION, TUMOR_TYPE_SUMMARY, DIAGNOSTIC_SUMMARY, PROGNOSTIC_SUMMARY, STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY, STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE, INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY, INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE") @RequestParam(value = "evidenceTypes", required = false) String evidenceTypes
         , @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
     );
 
-    @ApiOperation(value = "", notes = "Search evidences.", response = EvidenceQueryRes.class, responseContainer = "List", tags = {"Evidences", "Search",})
+    @ApiOperation(value = "", notes = "Search evidences.", response = EvidenceQueryRes.class, responseContainer = "List")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = EvidenceQueryRes.class, responseContainer = "List")})
 //    @RequestMapping(value = "/evidences/lookup",
@@ -73,7 +73,7 @@ public interface EvidencesApi {
         , @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
     );
 
-//    @ApiOperation(value = "", notes = "Get specific evidences.", response = Evidence.class, responseContainer = "List", tags = {"Evidences",})
+//    @ApiOperation(value = "", notes = "Get specific evidences.", response = Evidence.class, responseContainer = "List")
 //    @ApiResponses(value = {
 //        @ApiResponse(code = 200, message = "OK", response = Evidence.class, responseContainer = "List"),
 //        @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiErrorResp.class)})

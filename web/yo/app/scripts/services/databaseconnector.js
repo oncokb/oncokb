@@ -14,6 +14,7 @@ angular.module('oncokbApp')
         'DriveAnnotation',
         'SendEmail',
         'DataSummary',
+        'Drugs',
         'Cache',
         'OncoTree',
         'InternalAccess',
@@ -32,6 +33,7 @@ angular.module('oncokbApp')
                  DriveAnnotation,
                  SendEmail,
                  DataSummary,
+                 Drugs,
                  Cache,
                  OncoTree,
                  InternalAccess,
@@ -42,6 +44,42 @@ angular.module('oncokbApp')
             var data = {};
             var testing = OncoKB.config.testing || false;
             var inProduction = OncoKB.config.production || false;
+
+            function searchNCITDrugs(keyword) {
+                var deferred = $q.defer();
+                Drugs.searchNCITDrugs(keyword)
+                    .then(function(data) {
+                        deferred.resolve(data.data);
+                    }, function(error) {
+                        var subject = 'searchDrugs Error';
+                        var content = 'The system error returned is ' + JSON.stringify(error);
+                        sendEmail({sendTo: 'dev.oncokb@gmail.com', subject: subject, content: content},
+                            function(result) {
+                                console.log('sent searchDrugs Error to oncokb dev account');
+                            },
+                            function(error) {
+                                console.log('fail to send searchDrugs Error to oncokb dev account', error);
+                            }
+                        );
+                        deferred.reject(error);
+                    });
+                return deferred.promise;
+            }
+
+            function updateDrugPreferredName(ncitCode, newPreferredName) {
+                var deferred = $q.defer();
+                if (testing) {
+                    deferred.resolve();
+                } else {
+                    Drugs.updatePreferredName(ncitCode, newPreferredName)
+                        .then(function(data) {
+                            deferred.resolve(data.data);
+                        }, function(error) {
+                            deferred.reject(error);
+                        });
+                }
+                return deferred.promise;
+            }
 
             function getAllGene(callback, timestamp) {
                 Gene.getFromServer()
@@ -57,6 +95,20 @@ angular.module('oncokbApp')
                         callback();
                     });
             }
+
+            function getAllInternalGenes() {
+                return Gene.getAllInternalGenes();
+            }
+
+            function removeGeneFromDB(hugoSymbol, callback) {
+                Gene.remove(hugoSymbol)
+                    .then(function(data) {
+                        callback(data);
+                    }, function() {
+                        callback();
+                    });
+            }
+
             function getAllTumorType(callback, timestamp) {
                 TumorType.getFromServer()
                     .then(function(data) {
@@ -519,10 +571,13 @@ angular.module('oncokbApp')
             }
             // Public API here
             return {
+                searchNCITDrugs: searchNCITDrugs,
+                updateDrugPreferredName: updateDrugPreferredName,
                 getGeneTumorType: getGeneTumorType,
                 searchAnnotation: searchVariant,
                 updateGene: updateGene,
                 updateGeneType: updateGeneType,
+                removeGeneFromDB: removeGeneFromDB,
                 deleteEvidences: deleteEvidences,
                 updateVUS: updateVUS,
                 updateEvidenceBatch: updateEvidenceBatch,
@@ -542,6 +597,7 @@ angular.module('oncokbApp')
                 updateGeneCache: function(hugoSymbol) {
                     return updateGeneCache(hugoSymbol);
                 },
+                getAllInternalGenes: getAllInternalGenes,
                 getOncoTreeTumorTypesByMainType: getOncoTreeTumorTypesByMainType,
                 testAccess: testAccess,
                 getIsoforms: getIsoforms,

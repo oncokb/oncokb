@@ -12,6 +12,7 @@ import org.mskcc.cbio.oncokb.model.Drug;
  * @author jgao
  */
 public interface DrugDao extends GenericDao<Drug, Integer> {
+    Drug findDrugById(Integer id);
     /**
      *
      * @param drugName
@@ -28,10 +29,10 @@ public interface DrugDao extends GenericDao<Drug, Integer> {
 
     /**
      *
-     * @param atcCode
+     * @param ncitCode
      * @return
      */
-    List<Drug> findDrugByAtcCode(String atcCode);
+    Drug findDrugByNcitCode(String ncitCode);
 
     @Override
     void save(Drug drug);

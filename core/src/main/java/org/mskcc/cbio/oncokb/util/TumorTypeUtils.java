@@ -502,6 +502,7 @@ public class TumorTypeUtils {
             tumorType.setColor(currentTumorType.getColor());
             tumorType.setLevel(currentTumorType.getLevel());
             tumorType.setParent(currentTumorType.getParent());
+            tumorType.setHistory(currentTumorType.getHistory());
 
             matchedTumorTypes.add(tumorType);
 

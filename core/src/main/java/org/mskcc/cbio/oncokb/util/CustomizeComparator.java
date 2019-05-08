@@ -50,10 +50,6 @@ public class CustomizeComparator {
         });
     }
 
-    public static void sortEvidenceBasedOnPriority(List<Evidence> evidenceList) {
-        sortEvidenceBasedOnPriority(evidenceList, LevelUtils.LEVELS);
-    }
-
     public static void sortKitTreatment(List<IndicatorQueryTreatment> treatments) {
         if (treatments == null)
             return;

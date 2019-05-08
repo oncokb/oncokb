@@ -288,6 +288,11 @@ public class EvidenceController {
             return new ArrayList<>();
         }
 
+        // if the level is not allowed, skip the update
+        if (level != null && !LevelUtils.getAllowedCurationLevels().contains(level)) {
+            return new ArrayList<>();
+        }
+
         List<String> cancerTypes = new ArrayList<>();
         List<String> subTypes = new ArrayList<>();
         Boolean isCancerEvidence = true;
@@ -405,7 +410,7 @@ public class EvidenceController {
                 }
             }
         } else if (!isCancerEvidence) {
-            // For the evidences which tumor type infomation is not involved, update it directly
+            // For the evidences which tumor type information is not involved, update it directly
             for (Evidence evidence : evidences) {
                 if (evidence.getAlterations() == null || evidence.getAlterations().isEmpty()) {
                     evidence.setAlterations(alterations);
@@ -484,7 +489,7 @@ public class EvidenceController {
         // The sample solution for now is updating all gene related evidences.
         for (Gene gene : genes) {
             ApplicationContextSingleton.getAlterationBo().deleteMutationsWithoutEvidenceAssociatedByGene(gene);
-            CacheUtils.updateGene(gene.getEntrezGeneId(), true);
+            CacheUtils.updateGene(Collections.singleton(gene.getEntrezGeneId()), true);
         }
     }
 

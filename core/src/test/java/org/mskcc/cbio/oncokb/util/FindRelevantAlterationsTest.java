@@ -42,6 +42,10 @@ public class FindRelevantAlterationsTest {
                 // Check Fusions
                 {"BRAF", "PAPSS1-BRAF Fusion", null, "PAPSS1-BRAF Fusion, Fusions, Oncogenic Mutations"},
 
+                // The revert fusion should get picked
+                {"ABL1", "ABL1-BCR fusion", null, "BCR-ABL1 Fusion, Fusions"},
+                {"ABL1", "BCR-ABL1 fusion", null, "BCR-ABL1 Fusion, Fusions"},
+
                 // Tumor suppressor should be mapped with Truncating Mutations. (The code does not check whether gene
                 // is tumor suppressor, just check whether Fusions is curated, is not, link Truncating Mutations)
                 {"PIK3R1", "KCTD16-PIK3R1 fusion", null, "KCTD16-PIK3R1 fusion, Truncating Mutations"},
@@ -50,8 +54,8 @@ public class FindRelevantAlterationsTest {
                 // Check splice
                 // TP53 Oncogenic Mutations does not have any information we are ready to relase
                 {"TP53", "X33_splice", null, "X33_splice, Truncating Mutations"},
-                {"MET", "X1010_splice", null, "X1010_splice, 963_D1010splice, 981_1028splice, 963_1028splice, Oncogenic Mutations"},
-                {"MET", "X1010splice", null, "X1010_splice, 963_D1010splice, 981_1028splice, 963_1028splice, Oncogenic Mutations"},
+                {"MET", "X1010_splice", null, "X1010_splice, 963_1010splice, 981_1028splice, Oncogenic Mutations"},
+                {"MET", "X1010splice", null, "X1010_splice, 963_1010splice, 981_1028splice, Oncogenic Mutations"},
 
                 // Check stop_gained
                 {"MAP2K4", "R304*", null, "R304*, Truncating Mutations"},
@@ -67,6 +71,8 @@ public class FindRelevantAlterationsTest {
                 // Check range
                 {"MED12", "G44S", null, "G44S, G44A, G44C, G44D, G44V, 34_68mut"},
                 {"MED12", "G44D", null, "G44D, G44A, G44C, G44S, G44V, 34_68mut"},
+                {"MED12", "G44*", null, "34_68mut, Truncating Mutations"},
+                {"MED12", "K42_N46del", null, "34_68mut"},
                 {"NOTCH1", "Q2405Rfs*17", null, "Q2405Rfs*17, T2375_K2555trunc, Truncating Mutations"},
 
                 // VUS should get mapped to hotspot VUS, but should not get Oncogenic Mutations from the hotspot VUS.
@@ -119,6 +125,12 @@ public class FindRelevantAlterationsTest {
 
                 // Do not mapping Oncogenic Mutations to Amplification
                 {"KIT", "Amplification", null, "Amplification"},
+
+
+                // Check non_truncating_variant
+//                {"MED12", "A22*", null, "1_33mut, Truncating Mutations"},
+//                {"MED12", "G22D", null, "1_33nontrunc, 1_33mut"},
+
             });
     }
 

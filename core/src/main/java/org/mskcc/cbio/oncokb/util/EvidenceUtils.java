@@ -294,7 +294,7 @@ public class EvidenceUtils {
 
     public static Map<Gene, Set<Evidence>> getEvidenceByGenesAndEvidenceTypes(Set<Gene> genes, Set<EvidenceType> evidenceTypes) {
         Map<Gene, Set<Evidence>> result = new HashMap<>();
-        if (evidenceTypes == null && evidenceTypes.isEmpty())
+        if (evidenceTypes == null || evidenceTypes.isEmpty())
             return result;
         if (CacheUtils.isEnabled()) {
             for (Gene gene : genes) {
@@ -378,6 +378,15 @@ public class EvidenceUtils {
     private static Set<Evidence> filterEvidence(Set<Evidence> evidences, EvidenceQueryRes evidenceQuery) {
         Set<Evidence> filtered = new HashSet<>();
 
+        // Logic step 1, liquid therapies will not be propagated to solid
+//        boolean isSolidTumorQuery = false;
+//        for (TumorType tumorType : evidenceQuery.getOncoTreeTypes()) {
+//            if (TumorTypeUtils.isSolidTumor(tumorType)) {
+//                isSolidTumorQuery = true;
+//                break;
+//            }
+//        }
+
         if (evidenceQuery.getGene() != null) {
             for (Evidence evidence : evidences) {
 
@@ -414,6 +423,10 @@ public class EvidenceUtils {
                                     if (evidence.getLevelOfEvidence() != null && evidence.getPropagation() != null) {
                                         LevelOfEvidence propagationLevel = LevelOfEvidence.getByName(evidence.getPropagation());
 
+                                        // Logic step 2, liquid therapies will not be propagated to solid
+//                                        if (isSolidTumorQuery && TumorTypeUtils.isLiquidTumor(evidence.getOncoTreeType())) {
+//                                            propagationLevel = null;
+//                                        }
                                         if (propagationLevel != null) {
                                             if (evidenceQuery.getLevelOfEvidences() == null
                                                 || evidenceQuery.getLevelOfEvidences().size() == 0
@@ -846,7 +859,7 @@ public class EvidenceUtils {
         }
 
         levelOfEvidences = levelOfEvidences == null ? levelOfEvidences :
-            new HashSet<>(CollectionUtils.intersection(levelOfEvidences, LevelUtils.getPublicAndOtherIndicationLevels()));
+            new HashSet<>(CollectionUtils.intersection(levelOfEvidences, LevelUtils.getPublicLevels()));
 
         // when the LoE and ET are empty, no info should be returned
         if ((levelOfEvidences != null && levelOfEvidences.size() == 0) || evidenceTypes.size() == 0) {
@@ -960,7 +973,7 @@ public class EvidenceUtils {
                 query.setEvidences(
                     new ArrayList<>(keepHighestLevelForSameTreatments(filterEvidence(evidences, query), query.getExactMatchedAlteration())));
             }
-            CustomizeComparator.sortEvidenceBasedOnPriority(query.getEvidences(), LevelUtils.TREATMENT_SORTING_LEVEL_PRIORITY);
+            CustomizeComparator.sortEvidenceBasedOnPriority(query.getEvidences(), LevelUtils.getIndexedTherapeuticLevels());
             if (query.getGene() != null && query.getGene().getHugoSymbol().equals("KIT")) {
                 CustomizeComparator.sortKitTreatmentByEvidence(query.getEvidences());
             }

@@ -108,4 +108,4 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 
 A public instance of OncoKB (https://oncokb.org) is hosted and maintained by Memorial Sloan Kettering Cancer Center. It provides access to all curators in MSKCC knowledgebase team.
 
-If you are interested in coordinating the development of new features, please contact team@oncokb.org.
+If you are interested in coordinating the development of new features, please contact contact@oncokb.org.

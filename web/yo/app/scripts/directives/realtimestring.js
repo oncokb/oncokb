@@ -7,7 +7,7 @@
  * # driveRealtimeString
  */
 angular.module('oncokbApp')
-    .directive('realtimeString', function ($timeout, _, $rootScope, mainUtils, ReviewResource, $firebaseObject, checkNameChange) {
+    .directive('realtimeString', function ($timeout, _, $rootScope, mainUtils, ReviewResource, $firebaseObject, checkNameChange, drugMapUtils) {
         return {
             templateUrl: 'views/realtimeString.html',
             restrict: 'AE',
@@ -53,10 +53,14 @@ angular.module('oncokbApp')
                         });
                     }
                     scope.$watch('data[key]', function (n, o) {
-                        if (n !== o && !_.isUndefined(n) && scope.fe) {
+                        // 1) Do not run the function when no data change(n===o).
+                        // 2) Do not run the function when there is no new content(_.isUndefined(n)).
+                        // 3) Do not run the function when just click panel without any change(_.isEmpty(n) && _.isUndefined(o)).
+                        // 4) Do not run the function when file is not editable(scope.fe===false).
+                        if (n !== o && !_.isUndefined(n) && !(_.isEmpty(n) && _.isUndefined(o)) && scope.fe) {
                             if (!scope.data || !scope.data[scope.key+'_editing'] || scope.data[scope.key+'_editing'] === $rootScope.me.name) {
                                 if (_.keys($rootScope.collaborators).length > 1) { // Multiple users on the same gene
-                                    if (scope.isChangedByOthers()) {
+                                    if (scope.isChangedByOthers(o)) {
                                         return;
                                     }
                                 }
@@ -77,7 +81,7 @@ angular.module('oncokbApp')
                                         scope.setReviewRelatedContent(n, o, false);
                                     }
                                 }
-                                if (n !== o && (scope.key === 'level' || scope.key === 'summary' && scope.mutation && scope.tumor)) {
+                                if (n !== o && (scope.key === 'level' || ['summary', 'diagnosticSummary', 'prognosticSummary'].includes(scope.key)  && scope.mutation && scope.tumor)) {
                                     $timeout(function() {
                                         scope.indicateMutationContent(scope.mutation);
                                         scope.indicateTumorContent(scope.tumor);
@@ -175,6 +179,22 @@ angular.module('oncokbApp')
                 };
                 $scope.setTrackSignal = function() {
                     mainUtils.updateMovingFlag(false);
+                };
+                $scope.uuidtoName = function(key, oldKey, uuid){
+                    if(mainUtils.processedInReview('remove', uuid) && oldKey){
+                        return drugMapUtils.drugUuidtoName(oldKey, $rootScope.drugList);
+                    }
+                    else{
+                        return drugMapUtils.drugUuidtoName(key, $rootScope.drugList);
+                    }
+                };
+                $scope.getMutationName = function(key, oldKey, uuid){
+                    if(mainUtils.processedInReview('remove', uuid) && oldKey){
+                        return oldKey;
+                    }
+                    else{
+                        return key;
+                    }
                 };
                 $scope.initializeFE = function() {
                     if ($scope.data[$scope.key+'_editing']) {
@@ -294,13 +314,11 @@ angular.module('oncokbApp')
                     }
                 };
                 $scope.updateThePath = function() {
-                    console.log($scope.uuid, $scope.path);
                     var tempArr = $scope.path.split('/');
                     var lastEle = Number(tempArr[tempArr.length-1]);
                     if (_.isNumber(lastEle) && !_.isNaN(lastEle)) {
                         tempArr[tempArr.length-1] = $rootScope.indiciesByUUID[$scope.uuid];
                         $scope.path = tempArr.join('/');
-                        console.log($scope.path);
                     }
                 };
                 $scope.getOldContentClass = function(content) {
@@ -328,10 +346,14 @@ angular.module('oncokbApp')
                 $scope.trimCSS = function() {
                     $scope.pasting = true;
                 };
-                $scope.isChangedByOthers = function() {
+                $scope.isChangedByOthers = function(oldContent) {
                     var changedByOthers = false;
-                    firebase.database().ref($scope.path).on('value', function(doc) {
-                        if (doc.val()[$scope.key] === $scope.data[$scope.key]) {
+                    // Do not use firebaseConnector at here,
+                    // otherwise the function will be async which means return false directly.
+                    firebase.database().ref($scope.path).once('value', function(doc) {
+                        var data = doc.val();
+                        if (!_.isUndefined(data[$scope.key]) && !_.isEmpty(data[$scope.key])
+                            && data[$scope.key] === oldContent) {
                             changedByOthers = true;
                             return;
                         }
