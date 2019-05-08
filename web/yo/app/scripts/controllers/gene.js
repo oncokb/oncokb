@@ -135,7 +135,9 @@ angular.module('oncokbApp')
                 $scope.mutationContent[uuid] = {
                     TT: 0,
                     levels: [],
-                    TTS: 0
+                    TTS: 0,
+                    DxS: 0,
+                    PxS: 0
                 };
                 if (mutation.tumors) {
                     for (var j = 0; j < mutation.tumors.length; j++) {
@@ -144,6 +146,12 @@ angular.module('oncokbApp')
                             $scope.mutationContent[uuid].TT++;
                             if (tumor.summary) {
                                 $scope.mutationContent[uuid].TTS++;
+                            }
+                            if (tumor.diagnosticSummary) {
+                                $scope.mutationContent[uuid].DxS++;
+                            }
+                            if (tumor.prognosticSummary) {
+                                $scope.mutationContent[uuid].PxS++;
                             }
                             for (var m = 0; m < tumor.TIs.length; m++) {
                                 var ti = tumor.TIs[m];
@@ -166,6 +174,12 @@ angular.module('oncokbApp')
                     $scope.mutationContent[uuid].result = $scope.mutationContent[uuid].TT + 'x TT';
                     if ($scope.mutationContent[uuid].TTS > 0) {
                         $scope.mutationContent[uuid].result += ', ' + $scope.mutationContent[uuid].TTS + 'x TTS';
+                    }
+                    if ($scope.mutationContent[uuid].DxS > 0) {
+                        $scope.mutationContent[uuid].result += ', ' + $scope.mutationContent[uuid].DxS + 'x DxS';
+                    }
+                    if ($scope.mutationContent[uuid].PxS > 0) {
+                        $scope.mutationContent[uuid].result += ', ' + $scope.mutationContent[uuid].PxS + 'x PxS';
                     }
                     if ($scope.mutationContent[uuid].levels.length > 0) {
                         $scope.mutationContent[uuid].levels = _.map(_.uniq($scope.mutationContent[uuid].levels), function (level) {
@@ -197,6 +211,12 @@ angular.module('oncokbApp')
                 };
                 if (tumor.summary) {
                     $scope.tumorContent[uuid].result = '1x TTS';
+                }
+                if (tumor.diagnosticSummary) {
+                    $scope.tumorContent[uuid].result += $scope.tumorContent[uuid].result.length > 0 ? ', 1x DxS' : '1x DxS';
+                }
+                if (tumor.prognosticSummary) {
+                    $scope.tumorContent[uuid].result += $scope.tumorContent[uuid].result.length > 0 ? ', 1x PxS' : '1x PxS';
                 }
                 for (var m = 0; m < tumor.TIs.length; m++) {
                     var ti = tumor.TIs[m];
