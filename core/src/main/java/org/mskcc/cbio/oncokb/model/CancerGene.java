@@ -16,8 +16,8 @@ public class CancerGene {
     private Boolean foundationHeme = false;
     private Boolean vogelstein = false;
     private Boolean sangerCGC = false;
-    private Boolean isOncogene;
-    private Boolean isTSG;
+    private Boolean isOncogene = false;
+    private Boolean isTSG = false;
 
     public String getHugoSymbol() {
         return hugoSymbol;
