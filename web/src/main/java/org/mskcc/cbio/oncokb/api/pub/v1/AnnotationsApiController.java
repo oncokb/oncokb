@@ -6,6 +6,7 @@ import org.mskcc.cbio.oncokb.apiModels.annotation.*;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
+import org.mskcc.cbio.oncokb.util.GeneAnnotatorMyGeneInfo2;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
 import org.mskcc.cbio.oncokb.util.IndicatorUtils;
 import org.springframework.http.HttpStatus;
@@ -253,8 +254,26 @@ public class AnnotationsApiController {
         } else {
             Gene geneA = GeneUtils.getGene(entrezGeneIdA, hugoSymbolA);
             Gene geneB = GeneUtils.getGene(entrezGeneIdB, hugoSymbolB);
-            Query query = new Query(null, AnnotationQueryType.REGULAR.getName(), null, geneA.getHugoSymbol() + "-" + geneB.getHugoSymbol(), null, AlterationType.STRUCTURAL_VARIANT.name(), structuralVariantType, tumorType, isFunctionalFusion ? "fusion" : null, null, null, null);
-            indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, false, null);
+
+            if (geneA == null) {
+                geneA = GeneAnnotatorMyGeneInfo2.findGeneFromCBioPortal(entrezGeneIdA == null ? hugoSymbolA : entrezGeneIdA.toString());
+            }
+            if (geneB == null) {
+                geneB = GeneAnnotatorMyGeneInfo2.findGeneFromCBioPortal(entrezGeneIdB == null ? hugoSymbolB : entrezGeneIdB.toString());
+            }
+
+            if (geneA != null) {
+                hugoSymbolA = geneA.getHugoSymbol();
+            }
+            if (geneB != null) {
+                hugoSymbolB = geneB.getHugoSymbol();
+            }
+            if (hugoSymbolA == null || hugoSymbolB == null) {
+                status = HttpStatus.BAD_REQUEST;
+            } else {
+                Query query = new Query(null, AnnotationQueryType.REGULAR.getName(), null, hugoSymbolA + "-" + hugoSymbolB, null, AlterationType.STRUCTURAL_VARIANT.name(), structuralVariantType, tumorType, isFunctionalFusion ? "fusion" : null, null, null, null);
+                indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, false, null);
+            }
         }
         return new ResponseEntity<>(indicatorQueryResp, status);
     }
