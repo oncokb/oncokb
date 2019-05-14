@@ -82,6 +82,16 @@ EGFR	Y764_D770dup	NSCLC	R1: Afatinib; R1: Erlotinib; R1: Gefitinib; 3A: Poziotin
 # this one does not overlap with A763_Y764insFQEA, so R1 for sure
 EGFR	N771delinsSTH	Lung Adenocarcinoma	R1: Afatinib; R1: Erlotinib; R1: Gefitinib; 3A: Poziotinib;
 
+# test cases cover the resistance treatment should overwrite sensitive from alternative allele
+ABL1	T315I	Chronic Myelogenous Leukemia	R1: Bosutinib; R1: Dasatinib; R1: Imatinib; R1: Nilotinib; 1: Ponatinib;
+ABL1	T315I	Melanoma	2B: Ponatinib;
+
+ABL1	T315A	Chronic Myelogenous Leukemia	2A: Bosutinib; 2A: Nilotinib;
+ABL1	T315A	Melanoma	2B: Bosutinib; 2B: Nilotinib;
+
+ABL1	T315V	Chronic Myelogenous Leukemia	2A: Bosutinib; 2A: Nilotinib;
+ABL1	T315V	Melanoma	2B: Bosutinib; 2B: Nilotinib;
+
 
 # Test Heme
 FLT3	Internal Tandem Duplication	AML	1: Gilteritinib; 1: Midostaurin+High Dose Chemotherapy; 3A: Crenolanib; 3A: Quizartinib; 3A: Sorafenib;
@@ -91,8 +101,8 @@ SF3B1	K700E	AML	4: H3B-8800;
 SF3B1	K700E	AMLNOS	4: H3B-8800;
 SF3B1	K700E	APLPMLRARA	4: H3B-8800;
 SF3B1	K700E	Colorectal Cancer
-DNMT3A	P904L	AML	
-DNMT3A	P904L	APLPMLRARA	
+DNMT3A	P904L	AML
+DNMT3A	P904L	APLPMLRARA
 DNMT3A	P904L	CMML
 DNMT3A	P904L	Colorectal Cancer
 ABL1	BCR-ABL1 Fusion	BLL	1: Dasatinib; 1: Imatinib; 1: Ponatinib; 2A: Bosutinib; 2A: Nilotinib;
