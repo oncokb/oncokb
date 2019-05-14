@@ -99,7 +99,7 @@
             <select ng-model="evidenceType"
                     ng-options="m.value as m.label for m in evidenceTypes"
                     class="form-control"
-                    ng-change="updateReviewData()">
+                    ng-change="updateReviewData(evidenceType)">
             </select>
         </div>
         <div class="col-sm-2">

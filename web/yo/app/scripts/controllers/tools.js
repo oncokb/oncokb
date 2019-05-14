@@ -175,7 +175,7 @@ angular.module('oncokbApp')
                 } else {
                     return 'Submit';
                 }
-            }
+            };
 
             $scope.reviewedDT = {};
             $scope.reviewedDT.dtOptions = {
@@ -200,6 +200,12 @@ angular.module('oncokbApp')
             }, {
                 label: 'Tumor Type Summary',
                 value: 'tumorSummary'
+            }, {
+                label: 'Diagnostic Summary',
+                value: 'diagnosticSummary'
+            }, {
+                label: 'Prognostic Summary',
+                value: 'prognosticSummary'
             }, {
                 label: 'Tumor Type Summary + Therapeutics',
                 value: 'ttsDrugs'
@@ -244,14 +250,14 @@ angular.module('oncokbApp')
                     evidenceTypes: 'TUMOR_TYPE_SUMMARY'
                 },
                 diagnosticSummary: {
-                    header: ['Gene', 'Mutation', 'Tumor Type', 'Tumor Summary'],
+                    header: ['Gene', 'Mutation', 'Tumor Type', 'Diagnostic Summary'],
                     body: [],
                     keys: ['gene', 'mutation', 'tumorType', 'diagnosticSummary'],
                     fileName: 'DiagnosticSummary.xls',
                     evidenceTypes: 'DIAGNOSTIC_SUMMARY'
                 },
                 prognosticSummary: {
-                    header: ['Gene', 'Mutation', 'Tumor Type', 'Tumor Summary'],
+                    header: ['Gene', 'Mutation', 'Tumor Type', 'Prognostic Summary'],
                     body: [],
                     keys: ['gene', 'mutation', 'tumorType', 'prognosticSummary'],
                     fileName: 'PrognosticSummary.xls',
@@ -279,9 +285,10 @@ angular.module('oncokbApp')
                 $scope.loadingReviewed = false;
                 $scope.displayReviewedData = true;
             }
-            $scope.updateReviewData = function() {
+            $scope.updateReviewData = function(selected) {
+                $scope.evidenceType = selected;
                 $scope.displayReviewedData = false;
-            }
+            };
             $scope.generateEvidences = function () {
                 $scope.loadingReviewed = true;
 
