@@ -11,7 +11,7 @@
  * gmail.com will be used as standard email format, googlemail address will be converted to gmail
  */
 angular.module('oncokbApp')
-    .service('user', function user($routeParams, $q, $firebaseAuth, $firebaseObject, $rootScope, mainUtils, firebaseConnector) {
+    .service('user', function user($routeParams, $q, $firebaseAuth, $firebaseObject, $rootScope, mainUtils, firebaseConnector, dialogs) {
         // me is used only inside user.js to share user information
         var me = {
             admin: false,
