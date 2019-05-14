@@ -59,7 +59,7 @@ public class IndicatorUtilsTest {
         assertEquals("The oncogenicity is not matched in variant summary.", "The TP53 R248Q mutation is likely oncogenic.", indicatorQueryResp.getVariantSummary());
         query = new Query(null, null, null, "KRAS", "V14I", null, null, "Pancreatic Adenocarcinoma", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, true, null);
-        assertEquals("The oncogenicity is not matched in variant summary.", "The KRAS V14I mutation is likly oncogenic.", indicatorQueryResp.getVariantSummary());
+        assertEquals("The oncogenicity is not matched in variant summary.", "The KRAS V14I mutation is likely oncogenic.", indicatorQueryResp.getVariantSummary());
 
         // Check critical case
         query = new Query(null, null, null, "BRAF", "V600E", null, null, "Melanoma", null, null, null, null);
