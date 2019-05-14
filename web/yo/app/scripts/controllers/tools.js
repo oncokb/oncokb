@@ -184,7 +184,7 @@ angular.module('oncokbApp')
                 scrollY: 500,
                 scrollCollapse: true
             };
-            $scope.evidenceType = '';
+            $scope.data = { evidenceType: ''};
             $scope.evidenceTypes = [{
                 label: 'Gene Summary',
                 value: 'geneSummary'
@@ -285,26 +285,25 @@ angular.module('oncokbApp')
                 $scope.loadingReviewed = false;
                 $scope.displayReviewedData = true;
             }
-            $scope.updateReviewData = function(selected) {
-                $scope.evidenceType = selected;
+            $scope.updateReviewData = function() {
                 $scope.displayReviewedData = false;
             };
             $scope.generateEvidences = function () {
                 $scope.loadingReviewed = true;
 
-                DatabaseConnector.getReviewedData($scope.reviewedData[$scope.evidenceType].evidenceTypes).then(function(response) {
-                    if ($scope.evidenceType === 'geneSummary' || $scope.evidenceType === 'geneBackground') {
+                DatabaseConnector.getReviewedData($scope.reviewedData[$scope.data.evidenceType].evidenceTypes).then(function(response) {
+                    if ($scope.data.evidenceType === 'geneSummary' || $scope.data.evidenceType === 'geneBackground') {
                         // key = 'summary' or key = 'background'
-                        var key = $scope.reviewedData[$scope.evidenceType].keys[1];
+                        var key = $scope.reviewedData[$scope.data.evidenceType].keys[1];
                         _.each(response.data, function(item) {
                             var tempObj = {
                                 gene: item.gene.hugoSymbol
                             };
                             tempObj[key] = item.description;
-                            $scope.reviewedData[$scope.evidenceType].body.push(tempObj);
+                            $scope.reviewedData[$scope.data.evidenceType].body.push(tempObj);
                         });
                         finishLoadingReviewedData();
-                    } else if ($scope.evidenceType === 'geneType') {
+                    } else if ($scope.data.evidenceType === 'geneType') {
                         var variantLookupBody = _.map(response.data, function(item) {
                             return {
                                 hugoSymbol: item.hugoSymbol
@@ -354,7 +353,7 @@ angular.module('oncokbApp')
                             });
                             finishLoadingReviewedData();
                         });
-                    } else if ($scope.evidenceType === 'mutationEffect') {
+                    } else if ($scope.data.evidenceType === 'mutationEffect') {
                         _.each(response.data, function (item) {
                             var flag = false;
                             for (var i = 0; i < $scope.reviewedData.mutationEffect.body.length; i++) {
@@ -382,7 +381,7 @@ angular.module('oncokbApp')
                                     subtypeMapping[item.code] = item.name;
                                 });
                             });
-                            if ($scope.evidenceType === 'tumorSummary') {
+                            if ($scope.data.evidenceType === 'tumorSummary') {
                                 _.each(response.data, function (item) {
                                     var tempObj =  {
                                         gene: item.gene.hugoSymbol,
@@ -396,7 +395,7 @@ angular.module('oncokbApp')
                                     }
                                     $scope.reviewedData.tumorSummary.body.push(tempObj);
                                 });
-                            } else if ($scope.evidenceType === 'drugs') {
+                            } else if ($scope.data.evidenceType === 'drugs') {
                                 _.each(response.data, function(item) {
                                     var drugs = [];
                                     if (item.treatments.length > 0) {
@@ -420,7 +419,7 @@ angular.module('oncokbApp')
                                         $scope.reviewedData.drugs.body.push(tempObj);
                                     }
                                 });
-                            } else if ($scope.evidenceType === 'ttsDrugs') {
+                            } else if ($scope.data.evidenceType === 'ttsDrugs') {
                                 var drugsMapping = {};
                                 _.each(response.data, function(item) {
                                     if (item.evidenceType !== 'TUMOR_TYPE_SUMMARY') {
@@ -520,13 +519,13 @@ angular.module('oncokbApp')
                 var content = [];
                 var tempArr = [];
                 var fileName = 'Reviewed.xls';
-                if ($scope.evidenceType && $scope.reviewedData[$scope.evidenceType]) {
-                    content.push($scope.reviewedData[$scope.evidenceType].header.join('\t'));
-                    fileName = $scope.reviewedData[$scope.evidenceType].fileName;
+                if ($scope.data.evidenceType && $scope.reviewedData[$scope.data.evidenceType]) {
+                    content.push($scope.reviewedData[$scope.data.evidenceType].header.join('\t'));
+                    fileName = $scope.reviewedData[$scope.data.evidenceType].fileName;
                 }
-                _.each($scope.reviewedData[$scope.evidenceType].body, function(item) {
+                _.each($scope.reviewedData[$scope.data.evidenceType].body, function(item) {
                     tempArr = [];
-                    _.each($scope.reviewedData[$scope.evidenceType].keys, function(key) {
+                    _.each($scope.reviewedData[$scope.data.evidenceType].keys, function(key) {
                         tempArr.push(item[key]);
                     });
                     content.push(tempArr.join('\t'));
