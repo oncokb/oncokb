@@ -688,24 +688,18 @@ public class EvidenceUtils {
     }
 
     public static Set<Evidence> keepHighestLevelForSameTreatments(Set<Evidence> evidences, Alteration exactMatch) {
-        Map<List<String>, Set<Evidence>> maps = new HashedMap();
+        Map<String, Set<Evidence>> maps = new HashedMap();
         Set<Evidence> filtered = new HashSet<>();
 
         for (Evidence evidence : evidences) {
             if (evidence.getTreatments() != null && evidence.getTreatments().size() > 0) {
                 List<String> treatments = TreatmentUtils.getTreatments(new HashSet<>(evidence.getTreatments()));
 
-                Map<String, Object> map = getBiggerItem(treatments, maps.keySet());
-                if ((boolean) map.get("exist")) {
-                    if ((boolean) map.get("origin")) {
-                        maps.get(map.get("result")).add(evidence);
-                    } else {
-                        maps.put(treatments, maps.get(map.get("result")));
-                        maps.get(treatments).add(evidence);
+                for(String treatment : treatments) {
+                    if(!maps.containsKey(treatment)) {
+                        maps.put(treatment, new HashSet<>());
                     }
-                } else {
-                    maps.put(treatments, new HashSet<Evidence>());
-                    maps.get(treatments).add(evidence);
+                    maps.get(treatment).add(evidence);
                 }
             } else {
                 // Keep all un-treatment evidences
@@ -713,7 +707,7 @@ public class EvidenceUtils {
             }
         }
 
-        for (Map.Entry<List<String>, Set<Evidence>> entry : maps.entrySet()) {
+        for (Map.Entry<String, Set<Evidence>> entry : maps.entrySet()) {
             Set<Evidence> highestEvis = EvidenceUtils.getOnlyHighestLevelEvidences(entry.getValue(), exactMatch);
 
             // If highestEvis has more than 1 items, find highest original level if the level is 2B, 3B
