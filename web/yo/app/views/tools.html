@@ -96,14 +96,14 @@
     <div class="row" style="margin-top:30px; margin-bottom:30px;">
         <div class="col-sm-2 queryLabel">Query Type:</div>
         <div class="col-sm-4">
-            <select ng-model="evidenceType"
+            <select ng-model="data.evidenceType"
                     ng-options="m.value as m.label for m in evidenceTypes"
                     class="form-control"
                     ng-change="updateReviewData()">
             </select>
         </div>
         <div class="col-sm-2">
-            <button type="button" class="btn btn-default" ng-click="generateEvidences()" ng-disabled="!evidenceType" ng-bind-html="getReviewButtonContent()"></button>
+            <button type="button" class="btn btn-default" ng-click="generateEvidences()" ng-disabled="!data.evidenceType" ng-bind-html="getReviewButtonContent()"></button>
         </div>
         <div class="col-sm-1" ng-if="displayReviewedData">
             <button type="button" class="btn btn-default" ng-click="downloadReviewedData()"> Download </button>
@@ -113,17 +113,17 @@
         <table datatable="ng" class="row-border hover" dt-options="reviewedDT.dtOptions">
             <thead>
             <tr>
-                <th ng-repeat="x in reviewedData[evidenceType].header">{{ x }}</th>
+                <th ng-repeat="x in reviewedData[data.evidenceType].header">{{ x }}</th>
             </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="item in reviewedData[evidenceType].body">
-                    <td ng-repeat="key in reviewedData[evidenceType].keys">
+                <tr ng-repeat="item in reviewedData[data.evidenceType].body">
+                    <td ng-repeat="key in reviewedData[data.evidenceType].keys">
                         <div ng-switch on="key">
                             <div ng-switch-when="gene">
                                 <strong><a href="#!/gene/{{item.gene}}">{{ item.gene }}</a></strong>
                             </div>
-                            <div ng-if="evidenceType !== 'drugs'">
+                            <div ng-if="data.evidenceType !== 'drugs'">
                                 <div class="reviewedData" ng-switch-when="mutation">{{item.mutation}}</div>
                                 <div class="reviewedData" ng-switch-when="drugs">{{item.drugs}}</div>
                             </div>

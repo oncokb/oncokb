@@ -47,6 +47,10 @@ public class HotspotUtilsTest extends TestCase {
         // PAK7 is an alias of PAK5
         alteration = AlterationUtils.getAlteration("PAK7", "M173I", null, null, null, null);
         assertTrue(HotspotUtils.isHotspot(alteration));
+
+        // This is a test to govern when sample is in-frame indel and that range happens to be a hotspot of splie site. The variant should not be a hotspot
+        alteration = AlterationUtils.getAlteration("TP53", "A307_L308insASFLS", null, null, null, null);
+        assertFalse(HotspotUtils.isHotspot(alteration));
     }
 
 }

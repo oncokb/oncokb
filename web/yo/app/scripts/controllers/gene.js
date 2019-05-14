@@ -2313,13 +2313,29 @@ angular.module('oncokbApp')
                         if (type === 'tumor') {
                             // Do not delete lastReviewed when curators delete a treatment.
                             // If a reviewer reject this change, we can rollback to previous reviewed name.
-                            obj.cancerTypes_review.updatedBy = $rootScope.me.name;
-                            obj.cancerTypes_review.updateTime = new Date().getTime();
-                            obj.cancerTypes_review.removed = true;
+                            if (_.isUndefined(obj.cancerTypes_review)) {
+                                obj.cancerTypes_review = {
+                                    updatedBy: $rootScope.me.name,
+                                    updateTime: new Date().getTime(),
+                                    removed: true
+                                };
+                            } else {
+                                obj.cancerTypes_review.updatedBy = $rootScope.me.name;
+                                obj.cancerTypes_review.updateTime = new Date().getTime();
+                                obj.cancerTypes_review.removed = true;
+                            }
                         } else {
-                            obj.name_review.updatedBy = $rootScope.me.name;
-                            obj.name_review.updateTime = new Date().getTime();
-                            obj.name_review.removed = true;
+                            if (_.isUndefined(obj.name_review)) {
+                                obj.name_review = {
+                                    updatedBy: $rootScope.me.name,
+                                    updateTime: new Date().getTime(),
+                                    removed: true
+                                };
+                            } else {
+                                obj.name_review.updatedBy = $rootScope.me.name;
+                                obj.name_review.updateTime = new Date().getTime();
+                                obj.name_review.removed = true;
+                            }
                         }
                         $scope.geneMeta.review[uuid] = true;
                     }
