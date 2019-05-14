@@ -8,10 +8,10 @@ describe('Mainutils', function() {
         expect(mainUtilsFactory.trimMutationName('p.120V')).toEqual('120V');
     });
     it('They should be in the developers list', function() {
-        expect(mainUtilsFactory.developerCheck('jianjiong gao')).toEqual(true);     
-        expect(mainUtilsFactory.developerCheck('hongxin zhang')).toEqual(true);     
-        expect(mainUtilsFactory.developerCheck('jing su')).toEqual(true);     
-        expect(mainUtilsFactory.developerCheck('jiaojiao wang')).toEqual(true);        
+        expect(mainUtilsFactory.developerCheck('jianjiong gao')).toEqual(true);
+        expect(mainUtilsFactory.developerCheck('hongxin zhang')).toEqual(true);
+        expect(mainUtilsFactory.developerCheck('jing su')).toEqual(true);
+        expect(mainUtilsFactory.developerCheck('jiaojiao wang')).toEqual(true);
     });
     it('Current time stamp should not be listed as expired', function() {
         expect(mainUtilsFactory.isExpiredCuration(new Date().getTime())).toEqual(false);
@@ -24,7 +24,53 @@ describe('Mainutils', function() {
             code: ''
         }];
         expect(mainUtilsFactory.getCancerTypesName(cancerTypes1)).toEqual('All Tumors');
+        var cancerTypes2 = [{
+            mainType: 'All Tumors',
+            subtype: 'SubType',
+            code: ''
+        }];
+        expect(mainUtilsFactory.getCancerTypesName(cancerTypes2)).toEqual('SubType');
     });
+    it('getFullCancerTypesName should return a sorted list of information', function () {
+        var cancerTypesExample = [
+            {mainType: 'mainType', subtype: '', code: ''},
+            {mainType: '', subtype: 'subType', code: ''},
+            {mainType: '', subtype: '', code: 'code'},
+            {mainType: 'a', subtype: 'b', code: 'c'},
+            {mainType: 'b', subtype:'', code:'d'}
+        ];
+        expect(mainUtilsFactory.getFullCancerTypesName()).toEqual(null);
+        expect(mainUtilsFactory.getFullCancerTypesName(cancerTypesExample)).toEqual('--subType, -code-, a-c-b, b-d-, mainType--');
+    });
+    var cancerTypesMetaExample = [
+        {mainType: {name: 'mainA', code: 'main1'}, subtype: {name: 'subA', code: 'sub1'}},
+        {mainType: '', subtype: {name: 'subB', code: 'sub2'}},
+        {mainType: {name: 'mainC', code: 'main3'}, subtype: ''},
+        {mainType: '', subtype: {name: '', code: 'sub4'}},
+        {mainType: '', subtype: {name: 'subE'}}];
+    it('getNewCancerTypesName should return a sorted list of names', function () {
+        expect(mainUtilsFactory.getNewCancerTypesName()).toEqual(null);
+        expect(mainUtilsFactory.getNewCancerTypesName(cancerTypesMetaExample)).toEqual('mainC, subA, subB, subE');
+    });
+    it('getFullCancerTypesName should return a sorted list of information', function () {
+        expect(mainUtilsFactory.getFullCancerTypesNames()).toEqual(null);
+        expect(mainUtilsFactory.getFullCancerTypesNames(cancerTypesMetaExample)).toEqual('--subE, -sub2-subB, -sub4-, mainA-sub1-subA, mainC--');
+    });
+    it('hasDuplicatedCancerTypes should return true if there are duplicated cancerTypes', function () {
+        var duplicatedCancerTypesMetaExample =[
+            {mainType: {name: 'mainA', code: 'main1'}, subtype: {name: 'subA', code: 'sub1'}},
+            {mainType: '', subtype: {name: 'subB', code: 'sub2'}},
+            {mainType: '', subtype: {name: 'subB', code: 'sub2'}},
+            {mainType: {name: 'mainC', code: 'main3'}}
+        ];
+        expect(mainUtilsFactory.hasDuplicateCancerTypes(duplicatedCancerTypesMetaExample)).toEqual(true);
+        expect(mainUtilsFactory.hasDuplicateCancerTypes(cancerTypesMetaExample)).toEqual(false);
+        expect(mainUtilsFactory.hasDuplicateCancerTypes()).toEqual(false);
+    });
+    it('containMainType should return true if it contatins', function () {
+        expect(mainUtilsFactory.containMainType(cancerTypesMetaExample)).toEqual(null);
+    });
+
     it('Reviewed data is not processed in the designed way', function() {
         var originalData = {
             summary_comments: [ {
@@ -39,7 +85,7 @@ describe('Mainutils', function() {
                 lastReviewed: 'This is the previsoud gene summary content',
                 updateTime: 1531828464480,
                 updatedBy: 'Jiaojiao wang'
-              }              
+              }
         };
         var keys = ['summary'];
         var noCommentsResult = {
@@ -48,7 +94,7 @@ describe('Mainutils', function() {
                 lastReviewed: 'This is the previsoud gene summary content',
                 updateTime: 1531828464480,
                 updatedBy: 'Jiaojiao wang'
-            }              
+            }
         };
         // this should be the json data that will be passed into database
         var resultForDB = {
@@ -181,7 +227,7 @@ describe('Mainutils', function() {
 
         var twoDaysAgo = new Date();
         twoDaysAgo.setDate(new Date().getDate()-2);
-        
+
         var reviewObjs = [{
             updatedBy: 'cBioPortal',
             updateTime: yesterday.getTime(),

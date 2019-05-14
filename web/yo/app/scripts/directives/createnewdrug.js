@@ -3,7 +3,7 @@
 The component is for creating a new drug in Firebase. The curator can search and choose one drug from drop down list (Drugs in the dropdown list are from NCI website) or they can do free text if there is no result.
 * */
 angular.module('oncokbApp')
-    .directive('createNewDrug', function (DatabaseConnector, dialogs, _, drugMapUtils, $q, FirebaseModel, firebaseConnector) {
+    .directive('createNewDrug', function (DatabaseConnector, dialogs, _, drugMapUtils, $q, FirebaseModel, firebaseConnector, mainUtils) {
         return {
             templateUrl: 'views/createNewDrug.html',
             restrict: 'E',
@@ -23,6 +23,11 @@ angular.module('oncokbApp')
                     var deferred = $q.defer();
                     if (($scope.drugList === undefined) || (checkSameDrug(drugName, ncitCode) === false)) {
                         var drug = new FirebaseModel.Drug(drugName, ncitCode, synonyms, ncitName);
+                        if(!ncitCode){
+                            var content = drugName + " has been added. It doesn't have NCI treasure code.";
+                        }else{
+                            var content = drugName + " has been added. Its NCI treasure code is " + ncitCode + ".";
+                        }
                         firebaseConnector.addDrug(drug.uuid, drug).then(function (result) {
                             deferred.resolve();
                             $scope.addDrugMessage = drugName + " has been added successfully.";
@@ -30,6 +35,7 @@ angular.module('oncokbApp')
                             $scope.addDrugErrorMessage = 'Failed to create the drug ' + drugName + '! Please contact developers.';
                             deferred.reject(error);
                         });
+                        mainUtils.sendEmailtoMultipulUsers(['kundrar@mskcc.org', 'chakravd@mskcc.org', 'nissanm@mskcc.org'], 'Reminder: A therapy has been added.', content);
                     }
                     else {
                         $scope.addDrugErrorMessage = "Sorry, same drug exists.";

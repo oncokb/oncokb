@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('oncokbApp')
-    .controller('DrugsCtrl', ['$window', '$scope', '$location', '$timeout', '$routeParams', '_', 'DTColumnDefBuilder', 'DTOptionsBuilder', '$firebaseArray', 'FirebaseModel', 'firebaseConnector', '$q', 'dialogs', 'drugMapUtils', '$rootScope', 'DatabaseConnector', '$firebaseObject',
-        function ($window, $scope, $location, $timeout, $routeParams, _, DTColumnDefBuilder, DTOptionsBuilder, $firebaseArray, FirebaseModel, firebaseConnector, $q, dialogs, drugMapUtils, $rootScope, DatabaseConnector, $firebaseObject) {
+    .controller('DrugsCtrl', ['$window', '$scope', '$location', '$timeout', '$routeParams', '_', 'DTColumnDefBuilder', 'DTOptionsBuilder', '$firebaseArray', 'FirebaseModel', 'firebaseConnector', '$q', 'dialogs', 'drugMapUtils', '$rootScope', 'DatabaseConnector', '$firebaseObject', 'mainUtils',
+        function ($window, $scope, $location, $timeout, $routeParams, _, DTColumnDefBuilder, DTOptionsBuilder, $firebaseArray, FirebaseModel, firebaseConnector, $q, dialogs, drugMapUtils, $rootScope, DatabaseConnector, $firebaseObject, mainUtils) {
             $scope.status = {
                 updatingDrugName : false
             };
@@ -101,6 +101,7 @@ angular.module('oncokbApp')
                         modalError("Sorry", "Same name exists.", true, false, drug.uuid);
                     } else {
                         $scope.status.updatingDrugName = true;
+                        var content = drug.drugName + " has been changed to " + newDrugName + ". Its NCI treasure code is " + drug.ncitCode + ".";
                         firebaseConnector.setDrugName(drug.uuid, newDrugName).then(function() {
                             DatabaseConnector.updateDrugPreferredName(drug.ncitCode, newDrugName)
                                 .then(function(value) {
@@ -113,6 +114,7 @@ angular.module('oncokbApp')
                         }, function(reason) {
                             // something goes wrong then the data in database should not be updated.
                         });
+                        mainUtils.sendEmailtoMultipulUsers(['kundrar@mskcc.org', 'chakravd@mskcc.org', 'nissanm@mskcc.org'], 'Reminder: A therapy preferred name changed.', content);
                     }
                 }
             };
