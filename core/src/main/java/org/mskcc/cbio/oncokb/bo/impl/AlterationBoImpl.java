@@ -259,7 +259,10 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
 
         //Find Alternative Alleles for missense variant
         if (includeAlternativeAllele && alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant"))) {
-            alterations.addAll(AlterationUtils.getAlleleAlterations(alteration, fullAlterations));
+            // do not include alternative alleles for ABL1 T351I
+            if (!(alteration.getGene().getHugoSymbol().equals("ABL1") && alteration.getAlteration().equals("T315I"))) {
+                alterations.addAll(AlterationUtils.getAlleleAlterations(alteration, fullAlterations));
+            }
             List<Alteration> includeRangeAlts = new ArrayList<>();
 
             // Include the range mutation
