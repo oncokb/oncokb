@@ -653,6 +653,10 @@ public final class AlterationUtils {
 
     // Only for missense alteration
     public static List<Alteration> getPositionedAlterations(Alteration alteration, Set<Alteration> fullAlterations) {
+        if (alteration.getGene().getHugoSymbol().equals("ABL1") && alteration.getAlteration().equals("T315I")) {
+            return new ArrayList<>();
+        }
+
         if (alteration.getConsequence() != null && alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant"))) {
             VariantConsequence variantConsequence = new VariantConsequence();
             variantConsequence.setTerm("NA");
@@ -668,6 +672,10 @@ public final class AlterationUtils {
     private static List<Alteration> getAlleleAlterationsSub(Alteration alteration, Set<Alteration> fullAlterations) {
         if (alteration == null || alteration.getConsequence() == null ||
             !alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant"))) {
+            return new ArrayList<>();
+        }
+
+        if (alteration.getGene().getHugoSymbol().equals("ABL1") && alteration.getAlteration().equals("T315I")) {
             return new ArrayList<>();
         }
 

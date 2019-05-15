@@ -118,6 +118,9 @@ public class FindRelevantAlterationsTest {
                 // Do not map few special KIT variants as alternative alleles, "K642E", "V654A", "T670I"
                 {"KIT", "K652G", null, ""},
 
+                // Do not get alternative alleles or positional variatn for ABL1 T315I
+                {"ABL1", "T315I", null, "T315I"},
+
                 // 654 is a hotspot position
                 {"KIT", "V654G", null, "Oncogenic Mutations"},
                 {"KIT", "T670A", null, "IT669MI"},
