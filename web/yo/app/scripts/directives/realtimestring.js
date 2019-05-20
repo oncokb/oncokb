@@ -56,8 +56,8 @@ angular.module('oncokbApp')
                         // Remove blank space character
                         if (!_.isUndefined(n) && !_.isUndefined(o) && (n.indexOf('&nbsp') > -1 || o.indexOf('&nbsp') > -1)) {
                             const nCopy = _.clone(n);
-                            n = OncoKB.utils.getString(n);
-                            o = OncoKB.utils.getString(o);
+                            n = n.replace(/&nbsp;/g, '').trim();
+                            o = o.replace(/&nbsp;/g, '').trim();
                             if (n === o && n !== nCopy) {
                                 scope.data[scope.key] = o;
                             }
