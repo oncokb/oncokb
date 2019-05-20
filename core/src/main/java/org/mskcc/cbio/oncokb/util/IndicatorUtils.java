@@ -11,6 +11,7 @@ import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.mskcc.cbio.oncokb.util.LevelUtils.getTherapeuticLevelsWithPriorityLIstIterator;
 
@@ -544,21 +545,43 @@ public class IndicatorUtils {
                     List<Treatment> list = new ArrayList<>(sameLevelTreatments);
                     TreatmentUtils.sortTreatmentsByName(list);
                     for (Treatment treatment : list) {
-                        IndicatorQueryTreatment indicatorQueryTreatment = new IndicatorQueryTreatment();
-                        indicatorQueryTreatment.setDrugs(treatment.getDrugs());
-                        indicatorQueryTreatment.setApprovedIndications(treatment.getApprovedIndications());
-                        indicatorQueryTreatment.setLevel(level);
-                        indicatorQueryTreatment.setPmids(pmidsMap.get(treatment));
-                        indicatorQueryTreatment.setAbstracts(abstractsMap.get(treatment));
-                        treatments.add(indicatorQueryTreatment);
+                        if (!treatmentExist(treatments, treatment.getDrugs())) {
+                            IndicatorQueryTreatment indicatorQueryTreatment = new IndicatorQueryTreatment();
+                            indicatorQueryTreatment.setDrugs(treatment.getDrugs());
+                            indicatorQueryTreatment.setApprovedIndications(treatment.getApprovedIndications());
+                            indicatorQueryTreatment.setLevel(level);
+                            indicatorQueryTreatment.setPmids(pmidsMap.get(treatment));
+                            indicatorQueryTreatment.setAbstracts(abstractsMap.get(treatment));
+                            treatments.add(indicatorQueryTreatment);
+                        }
                     }
-
                 }
             }
         }
         return treatments;
     }
 
+    private static boolean treatmentExist(List<IndicatorQueryTreatment> treatments, List<Drug> newTreatment) {
+        boolean exists = false;
+        for (IndicatorQueryTreatment treatment : treatments) {
+            if (getSortedTreatmentName(treatment.getDrugs()).equals(getSortedTreatmentName(newTreatment))) {
+                exists = true;
+                break;
+            }
+        }
+        return exists;
+    }
+
+    private static String getSortedTreatmentName(List<Drug> drugs) {
+        List<Drug> drugsCopy = new ArrayList<>(drugs);
+        drugsCopy.sort(new Comparator<Drug>() {
+            @Override
+            public int compare(Drug o1, Drug o2) {
+                return o1.getDrugName().compareTo(o2.getDrugName());
+            }
+        });
+        return drugsCopy.stream().map(drug -> drug.getDrugName()).collect(Collectors.joining("+"));
+    }
     private static Boolean isVUS(Alteration alteration) {
         if (alteration == null) {
             return false;

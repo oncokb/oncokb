@@ -653,6 +653,10 @@ public final class AlterationUtils {
 
     // Only for missense alteration
     public static List<Alteration> getPositionedAlterations(Alteration alteration, Set<Alteration> fullAlterations) {
+        if (alteration.getGene().getHugoSymbol().equals("ABL1") && alteration.getAlteration().equals("T315I")) {
+            return new ArrayList<>();
+        }
+
         if (alteration.getConsequence() != null && alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant"))) {
             VariantConsequence variantConsequence = new VariantConsequence();
             variantConsequence.setTerm("NA");
@@ -671,6 +675,10 @@ public final class AlterationUtils {
             return new ArrayList<>();
         }
 
+        if (alteration.getGene().getHugoSymbol().equals("ABL1") && alteration.getAlteration().equals("T315I")) {
+            return new ArrayList<>();
+        }
+
         List<Alteration> missenseVariants = alterationBo.findMutationsByConsequenceAndPosition(
             alteration.getGene(), VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant"), alteration.getProteinStart(),
             alteration.getProteinEnd(), fullAlterations);
@@ -682,18 +690,21 @@ public final class AlterationUtils {
             }
         }
 
-        // Do not map these KIT variants as alternative alleles
-        if (alteration.getGene() != null && alteration.getGene().getEntrezGeneId() == 3815) {
-            String[] speicalVariants = {"K642E", "V654A", "T670I"};
+        Map<Integer, List<String>> speicalVariants = new HashMap<>();
+        speicalVariants.put(25, Arrays.asList(new String[]{"T315I"}));
+        speicalVariants.put(3815, Arrays.asList(new String[]{"K642E", "V654A", "T670I"}));
+        if (alteration.getGene() != null && speicalVariants.containsKey(alteration.getGene().getEntrezGeneId())) {
             VariantConsequence missense = VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant");
             Iterator<Alteration> iter = alleles.iterator();
             while (iter.hasNext()) {
                 Alteration altAllele = iter.next();
-                for (int i = 0; i < speicalVariants.length; i++) {
-                    if (altAllele.getGene() != null && altAllele.getGene().getEntrezGeneId() == 3815
-                        && altAllele.getAlteration() != null && altAllele.getAlteration().equals(speicalVariants[i])
-                        && altAllele.getConsequence().equals(missense)) {
-                        iter.remove();
+                for (Map.Entry<Integer, List<String>> geneList : speicalVariants.entrySet()) {
+                    for (String alt : geneList.getValue()) {
+                        if (altAllele.getGene() != null && altAllele.getGene().getEntrezGeneId().equals(geneList.getKey())
+                            && altAllele.getAlteration() != null && altAllele.getAlteration().equals(alt)
+                            && altAllele.getConsequence().equals(missense)) {
+                            iter.remove();
+                        }
                     }
                 }
             }
