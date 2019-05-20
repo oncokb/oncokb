@@ -53,6 +53,15 @@ angular.module('oncokbApp')
                         });
                     }
                     scope.$watch('data[key]', function (n, o) {
+                        // Remove blank space character
+                        if (!_.isUndefined(n) && !_.isUndefined(o) && (n.indexOf('&nbsp') > -1 || o.indexOf('&nbsp') > -1)) {
+                            const nCopy = _.clone(n);
+                            n = OncoKB.utils.getString(n);
+                            o = OncoKB.utils.getString(o);
+                            if (n === o && n !== nCopy) {
+                                scope.data[scope.key] = o;
+                            }
+                        }
                         // 1) Do not run the function when no data change(n===o).
                         // 2) Do not run the function when there is no new content(_.isUndefined(n)).
                         // 3) Do not run the function when just click panel without any change(_.isEmpty(n) && _.isUndefined(o)).
