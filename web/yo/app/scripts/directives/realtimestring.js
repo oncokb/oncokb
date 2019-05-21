@@ -53,15 +53,6 @@ angular.module('oncokbApp')
                         });
                     }
                     scope.$watch('data[key]', function (n, o) {
-                        // Remove blank space character
-                        if (!_.isUndefined(n) && !_.isUndefined(o) && (n.indexOf('&nbsp;') > -1 || o.indexOf('&nbsp;') > -1)) {
-                            const nCopy = n;
-                            n = n.replace(/&nbsp;/g, ' ').trim();
-                            o = o.replace(/&nbsp;/g, ' ').trim();
-                            if (n === o && n !== nCopy) {
-                                scope.data[scope.key] = o;
-                            }
-                        }
                         // 1) Do not run the function when no data change(n===o).
                         // 2) Do not run the function when there is no new content(_.isUndefined(n)).
                         // 3) Do not run the function when just click panel without any change(_.isEmpty(n) && _.isUndefined(o)).
@@ -192,16 +183,14 @@ angular.module('oncokbApp')
                 $scope.uuidtoName = function(key, oldKey, uuid){
                     if(mainUtils.processedInReview('remove', uuid) && oldKey){
                         return drugMapUtils.drugUuidtoName(oldKey, $rootScope.drugList);
-                    }
-                    else{
+                    } else {
                         return drugMapUtils.drugUuidtoName(key, $rootScope.drugList);
                     }
                 };
                 $scope.getMutationName = function(key, oldKey, uuid){
                     if(mainUtils.processedInReview('remove', uuid) && oldKey){
                         return oldKey;
-                    }
-                    else{
+                    } else {
                         return key;
                     }
                 };
@@ -317,9 +306,9 @@ angular.module('oncokbApp')
                 };
                 $scope.reviewContentEditable = function (type) {
                     if (type === 'regular') {
-                        return !mainUtils.processedInReview('accept', $scope.uuid) && !mainUtils.processedInReview('reject', $scope.uuid);
+                        return !mainUtils.processedInReview('accept', $scope.uuid) && !mainUtils.processedInReview('reject', $scope.uuid) ? 'plaintext-only': 'false';
                     } else if (type === 'name') {
-                        return !mainUtils.processedInReview('inside', $scope.uuid) && !mainUtils.processedInReview('accept', $scope.uuid) && !mainUtils.processedInReview('reject', $scope.uuid) && !mainUtils.processedInReview('add', $scope.uuid);
+                        return !mainUtils.processedInReview('inside', $scope.uuid) && !mainUtils.processedInReview('accept', $scope.uuid) && !mainUtils.processedInReview('reject', $scope.uuid) && !mainUtils.processedInReview('add', $scope.uuid)  ? 'plaintext-only': 'false';
                     }
                 };
                 $scope.updateThePath = function() {
