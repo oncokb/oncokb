@@ -619,7 +619,7 @@ angular.module('oncokbApp')
         }
         function calculateDiff(oldContent, newContent) {
             var dmp = new diff_match_patch();
-            var diff = dmp.diff_main(OncoKB.utils.getString(oldContent), OncoKB.utils.getString(newContent));
+            var diff = dmp.diff_main(getString(oldContent), getString(newContent));
             dmp.diff_cleanupSemantic(diff);
             return dmp.diff_prettyHtml(diff);
         }
@@ -643,6 +643,34 @@ angular.module('oncokbApp')
             }).catch(function (error) {
                 console.log(error);
             });
+        }
+        function getString(string) {
+            if(!string || !_.isString(string)) {
+                return '';
+            }
+            var tmp = window.document.createElement('DIV');
+            var processdStr = string.replace(/(\r\n|\n|\r)/gm, '');
+            var processdStr = processdStr.replace(/<style>.*<\/style>/i, '');
+            tmp.innerHTML = processdStr;
+            /* eslint new-cap: 0*/
+            var _string = tmp.textContent || tmp.innerText || S(string).stripTags().s;
+            string = S(_string).collapseWhitespace().s;
+            string = string.replace(/<!--.*-->/g, '');
+
+            // Convert the html fragment again to trim the reserved text.
+            var tmp = window.document.createElement('DIV');
+            tmp.innerHTML = string;
+
+            var _string = tmp.textContent || tmp.innerText || S(string).stripTags().s;
+            string = S(_string).decodeHTMLEntities().s;
+            string = S(_string).collapseWhitespace().s;
+
+            return string;
+        }
+        function decodeHTMLEntities(string) {
+            string = S(string).decodeHTMLEntities().s;
+            string = S(string).collapseWhitespace().s;
+            return string;
         }
         return {
             setIsoFormAndGeneType: setIsoFormAndGeneType,
@@ -668,7 +696,6 @@ angular.module('oncokbApp')
             getCaseNumber: getCaseNumber,
             getGeneData: getGeneData,
             getVUSData: getVUSData,
-            getTextString: OncoKB.utils.getString,
             mostRecentItem: mostRecentItem,
             getHistoryData: getHistoryData,
             setUUIDInReview: setUUIDInReview,
@@ -679,6 +706,8 @@ angular.module('oncokbApp')
             getTimeStamp: getTimeStamp,
             calculateDiff: calculateDiff,
             getOldGeneType: getOldGeneType,
-            clearCollaboratorsByName: clearCollaboratorsByName
+            clearCollaboratorsByName: clearCollaboratorsByName,
+            getString: getString,
+            decodeHTMLEntities: decodeHTMLEntities
         };
     });

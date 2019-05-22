@@ -53,6 +53,18 @@ angular.module('oncokbApp')
                         });
                     }
                     scope.$watch('data[key]', function (n, o) {
+                        if (!_.isUndefined(n)) {
+                            var nCopy = n;
+                            if (n.indexOf('&') > -1) {
+                                n = mainUtils.decodeHTMLEntities(n);
+                            }
+                            if (!_.isUndefined(o) && o.indexOf('&') > -1) {
+                                o = mainUtils.decodeHTMLEntities(o);
+                            }
+                            if (n === o && n !== nCopy) {
+                                scope.data[scope.key] = mainUtils.decodeHTMLEntities(scope.data[scope.key]);
+                            }
+                        }
                         // 1) Do not run the function when no data change(n===o).
                         // 2) Do not run the function when there is no new content(_.isUndefined(n)).
                         // 3) Do not run the function when just click panel without any change(_.isEmpty(n) && _.isUndefined(o)).
@@ -68,7 +80,7 @@ angular.module('oncokbApp')
                                 if (!$rootScope.reviewMode || !isRejected) {
                                     mainUtils.updateLastModified();
                                     if (scope.pasting === true) {
-                                        scope.data[scope.key] = OncoKB.utils.getString(scope.data[scope.key]);
+                                        scope.data[scope.key] = mainUtils.getString(scope.data[scope.key]);
                                         scope.pasting = false;
                                     }
                                     scope.pContent = scope.data[scope.key];
@@ -183,16 +195,14 @@ angular.module('oncokbApp')
                 $scope.uuidtoName = function(key, oldKey, uuid){
                     if(mainUtils.processedInReview('remove', uuid) && oldKey){
                         return drugMapUtils.drugUuidtoName(oldKey, $rootScope.drugList);
-                    }
-                    else{
+                    } else {
                         return drugMapUtils.drugUuidtoName(key, $rootScope.drugList);
                     }
                 };
                 $scope.getMutationName = function(key, oldKey, uuid){
                     if(mainUtils.processedInReview('remove', uuid) && oldKey){
                         return oldKey;
-                    }
-                    else{
+                    } else {
                         return key;
                     }
                 };

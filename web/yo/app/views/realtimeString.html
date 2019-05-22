@@ -32,8 +32,7 @@
                 </div>
                 <div ng-switch-when="TREATMENT_NAME">
                     <p ng-if="!fe && editingMessage" style="font-style:italic;margin-top:-30px;margin-left:30%;color:orange">{{editingMessage}}</p>
-                    <p contenteditable="false"
-                       ng-class="getInputClass()"
+                    <p ng-class="getInputClass()"
                        ng-click="setTrackSignal()"
                        ng-paste="trimCSS()"
                        ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 200, 'blur': 0 } }"
@@ -121,7 +120,7 @@
                     </p>
                     <div ng-if="reviewLayout('name')" ng-class="getOldContentDivClass(data[key])">
                         <h4>Old Content:</h4>
-                        <p ng-class="getOldContentClass(data[key+'_review'].lastReviewed)" contenteditable="false" >{{::data[key+'_review'].lastReviewed}}</p>
+                        <p ng-class="getOldContentClass(data[key+'_review'].lastReviewed)">{{::data[key+'_review'].lastReviewed}}</p>
                     </div>
                 </div>
                 <div ng-switch-when="TREATMENT_NAME">
@@ -134,7 +133,7 @@
                     </p>
                     <div ng-if="reviewLayout('name')" ng-class="getOldContentDivClass(data[key])">
                         <h4>Old Content:</h4>
-                        <p ng-class="getOldContentClass(data[key+'_review'].lastReviewed)" contenteditable="false" >{{::uuidtoName(data[key+'_review'].lastReviewed)}}</p>
+                        <p ng-class="getOldContentClass(data[key+'_review'].lastReviewed)">{{::uuidtoName(data[key+'_review'].lastReviewed)}}</p>
                     </div>
                 </div>
 
