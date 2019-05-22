@@ -304,23 +304,6 @@ OncoKB.config = {
         "messagingSenderId": ""
     }
 };
-function getString(string) {
-    if (!string || !_.isString(string)) {
-        return '';
-    }
-    var tmp = window.document.createElement('DIV');
-    var processdStr = string.replace(/(\r\n|\n|\r)/gm, '');
-    var processdStr = processdStr.replace(/<style>.*<\/style>/i, '');
-    tmp.innerHTML = processdStr;
-    /* eslint new-cap: 0*/
-    var _string = tmp.textContent || tmp.innerText || S(string).stripTags().s;
-    string = S(_string).collapseWhitespace().s;
-    string = string.replace(/<!--.*-->/g, '');
-    return string;
-}
-OncoKB.utils = {
-    getString: getString
-};
 var oncokbApp = angular.module('oncokbApp', [
     'ngAnimate',
     'ngCookies',
