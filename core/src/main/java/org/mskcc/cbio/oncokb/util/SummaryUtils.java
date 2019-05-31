@@ -455,13 +455,12 @@ public class SummaryUtils {
             Evidence ev = geneSummaryEvs.iterator().next();
             if (ev != null) {
                 summary = ev.getDescription();
-
-                if (summary != null) {
-                    summary = StringEscapeUtils.escapeXml10(summary).trim();
-                }
             }
         }
 
+        if (summary == null) {
+            summary = "";
+        }
         summary = summary.trim();
         summary = summary.endsWith(".") ? summary : summary + ".";
         return summary;
@@ -967,7 +966,7 @@ public class SummaryUtils {
             String tumorTypeSummary = ev.getDescription();
             if (tumorTypeSummary != null) {
                 summary = newTumorTypeSummary();
-                summary.put("summary", StringEscapeUtils.escapeXml10(tumorTypeSummary).trim());
+                summary.put("summary", tumorTypeSummary.trim());
                 summary.put("lastEdit", ev.getLastEdit());
             }
         }
