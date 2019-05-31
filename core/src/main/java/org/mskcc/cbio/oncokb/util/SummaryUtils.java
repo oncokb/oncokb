@@ -18,6 +18,7 @@ import java.util.regex.Pattern;
  * Created by Hongxin on 8/10/15.
  */
 public class SummaryUtils {
+    public static final String TERT_PROMOTER_MUTATION_SUMMARY = "Select hotspot mutations in the TERT promoter have been shown to be oncogenic.";
 
     public static long lastUpdateVariantSummaries = new Date().getTime();
 
@@ -268,6 +269,11 @@ public class SummaryUtils {
             } else {
                 return "";
             }
+        }
+
+        // Give predefined TERT promoter summary
+        if(gene.getHugoSymbol().equals("TERT") && query.getAlteration().trim().equalsIgnoreCase("promoter")) {
+            return TERT_PROMOTER_MUTATION_SUMMARY;
         }
 
         if (exactMatchAlteration != null) {
