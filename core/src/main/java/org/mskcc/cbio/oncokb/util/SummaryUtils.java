@@ -18,6 +18,8 @@ import java.util.regex.Pattern;
  * Created by Hongxin on 8/10/15.
  */
 public class SummaryUtils {
+    public static final String TERT_PROMOTER_MUTATION_SUMMARY = "Select hotspot mutations in the TERT promoter have been shown to be oncogenic.";
+    public static final String TERT_PROMOTER_NO_THERAPY_TUMOR_TYPE_SUMMARY = "There are no FDA-approved or NCCN-compendium listed treatments specifically for patients with TERT promoter mutations in [[tumor type]].";
 
     public static long lastUpdateVariantSummaries = new Date().getTime();
 
@@ -202,11 +204,15 @@ public class SummaryUtils {
 
         if (tumorTypeSummary == null) {
             tumorTypeSummary = newTumorTypeSummary();
+            String tmpSummary = "";
             if (query.getAlteration().toLowerCase().contains("truncating mutation")) {
-                tumorTypeSummary.put("summary", "There are no FDA-approved or NCCN-compendium listed treatments specifically for patients with [[tumor type]] harboring " + getGeneArticle(gene) + " [[gene]] truncating mutation.");
+                tmpSummary = "There are no FDA-approved or NCCN-compendium listed treatments specifically for patients with [[tumor type]] harboring " + getGeneArticle(gene) + " [[gene]] truncating mutation.";
+            } else if (gene.getHugoSymbol().equals("TERT") && query.getAlteration().trim().equalsIgnoreCase("promoter")) {
+                tmpSummary = TERT_PROMOTER_NO_THERAPY_TUMOR_TYPE_SUMMARY;
             } else {
-                tumorTypeSummary.put("summary", "There are no FDA-approved or NCCN-compendium listed treatments specifically for patients with [[variant]].");
+                tmpSummary = "There are no FDA-approved or NCCN-compendium listed treatments specifically for patients with [[variant]].";
             }
+            tumorTypeSummary.put("summary", tmpSummary);
         }
 
         tumorTypeSummary.put("summary", replaceSpecialCharacterInTumorTypeSummary((String) tumorTypeSummary.get("summary"), gene, query.getAlteration(), query.getTumorType()));
@@ -268,6 +274,11 @@ public class SummaryUtils {
             } else {
                 return "";
             }
+        }
+
+        // Give predefined TERT promoter summary
+        if(gene.getHugoSymbol().equals("TERT") && query.getAlteration().trim().equalsIgnoreCase("promoter")) {
+            return TERT_PROMOTER_MUTATION_SUMMARY;
         }
 
         if (exactMatchAlteration != null) {
