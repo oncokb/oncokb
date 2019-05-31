@@ -286,17 +286,30 @@ angular.module('oncokbApp')
         * */
         function sendEmail(sendTo, subject, content) {
             var deferred = $q.defer();
-            var param = {sendTo: sendTo, subject: subject, content: content};
-            DatabaseConnector.sendEmail(
-                param,
-                function(result) {
-                    deferred.resolve(result);
-                },
-                function(result) {
-                    deferred.reject(result);
-                }
-            );
-            return deferred.promise;
+            if(sendTo && content){
+                var param = {sendTo: sendTo, subject: subject, content: content};
+                DatabaseConnector.sendEmail(
+                    param,
+                    function(result) {
+                        deferred.resolve(result);
+                    },
+                    function(result) {
+                        deferred.reject(result);
+                    }
+                );
+                return deferred.promise;
+            } else {
+                return deferred.reject('Undefined sendTo or content');
+            }
+        }
+        /**
+         * Util to send email to multipul users systematically
+         * sendToArray is a String array which contains users' email address
+         * */
+        function sendEmailtoMultipulUsers(sendToArray, subject, content) {
+            _.forEach(sendToArray, function (sendTo) {
+                sendEmail(sendTo, subject, content);
+            })
         }
         /**
          * Util to send email to developer account
@@ -685,6 +698,7 @@ angular.module('oncokbApp')
             getOncogeneTSG: getOncogeneTSG,
             getLastReviewedCancerTypesName: getLastReviewedCancerTypesName,
             sendEmail: sendEmail,
+            sendEmailtoMultipulUsers: sendEmailtoMultipulUsers,
             developerCheck: developerCheck,
             getOncoTreeMainTypes: getOncoTreeMainTypes,
             isExpiredCuration: isExpiredCuration,

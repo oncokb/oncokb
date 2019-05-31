@@ -10,32 +10,52 @@
 angular.module('oncokbApp')
     .factory('drugMapUtils', function(OncoKB, _, $q, DatabaseConnector, $rootScope, ReviewResource, S, UUIDjs, $routeParams, firebaseConnector, firebasePathUtils) {
 
-        function therapyStrToArr(key){
-            return key.split(",").map(function(element){
-                return element.trim().split(" + ")
-            });
+        function therapyStrToArr(key) {
+            if (key) {
+                return key.split(",").map(function (element) {
+                    return element.trim().split(" + ")
+                });
+            } else {
+                return [];
+            }
         }
-        function drugUuidtoName(key, drugList){
-            if (key != undefined){
+
+        function drugUuidtoName(key, drugList) {
+            if (key != undefined) {
                 var keys = therapyStrToArr(key);
                 return getDrugNameByUuids(keys, drugList);
+            } else {
+                return key;
             }
         }
-        function drugUuidtoDrug(key, drugList){
-            if (key != undefined){
+
+        function drugUuidtoDrug(key, drugList) {
+            if (key != undefined) {
                 var keys = therapyStrToArr(key);
                 return getDrugsByUuids(keys, drugList);
+            } else {
+                return {};
             }
         }
-        function getKeysWithoutFirebasePrefix(array){
-            return _.keys(array).filter(function (item) {
-                return item.indexOf("$") !== 0;
-            });
+
+        function getKeysWithoutFirebasePrefix(array) {
+            if (array) {
+                return _.keys(array).filter(function (item) {
+                    return item.indexOf("$") !== 0;
+                });
+            } else {
+                return array;
+            }
         }
-        function checkDifferenceBetweenTherapies(oldContent, newContent){
-            var oldArray = _.flatten(therapyStrToArr(oldContent));
-            var newArray = _.flatten(therapyStrToArr(newContent));
-            return checkDifferenceBetweenTwoArrays(oldArray, newArray);
+
+        function checkDifferenceBetweenTherapies(oldContent, newContent) {
+            if (oldContent || newContent) {
+                var oldArray = _.flatten(therapyStrToArr(oldContent));
+                var newArray = _.flatten(therapyStrToArr(newContent));
+                return checkDifferenceBetweenTwoArrays(oldArray, newArray);
+            } else {
+                return {};
+            }
         }
         function changeMapByCurator(actionType, dataType, geneName, mutationUuid, mutationName, cancerTypeUuid, therapyUuid, content, oldContent){
             switch (actionType) {
