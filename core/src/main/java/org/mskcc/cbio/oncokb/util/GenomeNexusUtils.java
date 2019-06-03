@@ -33,6 +33,9 @@ public class GenomeNexusUtils {
             String genomeNexusApi = GENOME_NEXUS_DEFAULT_API;
             try {
                 genomeNexusApi = PropertiesUtils.getProperties("genomenexus.api");
+                if (genomeNexusApi == null) {
+                    genomeNexusApi = GENOME_NEXUS_DEFAULT_API;
+                }
                 encodedQuery = URLEncoder.encode(query, "UTF-8");
             } catch (IOException e) {
                 e.printStackTrace();
