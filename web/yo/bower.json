@@ -38,7 +38,6 @@
     "file-saver.js": "~1.20150304.1",
     "fontawesome": "~4.4.0",
     "uuid-js": "^0.7.5",
-    "Blob": "*",
     "angularfire": "^2.3.0",
     "angular-ui-notification": "MikhailRoot/angular-ui-notification#0.3.5",
     "google-diff-match-patch-js": "^1.0.0",
