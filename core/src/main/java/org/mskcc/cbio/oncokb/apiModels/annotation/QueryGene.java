@@ -3,9 +3,12 @@ package org.mskcc.cbio.oncokb.apiModels.annotation;
 /**
  * Created by Hongxin Zhang on 2019-03-25.
  */
-public class QueryGene {
+public class QueryGene implements java.io.Serializable {
     private Integer entrezGeneId;
     private String hugoSymbol;
+
+    public QueryGene() {
+    }
 
     public QueryGene(Integer entrezGeneId, String hugoSymbol) {
         this.entrezGeneId = entrezGeneId;
