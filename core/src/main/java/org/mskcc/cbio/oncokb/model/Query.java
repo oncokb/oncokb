@@ -38,8 +38,10 @@ public class Query implements java.io.Serializable {
         this.type = AnnotationQueryType.REGULAR.getName();
         this.setTumorType(mutationQuery.getTumorType());
 
-        this.hugoSymbol = mutationQuery.getGene().getHugoSymbol();
-        this.entrezGeneId = mutationQuery.getGene().getEntrezGeneId();
+        if (mutationQuery.getGene() != null) {
+            this.hugoSymbol = mutationQuery.getGene().getHugoSymbol();
+            this.entrezGeneId = mutationQuery.getGene().getEntrezGeneId();
+        }
 
         setAlteration(mutationQuery.getAlteration());
         this.consequence = mutationQuery.getConsequence();
