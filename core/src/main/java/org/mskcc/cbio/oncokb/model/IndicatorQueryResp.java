@@ -20,8 +20,8 @@ public class IndicatorQueryResp implements java.io.Serializable {
     private MutationEffectResp mutationEffect;
     private LevelOfEvidence highestSensitiveLevel;
     private LevelOfEvidence highestResistanceLevel;
-    private List<LevelOfEvidence> otherSignificantSensitiveLevels;
-    private List<LevelOfEvidence> otherSignificantResistanceLevels;
+    private List<LevelOfEvidence> otherSignificantSensitiveLevels = new ArrayList<>();
+    private List<LevelOfEvidence> otherSignificantResistanceLevels = new ArrayList<>();
     private Boolean VUS;
     private Boolean hotspot;
     private String geneSummary = "";

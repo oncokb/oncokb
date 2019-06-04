@@ -352,6 +352,12 @@ public class IndicatorUtilsTest {
         assertEquals("The variant summary is not expected.", SummaryUtils.TERT_PROMOTER_MUTATION_SUMMARY, indicatorQueryResp.getVariantSummary());
         assertEquals("The tumor type summary is not expected.", SummaryUtils.TERT_PROMOTER_NO_THERAPY_TUMOR_TYPE_SUMMARY.replace("[[tumor type]]", "ovarian cancer"), indicatorQueryResp.getTumorTypeSummary());
 
+        // Check the case when alteration is empty but consequence is specified. This avoids positional variants
+        query = new Query(null, null, null, "KIT", "", null, null, "Ovarian Cancer", "missense_variant", null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true, null);
+        assertEquals("The Oncogenicity is not empty, but it should be.", "", indicatorQueryResp.getOncogenic());
+        assertTrue("There should not be any treatments", indicatorQueryResp.getTreatments().isEmpty());
+
 
         /**
          * Comparing between two queries

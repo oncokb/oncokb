@@ -96,7 +96,7 @@ public class HotspotUtils {
     }
 
     public static boolean isHotspot(Alteration alteration) {
-        if (alteration == null || alteration.getGene() == null) {
+        if (alteration == null || alteration.getGene() == null || alteration.getProteinStart().equals(-1) || alteration.getProteinEnd().equals(100000)) {
             return false;
         }
 
