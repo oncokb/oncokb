@@ -126,7 +126,7 @@ public class AnnotationsApiController {
         Alteration alteration = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, genomicLocation);
         Query query = new Query();
         if (alteration != null) {
-            query = new Query(null, AnnotationQueryType.REGULAR.getName(), null, alteration.getGene().getHugoSymbol(), alteration.getAlteration(), null, null, tumorType, alteration.getConsequence().getTerm(), alteration.getProteinStart(), alteration.getProteinEnd(), null);
+            query = new Query(null, AnnotationQueryType.REGULAR.getName(), null, alteration.getGene().getHugoSymbol(), alteration.getAlteration(), null, null, tumorType, alteration.getConsequence() == null ? null : alteration.getConsequence().getTerm(), alteration.getProteinStart(), alteration.getProteinEnd(), null);
         }
         return IndicatorUtils.processQuery(query, null, null, null, false, null);
     }
