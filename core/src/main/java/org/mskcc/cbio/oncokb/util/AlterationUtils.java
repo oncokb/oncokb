@@ -658,7 +658,7 @@ public final class AlterationUtils {
         }
 
         if (alteration.getConsequence() != null && alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant"))
-            && !alteration.getProteinStart().equals(-1) && !alteration.getProteinStart().equals(100000)) {
+            && alteration.getProteinStart().intValue() != AlterationPositionBoundary.START.getValue() && alteration.getProteinStart().intValue() != AlterationPositionBoundary.END.getValue()) {
             VariantConsequence variantConsequence = new VariantConsequence();
             variantConsequence.setTerm("NA");
             return ApplicationContextSingleton.getAlterationBo().findMutationsByConsequenceAndPositionOnSamePosition(alteration.getGene(), variantConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations);
