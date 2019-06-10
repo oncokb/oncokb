@@ -17,13 +17,13 @@ esac
 shift # past argument or value
 done
 
-if [[ $FRONTEND_PATH == *"public"* ]]
+if [[ $FRONTEND_PATH == "public" ]]
 then
-    sed 's/<base[^>]*>/<base href="<%=basePath%>\/" \/>/g' "$FRONTEND_PATH"/dist/index.html > "$FRONTEND_PATH"/dist/content.jsp
+    sed 's/<base[^>]*>/<base href="<%=basePath%>\/" \/>/g' dist/index.html > dist/content.jsp
 fi
 
-if [[ $FRONTEND_PATH == *"yo"* ]]
+if [[ $FRONTEND_PATH == "yo" ]]
 then
-    cp "$FRONTEND_PATH"/dist/index.html "$FRONTEND_PATH"/dist/content.jsp
+    cp dist/index.html dist/content.jsp
 fi
-rm "$FRONTEND_PATH"/dist/index.html
+rm dist/index.html
