@@ -22,73 +22,12 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
             <properties>
-                <web.folder>public</web.folder>
+                <frontend.version>1.2.2</frontend.version>
+                <frontend.groupId>com.github.oncokb</frontend.groupId>
+                <frontend.artifactId>oncokb-public</frontend.artifactId>
             </properties>
             <build>
                 <plugins>
-                    <plugin>
-                        <groupId>com.github.eirslett</groupId>
-                        <artifactId>frontend-maven-plugin</artifactId>
-                        <version>1.0</version>
-
-                        <executions>
-                            <execution>
-                                <id>install node and npm</id>
-                                <goals>
-                                    <goal>install-node-and-npm</goal>
-                                </goals>
-                                <configuration>
-                                    <!-- See https://nodejs.org/en/download/ for latest node and npm (lts) versions -->
-                                    <nodeVersion>v8.12.0</nodeVersion>
-                                    <npmVersion>6.4.1</npmVersion>
-                                </configuration>
-                            </execution>
-
-                            <execution>
-                                <id>npm install</id>
-                                <goals>
-                                    <goal>npm</goal>
-                                </goals>
-                                <configuration>
-                                    <arguments>ci</arguments>
-                                </configuration>
-                            </execution>
-
-                            <execution>
-                                <id>bower install</id>
-                                <goals>
-                                    <goal>bower</goal>
-                                </goals>
-
-                                <configuration>
-                                    <!-- optional: The default argument is actually
-                                    "install", so unless you need to run some other bower command,
-                                    you can remove this whole <configuration> section.
-                                    -->
-                                    <arguments>install</arguments>
-                                </configuration>
-                            </execution>
-
-                            <execution>
-                                <id>grunt build</id>
-                                <goals>
-                                    <goal>grunt</goal>
-                                </goals>
-
-                                <!-- optional: the default phase is "generate-resources" -->
-                                <phase>generate-resources</phase>
-
-                                <configuration>
-                                    <!-- optional: if not specified, it will run Grunt's default
-                                    task (and you can remove this whole <configuration> section.) -->
-                                    <arguments>build</arguments>
-                                </configuration>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <workingDirectory>${web.folder}</workingDirectory>
-                        </configuration>
-                    </plugin>
                     <plugin>
                         <artifactId>exec-maven-plugin</artifactId>
                         <groupId>org.codehaus.mojo</groupId>
@@ -102,42 +41,10 @@
                                 <phase>process-resources</phase>
                                 <configuration>
                                     <executable>bash</executable>
-                                    <commandlineArgs>scripts/generate_content_jsp.sh -p ${web.folder}</commandlineArgs>
+                                    <commandlineArgs>scripts/generate_content_jsp.sh -p public</commandlineArgs>
                                 </configuration>
                             </execution>
                         </executions>
-                    </plugin>
-                    <plugin>
-                        <artifactId>maven-war-plugin</artifactId>
-                        <version>2.3</version>
-                        <configuration>
-                            <webResources>
-                                <resource>
-                                    <directory>${web.folder}/dist</directory>
-                                    <targetPath></targetPath>
-                                </resource>
-                            </webResources>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <artifactId>maven-clean-plugin</artifactId>
-                        <version>2.5</version>
-                        <configuration>
-                            <filesets>
-                                <fileset>
-                                    <directory>${web.folder}/dist</directory>
-                                </fileset>
-                                <fileset>
-                                    <directory>${web.folder}/.tmp</directory>
-                                </fileset>
-                                <!--<fileset>-->
-                                <!--<directory>yo/app/components</directory>-->
-                                <!--</fileset>-->
-                                <!--<fileset>-->
-                                <!--<directory>yo/node_modules</directory>-->
-                                <!--</fileset>-->
-                            </filesets>
-                        </configuration>
                     </plugin>
                 </plugins>
             </build>
@@ -173,73 +80,12 @@
         <profile>
             <id>curate</id>
             <properties>
-                <web.folder>yo</web.folder>
+                <frontend.version>0.0.1</frontend.version>
+                <frontend.groupId>com.github.oncokb</frontend.groupId>
+                <frontend.artifactId>curation-platform</frontend.artifactId>
             </properties>
             <build>
                 <plugins>
-                    <plugin>
-                        <groupId>com.github.eirslett</groupId>
-                        <artifactId>frontend-maven-plugin</artifactId>
-                        <version>1.0</version>
-
-                        <executions>
-                            <execution>
-                                <id>install node and npm</id>
-                                <goals>
-                                    <goal>install-node-and-npm</goal>
-                                </goals>
-                                <configuration>
-                                    <!-- See https://nodejs.org/en/download/ for latest node and npm (lts) versions -->
-                                    <nodeVersion>v8.12.0</nodeVersion>
-                                    <npmVersion>6.4.1</npmVersion>
-                                </configuration>
-                            </execution>
-
-                            <execution>
-                                <id>npm install</id>
-                                <goals>
-                                    <goal>npm</goal>
-                                </goals>
-                                <configuration>
-                                    <arguments>ci</arguments>
-                                </configuration>
-                            </execution>
-
-                            <execution>
-                                <id>bower install</id>
-                                <goals>
-                                    <goal>bower</goal>
-                                </goals>
-
-                                <configuration>
-                                    <!-- optional: The default argument is actually
-                                    "install", so unless you need to run some other bower command,
-                                    you can remove this whole <configuration> section.
-                                    -->
-                                    <arguments>install</arguments>
-                                </configuration>
-                            </execution>
-
-                            <execution>
-                                <id>grunt build</id>
-                                <goals>
-                                    <goal>grunt</goal>
-                                </goals>
-
-                                <!-- optional: the default phase is "generate-resources" -->
-                                <phase>generate-resources</phase>
-
-                                <configuration>
-                                    <!-- optional: if not specified, it will run Grunt's default
-                                    task (and you can remove this whole <configuration> section.) -->
-                                    <arguments>build</arguments>
-                                </configuration>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <workingDirectory>${web.folder}</workingDirectory>
-                        </configuration>
-                    </plugin>
                     <plugin>
                         <artifactId>exec-maven-plugin</artifactId>
                         <groupId>org.codehaus.mojo</groupId>
@@ -252,48 +98,13 @@
                                 <phase>process-resources</phase>
                                 <configuration>
                                     <executable>bash</executable>
-                                    <commandlineArgs>scripts/generate_content_jsp.sh -p ${web.folder}</commandlineArgs>
+                                    <commandlineArgs>scripts/generate_content_jsp.sh -p yo</commandlineArgs>
                                 </configuration>
                             </execution>
                         </executions>
                     </plugin>
-                    <plugin>
-                        <artifactId>maven-war-plugin</artifactId>
-                        <version>2.3</version>
-                        <configuration>
-                            <webResources>
-                                <resource>
-                                    <directory>${web.folder}/dist</directory>
-                                    <targetPath></targetPath>
-                                </resource>
-                            </webResources>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <artifactId>maven-clean-plugin</artifactId>
-                        <version>2.5</version>
-                        <configuration>
-                            <filesets>
-                                <fileset>
-                                    <directory>${web.folder}/dist</directory>
-                                </fileset>
-                                <fileset>
-                                    <directory>${web.folder}/.tmp</directory>
-                                </fileset>
-                                <!--<fileset>-->
-                                <!--<directory>yo/app/components</directory>-->
-                                <!--</fileset>-->
-                                <!--<fileset>-->
-                                <!--<directory>yo/node_modules</directory>-->
-                                <!--</fileset>-->
-                            </filesets>
-                        </configuration>
-                    </plugin>
                 </plugins>
             </build>
-        </profile>
-        <profile>
-            <id>backend</id>
         </profile>
     </profiles>
 
@@ -461,6 +272,55 @@
     <build>
         <finalName>oncokb</finalName>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.3</version>
+                <executions>
+                    <execution>
+                        <id>unpack</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>${frontend.groupId}</groupId>
+                                    <artifactId>${frontend.artifactId}</artifactId>
+                                    <version>${frontend.version}</version>
+                                    <type>jar</type>
+                                    <outputDirectory>dist</outputDirectory>
+                                    <overWrite>true</overWrite>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.3</version>
+                <configuration>
+                    <webResources>
+                        <resource>
+                            <directory>dist</directory>
+                            <targetPath></targetPath>
+                        </resource>
+                    </webResources>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>2.5</version>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>dist</directory>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
