@@ -1,6 +1,7 @@
 package org.mskcc.cbio.oncokb.apiModels;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 
@@ -53,6 +54,20 @@ public class NCITDrug implements java.io.Serializable {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof NCITDrug)) return false;
+        NCITDrug ncitDrug = (NCITDrug) o;
+        return Objects.equals(getNcitCode(), ncitDrug.getNcitCode()) &&
+            Objects.equals(getDrugName(), ncitDrug.getDrugName());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getNcitCode(), getDrugName());
     }
 }
 
