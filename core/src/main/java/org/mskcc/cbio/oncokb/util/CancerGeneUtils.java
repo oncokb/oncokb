@@ -17,7 +17,7 @@ public class CancerGeneUtils {
     private static final String FOUNDATION_GENES = "foundation_one_cdx_324_genes.csv";
     private static final String FOUNDATION_HEME_GENES = "foundation_one_heme_593_genes.csv";
     private static final String VOGELSTEIN_GENES = "vogelstein_125_genes.csv";
-    private static final String CGC_GENES = "cancer_gene_census_05072019_723_genes.csv";
+    private static final String CGC_GENES = "cancer_gene_census_06192019_576_genes_tier_1_only.csv";
 
     public static List<CancerGene> getCancerGeneList() {
         return CacheUtils.getCancerGeneList();
