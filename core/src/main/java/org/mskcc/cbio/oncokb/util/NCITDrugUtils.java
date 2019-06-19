@@ -10,13 +10,11 @@ import java.util.*;
  * Created by Hongxin Zhang on 10/18/18.
  */
 public class NCITDrugUtils {
-    private static boolean allNcitDrugsInitialized = false;
-    private static Set<NCITDrug> allNcitDrugs = new HashSet<>();
+    private static Set<NCITDrug> allNcitDrugs = null;
 
     public static NCITDrug findDrugByNcitCode(String ncitCode) {
-        if (!allNcitDrugsInitialized) {
+        if (allNcitDrugs == null) {
             cacheDrugs();
-            allNcitDrugsInitialized = true;
         }
 
         for (NCITDrug drug : allNcitDrugs) {
@@ -29,9 +27,8 @@ public class NCITDrugUtils {
 
     public static LinkedHashSet<NCITDrug> findDrugs(String query) {
         LinkedHashSet<NCITDrug> matches = new LinkedHashSet<>();
-        if (!allNcitDrugsInitialized) {
+        if (allNcitDrugs == null) {
             cacheDrugs();
-            allNcitDrugsInitialized = true;
         }
         return findMatches(query);
     }
@@ -39,7 +36,7 @@ public class NCITDrugUtils {
     private static LinkedHashSet<NCITDrug> findMatches(String query) {
         TreeSet<NCITDrug> matches = new TreeSet<>(new NCTIDrugComp(query));
 
-        if (query == null) {
+        if (query == null || allNcitDrugs == null) {
             return new LinkedHashSet<>();
         }
         for (NCITDrug drug : allNcitDrugs) {
@@ -70,7 +67,8 @@ public class NCITDrugUtils {
 
     private static void cacheDrugs() {
         System.out.println("getting accepted semantic types...");
-        Set<String> acceptedSemanticTypes = getAcceptedSemanticTypes();
+
+        allNcitDrugs = new HashSet<>();
 
         List<String> lines = null;
         try {
