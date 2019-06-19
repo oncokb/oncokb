@@ -56,6 +56,24 @@ public class GenomeNexusUtilsTest extends TestCase {
             gene.getCuratedRefSeq(), consequence.getRefSeq());
         assertEquals("Picked transcript isoform is not the same with MSKIMPACT BRAF isoform, but it should.",
             gene.getCuratedIsoform(), consequence.getTranscriptId());
+
+
+        // Potential multiple consequences
+        consequence = GenomeNexusUtils.getTranscriptConsequence(GNVariantAnnotationType.GENOMIC_LOCATION, "3,178917478,178917478,G,A");
+        gene = GeneUtils.getGeneByHugoSymbol("PIK3CA");
+        assertEquals("Picked transcript gene symbol is not PIK3CA, but it should.",
+            gene.getHugoSymbol(), consequence.getGeneSymbol());
+        assertEquals("Picked transcript hgvs p short is not p.V600E, but it should.",
+            "p.G118D", consequence.getHgvspShort());
+        assertEquals("Picked transcript protein start is not 118, but it should.",
+            "118", consequence.getProteinStart());
+        assertEquals("Picked transcript protein end is not 118, but it should.",
+            "118", consequence.getProteinEnd());
+        assertEquals("Picked transcript RefSeq is not the same with MSKIMPACT PIK3CA RefSeq, but it should.",
+            gene.getCuratedRefSeq(), consequence.getRefSeq());
+        assertEquals("Picked transcript isoform is not the same with MSKIMPACT BRAF isoform, but it should.",
+            gene.getCuratedIsoform(), consequence.getTranscriptId());
+        assertTrue("There are multiple consequences", consequence.getConsequenceTerms().size() > 1);
     }
 
 }

@@ -7,6 +7,7 @@ import org.mskcc.cbio.oncokb.genomenexus.Hotspot;
 import org.mskcc.cbio.oncokb.genomenexus.IntegerRange;
 import org.mskcc.cbio.oncokb.genomenexus.ProteinLocation;
 import org.mskcc.cbio.oncokb.model.Alteration;
+import org.mskcc.cbio.oncokb.model.AlterationPositionBoundary;
 import org.mskcc.cbio.oncokb.model.Gene;
 
 import java.io.BufferedReader;
@@ -96,7 +97,7 @@ public class HotspotUtils {
     }
 
     public static boolean isHotspot(Alteration alteration) {
-        if (alteration == null || alteration.getGene() == null) {
+        if (alteration == null || alteration.getGene() == null || alteration.getProteinStart().intValue() == AlterationPositionBoundary.START.getValue() || alteration.getProteinEnd().intValue() == AlterationPositionBoundary.END.getValue()) {
             return false;
         }
 

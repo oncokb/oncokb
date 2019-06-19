@@ -1,6 +1,5 @@
 package org.mskcc.cbio.oncokb.apiModels.annotation;
 
-import io.swagger.annotations.ApiModel;
 import org.mskcc.cbio.oncokb.model.CopyNumberAlterationType;
 
 /**
