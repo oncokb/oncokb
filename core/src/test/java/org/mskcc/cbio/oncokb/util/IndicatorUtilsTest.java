@@ -96,7 +96,7 @@ public class IndicatorUtilsTest {
         assertEquals("The oncogenicity of NOTCH1 intragenic should be Likely Oncogenic", "Likely Oncogenic", indicatorQueryResp.getOncogenic());
 
         // Check other significant level
-        query = new Query(null, null, null, "BRAF", "V600E", null, null, "Colorectal Cancer", null, null, null, null);
+        query = new Query(null, null, null, "BRAF", "V600E", null, null, "Bladder Cancer", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, true, null);
         assertEquals("The highest sensitive level should be 2B", LevelOfEvidence.LEVEL_2B, indicatorQueryResp.getHighestSensitiveLevel());
         assertTrue("The highest resistance level should be null", indicatorQueryResp.getHighestResistanceLevel() == null);
@@ -110,11 +110,11 @@ public class IndicatorUtilsTest {
         assertTrue(treatmentsContainLevel(indicatorQueryResp.getTreatments(), LevelOfEvidence.LEVEL_2B));
 
         // For treatments include both 2B and 3A, 3A should be shown first
-        query = new Query(null, null, null, "BRAF", "V600E", null, null, "Rectal Adenocarcinoma", null, null, null, null);
+        query = new Query(null, null, null, "RET", "Fusions", null, null, "Medullary Thyroid Cancer", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, true, null);
         assertEquals("The highest sensitive level should be 2B", LevelOfEvidence.LEVEL_2B, indicatorQueryResp.getHighestSensitiveLevel());
         assertTrue("The highest resistance level should be null", indicatorQueryResp.getHighestResistanceLevel() == null);
-        assertTrue("Shouldn't have any significant level", indicatorQueryResp.getOtherSignificantSensitiveLevels().size() > 0);
+        assertTrue("Should have any significant level", indicatorQueryResp.getOtherSignificantSensitiveLevels().size() > 0);
         assertTrue(treatmentsContainLevel(indicatorQueryResp.getTreatments(), LevelOfEvidence.LEVEL_2B));
         assertTrue(treatmentsContainLevel(indicatorQueryResp.getTreatments(), LevelOfEvidence.LEVEL_3A));
         assertEquals("The level 3A should be shown before 2A", LevelOfEvidence.LEVEL_3A, indicatorQueryResp.getTreatments().get(0).getLevel());
@@ -472,7 +472,7 @@ public class IndicatorUtilsTest {
         assertEquals("The oncogenicity is not Oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The highest sensitive level is not 1, but it should be.", LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
         assertEquals("The gene summary is not empty, but it should be.", "", indicatorQueryResp.getGeneSummary());
-        assertEquals("The variant summary is not expected.", "Genetic or epigenetic alterations resulting in loss of function of mismatch repair (MMR) genes lead to a microsatellite instability-high (MSI-H)/mismatch repair deficient (MMR-D) phenotype (PMID: 23636398, 22810696). The MSIsensor score detected in this tumor indicates MSI-H/MMR-D status.", indicatorQueryResp.getVariantSummary());
+        assertEquals("The variant summary is not expected.", "Genetic or epigenetic alterations resulting in loss of function of mismatch repair (MMR) genes can lead to a microsatellite instability-high (MSI-H)/mismatch repair deficient (MMR-D) phenotype.", indicatorQueryResp.getVariantSummary());
         assertEquals("The tumor type summary is not expected.", "The anti-PD-1 antibodies pembrolizumab or nivolumab, as single-agents, are FDA-approved for the treatment of patients with MMR-D or MSI-H metastatic colorectal cancer.", indicatorQueryResp.getTumorTypeSummary());
 
         query = new Query(null, null, null, null, "MSI-H", null, null, "Endometrioid Carcinoma", null, null, null, null);
@@ -481,7 +481,7 @@ public class IndicatorUtilsTest {
         assertEquals("The oncogenicity is not Oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The highest sensitive level is not 1, but it should be.", LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
         assertEquals("The gene summary is not empty, but it should be.", "", indicatorQueryResp.getGeneSummary());
-        assertEquals("The variant summary is not expected.", "Genetic or epigenetic alterations resulting in loss of function of mismatch repair (MMR) genes lead to a microsatellite instability-high (MSI-H)/mismatch repair deficient (MMR-D) phenotype (PMID: 23636398, 22810696). The MSIsensor score detected in this tumor indicates MSI-H/MMR-D status.", indicatorQueryResp.getVariantSummary());
+        assertEquals("The variant summary is not expected.", "Genetic or epigenetic alterations resulting in loss of function of mismatch repair (MMR) genes can lead to a microsatellite instability-high (MSI-H)/mismatch repair deficient (MMR-D) phenotype.", indicatorQueryResp.getVariantSummary());
         assertEquals("The tumor type summary is not expected.", "The anti-PD-1 antibody pembrolizumab is an FDA-approved drug for therapy of adult and pediatric patients with unresectable or metastatic MSI-H/MMR-D solid cancers that have progressed following prior treatment.", indicatorQueryResp.getTumorTypeSummary());
 
         // Test indicator endpoint supports HGVS
