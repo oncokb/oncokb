@@ -1281,7 +1281,7 @@ angular.module('oncokbApp')
                 if (mutation && ['TUMOR_NAME_CHANGE', 'TREATMENT_NAME_CHANGE'].indexOf(type) === -1) {
                     var mutationStr;
                     if ($scope.geneMeta.review[mutation.name_uuid] && mutation.name_review.lastReviewed && type !== 'MUTATION_NAME_CHANGE' && !mutation.name_review.added) {
-                        mutationStr = mainUtils.getTextString(mutation.name_review.lastReviewed);
+                        mutationStr = mainUtils.getString(mutation.name_review.lastReviewed);
                     } else {
                         mutationStr = mutation.name;
                     }
