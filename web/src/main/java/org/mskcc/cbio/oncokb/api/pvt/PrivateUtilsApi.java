@@ -126,5 +126,15 @@ public interface PrivateUtilsApi {
         produces = {"application/json"},
         method = RequestMethod.GET)
     ResponseEntity<Map<LevelOfEvidence, Set<Evidence>>> utilsEvidencesByLevelsGet();
+
+    @ApiOperation(value = "", notes = "Get the list of relevant tumor types.", response = List.class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK", response = List.class)})
+    @RequestMapping(value = "/utils/relevantTumorTypes",
+        produces = {"application/json"},
+        method = RequestMethod.GET)
+    ResponseEntity<List<TumorType>> utilRelevantTumorTypesGet(
+        @ApiParam(value = "OncoTree tumor type name/main type/code") @RequestParam(value = "tumorType") String tumorType
+    );
 }
 
