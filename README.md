@@ -1,8 +1,5 @@
 Repository for OncoKB, a precision oncology knowledge base.
 
-We use Google Firebase Realtime Database to store all information curators generated.
-We use MySQL to store data after reviewing.
-
 The core of OncoKB Annotation service.
 
 ## Prepare properties files  
