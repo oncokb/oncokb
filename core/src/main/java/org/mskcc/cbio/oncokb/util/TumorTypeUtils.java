@@ -350,18 +350,19 @@ public class TumorTypeUtils {
             mappedTumorTypesFromSource.add(getMappedSpecialTumor(SpecialTumorType.ALL_LIQUID_TUMORS));
         }
 
-        if (mappedTumorTypesFromSource.size() == 0 && !com.mysql.jdbc.StringUtils.isNullOrEmpty(tumorType)) {
-            // When there is no OncoTree tumor type mapped, temporary check the tumor form
-            // TODO: need to find a way for different version of the OncoTree usage.
-            TumorType tt = new TumorType();
-            tt.setMainType(new MainType(tumorType));
-            TumorForm tumorForm = checkTumorForm(tt);
-            if (tumorForm.equals(TumorForm.SOLID)) {
-                mappedTumorTypesFromSource.add(getMappedSpecialTumor(SpecialTumorType.ALL_SOLID_TUMORS));
-            } else {
-                mappedTumorTypesFromSource.add(getMappedSpecialTumor(SpecialTumorType.ALL_LIQUID_TUMORS));
-            }
-        }
+        // We do not want to annotate the tumor type that we don't have any knowledge about
+//        if (mappedTumorTypesFromSource.size() == 0 && !com.mysql.jdbc.StringUtils.isNullOrEmpty(tumorType)) {
+//            // When there is no OncoTree tumor type mapped, temporary check the tumor form
+//            // TODO: need to find a way for different version of the OncoTree usage.
+//            TumorType tt = new TumorType();
+//            tt.setMainType(new MainType(tumorType));
+//            TumorForm tumorForm = checkTumorForm(tt);
+//            if (tumorForm.equals(TumorForm.SOLID)) {
+//                mappedTumorTypesFromSource.add(getMappedSpecialTumor(SpecialTumorType.ALL_SOLID_TUMORS));
+//            } else {
+//                mappedTumorTypesFromSource.add(getMappedSpecialTumor(SpecialTumorType.ALL_LIQUID_TUMORS));
+//            }
+//        }
 
         // Include all tumors
         TumorType allTumor = getMappedSpecialTumor(SpecialTumorType.ALL_TUMORS);
