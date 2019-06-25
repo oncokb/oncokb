@@ -32,6 +32,22 @@ public class TumorTypeUtilsTest extends TestCase {
         tumorTypes = TumorTypeUtils.findTumorTypes("Chronic Myeloid Leukemia, BCR-ABL1+", "oncotree");
         expectedResult = "Chronic Myeloid Leukemia, BCR-ABL1+, Myeloproliferative Neoplasms, Chronic Myelogenous Leukemia, Myeloproliferative Neoplasms, Myeloid Neoplasm, Myeloid, All Solid Tumors, All Liquid Tumors, All Tumors";
         assertEquals(expectedResult, tumorTypesToString(tumorTypes));
+
+        tumorTypes = TumorTypeUtils.findTumorTypes("All Liquid Tumors", "oncotree");
+        expectedResult = "All Liquid Tumors, All Tumors";
+        assertEquals(expectedResult, tumorTypesToString(tumorTypes));
+
+        tumorTypes = TumorTypeUtils.findTumorTypes("All Solid Tumors", "oncotree");
+        expectedResult = "All Solid Tumors, All Tumors";
+        assertEquals(expectedResult, tumorTypesToString(tumorTypes));
+
+        tumorTypes = TumorTypeUtils.findTumorTypes("All Tumors", "oncotree");
+        expectedResult = "All Tumors";
+        assertEquals(expectedResult, tumorTypesToString(tumorTypes));
+
+        tumorTypes = TumorTypeUtils.findTumorTypes("All Pediatric Tumors", "oncotree");
+        expectedResult = "All Pediatric Tumors, All Tumors";
+        assertEquals(expectedResult, tumorTypesToString(tumorTypes));
     }
 
     public void testGetAllOncoTreeCancerTypes() throws Exception {

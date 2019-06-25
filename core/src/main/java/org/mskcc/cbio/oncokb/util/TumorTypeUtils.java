@@ -740,6 +740,15 @@ public class TumorTypeUtils {
     private static TumorForm checkTumorForm(TumorType tumorType) {
         if (tumorType == null)
             return null;
+
+        if (tumorType.equals(getMappedSpecialTumor(SpecialTumorType.ALL_LIQUID_TUMORS))) {
+            return TumorForm.LIQUID;
+        } else if (tumorType.equals(getMappedSpecialTumor(SpecialTumorType.ALL_SOLID_TUMORS))) {
+            return TumorForm.SOLID;
+        } else if (tumorType.getMainType() != null && getAllSpecialTumorOncoTreeTypes().contains(tumorType)) {
+            return null;
+        }
+
         // This is mainly for subtypes
         if (!com.mysql.jdbc.StringUtils.isNullOrEmpty(tumorType.getTissue())) {
             if (LiquidTumorTissues.contains(tumorType.getTissue()))
