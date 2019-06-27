@@ -93,8 +93,6 @@ public class FileUtils {
         String line;
         while ((line = in.readLine()) != null) {
             if (trim) {
-                line = line.replaceAll("^[\uFEFF-\uFFFF]+", ""); // trim and remove unicode
-                line = line.replaceAll("\\[[a-z]\\]", ""); // remove comments from google docs
                 line = line.trim();
             }
             if (!line.isEmpty())
@@ -103,25 +101,5 @@ public class FileUtils {
         in.close();
         
         return lines;
-    }
-    
-    public static List<String> readLinesDocStream(InputStream is, boolean trim) throws IOException {
-        XWPFDocument document=new XWPFDocument(is);
-        List<XWPFParagraph> paragraphs = document.getParagraphs();
-        List<String> ret = new ArrayList<String>();
-        for(XWPFParagraph paragraph : paragraphs){
-            String[] lines = paragraph.getParagraphText().split("\n");
-            for (String line : lines) {
-                if (trim) {
-                    line = line.replaceAll("^[\uFEFF-\uFFFF]+", ""); // trim and remove unicode
-                    line = line.replaceAll("\\[[a-z]\\]", ""); // remove comments from google docs
-                    line = line.trim();
-                }
-                if (!line.isEmpty()) {
-                    ret.add(line);
-                }
-            }
-        }
-        return ret;
     }
 }
