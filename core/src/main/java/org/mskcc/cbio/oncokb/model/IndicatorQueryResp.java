@@ -1,6 +1,7 @@
 package org.mskcc.cbio.oncokb.model;
 
 
+import org.mskcc.cbio.oncokb.apiModels.Implication;
 import org.mskcc.cbio.oncokb.apiModels.MutationEffectResp;
 
 import java.util.ArrayList;
@@ -20,6 +21,8 @@ public class IndicatorQueryResp implements java.io.Serializable {
     private MutationEffectResp mutationEffect;
     private LevelOfEvidence highestSensitiveLevel;
     private LevelOfEvidence highestResistanceLevel;
+    private LevelOfEvidence highestDiagnosticImplicationLevel;
+    private LevelOfEvidence highestPrognosticImplicationLevel;
     private List<LevelOfEvidence> otherSignificantSensitiveLevels = new ArrayList<>();
     private List<LevelOfEvidence> otherSignificantResistanceLevels = new ArrayList<>();
     private Boolean VUS;
@@ -29,6 +32,8 @@ public class IndicatorQueryResp implements java.io.Serializable {
     private String tumorTypeSummary = "";
     private String prognosticSummary = "";
     private String diagnosticSummary = "";
+    private List<Implication> diagnosticImplications;
+    private List<Implication> prognosticImplications;
     private List<IndicatorQueryTreatment> treatments = new ArrayList<>();
     private String dataVersion;
     private String lastUpdate;
@@ -90,6 +95,22 @@ public class IndicatorQueryResp implements java.io.Serializable {
 
     public void setHighestResistanceLevel(LevelOfEvidence highestResistanceLevel) {
         this.highestResistanceLevel = highestResistanceLevel;
+    }
+
+    public LevelOfEvidence getHighestDiagnosticImplicationLevel() {
+        return highestDiagnosticImplicationLevel;
+    }
+
+    public void setHighestDiagnosticImplicationLevel(LevelOfEvidence highestDiagnosticImplicationLevel) {
+        this.highestDiagnosticImplicationLevel = highestDiagnosticImplicationLevel;
+    }
+
+    public LevelOfEvidence getHighestPrognosticImplicationLevel() {
+        return highestPrognosticImplicationLevel;
+    }
+
+    public void setHighestPrognosticImplicationLevel(LevelOfEvidence highestPrognosticImplicationLevel) {
+        this.highestPrognosticImplicationLevel = highestPrognosticImplicationLevel;
     }
 
     public List<LevelOfEvidence> getOtherSignificantSensitiveLevels() {
@@ -170,6 +191,22 @@ public class IndicatorQueryResp implements java.io.Serializable {
 
     public void setDiagnosticSummary(String diagnosticSummary) {
         this.diagnosticSummary = diagnosticSummary;
+    }
+
+    public List<Implication> getDiagnosticImplications() {
+        return diagnosticImplications;
+    }
+
+    public void setDiagnosticImplications(List<Implication> diagnosticImplications) {
+        this.diagnosticImplications = diagnosticImplications;
+    }
+
+    public List<Implication> getPrognosticImplications() {
+        return prognosticImplications;
+    }
+
+    public void setPrognosticImplications(List<Implication> prognosticImplications) {
+        this.prognosticImplications = prognosticImplications;
     }
 
     public List<IndicatorQueryTreatment> getTreatments() {

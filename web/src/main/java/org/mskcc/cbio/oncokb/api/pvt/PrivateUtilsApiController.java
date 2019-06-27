@@ -110,8 +110,8 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
                 mainNumber.setAlteration(alterations.size());
                 Set<Evidence> evidences = CacheUtils.getAllEvidences();
                 Set<TumorType> treatmentTumorTypes = new HashSet<>();
-                for(Evidence evidence : evidences) {
-                    if(evidence.getLevelOfEvidence() != null && evidence.getOncoTreeType() != null) {
+                for (Evidence evidence : evidences) {
+                    if (evidence.getLevelOfEvidence() != null && evidence.getOncoTreeType() != null) {
                         treatmentTumorTypes.add(evidence.getOncoTreeType());
                     }
                 }
@@ -166,7 +166,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             Set<MatchVariant> match = new HashSet<>();
 
             for (MatchVariant matchVariantRequestVariant : body.getOncokbVariants()) {
-                if(query.getHugoSymbol().equals(matchVariantRequestVariant.getHugoSymbol())) {
+                if (query.getHugoSymbol().equals(matchVariantRequestVariant.getHugoSymbol())) {
                     boolean isMatch = matchVariant(query.getHugoSymbol(), matchVariantRequestVariant.getAlteration(), query.getAlteration());
                     if (isMatch) {
                         match.add(matchVariantRequestVariant);
@@ -273,5 +273,12 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             }
         }
         return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<List<TumorType>> utilRelevantTumorTypesGet(
+        @ApiParam(value = "OncoTree tumor type name/main type/code") @RequestParam(value = "tumorType") String tumorType
+    ) {
+        return new ResponseEntity<>(TumorTypeUtils.findTumorTypes(tumorType, null), HttpStatus.OK);
     }
 }

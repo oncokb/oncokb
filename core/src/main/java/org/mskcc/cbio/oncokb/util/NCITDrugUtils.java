@@ -26,7 +26,6 @@ public class NCITDrugUtils {
     }
 
     public static LinkedHashSet<NCITDrug> findDrugs(String query) {
-        LinkedHashSet<NCITDrug> matches = new LinkedHashSet<>();
         if (allNcitDrugs == null) {
             cacheDrugs();
         }
@@ -39,19 +38,20 @@ public class NCITDrugUtils {
         if (query == null || allNcitDrugs == null) {
             return new LinkedHashSet<>();
         }
+        query = query.toLowerCase();
         for (NCITDrug drug : allNcitDrugs) {
-            if (drug.getNcitCode().contains(query)) {
+            if (drug.getNcitCode().toLowerCase().contains(query)) {
                 matches.add(drug);
                 continue;
             }
-            if (drug.getDrugName().contains(query)) {
+            if (drug.getDrugName().toLowerCase().contains(query)) {
                 matches.add(drug);
                 continue;
             }
 
             boolean found = false;
             for (String synonym : drug.getSynonyms()) {
-                if (synonym.contains(query)) {
+                if (synonym.toLowerCase().contains(query)) {
                     matches.add(drug);
                     found = true;
                     break;
@@ -94,7 +94,6 @@ public class NCITDrugUtils {
             String code = parts[0] == null ? null : parts[0].trim();
             String preferredName = parts[1] == null ? null : parts[1].trim();
             String synonyms = parts.length >= 3 ? (parts[2] == null ? null : parts[2].trim()) : null;
-            String description = parts.length >= 4 ? (parts[3] == null ? null : parts[3].trim()) : null;
             List<String> synonymsList = new ArrayList<>();
 
             if (StringUtils.isNullOrEmpty(code)) {
@@ -124,9 +123,6 @@ public class NCITDrugUtils {
                 synonymsList.remove(preferredName);
                 drug.setSynonyms(new HashSet<>(synonymsList));
 
-            }
-            if (!StringUtils.isNullOrEmpty(description)) {
-                drug.setDescription(description);
             }
             allNcitDrugs.add(drug);
         }

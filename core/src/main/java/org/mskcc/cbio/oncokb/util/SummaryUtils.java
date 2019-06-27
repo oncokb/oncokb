@@ -23,7 +23,7 @@ public class SummaryUtils {
 
     public static long lastUpdateVariantSummaries = new Date().getTime();
 
-    public static String variantTumorTypeSummary(Gene gene, Alteration exactMatchAlteration, List<Alteration> alterations, Query query, List<TumorType> relevantTumorTypes) {
+    public static String variantTumorTypeSummary(EvidenceType evidenceType, Gene gene, Alteration exactMatchAlteration, List<Alteration> alterations, Query query, List<TumorType> relevantTumorTypes) {
         if (gene == null) {
             return "";
         }
@@ -54,7 +54,7 @@ public class SummaryUtils {
             sb.append(" " + os);
         }
 
-        Map<String, Object> ts = tumorTypeSummary(gene, query, exactMatchAlteration, alterations, relevantTumorTypes);
+        Map<String, Object> ts = tumorTypeSummary(evidenceType, gene, query, exactMatchAlteration, alterations, relevantTumorTypes);
         if (ts != null && ts.get("summary") != null && !((String) ts.get("summary")).isEmpty()) {
             sb.append(" " + ts.get("summary"));
         }
@@ -77,7 +77,7 @@ public class SummaryUtils {
         return sb.toString().trim();
     }
 
-    public static Map<String, Object> tumorTypeSummary(Gene gene, Query query, Alteration exactMatchedAlt, List<Alteration> alterations, List<TumorType> relevantTumorTypes) {
+    public static Map<String, Object> tumorTypeSummary(EvidenceType evidenceType, Gene gene, Query query, Alteration exactMatchedAlt, List<Alteration> alterations, List<TumorType> relevantTumorTypes) {
         Map<String, Object> tumorTypeSummary = newTumorTypeSummary();
         String queryTumorType = query.getTumorType();
         String key = query.getQueryId();
@@ -96,12 +96,12 @@ public class SummaryUtils {
         }
 
         query.setTumorType(queryTumorType);
-        tumorTypeSummary = getTumorTypeSummarySubFunc(gene, query, exactMatchedAlt, alterations, relevantTumorTypes);
+        tumorTypeSummary = getTumorTypeSummarySubFunc(evidenceType, gene, query, exactMatchedAlt, alterations, relevantTumorTypes);
 
         return tumorTypeSummary;
     }
 
-    private static Map<String, Object> getTumorTypeSummarySubFunc(Gene gene, Query query, Alteration exactMatchedAlt, List<Alteration> relevantAlterations, List<TumorType> relevantTumorTypes) {
+    private static Map<String, Object> getTumorTypeSummarySubFunc(EvidenceType evidenceType, Gene gene, Query query, Alteration exactMatchedAlt, List<Alteration> relevantAlterations, List<TumorType> relevantTumorTypes) {
         Map<String, Object> tumorTypeSummary = newTumorTypeSummary();
         Alteration alteration = null;
 
@@ -134,7 +134,7 @@ public class SummaryUtils {
         if (tumorTypeSummary == null) {
             for (TumorType tumorType : relevantTumorTypes) {
                 for (Alteration allele : alternativeAlleles) {
-                    tumorTypeSummary = getRelevantTumorTypeSummaryByAlt(allele, Collections.singleton(tumorType));
+                    tumorTypeSummary = getRelevantTumorTypeSummaryByAlt(evidenceType, allele, Collections.singleton(tumorType));
                     if (tumorTypeSummary != null) {
                         break;
                     }
@@ -146,7 +146,7 @@ public class SummaryUtils {
 
             if (tumorTypeSummary == null) {
                 for (Alteration allele : alternativeAlleles) {
-                    tumorTypeSummary = getOtherTumorTypeSummaryByAlt(allele);
+                    tumorTypeSummary = getOtherTumorTypeSummaryByAlt(evidenceType, allele);
                     if (tumorTypeSummary != null) {
                         break;
                     }
@@ -188,13 +188,13 @@ public class SummaryUtils {
 
             // Base on the priority of relevant alterations
             for (Alteration alt : relevantAlterations) {
-                tumorTypeSummary = getRelevantTumorTypeSummaryByAlt(alt, new HashSet<>(relevantTumorTypes));
+                tumorTypeSummary = getRelevantTumorTypeSummaryByAlt(evidenceType, alt, new HashSet<>(relevantTumorTypes));
                 if (tumorTypeSummary != null) {
                     break;
                 }
 
                 // Get Other Tumor Types summary
-                tumorTypeSummary = getOtherTumorTypeSummaryByAlt(alt);
+                tumorTypeSummary = getOtherTumorTypeSummaryByAlt(evidenceType, alt);
                 if (tumorTypeSummary != null) {
                     break;
                 }
@@ -205,12 +205,14 @@ public class SummaryUtils {
         if (tumorTypeSummary == null) {
             tumorTypeSummary = newTumorTypeSummary();
             String tmpSummary = "";
-            if (query.getAlteration().toLowerCase().contains("truncating mutation")) {
-                tmpSummary = "There are no FDA-approved or NCCN-compendium listed treatments specifically for patients with [[tumor type]] harboring " + getGeneArticle(gene) + " [[gene]] truncating mutation.";
-            } else if (gene.getHugoSymbol().equals("TERT") && query.getAlteration().trim().equalsIgnoreCase("promoter")) {
-                tmpSummary = TERT_PROMOTER_NO_THERAPY_TUMOR_TYPE_SUMMARY;
-            } else {
-                tmpSummary = "There are no FDA-approved or NCCN-compendium listed treatments specifically for patients with [[variant]].";
+            if (evidenceType.equals(EvidenceType.TUMOR_TYPE_SUMMARY)) {
+                if (query.getAlteration().toLowerCase().contains("truncating mutation")) {
+                    tmpSummary = "There are no FDA-approved or NCCN-compendium listed treatments specifically for patients with [[tumor type]] harboring " + getGeneArticle(gene) + " [[gene]] truncating mutation.";
+                } else if (gene.getHugoSymbol().equals("TERT") && query.getAlteration().trim().equalsIgnoreCase("promoter")) {
+                    tmpSummary = TERT_PROMOTER_NO_THERAPY_TUMOR_TYPE_SUMMARY;
+                } else {
+                    tmpSummary = "There are no FDA-approved or NCCN-compendium listed treatments specifically for patients with [[variant]].";
+                }
             }
             tumorTypeSummary.put("summary", tmpSummary);
         }
@@ -220,12 +222,12 @@ public class SummaryUtils {
         return tumorTypeSummary;
     }
 
-    private static Map<String, Object> getRelevantTumorTypeSummaryByAlt(Alteration alteration, Set<TumorType> relevantTumorTypes) {
-        return getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(Collections.singletonList(alteration), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), relevantTumorTypes, null));
+    private static Map<String, Object> getRelevantTumorTypeSummaryByAlt(EvidenceType evidenceType, Alteration alteration, Set<TumorType> relevantTumorTypes) {
+        return getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(Collections.singletonList(alteration), Collections.singleton(evidenceType), relevantTumorTypes, null));
     }
 
-    private static Map<String, Object> getOtherTumorTypeSummaryByAlt(Alteration alteration) {
-        return getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(Collections.singletonList(alteration), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), Collections.singleton(TumorTypeUtils.getMappedSpecialTumor(SpecialTumorType.OTHER_TUMOR_TYPES)), null));
+    private static Map<String, Object> getOtherTumorTypeSummaryByAlt(EvidenceType evidenceType, Alteration alteration) {
+        return getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(Collections.singletonList(alteration), Collections.singleton(evidenceType), Collections.singleton(TumorTypeUtils.getMappedSpecialTumor(SpecialTumorType.OTHER_TUMOR_TYPES)), null));
     }
 
     public static String unknownOncogenicSummary(Gene gene, String queryAlteration) {
@@ -482,7 +484,7 @@ public class SummaryUtils {
 
         sb.append(geneSummary(gene));
 
-        String vts = SummaryUtils.variantTumorTypeSummary(gene, exactMatchAlteration, alterations, query, relevantTumorTypes);
+        String vts = SummaryUtils.variantTumorTypeSummary(EvidenceType.TUMOR_TYPE_SUMMARY, gene, exactMatchAlteration, alterations, query, relevantTumorTypes);
         if (vts != null && !vts.equals("")) {
             sb.append(" " + vts);
         }

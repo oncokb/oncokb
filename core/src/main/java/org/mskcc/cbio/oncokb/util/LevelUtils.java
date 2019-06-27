@@ -98,6 +98,14 @@ public class LevelUtils {
         return getHighestLevelByType(levels, PUBLIC_LEVELS);
     }
 
+    public static LevelOfEvidence getHighestDiagnosticImplicationLevel(Set<LevelOfEvidence> levels) {
+        return getHighestLevelByType(levels, DIAGNOSTIC_LEVELS);
+    }
+
+    public static LevelOfEvidence getHighestPrognosticImplicationLevel(Set<LevelOfEvidence> levels) {
+        return getHighestLevelByType(levels, PROGNOSTIC_LEVELS);
+    }
+
     public static LevelOfEvidence getHighestSensitiveLevel(Set<LevelOfEvidence> levels) {
         return getHighestLevelByType(levels, THERAPEUTIC_SENSITIVE_LEVELS);
     }

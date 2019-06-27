@@ -1,9 +1,6 @@
 package org.mskcc.cbio.oncokb.controller;
 
-import org.mskcc.cbio.oncokb.model.Query;
-import org.mskcc.cbio.oncokb.model.SummaryQueries;
-import org.mskcc.cbio.oncokb.model.SummaryQueryRes;
-import org.mskcc.cbio.oncokb.model.VariantQuery;
+import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.SummaryUtils;
 import org.mskcc.cbio.oncokb.util.VariantPairUtils;
 import org.springframework.http.HttpMethod;
@@ -89,7 +86,7 @@ public class SummaryController {
                     summary = SummaryUtils.oncogenicSummary(variantQuery.getGene(), variantQuery.getExactMatchAlteration(), variantQuery.getAlterations(), query);
                     break;
                 case "variant":
-                    summary = SummaryUtils.variantTumorTypeSummary(variantQuery.getGene(), variantQuery.getExactMatchAlteration(), variantQuery.getAlterations(), query, variantQuery.getTumorTypes());
+                    summary = SummaryUtils.variantTumorTypeSummary(EvidenceType.TUMOR_TYPE_SUMMARY, variantQuery.getGene(), variantQuery.getExactMatchAlteration(), variantQuery.getAlterations(), query, variantQuery.getTumorTypes());
                     break;
                 case "full":
                     summary = SummaryUtils.fullSummary(variantQuery.getGene(), variantQuery.getExactMatchAlteration(), variantQuery.getAlterations(), query, variantQuery.getTumorTypes());
@@ -98,13 +95,13 @@ public class SummaryController {
                     summary = SummaryUtils.variantCustomizedSummary(Collections.singleton(variantQuery.getGene()), variantQuery.getExactMatchAlteration(), variantQuery.getAlterations(), query, new HashSet<>(variantQuery.getTumorTypes()));
                     break;
                 case "tumorType":
-                    Map<String, Object> summaryMap = SummaryUtils.tumorTypeSummary(variantQuery.getGene(), query, variantQuery.getExactMatchAlteration(), variantQuery.getAlterations(), variantQuery.getTumorTypes());
+                    Map<String, Object> summaryMap = SummaryUtils.tumorTypeSummary(EvidenceType.TUMOR_TYPE_SUMMARY, variantQuery.getGene(), query, variantQuery.getExactMatchAlteration(), variantQuery.getAlterations(), variantQuery.getTumorTypes());
                     if (summaryMap != null) {
                         summary = (String) summaryMap.get("summary");
                     }
                     break;
                 default:
-                    summary = SummaryUtils.variantTumorTypeSummary(variantQuery.getGene(), variantQuery.getExactMatchAlteration(), variantQuery.getAlterations(), query, variantQuery.getTumorTypes());
+                    summary = SummaryUtils.variantTumorTypeSummary(EvidenceType.TUMOR_TYPE_SUMMARY, variantQuery.getGene(), variantQuery.getExactMatchAlteration(), variantQuery.getAlterations(), query, variantQuery.getTumorTypes());
                     break;
             }
         }
