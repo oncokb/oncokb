@@ -70,13 +70,14 @@ public class NCITDrugUtils {
 
         allNcitDrugs = new HashSet<>();
 
-        List<String> lines = null;
+        List<String> lines = new ArrayList<>();
         try {
-            lines = FileUtils.readTrimedLinesStream(
-                NCITDrugUtils.class.getResourceAsStream("/data/Thesaurus.txt"));
+            lines.addAll(FileUtils.readTrimedLinesStream(
+                NCITDrugUtils.class.getResourceAsStream("/data/Antineoplastic_Agent.txt")));
+            lines.addAll(FileUtils.readTrimedLinesStream(
+                NCITDrugUtils.class.getResourceAsStream("/data/Antineoplastic_Agent_Addition.txt")));
         } catch (IOException e) {
             e.printStackTrace();
-            lines = new ArrayList<>();
         }
         int nLines = lines.size();
 
