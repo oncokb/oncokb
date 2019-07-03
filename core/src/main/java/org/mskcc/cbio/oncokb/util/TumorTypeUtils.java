@@ -15,6 +15,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by Hongxin on 8/10/15.
@@ -339,6 +340,16 @@ public class TumorTypeUtils {
 
         mappedTumorTypesFromSource.addAll(parentIncludedMatchByCode);
         mappedTumorTypesFromSource.addAll(parentIncludedMatchByName);
+
+        // We should exclude all tumor types don't have same main type
+        Set<MainType> allowedMainTypes = oncoTreeTypes.stream().map(oncoTreeType -> oncoTreeType.getMainType()).collect(Collectors.toSet());
+        Iterator<TumorType> it = mappedTumorTypesFromSource.iterator();
+        while (it.hasNext()) {
+            TumorType oncotreeTumorType = it.next();
+            if (!allowedMainTypes.contains(oncotreeTumorType.getMainType())) {
+                it.remove();
+            }
+        }
 
         // Include all solid tumors
         if (hasSolidTumor(new HashSet<>(mappedTumorTypesFromSource))) {
