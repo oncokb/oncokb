@@ -607,6 +607,10 @@ public class TumorTypeUtils {
         LinkedHashSet<TumorType> types = new LinkedHashSet<>();
         TumorType mapped;
 
+        if (tumorType == null) {
+            return types;
+        }
+
         mapped = getOncoTreeSubtypeByCode(tumorType);
         if (mapped == null) {
             mapped = getOncoTreeSubtypeByName(tumorType);
