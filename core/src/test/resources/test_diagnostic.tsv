@@ -1,6 +1,8 @@
 # Gene	Alteration	Tumor Type	Summary	The highest Level	Number of diagnostic implications
 
-ABL1	BCR-ABL1 Fusion		The presence of a BCR-ABL1 fusion is required for a diagnosis of chronic myelogenous leukemia, BCR-ABL1-positive.	Dx1	5
+ABL1	BCR-ABL1 Fusion			Dx1	5
+ABL1	BCR-ABL1 Fusion	CML	The presence of a BCR-ABL1 fusion is required for a diagnosis of chronic myelogenous leukemia, BCR-ABL1-positive.	Dx1	1
+ABL1	BCR-ABL1 Fusion	CMLBCRABL1	The presence of a BCR-ABL1 fusion is required for a diagnosis of chronic myelogenous leukemia, BCR-ABL1-positive.	Dx1	1
 ABL1	BCR-ABL1 Fusion	Myloid		Dx1	5
 ABL1	BCR-ABL1 Fusion	AML		Dx1	1
 ABL1	BCR-ABL1 Fusion	BLL		Dx1	2

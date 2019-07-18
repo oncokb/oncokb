@@ -373,7 +373,7 @@ public class IndicatorUtils {
             if (evidenceTypes.contains(EvidenceType.DIAGNOSTIC_SUMMARY)) {
                 Map<String, Object> diagnosticSummary = SummaryUtils.tumorTypeSummary(EvidenceType.DIAGNOSTIC_SUMMARY, gene, query, matchedAlt,
                     new ArrayList<>(relevantAlterations),
-                    relevantDownwardTumorTypes);
+                    relevantUpwardTumorTypes);
                 if (diagnosticSummary != null) {
                     indicatorQuery.setDiagnosticSummary((String) diagnosticSummary.get("summary"));
                     Date lateEdit = diagnosticSummary.get("lastEdit") == null ? null : (Date) diagnosticSummary.get("lastEdit");
