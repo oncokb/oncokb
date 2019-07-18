@@ -6,6 +6,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.mskcc.cbio.oncokb.model.RelevantTumorTypeDirection;
 import org.mskcc.cbio.oncokb.model.SpecialTumorType;
 import org.mskcc.cbio.oncokb.model.TumorForm;
 import org.mskcc.cbio.oncokb.model.oncotree.MainType;
@@ -44,7 +45,14 @@ public class TumorTypeUtils {
         "Myelodysplasia", "Myeloproliferative Neoplasm", "Mastocytosis", "Hodgkin Lymphoma", "Non-Hodgkin Lymphoma",
         "Blood Cancer, NOS", "Myelodysplastic Syndromes", "Lymphatic Cancer, NOS", " B-Lymphoblastic Leukemia/Lymphoma",
         "Mature B-Cell Neoplasms", "Mature T and NK Neoplasms", "Posttransplant Lymphoproliferative Disorders",
-        "T-Lymphoblastic Leukemia/Lymphoma", "Histiocytic Disorder");
+        "T-Lymphoblastic Leukemia/Lymphoma", "Histiocytic Disorder"
+
+        // Addition in oncotree_2019_03_01
+        , "Myeloproliferative Neoplasms"
+        , "Myelodysplastic/Myeloproliferative Neoplasms"
+        , "Myeloid Neoplasms with Germ Line Predisposition"
+
+    );
 
     /**
      * Get all exist OncoTree tumor types including cancer types and subtypes
@@ -324,31 +332,57 @@ public class TumorTypeUtils {
     }
 
     public static List<TumorType> findTumorTypes(String tumorType, String source) {
+        return findTumorTypes(tumorType, RelevantTumorTypeDirection.UPWARD);
+    }
+
+    public static List<TumorType> findTumorTypes(String tumorType, RelevantTumorTypeDirection direction) {
         LinkedHashSet<TumorType> mappedTumorTypesFromSource = new LinkedHashSet<>();
 
-        // Include exact matched tumor type
-        LinkedHashSet<TumorType> oncoTreeTypes = getOncoTreeTypesByTumorType(tumorType);
-        mappedTumorTypesFromSource.addAll(oncoTreeTypes);
+        if (direction.equals(RelevantTumorTypeDirection.UPWARD)) {
+            // Include exact matched tumor type
+            LinkedHashSet<TumorType> oncoTreeTypes = getOncoTreeTypesByTumorType(tumorType);
+            mappedTumorTypesFromSource.addAll(oncoTreeTypes);
 
-        // Include all parent nodes
-        List<TumorType> parentIncludedMatchByCode = findTumorType(
-            allNestedOncoTreeSubtypes.get("TISSUE"), allNestedOncoTreeSubtypes.get("TISSUE"),
-            new ArrayList<TumorType>(), "code", tumorType, true, true, false);
-        List<TumorType> parentIncludedMatchByName = findTumorType(
-            allNestedOncoTreeSubtypes.get("TISSUE"), allNestedOncoTreeSubtypes.get("TISSUE"),
-            new ArrayList<TumorType>(), "name", tumorType, true, true, false);
+            // Include all parent nodes
+            List<TumorType> parentIncludedMatchByCode = findTumorType(
+                allNestedOncoTreeSubtypes.get("TISSUE"), allNestedOncoTreeSubtypes.get("TISSUE"),
+                new ArrayList<TumorType>(), "code", tumorType, true, true, false);
+            List<TumorType> parentIncludedMatchByName = findTumorType(
+                allNestedOncoTreeSubtypes.get("TISSUE"), allNestedOncoTreeSubtypes.get("TISSUE"),
+                new ArrayList<TumorType>(), "name", tumorType, true, true, false);
 
-        mappedTumorTypesFromSource.addAll(parentIncludedMatchByCode);
-        mappedTumorTypesFromSource.addAll(parentIncludedMatchByName);
+            mappedTumorTypesFromSource.addAll(parentIncludedMatchByCode);
+            mappedTumorTypesFromSource.addAll(parentIncludedMatchByName);
 
-        // We should exclude all tumor types don't have same main type
-        Set<MainType> allowedMainTypes = oncoTreeTypes.stream().map(oncoTreeType -> oncoTreeType.getMainType()).collect(Collectors.toSet());
-        Iterator<TumorType> it = mappedTumorTypesFromSource.iterator();
-        while (it.hasNext()) {
-            TumorType oncotreeTumorType = it.next();
-            if (!allowedMainTypes.contains(oncotreeTumorType.getMainType())) {
-                it.remove();
+            // We should not exclude all tumor types don't have same main type
+            Set<MainType> allowedMainTypes = oncoTreeTypes.stream().map(oncoTreeType -> oncoTreeType.getMainType()).collect(Collectors.toSet());
+            Iterator<TumorType> it = mappedTumorTypesFromSource.iterator();
+            while (it.hasNext()) {
+                TumorType oncotreeTumorType = it.next();
+                if (!allowedMainTypes.contains(oncotreeTumorType.getMainType())) {
+                    it.remove();
+                }
             }
+        } else {
+            LinkedHashSet<TumorType> tumorTypesIncludeChildren = new LinkedHashSet<>();
+            if (com.mysql.jdbc.StringUtils.isNullOrEmpty(tumorType)) {
+                tumorTypesIncludeChildren.addAll(findTumorType(
+                    allNestedOncoTreeSubtypes.get("TISSUE"), allNestedOncoTreeSubtypes.get("TISSUE"),
+                    new ArrayList<TumorType>(), "code", "TISSUE", true, false, true));
+            } else {
+                tumorTypesIncludeChildren.addAll(findTumorType(
+                    allNestedOncoTreeSubtypes.get("TISSUE"), allNestedOncoTreeSubtypes.get("TISSUE"),
+                    new ArrayList<TumorType>(), "code", tumorType, true, false, true));
+                if (tumorTypesIncludeChildren.size() == 0) {
+                    tumorTypesIncludeChildren.addAll(findTumorType(
+                        allNestedOncoTreeSubtypes.get("TISSUE"), allNestedOncoTreeSubtypes.get("TISSUE"),
+                        new ArrayList<TumorType>(), "name", tumorType, true, false, true));
+                }
+            }
+            if (tumorTypesIncludeChildren.size() == 0) {
+                return new ArrayList<>();
+            }
+            mappedTumorTypesFromSource.addAll(getAllChildrenTumorTypes(new ArrayList<>(tumorTypesIncludeChildren)));
         }
 
         // Include all solid tumors
@@ -507,7 +541,7 @@ public class TumorTypeUtils {
                 }
         }
 
-        if (match && currentTumorType.getLevel() > 0) {
+        if (match) {
             TumorType tumorType = new TumorType();
             tumorType.setTissue(currentTumorType.getTissue());
             tumorType.setCode(currentTumorType.getCode());
@@ -643,8 +677,8 @@ public class TumorTypeUtils {
         return mapped;
     }
 
-    private static Set<TumorType> getAllChildrenTumorTypes(Set<TumorType> tumorTypes) {
-        Set<TumorType> children = new HashSet<>();
+    private static List<TumorType> getAllChildrenTumorTypes(List<TumorType> tumorTypes) {
+        List<TumorType> children = new ArrayList<>();
         for (TumorType tumorType : tumorTypes) {
             TumorType trimmedTT = new TumorType();
             trimmedTT.setTissue(tumorType.getTissue());
@@ -657,25 +691,14 @@ public class TumorTypeUtils {
             trimmedTT.setLevel(tumorType.getLevel());
             trimmedTT.setHistory(tumorType.getHistory());
             children.add(trimmedTT);
+            if (tumorType.getMainType() != null && !com.mysql.jdbc.StringUtils.isNullOrEmpty(tumorType.getMainType().getName())) {
+                children.add(getOncoTreeCancerType(tumorType.getMainType().getName()));
+            }
             if (!tumorType.getChildren().isEmpty()) {
-                children.addAll(getAllChildrenTumorTypes(new HashSet<>(tumorType.getChildren().values())));
+                children.addAll(getAllChildrenTumorTypes(new ArrayList<>(tumorType.getChildren().values())));
             }
         }
         return children;
-    }
-
-    public static Set<TumorType> getAllChildrenTumorTypes(String tumorType) {
-        Set<TumorType> matchedTumorTypes = new HashSet<>();
-        matchedTumorTypes.addAll(findTumorType(
-            allNestedOncoTreeSubtypes.get("TISSUE"), allNestedOncoTreeSubtypes.get("TISSUE"),
-            new ArrayList<TumorType>(), "code", tumorType, true, false, true));
-        matchedTumorTypes.addAll(findTumorType(
-            allNestedOncoTreeSubtypes.get("TISSUE"), allNestedOncoTreeSubtypes.get("TISSUE"),
-            new ArrayList<TumorType>(), "name", tumorType, true, false, true));
-        if (matchedTumorTypes.size() == 0) {
-            return new HashSet<>();
-        }
-        return getAllChildrenTumorTypes(matchedTumorTypes);
     }
 
     private static List<TumorType> getOncoTreeCancerTypesFromSource() {

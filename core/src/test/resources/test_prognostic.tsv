@@ -1,5 +1,6 @@
-# Gene	Alteration	Tumor Type	Summary	Level
+# Gene	Alteration	Tumor Type	Summary	The Highest Level	Number of prognostic implications
 
-#ABL1	BCR-ABL1 Fusion	AML
-#ABL1	BCR-ABL1 Fusion	BLLBCRABL1L		Px1
-#ABL1	BCR-ABL1 Fusion	MPALBCRABL1		Px1
+ABL1	BCR-ABL1 Fusion				0
+ABL1	BCR-ABL1 Fusion	AML			0
+ABL1	BCR-ABL1 Fusion	BLLBCRABL1L		Px1	1
+ABL1	BCR-ABL1 Fusion	MPALBCRABL1		Px1	1

@@ -198,7 +198,8 @@ public class IndicatorUtils {
 
             List<Alteration> nonVUSRelevantAlts = AlterationUtils.excludeVUS(relevantAlterations);
             Map<String, LevelOfEvidence> highestLevels = new HashMap<>();
-            List<TumorType> oncoTreeTypes = new ArrayList<>();
+            List<TumorType> relevantUpwardTumorTypes = new ArrayList<>();
+            List<TumorType> relevantDownwardTumorTypes = new ArrayList<>();
 
             Alteration matchedAlt = AlterationUtils.findAlteration(alteration.getGene(), alteration.getAlteration());
 
@@ -222,8 +223,10 @@ public class IndicatorUtils {
             }
 
             if (query.getTumorType() != null) {
-                oncoTreeTypes = TumorTypeUtils.getMappedOncoTreeTypesBySource(query.getTumorType(), source);
+                relevantUpwardTumorTypes = TumorTypeUtils.getMappedOncoTreeTypesBySource(query.getTumorType(), source);
             }
+
+            relevantDownwardTumorTypes = TumorTypeUtils.findTumorTypes(query.getTumorType(), RelevantTumorTypeDirection.DOWNWARD);
 
             indicatorQuery.setVUS(isVUS(matchedAlt));
 
@@ -282,14 +285,14 @@ public class IndicatorUtils {
                 }
 
                 if (hasDiagnosticImplicationEvidence) {
-                    indicatorQuery.setDiagnosticImplications(getImplications(matchedAlt, alleles, relevantAlterations, EvidenceType.DIAGNOSTIC_IMPLICATION, new HashSet<>(oncoTreeTypes)));
+                    indicatorQuery.setDiagnosticImplications(getImplications(matchedAlt, alleles, relevantAlterations, EvidenceType.DIAGNOSTIC_IMPLICATION, new HashSet<>(relevantDownwardTumorTypes)));
                     if (indicatorQuery.getDiagnosticImplications().size() > 0) {
                         indicatorQuery.setHighestDiagnosticImplicationLevel(LevelUtils.getHighestDiagnosticImplicationLevel(indicatorQuery.getDiagnosticImplications().stream().map(implication -> implication.getLevelOfEvidence()).collect(Collectors.toSet())));
                     }
                 }
 
                 if (hasPrognosticImplicationEvidence) {
-                    indicatorQuery.setPrognosticImplications(getImplications(matchedAlt, alleles, relevantAlterations, EvidenceType.PROGNOSTIC_IMPLICATION, new HashSet<>(oncoTreeTypes)));
+                    indicatorQuery.setPrognosticImplications(getImplications(matchedAlt, alleles, relevantAlterations, EvidenceType.PROGNOSTIC_IMPLICATION, new HashSet<>(relevantUpwardTumorTypes)));
                     if (indicatorQuery.getPrognosticImplications().size() > 0) {
                         indicatorQuery.setHighestPrognosticImplicationLevel(LevelUtils.getHighestPrognosticImplicationLevel(indicatorQuery.getPrognosticImplications().stream().map(implication -> implication.getLevelOfEvidence()).collect(Collectors.toSet())));
                     }
@@ -308,7 +311,7 @@ public class IndicatorUtils {
                         treatmentEvidences.addAll(EvidenceUtils.keepHighestLevelForSameTreatments(
                             EvidenceUtils.convertEvidenceLevel(
                                 EvidenceUtils.getEvidence(Collections.singletonList(oncogenicMutation),
-                                    selectedTreatmentEvidence, levels), new HashSet<>(oncoTreeTypes)), matchedAlt));
+                                    selectedTreatmentEvidence, levels), new HashSet<>(relevantUpwardTumorTypes)), matchedAlt));
                     }
                 }
             }
@@ -348,7 +351,7 @@ public class IndicatorUtils {
             if (evidenceTypes.contains(EvidenceType.TUMOR_TYPE_SUMMARY) && query.getTumorType() != null) {
                 Map<String, Object> tumorTypeSummary = SummaryUtils.tumorTypeSummary(EvidenceType.TUMOR_TYPE_SUMMARY, gene, query, matchedAlt,
                     new ArrayList<>(relevantAlterations),
-                    oncoTreeTypes);
+                    relevantUpwardTumorTypes);
                 if (tumorTypeSummary != null) {
                     indicatorQuery.setTumorTypeSummary((String) tumorTypeSummary.get("summary"));
                     Date lateEdit = tumorTypeSummary.get("lastEdit") == null ? null : (Date) tumorTypeSummary.get("lastEdit");
@@ -370,7 +373,7 @@ public class IndicatorUtils {
             if (evidenceTypes.contains(EvidenceType.DIAGNOSTIC_SUMMARY)) {
                 Map<String, Object> diagnosticSummary = SummaryUtils.tumorTypeSummary(EvidenceType.DIAGNOSTIC_SUMMARY, gene, query, matchedAlt,
                     new ArrayList<>(relevantAlterations),
-                    oncoTreeTypes);
+                    relevantDownwardTumorTypes);
                 if (diagnosticSummary != null) {
                     indicatorQuery.setDiagnosticSummary((String) diagnosticSummary.get("summary"));
                     Date lateEdit = diagnosticSummary.get("lastEdit") == null ? null : (Date) diagnosticSummary.get("lastEdit");
@@ -386,7 +389,7 @@ public class IndicatorUtils {
             if (evidenceTypes.contains(EvidenceType.PROGNOSTIC_SUMMARY)) {
                 Map<String, Object> prognosticSummary = SummaryUtils.tumorTypeSummary(EvidenceType.PROGNOSTIC_SUMMARY, gene, query, matchedAlt,
                     new ArrayList<>(relevantAlterations),
-                    oncoTreeTypes);
+                    relevantUpwardTumorTypes);
                 if (prognosticSummary != null) {
                     indicatorQuery.setPrognosticSummary((String) prognosticSummary.get("summary"));
                     Date lateEdit = prognosticSummary.get("lastEdit") == null ? null : (Date) prognosticSummary.get("lastEdit");
@@ -402,7 +405,7 @@ public class IndicatorUtils {
             if (gene != null && (gene.getHugoSymbol().equals("KRAS") || gene.getHugoSymbol().equals("NRAS"))
                 && query.getAlteration() != null
                 && StringUtils.containsIgnoreCase(query.getAlteration(), "wildtype")) {
-                if (oncoTreeTypes.contains(TumorTypeUtils.getOncoTreeCancerType("Colorectal Cancer"))) {
+                if (relevantUpwardTumorTypes.contains(TumorTypeUtils.getOncoTreeCancerType("Colorectal Cancer"))) {
                     indicatorQuery.setGeneSummary("RAS (KRAS/NRAS) which is wildtype (not mutated) in this sample, encodes an upstream activator of the pro-oncogenic MAP- and PI3-kinase pathways and is mutated in approximately 40% of late stage colorectal cancers.");
                     indicatorQuery.setVariantSummary("The absence of a mutation in the RAS genes is clinically important because it expands approved treatments available to treat this tumor. RAS status in stage IV colorectal cancer influences patient responses to the anti-EGFR antibody therapies cetuximab and panitumumab.");
                     indicatorQuery.setTumorTypeSummary("These drugs are FDA-approved for the treatment of KRAS wildtype colorectal tumors together with chemotherapy or alone following progression through standard chemotherapy.");
