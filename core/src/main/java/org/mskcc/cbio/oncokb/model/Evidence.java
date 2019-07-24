@@ -190,6 +190,7 @@ public class Evidence implements java.io.Serializable {
     private Integer id;
 
     @Column(length = 40)
+    @JsonIgnore
     private String uuid;
 
     @Column(name = "evidence_type")
