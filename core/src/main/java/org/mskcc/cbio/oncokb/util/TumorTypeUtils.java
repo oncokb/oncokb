@@ -578,7 +578,7 @@ public class TumorTypeUtils {
                 matchedTumorTypes = findTumorType(allTumorTypes, (TumorType) pair.getValue(), matchedTumorTypes, key, keyword, exactMatch, includeParent, includeChildren);
             }
         }
-        return new ArrayList<>(new LinkedHashSet<>(matchedTumorTypes));
+        return matchedTumorTypes;
     }
 
     private static Set<TumorType> fromQuestTumorType(String questTumorType) {
