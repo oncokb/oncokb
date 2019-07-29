@@ -952,21 +952,20 @@ public class EvidenceUtils {
                 query = assignEvidence(relevantEvidences,
                     Collections.singletonList(query), highestLevelOnly).iterator().next();
 
-                if (highestLevelOnly) {
-                    Set<Evidence> updatedEvidences = new HashSet<>();
-                    final List<LevelOfEvidence> allowedLevels = query.getLevelOfEvidences();
-                    query.getEvidences().stream().forEach(evidence -> {
-                        if (evidence.getLevelOfEvidence() != null && evidence.getPropagation() != null) {
-                            Evidence propagatedLevel = getPropagateEvidence(allowedLevels, evidence);
-                            if (propagatedLevel != null) {
-                                updatedEvidences.add(propagatedLevel);
-                            }
-                        } else {
-                            updatedEvidences.add(evidence);
+                Set<Evidence> updatedEvidences = new HashSet<>();
+                final List<LevelOfEvidence> allowedLevels = query.getLevelOfEvidences();
+                final List<TumorType> upwardTumorTypes = query.getOncoTreeTypes();
+                query.getEvidences().stream().forEach(evidence -> {
+                    if (evidence.getLevelOfEvidence() != null && evidence.getPropagation() != null && !upwardTumorTypes.contains(evidence.getOncoTreeType())) {
+                        Evidence propagatedLevel = getPropagateEvidence(allowedLevels, evidence);
+                        if (propagatedLevel != null) {
+                            updatedEvidences.add(propagatedLevel);
                         }
-                    });
-                    query.setEvidences(new ArrayList<>(keepHighestLevelForSameTreatments(updatedEvidences, query.getExactMatchedAlteration())));
-                }
+                    } else {
+                        updatedEvidences.add(evidence);
+                    }
+                });
+                query.setEvidences(new ArrayList<>(keepHighestLevelForSameTreatments(updatedEvidences, query.getExactMatchedAlteration())));
                 evidenceQueries.add(query);
             }
         }
