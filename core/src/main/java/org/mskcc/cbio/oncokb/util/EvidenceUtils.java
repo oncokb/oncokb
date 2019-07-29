@@ -13,6 +13,8 @@ import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
 import javax.xml.parsers.ParserConfigurationException;
 import java.util.*;
 
+import static org.mskcc.cbio.oncokb.model.RelevantTumorTypeDirection.DOWNWARD;
+
 /**
  * Created by Hongxin on 8/10/15.
  */
@@ -194,7 +196,8 @@ public class EvidenceUtils {
 
         Map<Integer, Gene> genes = new HashMap<>(); //Get gene evidences
         Map<Integer, Alteration> alterations = new HashMap<>();
-        Set<TumorType> tumorTypes = new HashSet<>();
+        Set<TumorType> upwardTumorTypes = new HashSet<>();
+        Set<TumorType> downwardTumorTypes = new HashSet<>();
 
         for (EvidenceQueryRes query : queries) {
             if (query.getGene() != null) {
@@ -221,11 +224,12 @@ public class EvidenceUtils {
 
                 if (query.getOncoTreeTypes() != null) {
                     for (TumorType tumorType : query.getOncoTreeTypes()) {
-                        if (!tumorTypes.contains(tumorType)) {
-                            tumorTypes.add(tumorType);
+                        if (!upwardTumorTypes.contains(tumorType)) {
+                            upwardTumorTypes.add(tumorType);
                         }
                     }
                 }
+                downwardTumorTypes.addAll(TumorTypeUtils.findTumorTypes(query.getQuery().getTumorType(), DOWNWARD));
             }
         }
 
@@ -251,12 +255,16 @@ public class EvidenceUtils {
             evidences.addAll(getEvidence(uniqueAlterations, common, levelOfEvidences));
         }
 
+        // Get diagnostic implication evidences
+        evidences.addAll(getEvidence(uniqueAlterations, Collections.singleton(EvidenceType.DIAGNOSTIC_IMPLICATION), downwardTumorTypes, levelOfEvidences));
+
         // Get other tumor type related evidences
         Set<EvidenceType> restTTevidenceTypes = EvidenceTypeUtils.getTumorTypeEvidenceTypes();
         restTTevidenceTypes.removeAll(EvidenceTypeUtils.getSensitiveTreatmentEvidenceTypes());
+        restTTevidenceTypes.remove(EvidenceType.DIAGNOSTIC_IMPLICATION);
         common = Sets.intersection(restTTevidenceTypes, evidenceTypes);
         if (common.size() > 0) {
-            evidences.addAll(getEvidence(uniqueAlterations, common, tumorTypes, levelOfEvidences));
+            evidences.addAll(getEvidence(uniqueAlterations, common, upwardTumorTypes, levelOfEvidences));
         }
 
         return evidences;
@@ -421,20 +429,9 @@ public class EvidenceUtils {
                                     filtered.add(evidence);
                                 } else {
                                     if (evidence.getLevelOfEvidence() != null && evidence.getPropagation() != null) {
-                                        LevelOfEvidence propagationLevel = LevelOfEvidence.getByName(evidence.getPropagation());
-
-                                        // Logic step 2, liquid therapies will not be propagated to solid
-//                                        if (isSolidTumorQuery && TumorTypeUtils.isLiquidTumor(evidence.getOncoTreeType())) {
-//                                            propagationLevel = null;
-//                                        }
-                                        if (propagationLevel != null) {
-                                            if (evidenceQuery.getLevelOfEvidences() == null
-                                                || evidenceQuery.getLevelOfEvidences().size() == 0
-                                                || evidenceQuery.getLevelOfEvidences().contains(propagationLevel)) {
-                                                Evidence tempEvidence = new Evidence(evidence, evidence.getId());
-                                                tempEvidence.setLevelOfEvidence(propagationLevel);
-                                                filtered.add(tempEvidence);
-                                            }
+                                        Evidence propagatedLevel = getPropagateEvidence(evidenceQuery.getLevelOfEvidences(), evidence);
+                                        if (propagatedLevel != null) {
+                                            filtered.add(propagatedLevel);
                                         }
                                     }
                                 }
@@ -446,6 +443,26 @@ public class EvidenceUtils {
         }
 
         return filtered;
+    }
+
+    private static Evidence getPropagateEvidence(List<LevelOfEvidence> allowedLevels, Evidence evidence) {
+        Evidence propagatedEvidence = null;
+        LevelOfEvidence propagationLevel = LevelOfEvidence.getByName(evidence.getPropagation());
+
+        // Logic step 2, liquid therapies will not be propagated to solid
+//                                        if (isSolidTumorQuery && TumorTypeUtils.isLiquidTumor(evidence.getOncoTreeType())) {
+//                                            propagationLevel = null;
+//                                        }
+
+        if (propagationLevel != null) {
+            if (allowedLevels == null
+                || allowedLevels.size() == 0
+                || allowedLevels.contains(propagationLevel)) {
+                propagatedEvidence = new Evidence(evidence, evidence.getId());
+                propagatedEvidence.setLevelOfEvidence(propagationLevel);
+            }
+        }
+        return propagatedEvidence;
     }
 
     public static List<Evidence> filterAlteration(List<Evidence> evidences, List<Alteration> alterations) {
@@ -855,6 +872,8 @@ public class EvidenceUtils {
         levelOfEvidences = levelOfEvidences == null ? levelOfEvidences :
             new HashSet<>(CollectionUtils.intersection(levelOfEvidences, LevelUtils.getPublicLevels()));
 
+        highestLevelOnly = highestLevelOnly == null ? false : highestLevelOnly;
+
         // when the LoE and ET are empty, no info should be returned
         if ((levelOfEvidences != null && levelOfEvidences.size() == 0) || evidenceTypes.size() == 0) {
             if (requestQueries == null || requestQueries.size() == 0) {
@@ -925,22 +944,38 @@ public class EvidenceUtils {
                         query.setAlleles(new ArrayList<>(allelesAlts));
                     } else {
                         // if no alteration assigned, but has tumor type
-                        query.setAlterations(new ArrayList<Alteration>(AlterationUtils.getAllAlterations(query.getGene())));
+                        query.setAlterations(new ArrayList<>(AlterationUtils.getAllAlterations(query.getGene())));
                     }
                 }
-                query.setLevelOfEvidences(levelOfEvidences == null ? null : new ArrayList<LevelOfEvidence>(levelOfEvidences));
+                query.setLevelOfEvidences(levelOfEvidences == null ? null : new ArrayList<>(levelOfEvidences));
+                Set<Evidence> relevantEvidences = getEvidence(Collections.singletonList(query), evidenceTypes, geneStatus, levelOfEvidences);
+                query = assignEvidence(relevantEvidences,
+                    Collections.singletonList(query), highestLevelOnly).iterator().next();
+
+                if (highestLevelOnly) {
+                    Set<Evidence> updatedEvidences = new HashSet<>();
+                    final List<LevelOfEvidence> allowedLevels = query.getLevelOfEvidences();
+                    query.getEvidences().stream().forEach(evidence -> {
+                        if (evidence.getLevelOfEvidence() != null && evidence.getPropagation() != null) {
+                            Evidence propagatedLevel = getPropagateEvidence(allowedLevels, evidence);
+                            if (propagatedLevel != null) {
+                                updatedEvidences.add(propagatedLevel);
+                            }
+                        } else {
+                            updatedEvidences.add(evidence);
+                        }
+                    });
+                    query.setEvidences(new ArrayList<>(keepHighestLevelForSameTreatments(updatedEvidences, query.getExactMatchedAlteration())));
+                }
                 evidenceQueries.add(query);
             }
         }
 
-        return assignEvidence(getEvidence(evidenceQueries, evidenceTypes, geneStatus, levelOfEvidences),
-            evidenceQueries, highestLevelOnly);
+        return evidenceQueries;
     }
 
     private static List<EvidenceQueryRes> assignEvidence(Set<Evidence> evidences, List<EvidenceQueryRes> evidenceQueries,
                                                          Boolean highestLevelOnly) {
-        highestLevelOnly = highestLevelOnly == null ? false : highestLevelOnly;
-
         for (EvidenceQueryRes query : evidenceQueries) {
             if (highestLevelOnly) {
                 Set<Evidence> allEvidences = new HashSet<>(query.getEvidences());
@@ -964,8 +999,7 @@ public class EvidenceUtils {
 
                 query.setEvidences(filteredEvidences);
             } else {
-                query.setEvidences(
-                    new ArrayList<>(keepHighestLevelForSameTreatments(filterEvidence(evidences, query), query.getExactMatchedAlteration())));
+                query.setEvidences(new ArrayList<>(evidences));
             }
             CustomizeComparator.sortEvidenceBasedOnPriority(query.getEvidences(), LevelUtils.getIndexedTherapeuticLevels());
             if (query.getGene() != null && query.getGene().getHugoSymbol().equals("KIT")) {
