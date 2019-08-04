@@ -1,5 +1,6 @@
 package org.mskcc.cbio.oncokb.util;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -45,7 +46,8 @@ public class DiagnosticParameterizedTest {
         this.numOfDiagnosticImplications = numOfDiagnosticImplications;
     }
 // Temporary disable the test due to lack of the data
-//    @Test
+    @Test
+    @Ignore
     public void testSummary() throws Exception {
         Query query = new Query();
         query.setAlteration(variant);
