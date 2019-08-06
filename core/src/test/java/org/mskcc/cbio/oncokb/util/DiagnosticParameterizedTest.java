@@ -1,10 +1,12 @@
 package org.mskcc.cbio.oncokb.util;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.mskcc.cbio.oncokb.apiModels.Implication;
 import org.mskcc.cbio.oncokb.model.IndicatorQueryResp;
+import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
 import org.mskcc.cbio.oncokb.model.Query;
 import org.omg.CORBA.IMP_LIMIT;
 
@@ -33,16 +35,19 @@ public class DiagnosticParameterizedTest {
     private String tumorType;
     private String diagnosticSummary;
     private String diagnosticImplicationLevel;
+    private String numOfDiagnosticImplications;
 
-    public DiagnosticParameterizedTest(String gene, String variant, String tumorType, String diagnosticSummary, String diagnosticImplicationLevel) {
+    public DiagnosticParameterizedTest(String gene, String variant, String tumorType, String diagnosticSummary, String diagnosticImplicationLevel, String numOfDiagnosticImplications) {
         this.gene = gene;
         this.variant = variant;
         this.tumorType = tumorType;
         this.diagnosticSummary = diagnosticSummary;
         this.diagnosticImplicationLevel = diagnosticImplicationLevel;
+        this.numOfDiagnosticImplications = numOfDiagnosticImplications;
     }
-
+// Temporary disable the test due to lack of the data
     @Test
+    @Ignore
     public void testSummary() throws Exception {
         Query query = new Query();
         query.setAlteration(variant);
@@ -52,15 +57,12 @@ public class DiagnosticParameterizedTest {
         IndicatorQueryResp resp = IndicatorUtils.processQuery(query, null, null, null, false, null);
         String _query = gene + " " + variant + " " + tumorType;
         String _diagnosticSummary = resp.getDiagnosticSummary();
+        LevelOfEvidence theHighestDiagnosticImplicationLevel = resp.getHighestDiagnosticImplicationLevel();
         List<Implication> _diagnosticImplications = resp.getDiagnosticImplications();
 
         assertEquals("Diagnostic summary, Query: " + _query, diagnosticSummary, _diagnosticSummary);
-        Set<String> levels = _diagnosticImplications.stream().map(implication -> implication.getLevelOfEvidence().getLevel()).collect(Collectors.toSet());
-        if (levels.size() > 0) {
-            assertTrue("Prognostic implication level, Query: " + _query, levels.contains(diagnosticImplicationLevel));
-        } else {
-            assertEquals("Prognostic implication level, Query: " + _query, diagnosticImplicationLevel, "");
-        }
+        assertEquals("Prognostic implication level, Query: " + _query, diagnosticImplicationLevel, theHighestDiagnosticImplicationLevel == null ? "" : theHighestDiagnosticImplicationLevel.getLevel());
+        assertEquals("Number of prognostic implications, Query: " + _query, numOfDiagnosticImplications, Integer.toString(_diagnosticImplications.size()));
     }
 
     @Parameterized.Parameters
@@ -85,15 +87,17 @@ public class DiagnosticParameterizedTest {
             if (!line.startsWith("#") && line.trim().length() > 0) {
                 try {
                     String parts[] = line.split("\t");
-                    if (parts.length < 3) {
+                    if (parts.length < 6) {
                         throw new IllegalArgumentException("Missing a tumor type summary query attribute, parts: " + parts.length);
                     }
+
                     String gene = parts[0];
                     String variant = parts[1];
                     String tumorType = parts[2];
-                    String diagnosticSummary = parts.length > 3 ? parts[3] : "";
-                    String diagnosticLevel = parts.length > 4 ? parts[4] : "";
-                    String[] query = {gene, variant, tumorType, diagnosticSummary, diagnosticLevel};
+                    String diagnosticSummary = parts[3];
+                    String diagnosticLevel = parts[4];
+                    String numOfDiagnosticImplications = parts[5];
+                    String[] query = {gene, variant, tumorType, diagnosticSummary, diagnosticLevel, numOfDiagnosticImplications};
                     queries.add(query);
                     count++;
                 } catch (Exception e) {

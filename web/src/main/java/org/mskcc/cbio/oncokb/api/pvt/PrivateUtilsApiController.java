@@ -279,6 +279,6 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     public ResponseEntity<List<TumorType>> utilRelevantTumorTypesGet(
         @ApiParam(value = "OncoTree tumor type name/main type/code") @RequestParam(value = "tumorType") String tumorType
     ) {
-        return new ResponseEntity<>(TumorTypeUtils.findTumorTypes(tumorType, null), HttpStatus.OK);
+        return new ResponseEntity<>(TumorTypeUtils.findTumorTypes(tumorType, "oncotree"), HttpStatus.OK);
     }
 }

@@ -1,10 +1,12 @@
 package org.mskcc.cbio.oncokb.util;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.mskcc.cbio.oncokb.apiModels.Implication;
 import org.mskcc.cbio.oncokb.model.IndicatorQueryResp;
+import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
 import org.mskcc.cbio.oncokb.model.Query;
 
 import java.io.BufferedReader;
@@ -32,16 +34,20 @@ public class PrognosticParameterizedTest {
     private String tumorType;
     private String prognosticSummary;
     private String prognosticImplicationLevel;
+    private String numOfPrognosticImplications;
 
-    public PrognosticParameterizedTest(String gene, String variant, String tumorType, String prognosticSummary, String prognosticImplicationLevel) {
+    public PrognosticParameterizedTest(String gene, String variant, String tumorType, String prognosticSummary, String prognosticImplicationLevel, String numOfPrognosticImplications) {
         this.gene = gene;
         this.variant = variant;
         this.tumorType = tumorType;
         this.prognosticSummary = prognosticSummary;
         this.prognosticImplicationLevel = prognosticImplicationLevel;
+        this.numOfPrognosticImplications = numOfPrognosticImplications;
     }
 
+    // Temporary disable the test due to lack of the data
     @Test
+    @Ignore
     public void testSummary() throws Exception {
         Query query = new Query();
         query.setAlteration(variant);
@@ -51,15 +57,12 @@ public class PrognosticParameterizedTest {
         IndicatorQueryResp resp = IndicatorUtils.processQuery(query, null, null, null, false, null);
         String _query = gene + " " + variant + " " + tumorType;
         String _prognosticSummary = resp.getPrognosticSummary();
-        List<Implication> _prognosticImplications = resp.getPrognosticImplications();
+        LevelOfEvidence theHighestPrognosticImplicationLevel = resp.getHighestPrognosticImplicationLevel();
+        List<Implication> implications = resp.getPrognosticImplications();
 
         assertEquals("Prognostic summary, Query: " + _query, prognosticSummary, _prognosticSummary);
-        Set<String> levels = _prognosticImplications.stream().map(implication -> implication.getLevelOfEvidence().getLevel()).collect(Collectors.toSet());
-        if(levels.size() > 0) {
-            assertTrue("Prognostic implication level, Query: " + _query, levels.contains(prognosticImplicationLevel));
-        } else {
-            assertEquals("Prognostic implication level, Query: " + _query, prognosticImplicationLevel, "");
-        }
+        assertEquals("Prognostic implication level, Query: " + _query, prognosticImplicationLevel, theHighestPrognosticImplicationLevel == null ? "" : theHighestPrognosticImplicationLevel.getLevel());
+        assertEquals("Number of prognostic implications, Query: " + _query, numOfPrognosticImplications, Integer.toString(implications.size()));
     }
 
     @Parameterized.Parameters
@@ -84,15 +87,16 @@ public class PrognosticParameterizedTest {
             if (!line.startsWith("#") && line.trim().length() > 0) {
                 try {
                     String parts[] = line.split("\t");
-                    if (parts.length < 3) {
+                    if (parts.length < 6) {
                         throw new IllegalArgumentException("Missing a tumor type summary query attribute, parts: " + parts.length);
                     }
                     String gene = parts[0];
                     String variant = parts[1];
                     String tumorType = parts[2];
-                    String prognosticSummary = parts.length > 3 ? parts[3] : "";
-                    String prognosticLevel = parts.length > 4 ? parts[4] : "";
-                    String[] query = {gene, variant, tumorType, prognosticSummary, prognosticLevel};
+                    String prognosticSummary = parts[3];
+                    String prognosticLevel = parts[4];
+                    String numOfPrognosticImplications = parts[5];
+                    String[] query = {gene, variant, tumorType, prognosticSummary, prognosticLevel, numOfPrognosticImplications};
                     queries.add(query);
                     count++;
                 } catch (Exception e) {
