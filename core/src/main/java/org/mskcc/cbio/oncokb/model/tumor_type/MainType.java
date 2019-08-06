@@ -1,4 +1,4 @@
-package org.mskcc.cbio.oncokb.model.oncotree;
+package org.mskcc.cbio.oncokb.model.tumor_type;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
@@ -10,8 +10,7 @@ import java.util.Objects;
 /**
  * General tumor type category.
  **/
-@ApiModel(description = "General tumor type category.")
-@javax.annotation.Generated(value = "class io.swagger.codegen.languages.SpringMVCServerCodegen", date = "2016-04-04T17:16:11.368Z")
+@ApiModel(description = "OncoTree Cancer Type")
 public class MainType {
 
   private Integer id = null;
@@ -23,11 +22,6 @@ public class MainType {
       this.name = name;
   }
 
-  /**
-   * the numarical identifier of tumor type.
-   **/
-  @ApiModelProperty(value = "the numarical identifier of tumor type.")
-  @JsonProperty("id")
   public Integer getId() {
     return id;
   }
@@ -36,11 +30,6 @@ public class MainType {
   }
 
 
-  /**
-   * Tumor type name.
-   **/
-  @ApiModelProperty(value = "Tumor type name.")
-  @JsonProperty("name")
   public String getName() {
     return name;
   }

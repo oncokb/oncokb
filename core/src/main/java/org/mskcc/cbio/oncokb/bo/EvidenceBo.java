@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.oncotree.TumorType;;
+import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;;
 
 /**
  *
