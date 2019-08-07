@@ -229,18 +229,21 @@ public final class VariantAnnotationXML {
             sb.append(indent).append("    </general_statement>\n");
         }
 
+        TumorForm tumorForm = TumorTypeUtils.checkTumorForm(new HashSet<>(relevantTumorTypes));
         // specific evs
         //boolean isInvestigational = tagTherapeuticImp.equals("investigational_therapeutic_implications");
         if (!evsSensitivity.get(1).isEmpty() || !evsResisitance.get(1).isEmpty()) {
             for (Evidence ev : evsSensitivity.get(1)) {
-                if(sameIndication || ev.getPropagation() == null || !ev.getPropagation().equals("NO")) {
+                LevelOfEvidence propagationLevel = EvidenceUtils.getPropagationLevel(ev, tumorForm);
+                if(sameIndication || propagationLevel == null || !propagationLevel.equals(LevelOfEvidence.NO)) {
                     sb.append(indent).append("    <sensitive_to>\n");
                     exportTherapeuticImplications(relevantTumorTypes, ev, sb, indent + "        ");
                     sb.append(indent).append("    </sensitive_to>\n");
                 }
             }
             for (Evidence ev : evsResisitance.get(1)) {
-                if(sameIndication || ev.getPropagation() == null || !ev.getPropagation().equals("NO")) {
+                LevelOfEvidence propagationLevel = EvidenceUtils.getPropagationLevel(ev, tumorForm);
+                if(sameIndication || propagationLevel == null || !propagationLevel.equals(LevelOfEvidence.NO)) {
                     sb.append(indent).append("    <resistant_to>\n");
                     exportTherapeuticImplications(relevantTumorTypes, ev, sb, indent + "        ");
                     sb.append(indent).append("    </resistant_to>\n");
@@ -276,8 +279,10 @@ public final class VariantAnnotationXML {
             sb.append(indent).append("</treatment>\n");
         }
 
+        TumorForm tumorForm = TumorTypeUtils.checkTumorForm(new HashSet<>(relevantTumorTypes));
+        LevelOfEvidence propagationLevel = EvidenceUtils.getPropagationLevel(evidence, tumorForm);
         if (levelOfEvidence != null) {
-            levelOfEvidence = LevelUtils.updateOrKeepLevelByIndication(levelOfEvidence, evidence.getPropagation(), relevantTumorTypes.contains(evidence.getOncoTreeType()));
+            levelOfEvidence = LevelUtils.updateOrKeepLevelByIndication(levelOfEvidence, propagationLevel, relevantTumorTypes.contains(evidence.getOncoTreeType()));
             sb.append(indent).append("<level_of_evidence_for_patient_indication>\n");
             sb.append(indent).append("    <level>");
             sb.append(levelOfEvidence.getLevel());
