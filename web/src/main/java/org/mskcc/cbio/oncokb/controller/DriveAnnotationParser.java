@@ -236,6 +236,10 @@ public class DriveAnnotationParser {
                 System.out.println(spaceStrByNestLevel(nestLevel + 1) +
                     "Last update on: " + MainUtils.getTimeByDate(lastEdit));
             }
+            if (lastReview != null) {
+                System.out.println(spaceStrByNestLevel(nestLevel + 1) +
+                    "Last review on: " + MainUtils.getTimeByDate(lastReview));
+            }
             setDocuments(geneSummary, evidence);
             EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
             evidenceBo.save(evidence);
