@@ -2,10 +2,9 @@ package org.mskcc.cbio.oncokb.util;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.map.HashedMap;
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
+import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -146,7 +145,7 @@ public class SummaryUtils {
 
             if (tumorTypeSummary == null) {
                 for (Alteration allele : alternativeAlleles) {
-                    tumorTypeSummary = getOtherTumorTypeSummaryByAlt(evidenceType, allele);
+                    tumorTypeSummary = getOtherTumorTypeSummaryByAlt(evidenceType, allele, new HashSet<>(relevantTumorTypes));
                     if (tumorTypeSummary != null) {
                         break;
                     }
@@ -194,7 +193,7 @@ public class SummaryUtils {
                 }
 
                 // Get Other Tumor Types summary
-                tumorTypeSummary = getOtherTumorTypeSummaryByAlt(evidenceType, alt);
+                tumorTypeSummary = getOtherTumorTypeSummaryByAlt(evidenceType, alt, new HashSet<>(relevantTumorTypes));
                 if (tumorTypeSummary != null) {
                     break;
                 }
@@ -226,8 +225,28 @@ public class SummaryUtils {
         return getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(Collections.singletonList(alteration), Collections.singleton(evidenceType), relevantTumorTypes, null));
     }
 
-    private static Map<String, Object> getOtherTumorTypeSummaryByAlt(EvidenceType evidenceType, Alteration alteration) {
-        return getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(Collections.singletonList(alteration), Collections.singleton(evidenceType), Collections.singleton(TumorTypeUtils.getMappedSpecialTumor(SpecialTumorType.OTHER_TUMOR_TYPES)), null));
+    private static Map<String, Object> getOtherTumorTypeSummaryByAlt(EvidenceType evidenceType, Alteration alteration, Set<TumorType> relevantTumorTypes) {
+        // Check other tumor types summary based on tumor form
+        List<SpecialTumorType> specialTumorTypes = new ArrayList<>();
+        TumorForm tumorForm = TumorTypeUtils.checkTumorForm(relevantTumorTypes);
+        if (tumorForm != null) {
+            specialTumorTypes.add(tumorForm.equals(TumorForm.SOLID) ?
+                SpecialTumorType.OTHER_SOLID_TUMOR_TYPES : SpecialTumorType.OTHER_LIQUID_TUMOR_TYPES);
+        }
+
+        specialTumorTypes.add(SpecialTumorType.OTHER_TUMOR_TYPES);
+
+        for (SpecialTumorType specialTumorType : specialTumorTypes) {
+
+            List<Evidence> evidences = EvidenceUtils.getEvidence(
+                Collections.singletonList(alteration),
+                Collections.singleton(evidenceType),
+                Collections.singleton(TumorTypeUtils.getMappedSpecialTumor(specialTumorType)), null);
+            if (evidences.size() > 0) {
+                return getTumorTypeSummaryFromEvidences(evidences);
+            }
+        }
+        return null;
     }
 
     public static String unknownOncogenicSummary(Gene gene, String queryAlteration) {
@@ -1150,6 +1169,20 @@ public class SummaryUtils {
         if (pickedTreatment != null && evidences != null) {
             for (Evidence evidence : evidences) {
                 if (evidence.getAlterations().equals(pickedTreatment.getAlterations())) {
+                    tumorTypeSummary = getTumorTypeSummaryFromEvidences(Collections.singletonList(evidence));
+                    if (tumorTypeSummary != null) {
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (tumorTypeSummary == null) {
+            TumorForm tumorForm = TumorTypeUtils.checkTumorForm(relevantTumorTypes);
+            if (tumorForm != null) {
+                SpecialTumorType specialTumorType = tumorForm.equals(TumorForm.SOLID) ? SpecialTumorType.OTHER_SOLID_TUMOR_TYPES : SpecialTumorType.OTHER_LIQUID_TUMOR_TYPES;
+                evidences = EvidenceUtils.getEvidence(Collections.singletonList(alteration), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), Collections.singleton(TumorTypeUtils.getMappedSpecialTumor(specialTumorType)), null);
+                for (Evidence evidence : evidences) {
                     tumorTypeSummary = getTumorTypeSummaryFromEvidences(Collections.singletonList(evidence));
                     if (tumorTypeSummary != null) {
                         break;

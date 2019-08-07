@@ -4,7 +4,6 @@
  */
 package org.mskcc.cbio.oncokb.controller;
 
-import com.google.gson.JsonArray;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -12,7 +11,7 @@ import org.json.JSONObject;
 import org.mskcc.cbio.oncokb.apiModels.NCITDrug;
 import org.mskcc.cbio.oncokb.bo.*;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
+import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
 import org.mskcc.cbio.oncokb.util.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
