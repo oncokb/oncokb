@@ -53,7 +53,7 @@ public class DriveAnnotationParser {
 
     private static final String LAST_REVIEW_EXTENSION = "_validateTime";
     private static final String LAST_EDIT_EXTENSION = "_review";
-    private static final String UUID_EXTENSION = "_review";
+    private static final String UUID_EXTENSION = "_uuid";
 
     public static void parseVUS(Gene gene, JSONArray vus, Integer nestLevel) throws JSONException {
         System.out.println(spaceStrByNestLevel(nestLevel) + "Variants of unknown significance");
