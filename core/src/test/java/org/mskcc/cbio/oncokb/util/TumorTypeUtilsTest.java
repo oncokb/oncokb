@@ -46,10 +46,6 @@ public class TumorTypeUtilsTest extends TestCase {
         expectedResult = "M:All Tumors";
         assertEquals(expectedResult, tumorTypesToString(tumorTypes));
 
-        tumorTypes = TumorTypeUtils.findTumorTypes("All Pediatric Tumors", "oncotree");
-        expectedResult = "M:All Pediatric Tumors, M:All Tumors";
-        assertEquals(expectedResult, tumorTypesToString(tumorTypes));
-
         // When parent node's main type does not match with child, it should not be listed as relevant tumor type
         tumorTypes = TumorTypeUtils.findTumorTypes("Small Cell Lung Cancer", "oncotree");
         expectedResult = "Small Cell Lung Cancer, M:Small Cell Lung Cancer, M:All Solid Tumors, M:All Tumors";
