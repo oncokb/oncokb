@@ -89,9 +89,9 @@ public class Alteration implements java.io.Serializable {
     private String variantResidues;
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "portalAlt_oncoKBAlt", joinColumns = {
-        @JoinColumn(name = "alteration_id", nullable = false, updatable = false)},
-        inverseJoinColumns = {@JoinColumn(name = "portalAlteration_id",
+    @JoinTable(name = "portal_alteration_oncokb_alteration", joinColumns = {
+        @JoinColumn(name = "oncokb_alteration_id", nullable = false, updatable = false)},
+        inverseJoinColumns = {@JoinColumn(name = "portal_alteration_id",
             nullable = false, updatable = false)})
     @JsonIgnore
     private Set<PortalAlteration> portalAlterations = new HashSet<PortalAlteration>(0);

@@ -190,7 +190,6 @@ public class Evidence implements java.io.Serializable {
     private Integer id;
 
     @Column(length = 40)
-    @JsonIgnore
     private String uuid;
 
     @Column(name = "evidence_type")
@@ -233,6 +232,9 @@ public class Evidence implements java.io.Serializable {
 
     @Column(name = "last_edit")
     private Date lastEdit;
+
+    @Column(name = "last_review")
+    private Date lastReview;
 
     @Column(name = "level_of_evidence")
     @Enumerated(EnumType.STRING)
@@ -404,6 +406,14 @@ public class Evidence implements java.io.Serializable {
         this.lastEdit = lastEdit;
     }
 
+    public Date getLastReview() {
+        return lastReview;
+    }
+
+    public void setLastReview(Date lastReview) {
+        this.lastReview = lastReview;
+    }
+
     public LevelOfEvidence getLevelOfEvidence() {
         return levelOfEvidence;
     }
@@ -477,6 +487,7 @@ public class Evidence implements java.io.Serializable {
         this.additionalInfo = e.additionalInfo;
         this.knownEffect = e.knownEffect;
         this.lastEdit = e.lastEdit;
+        this.lastReview = e.lastReview;
         this.levelOfEvidence = e.levelOfEvidence;
         this.propagation = e.propagation;
         // make deep copy of sets
@@ -486,7 +497,8 @@ public class Evidence implements java.io.Serializable {
     }
 
     public Evidence(String uuid, EvidenceType evidenceType, String cancerType, String subtype, TumorType oncoTreeType, Gene gene, Set<Alteration> alterations, String description, String additionalInfo, List<Treatment> treatments,
-                    String knownEffect, Date lastEdit, LevelOfEvidence levelOfEvidence, String propagation, Set<Article> articles) {
+                    String knownEffect, Date lastEdit, Date lastReview,
+                    LevelOfEvidence levelOfEvidence, String propagation, Set<Article> articles) {
         this.uuid = uuid;
         this.evidenceType = evidenceType;
         this.cancerType = cancerType;
@@ -497,6 +509,7 @@ public class Evidence implements java.io.Serializable {
         this.additionalInfo = additionalInfo;
         this.knownEffect = knownEffect;
         this.lastEdit = lastEdit;
+        this.lastReview = lastReview;
         this.levelOfEvidence = levelOfEvidence;
         this.propagation = propagation;
         this.articles = articles;
