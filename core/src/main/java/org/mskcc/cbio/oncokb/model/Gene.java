@@ -38,15 +38,15 @@ public class Gene implements Serializable {
     @Column(length = 500)
     private String name;
 
-    @Column()
+    @Column(name = "tsg")
     @ApiModelProperty(value = "tumorSuppressorGene")
     private Boolean TSG;
     private Boolean oncogene;
 
-    @Column(length = 100)
+    @Column(name = "curated_isoform", length = 100)
     private String curatedIsoform;
 
-    @Column(length = 100)
+    @Column(name = "curated_ref_seq", length = 100)
     private String curatedRefSeq;
 
     @ElementCollection(fetch = FetchType.EAGER)
