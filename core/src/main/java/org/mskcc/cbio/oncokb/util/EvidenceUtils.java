@@ -354,14 +354,14 @@ public class EvidenceUtils {
 
     public static Set<Evidence> convertEvidenceLevel(List<Evidence> evidences, Set<TumorType> tumorTypes) {
         Set<Evidence> tmpEvidences = new HashSet<>();
-
+        TumorForm tumorForm = TumorTypeUtils.checkTumorForm(tumorTypes);
         for (Evidence evidence : evidences) {
             Evidence tmpEvidence = new Evidence(evidence, evidence.getId());
             Boolean flag = true;
             if (Collections.disjoint(Collections.singleton(tmpEvidence.getOncoTreeType()), tumorTypes)) {
                 if (tmpEvidence.getLevelOfEvidence() != null) {
-                    if (tmpEvidence.getPropagation() != null) {
-                        LevelOfEvidence propagationLevel = LevelOfEvidence.getByName(tmpEvidence.getPropagation());
+                    if (tumorForm != null) {
+                        LevelOfEvidence propagationLevel = getPropagationLevel(tmpEvidence, tumorForm);
                         if (propagationLevel != null) {
                             tmpEvidence.setLevelOfEvidence(propagationLevel);
                         } else {
@@ -413,7 +413,6 @@ public class EvidenceUtils {
                                     if (evidence.getDescription() == null) {
                                         List<Alteration> alterations = new ArrayList<>();
                                         alterations.addAll(evidence.getAlterations());
-//                                        tempEvidence.setDescription(SummaryUtils.variantSummary(Collections.singleton(tempEvidence.getGene()), alterations, evidenceQuery.getQueryAlteration(), Collections.singleton(tempEvidence.getTumorType()), evidenceQuery.getQueryTumorType()));
                                     }
                                 }
                                 filtered.add(evidence);
@@ -424,12 +423,13 @@ public class EvidenceUtils {
                                     tumorType.add(evidence.getOncoTreeType());
                                 }
 
+                                TumorForm tumorForm = TumorTypeUtils.checkTumorForm(new HashSet<>(evidenceQuery.getOncoTreeTypes()));
                                 hasjointed = !Collections.disjoint(evidenceQuery.getOncoTreeTypes(), tumorType);
                                 if (hasjointed || com.mysql.jdbc.StringUtils.isNullOrEmpty(evidenceQuery.getQuery().getTumorType())) {
                                     filtered.add(evidence);
-                                } else {
-                                    if (evidence.getLevelOfEvidence() != null && evidence.getPropagation() != null) {
-                                        Evidence propagatedLevel = getPropagateEvidence(evidenceQuery.getLevelOfEvidences(), evidence);
+                                } else if(tumorForm != null){
+                                    if (evidence.getLevelOfEvidence() != null) {
+                                        Evidence propagatedLevel = getPropagateEvidence(evidenceQuery.getLevelOfEvidences(), evidence, tumorForm);
                                         if (propagatedLevel != null) {
                                             filtered.add(propagatedLevel);
                                         }
@@ -445,15 +445,19 @@ public class EvidenceUtils {
         return filtered;
     }
 
-    private static Evidence getPropagateEvidence(List<LevelOfEvidence> allowedLevels, Evidence evidence) {
+    public static LevelOfEvidence getPropagationLevel(Evidence evidence, TumorForm queriedTumorForm) {
+        if (evidence == null || queriedTumorForm == null) {
+            return null;
+        }
+        return queriedTumorForm.equals(TumorForm.SOLID) ? evidence.getSolidPropagationLevel() : evidence.getLiquidPropagationLevel();
+    }
+
+    private static Evidence getPropagateEvidence(List<LevelOfEvidence> allowedLevels, Evidence evidence, TumorForm queriedTumorForm) {
         Evidence propagatedEvidence = null;
-        LevelOfEvidence propagationLevel = LevelOfEvidence.getByName(evidence.getPropagation());
-
-        // Logic step 2, liquid therapies will not be propagated to solid
-//                                        if (isSolidTumorQuery && TumorTypeUtils.isLiquidTumor(evidence.getOncoTreeType())) {
-//                                            propagationLevel = null;
-//                                        }
-
+        if (queriedTumorForm == null) {
+            return propagatedEvidence;
+        }
+        LevelOfEvidence propagationLevel = getPropagationLevel(evidence, queriedTumorForm);
         if (propagationLevel != null) {
             if (allowedLevels == null
                 || allowedLevels.size() == 0
@@ -955,9 +959,10 @@ public class EvidenceUtils {
                 Set<Evidence> updatedEvidences = new HashSet<>();
                 final List<LevelOfEvidence> allowedLevels = query.getLevelOfEvidences();
                 final List<TumorType> upwardTumorTypes = query.getOncoTreeTypes();
+                TumorForm tumorForm = TumorTypeUtils.checkTumorForm(new HashSet<>(upwardTumorTypes));
                 query.getEvidences().stream().forEach(evidence -> {
-                    if (evidence.getLevelOfEvidence() != null && evidence.getPropagation() != null && !upwardTumorTypes.contains(evidence.getOncoTreeType())) {
-                        Evidence propagatedLevel = getPropagateEvidence(allowedLevels, evidence);
+                    if (evidence.getLevelOfEvidence() != null && tumorForm != null && !upwardTumorTypes.contains(evidence.getOncoTreeType())) {
+                        Evidence propagatedLevel = getPropagateEvidence(allowedLevels, evidence, tumorForm);
                         if (propagatedLevel != null) {
                             updatedEvidences.add(propagatedLevel);
                         }

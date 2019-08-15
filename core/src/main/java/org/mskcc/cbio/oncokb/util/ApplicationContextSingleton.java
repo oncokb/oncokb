@@ -54,4 +54,8 @@ public final class ApplicationContextSingleton {
     public static PortalAlterationBo getPortalAlterationBo() {
         return PortalAlterationBo.class.cast(getApplicationContext().getBean("portalAlterationBo"));
     }
+
+    public static GenesetBo getGenesetBo() {
+        return GenesetBo.class.cast(getApplicationContext().getBean("genesetBo"));
+    }
 }

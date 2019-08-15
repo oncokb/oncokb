@@ -54,6 +54,8 @@ public class DriveAnnotationParser {
     private static final String LAST_REVIEW_EXTENSION = "_validateTime";
     private static final String LAST_EDIT_EXTENSION = "_review";
     private static final String UUID_EXTENSION = "_uuid";
+    private static final String SOLID_PROPAGATION_KEY = "propagation";
+    private static final String LIQUID_PROPAGATION_KEY = "propagationLiquid";
 
     public static void parseVUS(Gene gene, JSONArray vus, Integer nestLevel) throws JSONException {
         System.out.println(spaceStrByNestLevel(nestLevel) + "Variants of unknown significance");
@@ -747,31 +749,37 @@ public class DriveAnnotationParser {
                 }
                 evidence.setLevelOfEvidence(levelOfEvidence);
 
-                if (drugObj.has("propagation")) {
-                    String definedPropagation = drugObj.getString("propagation");
-                    if (definedPropagation.equals("no")) {
-                        evidence.setPropagation("NO");
-                    }
+                if (drugObj.has(SOLID_PROPAGATION_KEY)) {
+                    String definedPropagation = drugObj.getString(SOLID_PROPAGATION_KEY);
                     LevelOfEvidence definedLevel = LevelOfEvidence.getByLevel(definedPropagation);
 
                     // Validate level
                     if (definedLevel != null && LevelUtils.getAllowedPropagationLevels().contains(definedLevel)) {
-                        evidence.setPropagation(definedLevel.name());
+                        evidence.setSolidPropagationLevel(definedLevel);
                     }
-                    if (evidence.getPropagation() != null) {
+                    if (evidence.getSolidPropagationLevel() != null) {
                         System.out.println(spaceStrByNestLevel(nestLevel + 2) +
-                            "Manual propagation level: " + evidence.getPropagation());
+                            "Manual solid propagation level: " + evidence.getSolidPropagationLevel());
                     }
+                } else {
+                    evidence.setSolidPropagationLevel(LevelUtils.getDefaultPropagationLevelByTumorForm(evidence, TumorForm.SOLID));
                 }
 
-                // If there is no propagation info predefined, use the default settings.
-                if (evidence.getPropagation() == null && evidence.getLevelOfEvidence() != null) {
-                    if (evidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_1) ||
-                        evidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_2A)) {
-                        evidence.setPropagation(LevelOfEvidence.LEVEL_2B.name());
-                    } else if (evidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_3A)) {
-                        evidence.setPropagation(LevelOfEvidence.LEVEL_3B.name());
+
+                if (drugObj.has(LIQUID_PROPAGATION_KEY)) {
+                    String definedPropagation = drugObj.getString(LIQUID_PROPAGATION_KEY);
+                    LevelOfEvidence definedLevel = LevelOfEvidence.getByLevel(definedPropagation);
+
+                    // Validate level
+                    if (definedLevel != null && LevelUtils.getAllowedPropagationLevels().contains(definedLevel)) {
+                        evidence.setLiquidPropagationLevel(definedLevel);
                     }
+                    if (evidence.getLiquidPropagationLevel() != null) {
+                        System.out.println(spaceStrByNestLevel(nestLevel + 2) +
+                            "Manual liquid propagation level: " + evidence.getLiquidPropagationLevel());
+                    }
+                } else {
+                    evidence.setSolidPropagationLevel(LevelUtils.getDefaultPropagationLevelByTumorForm(evidence, TumorForm.LIQUID));
                 }
             }
 
@@ -932,7 +940,7 @@ public class DriveAnnotationParser {
 
     private static void addDateToLastEditSetFromObject(Set<Date> set, JSONObject object, String key) throws JSONException {
         if (object.has(key + LAST_EDIT_EXTENSION)) {
-            Date tmpDate = getUpdateTime(object.get(key));
+            Date tmpDate = getUpdateTime(object.get(key + LAST_EDIT_EXTENSION));
             if (tmpDate != null) {
                 set.add(tmpDate);
             }

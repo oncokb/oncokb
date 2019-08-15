@@ -202,6 +202,10 @@ public class Evidence implements java.io.Serializable {
     @Column(length = 50)
     private String subtype;
 
+    @JsonIgnore
+    @Column(name = "for_germline")
+    private Boolean forGermline = false;
+
     @Transient
     private TumorType oncoTreeType;
 
@@ -240,8 +244,11 @@ public class Evidence implements java.io.Serializable {
     @Enumerated(EnumType.STRING)
     private LevelOfEvidence levelOfEvidence;
 
-    @Column(length = 10)
-    private String propagation;
+    @Column(name = "solid_propagation_level", length = 10)
+    private LevelOfEvidence solidPropagationLevel;
+
+    @Column(name = "liquid_propagation_level", length = 10)
+    private LevelOfEvidence liquidPropagationLevel;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "evidence_article", joinColumns = {
@@ -292,6 +299,14 @@ public class Evidence implements java.io.Serializable {
 
     public void setSubtype(String subtype) {
         this.subtype = subtype;
+    }
+
+    public Boolean getForGermline() {
+        return forGermline;
+    }
+
+    public void setForGermline(Boolean forGermline) {
+        this.forGermline = forGermline;
     }
 
     public void setOncoTreeType(TumorType oncoTreeType) {
@@ -422,12 +437,20 @@ public class Evidence implements java.io.Serializable {
         this.levelOfEvidence = levelOfEvidence;
     }
 
-    public String getPropagation() {
-        return propagation;
+    public LevelOfEvidence getSolidPropagationLevel() {
+        return solidPropagationLevel;
     }
 
-    public void setPropagation(String propagation) {
-        this.propagation = propagation;
+    public void setSolidPropagationLevel(LevelOfEvidence solidPropagationLevel) {
+        this.solidPropagationLevel = solidPropagationLevel;
+    }
+
+    public LevelOfEvidence getLiquidPropagationLevel() {
+        return liquidPropagationLevel;
+    }
+
+    public void setLiquidPropagationLevel(LevelOfEvidence liquidPropagationLevel) {
+        this.liquidPropagationLevel = liquidPropagationLevel;
     }
 
     public Set<Article> getArticles() {
@@ -489,7 +512,8 @@ public class Evidence implements java.io.Serializable {
         this.lastEdit = e.lastEdit;
         this.lastReview = e.lastReview;
         this.levelOfEvidence = e.levelOfEvidence;
-        this.propagation = e.propagation;
+        this.solidPropagationLevel = e.solidPropagationLevel;
+        this.liquidPropagationLevel = e.liquidPropagationLevel;
         // make deep copy of sets
         this.alterations = new HashSet<>(e.alterations);
         this.setTreatments(new ArrayList<>(e.treatments));
@@ -498,7 +522,9 @@ public class Evidence implements java.io.Serializable {
 
     public Evidence(String uuid, EvidenceType evidenceType, String cancerType, String subtype, TumorType oncoTreeType, Gene gene, Set<Alteration> alterations, String description, String additionalInfo, List<Treatment> treatments,
                     String knownEffect, Date lastEdit, Date lastReview,
-                    LevelOfEvidence levelOfEvidence, String propagation, Set<Article> articles) {
+                    LevelOfEvidence levelOfEvidence,
+                    LevelOfEvidence solidPropagationLevel, LevelOfEvidence liquidPropagationLevel,
+                    Set<Article> articles) {
         this.uuid = uuid;
         this.evidenceType = evidenceType;
         this.cancerType = cancerType;
@@ -511,7 +537,8 @@ public class Evidence implements java.io.Serializable {
         this.lastEdit = lastEdit;
         this.lastReview = lastReview;
         this.levelOfEvidence = levelOfEvidence;
-        this.propagation = propagation;
+        this.solidPropagationLevel = solidPropagationLevel;
+        this.liquidPropagationLevel = liquidPropagationLevel;
         this.articles = articles;
         if (treatments != null) {
             this.setTreatments(treatments);

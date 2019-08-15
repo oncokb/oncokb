@@ -7,10 +7,7 @@ import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author jgao
@@ -211,28 +208,18 @@ public class Alteration implements java.io.Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Alteration)) return false;
-
         Alteration that = (Alteration) o;
-
-        if(getId() != null && that.getId() != null) {
-            return getId().equals(that.getId());
-        }
-
-        if (getUuid() != null ? !getUuid().equals(that.getUuid()) : that.getUuid() != null) return false;
-        if (getGene() != null ? !getGene().equals(that.getGene()) : that.getGene() != null) return false;
-        if (getAlterationType() != that.getAlterationType()) return false;
-        if (getConsequence() != null ? !getConsequence().equals(that.getConsequence()) : that.getConsequence() != null)
-            return false;
-        if (getAlteration() != null ? !getAlteration().equals(that.getAlteration()) : that.getAlteration() != null)
-            return false;
-        if (getName() != null ? !getName().equals(that.getName()) : that.getName() != null) return false;
-        if (getRefResidues() != null ? !getRefResidues().equals(that.getRefResidues()) : that.getRefResidues() != null)
-            return false;
-        if (getProteinStart() != null ? !getProteinStart().equals(that.getProteinStart()) : that.getProteinStart() != null)
-            return false;
-        if (getProteinEnd() != null ? !getProteinEnd().equals(that.getProteinEnd()) : that.getProteinEnd() != null)
-            return false;
-        return getVariantResidues() != null ? getVariantResidues().equals(that.getVariantResidues()) : that.getVariantResidues() == null;
+        return Objects.equals(getId(), that.getId()) &&
+            Objects.equals(getUuid(), that.getUuid()) &&
+            Objects.equals(getGene(), that.getGene()) &&
+            getAlterationType() == that.getAlterationType() &&
+            Objects.equals(getConsequence(), that.getConsequence()) &&
+            Objects.equals(getAlteration(), that.getAlteration()) &&
+            Objects.equals(getName(), that.getName()) &&
+            Objects.equals(getRefResidues(), that.getRefResidues()) &&
+            Objects.equals(getProteinStart(), that.getProteinStart()) &&
+            Objects.equals(getProteinEnd(), that.getProteinEnd()) &&
+            Objects.equals(getVariantResidues(), that.getVariantResidues());
     }
 
     @Override
