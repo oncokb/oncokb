@@ -5,6 +5,7 @@ import org.mskcc.cbio.oncokb.apiModels.AnnotatedVariant;
 import org.mskcc.cbio.oncokb.apiModels.MatchVariantRequest;
 import org.mskcc.cbio.oncokb.apiModels.MatchVariantResult;
 import org.mskcc.cbio.oncokb.model.*;
+import org.mskcc.cbio.oncokb.model.tumor_type.MainType;
 import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -109,7 +110,7 @@ public interface PrivateUtilsApi {
     @RequestMapping(value = "/utils/oncotree/mainTypes",
         produces = {"application/json"},
         method = RequestMethod.GET)
-    ResponseEntity<List<String>> utilsOncoTreeMainTypesGet();
+    ResponseEntity<Set<MainType>> utilsOncoTreeMainTypesGet();
 
     @ApiOperation(value = "", notes = "Get the full list of OncoTree Subtypes.", response = List.class)
     @ApiResponses(value = {
