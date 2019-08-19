@@ -685,8 +685,8 @@ public class TumorTypeUtils {
             for (String str : mainTypes) {
                 TumorType cancerType = new TumorType();
                 MainType mainType = new MainType(str);
+                mainType.setTumorForm(getTumorForm(mainType));
                 cancerType.setMainType(mainType);
-                cancerType.setTumorForm(getTumorForm(mainType));
                 cancerTypes.add(cancerType);
             }
         } catch (Exception e) {
@@ -736,8 +736,8 @@ public class TumorTypeUtils {
             TumorType tumorType = new TumorType();
             MainType mainType = new MainType();
             mainType.setName(specialTumorType.getTumorType());
+            mainType.setTumorForm(getTumorForm(specialTumorType));
             tumorType.setMainType(mainType);
-            tumorType.setTumorForm(getTumorForm(specialTumorType));
             types.add(tumorType);
         }
         return types;
@@ -760,9 +760,9 @@ public class TumorTypeUtils {
         if (specialTumorType == null)
             return null;
 
-        if (specialTumorType.equals(SpecialTumorType.ALL_LIQUID_TUMORS)) {
+        if (specialTumorType.equals(SpecialTumorType.ALL_LIQUID_TUMORS) || specialTumorType.equals(SpecialTumorType.OTHER_LIQUID_TUMOR_TYPES)) {
             return TumorForm.LIQUID;
-        } else if (specialTumorType.equals(SpecialTumorType.ALL_SOLID_TUMORS)) {
+        } else if (specialTumorType.equals(SpecialTumorType.ALL_SOLID_TUMORS) || specialTumorType.equals(SpecialTumorType.OTHER_SOLID_TUMOR_TYPES)) {
             return TumorForm.SOLID;
         } else {
             return null;
