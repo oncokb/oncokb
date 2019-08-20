@@ -53,7 +53,7 @@ public class FindRelevantAlterationsTest {
                 // General truncating consequence should be associated with Truncating Mutations
                 // Check splice
                 // TP53 Oncogenic Mutations does not have any information we are ready to relase
-                {"TP53", "X33_splice", null, "X33_splice, Truncating Mutations, Oncogenic Mutations"},
+                {"TP53", "X33_splice", null, "X33_splice, Truncating Mutations"},
                 {"MET", "X1010_splice", null, "X1010_splice, 963_1010splice, 981_1028splice, Oncogenic Mutations"},
                 {"MET", "X1010splice", null, "X1010_splice, 963_1010splice, 981_1028splice, Oncogenic Mutations"},
 
@@ -73,7 +73,7 @@ public class FindRelevantAlterationsTest {
                 {"MED12", "G44D", null, "G44D, G44A, G44C, G44S, G44V, 34_68mut"},
                 {"MED12", "G44*", null, "34_68mut, Truncating Mutations"},
                 {"MED12", "K42_N46del", null, "34_68mut"},
-                {"NOTCH1", "Q2405Rfs*17", null, "Q2405Rfs*17, T2375_K2555trunc, Truncating Mutations, Oncogenic Mutations"},
+                {"NOTCH1", "Q2405Rfs*17", null, "Q2405Rfs*17, T2375_K2555trunc, Truncating Mutations"},
 
                 // VUS should get mapped to hotspot VUS, but should not get Oncogenic Mutations from the hotspot VUS.
                 // In this case VUS N109_R113del is covered by VUS I99_R113del, and I99_R113del is a hotpot.
@@ -99,7 +99,7 @@ public class FindRelevantAlterationsTest {
                 // But we do map if gene is oncogene and TSG. TSG here is a Oncogene+TSG
                 {"MED12", "A34*", null, "34_68mut, Truncating Mutations"},
 
-                {"NOTCH1", "Q2405Rfs*17", null, "Q2405Rfs*17, T2375_K2555trunc, Truncating Mutations, Oncogenic Mutations"},
+                {"NOTCH1", "Q2405Rfs*17", null, "Q2405Rfs*17, T2375_K2555trunc, Truncating Mutations"},
 
                 // Deletion
                 // With specific Deletion curated
