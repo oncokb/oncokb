@@ -22,7 +22,7 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
             <properties>
-                <frontend.version>342f889762</frontend.version>
+                <frontend.version>37d4ce2df1</frontend.version>
                 <frontend.groupId>com.github.oncokb</frontend.groupId>
                 <frontend.artifactId>oncokb-public</frontend.artifactId>
             </properties>
@@ -80,7 +80,7 @@
         <profile>
             <id>curate</id>
             <properties>
-                <frontend.version>ebdb1404d1</frontend.version>
+                <frontend.version>0.0.7</frontend.version>
                 <frontend.groupId>com.github.oncokb</frontend.groupId>
                 <frontend.artifactId>curation-platform</frontend.artifactId>
             </properties>
