@@ -312,7 +312,10 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
 
         VariantAnnotation annotation = new VariantAnnotation(indicatorQueryResp);
 
-        annotation.setBackground(EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Collections.singleton(EvidenceType.GENE_BACKGROUND)).iterator().next().getDescription());
+        Set<Evidence> background = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Collections.singleton(EvidenceType.GENE_BACKGROUND));
+        if (background.size() > 0) {
+            annotation.setBackground(background.iterator().next().getDescription());
+        }
 
         if (StringUtils.isNullOrEmpty(tumorType)) {
             for (TumorType uniqueTumorType : uniqueTumorTypes) {
