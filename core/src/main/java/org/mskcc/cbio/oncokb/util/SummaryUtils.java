@@ -1114,6 +1114,7 @@ public class SummaryUtils {
         // In case of miss typed
         summary = summary.replace("[[gene]] [[mutation]] [[mutation]]", alterationName);
         summary = summary.replace("[[gene]] [[mutation]] [[mutant]]", altName);
+        summary = summary.replace("[[gene]] [[mutation]] [[[mutant]]]", altName);
         summary = summary.replace("[[gene]]", gene.getHugoSymbol());
 
         // Improve false tolerance. Curators often use hugoSymbol directly instead of [[gene]]
