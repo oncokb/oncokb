@@ -182,15 +182,12 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
         les.addAll(levelOfEvidences);
 
         for (TumorType oncoTreeType : tumorTypes) {
-            if (oncoTreeType.getCode() == null) {
+            if (StringUtils.isNullOrEmpty(oncoTreeType.getCode())) {
                 if (oncoTreeType.getMainType() != null) {
                     cancerTypes.add(oncoTreeType.getMainType().getName());
                 }
             } else {
                 subTypes.add(oncoTreeType.getCode());
-                if (oncoTreeType.getMainType() != null) {
-                    cancerTypesOfSubtypes.add(oncoTreeType.getMainType().getName());
-                }
             }
         }
 
@@ -209,34 +206,18 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
             }
         }
 
-        if (cancerTypesOfSubtypes.size() > 0) {
-            List<String> tts = cancerTypesOfSubtypes;
-            if (CacheUtils.isEnabled()) {
-                List<Evidence> evidences = findEvidencesByAlteration(alterations);
-                for (Evidence evidence : evidences) {
-                    if ((ets.contains(evidence.getEvidenceType())) && tts.contains(evidence.getCancerType())
-                        && evidence.getSubtype() == null
-                        && les.contains(evidence.getLevelOfEvidence())) {
-                        set.add(evidence);
-                    }
-                }
-            } else {
-                set.addAll(getDao().findEvidencesByAlterationsAndCancerTypesAndEvidenceTypesAndLevelOfEvidenceNoSubtype(alts, tts, ets, les));
-            }
-        }
-
         if (cancerTypes.size() > 0) {
             List<String> tts = cancerTypes;
             if (CacheUtils.isEnabled()) {
                 List<Evidence> evidences = findEvidencesByAlteration(alterations);
                 for (Evidence evidence : evidences) {
                     if ((ets.contains(evidence.getEvidenceType())) && tts.contains(evidence.getCancerType())
-                        && les.contains(evidence.getLevelOfEvidence())) {
+                        && les.contains(evidence.getLevelOfEvidence()) && StringUtils.isNullOrEmpty(evidence.getSubtype())) {
                         set.add(evidence);
                     }
                 }
             } else {
-                set.addAll(getDao().findEvidencesByAlterationsAndCancerTypesAndEvidenceTypesAndLevelOfEvidence(alts, tts, ets, les));
+                set.addAll(getDao().findEvidencesByAlterationsAndCancerTypesAndEvidenceTypesAndLevelOfEvidenceNoSubtype(alts, tts, ets, les));
             }
         }
 
