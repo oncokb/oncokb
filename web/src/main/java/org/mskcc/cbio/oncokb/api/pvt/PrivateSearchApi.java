@@ -48,7 +48,7 @@ public interface PrivateSearchApi {
         @ApiParam(value = "The level of evidence.", defaultValue = "false") @RequestParam(value = "level", required = false) String queryLevel
     );
 
-    @ApiOperation(value = "", notes = "Find matches based on blur query.", response = Treatment.class, responseContainer = "LinkedHashSet")
+    @ApiOperation(value = "", notes = "Find matches based on blur query.", response = TypeaheadSearchResp.class, responseContainer = "List")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK")})
     @RequestMapping(value = "/search/typeahead",
@@ -59,7 +59,7 @@ public interface PrivateSearchApi {
         @ApiParam(value = "The limit of returned result.") @RequestParam(value = "limit", defaultValue = "5", required = false) Integer limit
     );
 
-    @ApiOperation(value = "", notes = "Find NCIT matches based on blur query. This is not for search OncoKB curated drugs. Please use drugs/lookup for that purpose.", response = Treatment.class, responseContainer = "LinkedHashSet", tags = "Drugs")
+    @ApiOperation(value = "", notes = "Find NCIT matches based on blur query. This is not for search OncoKB curated drugs. Please use drugs/lookup for that purpose.", response = NCITDrug.class, responseContainer = "List", tags = "Drugs")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK")})
     @RequestMapping(value = "/search/ncitDrugs",
