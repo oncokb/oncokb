@@ -40,9 +40,9 @@ public interface PrivateSearchApi {
     @ApiOperation(value = "", notes = "Search to find treatments.", response = Treatment.class, responseContainer = "Set")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK")})
-    @RequestMapping(value = "/search/treatments",
-        produces = {"application/json"},
-        method = RequestMethod.GET)
+//    @RequestMapping(value = "/search/treatments",
+//        produces = {"application/json"},
+//        method = RequestMethod.GET)
     ResponseEntity<Set<Treatment>> searchTreatmentsGet(
         @ApiParam(value = "The search query, it could be hugoSymbol or entrezGeneId.", required = true) @RequestParam(value = "gene", required = false) String queryGene,
         @ApiParam(value = "The level of evidence.", defaultValue = "false") @RequestParam(value = "level", required = false) String queryLevel
@@ -51,9 +51,9 @@ public interface PrivateSearchApi {
     @ApiOperation(value = "", notes = "Find matches based on blur query.", response = TypeaheadSearchResp.class, responseContainer = "List")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK")})
-    @RequestMapping(value = "/search/typeahead",
-        produces = {"application/json"},
-        method = RequestMethod.GET)
+//    @RequestMapping(value = "/search/typeahead",
+//        produces = {"application/json"},
+//        method = RequestMethod.GET)
     ResponseEntity<LinkedHashSet<TypeaheadSearchResp>> searchTypeAheadGet(
         @ApiParam(value = "The search query, it could be hugoSymbol, entrezGeneId or variant. Maximum two keywords are supported, separated by space", required = true) @RequestParam(value = "query") String query,
         @ApiParam(value = "The limit of returned result.") @RequestParam(value = "limit", defaultValue = "5", required = false) Integer limit

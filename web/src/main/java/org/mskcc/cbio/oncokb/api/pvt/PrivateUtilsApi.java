@@ -123,9 +123,9 @@ public interface PrivateUtilsApi {
     @ApiOperation(value = "", notes = "Get the list of evidences by levels.", response = List.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK")})
-    @RequestMapping(value = "/utils/evidences/levels",
-        produces = {"application/json"},
-        method = RequestMethod.GET)
+//    @RequestMapping(value = "/utils/evidences/levels",
+//        produces = {"application/json"},
+//        method = RequestMethod.GET)
     ResponseEntity<Map<LevelOfEvidence, Set<Evidence>>> utilsEvidencesByLevelsGet();
 
     @ApiOperation(value = "", notes = "Get the list of relevant tumor types.", response = List.class)
@@ -141,9 +141,9 @@ public interface PrivateUtilsApi {
     @ApiOperation(value = "", notes = "Get all the info for the query", response = VariantAnnotation.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = VariantAnnotation.class)})
-    @RequestMapping(value = "/utils/variantAnnotation",
-        produces = {"application/json"},
-        method = RequestMethod.GET)
+//    @RequestMapping(value = "/utils/variantAnnotation",
+//        produces = {"application/json"},
+//        method = RequestMethod.GET)
     ResponseEntity<VariantAnnotation> utilVariantAnnotationGet(
         @ApiParam(value = "hugoSymbol") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
         , @ApiParam(value = "entrezGeneId") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
