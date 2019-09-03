@@ -12,6 +12,7 @@ public class CurationPlatformConfigs {
     String curationLink;
     String apiLink;
     String privateApiLink;
+    String internalPrivateApiLink;
     String publicApiLink;
     Boolean testing;
     Boolean production;
@@ -39,6 +40,14 @@ public class CurationPlatformConfigs {
 
     public void setPrivateApiLink(String privateApiLink) {
         this.privateApiLink = privateApiLink;
+    }
+
+    public String getInternalPrivateApiLink() {
+        return internalPrivateApiLink;
+    }
+
+    public void setInternalPrivateApiLink(String internalPrivateApiLink) {
+        this.internalPrivateApiLink = internalPrivateApiLink;
     }
 
     public String getPublicApiLink() {
