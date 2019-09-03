@@ -313,10 +313,8 @@ public class LevelUtils {
             } else if (evidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_4)) {
                 return LevelOfEvidence.NO;
             }
-        } else if (!tumorType.getTumorForm().equals(tumorForm)) {
-            return LevelOfEvidence.NO;
         }
-        return null;
+        return LevelOfEvidence.NO;
     }
 
     public static ListIterator getTherapeuticLevelsWithPriorityLIstIterator() {
