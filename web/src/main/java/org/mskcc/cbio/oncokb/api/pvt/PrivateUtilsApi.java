@@ -4,6 +4,7 @@ import io.swagger.annotations.*;
 import org.mskcc.cbio.oncokb.apiModels.AnnotatedVariant;
 import org.mskcc.cbio.oncokb.apiModels.MatchVariantRequest;
 import org.mskcc.cbio.oncokb.apiModels.MatchVariantResult;
+import org.mskcc.cbio.oncokb.apiModels.VariantAnnotation;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.tumor_type.MainType;
 import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
@@ -136,6 +137,19 @@ public interface PrivateUtilsApi {
         method = RequestMethod.GET)
     ResponseEntity<List<TumorType>> utilRelevantTumorTypesGet(
         @ApiParam(value = "OncoTree tumor type name/main type/code") @RequestParam(value = "tumorType") String tumorType
+    );
+
+    @ApiOperation(value = "", notes = "Get all the info for the query", response = VariantAnnotation.class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK", response = VariantAnnotation.class)})
+    @RequestMapping(value = "/utils/variantAnnotation",
+        produces = {"application/json"},
+        method = RequestMethod.GET)
+    ResponseEntity<VariantAnnotation> utilVariantAnnotationGet(
+        @ApiParam(value = "hugoSymbol") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
+        , @ApiParam(value = "entrezGeneId") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
+        , @ApiParam(value = "Alteration") @RequestParam(value = "alteration", required = false) String alteration
+        , @ApiParam(value = "OncoTree tumor type name/main type/code") @RequestParam(value = "tumorType", required = false) String tumorType
     );
 }
 
