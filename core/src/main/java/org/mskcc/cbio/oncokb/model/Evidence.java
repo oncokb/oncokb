@@ -244,10 +244,12 @@ public class Evidence implements java.io.Serializable {
     @Enumerated(EnumType.STRING)
     private LevelOfEvidence levelOfEvidence;
 
-    @Column(name = "solid_propagation_level", length = 10)
+    @Column(name = "solid_propagation_level")
+    @Enumerated(EnumType.STRING)
     private LevelOfEvidence solidPropagationLevel;
 
-    @Column(name = "liquid_propagation_level", length = 10)
+    @Column(name = "liquid_propagation_level")
+    @Enumerated(EnumType.STRING)
     private LevelOfEvidence liquidPropagationLevel;
 
     @ManyToMany(fetch = FetchType.EAGER)

@@ -100,6 +100,7 @@ public class DriveAnnotationParser {
                     if (lastEdit != null) {
                         Date date = new Date(lastEdit);
                         evidence.setLastEdit(date);
+                        evidence.setLastReview(date);
                     }
                     if (evidence.getLastEdit() == null) {
                         System.out.println(spaceStrByNestLevel(nestLevel + 1) + "WARNING: " + mutationStr + " do not have last update.");
@@ -218,7 +219,7 @@ public class DriveAnnotationParser {
         if (obj == null) return null;
         JSONObject reviewObj = new JSONObject(obj.toString());
         if (reviewObj.has("updateTime") && StringUtils.isNumeric(reviewObj.get("updateTime").toString())) {
-            return new Date((long) reviewObj.get("updateTime"));
+            return new Date(reviewObj.getLong("updateTime"));
         }
         return null;
     }
@@ -259,6 +260,7 @@ public class DriveAnnotationParser {
             evidence.setDescription(bg);
             evidence.setUuid(uuid);
             evidence.setLastEdit(lastEdit);
+            evidence.setLastReview(lastReview);
             if (lastEdit != null) {
                 System.out.println(spaceStrByNestLevel(nestLevel + 1) +
                     "Last update on: " + MainUtils.getTimeByDate(lastEdit));
@@ -430,6 +432,7 @@ public class DriveAnnotationParser {
                 evidence.setKnownEffect(oncogenic.getOncogenic());
                 evidence.setUuid(uuid);
                 evidence.setLastEdit(lastEdit);
+                evidence.setLastReview(lastReview);
                 evidenceBo.save(evidence);
             } else if (Oncogenicity.compare(oncogenic, Oncogenicity.getByEvidence(evidences.get(0))) > 0) {
                 evidences.get(0).setKnownEffect(oncogenic.getOncogenic());
@@ -779,7 +782,7 @@ public class DriveAnnotationParser {
                             "Manual liquid propagation level: " + evidence.getLiquidPropagationLevel());
                     }
                 } else {
-                    evidence.setSolidPropagationLevel(LevelUtils.getDefaultPropagationLevelByTumorForm(evidence, TumorForm.LIQUID));
+                    evidence.setLiquidPropagationLevel(LevelUtils.getDefaultPropagationLevelByTumorForm(evidence, TumorForm.LIQUID));
                 }
             }
 
@@ -804,6 +807,13 @@ public class DriveAnnotationParser {
                     "Last update on: " + MainUtils.getTimeByDate(lastEdit));
             }
             evidence.setLastEdit(lastEdit);
+
+            Date lastReview = getMostRecentDate(lastReviewDates);
+            if (lastReview != null) {
+                System.out.println(spaceStrByNestLevel(nestLevel + 2) +
+                    "Last update on: " + MainUtils.getTimeByDate(lastReview));
+            }
+            evidence.setLastReview(lastReview);
 
             evidenceBo.save(evidence);
         }
@@ -852,6 +862,13 @@ public class DriveAnnotationParser {
             if (lastEdit != null) {
                 System.out.println(spaceStrByNestLevel(nestLevel + 1) +
                     "Last update on: " + MainUtils.getTimeByDate(lastEdit));
+            }
+
+            Date lastReview = getMostRecentDate(lastReviewDates);
+            evidence.setLastReview(lastReview);
+            if (lastReview != null) {
+                System.out.println(spaceStrByNestLevel(nestLevel + 1) +
+                    "Last review on: " + MainUtils.getTimeByDate(lastReview));
             }
             evidenceBo.save(evidence);
         }
@@ -926,8 +943,9 @@ public class DriveAnnotationParser {
         evidence.addArticles(docs);
     }
 
+    // if the object does not have last review, it should fall back on last edit
     private static Date getLastReview(JSONObject object, String key) {
-        return object.has(key + LAST_REVIEW_EXTENSION) ? new Date(object.getLong(key + LAST_REVIEW_EXTENSION)) : null;
+        return object.has(key + LAST_REVIEW_EXTENSION) ? getUpdateTime(object.get(key + LAST_REVIEW_EXTENSION)) : getLastEdit(object, key);
     }
 
     private static Date getLastEdit(JSONObject object, String key) {
@@ -948,11 +966,9 @@ public class DriveAnnotationParser {
     }
 
     private static void addDateToLastReviewSetFromLong(Set<Date> set, JSONObject object, String key) throws JSONException {
-        if (object.has(key + LAST_REVIEW_EXTENSION)) {
-            Date tmpDate = new Date(object.getLong(key + LAST_REVIEW_EXTENSION));
-            if (tmpDate != null) {
-                set.add(tmpDate);
-            }
+        Date tmpDate = getLastReview(object, key);
+        if (tmpDate != null) {
+            set.add(tmpDate);
         }
     }
 
