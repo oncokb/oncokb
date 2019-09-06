@@ -486,7 +486,7 @@ public class DriveAnnotationParser {
             evidence.setEvidenceType(evidenceType);
             evidence.setGene(gene);
             evidence.setDescription(cancerObj.getString(summaryKey));
-            evidence.setUuid(getUUID(cancerObj, "summary"));
+            evidence.setUuid(getUUID(cancerObj, summaryKey));
             evidence.setAlterations(alterations);
             evidence.setLastEdit(lastEdit);
             evidence.setLastReview(lastReview);
