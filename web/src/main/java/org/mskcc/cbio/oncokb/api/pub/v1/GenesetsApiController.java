@@ -21,9 +21,9 @@ public class GenesetsApiController implements GenesetsApi {
     }
 
     @Override
-    public ResponseEntity<Geneset> genesetsIdGet(
-        @ApiParam(value = "Geneset ID", required = true) @PathVariable(value = "id") Integer id
+    public ResponseEntity<Geneset> genesetsUuidGet(
+        @ApiParam(value = "Geneset UUID", required = true) @PathVariable(value = "uuid") String uuid
     ) {
-        return new ResponseEntity<>(ApplicationContextSingleton.getGenesetBo().findGenesetById(id), HttpStatus.OK);
+        return new ResponseEntity<>(ApplicationContextSingleton.getGenesetBo().findGenesetByUuid(uuid), HttpStatus.OK);
     }
 }
