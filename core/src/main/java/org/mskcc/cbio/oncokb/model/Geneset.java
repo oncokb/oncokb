@@ -16,6 +16,10 @@ import java.util.Set;
         name = "findGenesetByName",
         query = "select g from Geneset g where g.name=?"
     ),
+    @NamedQuery(
+        name = "findGenesetByUUID",
+        query = "select g from Geneset g where g.uuid=?"
+    ),
 })
 
 @Entity
@@ -28,6 +32,9 @@ public class Geneset implements java.io.Serializable {
 
     @Column(nullable = false)
     private String name;
+
+    @Column(length = 40, nullable = false)
+    private String uuid;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "geneset_gene", joinColumns = {
@@ -44,6 +51,14 @@ public class Geneset implements java.io.Serializable {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public String getName() {

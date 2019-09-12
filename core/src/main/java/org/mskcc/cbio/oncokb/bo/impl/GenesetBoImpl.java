@@ -11,8 +11,8 @@ import java.util.List;
  */
 public class GenesetBoImpl extends GenericBoImpl<Geneset, GenesetDao> implements GenesetBo {
     @Override
-    public Geneset findGenesetById(Integer id) {
-        return getDao().findById(id);
+    public Geneset findGenesetByUuid(String uuid) {
+        return getDao().findByUuid(uuid);
     }
 
     @Override

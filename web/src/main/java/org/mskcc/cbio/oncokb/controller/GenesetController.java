@@ -18,10 +18,10 @@ public class GenesetController {
     public
     @ResponseBody
     synchronized ResponseEntity createGeneset(@RequestBody Geneset geneset) {
-        if (geneset == null || geneset.getName() == null) {
+        if (geneset == null || geneset.getName() == null || geneset.getUuid() == null) {
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
         }
-        Geneset existedGeneSet = ApplicationContextSingleton.getGenesetBo().findGenesetByName(geneset.getName());
+        Geneset existedGeneSet = ApplicationContextSingleton.getGenesetBo().findGenesetByUuid(geneset.getUuid());
         if (existedGeneSet != null) {
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
         }
@@ -29,28 +29,34 @@ public class GenesetController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/legacy-api/genesets/update/{id}", method = RequestMethod.POST)
+    @RequestMapping(value = "/legacy-api/genesets/update/{uuid}", method = RequestMethod.POST)
     public
     @ResponseBody
-    synchronized ResponseEntity updateGeneset(@ApiParam(value = "id", required = true) @PathVariable("id") Integer id,
+    synchronized ResponseEntity updateGeneset(@ApiParam(value = "uuid", required = true) @PathVariable("uuid") String uuid,
                                               @RequestBody Geneset body) {
-        Geneset geneset = ApplicationContextSingleton.getGenesetBo().findGenesetById(id);
+        Geneset geneset = ApplicationContextSingleton.getGenesetBo().findGenesetByUuid(uuid);
         if (geneset == null) {
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
         } else {
-            ApplicationContextSingleton.getGenesetBo().update(body);
+            if (body.getName() != null) {
+                geneset.setName(body.getName());
+            }
+            if (body.getGenes() != null) {
+                geneset.setGenes(body.getGenes());
+            }
+            ApplicationContextSingleton.getGenesetBo().update(geneset);
             return new ResponseEntity(HttpStatus.OK);
         }
     }
 
-    @RequestMapping(value = "/legacy-api/genesets/delete/{id}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/legacy-api/genesets/delete/{uuid}", method = RequestMethod.DELETE)
     public
     @ResponseBody
-    synchronized ResponseEntity deleteGeneset(@ApiParam(value = "id", required = true) @PathVariable("id") Integer id) {
-        if (id == null) {
+    synchronized ResponseEntity deleteGeneset(@ApiParam(value = "uuid", required = true) @PathVariable("uuid") String uuid) {
+        if (uuid == null) {
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
         } else {
-            Geneset geneset = ApplicationContextSingleton.getGenesetBo().findGenesetById(id);
+            Geneset geneset = ApplicationContextSingleton.getGenesetBo().findGenesetByUuid(uuid);
             if (geneset == null) {
                 return new ResponseEntity(HttpStatus.BAD_REQUEST);
             }

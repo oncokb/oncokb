@@ -16,6 +16,7 @@ public class SetGenesetInGeneConverter extends StdConverter<Set<Geneset>, Set<Ge
         for (Geneset geneset : genesets) {
             Geneset newGeneset = new Geneset();
             newGeneset.setId(geneset.getId());
+            newGeneset.setUuid(geneset.getUuid());
             newGeneset.setName(geneset.getName());
             newGenesets.add(newGeneset);
         }

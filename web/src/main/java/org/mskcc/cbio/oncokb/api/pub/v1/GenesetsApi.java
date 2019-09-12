@@ -19,14 +19,14 @@ public interface GenesetsApi {
         method = RequestMethod.GET)
     ResponseEntity<List<Geneset>> genesetsGet();
 
-    @ApiOperation(value = "", notes = "Find geneset by id", response = Geneset.class)
+    @ApiOperation(value = "", notes = "Find geneset by uuid", response = Geneset.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = Geneset.class)})
-    @RequestMapping(value = "/genesets/{id}",
+    @RequestMapping(value = "/genesets/{uuid}",
         produces = {"application/json"},
         method = RequestMethod.GET)
-    ResponseEntity<Geneset> genesetsIdGet(
-        @ApiParam(value = "Geneset ID", required = true) @PathVariable(value = "id") Integer id
+    ResponseEntity<Geneset> genesetsUuidGet(
+        @ApiParam(value = "Geneset UUID", required = true) @PathVariable(value = "uuid") String uuid
     );
 
 }
