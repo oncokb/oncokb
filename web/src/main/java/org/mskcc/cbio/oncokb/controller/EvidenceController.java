@@ -294,7 +294,7 @@ public class EvidenceController {
         String description = queryEvidence.getDescription();
         String additionalInfo = queryEvidence.getAdditionalInfo();
         Date lastEdit = queryEvidence.getLastEdit();
-        Date lastReview = queryEvidence.getLastReview();
+//        Date lastReview = queryEvidence.getLastReview();
         List<Treatment> treatments = queryEvidence.getSortedTreatment();
         Set<Article> articles = queryEvidence.getArticles();
         LevelOfEvidence solidPropagation = queryEvidence.getSolidPropagationLevel();
@@ -408,19 +408,19 @@ public class EvidenceController {
             if (evidenceType.equals(EvidenceType.ONCOGENIC) && alterations.size() > 1) {
                 // save duplicated evidence record for string alteration oncogenic
                 for (Alteration alteration : alterations) {
-                    Evidence evidence = new Evidence(uuid, evidenceType, null, null, null, gene, Collections.singleton(alteration), description, additionalInfo, treatments, knownEffect, lastEdit, lastReview, level, solidPropagation, liquidPropagation, articles);
+                    Evidence evidence = new Evidence(uuid, evidenceType, null, null, null, gene, Collections.singleton(alteration), description, additionalInfo, treatments, knownEffect, lastEdit, null, level, solidPropagation, liquidPropagation, articles);
                     initEvidence(evidence, new ArrayList<>(evidence.getTreatments()));
                     evidences.add(evidence);
                     evidenceBo.save(evidence);
                 }
             } else if (!isCancerEvidence) {
-                Evidence evidence = new Evidence(uuid, evidenceType, null, null, null, gene, alterations, description, additionalInfo, treatments, knownEffect, lastEdit, lastReview, level, solidPropagation, liquidPropagation, articles);
+                Evidence evidence = new Evidence(uuid, evidenceType, null, null, null, gene, alterations, description, additionalInfo, treatments, knownEffect, lastEdit, null, level, solidPropagation, liquidPropagation, articles);
                 initEvidence(evidence, new ArrayList<>(evidence.getTreatments()));
                 evidenceBo.save(evidence);
                 evidences.add(evidence);
             } else {
                 for (int i = 0; i < cancerTypes.size(); i++) {
-                    Evidence evidence = new Evidence(uuid, evidenceType, cancerTypes.get(i), subTypes.get(i), null, gene, alterations, description, additionalInfo, treatments, knownEffect, lastEdit, lastReview, level, solidPropagation, liquidPropagation, articles);
+                    Evidence evidence = new Evidence(uuid, evidenceType, cancerTypes.get(i), subTypes.get(i), null, gene, alterations, description, additionalInfo, treatments, knownEffect, lastEdit, null, level, solidPropagation, liquidPropagation, articles);
                     initEvidence(evidence, new ArrayList<>(evidence.getTreatments()));
                     evidences.add(evidence);
                     evidenceBo.save(evidence);
@@ -453,7 +453,7 @@ public class EvidenceController {
             // insert cancer type information and save it
             for (int i = 0; i < cancerTypes.size(); i++) {
                 // create a new evidence based on input passed in, and gene and alterations information from the current evidences
-                Evidence evidence = new Evidence(uuid, evidenceType, cancerTypes.get(i), subTypes.get(i), null, gene, alterations, description, additionalInfo, treatments, knownEffect, lastEdit, lastReview, level, solidPropagation, liquidPropagation, articles);
+                Evidence evidence = new Evidence(uuid, evidenceType, cancerTypes.get(i), subTypes.get(i), null, gene, alterations, description, additionalInfo, treatments, knownEffect, lastEdit, null, level, solidPropagation, liquidPropagation, articles);
 
                 initEvidence(evidence, new ArrayList<>(evidence.getTreatments()));
 
