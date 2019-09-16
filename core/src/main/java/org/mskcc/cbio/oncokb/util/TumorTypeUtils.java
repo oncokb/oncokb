@@ -300,11 +300,32 @@ public class TumorTypeUtils {
     }
 
     public static Boolean isSolidTumor(TumorType tumorType) {
-        return tumorType.getTumorForm() != null && tumorType.getTumorForm().equals(TumorForm.SOLID);
+        return isDesiredTumorForm(tumorType, TumorForm.SOLID);
     }
 
     public static Boolean isLiquidTumor(TumorType tumorType) {
-        return tumorType.getTumorForm() != null && tumorType.getTumorForm().equals(TumorForm.LIQUID);
+        return isDesiredTumorForm(tumorType, TumorForm.LIQUID);
+    }
+
+    private static boolean isDesiredTumorForm(TumorType tumorType, TumorForm tumorForm) {
+        if (tumorForm == null || tumorType == null) {
+            return false;
+        }
+
+        // This is mainly for the tissue
+        if (tumorType.getTumorForm() != null) {
+            return tumorForm.equals(tumorType.getTumorForm());
+        }
+
+        // when the code is null, we need to validate the main type
+        if (tumorType.getCode() == null) {
+            if (tumorType.getMainType() != null && tumorType.getMainType().getTumorForm() != null) {
+                return tumorType.getMainType().getTumorForm().equals(tumorForm);
+            }
+        } else {
+            return tumorType.getTumorForm() != null && tumorType.getTumorForm().equals(tumorForm);
+        }
+        return false;
     }
 
     public static Boolean hasSolidTumor(Set<TumorType> tumorTypes) {
@@ -705,12 +726,24 @@ public class TumorTypeUtils {
             Map<String, org.mskcc.oncotree.model.TumorType> data = (Map<String, org.mskcc.oncotree.model.TumorType>) map;
             org.mskcc.oncotree.model.TumorType oncoTreeTumorType = new ObjectMapper().convertValue(data.get("TISSUE"), org.mskcc.oncotree.model.TumorType.class);
             TumorType tumorType = new TumorType(oncoTreeTumorType);
+            annotateTumorFormRecursively(tumorType);
             result.put("TISSUE", tumorType);
         } catch (Exception e) {
             System.out.println("You need to include oncotree nested file. Endpoint: tumorTypes?version=" + ONCO_TREE_ONCOKB_VERSION + "&flat=false");
             e.printStackTrace();
         }
         return result;
+    }
+
+    private static void annotateTumorFormRecursively(TumorType tumorType) {
+        tumorType.setTumorForm(getTumorForm(tumorType.getTissue()));
+        if (tumorType.getChildren().size() > 0) {
+            Iterator<Map.Entry<String, TumorType>> it = tumorType.getChildren().entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry<String, TumorType> pair = it.next();
+                annotateTumorFormRecursively(pair.getValue());
+            }
+        }
     }
 
     private static List<TumorType> getOncoTreeSubtypesFromSource() {
@@ -792,12 +825,24 @@ public class TumorTypeUtils {
         return null;
     }
 
+    private static TumorForm getTumorForm(TumorType tumorType) {
+        if (tumorType.getTumorForm() != null) {
+            return tumorType.getTumorForm();
+        } else if (tumorType.getMainType() != null) {
+            return tumorType.getMainType().getTumorForm();
+        }
+        return null;
+    }
+
     public static TumorForm checkTumorForm(Set<TumorType> tumorTypes) {
         if (tumorTypes == null)
             return null;
         Set<TumorForm> uniqueTumorForms = tumorTypes.stream()
-            .filter(tumorType -> tumorType.getTumorForm() != null)
-            .map(tumorType -> tumorType.getTumorForm()).collect(Collectors.toSet());
+            .filter(tumorType -> {
+                TumorForm tumorForm = getTumorForm(tumorType);
+                return tumorForm != null;
+            })
+            .map(tumorType -> getTumorForm(tumorType)).collect(Collectors.toSet());
         if (uniqueTumorForms.size() > 1 || uniqueTumorForms.size() == 0) {
             // There are ambiguous tumor forms
             return null;
