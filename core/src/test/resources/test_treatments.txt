@@ -118,16 +118,17 @@ ABL1	BCR-ABL1 Fusion	Colorectal Cancer
 ABL1	E255K	CML	2A: Bosutinib; 2A: Dasatinib;
 ABL1	E255K	CMLBCRABL1	2A: Bosutinib; 2A: Dasatinib;
 ABL1	E255K	AML
-ABL1	E255K	Colorectal Cacner
+ABL1	E255K	Colorectal Cancer
 KMT2A	KMT2A-MLLT3 Fusion	AML
 KMT2A	KMT2A-MLLT3 Fusion	APLPMLRARA
 KMT2A	KMT2A-MLLT3 Fusion	Colorectal Cacner
 PDGFRB	PDGFRB-CSF1R Fusion	CMML	1: Imatinib;
 PDGFRB	PDGFRB-CSF1R Fusion	Colorectal Cancer
-BRAF	K601E	CMML	3B: Trametinib; 4: PLX8394;
+BRAF	K601E	Colorectal Cancer	3B: Trametinib; 4: PLX8394;
+BRAF	K601E	CMML
 ARAF	S214A	HDCN	3A: Cobimetinib; 3A: Sorafenib;
 ARAF	S214A	ECD	3A: Cobimetinib; 3A: Sorafenib;
-ARAF	S214A	RDD	3B: Sorafenib;
+ARAF	S214A	RDD
 ARAF	S214A	Colorectal Cancer	3B: Sorafenib;
 TP53	K292T	AML
 TP53	K292T	APLPMLRARA
