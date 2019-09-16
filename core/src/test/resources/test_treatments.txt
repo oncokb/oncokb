@@ -134,3 +134,25 @@ TP53	K292T	AML
 TP53	K292T	APLPMLRARA
 TP53	K292T	Colorectal cancer
 
+# Test solid/liquid propagation
+ABL1	BCR-ABL1 Fusion	B-Lymphoblastic Leukemia/Lymphoma	1: Dasatinib; 1: Imatinib; 1: Ponatinib; 2A: Bosutinib; 2A: Nilotinib;
+ABL1	BCR-ABL1 Fusion	Chronic Myelogenous Leukemia	1: Bosutinib; 1: Dasatinib; 1: Imatinib; 1: Nilotinib; 3A: Asciminib;
+ABL1	BCR-ABL1 Fusion	Acute Myeloid Leukemia
+IDH1	R132H	Acute Myeloid Leukemia	1: Ivosidenib;
+IDH1	R132H	Glioblastoma	2B: Ivosidenib;
+IDH1	R132H	B-Lymphoblastic Leukemia/Lymphoma	2B: Ivosidenib;
+IDH1	R132H	Therapy-Related Acute Myeloid Leukemia	1: Ivosidenib;
+IDH2	R172K	Acute Myeloid Leukemia	1: Enasidenib;
+IDH2	R172K	Melanoma	2B: Enasidenib;
+MAP2K1	K57N	Erdheim-Chester Disease	3A: Cobimetinib; 3A: Trametinib;
+MAP2K1	K57N	Lung Adenocarcinoma	3A: Cobimetinib; 3A: Trametinib;
+MAP2K1	K57N	Glioblastoma	3B: Cobimetinib; 3B: Trametinib;
+MAP2K1	K57N	Diffuse Large B-Cell Lymphoma, NOS
+PIK3CA	E545K	Breast Cancer	1: Fulvestrant+Alpelisib; 3A: Alpelisib; 3A: Buparlisib; 3A: Buparlisib+Fulvestrant; 3A: Copanlisib; 3A: GDC-0077; 3A: Serabelisib; 3A: Taselisib; 3A: Taselisib+Fulvestrant;
+PIK3CA	E545K	Ovarian Cancer	2B: Fulvestrant+Alpelisib; 3B: Alpelisib; 3B: Buparlisib; 3B: Copanlisib; 3B: GDC-0077; 3B: Serabelisib; 3B: Taselisib;
+PIK3CA	E545K	Acute Myeloid Leukemia
+NRAS	G12C	Breast Cancer	3B: Binimetinib; 3B: Binimetinib+Ribociclib;
+NRAS	G12C	Chronic Myelogenous Leukemia
+SF3B1	K625G	Chronic Myelomonocytic Leukemia	4: H3B-8800;
+SF3B1	K625G	Breast Cancer
+

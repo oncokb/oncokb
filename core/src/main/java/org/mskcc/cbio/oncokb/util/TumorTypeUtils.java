@@ -34,7 +34,7 @@ public class TumorTypeUtils {
     private static final ImmutableList<String> LiquidTumorMainTypes = ImmutableList.of(
         "Blastic Plasmacytoid Dendritic Cell Neoplasm", "Histiocytosis", "Leukemia", "Multiple Myeloma",
         "Myelodysplasia", "Myeloproliferative Neoplasm", "Mastocytosis", "Hodgkin Lymphoma", "Non-Hodgkin Lymphoma",
-        "Blood Cancer, NOS", "Myelodysplastic Syndromes", "Lymphatic Cancer, NOS", " B-Lymphoblastic Leukemia/Lymphoma",
+        "Blood Cancer, NOS", "Myelodysplastic Syndromes", "Lymphatic Cancer, NOS", "B-Lymphoblastic Leukemia/Lymphoma",
         "Mature B-Cell Neoplasms", "Mature T and NK Neoplasms", "Posttransplant Lymphoproliferative Disorders",
         "T-Lymphoblastic Leukemia/Lymphoma", "Histiocytic Disorder"
 
