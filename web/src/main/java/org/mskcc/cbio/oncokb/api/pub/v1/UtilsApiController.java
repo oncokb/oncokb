@@ -86,8 +86,8 @@ public class UtilsApiController implements UtilsApi {
                     biologicalVariant.getVariant().getAlteration(),
                     biologicalVariant.getOncogenic(),
                     biologicalVariant.getMutationEffect(),
-                    MainUtils.listToString(new ArrayList<>(biologicalVariant.getMutationEffectPmids()), ", "),
-                    MainUtils.listToString(abstracts, "; ")));
+                    MainUtils.listToString(new ArrayList<>(biologicalVariant.getMutationEffectPmids()), ", ", true),
+                    MainUtils.listToString(abstracts, "; ", true)));
             }
         }
 
@@ -166,9 +166,9 @@ public class UtilsApiController implements UtilsApi {
                     clinicalVariant.getVariant().getAlteration(),
                     getCancerType(clinicalVariant.getOncoTreeType()),
                     clinicalVariant.getLevel(),
-                    MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrug()), ", "),
-                    MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrugPmids()), ", "),
-                    MainUtils.listToString(abstracts, "; ")));
+                    MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrug()), ", ", true),
+                    MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrugPmids()), ", ", true),
+                    MainUtils.listToString(abstracts, "; ", true)));
             }
         }
 
