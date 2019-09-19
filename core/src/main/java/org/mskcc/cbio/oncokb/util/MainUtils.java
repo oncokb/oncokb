@@ -314,8 +314,16 @@ public class MainUtils {
     }
 
     public static String listToString(List<String> list, String separator) {
+        return listToString(list, separator, false);
+    }
+
+    public static String listToString(List<String> list, String separator, boolean sort) {
         if (list.isEmpty()) {
             return "";
+        }
+
+        if (sort) {
+            Collections.sort(list);
         }
 
         int n = list.size();
