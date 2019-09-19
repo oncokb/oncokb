@@ -94,7 +94,7 @@ public interface PrivateUtilsApi {
         , @ApiParam(value = "The genomic examples.") @RequestParam(value = "examples") String examples
     ) throws ParserConfigurationException, SAXException, IOException;
 
-    @ApiOperation(value = "", notes = "Check which OncoKB variants can be mapped on genomic examples.", response = List.class)
+    @ApiOperation(value = "", notes = "Check which OncoKB variants can be mapped on genomic examples.", response = MatchVariantResult.class, responseContainer = "List")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK")})
     @RequestMapping(value = "/utils/match/variant",
@@ -104,7 +104,7 @@ public interface PrivateUtilsApi {
     ResponseEntity<List<MatchVariantResult>> validateVariantExamplePost(@ApiParam(value = "List of queries. Please see swagger.json for request body format.", required = true) @RequestBody(required = true) MatchVariantRequest body
     );
 
-    @ApiOperation(value = "", notes = "Get the full list of OncoTree Maintype.", response = List.class)
+    @ApiOperation(value = "", notes = "Get the full list of OncoTree Maintype.", response = String.class, responseContainer = "List")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK")})
     @RequestMapping(value = "/utils/oncotree/mainTypes",
@@ -112,7 +112,7 @@ public interface PrivateUtilsApi {
         method = RequestMethod.GET)
     ResponseEntity<List<String>> utilsOncoTreeMainTypesGet();
 
-    @ApiOperation(value = "", notes = "Get the full list of OncoTree Subtypes.", response = List.class)
+    @ApiOperation(value = "", notes = "Get the full list of OncoTree Subtypes.", response = TumorType.class, responseContainer = "List")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK")})
     @RequestMapping(value = "/utils/oncotree/subtypes",
@@ -120,7 +120,7 @@ public interface PrivateUtilsApi {
         method = RequestMethod.GET)
     ResponseEntity<List<TumorType>> utilsOncoTreeSubtypesGet();
 
-    @ApiOperation(value = "", notes = "Get the list of evidences by levels.", response = List.class)
+    @ApiOperation(value = "", notes = "Get the list of evidences by levels.", response = Map.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK")})
     @RequestMapping(value = "/utils/evidences/levels",
@@ -128,9 +128,9 @@ public interface PrivateUtilsApi {
         method = RequestMethod.GET)
     ResponseEntity<Map<LevelOfEvidence, Set<Evidence>>> utilsEvidencesByLevelsGet();
 
-    @ApiOperation(value = "", notes = "Get the list of relevant tumor types.", response = List.class)
+    @ApiOperation(value = "", notes = "Get the list of relevant tumor types.", response = TumorType.class, responseContainer = "List")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "OK", response = List.class)})
+        @ApiResponse(code = 200, message = "OK", response = TumorType.class, responseContainer = "List")})
     @RequestMapping(value = "/utils/relevantTumorTypes",
         produces = {"application/json"},
         method = RequestMethod.GET)
