@@ -8,7 +8,7 @@ import org.mskcc.cbio.oncokb.apiModels.Citations;
 import org.mskcc.cbio.oncokb.apiModels.Implication;
 import org.mskcc.cbio.oncokb.apiModels.MutationEffectResp;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
+import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
 
 import java.text.SimpleDateFormat;
 import java.util.*;

@@ -6,7 +6,8 @@ import org.mskcc.cbio.oncokb.apiModels.MatchVariantRequest;
 import org.mskcc.cbio.oncokb.apiModels.MatchVariantResult;
 import org.mskcc.cbio.oncokb.apiModels.VariantAnnotation;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
+import org.mskcc.cbio.oncokb.model.tumor_type.MainType;
+import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.xml.sax.SAXException;
@@ -104,13 +105,13 @@ public interface PrivateUtilsApi {
     ResponseEntity<List<MatchVariantResult>> validateVariantExamplePost(@ApiParam(value = "List of queries. Please see swagger.json for request body format.", required = true) @RequestBody(required = true) MatchVariantRequest body
     );
 
-    @ApiOperation(value = "", notes = "Get the full list of OncoTree Maintype.", response = String.class, responseContainer = "List")
+    @ApiOperation(value = "", notes = "Get the full list of OncoTree Maintype.", response = MainType.class, responseContainer = "Set")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK")})
     @RequestMapping(value = "/utils/oncotree/mainTypes",
         produces = {"application/json"},
         method = RequestMethod.GET)
-    ResponseEntity<List<String>> utilsOncoTreeMainTypesGet();
+    ResponseEntity<Set<MainType>> utilsOncoTreeMainTypesGet();
 
     @ApiOperation(value = "", notes = "Get the full list of OncoTree Subtypes.", response = TumorType.class, responseContainer = "List")
     @ApiResponses(value = {

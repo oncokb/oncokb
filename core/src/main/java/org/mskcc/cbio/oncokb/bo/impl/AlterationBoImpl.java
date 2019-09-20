@@ -221,6 +221,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         }
 
         if (matchedAlt != null) {
+            alteration = matchedAlt;
             alterations.add(matchedAlt);
         }
 

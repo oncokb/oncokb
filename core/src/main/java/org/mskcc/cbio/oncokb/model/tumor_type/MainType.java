@@ -1,8 +1,9 @@
-package org.mskcc.cbio.oncokb.model.oncotree;
+package org.mskcc.cbio.oncokb.model.tumor_type;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.mskcc.cbio.oncokb.model.TumorForm;
 
 import java.util.Objects;
 
@@ -10,12 +11,12 @@ import java.util.Objects;
 /**
  * General tumor type category.
  **/
-@ApiModel(description = "General tumor type category.")
-@javax.annotation.Generated(value = "class io.swagger.codegen.languages.SpringMVCServerCodegen", date = "2016-04-04T17:16:11.368Z")
+@ApiModel(description = "OncoTree Cancer Type")
 public class MainType {
 
   private Integer id = null;
   private String name = null;
+  private TumorForm tumorForm = null;
 
   public MainType(){}
 
@@ -23,11 +24,6 @@ public class MainType {
       this.name = name;
   }
 
-  /**
-   * the numarical identifier of tumor type.
-   **/
-  @ApiModelProperty(value = "the numarical identifier of tumor type.")
-  @JsonProperty("id")
   public Integer getId() {
     return id;
   }
@@ -36,11 +32,6 @@ public class MainType {
   }
 
 
-  /**
-   * Tumor type name.
-   **/
-  @ApiModelProperty(value = "Tumor type name.")
-  @JsonProperty("name")
   public String getName() {
     return name;
   }
@@ -48,9 +39,15 @@ public class MainType {
     this.name = name;
   }
 
+  public TumorForm getTumorForm() {
+      return tumorForm;
+  }
 
+    public void setTumorForm(TumorForm tumorForm) {
+        this.tumorForm = tumorForm;
+    }
 
-  @Override
+    @Override
   public boolean equals(Object o) {
     if (this == o) {
       return true;
@@ -75,6 +72,7 @@ public class MainType {
 
     sb.append("  id: ").append(id).append("\n");
     sb.append("  name: ").append(name).append("\n");
+    sb.append("  tumor form: ").append(tumorForm).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

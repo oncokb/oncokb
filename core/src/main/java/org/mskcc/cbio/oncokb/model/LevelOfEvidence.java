@@ -32,6 +32,8 @@ public enum LevelOfEvidence {
     LEVEL_Dx1("Dx1", "FDA and/or professional guideline-recognized biomarker required for diagnosis in this indication", "FDA and/or professional guideline-recognized biomarker required for diagnosis in this indication", ""),
     LEVEL_Dx2("Dx2", "FDA and/or professional guideline-recognized biomarker that supports diagnosis in this indication", "FDA and/or professional guideline-recognized biomarker that supports diagnosis in this indication", ""),
     LEVEL_Dx3("Dx3", "Biomarker that may assist disease diagnosis in this indication based on clinical evidence", "Biomarker that may assist disease diagnosis in this indication based on clinical evidence", ""),
+
+    NO("NO", "No level", "No Level", ""),
     ;
     LevelOfEvidence(String level, String description, String htmlDescription, String colorHex) {
         this.level = level;
@@ -74,7 +76,8 @@ public enum LevelOfEvidence {
      * @return
      */
     public static LevelOfEvidence getByLevel(String level) {
-        return map.get(level);
+        if (level == null) return null;
+        return map.get(level.toUpperCase());
     }
 
     public static LevelOfEvidence getByName(String name) {

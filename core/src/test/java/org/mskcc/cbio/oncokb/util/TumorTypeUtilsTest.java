@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.mysql.jdbc.StringUtils;
 import junit.framework.TestCase;
 import org.mskcc.cbio.oncokb.model.RelevantTumorTypeDirection;
-import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
+import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -44,10 +44,6 @@ public class TumorTypeUtilsTest extends TestCase {
 
         tumorTypes = TumorTypeUtils.findTumorTypes("All Tumors", "oncotree");
         expectedResult = "M:All Tumors";
-        assertEquals(expectedResult, tumorTypesToString(tumorTypes));
-
-        tumorTypes = TumorTypeUtils.findTumorTypes("All Pediatric Tumors", "oncotree");
-        expectedResult = "M:All Pediatric Tumors, M:All Tumors";
         assertEquals(expectedResult, tumorTypesToString(tumorTypes));
 
         // When parent node's main type does not match with child, it should not be listed as relevant tumor type
@@ -123,15 +119,19 @@ public class TumorTypeUtilsTest extends TestCase {
 
         // Empty
         tumorType.setTissue("");
+        tumorType.setTumorForm(TumorTypeUtils.getTumorForm(tumorType.getTissue()));
         assertFalse("Empty tissue is solid tumor, but it should not be.", TumorTypeUtils.isSolidTumor(tumorType));
 
         tumorType.setTissue("Blood");
+        tumorType.setTumorForm(TumorTypeUtils.getTumorForm(tumorType.getTissue()));
         assertFalse("Blood tissue is solid tumor, but it should not be.", TumorTypeUtils.isSolidTumor(tumorType));
 
         tumorType.setTissue("Lymph");
+        tumorType.setTumorForm(TumorTypeUtils.getTumorForm(tumorType.getTissue()));
         assertFalse("Lymph tissue is solid tumor, but it should not be.", TumorTypeUtils.isSolidTumor(tumorType));
 
         tumorType.setTissue("Eye");
+        tumorType.setTumorForm(TumorTypeUtils.getTumorForm(tumorType.getTissue()));
         assertTrue("Eye tissue is not solid tumor, but it should be.", TumorTypeUtils.isSolidTumor(tumorType));
     }
 
@@ -144,15 +144,19 @@ public class TumorTypeUtilsTest extends TestCase {
 
         // empty
         tumorType.setTissue("");
+        tumorType.setTumorForm(TumorTypeUtils.getTumorForm(tumorType.getTissue()));
         assertFalse("Empty is liquid tumor, but it should not be.", TumorTypeUtils.isLiquidTumor(tumorType));
 
         tumorType.setTissue("Skin");
+        tumorType.setTumorForm(TumorTypeUtils.getTumorForm(tumorType.getTissue()));
         assertFalse("Skin tissue is liquid tumor, but it should not be.", TumorTypeUtils.isLiquidTumor(tumorType));
 
         tumorType.setTissue("Blood");
+        tumorType.setTumorForm(TumorTypeUtils.getTumorForm(tumorType.getTissue()));
         assertTrue("Blood tissue is not liquid tumor, but it should be.", TumorTypeUtils.isLiquidTumor(tumorType));
 
         tumorType = TumorTypeUtils.getOncoTreeSubtypeByCode("CMLBCRABL1");
+        tumorType.setTumorForm(TumorTypeUtils.getTumorForm(tumorType.getTissue()));
         assertTrue("Blood tissue is not liquid tumor, but it should be.", TumorTypeUtils.isLiquidTumor(tumorType));
     }
 
@@ -168,13 +172,17 @@ public class TumorTypeUtilsTest extends TestCase {
         assertFalse("Empty tumor type set has solid tumor, but it should not.", TumorTypeUtils.hasSolidTumor(tumorTypeSet));
 
         tt1.setTissue("Eye");
+        tt1.setTumorForm(TumorTypeUtils.getTumorForm(tt1.getTissue()));
         assertTrue("Tumor types set does not have solid tumor, but it should because of EYE is solid tumor.", TumorTypeUtils.hasSolidTumor(tumorTypeSet));
 
         tt2.setTissue("Bone");
+        tt2.setTumorForm(TumorTypeUtils.getTumorForm(tt2.getTissue()));
         assertTrue("Tumor types set does not have solid tumor, but both tumor types in the set are solid tumor.", TumorTypeUtils.hasSolidTumor(tumorTypeSet));
 
         tt1.setTissue("Blood");
+        tt1.setTumorForm(TumorTypeUtils.getTumorForm(tt1.getTissue()));
         tt2.setTissue("Bone");
+        tt2.setTumorForm(TumorTypeUtils.getTumorForm(tt2.getTissue()));
         assertTrue("Tumor types set does not have solid tumor, but one of tumor types Bone is solid tumor.", TumorTypeUtils.hasSolidTumor(tumorTypeSet));
     }
 
@@ -190,10 +198,13 @@ public class TumorTypeUtilsTest extends TestCase {
         assertFalse("Empty tumor type set has liquid tumor, but it should not have", TumorTypeUtils.hasLiquidTumor(tumorTypeSet));
 
         tt1.setTissue("Blood");
+        tt1.setTumorForm(TumorTypeUtils.getTumorForm(tt1.getTissue()));
         assertTrue("Tumor types set does not have liquid tumor, but one tumor type in the set is liquid tumor.", TumorTypeUtils.hasLiquidTumor(tumorTypeSet));
 
         tt1.setTissue("Blood");
+        tt1.setTumorForm(TumorTypeUtils.getTumorForm(tt1.getTissue()));
         tt2.setTissue("Bone");
+        tt2.setTumorForm(TumorTypeUtils.getTumorForm(tt2.getTissue()));
         assertTrue("Tumor types set does not have liquid tumor, but one of tumor types Blood is liquid tumor.", TumorTypeUtils.hasLiquidTumor(tumorTypeSet));
     }
 

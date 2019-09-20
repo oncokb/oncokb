@@ -5,7 +5,8 @@ import io.swagger.annotations.ApiParam;
 import org.mskcc.cbio.oncokb.apiModels.*;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
+import org.mskcc.cbio.oncokb.model.tumor_type.MainType;
+import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
 import org.mskcc.cbio.oncokb.util.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -180,12 +181,12 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     }
 
     @Override
-    public ResponseEntity<List<String>> utilsOncoTreeMainTypesGet() {
-        List<String> names = new ArrayList<>();
+    public ResponseEntity<Set<MainType>> utilsOncoTreeMainTypesGet() {
+        Set<MainType> mainTypes = new HashSet<>();
         for (TumorType tumorType : TumorTypeUtils.getAllOncoTreeCancerTypes()) {
-            names.add(tumorType.getMainType().getName());
+            mainTypes.add(tumorType.getMainType());
         }
-        return new ResponseEntity<>(names, HttpStatus.OK);
+        return new ResponseEntity<>(mainTypes, HttpStatus.OK);
     }
 
     @Override
