@@ -1,8 +1,6 @@
 package org.mskcc.cbio.oncokb.apiModels;
 
 import org.mskcc.cbio.oncokb.model.IndicatorQueryResp;
-import org.mskcc.cbio.oncokb.model.Oncogenicity;
-import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
 
 import java.util.ArrayList;
 import java.util.List;

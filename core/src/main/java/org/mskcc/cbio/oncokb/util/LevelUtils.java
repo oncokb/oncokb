@@ -4,6 +4,8 @@ import org.apache.commons.collections.CollectionUtils;
 import org.mskcc.cbio.oncokb.apiModels.InfoLevel;
 import org.mskcc.cbio.oncokb.model.Evidence;
 import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
+import org.mskcc.cbio.oncokb.model.TumorForm;
+import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
 
 import javax.sound.sampled.Line;
 import java.util.*;
@@ -33,8 +35,8 @@ public class LevelUtils {
         Arrays.asList(LevelOfEvidence.LEVEL_R2, LevelOfEvidence.LEVEL_R1)
     );
 
-    private static final List<LevelOfEvidence> ALLOWED_PRAPOGATION_LEVELS = Collections.unmodifiableList(
-        Arrays.asList(LevelOfEvidence.LEVEL_4, LevelOfEvidence.LEVEL_3B, LevelOfEvidence.LEVEL_2B)
+    private static final List<LevelOfEvidence> ALLOWED_PROPAGATION_LEVELS = Collections.unmodifiableList(
+        Arrays.asList(LevelOfEvidence.LEVEL_4, LevelOfEvidence.LEVEL_3B, LevelOfEvidence.LEVEL_2B, LevelOfEvidence.NO)
     );
 
     // This is for sorting treatments when all levels are in one array. The only difference at the moment is the level 3A will be prioritised over 2B.
@@ -201,12 +203,12 @@ public class LevelUtils {
         return level;
     }
 
-    public static LevelOfEvidence updateOrKeepLevelByIndication(LevelOfEvidence level, String propagation, Boolean sameIndication) {
+    public static LevelOfEvidence updateOrKeepLevelByIndication(LevelOfEvidence level, LevelOfEvidence propagation, Boolean sameIndication) {
         if (level == null)
             return level;
 
         if (!sameIndication && propagation != null) {
-            return LevelOfEvidence.getByName(propagation);
+            return propagation;
         }
 
         return level;
@@ -295,8 +297,26 @@ public class LevelUtils {
     }
 
     public static List<LevelOfEvidence> getAllowedPropagationLevels() {
-        return ALLOWED_PRAPOGATION_LEVELS;
+        return ALLOWED_PROPAGATION_LEVELS;
     }
+
+    public static LevelOfEvidence getDefaultPropagationLevelByTumorForm(Evidence evidence, TumorForm tumorForm) {
+        TumorType tumorType = evidence.getOncoTreeType();
+        if (tumorType.getTumorForm() == null || tumorForm == null) {
+            return null;
+        } else if (tumorType.getTumorForm().equals(tumorForm) && tumorForm.equals(TumorForm.SOLID)) {
+            if (evidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_1) ||
+                evidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_2A)) {
+                return LevelOfEvidence.LEVEL_2B;
+            } else if (evidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_3A)) {
+                return LevelOfEvidence.LEVEL_3B;
+            } else if (evidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_4)) {
+                return LevelOfEvidence.NO;
+            }
+        }
+        return LevelOfEvidence.NO;
+    }
+
     public static ListIterator getTherapeuticLevelsWithPriorityLIstIterator() {
         return THERAPEUTIC_LEVELS_WITH_PRIORITY.listIterator(THERAPEUTIC_LEVELS_WITH_PRIORITY.size());
     }

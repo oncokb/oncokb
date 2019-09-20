@@ -5,7 +5,7 @@ import org.mskcc.cbio.oncokb.apiModels.AnnotatedVariant;
 import org.mskcc.cbio.oncokb.apiModels.Citations;
 import org.mskcc.cbio.oncokb.apiModels.CuratedGene;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
+import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -314,8 +314,16 @@ public class MainUtils {
     }
 
     public static String listToString(List<String> list, String separator) {
+        return listToString(list, separator, false);
+    }
+
+    public static String listToString(List<String> list, String separator, boolean sort) {
         if (list.isEmpty()) {
             return "";
+        }
+
+        if (sort) {
+            Collections.sort(list);
         }
 
         int n = list.size();

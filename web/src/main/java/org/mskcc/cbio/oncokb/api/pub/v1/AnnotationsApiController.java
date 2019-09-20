@@ -255,11 +255,11 @@ public class AnnotationsApiController {
             Gene geneA = GeneUtils.getGene(entrezGeneIdA, hugoSymbolA);
             Gene geneB = GeneUtils.getGene(entrezGeneIdB, hugoSymbolB);
 
-            if (geneA == null) {
-                geneA = GeneAnnotatorMyGeneInfo2.findGeneFromCBioPortal(entrezGeneIdA == null ? hugoSymbolA : entrezGeneIdA.toString());
+            if (geneA == null && entrezGeneIdA != null) {
+                geneA = GeneAnnotatorMyGeneInfo2.findGeneFromCBioPortal(entrezGeneIdA.toString());
             }
-            if (geneB == null) {
-                geneB = GeneAnnotatorMyGeneInfo2.findGeneFromCBioPortal(entrezGeneIdB == null ? hugoSymbolB : entrezGeneIdB.toString());
+            if (geneB == null && entrezGeneIdB != null) {
+                geneB = GeneAnnotatorMyGeneInfo2.findGeneFromCBioPortal(entrezGeneIdB.toString());
             }
 
             if (geneA != null) {

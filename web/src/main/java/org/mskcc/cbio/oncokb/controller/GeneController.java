@@ -6,8 +6,8 @@ package org.mskcc.cbio.oncokb.controller;
 
 import io.swagger.annotations.ApiParam;
 import org.mskcc.cbio.oncokb.bo.GeneBo;
-import org.mskcc.cbio.oncokb.model.Evidence;
 import org.mskcc.cbio.oncokb.model.Gene;
+import org.mskcc.cbio.oncokb.model.Geneset;
 import org.mskcc.cbio.oncokb.service.JsonResultFactory;
 import org.mskcc.cbio.oncokb.util.*;
 import org.springframework.stereotype.Controller;
@@ -95,6 +95,23 @@ public class GeneController {
             ApplicationContextSingleton.getAlterationBo().deleteAll(new ArrayList<>(AlterationUtils.getAllAlterations(gene)));
             ApplicationContextSingleton.getGeneBo().delete(gene);
             CacheUtils.updateGene(Collections.singleton(gene.getEntrezGeneId()), true);
+        }
+        return "success";
+    }
+
+    @RequestMapping(value = "/legacy-api/genes/{hugoSymbol}/genesets/update", method = RequestMethod.POST)
+    public @ResponseBody
+    String updateGene(
+        @ApiParam(value = "hugoSymbol", required = true) @PathVariable("hugoSymbol") String hugoSymbol
+        , @RequestBody Set<Geneset> genesets
+    ) {
+        if (hugoSymbol == null) {
+            return "error";
+        }
+        Gene gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
+        if (gene != null) {
+            gene.setGenesets(genesets);
+            ApplicationContextSingleton.getGeneBo().update(gene);
         }
         return "success";
     }

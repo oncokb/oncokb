@@ -7,7 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.apiModels.DrugMatch;
 import org.mskcc.cbio.oncokb.apiModels.NCITDrug;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
+import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
 import org.mskcc.cbio.oncokb.util.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -9,8 +9,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.model.RelevantTumorTypeDirection;
 import org.mskcc.cbio.oncokb.model.SpecialTumorType;
 import org.mskcc.cbio.oncokb.model.TumorForm;
-import org.mskcc.cbio.oncokb.model.oncotree.MainType;
-import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
+import org.mskcc.cbio.oncokb.model.tumor_type.MainType;
+import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -28,22 +28,13 @@ public class TumorTypeUtils {
     private static final String ONCO_TREE_ONCOKB_VERSION = "oncotree_2019_03_01";
     private static final String ACCESS_ERROR_ONCO_TREE_MESSAGE = "Error: Cannot access OncoTree service.";
     private static String ONCO_TREE_API_URL = null;
-    private static List<TumorType> allOncoTreeCancerTypes = new ArrayList<TumorType>() {{
-        addAll(getOncoTreeCancerTypesFromSource());
-        addAll(getAllSpecialTumorOncoTreeTypes());
-    }};
-
-    private static List<TumorType> allOncoTreeSubtypes = getOncoTreeSubtypesFromSource();
-    private static Map<String, TumorType> allNestedOncoTreeSubtypes = getAllNestedOncoTreeSubtypesFromSource();
-    private static Map<String, List<TumorType>> questTumorTypeMap = null;
-    private static Map<String, List<TumorType>> cbioTumorTypeMap = null;
     private static final ImmutableList<String> LiquidTumorTissues = ImmutableList.of(
         "Lymph", "Blood", "Lymphoid", "Myeloid"
     );
     private static final ImmutableList<String> LiquidTumorMainTypes = ImmutableList.of(
         "Blastic Plasmacytoid Dendritic Cell Neoplasm", "Histiocytosis", "Leukemia", "Multiple Myeloma",
         "Myelodysplasia", "Myeloproliferative Neoplasm", "Mastocytosis", "Hodgkin Lymphoma", "Non-Hodgkin Lymphoma",
-        "Blood Cancer, NOS", "Myelodysplastic Syndromes", "Lymphatic Cancer, NOS", " B-Lymphoblastic Leukemia/Lymphoma",
+        "Blood Cancer, NOS", "Myelodysplastic Syndromes", "Lymphatic Cancer, NOS", "B-Lymphoblastic Leukemia/Lymphoma",
         "Mature B-Cell Neoplasms", "Mature T and NK Neoplasms", "Posttransplant Lymphoproliferative Disorders",
         "T-Lymphoblastic Leukemia/Lymphoma", "Histiocytic Disorder"
 
@@ -53,6 +44,15 @@ public class TumorTypeUtils {
         , "Myeloid Neoplasms with Germ Line Predisposition"
 
     );
+    private static List<TumorType> allOncoTreeCancerTypes = new ArrayList<TumorType>() {{
+        addAll(getOncoTreeCancerTypesFromSource());
+        addAll(getAllSpecialTumorOncoTreeTypes());
+    }};
+
+    private static List<TumorType> allOncoTreeSubtypes = getOncoTreeSubtypesFromSource();
+    private static Map<String, TumorType> allNestedOncoTreeSubtypes = getAllNestedOncoTreeSubtypesFromSource();
+    private static Map<String, List<TumorType>> questTumorTypeMap = null;
+    private static Map<String, List<TumorType>> cbioTumorTypeMap = null;
 
     /**
      * Get all exist OncoTree tumor types including cancer types and subtypes
@@ -300,13 +300,32 @@ public class TumorTypeUtils {
     }
 
     public static Boolean isSolidTumor(TumorType tumorType) {
-        TumorForm tumorForm = checkTumorForm(tumorType);
-        return tumorForm != null && tumorForm.equals(TumorForm.SOLID);
+        return isDesiredTumorForm(tumorType, TumorForm.SOLID);
     }
 
     public static Boolean isLiquidTumor(TumorType tumorType) {
-        TumorForm tumorForm = checkTumorForm(tumorType);
-        return tumorForm != null && tumorForm.equals(TumorForm.LIQUID);
+        return isDesiredTumorForm(tumorType, TumorForm.LIQUID);
+    }
+
+    private static boolean isDesiredTumorForm(TumorType tumorType, TumorForm tumorForm) {
+        if (tumorForm == null || tumorType == null) {
+            return false;
+        }
+
+        // This is mainly for the tissue
+        if (tumorType.getTumorForm() != null) {
+            return tumorForm.equals(tumorType.getTumorForm());
+        }
+
+        // when the code is null, we need to validate the main type
+        if (tumorType.getCode() == null) {
+            if (tumorType.getMainType() != null && tumorType.getMainType().getTumorForm() != null) {
+                return tumorType.getMainType().getTumorForm().equals(tumorForm);
+            }
+        } else {
+            return tumorType.getTumorForm() != null && tumorType.getTumorForm().equals(tumorForm);
+        }
+        return false;
     }
 
     public static Boolean hasSolidTumor(Set<TumorType> tumorTypes) {
@@ -493,24 +512,6 @@ public class TumorTypeUtils {
                         StringUtils.containsIgnoreCase(currentTumorType.getName(), keyword);
                 }
                 break;
-            case "nci":
-                if (exactMatch) {
-                    match = currentTumorType.getNCI() == null ? false : hasMatchingElementIgnoreCase(currentTumorType.getNCI(), keyword);
-                } else {
-                    match = currentTumorType.getNCI() == null ?
-                        false :
-                        hasElementWhichContainsStringIgnoreCase(currentTumorType.getNCI(), keyword);
-                }
-                break;
-            case "umls":
-                if (exactMatch) {
-                    match = currentTumorType.getUMLS() == null ? false : hasMatchingElementIgnoreCase(currentTumorType.getUMLS(), keyword);
-                } else {
-                    match = currentTumorType.getUMLS() == null ?
-                        false :
-                        hasElementWhichContainsStringIgnoreCase(currentTumorType.getUMLS(), keyword);
-                }
-                break;
             case "maintype":
                 if (exactMatch) {
                     match = currentTumorType == null ? false :
@@ -546,13 +547,11 @@ public class TumorTypeUtils {
             tumorType.setTissue(currentTumorType.getTissue());
             tumorType.setCode(currentTumorType.getCode());
             tumorType.setName(currentTumorType.getName());
-            tumorType.setUMLS(currentTumorType.getUMLS());
-            tumorType.setNCI(currentTumorType.getNCI());
             tumorType.setMainType(currentTumorType.getMainType());
             tumorType.setColor(currentTumorType.getColor());
             tumorType.setLevel(currentTumorType.getLevel());
             tumorType.setParent(currentTumorType.getParent());
-            tumorType.setHistory(currentTumorType.getHistory());
+            tumorType.setTumorForm(currentTumorType.getTumorForm());
             if (includeChildren) {
                 tumorType.setChildren(currentTumorType.getChildren());
             }
@@ -684,12 +683,10 @@ public class TumorTypeUtils {
             trimmedTT.setTissue(tumorType.getTissue());
             trimmedTT.setCode(tumorType.getCode());
             trimmedTT.setName(tumorType.getName());
-            trimmedTT.setUMLS(tumorType.getUMLS());
-            trimmedTT.setNCI(tumorType.getNCI());
             trimmedTT.setMainType(tumorType.getMainType());
             trimmedTT.setColor(tumorType.getColor());
             trimmedTT.setLevel(tumorType.getLevel());
-            trimmedTT.setHistory(tumorType.getHistory());
+            trimmedTT.setTumorForm(tumorType.getTumorForm());
             children.add(trimmedTT);
             if (tumorType.getMainType() != null && !com.mysql.jdbc.StringUtils.isNullOrEmpty(tumorType.getMainType().getName())) {
                 children.add(getOncoTreeCancerType(tumorType.getMainType().getName()));
@@ -709,6 +706,7 @@ public class TumorTypeUtils {
             for (String str : mainTypes) {
                 TumorType cancerType = new TumorType();
                 MainType mainType = new MainType(str);
+                mainType.setTumorForm(getTumorForm(mainType));
                 cancerType.setMainType(mainType);
                 cancerTypes.add(cancerType);
             }
@@ -726,8 +724,10 @@ public class TumorTypeUtils {
             String json = IOUtils.toString(new InputStreamReader(TumorTypeUtils.class.getResourceAsStream("/data/oncotree-tumortypes.json")));
             Map map = JsonUtils.jsonToMap(json);
             Map<String, org.mskcc.oncotree.model.TumorType> data = (Map<String, org.mskcc.oncotree.model.TumorType>) map;
-            org.mskcc.oncotree.model.TumorType tumorType = new ObjectMapper().convertValue(data.get("TISSUE"), org.mskcc.oncotree.model.TumorType.class);
-            result.put("TISSUE", new TumorType(tumorType));
+            org.mskcc.oncotree.model.TumorType oncoTreeTumorType = new ObjectMapper().convertValue(data.get("TISSUE"), org.mskcc.oncotree.model.TumorType.class);
+            TumorType tumorType = new TumorType(oncoTreeTumorType);
+            annotateTumorFormRecursively(tumorType);
+            result.put("TISSUE", tumorType);
         } catch (Exception e) {
             System.out.println("You need to include oncotree nested file. Endpoint: tumorTypes?version=" + ONCO_TREE_ONCOKB_VERSION + "&flat=false");
             e.printStackTrace();
@@ -735,13 +735,26 @@ public class TumorTypeUtils {
         return result;
     }
 
+    private static void annotateTumorFormRecursively(TumorType tumorType) {
+        tumorType.setTumorForm(getTumorForm(tumorType.getTissue()));
+        if (tumorType.getChildren().size() > 0) {
+            Iterator<Map.Entry<String, TumorType>> it = tumorType.getChildren().entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry<String, TumorType> pair = it.next();
+                annotateTumorFormRecursively(pair.getValue());
+            }
+        }
+    }
+
     private static List<TumorType> getOncoTreeSubtypesFromSource() {
         List<TumorType> tumorTypes = new ArrayList<>();
         try {
             Gson gson = new GsonBuilder().create();
-            org.mskcc.oncotree.model.TumorType[] tumorType = gson.fromJson(new BufferedReader(new InputStreamReader(TumorTypeUtils.class.getResourceAsStream("/data/oncotree-tumortypes-flat.json"))), org.mskcc.oncotree.model.TumorType[].class);
-            for (org.mskcc.oncotree.model.TumorType tt : Arrays.asList(tumorType)) {
-                tumorTypes.add(new TumorType(tt));
+            org.mskcc.oncotree.model.TumorType[] oncoTreeTumorTypes = gson.fromJson(new BufferedReader(new InputStreamReader(TumorTypeUtils.class.getResourceAsStream("/data/oncotree-tumortypes-flat.json"))), org.mskcc.oncotree.model.TumorType[].class);
+            for (org.mskcc.oncotree.model.TumorType oncotreeTumorType : Arrays.asList(oncoTreeTumorTypes)) {
+                TumorType tumorType = new TumorType(oncotreeTumorType);
+                tumorType.setTumorForm(getTumorForm(tumorType.getTissue()));
+                tumorTypes.add(tumorType);
             }
         } catch (Exception e) {
             System.out.println("You need to include oncotree flat file. Endpoint: tumorTypes?version=" + ONCO_TREE_ONCOKB_VERSION + "&flat=true");
@@ -756,6 +769,7 @@ public class TumorTypeUtils {
             TumorType tumorType = new TumorType();
             MainType mainType = new MainType();
             mainType.setName(specialTumorType.getTumorType());
+            mainType.setTumorForm(getTumorForm(specialTumorType));
             tumorType.setMainType(mainType);
             types.add(tumorType);
         }
@@ -775,32 +789,66 @@ public class TumorTypeUtils {
         return ONCO_TREE_API_URL;
     }
 
-    private static TumorForm checkTumorForm(TumorType tumorType) {
-        if (tumorType == null)
+    public static TumorForm getTumorForm(SpecialTumorType specialTumorType) {
+        if (specialTumorType == null)
             return null;
 
-        if (tumorType.equals(getMappedSpecialTumor(SpecialTumorType.ALL_LIQUID_TUMORS))) {
+        if (specialTumorType.equals(SpecialTumorType.ALL_LIQUID_TUMORS) || specialTumorType.equals(SpecialTumorType.OTHER_LIQUID_TUMOR_TYPES)) {
             return TumorForm.LIQUID;
-        } else if (tumorType.equals(getMappedSpecialTumor(SpecialTumorType.ALL_SOLID_TUMORS))) {
+        } else if (specialTumorType.equals(SpecialTumorType.ALL_SOLID_TUMORS) || specialTumorType.equals(SpecialTumorType.OTHER_SOLID_TUMOR_TYPES)) {
             return TumorForm.SOLID;
-        } else if (tumorType.getMainType() != null && getAllSpecialTumorOncoTreeTypes().contains(tumorType)) {
+        } else {
             return null;
         }
+    }
 
-        // This is mainly for subtypes
-        if (!com.mysql.jdbc.StringUtils.isNullOrEmpty(tumorType.getTissue())) {
-            if (LiquidTumorTissues.contains(tumorType.getTissue()))
-                return TumorForm.LIQUID;
-            else
-                return TumorForm.SOLID;
-        }
-        if (tumorType.getMainType() != null && !com.mysql.jdbc.StringUtils.isNullOrEmpty(tumorType.getMainType().getName())) {
-            if (LiquidTumorMainTypes.contains(tumorType.getMainType().getName()))
+    public static TumorForm getTumorForm(String tissue) {
+        if (!com.mysql.jdbc.StringUtils.isNullOrEmpty(tissue)) {
+            if (LiquidTumorTissues.contains(tissue))
                 return TumorForm.LIQUID;
             else
                 return TumorForm.SOLID;
         }
         return null;
+    }
+
+    private static TumorForm getTumorForm(MainType mainType) {
+        if (mainType == null)
+            return null;
+
+        if (!com.mysql.jdbc.StringUtils.isNullOrEmpty(mainType.getName())) {
+            if (LiquidTumorMainTypes.contains(mainType.getName()))
+                return TumorForm.LIQUID;
+            else
+                return TumorForm.SOLID;
+        }
+        return null;
+    }
+
+    private static TumorForm getTumorForm(TumorType tumorType) {
+        if (tumorType.getTumorForm() != null) {
+            return tumorType.getTumorForm();
+        } else if (tumorType.getMainType() != null) {
+            return tumorType.getMainType().getTumorForm();
+        }
+        return null;
+    }
+
+    public static TumorForm checkTumorForm(Set<TumorType> tumorTypes) {
+        if (tumorTypes == null)
+            return null;
+        Set<TumorForm> uniqueTumorForms = tumorTypes.stream()
+            .filter(tumorType -> {
+                TumorForm tumorForm = getTumorForm(tumorType);
+                return tumorForm != null;
+            })
+            .map(tumorType -> getTumorForm(tumorType)).collect(Collectors.toSet());
+        if (uniqueTumorForms.size() > 1 || uniqueTumorForms.size() == 0) {
+            // There are ambiguous tumor forms
+            return null;
+        } else {
+            return uniqueTumorForms.iterator().next();
+        }
     }
 
     private static boolean hasMatchingElementIgnoreCase(List<String> list, String soughtFor) {

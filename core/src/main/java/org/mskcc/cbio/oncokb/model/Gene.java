@@ -2,7 +2,9 @@ package org.mskcc.cbio.oncokb.model;
 
 
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.swagger.annotations.ApiModelProperty;
+import org.mskcc.cbio.oncokb.serializer.SetGenesetInGeneConverter;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -38,21 +40,25 @@ public class Gene implements Serializable {
     @Column(length = 500)
     private String name;
 
-    @Column()
+    @Column(name = "tsg")
     @ApiModelProperty(value = "tumorSuppressorGene")
     private Boolean TSG;
     private Boolean oncogene;
 
-    @Column(length = 100)
+    @Column(name = "curated_isoform", length = 100)
     private String curatedIsoform;
 
-    @Column(length = 100)
+    @Column(name = "curated_ref_seq", length = 100)
     private String curatedRefSeq;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "gene_alias", joinColumns = @JoinColumn(name = "entrez_gene_id", nullable = false))
     @Column(name = "alias")
     private Set<String> geneAliases = new HashSet<String>(0);
+
+    @ManyToMany(fetch = FetchType.EAGER, mappedBy = "genes")
+    @JsonSerialize(converter = SetGenesetInGeneConverter.class)
+    private Set<Geneset> genesets = new HashSet<>();
 
     public Gene() {
     }
@@ -138,6 +144,14 @@ public class Gene implements Serializable {
 
     public void setCuratedRefSeq(String curatedRefSeq) {
         this.curatedRefSeq = curatedRefSeq;
+    }
+
+    public Set<Geneset> getGenesets() {
+        return genesets;
+    }
+
+    public void setGenesets(Set<Geneset> genesets) {
+        this.genesets = genesets;
     }
 
     @Override

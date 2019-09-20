@@ -4,7 +4,7 @@ import org.mskcc.cbio.oncokb.apiModels.ActionableGene;
 import org.mskcc.cbio.oncokb.apiModels.AnnotatedVariant;
 import org.mskcc.cbio.oncokb.apiModels.CuratedGene;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.oncotree.TumorType;
+import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
 import org.mskcc.cbio.oncokb.util.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -86,8 +86,8 @@ public class UtilsApiController implements UtilsApi {
                     biologicalVariant.getVariant().getAlteration(),
                     biologicalVariant.getOncogenic(),
                     biologicalVariant.getMutationEffect(),
-                    MainUtils.listToString(new ArrayList<>(biologicalVariant.getMutationEffectPmids()), ", "),
-                    MainUtils.listToString(abstracts, "; ")));
+                    MainUtils.listToString(new ArrayList<>(biologicalVariant.getMutationEffectPmids()), ", ", true),
+                    MainUtils.listToString(abstracts, "; ", true)));
             }
         }
 
@@ -166,9 +166,9 @@ public class UtilsApiController implements UtilsApi {
                     clinicalVariant.getVariant().getAlteration(),
                     getCancerType(clinicalVariant.getOncoTreeType()),
                     clinicalVariant.getLevel(),
-                    MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrug()), ", "),
-                    MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrugPmids()), ", "),
-                    MainUtils.listToString(abstracts, "; ")));
+                    MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrug()), ", ", true),
+                    MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrugPmids()), ", ", true),
+                    MainUtils.listToString(abstracts, "; ", true)));
             }
         }
 
