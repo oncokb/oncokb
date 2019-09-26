@@ -123,7 +123,15 @@ public class GenesApiController implements GenesApi {
         , @ApiParam(value = "The search query, it could be hugoSymbol or entrezGeneId.") @RequestParam(value = "query", required = false) String query
         , @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
     ) {
-        Set<Gene> genes = GeneUtils.searchGene(query, false);
+
+        Set<Gene> genes = new HashSet<>();
+        if (query != null) {
+            genes = GeneUtils.searchGene(query, false);
+        } else if (entrezGeneId != null) {
+            genes.add(GeneUtils.getGeneByEntrezId(entrezGeneId));
+        } else if (hugoSymbol != null) {
+            genes.add(GeneUtils.getGeneByHugoSymbol(hugoSymbol));
+        }
         List<Gene> geneList = new ArrayList<>(genes);
         return ResponseEntity.ok().body(JsonResultFactory.getGene(geneList, fields));
     }
