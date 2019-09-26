@@ -256,7 +256,9 @@ public class EvidenceUtils {
         }
 
         // Get diagnostic implication evidences
-        evidences.addAll(getEvidence(uniqueAlterations, Collections.singleton(EvidenceType.DIAGNOSTIC_IMPLICATION), downwardTumorTypes, levelOfEvidences));
+        if (evidenceTypes.contains(EvidenceType.DIAGNOSTIC_IMPLICATION)) {
+            evidences.addAll(getEvidence(uniqueAlterations, Collections.singleton(EvidenceType.DIAGNOSTIC_IMPLICATION), downwardTumorTypes, levelOfEvidences));
+        }
 
         // Get other tumor type related evidences
         Set<EvidenceType> restTTevidenceTypes = EvidenceTypeUtils.getTumorTypeEvidenceTypes();
@@ -427,7 +429,7 @@ public class EvidenceUtils {
                                 hasjointed = !Collections.disjoint(evidenceQuery.getOncoTreeTypes(), tumorType);
                                 if (hasjointed || com.mysql.jdbc.StringUtils.isNullOrEmpty(evidenceQuery.getQuery().getTumorType())) {
                                     filtered.add(evidence);
-                                } else if(tumorForm != null){
+                                } else if (tumorForm != null) {
                                     if (evidence.getLevelOfEvidence() != null) {
                                         Evidence propagatedLevel = getPropagateEvidence(evidenceQuery.getLevelOfEvidences(), evidence, tumorForm);
                                         if (propagatedLevel != null) {
@@ -716,8 +718,8 @@ public class EvidenceUtils {
             if (evidence.getTreatments() != null && evidence.getTreatments().size() > 0) {
                 List<String> treatments = TreatmentUtils.getTreatments(new HashSet<>(evidence.getTreatments()));
 
-                for(String treatment : treatments) {
-                    if(!maps.containsKey(treatment)) {
+                for (String treatment : treatments) {
+                    if (!maps.containsKey(treatment)) {
                         maps.put(treatment, new HashSet<>());
                     }
                     maps.get(treatment).add(evidence);
@@ -925,7 +927,7 @@ public class EvidenceUtils {
                                 requestQuery.getAlteration(), null, requestQuery.getConsequence(),
                                 requestQuery.getProteinStart(), requestQuery.getProteinEnd());
                             AlterationUtils.annotateAlteration(alt, alt.getAlteration());
-                        }else{
+                        } else {
                             query.setExactMatchedAlteration(alt);
                         }
                         List<Alteration> relevantAlts = AlterationUtils.getRelevantAlterations(alt);

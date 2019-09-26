@@ -4,6 +4,7 @@ import com.mysql.jdbc.StringUtils;
 import io.swagger.annotations.ApiParam;
 import org.mskcc.cbio.oncokb.apiModels.*;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
+import org.mskcc.cbio.oncokb.bo.PortalAlterationBo;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.tumor_type.MainType;
 import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
@@ -336,5 +337,32 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             }
         }
         return new ResponseEntity<>(annotation, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<List<CancerTypeCount>> utilPortalAlterationSampleCountGet(
+        @ApiParam(value = "hugoSymbol") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
+    ) {
+        PortalAlterationBo portalAlterationBo = ApplicationContextSingleton.getPortalAlterationBo();
+        List<CancerTypeCount> counts = new ArrayList<>();
+        if (hugoSymbol == null) {
+            counts.addAll(portalAlterationBo.findPortalAlterationCount());
+        } else {
+            Gene gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
+            counts.addAll(portalAlterationBo.findPortalAlterationCountByGene(gene));
+
+        }
+        return new ResponseEntity<>(counts, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<List<PortalAlteration>> utilMutationMapperDataGet(
+        @ApiParam(value = "hugoSymbol") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
+    ) {
+        PortalAlterationBo portalAlterationBo = ApplicationContextSingleton.getPortalAlterationBo();
+        List<PortalAlteration> portalAlterations = new ArrayList<>();
+        Gene gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
+        portalAlterations.addAll(portalAlterationBo.findMutationMapperData(gene));
+        return new ResponseEntity<>(portalAlterations, HttpStatus.OK);
     }
 }
