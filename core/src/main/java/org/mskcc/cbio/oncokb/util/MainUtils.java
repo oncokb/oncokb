@@ -502,6 +502,11 @@ public class MainUtils {
 
             for (Map.Entry<Alteration, Map<TumorType, Map<LevelOfEvidence, Set<Evidence>>>> entry : evidences.entrySet()) {
                 Alteration alteration = entry.getKey();
+                IndicatorQueryOncogenicity oncogenicity = IndicatorUtils.getOncogenicity(alteration, AlterationUtils.getAlleleAlterations(alteration), AlterationUtils.getRelevantAlterations(alteration));
+                String oncogenicityString = null;
+                if (oncogenicity.getOncogenicity() != null) {
+                    oncogenicityString = oncogenicity.getOncogenicity().getOncogenic();
+                }
                 Map<TumorType, Map<LevelOfEvidence, Set<Evidence>>> map = entry.getValue();
 
                 for (Map.Entry<TumorType, Map<LevelOfEvidence, Set<Evidence>>> _entry : map.entrySet()) {
@@ -511,6 +516,7 @@ public class MainUtils {
                         ClinicalVariant variant = new ClinicalVariant();
                         variant.setOncoTreeType(oncoTreeType);
                         variant.setVariant(alteration);
+                        variant.setOncogenic(oncogenicityString);
                         variant.setLevel(__entry.getKey().getLevel());
                         variant.setDrug(EvidenceUtils.getDrugs(__entry.getValue()));
                         variant.setDrugPmids(EvidenceUtils.getPmids(__entry.getValue()));
