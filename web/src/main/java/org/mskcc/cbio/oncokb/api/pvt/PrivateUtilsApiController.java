@@ -182,12 +182,22 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     }
 
     @Override
-    public ResponseEntity<Set<MainType>> utilsOncoTreeMainTypesGet() {
+    public ResponseEntity<Set<MainType>> utilsOncoTreeMainTypesGet(
+        @ApiParam(value = "Exclude special general tumor type") @RequestParam(value = "excludeSpecialTumorType", required = false) Boolean excludeSpecialTumorType
+    ) {
+        if (excludeSpecialTumorType == null) {
+            excludeSpecialTumorType = false;
+        }
         Set<MainType> mainTypes = new HashSet<>();
         for (TumorType tumorType : TumorTypeUtils.getAllOncoTreeCancerTypes()) {
             mainTypes.add(tumorType.getMainType());
         }
-        return new ResponseEntity<>(mainTypes, HttpStatus.OK);
+        if (excludeSpecialTumorType) {
+            Set<String> specialTumorTypes = Arrays.stream(SpecialTumorType.values()).map(specialTumorType -> specialTumorType.getTumorType()).collect(Collectors.toSet());
+            return new ResponseEntity<>(mainTypes.stream().filter(mainType -> !specialTumorTypes.contains(mainType.getName())).collect(Collectors.toSet()), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(mainTypes, HttpStatus.OK);
+        }
     }
 
     @Override
