@@ -108,7 +108,9 @@ public interface PrivateUtilsApi {
     @RequestMapping(value = "/utils/oncotree/mainTypes",
         produces = {"application/json"},
         method = RequestMethod.GET)
-    ResponseEntity<Set<MainType>> utilsOncoTreeMainTypesGet();
+    ResponseEntity<Set<MainType>> utilsOncoTreeMainTypesGet(
+        @ApiParam(value = "Exclude special general tumor type") @RequestParam(value = "excludeSpecialTumorType", required = false) Boolean excludeSpecialTumorType
+    );
 
     @ApiOperation(value = "", notes = "Get the full list of OncoTree Subtypes.", response = TumorType.class, responseContainer = "List")
     @ApiResponses(value = {

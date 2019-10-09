@@ -30,6 +30,7 @@ public interface UtilsApi {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK")})
     @RequestMapping(value = "/utils/allAnnotatedVariants.txt",
+        produces = {"text/plain"},
         method = RequestMethod.GET)
     ResponseEntity<String> utilsAllAnnotatedVariantsTxtGet();
 
@@ -45,6 +46,7 @@ public interface UtilsApi {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK")})
     @RequestMapping(value = "/utils/allActionableVariants.txt",
+        produces = {"text/plain"},
         method = RequestMethod.GET)
     ResponseEntity<String> utilsAllActionableVariantsTxtGet();
 
@@ -60,6 +62,7 @@ public interface UtilsApi {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK")})
     @RequestMapping(value = "/utils/cancerGeneList.txt",
+        produces = {"text/plain"},
         method = RequestMethod.GET)
     ResponseEntity<String> utilsCancerGeneListTxtGet();
 
@@ -75,6 +78,7 @@ public interface UtilsApi {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK")})
     @RequestMapping(value = "/utils/allCuratedGenes.txt",
+        produces = {"text/plain"},
         method = RequestMethod.GET)
     ResponseEntity<String> utilsAllCuratedGenesTxtGet();
 }

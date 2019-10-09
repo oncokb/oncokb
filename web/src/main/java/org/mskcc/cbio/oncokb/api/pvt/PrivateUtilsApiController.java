@@ -182,12 +182,22 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     }
 
     @Override
-    public ResponseEntity<Set<MainType>> utilsOncoTreeMainTypesGet() {
+    public ResponseEntity<Set<MainType>> utilsOncoTreeMainTypesGet(
+        @ApiParam(value = "Exclude special general tumor type") @RequestParam(value = "excludeSpecialTumorType", required = false) Boolean excludeSpecialTumorType
+    ) {
+        if (excludeSpecialTumorType == null) {
+            excludeSpecialTumorType = false;
+        }
         Set<MainType> mainTypes = new HashSet<>();
         for (TumorType tumorType : TumorTypeUtils.getAllOncoTreeCancerTypes()) {
             mainTypes.add(tumorType.getMainType());
         }
-        return new ResponseEntity<>(mainTypes, HttpStatus.OK);
+        if (excludeSpecialTumorType) {
+            Set<String> specialTumorTypes = Arrays.stream(SpecialTumorType.values()).map(specialTumorType -> specialTumorType.getTumorType()).collect(Collectors.toSet());
+            return new ResponseEntity<>(mainTypes.stream().filter(mainType -> !specialTumorTypes.contains(mainType.getName())).collect(Collectors.toSet()), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(mainTypes, HttpStatus.OK);
+        }
     }
 
     @Override
@@ -297,12 +307,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             alterationModel = AlterationUtils.getAlteration(gene.getHugoSymbol(), alteration, null, null, null, null);
         }
 
-        List<Alteration> relevantAlterations = AlterationUtils.getRelevantAlterations(alterationModel);
-
         List<TumorType> relevantTumorTypes = TumorTypeUtils.findTumorTypes(tumorType, "oncotree");
-
-        List<Evidence> evidences = EvidenceUtils.getAlterationEvidences(Collections.singletonList(alterationModel));
-        Set<TumorType> uniqueTumorTypes = evidences.stream().filter(evidence -> evidence.getOncoTreeType() != null).map(evidence -> evidence.getOncoTreeType()).collect(Collectors.toSet());
 
         Query query = new Query(alterationModel);
         query.setTumorType(tumorType);
@@ -319,22 +324,12 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             annotation.setBackground(background.iterator().next().getDescription());
         }
 
-        if (StringUtils.isNullOrEmpty(tumorType)) {
-            for (TumorType uniqueTumorType : uniqueTumorTypes) {
-                VariantAnnotationTumorType variantAnnotationTumorType = new VariantAnnotationTumorType();
-                variantAnnotationTumorType.setRelevantTumorType(relevantTumorTypes.contains(uniqueTumorType));
-                variantAnnotationTumorType.setTumorType(uniqueTumorType);
-                variantAnnotationTumorType.setEvidences(evidences.stream().filter(evidence -> evidence.getOncoTreeType() != null && evidence.getOncoTreeType().equals(uniqueTumorType)).collect(Collectors.toList()));
-                annotation.getTumorTypes().add(variantAnnotationTumorType);
-            }
-        } else {
-            for (TumorType uniqueTumorType : response.getEvidences().stream().filter(evidence -> evidence.getOncoTreeType() != null).map(evidence -> evidence.getOncoTreeType()).collect(Collectors.toSet())) {
-                VariantAnnotationTumorType variantAnnotationTumorType = new VariantAnnotationTumorType();
-                variantAnnotationTumorType.setRelevantTumorType(relevantTumorTypes.contains(uniqueTumorType));
-                variantAnnotationTumorType.setTumorType(uniqueTumorType);
-                variantAnnotationTumorType.setEvidences(response.getEvidences().stream().filter(evidence -> evidence.getOncoTreeType() != null && evidence.getOncoTreeType().equals(uniqueTumorType)).collect(Collectors.toList()));
-                annotation.getTumorTypes().add(variantAnnotationTumorType);
-            }
+        for (TumorType uniqueTumorType : response.getEvidences().stream().filter(evidence -> evidence.getOncoTreeType() != null).map(evidence -> evidence.getOncoTreeType()).collect(Collectors.toSet())) {
+            VariantAnnotationTumorType variantAnnotationTumorType = new VariantAnnotationTumorType();
+            variantAnnotationTumorType.setRelevantTumorType(relevantTumorTypes.contains(uniqueTumorType));
+            variantAnnotationTumorType.setTumorType(uniqueTumorType);
+            variantAnnotationTumorType.setEvidences(response.getEvidences().stream().filter(evidence -> evidence.getOncoTreeType() != null && evidence.getOncoTreeType().equals(uniqueTumorType)).collect(Collectors.toList()));
+            annotation.getTumorTypes().add(variantAnnotationTumorType);
         }
         return new ResponseEntity<>(annotation, HttpStatus.OK);
     }
