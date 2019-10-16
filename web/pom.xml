@@ -22,7 +22,7 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
             <properties>
-                <frontend.version>1a63500808</frontend.version>
+                <frontend.version>2ec86dc3c6</frontend.version>
                 <frontend.groupId>com.github.zhx828</frontend.groupId>
                 <frontend.artifactId>oncokb-public</frontend.artifactId>
             </properties>
