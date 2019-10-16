@@ -124,16 +124,16 @@ public class GenesApiController implements GenesApi {
         , @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
     ) {
 
-        Set<Gene> genes = new HashSet<>();
+        LinkedHashSet<Gene> genes = new LinkedHashSet<>();
         if (query != null) {
-            genes = GeneUtils.searchGene(query, false);
+            genes.addAll(GeneUtils.searchGene(query, true));
+            genes.addAll(GeneUtils.searchGene(query, false));
         } else if (entrezGeneId != null) {
             genes.add(GeneUtils.getGeneByEntrezId(entrezGeneId));
         } else if (hugoSymbol != null) {
             genes.add(GeneUtils.getGeneByHugoSymbol(hugoSymbol));
         }
-        List<Gene> geneList = new ArrayList<>(genes);
-        return ResponseEntity.ok().body(JsonResultFactory.getGene(geneList, fields));
+        return ResponseEntity.ok().body(JsonResultFactory.getGene(new ArrayList<>(genes), fields));
     }
 
 }
