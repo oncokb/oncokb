@@ -46,6 +46,9 @@ public class GitHubUtils {
         }
     }
 
+    public static String getOncoKBSqlDumpFileName(String version) {
+        return "oncokb_" + version + ".sql" + FileExtension.ZIP.getExtension();
+    }
 
     private static Boolean checkFileNameExists(List<GHContent> files, String fileName) {
         return checkFileNameExists(files, fileName, false);
@@ -62,7 +65,7 @@ public class GitHubUtils {
     private static Boolean checkSqlDumpExists(List<GHContent> files, String version) {
         return files
             .stream()
-            .filter(file -> file.getName().startsWith("oncokb_" + version + ".sql"))
+            .filter(file -> file.getName().startsWith(getOncoKBSqlDumpFileName(version)))
             .findFirst()
             .isPresent();
     }

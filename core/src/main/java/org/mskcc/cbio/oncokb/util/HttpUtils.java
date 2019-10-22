@@ -68,11 +68,15 @@ public class HttpUtils {
 
 
     public static <T> ResponseEntity<T> getDataDownloadResponseEntity(String version, FileName fileName, FileExtension fileExtension) {
+        return getDataDownloadResponseEntity(version, fileName.getName() + fileExtension.getExtension(), fileExtension);
+    }
+
+    public static <T> ResponseEntity<T> getDataDownloadResponseEntity(String version, String fileName, FileExtension fileExtension) {
         try {
-            if(fileExtension.equals(FileExtension.JSON)) {
-                return new ResponseEntity<>((T) JsonUtils.jsonToArray(GitHubUtils.getOncoKBData(version, fileName.getName() + fileExtension.getExtension())), HttpStatus.OK);
+            if (fileExtension.equals(FileExtension.JSON)) {
+                return new ResponseEntity<>((T) JsonUtils.jsonToArray(GitHubUtils.getOncoKBData(version, fileName)), HttpStatus.OK);
             } else {
-                return new ResponseEntity<>((T) GitHubUtils.getOncoKBData(version, fileName.getName() + fileExtension.getExtension()), HttpStatus.OK);
+                return new ResponseEntity<>((T) GitHubUtils.getOncoKBData(version, fileName), HttpStatus.OK);
             }
         } catch (HttpClientErrorException exception) {
             return new ResponseEntity<>(null, exception.getStatusCode());

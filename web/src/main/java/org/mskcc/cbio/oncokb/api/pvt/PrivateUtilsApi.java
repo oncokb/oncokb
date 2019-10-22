@@ -192,7 +192,13 @@ public interface PrivateUtilsApi {
         produces = {"text/plain"},
         method = RequestMethod.GET)
     ResponseEntity<String> utilDataReleaseReadmeGet(
-        @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
+        @ApiParam(value = "version", required = true) @RequestParam(value = "version") String version
+    );
+    @RequestMapping(value = "/utils/dataRelease/sqlDump",
+        produces = {"text/plain"},
+        method = RequestMethod.GET)
+    ResponseEntity<String> utilDataReleaseSqlDumpGet(
+        @ApiParam(value = "version", required = true) @RequestParam(value = "version") String version
     );
 }
 
