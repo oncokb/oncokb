@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.mskcc.cbio.oncokb.util.GitHubUtils.getOncoKBSqlDumpFileName;
 import static org.mskcc.cbio.oncokb.util.HttpUtils.getDataDownloadResponseEntity;
 
 /**
@@ -376,5 +377,12 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
     ) {
         return getDataDownloadResponseEntity(version, FileName.README, FileExtension.MARK_DOWN);
+    }
+
+    @Override
+    public ResponseEntity<String> utilDataReleaseSqlDumpGet(
+        @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
+    ) {
+        return getDataDownloadResponseEntity(version, getOncoKBSqlDumpFileName(version), FileExtension.ZIP);
     }
 }
