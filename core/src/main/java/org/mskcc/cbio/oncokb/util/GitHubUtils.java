@@ -62,7 +62,7 @@ public class GitHubUtils {
     private static Boolean checkSqlDumpExists(List<GHContent> files, String version) {
         return files
             .stream()
-            .filter(file -> file.getName().equals("oncokb_" + version + ".sql.zip"))
+            .filter(file -> file.getName().startsWith("oncokb_" + version + ".sql"))
             .findFirst()
             .isPresent();
     }
