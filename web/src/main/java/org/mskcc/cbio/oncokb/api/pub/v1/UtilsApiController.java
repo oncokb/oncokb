@@ -1,31 +1,45 @@
 package org.mskcc.cbio.oncokb.api.pub.v1;
 
+import io.swagger.annotations.ApiParam;
 import org.mskcc.cbio.oncokb.apiModels.ActionableGene;
 import org.mskcc.cbio.oncokb.apiModels.AnnotatedVariant;
 import org.mskcc.cbio.oncokb.apiModels.CuratedGene;
+import org.mskcc.cbio.oncokb.apiModels.download.FileName;
+import org.mskcc.cbio.oncokb.apiModels.download.FileExtension;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
 import org.mskcc.cbio.oncokb.util.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.*;
+
+import static org.mskcc.cbio.oncokb.util.HttpUtils.getDataDownloadResponseEntity;
 
 /**
  * Created by Hongxin on 10/28/16.
  */
 @Controller
 public class UtilsApiController implements UtilsApi {
-
     @Override
-    public ResponseEntity<List<AnnotatedVariant>> utilsAllAnnotatedVariantsGet() {
+    public ResponseEntity<List<AnnotatedVariant>> utilsAllAnnotatedVariantsGet(
+        @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
+    ) {
+        if (version != null) {
+            return getDataDownloadResponseEntity(version, FileName.ALL_ANNOTATED_VARIANTS, FileExtension.JSON);
+        }
         return new ResponseEntity<>(getAllAnnotatedVariants(), HttpStatus.OK);
-
     }
 
     @Override
-    public ResponseEntity<String> utilsAllAnnotatedVariantsTxtGet() {
+    public ResponseEntity<String> utilsAllAnnotatedVariantsTxtGet(
+        @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
+    ) {
+        if (version != null) {
+            return getDataDownloadResponseEntity(version, FileName.ALL_ANNOTATED_VARIANTS, FileExtension.TEXT);
+        }
         String separator = "\t";
         String newLine = "\n";
 
@@ -97,12 +111,22 @@ public class UtilsApiController implements UtilsApi {
     }
 
     @Override
-    public ResponseEntity<List<ActionableGene>> utilsAllActionableVariantsGet() {
+    public ResponseEntity<List<ActionableGene>> utilsAllActionableVariantsGet(
+        @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
+    ) {
+        if (version != null) {
+            return getDataDownloadResponseEntity(version, FileName.ALL_ACTIONABLE_VARIANTS, FileExtension.JSON);
+        }
         return new ResponseEntity<>(getAllActionableVariants(), HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<String> utilsAllActionableVariantsTxtGet() {
+    public ResponseEntity<String> utilsAllActionableVariantsTxtGet(
+        @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
+    ) {
+        if (version != null) {
+            return getDataDownloadResponseEntity(version, FileName.ALL_ANNOTATED_VARIANTS, FileExtension.TEXT);
+        }
         String separator = "\t";
         String newLine = "\n";
         StringBuilder sb = new StringBuilder();
@@ -185,13 +209,23 @@ public class UtilsApiController implements UtilsApi {
     }
 
     @Override
-    public ResponseEntity<List<CancerGene>> utilsCancerGeneListGet() {
+    public ResponseEntity<List<CancerGene>> utilsCancerGeneListGet(
+        @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
+    ) {
+        if (version != null) {
+            return getDataDownloadResponseEntity(version, FileName.CANCER_GENE_LIST, FileExtension.JSON);
+        }
         List<CancerGene> result = CancerGeneUtils.getCancerGeneList();
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<String> utilsCancerGeneListTxtGet() {
+    public ResponseEntity<String> utilsCancerGeneListTxtGet(
+        @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
+    ) {
+        if (version != null) {
+            return getDataDownloadResponseEntity(version, FileName.CANCER_GENE_LIST, FileExtension.TEXT);
+        }
         String separator = "\t";
         String newLine = "\n";
         StringBuilder sb = new StringBuilder();
@@ -233,12 +267,22 @@ public class UtilsApiController implements UtilsApi {
 
 
     @Override
-    public ResponseEntity<List<CuratedGene>> utilsAllCuratedGenesGet() {
+    public ResponseEntity<List<CuratedGene>> utilsAllCuratedGenesGet(
+        @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
+    ) {
+        if (version != null) {
+            return getDataDownloadResponseEntity(version, FileName.ALL_CURATED_GENES, FileExtension.JSON);
+        }
         return new ResponseEntity<>(getCuratedGenes(), HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<String> utilsAllCuratedGenesTxtGet() {
+    public ResponseEntity<String> utilsAllCuratedGenesTxtGet(
+        @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
+    ) {
+        if (version != null) {
+            return getDataDownloadResponseEntity(version, FileName.ALL_CURATED_GENES, FileExtension.TEXT);
+        }
         String separator = "\t";
         String newLine = "\n";
         StringBuilder sb = new StringBuilder();

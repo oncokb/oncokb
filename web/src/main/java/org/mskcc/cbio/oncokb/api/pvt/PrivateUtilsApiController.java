@@ -3,6 +3,9 @@ package org.mskcc.cbio.oncokb.api.pvt;
 import com.mysql.jdbc.StringUtils;
 import io.swagger.annotations.ApiParam;
 import org.mskcc.cbio.oncokb.apiModels.*;
+import org.mskcc.cbio.oncokb.apiModels.download.DownloadAvailability;
+import org.mskcc.cbio.oncokb.apiModels.download.FileExtension;
+import org.mskcc.cbio.oncokb.apiModels.download.FileName;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.PortalAlterationBo;
 import org.mskcc.cbio.oncokb.model.*;
@@ -21,6 +24,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static org.mskcc.cbio.oncokb.util.HttpUtils.getDataDownloadResponseEntity;
 
 /**
  * Created by Hongxin on 10/28/16.
@@ -359,5 +364,17 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         Gene gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
         portalAlterations.addAll(portalAlterationBo.findMutationMapperData(gene));
         return new ResponseEntity<>(portalAlterations, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<List<DownloadAvailability>> utilDataReleaseDownloadAvailabilityGet() {
+        return new ResponseEntity<>(CacheUtils.getDownloadAvailabilities(), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<String> utilDataReleaseReadmeGet(
+        @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
+    ) {
+        return getDataDownloadResponseEntity(version, FileName.README, FileExtension.MARK_DOWN);
     }
 }

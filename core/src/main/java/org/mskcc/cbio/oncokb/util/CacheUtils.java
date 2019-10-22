@@ -2,8 +2,11 @@ package org.mskcc.cbio.oncokb.util;
 
 import com.mysql.jdbc.StringUtils;
 import org.apache.commons.collections.map.HashedMap;
+import org.mskcc.cbio.oncokb.apiModels.download.DownloadAvailability;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.io.IOException;
 import java.util.*;
@@ -33,6 +36,8 @@ public class CacheUtils {
     private static Map<String, List<TumorType>> mappedTumorTypes = new HashMap<>();
     private static Map<String, List<TumorType>> allOncoTreeTypes = new HashMap<>(); //Tag by different categories. main or subtype
     private static Map<String, Object> numbers = new HashMap<>();
+
+    private static List<DownloadAvailability> downloadAvailabilities = new ArrayList<>();
 
     private static String status = "enabled"; //Current cacheUtils status. Applicable value: disabled enabled
 
@@ -176,7 +181,7 @@ public class CacheUtils {
 
                 current = MainUtils.getCurrentTimestamp();
                 drugs = new HashSet<>(ApplicationContextSingleton.getDrugBo().findAll());
-                System.out.println("Cache all drugs: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
+                System.out.println("Cached all drugs: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
                 current = MainUtils.getCurrentTimestamp();
 
                 Set<Evidence> geneEvidences = new HashSet<>(ApplicationContextSingleton.getEvidenceBo().findAll());
@@ -193,13 +198,13 @@ public class CacheUtils {
                     Map.Entry<Gene, Set<Evidence>> pair = (Map.Entry) it.next();
                     evidences.put(pair.getKey().getEntrezGeneId(), pair.getValue());
                 }
-                System.out.println("Cache all evidences: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
+                System.out.println("Cached all evidences: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
                 current = MainUtils.getCurrentTimestamp();
 
                 for (Map.Entry<Integer, Set<Evidence>> entry : evidences.entrySet()) {
                     setVUS(entry.getKey(), entry.getValue());
                 }
-                System.out.println("Cache all VUSs: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
+                System.out.println("Cached all VUSs: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
             } else {
                 System.out.println("CacheUtil is disabled at " + MainUtils.getCurrentTime());
             }
@@ -208,12 +213,15 @@ public class CacheUtils {
             allOncoTreeTypes.put("main", TumorTypeUtils.getOncoTreeCancerTypes(ApplicationContextSingleton.getEvidenceBo().findAllCancerTypes()));
             allOncoTreeTypes.put("subtype", TumorTypeUtils.getOncoTreeSubtypesByCode(ApplicationContextSingleton.getEvidenceBo().findAllSubtypes()));
 
-            System.out.println("Cache all tumor types: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
+            System.out.println("Cached all tumor types: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
             current = MainUtils.getCurrentTimestamp();
 
             NamingUtils.cacheAllAbbreviations();
-            System.out.println("Cache abbreviation ontology: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
+            System.out.println("Cached abbreviation ontology: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
             current = MainUtils.getCurrentTimestamp();
+
+            cacheDownloadAvailability();
+            System.out.println("Cached downloadable files availability on github: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
 
             registerOtherServices();
             System.out.println("Register other services: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
@@ -261,7 +269,7 @@ public class CacheUtils {
             hugoSymbolToEntrez.put(gene.getHugoSymbol(), gene.getEntrezGeneId());
         }
         cancerGeneList = null;
-        System.out.println("Cache all genes: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
+        System.out.println("Cached all genes: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
     }
 
     public static List<CancerGene> getCancerGeneList() {
@@ -409,7 +417,7 @@ public class CacheUtils {
             }
             alterations.get(gene.getEntrezGeneId()).add(alteration);
         }
-        System.out.println("Cache all alterations: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
+        System.out.println("Cached all alterations: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
     }
 
     public static Set<Drug> getAllDrugs() {
@@ -624,7 +632,7 @@ public class CacheUtils {
             Map.Entry<Gene, Set<Evidence>> pair = (Map.Entry) it.next();
             evidences.put(pair.getKey().getEntrezGeneId(), pair.getValue());
         }
-        System.out.println("Cache all evidences by gene: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
+        System.out.println("Cached all evidences by gene: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
     }
 
     public static Map<String, Long> getRecordTime() {
@@ -639,5 +647,19 @@ public class CacheUtils {
         if (!recordTime.containsKey(key))
             recordTime.put(key, (long) 0);
         recordTime.put(key, recordTime.get(key) + time);
+    }
+
+    public static List<DownloadAvailability> getDownloadAvailabilities() {
+        return downloadAvailabilities;
+    }
+
+    private static void cacheDownloadAvailability() {
+        try {
+            downloadAvailabilities = GitHubUtils.getDownloadAvailability();
+        } catch (IOException e) {
+            System.out.println("There is an issue connecting to GitHub.");
+        } catch (NoPropertyException exception) {
+            System.out.println("The data access token is not available");
+        }
     }
 }

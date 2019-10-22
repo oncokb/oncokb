@@ -1,5 +1,11 @@
 package org.mskcc.cbio.oncokb.util;
 
+import org.mskcc.cbio.oncokb.apiModels.download.FileExtension;
+import org.mskcc.cbio.oncokb.apiModels.download.FileName;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.HttpClientErrorException;
+
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -57,6 +63,23 @@ public class HttpUtils {
             return FileUtils.readStream(con.getInputStream());
         } else {
             return null;
+        }
+    }
+
+
+    public static <T> ResponseEntity<T> getDataDownloadResponseEntity(String version, FileName fileName, FileExtension fileExtension) {
+        try {
+            if(fileExtension.equals(FileExtension.JSON)) {
+                return new ResponseEntity<>((T) JsonUtils.jsonToArray(GitHubUtils.getOncoKBData(version, fileName.getName() + fileExtension.getExtension())), HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>((T) GitHubUtils.getOncoKBData(version, fileName.getName() + fileExtension.getExtension()), HttpStatus.OK);
+            }
+        } catch (HttpClientErrorException exception) {
+            return new ResponseEntity<>(null, exception.getStatusCode());
+        } catch (IOException exception) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (NoPropertyException exception) {
+            return new ResponseEntity<>(HttpStatus.SERVICE_UNAVAILABLE);
         }
     }
 }
