@@ -125,10 +125,10 @@ KMT2A	KMT2A-MLLT3 Fusion	Colorectal Cacner
 PDGFRB	PDGFRB-CSF1R Fusion	CMML	1: Imatinib;
 PDGFRB	PDGFRB-CSF1R Fusion	Colorectal Cancer
 BRAF	K601E	Colorectal Cancer	3B: Trametinib; 4: PLX8394;
-BRAF	K601E	CMML
+#BRAF	K601E	CMML
 ARAF	S214A	HDCN	3A: Cobimetinib; 3A: Sorafenib;
 ARAF	S214A	ECD	3A: Cobimetinib; 3A: Sorafenib;
-ARAF	S214A	RDD
+#ARAF	S214A	RDD
 ARAF	S214A	Colorectal Cancer	3B: Sorafenib;
 TP53	K292T	AML
 TP53	K292T	APLPMLRARA
@@ -147,12 +147,12 @@ IDH2	R172K	Melanoma	2B: Enasidenib;
 MAP2K1	K57N	Erdheim-Chester Disease	3A: Cobimetinib; 3A: Trametinib;
 MAP2K1	K57N	Lung Adenocarcinoma	3A: Cobimetinib; 3A: Trametinib;
 MAP2K1	K57N	Glioblastoma	3B: Cobimetinib; 3B: Trametinib;
-MAP2K1	K57N	Diffuse Large B-Cell Lymphoma, NOS
+#MAP2K1	K57N	Diffuse Large B-Cell Lymphoma, NOS
 PIK3CA	E545K	Breast Cancer	1: Fulvestrant+Alpelisib; 3A: Alpelisib; 3A: Buparlisib; 3A: Buparlisib+Fulvestrant; 3A: Copanlisib; 3A: GDC-0077; 3A: Serabelisib; 3A: Taselisib; 3A: Taselisib+Fulvestrant;
 PIK3CA	E545K	Ovarian Cancer	2B: Fulvestrant+Alpelisib; 3B: Alpelisib; 3B: Buparlisib; 3B: Copanlisib; 3B: GDC-0077; 3B: Serabelisib; 3B: Taselisib;
-PIK3CA	E545K	Acute Myeloid Leukemia
+#PIK3CA	E545K	Acute Myeloid Leukemia
 NRAS	G12C	Breast Cancer	3B: Binimetinib; 3B: Binimetinib+Ribociclib;
-NRAS	G12C	Chronic Myelogenous Leukemia
+#NRAS	G12C	Chronic Myelogenous Leukemia
 SF3B1	K625G	Chronic Myelomonocytic Leukemia	4: H3B-8800;
 SF3B1	K625G	Breast Cancer
 
