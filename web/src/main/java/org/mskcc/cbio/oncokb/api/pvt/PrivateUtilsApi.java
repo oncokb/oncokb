@@ -195,9 +195,9 @@ public interface PrivateUtilsApi {
         @ApiParam(value = "version", required = true) @RequestParam(value = "version") String version
     );
     @RequestMapping(value = "/utils/dataRelease/sqlDump",
-        produces = {"text/plain"},
+        produces = {"application/zip"},
         method = RequestMethod.GET)
-    ResponseEntity<String> utilDataReleaseSqlDumpGet(
+    ResponseEntity<byte[]> utilDataReleaseSqlDumpGet(
         @ApiParam(value = "version", required = true) @RequestParam(value = "version") String version
     );
 }

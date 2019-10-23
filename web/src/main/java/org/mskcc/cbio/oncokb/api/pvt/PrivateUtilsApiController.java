@@ -380,7 +380,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     }
 
     @Override
-    public ResponseEntity<String> utilDataReleaseSqlDumpGet(
+    public ResponseEntity<byte[]> utilDataReleaseSqlDumpGet(
         @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
     ) {
         return getDataDownloadResponseEntity(version, getOncoKBSqlDumpFileName(version), FileExtension.ZIP);

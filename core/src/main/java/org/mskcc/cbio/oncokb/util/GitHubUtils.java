@@ -1,5 +1,6 @@
 package org.mskcc.cbio.oncokb.util;
 
+import com.sun.mail.iap.ByteArray;
 import org.apache.commons.io.IOUtils;
 import org.kohsuke.github.GHBlob;
 import org.kohsuke.github.GHContent;
@@ -27,6 +28,16 @@ public class GitHubUtils {
     private final static String ONCOKB_DATA_REPO = "knowledgesystems/oncokb-data/contents";
 
     public static String getOncoKBData(String version, String fileName) throws HttpClientErrorException, IOException, NoPropertyException {
+        GHBlob ghBlob = getGHBlob(version, fileName);
+        return IOUtils.toString(ghBlob.read(), StandardCharsets.UTF_8);
+    }
+
+    public static byte[] getOncoKBDataInBytes(String version, String fileName) throws HttpClientErrorException, IOException, NoPropertyException {
+        GHBlob ghBlob = getGHBlob(version, fileName);
+        return IOUtils.toByteArray(ghBlob.read());
+    }
+
+    private static GHBlob getGHBlob(String version, String fileName) throws IOException, NoPropertyException {
         GHRepository repo = getOncoKBDataRepo();
         List<GHContent> contents = new ArrayList<>();
         try {
@@ -40,7 +51,7 @@ public class GitHubUtils {
         if (matchedContent.isPresent()) {
             String sha = matchedContent.get().getSha();
             GHBlob ghBlob = repo.getBlob(sha);
-            return IOUtils.toString(ghBlob.read(), StandardCharsets.UTF_8);
+            return ghBlob;
         } else {
             throw new HttpClientErrorException(HttpStatus.NOT_FOUND);
         }
@@ -109,7 +120,7 @@ public class GitHubUtils {
 
     private static GitHub getGitHubConnection() throws IOException, NoPropertyException {
         String token = PropertiesUtils.getProperties(ONCOKB_DATA_ACCESS_TOKEN_PROPERTY_NAME);
-        if(token == null) {
+        if (token == null) {
             throw new NoPropertyException("The data access token is not available.");
         }
         return GitHub.connectUsingOAuth(token);
