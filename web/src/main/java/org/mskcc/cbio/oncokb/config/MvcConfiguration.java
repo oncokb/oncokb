@@ -71,10 +71,10 @@ public class MvcConfiguration extends WebMvcConfigurerAdapter {
             "OncoKB APIs",
             "OncoKB, a comprehensive and curated precision oncology knowledge base, offers oncologists detailed, evidence-based information about individual somatic mutations and structural alterations present in patient tumors with the goal of supporting optimal treatment decisions.",
             "v1.0.0",
-            "https://oncokb.org/terms",
-            new Contact("OncoKB", "https://oncokb.org", "contact@oncokb.org"),
+            "https://www.oncokb.org/terms",
+            new Contact("OncoKB", "https://www.oncokb.org", "contact@oncokb.org"),
             "Usage Terms",
-            "https://oncokb.org/terms"
+            "https://www.oncokb.org/terms"
         );
         return apiInfo;
     }
