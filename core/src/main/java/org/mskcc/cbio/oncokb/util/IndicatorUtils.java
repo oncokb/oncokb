@@ -615,12 +615,12 @@ public class IndicatorUtils {
         List<LevelOfEvidence> otherSignificantLevels = new ArrayList<>();
         if (type != null && highestLevel != null && evidences != null) {
             if (type.equals("sensitive")) {
-                if (highestLevel.equals(LevelOfEvidence.LEVEL_2B)) {
-                    Map<LevelOfEvidence, Set<Evidence>> levels = EvidenceUtils.separateEvidencesByLevel(evidences);
-                    if (levels.containsKey(LevelOfEvidence.LEVEL_3A)) {
-                        otherSignificantLevels.add(LevelOfEvidence.LEVEL_3A);
-                    }
-                }
+//                if (highestLevel.equals(LevelOfEvidence.LEVEL_2B)) {
+//                    Map<LevelOfEvidence, Set<Evidence>> levels = EvidenceUtils.separateEvidencesByLevel(evidences);
+//                    if (levels.containsKey(LevelOfEvidence.LEVEL_3A)) {
+//                        otherSignificantLevels.add(LevelOfEvidence.LEVEL_3A);
+//                    }
+//                }
             } else if (type.equals("resistance")) {
 
             }

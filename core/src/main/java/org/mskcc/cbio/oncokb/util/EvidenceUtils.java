@@ -665,9 +665,6 @@ public class EvidenceUtils {
         Set<Evidence> result = new HashSet<>();
 
         if (highestLevel != null) {
-            if (highestLevel.equals(LevelOfEvidence.LEVEL_2B) && levels.containsKey(LevelOfEvidence.LEVEL_3A)) {
-                result.addAll(levels.get(LevelOfEvidence.LEVEL_3A));
-            }
             result.addAll(levels.get(highestLevel));
         }
         return result;
@@ -737,7 +734,6 @@ public class EvidenceUtils {
             // If highestEvis has more than 1 items, find highest original level if the level is 2B, 3B
             if (highestEvis.size() > 1) {
                 Set<LevelOfEvidence> checkLevels = new HashSet<>();
-                checkLevels.add(LevelOfEvidence.LEVEL_2B);
                 checkLevels.add(LevelOfEvidence.LEVEL_3B);
 
                 for (Evidence highestEvi : highestEvis) {
