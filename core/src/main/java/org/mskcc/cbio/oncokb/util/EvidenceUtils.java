@@ -405,6 +405,11 @@ public class EvidenceUtils {
                     if (evidence.getAlterations().isEmpty()) {
                         filtered.add(evidence);
                     } else {
+                        if (isKrasG12CAMG150(evidence)) {
+                            if (!evidenceQuery.getQuery().getAlteration().equalsIgnoreCase("G12C")) {
+                                continue;
+                            }
+                        }
                         boolean hasjointed = !Collections.disjoint(evidence.getAlterations(), evidenceQuery.getAlterations());
                         if (!hasjointed) {
                             hasjointed = !Collections.disjoint(evidence.getAlterations(), evidenceQuery.getAlleles());
@@ -445,6 +450,20 @@ public class EvidenceUtils {
         }
 
         return filtered;
+    }
+
+    private static boolean isKrasG12CAMG150(Evidence evidence) {
+        if (evidence.getGene().getHugoSymbol().equalsIgnoreCase("KRAS")
+            && evidence.getAlterations().size() == 1
+            && evidence.getAlterations().iterator().next().getAlteration().equalsIgnoreCase("G12C")
+            && evidence.getTreatments().size() == 1
+            && evidence.getTreatments().iterator().next().getDrugs().size() == 1
+            && evidence.getTreatments().iterator().next().getDrugs().get(0).getNcitCode().equals("C154287")
+        ) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public static LevelOfEvidence getPropagationLevel(Evidence evidence, TumorForm queriedTumorForm) {

@@ -156,3 +156,10 @@ NRAS	G12C	Breast Cancer	3B: Binimetinib; 3B: Binimetinib+Ribociclib;
 SF3B1	K625G	Chronic Myelomonocytic Leukemia	4: H3B-8800;
 SF3B1	K625G	Breast Cancer
 
+# AMG-510 should only work for KRAS G12C, not alternative allele
+# KRAS	G12C	Breast Cancer	3A: AGM-510; 4: Binimetinib; 4: Cobimetinib; 4: Trametinib;
+KRAS	G12D	Breast Cancer	4: Binimetinib; 4: Cobimetinib; 4: Trametinib;
+# KRAS	G12C	NSCLC	3A: AGM-510; 4: Binimetinib; 4: Cobimetinib; 4: Trametinib;
+KRAS	G12D	NSCLC	4: Binimetinib; 4: Cobimetinib; 4: Trametinib;
+# KRAS	G12C	AML
+# KRAS	G12D	AML
