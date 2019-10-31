@@ -12,6 +12,7 @@ import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.mskcc.cbio.oncokb.model.RelevantTumorTypeDirection.DOWNWARD;
 
@@ -1002,29 +1003,34 @@ public class EvidenceUtils {
     private static List<EvidenceQueryRes> assignEvidence(Set<Evidence> evidences, List<EvidenceQueryRes> evidenceQueries,
                                                          Boolean highestLevelOnly) {
         for (EvidenceQueryRes query : evidenceQueries) {
+            Set<Evidence> filteredEvidences = new HashSet<>();
+            if (query.getGene().getHugoSymbol().equalsIgnoreCase("KRAS") && !query.getQuery().getAlteration().equalsIgnoreCase("G12C")) {
+                filteredEvidences = evidences.stream().filter(evidence -> !isKrasG12CAMG150(evidence)).collect(Collectors.toSet());
+            } else {
+                filteredEvidences = evidences;
+            }
             if (highestLevelOnly) {
-                Set<Evidence> allEvidences = new HashSet<>(query.getEvidences());
-                List<Evidence> filteredEvidences = new ArrayList<>();
+                List<Evidence> filteredHighestEvidences = new ArrayList<>();
 
                 // Get highest sensitive evidences
-                Set<Evidence> sensitiveEvidences = EvidenceUtils.getSensitiveEvidences(allEvidences);
-                filteredEvidences.addAll(EvidenceUtils.getOnlyHighestLevelEvidences(sensitiveEvidences, query.getExactMatchedAlteration()));
+                Set<Evidence> sensitiveEvidences = EvidenceUtils.getSensitiveEvidences(filteredEvidences);
+                filteredHighestEvidences.addAll(EvidenceUtils.getOnlyHighestLevelEvidences(sensitiveEvidences, query.getExactMatchedAlteration()));
 
                 // Get highest resistance evidences
-                Set<Evidence> resistanceEvidences = EvidenceUtils.getResistanceEvidences(allEvidences);
-                filteredEvidences.addAll(EvidenceUtils.getOnlyHighestLevelEvidences(resistanceEvidences, query.getExactMatchedAlteration()));
+                Set<Evidence> resistanceEvidences = EvidenceUtils.getResistanceEvidences(filteredEvidences);
+                filteredHighestEvidences.addAll(EvidenceUtils.getOnlyHighestLevelEvidences(resistanceEvidences, query.getExactMatchedAlteration()));
 
 
                 // Also include all non-treatment evidences
-                for (Evidence evidence : allEvidences) {
+                for (Evidence evidence : filteredEvidences) {
                     if (!sensitiveEvidences.contains(evidence) && !resistanceEvidences.contains(evidence)) {
-                        filteredEvidences.add(evidence);
+                        filteredHighestEvidences.add(evidence);
                     }
                 }
 
-                query.setEvidences(filteredEvidences);
+                query.setEvidences(filteredHighestEvidences);
             } else {
-                query.setEvidences(new ArrayList<>(evidences));
+                query.setEvidences(new ArrayList<>(filteredEvidences));
             }
             CustomizeComparator.sortEvidenceBasedOnPriority(query.getEvidences(), LevelUtils.getIndexedTherapeuticLevels());
             if (query.getGene() != null && query.getGene().getHugoSymbol().equals("KIT")) {
