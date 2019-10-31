@@ -493,7 +493,7 @@ public class IndicatorUtils {
         return new HashSet<>();
     }
 
-    private static IndicatorQueryOncogenicity getOncogenicity(Alteration alteration, List<Alteration> alternativeAllele, List<Alteration> relevantAlterations) {
+    public static IndicatorQueryOncogenicity getOncogenicity(Alteration alteration, List<Alteration> alternativeAllele, List<Alteration> relevantAlterations) {
         Oncogenicity oncogenicity = null;
         Evidence oncogenicityEvidence = null;
 

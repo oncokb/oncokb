@@ -3,7 +3,11 @@ package org.mskcc.cbio.oncokb.api.pvt;
 import com.mysql.jdbc.StringUtils;
 import io.swagger.annotations.ApiParam;
 import org.mskcc.cbio.oncokb.apiModels.*;
+import org.mskcc.cbio.oncokb.apiModels.download.DownloadAvailability;
+import org.mskcc.cbio.oncokb.apiModels.download.FileExtension;
+import org.mskcc.cbio.oncokb.apiModels.download.FileName;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
+import org.mskcc.cbio.oncokb.bo.PortalAlterationBo;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.tumor_type.MainType;
 import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
@@ -20,6 +24,9 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static org.mskcc.cbio.oncokb.util.GitHubUtils.getOncoKBSqlDumpFileName;
+import static org.mskcc.cbio.oncokb.util.HttpUtils.getDataDownloadResponseEntity;
 
 /**
  * Created by Hongxin on 10/28/16.
@@ -181,12 +188,22 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     }
 
     @Override
-    public ResponseEntity<Set<MainType>> utilsOncoTreeMainTypesGet() {
+    public ResponseEntity<Set<MainType>> utilsOncoTreeMainTypesGet(
+        @ApiParam(value = "Exclude special general tumor type") @RequestParam(value = "excludeSpecialTumorType", required = false) Boolean excludeSpecialTumorType
+    ) {
+        if (excludeSpecialTumorType == null) {
+            excludeSpecialTumorType = false;
+        }
         Set<MainType> mainTypes = new HashSet<>();
         for (TumorType tumorType : TumorTypeUtils.getAllOncoTreeCancerTypes()) {
             mainTypes.add(tumorType.getMainType());
         }
-        return new ResponseEntity<>(mainTypes, HttpStatus.OK);
+        if (excludeSpecialTumorType) {
+            Set<String> specialTumorTypes = Arrays.stream(SpecialTumorType.values()).map(specialTumorType -> specialTumorType.getTumorType()).collect(Collectors.toSet());
+            return new ResponseEntity<>(mainTypes.stream().filter(mainType -> !specialTumorTypes.contains(mainType.getName())).collect(Collectors.toSet()), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(mainTypes, HttpStatus.OK);
+        }
     }
 
     @Override
@@ -296,12 +313,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             alterationModel = AlterationUtils.getAlteration(gene.getHugoSymbol(), alteration, null, null, null, null);
         }
 
-        List<Alteration> relevantAlterations = AlterationUtils.getRelevantAlterations(alterationModel);
-
         List<TumorType> relevantTumorTypes = TumorTypeUtils.findTumorTypes(tumorType, "oncotree");
-
-        List<Evidence> evidences = EvidenceUtils.getAlterationEvidences(Collections.singletonList(alterationModel));
-        Set<TumorType> uniqueTumorTypes = evidences.stream().filter(evidence -> evidence.getOncoTreeType() != null).map(evidence -> evidence.getOncoTreeType()).collect(Collectors.toSet());
 
         Query query = new Query(alterationModel);
         query.setTumorType(tumorType);
@@ -318,23 +330,59 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             annotation.setBackground(background.iterator().next().getDescription());
         }
 
-        if (StringUtils.isNullOrEmpty(tumorType)) {
-            for (TumorType uniqueTumorType : uniqueTumorTypes) {
-                VariantAnnotationTumorType variantAnnotationTumorType = new VariantAnnotationTumorType();
-                variantAnnotationTumorType.setRelevantTumorType(relevantTumorTypes.contains(uniqueTumorType));
-                variantAnnotationTumorType.setTumorType(uniqueTumorType);
-                variantAnnotationTumorType.setEvidences(evidences.stream().filter(evidence -> evidence.getOncoTreeType() != null && evidence.getOncoTreeType().equals(uniqueTumorType)).collect(Collectors.toList()));
-                annotation.getTumorTypes().add(variantAnnotationTumorType);
-            }
-        } else {
-            for (TumorType uniqueTumorType : response.getEvidences().stream().filter(evidence -> evidence.getOncoTreeType() != null).map(evidence -> evidence.getOncoTreeType()).collect(Collectors.toSet())) {
-                VariantAnnotationTumorType variantAnnotationTumorType = new VariantAnnotationTumorType();
-                variantAnnotationTumorType.setRelevantTumorType(relevantTumorTypes.contains(uniqueTumorType));
-                variantAnnotationTumorType.setTumorType(uniqueTumorType);
-                variantAnnotationTumorType.setEvidences(response.getEvidences().stream().filter(evidence -> evidence.getOncoTreeType() != null && evidence.getOncoTreeType().equals(uniqueTumorType)).collect(Collectors.toList()));
-                annotation.getTumorTypes().add(variantAnnotationTumorType);
-            }
+        for (TumorType uniqueTumorType : response.getEvidences().stream().filter(evidence -> evidence.getOncoTreeType() != null).map(evidence -> evidence.getOncoTreeType()).collect(Collectors.toSet())) {
+            VariantAnnotationTumorType variantAnnotationTumorType = new VariantAnnotationTumorType();
+            variantAnnotationTumorType.setRelevantTumorType(relevantTumorTypes.contains(uniqueTumorType));
+            variantAnnotationTumorType.setTumorType(uniqueTumorType);
+            variantAnnotationTumorType.setEvidences(response.getEvidences().stream().filter(evidence -> evidence.getOncoTreeType() != null && evidence.getOncoTreeType().equals(uniqueTumorType)).collect(Collectors.toList()));
+            annotation.getTumorTypes().add(variantAnnotationTumorType);
         }
         return new ResponseEntity<>(annotation, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<List<CancerTypeCount>> utilPortalAlterationSampleCountGet(
+        @ApiParam(value = "hugoSymbol") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
+    ) {
+        PortalAlterationBo portalAlterationBo = ApplicationContextSingleton.getPortalAlterationBo();
+        List<CancerTypeCount> counts = new ArrayList<>();
+        if (hugoSymbol == null) {
+            counts.addAll(portalAlterationBo.findPortalAlterationCount());
+        } else {
+            Gene gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
+            counts.addAll(portalAlterationBo.findPortalAlterationCountByGene(gene));
+
+        }
+        return new ResponseEntity<>(counts, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<List<PortalAlteration>> utilMutationMapperDataGet(
+        @ApiParam(value = "hugoSymbol") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
+    ) {
+        PortalAlterationBo portalAlterationBo = ApplicationContextSingleton.getPortalAlterationBo();
+        List<PortalAlteration> portalAlterations = new ArrayList<>();
+        Gene gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
+        portalAlterations.addAll(portalAlterationBo.findMutationMapperData(gene));
+        return new ResponseEntity<>(portalAlterations, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<List<DownloadAvailability>> utilDataReleaseDownloadAvailabilityGet() {
+        return new ResponseEntity<>(CacheUtils.getDownloadAvailabilities(), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<String> utilDataReleaseReadmeGet(
+        @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
+    ) {
+        return getDataDownloadResponseEntity(version, FileName.README, FileExtension.MARK_DOWN);
+    }
+
+    @Override
+    public ResponseEntity<byte[]> utilDataReleaseSqlDumpGet(
+        @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
+    ) {
+        return getDataDownloadResponseEntity(version, getOncoKBSqlDumpFileName(version), FileExtension.ZIP);
     }
 }

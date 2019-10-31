@@ -6,6 +6,8 @@
 package org.mskcc.cbio.oncokb.bo;
 
 import java.util.List;
+
+import org.mskcc.cbio.oncokb.apiModels.CancerTypeCount;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.PortalAlteration;
 
@@ -15,9 +17,9 @@ import org.mskcc.cbio.oncokb.model.PortalAlteration;
  */
 public interface PortalAlterationBo extends GenericBo<PortalAlteration> {
 
-    List<PortalAlteration> findPortalAlterationCountByGene(Gene gene);
+    List<CancerTypeCount> findPortalAlterationCountByGene(Gene gene);
 
-    List<PortalAlteration> findPortalAlterationCount();
-    
+    List<CancerTypeCount> findPortalAlterationCount();
+
     List<PortalAlteration> findMutationMapperData(Gene gene);
 }

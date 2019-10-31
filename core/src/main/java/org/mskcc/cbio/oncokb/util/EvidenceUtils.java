@@ -12,6 +12,7 @@ import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.mskcc.cbio.oncokb.model.RelevantTumorTypeDirection.DOWNWARD;
 
@@ -256,7 +257,9 @@ public class EvidenceUtils {
         }
 
         // Get diagnostic implication evidences
-        evidences.addAll(getEvidence(uniqueAlterations, Collections.singleton(EvidenceType.DIAGNOSTIC_IMPLICATION), downwardTumorTypes, levelOfEvidences));
+        if (evidenceTypes.contains(EvidenceType.DIAGNOSTIC_IMPLICATION)) {
+            evidences.addAll(getEvidence(uniqueAlterations, Collections.singleton(EvidenceType.DIAGNOSTIC_IMPLICATION), downwardTumorTypes, levelOfEvidences));
+        }
 
         // Get other tumor type related evidences
         Set<EvidenceType> restTTevidenceTypes = EvidenceTypeUtils.getTumorTypeEvidenceTypes();
@@ -403,6 +406,11 @@ public class EvidenceUtils {
                     if (evidence.getAlterations().isEmpty()) {
                         filtered.add(evidence);
                     } else {
+                        if (isKrasG12CAMG150(evidence)) {
+                            if (!evidenceQuery.getQuery().getAlteration().equalsIgnoreCase("G12C")) {
+                                continue;
+                            }
+                        }
                         boolean hasjointed = !Collections.disjoint(evidence.getAlterations(), evidenceQuery.getAlterations());
                         if (!hasjointed) {
                             hasjointed = !Collections.disjoint(evidence.getAlterations(), evidenceQuery.getAlleles());
@@ -427,7 +435,7 @@ public class EvidenceUtils {
                                 hasjointed = !Collections.disjoint(evidenceQuery.getOncoTreeTypes(), tumorType);
                                 if (hasjointed || com.mysql.jdbc.StringUtils.isNullOrEmpty(evidenceQuery.getQuery().getTumorType())) {
                                     filtered.add(evidence);
-                                } else if(tumorForm != null){
+                                } else if (tumorForm != null) {
                                     if (evidence.getLevelOfEvidence() != null) {
                                         Evidence propagatedLevel = getPropagateEvidence(evidenceQuery.getLevelOfEvidences(), evidence, tumorForm);
                                         if (propagatedLevel != null) {
@@ -443,6 +451,20 @@ public class EvidenceUtils {
         }
 
         return filtered;
+    }
+
+    private static boolean isKrasG12CAMG150(Evidence evidence) {
+        if (evidence.getGene().getHugoSymbol().equalsIgnoreCase("KRAS")
+            && evidence.getAlterations().size() == 1
+            && evidence.getAlterations().iterator().next().getAlteration().equalsIgnoreCase("G12C")
+            && evidence.getTreatments().size() == 1
+            && evidence.getTreatments().iterator().next().getDrugs().size() == 1
+            && evidence.getTreatments().iterator().next().getDrugs().get(0).getNcitCode().equals("C154287")
+        ) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public static LevelOfEvidence getPropagationLevel(Evidence evidence, TumorForm queriedTumorForm) {
@@ -716,8 +738,8 @@ public class EvidenceUtils {
             if (evidence.getTreatments() != null && evidence.getTreatments().size() > 0) {
                 List<String> treatments = TreatmentUtils.getTreatments(new HashSet<>(evidence.getTreatments()));
 
-                for(String treatment : treatments) {
-                    if(!maps.containsKey(treatment)) {
+                for (String treatment : treatments) {
+                    if (!maps.containsKey(treatment)) {
                         maps.put(treatment, new HashSet<>());
                     }
                     maps.get(treatment).add(evidence);
@@ -925,7 +947,7 @@ public class EvidenceUtils {
                                 requestQuery.getAlteration(), null, requestQuery.getConsequence(),
                                 requestQuery.getProteinStart(), requestQuery.getProteinEnd());
                             AlterationUtils.annotateAlteration(alt, alt.getAlteration());
-                        }else{
+                        } else {
                             query.setExactMatchedAlteration(alt);
                         }
                         List<Alteration> relevantAlts = AlterationUtils.getRelevantAlterations(alt);
@@ -981,29 +1003,34 @@ public class EvidenceUtils {
     private static List<EvidenceQueryRes> assignEvidence(Set<Evidence> evidences, List<EvidenceQueryRes> evidenceQueries,
                                                          Boolean highestLevelOnly) {
         for (EvidenceQueryRes query : evidenceQueries) {
+            Set<Evidence> filteredEvidences = new HashSet<>();
+            if (query.getGene().getHugoSymbol().equalsIgnoreCase("KRAS") && !query.getQuery().getAlteration().equalsIgnoreCase("G12C")) {
+                filteredEvidences = evidences.stream().filter(evidence -> !isKrasG12CAMG150(evidence)).collect(Collectors.toSet());
+            } else {
+                filteredEvidences = evidences;
+            }
             if (highestLevelOnly) {
-                Set<Evidence> allEvidences = new HashSet<>(query.getEvidences());
-                List<Evidence> filteredEvidences = new ArrayList<>();
+                List<Evidence> filteredHighestEvidences = new ArrayList<>();
 
                 // Get highest sensitive evidences
-                Set<Evidence> sensitiveEvidences = EvidenceUtils.getSensitiveEvidences(allEvidences);
-                filteredEvidences.addAll(EvidenceUtils.getOnlyHighestLevelEvidences(sensitiveEvidences, query.getExactMatchedAlteration()));
+                Set<Evidence> sensitiveEvidences = EvidenceUtils.getSensitiveEvidences(filteredEvidences);
+                filteredHighestEvidences.addAll(EvidenceUtils.getOnlyHighestLevelEvidences(sensitiveEvidences, query.getExactMatchedAlteration()));
 
                 // Get highest resistance evidences
-                Set<Evidence> resistanceEvidences = EvidenceUtils.getResistanceEvidences(allEvidences);
-                filteredEvidences.addAll(EvidenceUtils.getOnlyHighestLevelEvidences(resistanceEvidences, query.getExactMatchedAlteration()));
+                Set<Evidence> resistanceEvidences = EvidenceUtils.getResistanceEvidences(filteredEvidences);
+                filteredHighestEvidences.addAll(EvidenceUtils.getOnlyHighestLevelEvidences(resistanceEvidences, query.getExactMatchedAlteration()));
 
 
                 // Also include all non-treatment evidences
-                for (Evidence evidence : allEvidences) {
+                for (Evidence evidence : filteredEvidences) {
                     if (!sensitiveEvidences.contains(evidence) && !resistanceEvidences.contains(evidence)) {
-                        filteredEvidences.add(evidence);
+                        filteredHighestEvidences.add(evidence);
                     }
                 }
 
-                query.setEvidences(filteredEvidences);
+                query.setEvidences(filteredHighestEvidences);
             } else {
-                query.setEvidences(new ArrayList<>(evidences));
+                query.setEvidences(new ArrayList<>(filteredEvidences));
             }
             CustomizeComparator.sortEvidenceBasedOnPriority(query.getEvidences(), LevelUtils.getIndexedTherapeuticLevels());
             if (query.getGene() != null && query.getGene().getHugoSymbol().equals("KIT")) {

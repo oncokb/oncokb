@@ -18,11 +18,11 @@ import javax.persistence.*;
 @NamedQueries({
     @NamedQuery(
         name = "findPortalAlterationCountByGene",
-        query = "select pa.cancerStudy, count(distinct pa.sampleId) as sampleCount from PortalAlteration pa, Alteration a join a.portalAlterations ap where pa.id = ap.id and pa.gene=? group by pa.cancerStudy"
+        query = "select pa.cancerType, count(distinct pa.sampleId) as sampleCount from PortalAlteration pa, Alteration a join a.portalAlterations ap where pa.id = ap.id and pa.gene=? group by pa.cancerType"
     ),
     @NamedQuery(
         name = "findPortalAlterationCount",
-        query = "select cancerStudy, count(distinct sampleId) as sampleCount from PortalAlteration pa group by cancerStudy"
+        query = "select cancerType, count(distinct sampleId) as sampleCount from PortalAlteration pa group by cancerType"
     ),
     @NamedQuery(
         name = "findMutationMapperData",
