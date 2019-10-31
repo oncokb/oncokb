@@ -24,8 +24,8 @@ public interface UtilsApi {
         @ApiResponse(code = 404, message = "Not Found"),
         @ApiResponse(code = 503, message = "Service Unavailable")
     })
-    @RequestMapping(value = "/utils/allAnnotatedVariants", produces = {"application/json"},
-        method = RequestMethod.GET)
+//    @RequestMapping(value = "/utils/allAnnotatedVariants", produces = {"application/json"},
+//        method = RequestMethod.GET)
     ResponseEntity<List<AnnotatedVariant>> utilsAllAnnotatedVariantsGet(
         @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
     );
@@ -36,9 +36,9 @@ public interface UtilsApi {
         @ApiResponse(code = 404, message = "Not Found"),
         @ApiResponse(code = 503, message = "Service Unavailable")
     })
-    @RequestMapping(value = "/utils/allAnnotatedVariants.txt",
-        produces = {"text/plain"},
-        method = RequestMethod.GET)
+//    @RequestMapping(value = "/utils/allAnnotatedVariants.txt",
+//        produces = {"text/plain"},
+//        method = RequestMethod.GET)
     ResponseEntity<String> utilsAllAnnotatedVariantsTxtGet(
         @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
     );
@@ -49,8 +49,8 @@ public interface UtilsApi {
         @ApiResponse(code = 404, message = "Not Found"),
         @ApiResponse(code = 503, message = "Service Unavailable")
     })
-    @RequestMapping(value = "/utils/allActionableVariants", produces = {"application/json"},
-        method = RequestMethod.GET)
+//    @RequestMapping(value = "/utils/allActionableVariants", produces = {"application/json"},
+//        method = RequestMethod.GET)
     ResponseEntity<List<ActionableGene>> utilsAllActionableVariantsGet(
         @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
     );
@@ -62,9 +62,9 @@ public interface UtilsApi {
         @ApiResponse(code = 404, message = "Not Found"),
         @ApiResponse(code = 503, message = "Service Unavailable")
     })
-    @RequestMapping(value = "/utils/allActionableVariants.txt",
-        produces = {"text/plain"},
-        method = RequestMethod.GET)
+//    @RequestMapping(value = "/utils/allActionableVariants.txt",
+//        produces = {"text/plain"},
+//        method = RequestMethod.GET)
     ResponseEntity<String> utilsAllActionableVariantsTxtGet(
         @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
     );
@@ -75,9 +75,9 @@ public interface UtilsApi {
         @ApiResponse(code = 404, message = "Not Found"),
         @ApiResponse(code = 503, message = "Service Unavailable")
     })
-    @RequestMapping(value = "/utils/cancerGeneList",
-        produces = {"application/json"},
-        method = RequestMethod.GET)
+//    @RequestMapping(value = "/utils/cancerGeneList",
+//        produces = {"application/json"},
+//        method = RequestMethod.GET)
     ResponseEntity<List<CancerGene>> utilsCancerGeneListGet(
         @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
     );
@@ -88,9 +88,9 @@ public interface UtilsApi {
         @ApiResponse(code = 404, message = "Not Found"),
         @ApiResponse(code = 503, message = "Service Unavailable")
     })
-    @RequestMapping(value = "/utils/cancerGeneList.txt",
-        produces = {"text/plain"},
-        method = RequestMethod.GET)
+//    @RequestMapping(value = "/utils/cancerGeneList.txt",
+//        produces = {"text/plain"},
+//        method = RequestMethod.GET)
     ResponseEntity<String> utilsCancerGeneListTxtGet(
         @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
     );
@@ -101,9 +101,9 @@ public interface UtilsApi {
         @ApiResponse(code = 404, message = "Not Found"),
         @ApiResponse(code = 503, message = "Service Unavailable")
     })
-    @RequestMapping(value = "/utils/allCuratedGenes",
-        produces = {"application/json"},
-        method = RequestMethod.GET)
+//    @RequestMapping(value = "/utils/allCuratedGenes",
+//        produces = {"application/json"},
+//        method = RequestMethod.GET)
     ResponseEntity<List<CuratedGene>> utilsAllCuratedGenesGet(
         @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
     );
@@ -114,9 +114,9 @@ public interface UtilsApi {
         @ApiResponse(code = 404, message = "Not Found"),
         @ApiResponse(code = 503, message = "Service Unavailable")
     })
-    @RequestMapping(value = "/utils/allCuratedGenes.txt",
-        produces = {"text/plain"},
-        method = RequestMethod.GET)
+//    @RequestMapping(value = "/utils/allCuratedGenes.txt",
+//        produces = {"text/plain"},
+//        method = RequestMethod.GET)
     ResponseEntity<String> utilsAllCuratedGenesTxtGet(
         @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
     );
