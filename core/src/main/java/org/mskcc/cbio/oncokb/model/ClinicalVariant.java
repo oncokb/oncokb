@@ -15,6 +15,7 @@ public class ClinicalVariant {
 
     private TumorType oncoTreeType = null;
     private Alteration variant = null;
+    private String oncogenic = null;
     private String level = null;
     private Set<String> drug = new HashSet<String>();
     private Set<String> drugPmids = new HashSet<String>();
@@ -33,6 +34,14 @@ public class ClinicalVariant {
         this.variant = variant;
     }
 
+
+    public String getOncogenic() {
+        return oncogenic;
+    }
+
+    public void setOncogenic(String oncogenic) {
+        this.oncogenic = oncogenic;
+    }
 
     /**
      **/

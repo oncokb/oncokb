@@ -1,5 +1,15 @@
 package org.mskcc.cbio.oncokb.util;
 
+import com.sun.net.httpserver.Headers;
+import org.mskcc.cbio.oncokb.apiModels.download.FileExtension;
+import org.mskcc.cbio.oncokb.apiModels.download.FileName;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -57,6 +67,34 @@ public class HttpUtils {
             return FileUtils.readStream(con.getInputStream());
         } else {
             return null;
+        }
+    }
+
+
+    public static <T> ResponseEntity<T> getDataDownloadResponseEntity(String version, FileName fileName, FileExtension fileExtension) {
+        return getDataDownloadResponseEntity(version, fileName.getName() + fileExtension.getExtension(), fileExtension);
+    }
+
+    public static <T> ResponseEntity<T> getDataDownloadResponseEntity(String version, String fileName, FileExtension fileExtension) {
+        try {
+            if (fileExtension.equals(FileExtension.JSON)) {
+                return new ResponseEntity<>((T) JsonUtils.jsonToArray(GitHubUtils.getOncoKBData(version, fileName)), HttpStatus.OK);
+            } else if (fileExtension.equals(FileExtension.ZIP)) {
+                HttpHeaders headers = new HttpHeaders();
+                headers.add("Content-Disposition", "attachment; filename=" + fileName);
+                return (ResponseEntity<T>) ResponseEntity.ok()
+                    .headers(headers)
+                    .contentType(new MediaType("application", "zip"))
+                    .body(GitHubUtils.getOncoKBDataInBytes(version, fileName));
+            } else {
+                return new ResponseEntity<>((T) GitHubUtils.getOncoKBData(version, fileName), HttpStatus.OK);
+            }
+        } catch (HttpClientErrorException exception) {
+            return new ResponseEntity<>(null, exception.getStatusCode());
+        } catch (IOException exception) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (NoPropertyException exception) {
+            return new ResponseEntity<>(HttpStatus.SERVICE_UNAVAILABLE);
         }
     }
 }

@@ -1,10 +1,8 @@
 package org.mskcc.cbio.oncokb.api.pvt;
 
 import io.swagger.annotations.*;
-import org.mskcc.cbio.oncokb.apiModels.AnnotatedVariant;
-import org.mskcc.cbio.oncokb.apiModels.MatchVariantRequest;
-import org.mskcc.cbio.oncokb.apiModels.MatchVariantResult;
-import org.mskcc.cbio.oncokb.apiModels.VariantAnnotation;
+import org.mskcc.cbio.oncokb.apiModels.*;
+import org.mskcc.cbio.oncokb.apiModels.download.DownloadAvailability;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.tumor_type.MainType;
 import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
@@ -77,10 +75,10 @@ public interface PrivateUtilsApi {
 
     @ApiOperation(value = "", notes = "Check if clinical trials are valid or not by nctId.", response = Map.class)
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK")})
+        @ApiResponse(code = 200, message = "OK")})
     @RequestMapping(value = "/utils/validation/trials",
-            produces = {"application/json"},
-            method = RequestMethod.GET)
+        produces = {"application/json"},
+        method = RequestMethod.GET)
     ResponseEntity<Map<String, Boolean>> validateTrials(@ApiParam(value = "NCT ID list") @RequestParam(value = "nctIds") List<String> nctIds) throws ParserConfigurationException, SAXException, IOException;
 
     @ApiOperation(value = "", notes = "Check if the genomic example will be mapped to OncoKB variant.", response = Map.class)
@@ -111,7 +109,9 @@ public interface PrivateUtilsApi {
     @RequestMapping(value = "/utils/oncotree/mainTypes",
         produces = {"application/json"},
         method = RequestMethod.GET)
-    ResponseEntity<Set<MainType>> utilsOncoTreeMainTypesGet();
+    ResponseEntity<Set<MainType>> utilsOncoTreeMainTypesGet(
+        @ApiParam(value = "Exclude special general tumor type") @RequestParam(value = "excludeSpecialTumorType", required = false) Boolean excludeSpecialTumorType
+    );
 
     @ApiOperation(value = "", notes = "Get the full list of OncoTree Subtypes.", response = TumorType.class, responseContainer = "List")
     @ApiResponses(value = {
@@ -150,6 +150,55 @@ public interface PrivateUtilsApi {
         , @ApiParam(value = "entrezGeneId") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
         , @ApiParam(value = "Alteration") @RequestParam(value = "alteration", required = false) String alteration
         , @ApiParam(value = "OncoTree tumor type name/main type/code") @RequestParam(value = "tumorType", required = false) String tumorType
+    );
+
+    @ApiOperation(value = "", notes = "", response = CancerTypeCount.class, responseContainer = "List")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK", response = CancerTypeCount.class, responseContainer = "List")})
+    @RequestMapping(value = "/utils/portalAlterationSampleCount",
+        produces = {"application/json"},
+        method = RequestMethod.GET)
+    ResponseEntity<List<CancerTypeCount>> utilPortalAlterationSampleCountGet(
+        @ApiParam(value = "hugoSymbol") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
+    );
+
+    @ApiOperation(value = "", notes = "", response = PortalAlteration.class, responseContainer = "List")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK", response = PortalAlteration.class, responseContainer = "List")})
+    @RequestMapping(value = "/utils/mutationMapperData",
+        produces = {"application/json"},
+        method = RequestMethod.GET)
+    ResponseEntity<List<PortalAlteration>> utilMutationMapperDataGet(
+        @ApiParam(value = "hugoSymbol") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
+    );
+
+    @ApiOperation(value = "", notes = "Get information about what files are available by data version", response = DownloadAvailability.class, responseContainer = "List")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK", response = DownloadAvailability.class, responseContainer = "List"),
+        @ApiResponse(code = 503, message = "Service Unavailable")
+    })
+    @RequestMapping(value = "/utils/dataRelease/downloadAvailability",
+        produces = {"application/json"},
+        method = RequestMethod.GET)
+    ResponseEntity<List<DownloadAvailability>> utilDataReleaseDownloadAvailabilityGet();
+
+    @ApiOperation(value = "", notes = "Get readme info for specific data release version", response = String.class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK", response = String.class),
+        @ApiResponse(code = 404, message = "Not Found"),
+        @ApiResponse(code = 503, message = "Service Unavailable")
+    })
+    @RequestMapping(value = "/utils/dataRelease/readme",
+        produces = {"text/plain"},
+        method = RequestMethod.GET)
+    ResponseEntity<String> utilDataReleaseReadmeGet(
+        @ApiParam(value = "version", required = true) @RequestParam(value = "version") String version
+    );
+    @RequestMapping(value = "/utils/dataRelease/sqlDump",
+        produces = {"application/zip"},
+        method = RequestMethod.GET)
+    ResponseEntity<byte[]> utilDataReleaseSqlDumpGet(
+        @ApiParam(value = "version", required = true) @RequestParam(value = "version") String version
     );
 }
 
