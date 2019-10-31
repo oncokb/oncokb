@@ -163,3 +163,5 @@ KRAS	G12D	Breast Cancer	4: Binimetinib; 4: Cobimetinib; 4: Trametinib;
 KRAS	G12D	NSCLC	4: Binimetinib; 4: Cobimetinib; 4: Trametinib;
 # KRAS	G12C	AML
 # KRAS	G12D	AML
+# KRAS	G12C	Leukemia
+# KRAS	G12D	Leukemia
