@@ -994,6 +994,14 @@ public final class AlterationUtils {
         return false;
     }
 
+    public static String toString(Collection<Alteration> relevantAlterations) {
+        List<String> names = new ArrayList<>();
+        for (Alteration alteration : relevantAlterations) {
+            names.add(alteration.getAlteration());
+        }
+        return MainUtils.listToString(names, ", ");
+    }
+
     private static boolean stringContainsItemFromSet(String inputString, Set<String> items) {
         for (String item : items) {
             if (StringUtils.containsIgnoreCase(inputString, item)) {
