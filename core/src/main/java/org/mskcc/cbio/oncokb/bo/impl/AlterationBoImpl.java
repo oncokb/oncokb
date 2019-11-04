@@ -237,7 +237,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         Alteration matchedAlt = findExactlyMatchedAlteration(alteration, fullAlterations);
 
         if(matchedAlt == null && AlterationUtils.isFusion(alteration.getAlteration())) {
-            matchedAlt = AlterationUtils.getRevertFusions(alteration);
+            matchedAlt = AlterationUtils.getRevertFusions(alteration, fullAlterations);
         }
 
         if (matchedAlt != null) {

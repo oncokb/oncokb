@@ -6,7 +6,9 @@ import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.Gene;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by Hongxin Zhang on 6/20/18.
@@ -21,6 +23,32 @@ public class AlterationUtilsTest extends TestCase
     }
 
     public void testGetRevertFusions() throws Exception {
+        Alteration alteration = createBRAFAlteration("BRAF-MKRN1 fusion");
+
+        // Check when alteration is not available
+        Set<Alteration> fullAlterations = new HashSet<>();
+        Alteration result = AlterationUtils.getRevertFusions(alteration, fullAlterations);
+        assertEquals("The result should be null", null, result);
+
+        fullAlterations = new HashSet<>();
+        fullAlterations.add(createBRAFAlteration("BRAF-MKRN1 fusion"));
+        result = AlterationUtils.getRevertFusions(alteration, fullAlterations);
+        assertEquals("The result should be null", null, result);
+
+        fullAlterations = new HashSet<>();
+        fullAlterations.add(createBRAFAlteration("MKRN1-BRAF fusion"));
+        result = AlterationUtils.getRevertFusions(alteration, fullAlterations);
+        assertTrue("The result should not be null", result != null);
+
+    }
+
+    private Alteration createBRAFAlteration(String alterationName) {
+        Gene gene = GeneUtils.getGeneByHugoSymbol("BRAF");
+        Alteration alteration = new Alteration();
+        alteration.setGene(gene);
+        alteration.setAlteration(alterationName);
+        AlterationUtils.annotateAlteration(alteration, alteration.getAlteration());
+        return alteration;
     }
 
     public void testTrimAlterationName() throws Exception {
@@ -249,4 +277,15 @@ public class AlterationUtilsTest extends TestCase
 
     }
 
+    public void testFindOverlapAlteration() {
+    }
+
+    public void testGetAlterationFromGenomeNexus() {
+    }
+
+    public void testGetEvidencesAlterations() {
+    }
+
+    public void testRemoveAlterationsFromList() {
+    }
 }
