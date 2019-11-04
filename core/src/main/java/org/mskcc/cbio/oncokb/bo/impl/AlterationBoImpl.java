@@ -27,6 +27,26 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         return alterations;
     }
 
+    private Alteration findExactlyMatchedAlteration(Alteration alteration, Set<Alteration> fullAlterations) {
+        Alteration matchedByAlteration = findAlteration(alteration.getAlteration(), fullAlterations);
+        if (matchedByAlteration != null) {
+            if (matchedByAlteration.getConsequence() == null
+                || alteration.getConsequence() == null
+                || matchedByAlteration.getConsequence().getTerm().equalsIgnoreCase("NA")
+                || alteration.getConsequence().getTerm().equalsIgnoreCase("NA")
+            ) {
+                return matchedByAlteration;
+            }
+            // We also want to do a consequence check, if the consequence has been specified, then it should be respected
+            if (matchedByAlteration.getConsequence().equals(alteration.getConsequence())) {
+                return matchedByAlteration;
+            } else {
+                return null;
+            }
+        }
+        return null;
+    }
+
     private Alteration findAlteration(String alteration, Set<Alteration> fullAlterations) {
         if (alteration == null) {
             return null;
@@ -214,7 +234,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         }
 
         // Find exact match
-        Alteration matchedAlt = findAlteration(alteration.getAlteration(), fullAlterations);
+        Alteration matchedAlt = findExactlyMatchedAlteration(alteration, fullAlterations);
 
         if(matchedAlt == null && AlterationUtils.isFusion(alteration.getAlteration())) {
             matchedAlt = AlterationUtils.getRevertFusions(alteration);

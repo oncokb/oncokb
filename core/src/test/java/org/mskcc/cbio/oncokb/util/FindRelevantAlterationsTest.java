@@ -142,14 +142,6 @@ public class FindRelevantAlterationsTest {
             });
     }
 
-    private String toString(LinkedHashSet<Alteration> relevantAlterations) {
-        List<String> names = new ArrayList<>();
-        for (Alteration alteration : relevantAlterations) {
-            names.add(alteration.getAlteration());
-        }
-        return MainUtils.listToString(names, ", ");
-    }
-
     @Test
     public void testAnnotateAlteration() throws Exception {
         // Particularly test consequence
@@ -159,7 +151,7 @@ public class FindRelevantAlterationsTest {
         LinkedHashSet<Alteration> relevantAlterations =
             ApplicationContextSingleton.getAlterationBo()
                 .findRelevantAlterations(alt, AlterationUtils.getAllAlterations(alt.getGene()), true);
-        String relevantAltsName = toString(relevantAlterations);
+        String relevantAltsName = AlterationUtils.toString(relevantAlterations);
 
         assertEquals("Relevant alterations are not matched on case " +
             hugoSymbol + " " + alteration + " " + alterationType + " ", expectedRelevantAlterations, relevantAltsName);
