@@ -693,6 +693,7 @@ public final class AlterationUtils {
 
         Map<Integer, List<String>> speicalVariants = new HashMap<>();
         speicalVariants.put(25, Arrays.asList(new String[]{"T315I"}));
+        speicalVariants.put(3845, Arrays.asList(new String[]{"G12C"}));
         speicalVariants.put(3815, Arrays.asList(new String[]{"K642E", "V654A", "T670I"}));
         if (alteration.getGene() != null && speicalVariants.containsKey(alteration.getGene().getEntrezGeneId())) {
             VariantConsequence missense = VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant");
