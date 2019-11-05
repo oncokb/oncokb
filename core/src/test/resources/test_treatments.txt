@@ -157,10 +157,11 @@ SF3B1	K625G	Chronic Myelomonocytic Leukemia	4: H3B-8800;
 SF3B1	K625G	Breast Cancer
 
 # AMG-510 should only work for KRAS G12C, not alternative allele
-# KRAS	G12C	Breast Cancer	3A: AGM-510; 4: Binimetinib; 4: Cobimetinib; 4: Trametinib;
-KRAS	G12D	Breast Cancer	4: Binimetinib; 4: Cobimetinib; 4: Trametinib;
+# the following tests should be enabled when the liquid propagation is in production also the AGM-510 treatment is in place
+# KRAS	G12C	Breast Cancer	3B: AGM-510; 4: Binimetinib; 4: Cobimetinib; 4: Trametinib;
+# KRAS	G12D	Breast Cancer	4: Binimetinib; 4: Cobimetinib; 4: Trametinib;
 # KRAS	G12C	NSCLC	3A: AGM-510; 4: Binimetinib; 4: Cobimetinib; 4: Trametinib;
-KRAS	G12D	NSCLC	4: Binimetinib; 4: Cobimetinib; 4: Trametinib;
+# KRAS	G12D	NSCLC	4: Binimetinib; 4: Cobimetinib; 4: Trametinib;
 # KRAS	G12C	AML
 # KRAS	G12D	AML
 # KRAS	G12C	Leukemia

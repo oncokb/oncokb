@@ -420,6 +420,11 @@ public class IndicatorUtils {
         } else {
             indicatorQuery.setGeneExist(false);
         }
+
+        if (indicatorQuery.getMutationEffect() == null) {
+            indicatorQuery.setMutationEffect(getDefaultMutationEffectResponse());
+        }
+
         indicatorQuery.setDataVersion(MainUtils.getDataVersion());
 
         Date lastUpdate = getLatestDateFromEvidences(allQueryRelatedEvidences);
@@ -443,6 +448,12 @@ public class IndicatorUtils {
         implication.setTumorType(evidence.getOncoTreeType());
         implication.setDescription(evidence.getDescription());
         return implication;
+    }
+
+    private static MutationEffectResp getDefaultMutationEffectResponse() {
+        MutationEffectResp mutationEffectResp = new MutationEffectResp();
+        mutationEffectResp.setKnownEffect(MutationEffect.UNKNOWN.getMutationEffect());
+        return mutationEffectResp;
     }
 
     private static List<Implication> getImplicationFromEvidence(List<Evidence> evidences) {

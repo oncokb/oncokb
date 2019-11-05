@@ -1,10 +1,14 @@
 package org.mskcc.cbio.oncokb.util;
 
 import junit.framework.TestCase;
+import org.apache.commons.lang3.AnnotationUtils;
 import org.mskcc.cbio.oncokb.model.Alteration;
+import org.mskcc.cbio.oncokb.model.Gene;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by Hongxin Zhang on 6/20/18.
@@ -19,6 +23,32 @@ public class AlterationUtilsTest extends TestCase
     }
 
     public void testGetRevertFusions() throws Exception {
+        Alteration alteration = createBRAFAlteration("BRAF-MKRN1 fusion");
+
+        // Check when alteration is not available
+        Set<Alteration> fullAlterations = new HashSet<>();
+        Alteration result = AlterationUtils.getRevertFusions(alteration, fullAlterations);
+        assertEquals("The result should be null", null, result);
+
+        fullAlterations = new HashSet<>();
+        fullAlterations.add(createBRAFAlteration("BRAF-MKRN1 fusion"));
+        result = AlterationUtils.getRevertFusions(alteration, fullAlterations);
+        assertEquals("The result should be null", null, result);
+
+        fullAlterations = new HashSet<>();
+        fullAlterations.add(createBRAFAlteration("MKRN1-BRAF fusion"));
+        result = AlterationUtils.getRevertFusions(alteration, fullAlterations);
+        assertTrue("The result should not be null", result != null);
+
+    }
+
+    private Alteration createBRAFAlteration(String alterationName) {
+        Gene gene = GeneUtils.getGeneByHugoSymbol("BRAF");
+        Alteration alteration = new Alteration();
+        alteration.setGene(gene);
+        alteration.setAlteration(alterationName);
+        AlterationUtils.annotateAlteration(alteration, alteration.getAlteration());
+        return alteration;
     }
 
     public void testTrimAlterationName() throws Exception {
@@ -118,6 +148,28 @@ public class AlterationUtilsTest extends TestCase
     }
 
     public void testGetRelevantAlterations() throws Exception {
+        // Check when the consequence is not exactly matched to the alteration in the DB even the alteration is the same
+        Gene gene = GeneUtils.getGeneByHugoSymbol("PIK3R1");
+        Alteration alteration = new Alteration();
+        alteration.setAlteration("W583del");
+        alteration.setGene(gene);
+        alteration.setConsequence(VariantConsequenceUtils.findVariantConsequenceByTerm("splice_region_variant"));
+        AlterationUtils.annotateAlteration(alteration, alteration.getAlteration());
+
+        List<Alteration> alterations = AlterationUtils.getRelevantAlterations(alteration);
+        String relevantAltsName = AlterationUtils.toString(alterations);
+        assertEquals("The relevant alterations do not match", "Truncating Mutations", relevantAltsName);
+
+
+        // if the consequence matches with the alteration in DB
+        alteration = new Alteration();
+        alteration.setAlteration("W583del");
+        alteration.setGene(gene);
+        AlterationUtils.annotateAlteration(alteration, alteration.getAlteration());
+
+        alterations = AlterationUtils.getRelevantAlterations(alteration);
+        relevantAltsName = AlterationUtils.toString(alterations);
+        assertEquals("The relevant alterations do not match", "W583del", relevantAltsName);
     }
 
     public void testHasAlleleAlterations() throws Exception {
@@ -225,4 +277,15 @@ public class AlterationUtilsTest extends TestCase
 
     }
 
+    public void testFindOverlapAlteration() {
+    }
+
+    public void testGetAlterationFromGenomeNexus() {
+    }
+
+    public void testGetEvidencesAlterations() {
+    }
+
+    public void testRemoveAlterationsFromList() {
+    }
 }

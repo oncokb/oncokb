@@ -358,6 +358,12 @@ public class IndicatorUtilsTest {
         assertEquals("The Oncogenicity is not empty, but it should be.", "", indicatorQueryResp.getOncogenic());
         assertTrue("There should not be any treatments", indicatorQueryResp.getTreatments().isEmpty());
 
+        // Give a default mutation effect when it is not available: Unknown
+        query = new Query(null, null, null, "PIK3R1", "W583del", null, null, null, null, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true, null);
+        assertTrue("The mutation effect is null, but it should not be.", indicatorQueryResp.getMutationEffect() != null);
+        assertEquals("The mutation effect is not unknown, but it should be.", "Unknown", indicatorQueryResp.getMutationEffect().getKnownEffect());
+
 
         /**
          * Comparing between two queries

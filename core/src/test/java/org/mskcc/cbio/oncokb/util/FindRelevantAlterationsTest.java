@@ -118,7 +118,12 @@ public class FindRelevantAlterationsTest {
                 // Do not map few special KIT variants as alternative alleles, "K642E", "V654A", "T670I"
                 {"KIT", "K652G", null, ""},
 
-                // Do not get alternative alleles or positional variatn for ABL1 T315I
+                // Do not map G12C to other alleles
+                {"KRAS", "G12C", null, "G12C, G12A, G12D, G12E, G12F, G12I, G12L, G12N, G12R, G12S, G12V, G12W, G12Y, Oncogenic Mutations"},
+                {"KRAS", "G12D", null, "G12D, G12A, G12E, G12F, G12I, G12L, G12N, G12R, G12S, G12V, G12W, G12Y, Oncogenic Mutations"},
+                {"KRAS", "G12V", null, "G12V, G12A, G12D, G12E, G12F, G12I, G12L, G12N, G12R, G12S, G12W, G12Y, Oncogenic Mutations"},
+
+                // Do not get alternative alleles or positional variant for ABL1 T315I
                 {"ABL1", "T315I", null, "T315I"},
 
                 // 654 is a hotspot position
@@ -137,14 +142,6 @@ public class FindRelevantAlterationsTest {
             });
     }
 
-    private String toString(LinkedHashSet<Alteration> relevantAlterations) {
-        List<String> names = new ArrayList<>();
-        for (Alteration alteration : relevantAlterations) {
-            names.add(alteration.getAlteration());
-        }
-        return MainUtils.listToString(names, ", ");
-    }
-
     @Test
     public void testAnnotateAlteration() throws Exception {
         // Particularly test consequence
@@ -154,7 +151,7 @@ public class FindRelevantAlterationsTest {
         LinkedHashSet<Alteration> relevantAlterations =
             ApplicationContextSingleton.getAlterationBo()
                 .findRelevantAlterations(alt, AlterationUtils.getAllAlterations(alt.getGene()), true);
-        String relevantAltsName = toString(relevantAlterations);
+        String relevantAltsName = AlterationUtils.toString(relevantAlterations);
 
         assertEquals("Relevant alterations are not matched on case " +
             hugoSymbol + " " + alteration + " " + alterationType + " ", expectedRelevantAlterations, relevantAltsName);

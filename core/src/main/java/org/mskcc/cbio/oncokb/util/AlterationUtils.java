@@ -289,8 +289,27 @@ public final class AlterationUtils {
         return flag;
     }
 
+    public static Alteration getRevertFusions(Alteration alteration, Set<Alteration> fullAlterations) {
+        if (fullAlterations == null) {
+            return getRevertFusions(alteration);
+        } else {
+            String revertFusionAltStr = getRevertFusionName(alteration);
+            Optional<Alteration> match = fullAlterations.stream().filter(alteration1 -> alteration1.getGene().equals(alteration.getGene()) && alteration1.getAlteration().equalsIgnoreCase(revertFusionAltStr)).findFirst();
+            if (match.isPresent()) {
+                return match.get();
+            } else {
+                return null;
+            }
+        }
+    }
+
     public static Alteration getRevertFusions(Alteration alteration) {
-        Alteration revertFusionAlt = null;
+        return alterationBo.findAlteration(alteration.getGene(),
+            alteration.getAlterationType(), getRevertFusionName(alteration));
+    }
+
+    private static String getRevertFusionName(Alteration alteration) {
+        String revertFusionAltStr = null;
         if (alteration != null && alteration.getAlteration() != null
             && isFusion(alteration.getAlteration())) {
             Pattern pattern = Pattern.compile(fusionRegex);
@@ -299,13 +318,10 @@ public final class AlterationUtils {
                 // Revert fusion
                 String geneA = matcher.group(2);
                 String geneB = matcher.group(3);
-                String revertFusion = geneB + "-" + geneA + " fusion";
-
-                revertFusionAlt = alterationBo.findAlteration(alteration.getGene(),
-                    alteration.getAlterationType(), revertFusion);
+                revertFusionAltStr = geneB + "-" + geneA + " fusion";
             }
         }
-        return revertFusionAlt;
+        return revertFusionAltStr;
     }
 
     public static String trimAlterationName(String alteration) {
@@ -627,7 +643,7 @@ public final class AlterationUtils {
             alt.setGene(gene);
 
             AlterationUtils.annotateAlteration(alt, alt.getAlteration());
-            Alteration revertFusion = getRevertFusions(alt);
+            Alteration revertFusion = getRevertFusions(alt, fullAlterations);
             if (revertFusion != null) {
                 LinkedHashSet<Alteration> alts = alterationBo.findRelevantAlterations(revertFusion, fullAlterations, true);
                 if (alts != null) {
@@ -693,6 +709,7 @@ public final class AlterationUtils {
 
         Map<Integer, List<String>> speicalVariants = new HashMap<>();
         speicalVariants.put(25, Arrays.asList(new String[]{"T315I"}));
+        speicalVariants.put(3845, Arrays.asList(new String[]{"G12C"}));
         speicalVariants.put(3815, Arrays.asList(new String[]{"K642E", "V654A", "T670I"}));
         if (alteration.getGene() != null && speicalVariants.containsKey(alteration.getGene().getEntrezGeneId())) {
             VariantConsequence missense = VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant");
@@ -991,6 +1008,14 @@ public final class AlterationUtils {
             return true;
         }
         return false;
+    }
+
+    public static String toString(Collection<Alteration> relevantAlterations) {
+        List<String> names = new ArrayList<>();
+        for (Alteration alteration : relevantAlterations) {
+            names.add(alteration.getAlteration());
+        }
+        return MainUtils.listToString(names, ", ");
     }
 
     private static boolean stringContainsItemFromSet(String inputString, Set<String> items) {
