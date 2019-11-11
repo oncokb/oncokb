@@ -701,7 +701,7 @@ public class TumorTypeUtils {
     private static List<TumorType> getOncoTreeCancerTypesFromSource() {
         List<TumorType> cancerTypes = new ArrayList<>();
         try {
-            String json = IOUtils.toString(new InputStreamReader(TumorTypeUtils.class.getResourceAsStream("/data/oncotree-maintypes.json")));
+            String json = IOUtils.toString(new InputStreamReader(TumorTypeUtils.class.getResourceAsStream("/data/oncotree/maintypes.json")));
             List<String> mainTypes = JsonUtils.jsonToArray(json);
             for (String str : mainTypes) {
                 TumorType cancerType = new TumorType();
@@ -721,7 +721,7 @@ public class TumorTypeUtils {
         String url = getOncoTreeApiUrl() + "tumorTypes?version=" + ONCO_TREE_ONCOKB_VERSION + "&flat=false";
         Map<String, TumorType> result = new HashMap<>();
         try {
-            String json = IOUtils.toString(new InputStreamReader(TumorTypeUtils.class.getResourceAsStream("/data/oncotree-tumortypes.json")));
+            String json = IOUtils.toString(new InputStreamReader(TumorTypeUtils.class.getResourceAsStream("/data/oncotree/tumortypes.json")));
             Map map = JsonUtils.jsonToMap(json);
             Map<String, org.mskcc.oncotree.model.TumorType> data = (Map<String, org.mskcc.oncotree.model.TumorType>) map;
             org.mskcc.oncotree.model.TumorType oncoTreeTumorType = new ObjectMapper().convertValue(data.get("TISSUE"), org.mskcc.oncotree.model.TumorType.class);
@@ -750,7 +750,7 @@ public class TumorTypeUtils {
         List<TumorType> tumorTypes = new ArrayList<>();
         try {
             Gson gson = new GsonBuilder().create();
-            org.mskcc.oncotree.model.TumorType[] oncoTreeTumorTypes = gson.fromJson(new BufferedReader(new InputStreamReader(TumorTypeUtils.class.getResourceAsStream("/data/oncotree-tumortypes-flat.json"))), org.mskcc.oncotree.model.TumorType[].class);
+            org.mskcc.oncotree.model.TumorType[] oncoTreeTumorTypes = gson.fromJson(new BufferedReader(new InputStreamReader(TumorTypeUtils.class.getResourceAsStream("/data/oncotree/tumortypes-flat.json"))), org.mskcc.oncotree.model.TumorType[].class);
             for (org.mskcc.oncotree.model.TumorType oncotreeTumorType : Arrays.asList(oncoTreeTumorTypes)) {
                 TumorType tumorType = new TumorType(oncotreeTumorType);
                 tumorType.setTumorForm(getTumorForm(tumorType.getTissue()));
