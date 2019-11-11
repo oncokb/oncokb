@@ -736,7 +736,7 @@ public class DriveAnnotationParser {
                     }
                 }
 
-                LevelOfEvidence levelOfEvidence = LevelOfEvidence.getByLevel(level);
+                LevelOfEvidence levelOfEvidence = LevelOfEvidence.getByLevel(level.toUpperCase());
                 if (levelOfEvidence == null) {
                     System.err.println(spaceStrByNestLevel(nestLevel + 2) + "Error: wrong level of evidence: " + level);
                     // TODO:
@@ -754,7 +754,7 @@ public class DriveAnnotationParser {
 
                 if (drugObj.has(SOLID_PROPAGATION_KEY)) {
                     String definedPropagation = drugObj.getString(SOLID_PROPAGATION_KEY);
-                    LevelOfEvidence definedLevel = LevelOfEvidence.getByLevel(definedPropagation);
+                    LevelOfEvidence definedLevel = LevelOfEvidence.getByLevel(definedPropagation.toUpperCase());
 
                     // Validate level
                     if (definedLevel != null && LevelUtils.getAllowedPropagationLevels().contains(definedLevel)) {
@@ -771,7 +771,7 @@ public class DriveAnnotationParser {
 
                 if (drugObj.has(LIQUID_PROPAGATION_KEY)) {
                     String definedPropagation = drugObj.getString(LIQUID_PROPAGATION_KEY);
-                    LevelOfEvidence definedLevel = LevelOfEvidence.getByLevel(definedPropagation);
+                    LevelOfEvidence definedLevel = LevelOfEvidence.getByLevel(definedPropagation.toUpperCase());
 
                     // Validate level
                     if (definedLevel != null && LevelUtils.getAllowedPropagationLevels().contains(definedLevel)) {

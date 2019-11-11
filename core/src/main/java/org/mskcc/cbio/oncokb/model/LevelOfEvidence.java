@@ -77,7 +77,7 @@ public enum LevelOfEvidence {
      */
     public static LevelOfEvidence getByLevel(String level) {
         if (level == null) return null;
-        return map.get(level.toUpperCase());
+        return map.get(level);
     }
 
     public static LevelOfEvidence getByName(String name) {
