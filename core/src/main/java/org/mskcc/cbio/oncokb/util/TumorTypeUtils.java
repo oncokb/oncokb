@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
  * the difference, tumorType will be used to include both.
  */
 public class TumorTypeUtils {
-    private static final String ONCO_TREE_ONCOKB_VERSION = "oncotree_2019_03_01";
+    private static final String ONCO_TREE_ONCOKB_VERSION = "oncotree_2019_08_01";
     private static final String ACCESS_ERROR_ONCO_TREE_MESSAGE = "Error: Cannot access OncoTree service.";
     private static String ONCO_TREE_API_URL = null;
     private static final ImmutableList<String> LiquidTumorTissues = ImmutableList.of(
