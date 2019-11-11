@@ -59,7 +59,8 @@ public class TumorTypeUtilsTest extends TestCase {
         assertEquals(expectedResult, tumorTypesToString(tumorTypes));
 
         tumorTypes = TumorTypeUtils.findTumorTypes("", RelevantTumorTypeDirection.DOWNWARD);
-        assertEquals(976, tumorTypes.size());
+        // 863 subtypes,  117 main types, 3 special(all solid, all liquid, all tumors)
+        assertEquals(983, tumorTypes.size());
     }
 
     public void testGetAllOncoTreeCancerTypes() throws Exception {
