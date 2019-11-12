@@ -6,10 +6,10 @@
     <parent>
         <groupId>org.mskcc.cbio.oncokb</groupId>
         <artifactId>master</artifactId>
-        <version>1.4.7</version>
+        <version>1.4.8</version>
     </parent>
     <artifactId>web</artifactId>
-    <version>1.4.7</version>
+    <version>1.4.8</version>
     <packaging>war</packaging>
 
     <name>OncoKB Web</name>
@@ -22,7 +22,7 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
             <properties>
-                <frontend.version>2ec86dc3c6</frontend.version>
+                <frontend.version>bf4842cb7c</frontend.version>
                 <frontend.groupId>com.github.zhx828</frontend.groupId>
                 <frontend.artifactId>oncokb-public</frontend.artifactId>
             </properties>
