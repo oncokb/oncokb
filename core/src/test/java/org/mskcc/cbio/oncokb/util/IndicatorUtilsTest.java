@@ -575,6 +575,13 @@ public class IndicatorUtilsTest {
         resp1 = IndicatorUtils.processQuery(query1, null, null, null, true, null);
         resp2 = IndicatorUtils.processQuery(query2, null, null, null, true, null);
         pairComparison(resp1, resp2);
+
+        // test RDD, it used to belong to Histiocytic Disorder, now under Histiocytosis
+        query1 = new Query(null, null, null, "MAP2K1", "C121S", null, null, "RDD", null, null, null, null);
+        query2 = new Query(null, null, null, "MAP2K1", "C121S", null, null, "Histiocytosis", null, null, null, null);
+        resp1 = IndicatorUtils.processQuery(query1, null, null, null, true, null);
+        resp2 = IndicatorUtils.processQuery(query2, null, null, null, true, null);
+        pairComparison(resp1, resp2);
     }
 
     private void pairComparison(IndicatorQueryResp resp1, IndicatorQueryResp resp2) {
