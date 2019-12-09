@@ -14,6 +14,7 @@ public enum LevelOfEvidence {
     // Levels for therapeutic implications
     LEVEL_0 ("0", "", "", ""),
     LEVEL_1 ("1", "FDA-recognized biomarker predictive of response to an FDA-approved drug in this indication", "<span><b>FDA-recognized</b> biomarker predictive of response to an <b>FDA-approved</b> drug <b>in this indication</b></span>", "#33A02C"),
+    LEVEL_2 ("2", "Standard care biomarker predictive of response to an FDA-approved drug in this indication", "<span><b>Standard of care</b> biomarker predictive of response to an <b>FDA-approved</b> drug <b>in this indication</b></span>", "#1F78B4"),
     LEVEL_2A ("2A", "Standard care biomarker predictive of response to an FDA-approved drug in this indication", "<span><b>Standard of care</b> biomarker predictive of response to an <b>FDA-approved</b> drug <b>in this indication</b></span>", "#1F78B4"),
     LEVEL_2B ("2B", "Standard care biomarker predictive of response to an FDA-approved drug in another indication but not standard care for this indication", "<span><b>Standard of care</b> biomarker predictive of response to an <b>FDA-approved</b> drug <b>in another indication</b> but not standard of care for this indication</span>", "#80B1D3"),
     LEVEL_3A ("3A", "Compelling clinical evidence supports the biomarker as being predictive of response to a drug in this indication", "<span><b>Compelling clinical evidence</b> supports the biomarker as being predictive of response to a drug <b>in this indication</b> but neither biomarker and drug are standard of care</span>", "#984EA3"),
