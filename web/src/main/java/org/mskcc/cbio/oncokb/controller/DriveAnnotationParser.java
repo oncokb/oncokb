@@ -726,15 +726,6 @@ public class DriveAnnotationParser {
                 String level = drugObj.getString("level").trim();
                 addDateToLastEditSetFromObject(lastEditDates, drugObj, "level");
 //                addDateToLastReviewSetFromLong(lastReviewDates, drugObj, "level");
-                if (level.equals("2")) {
-
-                    if (evidenceType == EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE
-                        || evidenceType == EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY) {
-                        level = "2A";
-                    } else {
-                        level = "2B";
-                    }
-                }
 
                 LevelOfEvidence levelOfEvidence = LevelOfEvidence.getByLevel(level.toUpperCase());
                 if (levelOfEvidence == null) {

@@ -12,8 +12,8 @@ public class LevelUtilsTest extends TestCase {
         assertTrue(LevelUtils.compareLevel(LevelOfEvidence.LEVEL_1, null) < 0);
         assertTrue(LevelUtils.compareLevel(null, LevelOfEvidence.LEVEL_1) > 0);
         assertTrue(LevelUtils.compareLevel(LevelOfEvidence.LEVEL_1, LevelOfEvidence.LEVEL_1) == 0);
-        assertTrue(LevelUtils.compareLevel(LevelOfEvidence.LEVEL_1, LevelOfEvidence.LEVEL_2B) < 0);
-        assertTrue(LevelUtils.compareLevel(LevelOfEvidence.LEVEL_R1, LevelOfEvidence.LEVEL_2B) < 0);
+        assertTrue(LevelUtils.compareLevel(LevelOfEvidence.LEVEL_1, LevelOfEvidence.LEVEL_3B) < 0);
+        assertTrue(LevelUtils.compareLevel(LevelOfEvidence.LEVEL_R1, LevelOfEvidence.LEVEL_3B) < 0);
         assertTrue(LevelUtils.compareLevel(LevelOfEvidence.LEVEL_R1, LevelOfEvidence.LEVEL_1) < 0);
         assertTrue(LevelUtils.compareLevel(LevelOfEvidence.LEVEL_R2, LevelOfEvidence.LEVEL_4) > 0);
     }
@@ -77,7 +77,7 @@ public class LevelUtilsTest extends TestCase {
     public void testAreSameLevels() throws Exception {
         assertTrue(LevelUtils.areSameLevels(LevelOfEvidence.LEVEL_1, null) == false);
         assertTrue(LevelUtils.areSameLevels(LevelOfEvidence.LEVEL_1, LevelOfEvidence.LEVEL_R2) == false);
-        assertTrue(LevelUtils.areSameLevels(LevelOfEvidence.LEVEL_R1, LevelOfEvidence.LEVEL_2B) == false);
+        assertTrue(LevelUtils.areSameLevels(LevelOfEvidence.LEVEL_R1, LevelOfEvidence.LEVEL_3B) == false);
         assertTrue(LevelUtils.areSameLevels(LevelOfEvidence.LEVEL_1, LevelOfEvidence.LEVEL_1) == true);
         assertTrue(LevelUtils.areSameLevels(null, null) == true);
     }
