@@ -8,6 +8,7 @@ import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.Treatment;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
@@ -84,8 +85,8 @@ public class GeneUtils {
         return null;
     }
 
-    public static Set<Gene> searchGene(String keyword, Boolean exactSearch) {
-        Set<Gene> genes = new HashSet<>();
+    public static LinkedHashSet<Gene> searchGene(String keyword, Boolean exactSearch) {
+        LinkedHashSet<Gene> genes = new LinkedHashSet<>();
         if (exactSearch == null)
             exactSearch = false;
         if (keyword != null && keyword != "") {
@@ -110,23 +111,26 @@ public class GeneUtils {
                     if (exactSearch) {
                         if (hugoSymbol.equalsIgnoreCase(keyword)) {
                             genes.add(gene);
-                        } else {
-                            for (String alias : gene.getGeneAliases()) {
-                                if (alias.toLowerCase().equals(keyword)) {
-                                    genes.add(gene);
-                                    break;
-                                }
-                            }
                         }
                     } else {
                         if (StringUtils.containsIgnoreCase(hugoSymbol, keyword)) {
                             genes.add(gene);
-                        } else {
-                            for (String alias : gene.getGeneAliases()) {
-                                if (StringUtils.containsIgnoreCase(alias, keyword)) {
-                                    genes.add(gene);
-                                    break;
-                                }
+                        }
+                    }
+                }
+                for (Gene gene : allGenes) {
+                    if (exactSearch) {
+                        for (String alias : gene.getGeneAliases()) {
+                            if (alias.toLowerCase().equals(keyword)) {
+                                genes.add(gene);
+                                break;
+                            }
+                        }
+                    } else {
+                        for (String alias : gene.getGeneAliases()) {
+                            if (StringUtils.containsIgnoreCase(alias, keyword)) {
+                                genes.add(gene);
+                                break;
                             }
                         }
                     }
