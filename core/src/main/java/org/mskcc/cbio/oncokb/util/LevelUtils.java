@@ -297,9 +297,10 @@ public class LevelUtils {
 
     public static LevelOfEvidence getDefaultPropagationLevelByTumorForm(Evidence evidence, TumorForm tumorForm) {
         TumorType tumorType = evidence.getOncoTreeType();
-        if (tumorType.getTumorForm() == null || tumorForm == null) {
+        TumorForm evidenceTumorForm = tumorType.getCode() == null ? tumorType.getMainType().getTumorForm() : tumorType.getTumorForm();
+        if (evidenceTumorForm == null || tumorForm == null) {
             return null;
-        } else if (tumorType.getTumorForm().equals(tumorForm) && tumorForm.equals(TumorForm.SOLID)) {
+        } else if (evidenceTumorForm.equals(tumorForm) && tumorForm.equals(TumorForm.SOLID)) {
             if (evidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_1) ||
                 evidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_2)) {
                 return LevelOfEvidence.LEVEL_3B;
