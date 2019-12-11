@@ -146,7 +146,7 @@ public class EvidenceUtilsTest extends TestCase {
         e1.setLevelOfEvidence(LevelOfEvidence.LEVEL_1);
         e2.setLevelOfEvidence(LevelOfEvidence.LEVEL_1);
         e3.setLevelOfEvidence(LevelOfEvidence.LEVEL_1);
-        e4.setLevelOfEvidence(LevelOfEvidence.LEVEL_2A);
+        e4.setLevelOfEvidence(LevelOfEvidence.LEVEL_2);
         e5.setLevelOfEvidence(LevelOfEvidence.LEVEL_R1);
 
         Drug d1 = new Drug("Vemurafinib");
@@ -224,12 +224,12 @@ public class EvidenceUtilsTest extends TestCase {
         filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets, alteration);
         assertEquals("5", getIds(filtered));
 
-        e1.setLevelOfEvidence(LevelOfEvidence.LEVEL_2A);
+        e1.setLevelOfEvidence(LevelOfEvidence.LEVEL_2);
         e5.setLevelOfEvidence(LevelOfEvidence.LEVEL_R1);
         filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets, alteration);
         assertEquals("5", getIds(filtered));
 
-        e1.setLevelOfEvidence(LevelOfEvidence.LEVEL_2A);
+        e1.setLevelOfEvidence(LevelOfEvidence.LEVEL_2);
         e5.setLevelOfEvidence(LevelOfEvidence.LEVEL_R2);
         filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets, alteration);
         assertEquals("1", getIds(filtered));
