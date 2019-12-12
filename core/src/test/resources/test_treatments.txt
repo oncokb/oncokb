@@ -14,14 +14,14 @@ KIT	N505L	Gastrointestinal Stromal Tumor	1: Imatinib; 1: Sunitinib; 1: Regorafen
 KIT	N505L	Melanoma	2A: Imatinib; 2B: Sunitinib; 2B: Regorafenib;
 KIT	N505L	Colorectal Cancer	2B: Imatinib; 2B: Sunitinib; 2B: Regorafenib;
 KIT	N505L	Thymic Tumor	2A: Sunitinib; 2A: Sorafenib; 2B: Imatinib; 2B: Regorafenib;
-KIT	M541L	Gastrointestinal Stromal Tumor	1: Imatinib; 1: Sunitinib; 1: Regorafenib;
-KIT	M541L	Melanoma	2A: Imatinib; 2B: Sunitinib; 2B: Regorafenib;
-KIT	M541L	Colorectal Cancer	2B: Imatinib; 2B: Sunitinib; 2B: Regorafenib;
-KIT	M541L	Thymic Tumor	2A: Sunitinib; 2A: Sorafenib; 2B: Imatinib; 2B: Regorafenib;
-KIT	M541C	Gastrointestinal Stromal Tumor	1: Imatinib; 1: Sunitinib; 1: Regorafenib;
-KIT	M541C	Melanoma	2A: Imatinib; 2B: Sunitinib; 2B: Regorafenib;
-KIT	M541C	Colorectal Cancer	2B: Imatinib; 2B: Sunitinib; 2B: Regorafenib;
-KIT	M541C	Thymic Tumor	2A: Sunitinib; 2A: Sorafenib; 2B: Imatinib; 2B: Regorafenib;
+KIT	M541L	Gastrointestinal Stromal Tumor
+KIT	M541L	Melanoma
+KIT	M541L	Colorectal Cancer
+KIT	M541L	Thymic Tumor
+KIT	M541C	Gastrointestinal Stromal Tumor
+KIT	M541C	Melanoma
+KIT	M541C	Colorectal Cancer
+KIT	M541C	Thymic Tumor
 KIT	Y553N	Gastrointestinal Stromal Tumor	1: Imatinib; 1: Sunitinib; 1: Regorafenib;
 KIT	Y553N	Melanoma	2A: Imatinib; 2B: Sunitinib; 2B: Regorafenib;
 KIT	Y553N	Colorectal Cancer	2B: Imatinib; 2B: Sunitinib; 2B: Regorafenib;
@@ -67,16 +67,16 @@ KIT	T670C	Melanoma
 KIT	T670C	Colorectal Cancer
 KIT	T670C	Thymic Tumor
 KIT	D816A	Gastrointestinal Stromal Tumor
-KIT	D816A	Melanoma	2A: Imatinib;
-KIT	D816A	Colorectal Cancer
+KIT	D816A	Melanoma	2A: Imatinib; 2B: Regorafenib; 2B: Sorafenib;
+KIT	D816A	Colorectal Cancer 2B: Regorafenib; 2B: Sorafenib;
 KIT	D816A	Mastocytosis	3A: Avapritinib;
-KIT	D816A	Thymic Tumor	2A: Sunitinib; 2A: Sorafenib;
+KIT	D816A	Thymic Tumor	2A: Sunitinib; 2A: Sorafenib; 2B: Regorafenib;
 MTOR	L2427Q	Renal Clear Cell Carcinoma	3A: Temsirolimus; 4: Everolimus;
 PDGFRA	D842I	GIST	2A: Imatinib;
 PDGFRA	D842I	Thymic Tumor	2B: Imatinib;
 PDGFRA	D842V	GIST	R1: Imatinib; 2A: Dasatinib;
 PDGFRA	D842V	Thymic Tumor	2B: Dasatinib; 2B: Imatinib;
-EGFR	A763_Y764insFQEA	NSCLC	1: Afatinib; 1: Erlotinib; 1: Gefitinib; 3A: Poziotinib;
+EGFR	A763_Y764insFQEA	NSCLC	2A: Afatinib; 2A: Erlotinib; 2A: Gefitinib; 3A: Poziotinib;
 # this one overlaps with A763_Y764insFQEA, but the rule only applies to exact match, so R1 will be used
 EGFR	Y764_D770dup	NSCLC	R1: Afatinib; R1: Erlotinib; R1: Gefitinib; 3A: Poziotinib;
 # this one does not overlap with A763_Y764insFQEA, so R1 for sure
@@ -148,8 +148,8 @@ MAP2K1	K57N	Erdheim-Chester Disease	3A: Cobimetinib; 3A: Trametinib;
 MAP2K1	K57N	Lung Adenocarcinoma	3A: Cobimetinib; 3A: Trametinib;
 MAP2K1	K57N	Glioblastoma	3B: Cobimetinib; 3B: Trametinib;
 #MAP2K1	K57N	Diffuse Large B-Cell Lymphoma, NOS
-PIK3CA	E545K	Breast Cancer	1: Fulvestrant+Alpelisib; 3A: Alpelisib; 3A: Buparlisib; 3A: Buparlisib+Fulvestrant; 3A: Copanlisib; 3A: GDC-0077; 3A: Serabelisib; 3A: Taselisib; 3A: Taselisib+Fulvestrant;
-PIK3CA	E545K	Ovarian Cancer	2B: Fulvestrant+Alpelisib; 3B: Alpelisib; 3B: Buparlisib; 3B: Copanlisib; 3B: GDC-0077; 3B: Serabelisib; 3B: Taselisib;
+PIK3CA	E545K	Breast Cancer	1: Fulvestrant+Alpelisib; 3A: Buparlisib; 3A: Buparlisib+Fulvestrant; 3A: Copanlisib; 3A: GDC-0077; 3A: Serabelisib; 3A: Taselisib; 3A: Taselisib+Fulvestrant;
+PIK3CA	E545K	Ovarian Cancer	2B: Fulvestrant+Alpelisib; 3B: Buparlisib; 3B: Copanlisib; 3B: GDC-0077; 3B: Serabelisib; 3B: Taselisib;
 #PIK3CA	E545K	Acute Myeloid Leukemia
 NRAS	G12C	Breast Cancer	3B: Binimetinib; 3B: Binimetinib+Ribociclib;
 #NRAS	G12C	Chronic Myelogenous Leukemia
