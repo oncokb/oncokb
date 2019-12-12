@@ -252,19 +252,19 @@ public class IndicatorUtilsTest {
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true, null);
         assertEquals("The Oncogenicity is not oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The variant summary is not expected.", "The EGFR kinase domain duplication (KDD) alteration is known to be oncogenic.", indicatorQueryResp.getVariantSummary());
-        assertEquals("The highest sensitive level should be 1", LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
+        assertEquals("The highest sensitive level should be 1", LevelOfEvidence.LEVEL_3A, indicatorQueryResp.getHighestSensitiveLevel());
 
         query = new Query(null, null, null, "EGFR", "KDD", "structural_variant", StructuralVariantType.DELETION, "NSCLC", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true, null);
         assertEquals("The Oncogenicity is not oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The variant summary is not expected.", "The EGFR kinase domain duplication (KDD) alteration is known to be oncogenic.", indicatorQueryResp.getVariantSummary());
-        assertEquals("The highest sensitive level should be 1", LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
+        assertEquals("The highest sensitive level should be 1", LevelOfEvidence.LEVEL_3A, indicatorQueryResp.getHighestSensitiveLevel());
 
         query = new Query(null, null, null, "EGFR", "kinase domain duplication", null, null, "NSCLC", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true, null);
         assertEquals("The Oncogenicity is not oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The variant summary is not expected.", "The EGFR kinase domain duplication alteration is known to be oncogenic.", indicatorQueryResp.getVariantSummary());
-        assertEquals("The highest sensitive level should be 1", LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
+        assertEquals("The highest sensitive level should be 1", LevelOfEvidence.LEVEL_3A, indicatorQueryResp.getHighestSensitiveLevel());
 
         // Check FLT3 ITD
         query = new Query(null, null, null, "FLT3", "ITD", null, null, "AML", null, null, null, null);
@@ -479,7 +479,7 @@ public class IndicatorUtilsTest {
         assertEquals("The highest sensitive level is not 1, but it should be.", LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
         assertEquals("The gene summary is not empty, but it should be.", "", indicatorQueryResp.getGeneSummary());
         assertEquals("The variant summary is not expected.", "Genetic or epigenetic alterations resulting in loss of function of mismatch repair (MMR) genes can lead to a microsatellite instability-high (MSI-H)/mismatch repair deficient (MMR-D) phenotype.", indicatorQueryResp.getVariantSummary());
-        assertEquals("The tumor type summary is not expected.", "The anti-PD-1 antibodies pembrolizumab or nivolumab, as single-agents, are FDA-approved for the treatment of patients with MMR-D or MSI-H metastatic colorectal cancer.", indicatorQueryResp.getTumorTypeSummary());
+        assertEquals("The tumor type summary is not expected.", "The anti-PD-1 antibodies pembrolizumab or nivolumab, as single-agents, and the anti-CTLA4 antibody ipilimumab in combination with nivolumab are FDA-approved for the treatment of patients with MMR-D or MSI-H metastatic colorectal cancer.", indicatorQueryResp.getTumorTypeSummary());
 
         query = new Query(null, null, null, null, "MSI-H", null, null, "Cervical Endometrioid Carcinoma", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, true, null);
