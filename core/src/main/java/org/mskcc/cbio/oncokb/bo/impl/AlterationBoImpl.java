@@ -410,26 +410,24 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
     private boolean addOncogenicMutations(Alteration exactAlt, Set<Alteration> relevantAlts) {
         boolean add = false;
         if (!isKitSpecialVariants(exactAlt)) {
-            if (!exactAlt.getAlteration().trim().equalsIgnoreCase("amplification")) {
-                Set<Oncogenicity> oncogenicities = AlterationUtils.getCuratedOncogenicity(exactAlt);
-                boolean has = AlterationUtils.hasImportantCuratedOncogenicity(oncogenicities);
-                if (has) {
-                    Boolean isOncogenic = AlterationUtils.hasOncogenic(oncogenicities);
+            Set<Oncogenicity> oncogenicities = AlterationUtils.getCuratedOncogenicity(exactAlt);
+            boolean has = AlterationUtils.hasImportantCuratedOncogenicity(oncogenicities);
+            if (has) {
+                Boolean isOncogenic = AlterationUtils.hasOncogenic(oncogenicities);
 
-                    if (isOncogenic != null && isOncogenic) {
-                        add = true;
-                    }
-                } else if (HotspotUtils.isHotspot(exactAlt)) {
+                if (isOncogenic != null && isOncogenic) {
                     add = true;
-                } else {
-                    // When we look at the oncogenicity, the VUS relevant variants should be excluded.
-                    for (Alteration alt : AlterationUtils.excludeVUS(new ArrayList<>(relevantAlts))) {
-                        Boolean isOncogenic = AlterationUtils.isOncogenicAlteration(alt);
+                }
+            } else if (HotspotUtils.isHotspot(exactAlt)) {
+                add = true;
+            } else {
+                // When we look at the oncogenicity, the VUS relevant variants should be excluded.
+                for (Alteration alt : AlterationUtils.excludeVUS(new ArrayList<>(relevantAlts))) {
+                    Boolean isOncogenic = AlterationUtils.isOncogenicAlteration(alt);
 
-                        if (isOncogenic != null && isOncogenic && !isKitSpecialVariants(alt)) {
-                            add = true;
-                            break;
-                        }
+                    if (isOncogenic != null && isOncogenic && !isKitSpecialVariants(alt)) {
+                        add = true;
+                        break;
                     }
                 }
             }
