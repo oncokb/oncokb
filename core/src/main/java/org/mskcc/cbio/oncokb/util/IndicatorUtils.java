@@ -215,6 +215,10 @@ public class IndicatorUtils {
 
             List<Alteration> alleles = AlterationUtils.getAlleleAlterations(matchedAlt);
 
+            // This is for tumor type level info. We do not want to map the alternative alleles on tumor type level
+            List<Alteration> relevantAlterationsWithoutAlternativeAlleles = new ArrayList<>(relevantAlterations);
+            AlterationUtils.removeAlternativeAllele(matchedAlt, relevantAlterations, alleles);
+
             // Whether alteration is hotpot from Matt's list
             if (query.getProteinEnd() == null || query.getProteinStart() == null) {
                 indicatorQuery.setHotspot(HotspotUtils.isHotspot(matchedAlt));
@@ -281,18 +285,18 @@ public class IndicatorUtils {
                 if (hasTreatmentEvidence) {
                     treatmentEvidences = EvidenceUtils.keepHighestLevelForSameTreatments(
                         EvidenceUtils.getRelevantEvidences(query, source, geneStatus, matchedAlt,
-                            selectedTreatmentEvidence, levels), matchedAlt);
+                            selectedTreatmentEvidence, levels, relevantAlterationsWithoutAlternativeAlleles, alleles), matchedAlt);
                 }
 
                 if (hasDiagnosticImplicationEvidence) {
-                    indicatorQuery.setDiagnosticImplications(getImplications(matchedAlt, alleles, relevantAlterations, EvidenceType.DIAGNOSTIC_IMPLICATION, new HashSet<>(relevantDownwardTumorTypes)));
+                    indicatorQuery.setDiagnosticImplications(getImplications(matchedAlt, alleles, relevantAlterationsWithoutAlternativeAlleles, EvidenceType.DIAGNOSTIC_IMPLICATION, new HashSet<>(relevantDownwardTumorTypes)));
                     if (indicatorQuery.getDiagnosticImplications().size() > 0) {
                         indicatorQuery.setHighestDiagnosticImplicationLevel(LevelUtils.getHighestDiagnosticImplicationLevel(indicatorQuery.getDiagnosticImplications().stream().map(implication -> implication.getLevelOfEvidence()).collect(Collectors.toSet())));
                     }
                 }
 
                 if (hasPrognosticImplicationEvidence) {
-                    indicatorQuery.setPrognosticImplications(getImplications(matchedAlt, alleles, relevantAlterations, EvidenceType.PROGNOSTIC_IMPLICATION, new HashSet<>(relevantUpwardTumorTypes)));
+                    indicatorQuery.setPrognosticImplications(getImplications(matchedAlt, alleles, relevantAlterationsWithoutAlternativeAlleles, EvidenceType.PROGNOSTIC_IMPLICATION, new HashSet<>(relevantUpwardTumorTypes)));
                     if (indicatorQuery.getPrognosticImplications().size() > 0) {
                         indicatorQuery.setHighestPrognosticImplicationLevel(LevelUtils.getHighestPrognosticImplicationLevel(indicatorQuery.getPrognosticImplications().stream().map(implication -> implication.getLevelOfEvidence()).collect(Collectors.toSet())));
                     }
@@ -350,7 +354,7 @@ public class IndicatorUtils {
             // Tumor type summary
             if (evidenceTypes.contains(EvidenceType.TUMOR_TYPE_SUMMARY) && query.getTumorType() != null) {
                 Map<String, Object> tumorTypeSummary = SummaryUtils.tumorTypeSummary(EvidenceType.TUMOR_TYPE_SUMMARY, gene, query, matchedAlt,
-                    new ArrayList<>(relevantAlterations),
+                    new ArrayList<>(relevantAlterationsWithoutAlternativeAlleles),
                     relevantUpwardTumorTypes);
                 if (tumorTypeSummary != null) {
                     indicatorQuery.setTumorTypeSummary((String) tumorTypeSummary.get("summary"));
@@ -372,7 +376,7 @@ public class IndicatorUtils {
             // Diagnostic summary
             if (evidenceTypes.contains(EvidenceType.DIAGNOSTIC_SUMMARY)) {
                 Map<String, Object> diagnosticSummary = SummaryUtils.tumorTypeSummary(EvidenceType.DIAGNOSTIC_SUMMARY, gene, query, matchedAlt,
-                    new ArrayList<>(relevantAlterations),
+                    new ArrayList<>(relevantAlterationsWithoutAlternativeAlleles),
                     relevantUpwardTumorTypes);
                 if (diagnosticSummary != null) {
                     indicatorQuery.setDiagnosticSummary((String) diagnosticSummary.get("summary"));
@@ -388,7 +392,7 @@ public class IndicatorUtils {
             // Prognostic summary
             if (evidenceTypes.contains(EvidenceType.PROGNOSTIC_SUMMARY)) {
                 Map<String, Object> prognosticSummary = SummaryUtils.tumorTypeSummary(EvidenceType.PROGNOSTIC_SUMMARY, gene, query, matchedAlt,
-                    new ArrayList<>(relevantAlterations),
+                    new ArrayList<>(relevantAlterationsWithoutAlternativeAlleles),
                     relevantUpwardTumorTypes);
                 if (prognosticSummary != null) {
                     indicatorQuery.setPrognosticSummary((String) prognosticSummary.get("summary"));
