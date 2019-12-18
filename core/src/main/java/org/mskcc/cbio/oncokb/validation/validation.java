@@ -135,7 +135,7 @@ public class validation {
     private static void compareActionableGenes() throws IOException {
         List<LevelOfEvidence> levels = new ArrayList<>();
         levels.add(LevelOfEvidence.LEVEL_1);
-        levels.add(LevelOfEvidence.LEVEL_2A);
+        levels.add(LevelOfEvidence.LEVEL_2);
         levels.add(LevelOfEvidence.LEVEL_3A);
         levels.add(LevelOfEvidence.LEVEL_4);
         levels.add(LevelOfEvidence.LEVEL_R1);
