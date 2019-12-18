@@ -9,11 +9,11 @@ KIT	N505I	Gastrointestinal Stromal Tumor	1: Imatinib; 1: Sunitinib; 1: Regorafen
 KIT	N505I	Gastrointestinal Stromal Tumor	1: Imatinib; 1: Sunitinib; 1: Regorafenib;
 KIT	N505I	Melanoma	2: Imatinib; 3B: Sunitinib; 3B: Regorafenib;
 KIT	N505I	Colorectal Cancer	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib;
-KIT	N505I	Thymic Tumor	2: Sunitinib; 2: Sorafenib; 3B: Imatinib; 3B: Regorafenib;
+KIT	N505I	Thymic Tumor	2: Sunitinib; 3B: Imatinib; 3B: Regorafenib;
 KIT	N505L	Gastrointestinal Stromal Tumor	1: Imatinib; 1: Sunitinib; 1: Regorafenib;
 KIT	N505L	Melanoma	2: Imatinib; 3B: Sunitinib; 3B: Regorafenib;
 KIT	N505L	Colorectal Cancer	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib;
-KIT	N505L	Thymic Tumor	2: Sunitinib; 2: Sorafenib; 3B: Imatinib; 3B: Regorafenib;
+KIT	N505L	Thymic Tumor	2: Sunitinib; 3B: Imatinib; 3B: Regorafenib;
 KIT	M541L	Gastrointestinal Stromal Tumor
 KIT	M541L	Melanoma
 KIT	M541L	Colorectal Cancer
@@ -25,11 +25,11 @@ KIT	M541C	Thymic Tumor
 KIT	Y553N	Gastrointestinal Stromal Tumor	1: Imatinib; 1: Sunitinib; 1: Regorafenib;
 KIT	Y553N	Melanoma	2: Imatinib; 3B: Sunitinib; 3B: Regorafenib;
 KIT	Y553N	Colorectal Cancer	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib;
-KIT	Y553N	Thymic Tumor	2: Sunitinib; 2: Sorafenib; 3B: Imatinib; 3B: Regorafenib;
+KIT	Y553N	Thymic Tumor	2: Sunitinib; 3B: Imatinib; 3B: Regorafenib;
 KIT	Y553C	Gastrointestinal Stromal Tumor	1: Imatinib; 1: Sunitinib; 1: Regorafenib;
 KIT	Y553C	Melanoma	2: Imatinib; 3B: Sunitinib; 3B: Regorafenib;
 KIT	Y553C	Colorectal Cancer	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib;
-KIT	Y553C	Thymic Tumor	2: Sunitinib; 2: Sorafenib; 3B: Imatinib; 3B: Regorafenib;
+KIT	Y553C	Thymic Tumor	2: Sunitinib; 3B: Imatinib; 3B: Regorafenib;
 KIT	R643W	Gastrointestinal Stromal Tumor
 KIT	R643W	Melanoma
 KIT	R643W	Colorectal Cancer
@@ -41,27 +41,27 @@ KIT	D737N	Thymic Tumor
 KIT	C809G	Gastrointestinal Stromal Tumor	1: Regorafenib; 2: Sorafenib; R2: Imatinib; R2: Sunitinib;
 KIT	C809G	Melanoma	2: Imatinib; 3B: Regorafenib; 3B: Sorafenib;
 KIT	C809G	Colorectal Cancer	3B: Regorafenib; 3B: Sorafenib;
-KIT	C809G	Thymic Tumor	2: Sunitinib; 2: Sorafenib; 3B: Regorafenib;
+KIT	C809G	Thymic Tumor	2: Sunitinib; 3B: Regorafenib; 3B: Sorafenib;
 KIT	K642E	Gastrointestinal Stromal Tumor	1: Imatinib; 1: Sunitinib; 1: Regorafenib;
 KIT	K642E	Melanoma	2: Imatinib; 3B: Sunitinib; 3B: Regorafenib;
 KIT	K642E	Colorectal Cancer	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib;
-KIT	K642E	Thymic Tumor	2: Sunitinib; 2: Sorafenib; 3B: Imatinib; 3B: Regorafenib;
+KIT	K642E	Thymic Tumor	2: Sunitinib; 3B: Imatinib; 3B: Regorafenib;
 KIT	K642G	Gastrointestinal Stromal Tumor	1: Imatinib; 1: Sunitinib; 1: Regorafenib;
 KIT	K642G	Melanoma	2: Imatinib; 3B: Sunitinib; 3B: Regorafenib;
 KIT	K642G	Colorectal Cancer	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib;
-KIT	K642G	Thymic Tumor	2: Sunitinib; 2: Sorafenib; 3B: Imatinib; 3B: Regorafenib;
+KIT	K642G	Thymic Tumor	2: Sunitinib; 3B: Imatinib; 3B: Regorafenib;
 KIT	V654A	Gastrointestinal Stromal Tumor	1: Sunitinib; 1: Regorafenib; R2: Imatinib;
 KIT	V654A	Melanoma	2: Imatinib; 3B: Sunitinib; 3B: Regorafenib;
 KIT	V654A	Colorectal Cancer	3B: Sunitinib; 3B: Regorafenib;
-KIT	V654A	Thymic Tumor	2: Sunitinib; 2: Sorafenib; 3B: Regorafenib;
+KIT	V654A	Thymic Tumor	2: Sunitinib; 3B: Regorafenib;
 KIT	V654G	Gastrointestinal Stromal Tumor	1: Imatinib; 1: Sunitinib; 1: Regorafenib;
 KIT	V654G	Melanoma	2: Imatinib; 3B: Sunitinib; 3B: Regorafenib;
 KIT	V654G	Colorectal Cancer	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib;
-KIT	V654G	Thymic Tumor	2: Sunitinib; 2: Sorafenib; 3B: Imatinib; 3B: Regorafenib;
+KIT	V654G	Thymic Tumor	2: Sunitinib; 3B: Imatinib; 3B: Regorafenib;
 KIT	T670I	Gastrointestinal Stromal Tumor	1: Sunitinib; 1: Regorafenib; R2: Imatinib;
 KIT	T670I	Melanoma	2: Imatinib; 3B: Sunitinib; 3B: Regorafenib;
 KIT	T670I	Colorectal Cancer	3B: Sunitinib; 3B: Regorafenib;
-KIT	T670I	Thymic Tumor	2: Sunitinib; 2: Sorafenib; 3B: Regorafenib;
+KIT	T670I	Thymic Tumor	2: Sunitinib; 3B: Regorafenib;
 KIT	T670C	Gastrointestinal Stromal Tumor
 KIT	T670C	Melanoma
 KIT	T670C	Colorectal Cancer
@@ -70,7 +70,7 @@ KIT	D816A	Gastrointestinal Stromal Tumor
 KIT	D816A	Melanoma	2: Imatinib; 3B: Regorafenib; 3B: Sorafenib;
 KIT	D816A	Colorectal Cancer 3B: Regorafenib; 3B: Sorafenib;
 KIT	D816A	Mastocytosis	3A: Avapritinib;
-KIT	D816A	Thymic Tumor	2: Sunitinib; 2: Sorafenib; 3B: Regorafenib;
+KIT	D816A	Thymic Tumor	2: Sunitinib; 3B: Regorafenib; 3B: Sorafenib;
 MTOR	L2427Q	Renal Clear Cell Carcinoma	3A: Temsirolimus; 4: Everolimus;
 PDGFRA	D842I	GIST	2: Imatinib;
 PDGFRA	D842I	Thymic Tumor	3B: Imatinib;
@@ -89,7 +89,7 @@ ABL1	T315I	Melanoma
 ABL1	T315A	Chronic Myelogenous Leukemia	2: Bosutinib; 2: Nilotinib;
 ABL1	T315A	Melanoma
 
-ABL1	T315V	Chronic Myelogenous Leukemia	2: Bosutinib; 2: Nilotinib;
+ABL1	T315V	Chronic Myelogenous Leukemia
 ABL1	T315V	Melanoma
 
 # test few more resistance treatments
@@ -148,8 +148,8 @@ MAP2K1	K57N	Erdheim-Chester Disease	3A: Cobimetinib; 3A: Trametinib;
 MAP2K1	K57N	Lung Adenocarcinoma	3A: Cobimetinib; 3A: Trametinib;
 MAP2K1	K57N	Glioblastoma	3B: Cobimetinib; 3B: Trametinib;
 #MAP2K1	K57N	Diffuse Large B-Cell Lymphoma, NOS
-PIK3CA	E545K	Breast Cancer	1: Fulvestrant+Alpelisib; 3A: Buparlisib; 3A: Buparlisib+Fulvestrant; 3A: Copanlisib; 3A: GDC-0077; 3A: Serabelisib; 3A: Taselisib; 3A: Taselisib+Fulvestrant;
-PIK3CA	E545K	Ovarian Cancer	3B: Buparlisib; 3B: Copanlisib; 3B: Fulvestrant+Alpelisib; 3B: GDC-0077; 3B: Serabelisib; 3B: Taselisib;
+PIK3CA	E545K	Breast Cancer	1: Fulvestrant+Alpelisib; 3A: Copanlisib; 3A: GDC-0077;
+PIK3CA	E545K	Ovarian Cancer	3B: Copanlisib; 3B: Fulvestrant+Alpelisib; 3B: GDC-0077;
 #PIK3CA	E545K	Acute Myeloid Leukemia
 NRAS	G12C	Breast Cancer	3B: Binimetinib; 3B: Binimetinib+Ribociclib;
 #NRAS	G12C	Chronic Myelogenous Leukemia
@@ -158,11 +158,53 @@ SF3B1	K625G	Breast Cancer
 
 # AMG-510 should only work for KRAS G12C, not alternative allele
 # the following tests should be enabled when the liquid propagation is in production also the AGM-510 treatment is in place
-# KRAS	G12C	Breast Cancer	3B: AGM-510; 4: Binimetinib; 4: Cobimetinib; 4: Trametinib;
-# KRAS	G12D	Breast Cancer	4: Binimetinib; 4: Cobimetinib; 4: Trametinib;
-# KRAS	G12C	NSCLC	3A: AGM-510; 4: Binimetinib; 4: Cobimetinib; 4: Trametinib;
-# KRAS	G12D	NSCLC	4: Binimetinib; 4: Cobimetinib; 4: Trametinib;
-# KRAS	G12C	AML
-# KRAS	G12D	AML
-# KRAS	G12C	Leukemia
-# KRAS	G12D	Leukemia
+KRAS	G12C	Breast Cancer	3B: AMG-510; 4: Binimetinib; 4: Cobimetinib; 4: Trametinib;
+KRAS	G12D	Breast Cancer	4: Binimetinib; 4: Cobimetinib; 4: Trametinib;
+KRAS	G12C	NSCLC	3A: AMG-510; 4: Binimetinib; 4: Cobimetinib; 4: Trametinib;
+KRAS	G12D	NSCLC	4: Binimetinib; 4: Cobimetinib; 4: Trametinib;
+KRAS	G12C	AML
+KRAS	G12D	AML
+KRAS	G12C	Leukemia
+KRAS	G12D	Leukemia
+
+# Check the Alternative Allele rule
+# When we map treatments, we should not map the treatments of alternative alleles. If it applies to all alleles, it should be curated under positional variant
+BRAF	V600E	Anaplastic Thyroid Cancer	1: Dabrafenib+Trametinib; 3B: Dabrafenib; 3B: Dabrafenib+Panitumumab+Trametinib; 3B: Encorafenib+Binimetinib; 3B: Encorafenib+Cetuximab+Binimetinib; 3B: Trametinib; 3B: Vemurafenib; 3B: Vemurafenib+Cobimetinib;
+BRAF	V600K	Anaplastic Thyroid Cancer	2: Dabrafenib+Trametinib; 3B: Encorafenib+Binimetinib; 3B: Trametinib; 3B: Vemurafenib+Cobimetinib;
+BRAF	V600E	Melanoma	1: Dabrafenib; 1: Dabrafenib+Trametinib; 1: Encorafenib+Binimetinib; 1: Trametinib; 1: Vemurafenib; 1: Vemurafenib+Cobimetinib; 3B: Dabrafenib+Panitumumab+Trametinib; 3B: Encorafenib+Cetuximab+Binimetinib;
+BRAF	V600K	Melanoma	1: Dabrafenib+Trametinib; 1: Encorafenib+Binimetinib; 1: Trametinib; 1: Vemurafenib+Cobimetinib;
+BRAF	V600G	Melanoma	2: Dabrafenib+Trametinib; 2: Encorafenib+Binimetinib; 2: Vemurafenib+Cobimetinib;
+BRAF	V600E	NSCLC	1: Dabrafenib+Trametinib; 3B: Dabrafenib; 3B: Dabrafenib+Panitumumab+Trametinib; 3B: Encorafenib+Binimetinib; 3B: Encorafenib+Cetuximab+Binimetinib; 3B: Trametinib; 3B: Vemurafenib; 3B: Vemurafenib+Cobimetinib;
+BRAF	V600K	NSCLC	3B: Dabrafenib+Trametinib; 3B: Encorafenib+Binimetinib; 3B: Trametinib; 3B: Vemurafenib+Cobimetinib;
+BRAF	V600G	NSCLC	3B: Dabrafenib+Trametinib; 3B: Encorafenib+Binimetinib; 3B: Vemurafenib+Cobimetinib;
+BRAF	V600K	NSCLC	3B: Dabrafenib+Trametinib; 3B: Encorafenib+Binimetinib; 3B: Trametinib; 3B: Vemurafenib+Cobimetinib;
+BRAF	V600E	Colorectal Cancer   2: Dabrafenib+Panitumumab+Trametinib; 2: Encorafenib+Cetuximab+Binimetinib; 3B: Dabrafenib; 3B: Dabrafenib+Trametinib; 3B: Encorafenib+Binimetinib; 3B: Trametinib; 3B: Vemurafenib; 3B: Vemurafenib+Cobimetinib;
+BRAF	V600K	Colorectal Cancer   3B: Dabrafenib+Trametinib; 3B: Encorafenib+Binimetinib; 3B: Trametinib; 3B: Vemurafenib+Cobimetinib;
+BRAF	V600E	HCL	2: Vemurafenib;
+BRAF	V600K	HCL
+AKT1	E17K	Breat Cancer
+AKT1	E17K	NSCLC	3B: AZD5363;
+AKT1	E17G	Breat Cancer
+FGFR3	Y373C	Bladder Cancer	1: Erdafitinib; 3A: AZD4547; 3A: BGJ398; 3A: Debio1347;
+FGFR3	Y373G	Bladder Cancer	4: AZD4547; 4: BGJ398; 4: Debio1347; 4: Erdafitinib;
+EGFR	A750P	NSCLC	4: Afatinib; 4: Erlotinib; 4: Gefitinib;
+EGFR	A750G	NSCLC
+MTOR	E2014K	Bladder Cancer	3A: Everolimus; 4: Temsirolimus;
+MTOR	E2014L	Bladder Cancer	4: Everolimus; 4: Temsirolimus;
+MTOR	E2014K	NSCLC	3B: Everolimus; 4: Temsirolimus;
+ABL1	Y253H	CML	2: Bosutinib; 2: Dasatinib;
+ABL1	Y253H	TLL
+ABL1	Y253M	CML
+BRAF	L597R	Melanoma	3A: Trametinib; 4: PLX8394;
+BRAF	L597M	NSCLC	3B: Trametinib; 4: PLX8394;
+EGFR	L861Q	NSCLC	1: Afatinib;
+EGFR	L861R	NSCLC	3A: Afatinib; 3A: Erlotinib; 3A: Gefitinib;
+EGFR	L861M	NSCLC
+KRAS	G12C	NSCLC	3A: AMG-510; 4: Binimetinib; 4: Cobimetinib; 4: Trametinib;
+KRAS	G12C	Melanoma	3B: AMG-510; 4: Binimetinib; 4: Cobimetinib; 4: Trametinib;
+KRAS	G12A	NSCLC	4: Binimetinib; 4: Cobimetinib; 4: Trametinib;
+KRAS	G12A	Melanoma	4: Binimetinib; 4: Cobimetinib; 4: Trametinib;
+KRAS	G12C	Histiocytosis	3A: Cobimetinib;
+KRAS	G12A	Histiocytosis	3A: Cobimetinib;
+IDH1	R132H	AML	1: Ivosidenib;
+IDH1	R132G	AML	1: Ivosidenib;
