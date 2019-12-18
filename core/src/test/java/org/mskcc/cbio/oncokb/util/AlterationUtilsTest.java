@@ -288,4 +288,130 @@ public class AlterationUtilsTest extends TestCase
 
     public void testRemoveAlterationsFromList() {
     }
+
+    public void testRemoveAlternativeAllele() {
+        // Test regular missense variant
+        Alteration v600e = createBRAFAlteration("V600E");
+
+        // Check when alteration is not available
+        List<Alteration> relevantAlterations = new ArrayList<>();
+        Alteration alteration = createBRAFAlteration("V600G");
+        relevantAlterations.add(alteration);
+        alteration = createBRAFAlteration("Oncogenic Mutations");
+        relevantAlterations.add(alteration);
+
+        List<Alteration> alleles = new ArrayList<>();
+        alteration = createBRAFAlteration("V600G");
+        alleles.add(alteration);
+
+        AlterationUtils.removeAlternativeAllele(v600e, relevantAlterations, alleles);
+
+        assertEquals(1, relevantAlterations.size());
+
+
+        // Check when alteration is present in list
+        relevantAlterations = new ArrayList<>();
+        alteration = createBRAFAlteration("V600G");
+        relevantAlterations.add(alteration);
+        relevantAlterations.add(v600e);
+
+        alleles = new ArrayList<>();
+        alteration = createBRAFAlteration("V600G");
+        alleles.add(alteration);
+
+        AlterationUtils.removeAlternativeAllele(v600e, relevantAlterations, alleles);
+        assertEquals(1, relevantAlterations.size());
+
+        // Check when it's a mix
+        relevantAlterations = new ArrayList<>();
+
+        alteration = createBRAFAlteration("V600G");
+        relevantAlterations.add(alteration);
+
+        alteration = createBRAFAlteration("Oncogenic Mutations");
+        relevantAlterations.add(alteration);
+
+        relevantAlterations.add(v600e);
+
+        alleles = new ArrayList<>();
+        alteration = createBRAFAlteration("V600G");
+        alleles.add(alteration);
+
+        AlterationUtils.removeAlternativeAllele(v600e, relevantAlterations, alleles);
+        assertEquals(2, relevantAlterations.size());
+
+        // Check delins match missense
+        relevantAlterations = new ArrayList<>();
+
+        alteration = createBRAFAlteration("V600_V601delinsEK");
+        relevantAlterations.add(alteration);
+
+        alleles = new ArrayList<>();
+        alteration = createBRAFAlteration("V600_V601delinsEK");
+        alleles.add(alteration);
+
+        AlterationUtils.removeAlternativeAllele(v600e, relevantAlterations, alleles);
+        assertEquals(1, relevantAlterations.size());
+
+        // Check delins match missense - match
+        relevantAlterations = new ArrayList<>();
+
+        alteration = createBRAFAlteration("V599_V600delinsKE");
+        relevantAlterations.add(alteration);
+
+        alleles = new ArrayList<>();
+        alteration = createBRAFAlteration("V599_V600delinsKE");
+        alleles.add(alteration);
+
+        AlterationUtils.removeAlternativeAllele(v600e, relevantAlterations, alleles);
+        assertEquals(1, relevantAlterations.size());
+
+        // Check delins match missense - does not match
+        relevantAlterations = new ArrayList<>();
+        relevantAlterations.add(createBRAFAlteration("V599_V600delinsKK"));
+
+        alleles = new ArrayList<>();
+        alleles.add(createBRAFAlteration("V599_V600delinsKK"));
+
+        AlterationUtils.removeAlternativeAllele(v600e, relevantAlterations, alleles);
+        assertEquals(0, relevantAlterations.size());
+
+        // Check missense match delins
+        Alteration delins = createBRAFAlteration("V599_V600delinsKE");
+
+        relevantAlterations = new ArrayList<>();
+        relevantAlterations.add(v600e);
+
+        alleles = new ArrayList<>();
+        alleles.add(v600e);
+
+        AlterationUtils.removeAlternativeAllele(delins, relevantAlterations, alleles);
+        assertEquals(1, relevantAlterations.size());
+
+        // Check missense match delins plus mix
+        relevantAlterations = new ArrayList<>();
+        relevantAlterations.add(v600e);
+        relevantAlterations.add(createBRAFAlteration("V600R"));
+        relevantAlterations.add(createBRAFAlteration("Oncogenic Mutations"));
+
+        alleles = new ArrayList<>();
+        alleles.add(v600e);
+        alleles.add(createBRAFAlteration("V600R"));
+
+        AlterationUtils.removeAlternativeAllele(delins, relevantAlterations, alleles);
+        assertEquals(2, relevantAlterations.size());
+
+        // Check missense match delins plus positional
+        relevantAlterations = new ArrayList<>();
+        relevantAlterations.add(v600e);
+        relevantAlterations.add(createBRAFAlteration("V600"));
+
+        alleles = new ArrayList<>();
+        alleles.add(v600e);
+        alleles.add(createBRAFAlteration("V600"));
+
+        AlterationUtils.removeAlternativeAllele(delins, relevantAlterations, alleles);
+        assertEquals(2, relevantAlterations.size());
+
+    }
 }

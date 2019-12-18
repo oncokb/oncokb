@@ -56,7 +56,7 @@ public class EvidenceUtils {
 
     public static Set<Evidence> getRelevantEvidences(
         Query query, String source, String geneStatus, Alteration matchedAlt,
-        Set<EvidenceType> evidenceTypes, Set<LevelOfEvidence> levelOfEvidences) {
+        Set<EvidenceType> evidenceTypes, Set<LevelOfEvidence> levelOfEvidences, List<Alteration> relevantAlterations, List<Alteration> alternativeAlleles) {
         if (query == null) {
             return new HashSet<>();
         }
@@ -71,8 +71,6 @@ public class EvidenceUtils {
                     AlterationType.getByName(query.getAlterationType()), query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
                 AlterationUtils.annotateAlteration(matchedAlt, matchedAlt.getAlteration());
             }
-            List<Alteration> relevantAlterations = AlterationUtils.getRelevantAlterations(matchedAlt);
-            List<Alteration> alleles = AlterationUtils.getAlleleAlterations(matchedAlt);
 
             Set<Evidence> relevantEvidences;
             List<TumorType> relevantTumorTypes = new ArrayList<>();
@@ -94,7 +92,7 @@ public class EvidenceUtils {
             Set<Alteration> excludeAlternativeAlleles = new HashSet<>();
             for (Evidence tempEvidence : relevantEvidences) {
                 if (LevelUtils.isResistanceLevel(tempEvidence.getLevelOfEvidence())) {
-                    excludeAlternativeAlleles.addAll(Sets.intersection(tempEvidence.getAlterations(), new HashSet<>(alleles)));
+                    excludeAlternativeAlleles.addAll(Sets.intersection(tempEvidence.getAlterations(), new HashSet<>(alternativeAlleles)));
                 }
             }
 
@@ -665,9 +663,6 @@ public class EvidenceUtils {
         Set<Evidence> result = new HashSet<>();
 
         if (highestLevel != null) {
-            if (highestLevel.equals(LevelOfEvidence.LEVEL_2B) && levels.containsKey(LevelOfEvidence.LEVEL_3A)) {
-                result.addAll(levels.get(LevelOfEvidence.LEVEL_3A));
-            }
             result.addAll(levels.get(highestLevel));
         }
         return result;
@@ -737,7 +732,6 @@ public class EvidenceUtils {
             // If highestEvis has more than 1 items, find highest original level if the level is 2B, 3B
             if (highestEvis.size() > 1) {
                 Set<LevelOfEvidence> checkLevels = new HashSet<>();
-                checkLevels.add(LevelOfEvidence.LEVEL_2B);
                 checkLevels.add(LevelOfEvidence.LEVEL_3B);
 
                 for (Evidence highestEvi : highestEvis) {

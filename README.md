@@ -1,3 +1,5 @@
+# OncoKB Core
+<a href="https://ascopubs.org/doi/full/10.1200/PO.17.00011"><img src="https://img.shields.io/badge/DOI-10.1200%2FPO.17.00011-1c75cd" /></a>  
 Repository for OncoKB, a precision oncology knowledge base.
 
 The core of OncoKB Annotation service.
