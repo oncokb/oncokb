@@ -182,9 +182,9 @@ BRAF	V600E	Colorectal Cancer   2: Dabrafenib+Panitumumab+Trametinib; 2: Encorafe
 BRAF	V600K	Colorectal Cancer   3B: Dabrafenib+Trametinib; 3B: Encorafenib+Binimetinib; 3B: Trametinib; 3B: Vemurafenib+Cobimetinib;
 BRAF	V600E	HCL	2: Vemurafenib;
 BRAF	V600K	HCL
-AKT1	E17K	Breat Cancer
+AKT1	E17K	Breast Cancer   3A: AZD5363;
 AKT1	E17K	NSCLC	3B: AZD5363;
-AKT1	E17G	Breat Cancer
+AKT1	E17G	Breast Cancer
 FGFR3	Y373C	Bladder Cancer	1: Erdafitinib; 3A: AZD4547; 3A: BGJ398; 3A: Debio1347;
 FGFR3	Y373G	Bladder Cancer	4: AZD4547; 4: BGJ398; 4: Debio1347; 4: Erdafitinib;
 EGFR	A750P	NSCLC	4: Afatinib; 4: Erlotinib; 4: Gefitinib;
