@@ -366,7 +366,7 @@ public class AlterationUtilsTest extends TestCase
         AlterationUtils.removeAlternativeAllele(v600e, relevantAlterations, alleles);
         assertEquals(1, relevantAlterations.size());
 
-        // Check missense mitch delins
+        // Check missense match delins
         Alteration delins = createBRAFAlteration("V599_V600delinsKE");
 
         relevantAlterations = new ArrayList<>();
@@ -378,7 +378,7 @@ public class AlterationUtilsTest extends TestCase
         AlterationUtils.removeAlternativeAllele(delins, relevantAlterations, alleles);
         assertEquals(1, relevantAlterations.size());
 
-        // Check missense mitch delins plus mix
+        // Check missense match delins plus mix
         relevantAlterations = new ArrayList<>();
         relevantAlterations.add(v600e);
         relevantAlterations.add(createBRAFAlteration("V600R"));
@@ -387,6 +387,18 @@ public class AlterationUtilsTest extends TestCase
         alleles = new ArrayList<>();
         alleles.add(v600e);
         alleles.add(createBRAFAlteration("V600R"));
+
+        AlterationUtils.removeAlternativeAllele(delins, relevantAlterations, alleles);
+        assertEquals(2, relevantAlterations.size());
+
+        // Check missense match delins plus positional
+        relevantAlterations = new ArrayList<>();
+        relevantAlterations.add(v600e);
+        relevantAlterations.add(createBRAFAlteration("V600"));
+
+        alleles = new ArrayList<>();
+        alleles.add(v600e);
+        alleles.add(createBRAFAlteration("V600"));
 
         AlterationUtils.removeAlternativeAllele(delins, relevantAlterations, alleles);
         assertEquals(2, relevantAlterations.size());

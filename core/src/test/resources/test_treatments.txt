@@ -158,11 +158,14 @@ SF3B1	K625G	Breast Cancer
 
 # AMG-510 should only work for KRAS G12C, not alternative allele
 # the following tests should be enabled when the liquid propagation is in production also the AGM-510 treatment is in place
-# KRAS	G12C	Breast Cancer	3B: AGM-510; 4: Binimetinib; 4: Cobimetinib; 4: Trametinib;
-# KRAS	G12D	Breast Cancer	4: Binimetinib; 4: Cobimetinib; 4: Trametinib;
-# KRAS	G12C	NSCLC	3A: AGM-510; 4: Binimetinib; 4: Cobimetinib; 4: Trametinib;
-# KRAS	G12D	NSCLC	4: Binimetinib; 4: Cobimetinib; 4: Trametinib;
-# KRAS	G12C	AML
-# KRAS	G12D	AML
-# KRAS	G12C	Leukemia
-# KRAS	G12D	Leukemia
+KRAS	G12C	Breast Cancer	3B: AMG-510; 4: Binimetinib; 4: Cobimetinib; 4: Trametinib;
+KRAS	G12D	Breast Cancer	4: Binimetinib; 4: Cobimetinib; 4: Trametinib;
+KRAS	G12C	NSCLC	3A: AMG-510; 4: Binimetinib; 4: Cobimetinib; 4: Trametinib;
+KRAS	G12D	NSCLC	4: Binimetinib; 4: Cobimetinib; 4: Trametinib;
+KRAS	G12C	AML
+KRAS	G12D	AML
+KRAS	G12C	Leukemia
+KRAS	G12D	Leukemia
+
+# Check the Alternative Allele rule
+# When we map treatments, we should not map the treatments of alternative alleles. If it applies to all alleles, it should be curated under positional variant
