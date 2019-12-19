@@ -738,10 +738,11 @@ public final class AlterationUtils {
         return alleles;
     }
 
-    public static void removeAlternativeAllele(Alteration alteration, List<Alteration> relevantAlterations, List<Alteration> alternativeAlleles) {
+    public static void removeAlternativeAllele(Alteration alteration, List<Alteration> relevantAlterations) {
         // the alternative alleles do not only include the different variant allele, but also include the delins but it's essentially the same thing.
         // For instance, S768_V769delinsIL. This is equivalent to S768I + V769L, S768I should be listed relevant and not be excluded.
-        if (alteration.getConsequence() != null && alteration.getConsequence().getTerm().equals("missense_variant")) {
+        if (alteration != null && alteration.getConsequence() != null && alteration.getConsequence().getTerm().equals("missense_variant")) {
+            List<Alteration> alternativeAlleles = alterationBo.findMutationsByConsequenceAndPosition(alteration.getGene(), alteration.getConsequence(), alteration.getProteinStart(), alteration.getProteinEnd(), new HashSet<>(relevantAlterations));
             for (Alteration allele : alternativeAlleles) {
                 if (allele.getConsequence() != null && allele.getConsequence().getTerm().equals("missense_variant")) {
                     if (alteration.getProteinStart().equals(alteration.getProteinEnd())) {
@@ -750,7 +751,7 @@ public final class AlterationUtils {
                                 relevantAlterations.remove(allele);
                             }
                         } else {
-                            String alleleVariant = getDelInsVariantAllele(allele, alteration.getProteinStart());
+                            String alleleVariant = getMissenseVariantAllele(allele, alteration.getProteinStart());
                             if (alleleVariant != null && !alteration.getVariantResidues().equalsIgnoreCase(alleleVariant)) {
                                 relevantAlterations.remove(allele);
                             }
@@ -758,7 +759,7 @@ public final class AlterationUtils {
                     } else {
                         boolean isRelevant = false;
                         for (int start = alteration.getProteinStart().intValue(); start <= alteration.getProteinEnd().intValue(); start++) {
-                            String alterationAllele = getDelInsVariantAllele(alteration, start);
+                            String alterationAllele = getMissenseVariantAllele(alteration, start);
                             if (alterationAllele != null) {
                                 if (allele.getProteinStart().equals(allele.getProteinEnd())) {
                                     if (alterationAllele.equalsIgnoreCase(allele.getVariantResidues())) {
@@ -766,7 +767,7 @@ public final class AlterationUtils {
                                         break;
                                     }
                                 } else {
-                                    String alleleVariant = getDelInsVariantAllele(allele, start);
+                                    String alleleVariant = getMissenseVariantAllele(allele, start);
                                     if (alleleVariant == null || alterationAllele.equalsIgnoreCase(alleleVariant)) {
                                         isRelevant = true;
                                         break;
@@ -783,13 +784,15 @@ public final class AlterationUtils {
         }
     }
 
-    private static String getDelInsVariantAllele(Alteration alteration, int position) {
+    private static String getMissenseVariantAllele(Alteration alteration, int position) {
         Pattern pattern = Pattern.compile(".*delins([\\w]+)");
         Matcher matcher = pattern.matcher(alteration.getAlteration());
         if (matcher.find()) {
             String variantAlleles = matcher.group(1);
             int index = position - alteration.getProteinStart();
             return variantAlleles.substring(index, index + 1);
+        } else if (alteration.getVariantResidues() != null && alteration.getVariantResidues().length() > 0) {
+            return alteration.getVariantResidues().substring(0, 1);
         }
         return null;
     }

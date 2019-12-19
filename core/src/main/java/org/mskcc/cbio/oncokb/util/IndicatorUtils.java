@@ -217,7 +217,7 @@ public class IndicatorUtils {
 
             // This is for tumor type level info. We do not want to map the alternative alleles on tumor type level
             List<Alteration> relevantAlterationsWithoutAlternativeAlleles = new ArrayList<>(relevantAlterations);
-            AlterationUtils.removeAlternativeAllele(matchedAlt, relevantAlterationsWithoutAlternativeAlleles, alleles);
+            AlterationUtils.removeAlternativeAllele(matchedAlt, relevantAlterationsWithoutAlternativeAlleles);
 
             // Whether alteration is hotpot from Matt's list
             if (query.getProteinEnd() == null || query.getProteinStart() == null) {
