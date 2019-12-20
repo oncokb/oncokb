@@ -790,7 +790,11 @@ public final class AlterationUtils {
         if (matcher.find()) {
             String variantAlleles = matcher.group(1);
             int index = position - alteration.getProteinStart();
-            return variantAlleles.substring(index, index + 1);
+            if (index >= 0 && index < variantAlleles.length()) {
+                return variantAlleles.substring(index, index + 1);
+            } else {
+                return null;
+            }
         } else if (alteration.getVariantResidues() != null && alteration.getVariantResidues().length() > 0) {
             return alteration.getVariantResidues().substring(0, 1);
         }

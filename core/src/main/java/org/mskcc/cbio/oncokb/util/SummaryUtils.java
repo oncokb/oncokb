@@ -125,8 +125,9 @@ public class SummaryUtils {
 
         List<Alteration> alternativeAlleles = new ArrayList<>();
         alternativeAlleles.add(alteration);
-        alternativeAlleles.addAll(AlterationUtils.getAlleleAlterations(alteration));
         alternativeAlleles.addAll(AlterationUtils.getPositionedAlterations(alteration));
+
+        alternativeAlleles = (List<Alteration>) CollectionUtils.intersection(alternativeAlleles, relevantAlterations);
 
         // Get all tumor type summary evidences for the exact alteration + alternative alleles
         // Tumor type has high priority. Get relevant tumor type summary across all alternative alleles, then look for other tumor types summary
