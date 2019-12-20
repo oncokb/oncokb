@@ -66,11 +66,11 @@ KIT	T670C	Gastrointestinal Stromal Tumor
 KIT	T670C	Melanoma
 KIT	T670C	Colorectal Cancer
 KIT	T670C	Thymic Tumor
-KIT	D816A	Gastrointestinal Stromal Tumor
-KIT	D816A	Melanoma	2: Imatinib; 3B: Regorafenib; 3B: Sorafenib;
+KIT	D816A	Gastrointestinal Stromal Tumor  3B: Avapritinib;
+KIT	D816A	Melanoma	2: Imatinib; 3B: Regorafenib; 3B: Sorafenib; 3B: Avapritinib;
 KIT	D816A	Colorectal Cancer 3B: Regorafenib; 3B: Sorafenib;
 KIT	D816A	Mastocytosis	3A: Avapritinib;
-KIT	D816A	Thymic Tumor	2: Sunitinib; 3B: Regorafenib; 3B: Sorafenib;
+KIT	D816A	Thymic Tumor	2: Sunitinib; 3B: Regorafenib; 3B: Sorafenib; 3B: Avapritinib;
 MTOR	L2427Q	Renal Clear Cell Carcinoma	3A: Temsirolimus; 4: Everolimus;
 PDGFRA	D842I	GIST	2: Imatinib;
 PDGFRA	D842I	Thymic Tumor	3B: Imatinib;
@@ -148,8 +148,8 @@ MAP2K1	K57N	Erdheim-Chester Disease	3A: Cobimetinib; 3A: Trametinib;
 MAP2K1	K57N	Lung Adenocarcinoma	3A: Cobimetinib; 3A: Trametinib;
 MAP2K1	K57N	Glioblastoma	3B: Cobimetinib; 3B: Trametinib;
 #MAP2K1	K57N	Diffuse Large B-Cell Lymphoma, NOS
-PIK3CA	E545K	Breast Cancer	1: Fulvestrant+Alpelisib; 3A: Copanlisib; 3A: GDC-0077;
-PIK3CA	E545K	Ovarian Cancer	3B: Copanlisib; 3B: Fulvestrant+Alpelisib; 3B: GDC-0077;
+PIK3CA	E545K	Breast Cancer	1: Fulvestrant+Alpelisib; 3A: Copanlisib+Fulvestrant; 3A: GDC-0077;
+PIK3CA	E545K	Ovarian Cancer	3B: Copanlisib+Fulvestrant; 3B: Fulvestrant+Alpelisib; 3B: GDC-0077;
 #PIK3CA	E545K	Acute Myeloid Leukemia
 NRAS	G12C	Breast Cancer	3B: Binimetinib; 3B: Binimetinib+Ribociclib;
 #NRAS	G12C	Chronic Myelogenous Leukemia
