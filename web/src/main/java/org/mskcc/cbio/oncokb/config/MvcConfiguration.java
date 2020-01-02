@@ -24,7 +24,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 
 @Configuration
-@ComponentScan(basePackages = "org.mskcc.cbio.oncokb")
 @EnableWebMvc
 public class MvcConfiguration extends WebMvcConfigurerAdapter {
 
@@ -66,18 +65,6 @@ public class MvcConfiguration extends WebMvcConfigurerAdapter {
         return new JsonViewSupportFactoryBean();
     }
 
-    protected ApiInfo apiInfo() {
-        ApiInfo apiInfo = new ApiInfo(
-            "OncoKB APIs",
-            "OncoKB, a comprehensive and curated precision oncology knowledge base, offers oncologists detailed, evidence-based information about individual somatic mutations and structural alterations present in patient tumors with the goal of supporting optimal treatment decisions.",
-            "v1.0.0",
-            "https://www.oncokb.org/terms",
-            new Contact("OncoKB", "https://www.oncokb.org", "contact@oncokb.org"),
-            "Terms of Use",
-            "https://www.oncokb.org/terms"
-        );
-        return apiInfo;
-    }
 
     @Bean
     public ServletContextInitializer sentryServletContextInitializer() {
