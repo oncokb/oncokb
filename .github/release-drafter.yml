@@ -38,3 +38,4 @@ template: |
   ## 🕵️‍♀️ Full commit logs
 
   - https://github.com/oncokb/oncokb/compare/v$PREVIOUS_TAG...v$NEXT_MAJOR_VERSION
+
