@@ -1,6 +1,7 @@
 package org.mskcc.cbio.oncokb.api.pub.v1;
 
 import io.swagger.annotations.*;
+import org.mskcc.cbio.oncokb.config.annotation.PremiumPublicApi;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.GeneEvidence;
@@ -17,6 +18,7 @@ import java.util.List;
 @Api(tags = "Genes", description = "OncoKB Genes")
 public interface GenesApi {
 
+    @PremiumPublicApi
     @ApiOperation(value = "", notes = "Get list of evidences for specific gene.", response = GeneEvidence.class, responseContainer = "List")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = GeneEvidence.class, responseContainer = "List")})
@@ -29,6 +31,7 @@ public interface GenesApi {
     );
 
 
+    @PremiumPublicApi
     @ApiOperation(value = "", notes = "Get specific gene information.", response = Gene.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = Gene.class)})
@@ -41,6 +44,7 @@ public interface GenesApi {
     );
 
 
+    @PremiumPublicApi
     @ApiOperation(value = "", notes = "Get list of variants for specific gene.", response = Alteration.class, responseContainer = "List")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = Alteration.class, responseContainer = "List")})
@@ -53,6 +57,7 @@ public interface GenesApi {
     );
 
 
+    @PremiumPublicApi
     @ApiOperation(value = "", notes = "Get list of currently curated genes.", response = Gene.class, responseContainer = "List")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = Gene.class, responseContainer = "List")})
@@ -64,6 +69,7 @@ public interface GenesApi {
     );
 
 
+    @PremiumPublicApi
     @ApiOperation(value = "", notes = "Search gene.", response = Gene.class, responseContainer = "List")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = Gene.class, responseContainer = "List")})

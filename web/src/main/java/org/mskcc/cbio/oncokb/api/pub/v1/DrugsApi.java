@@ -1,6 +1,7 @@
 package org.mskcc.cbio.oncokb.api.pub.v1;
 
 import io.swagger.annotations.*;
+import org.mskcc.cbio.oncokb.config.annotation.PremiumPublicApi;
 import org.mskcc.cbio.oncokb.model.Drug;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,18 +13,16 @@ import java.util.List;
 @Api(tags = "Drugs", description = "OncoKB Drugs")
 public interface DrugsApi {
 
-    @ApiOperation(value = "", notes = "Get all curated drugs.", response = Drug.class, responseContainer = "List")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "OK", response = Drug.class, responseContainer = "List")})
+    @PremiumPublicApi
+    @ApiOperation("Get all curated drugs.")
     @RequestMapping(value = "/drugs",
         produces = {"application/json"},
         method = RequestMethod.GET)
     ResponseEntity<List<Drug>> drugsGet();
 
 
-    @ApiOperation(value = "", notes = "Search drugs.", response = Drug.class, responseContainer = "List")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "OK", response = Drug.class, responseContainer = "List")})
+    @PremiumPublicApi
+    @ApiOperation("Search drugs.")
     @RequestMapping(value = "/drugs/lookup",
         produces = {"application/json"},
         method = RequestMethod.GET)

@@ -1,6 +1,8 @@
 package org.mskcc.cbio.oncokb.api.pub.v1;
 
 import io.swagger.annotations.*;
+import org.mskcc.cbio.oncokb.config.annotation.PremiumPublicApi;
+import org.mskcc.cbio.oncokb.config.annotation.PublicApi;
 import org.mskcc.cbio.oncokb.model.EvidenceQueries;
 import org.mskcc.cbio.oncokb.model.IndicatorQueryResp;
 import org.mskcc.cbio.oncokb.model.StructuralVariantType;
@@ -17,6 +19,7 @@ import java.util.List;
 @Api(tags = "Search", description = "The search endpoints")
 public interface SearchApi {
 
+    @PremiumPublicApi
     @ApiOperation(value = "", notes = "General search for possible combinations.", response = IndicatorQueryResp.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = IndicatorQueryResp.class),
@@ -45,6 +48,7 @@ public interface SearchApi {
     );
 
 
+    @PremiumPublicApi
     @ApiOperation(value = "", notes = "General search for possible combinations.", response = IndicatorQueryResp.class, responseContainer = "List")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = IndicatorQueryResp.class, responseContainer = "List"),
