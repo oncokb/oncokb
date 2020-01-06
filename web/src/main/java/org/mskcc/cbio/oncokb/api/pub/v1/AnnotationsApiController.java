@@ -3,6 +3,8 @@ package org.mskcc.cbio.oncokb.api.pub.v1;
 import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.apiModels.annotation.*;
+import org.mskcc.cbio.oncokb.config.annotation.PremiumPublicApi;
+import org.mskcc.cbio.oncokb.config.annotation.PublicApi;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
@@ -27,6 +29,8 @@ import java.util.List;
 @Controller
 public class AnnotationsApiController {
     // Annotate mutations by protein change
+    @PublicApi
+    @PremiumPublicApi
     @ApiOperation(value = "", notes = "Annotate mutation by protein change.", response = IndicatorQueryResp.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = IndicatorQueryResp.class),
@@ -55,6 +59,8 @@ public class AnnotationsApiController {
         return new ResponseEntity<>(indicatorQueryResp, status);
     }
 
+    @PublicApi
+    @PremiumPublicApi
     @ApiOperation(value = "", notes = "Annotate mutations by protein change.", response = IndicatorQueryResp.class, responseContainer = "List")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = IndicatorQueryResp.class, responseContainer = "List"),
@@ -80,6 +86,8 @@ public class AnnotationsApiController {
     }
 
     // Annotate mutations by genomic change
+    @PublicApi
+    @PremiumPublicApi
     @ApiOperation(value = "", notes = "Annotate mutation by genomic change.", response = IndicatorQueryResp.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = IndicatorQueryResp.class),
@@ -98,6 +106,8 @@ public class AnnotationsApiController {
         return new ResponseEntity<>(indicatorQueryResp, status);
     }
 
+    @PublicApi
+    @PremiumPublicApi
     @ApiOperation(value = "", notes = "Annotate mutations by genomic change.", response = IndicatorQueryResp.class, responseContainer = "List")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = IndicatorQueryResp.class, responseContainer = "List"),
@@ -132,6 +142,8 @@ public class AnnotationsApiController {
     }
 
     // Annotate mutations by HGVSg
+    @PublicApi
+    @PremiumPublicApi
     @ApiOperation(value = "", notes = "Annotate mutation by HGVSg.", response = IndicatorQueryResp.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = IndicatorQueryResp.class),
@@ -155,6 +167,8 @@ public class AnnotationsApiController {
         return new ResponseEntity<>(indicatorQueryResp, status);
     }
 
+    @PublicApi
+    @PremiumPublicApi
     @ApiOperation(value = "", notes = "Annotate mutations by genomic change.", response = IndicatorQueryResp.class, responseContainer = "List")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = IndicatorQueryResp.class, responseContainer = "List"),
@@ -180,6 +194,8 @@ public class AnnotationsApiController {
     }
 
     // Annotate copy number alterations
+    @PublicApi
+    @PremiumPublicApi
     @ApiOperation(value = "", notes = "Annotate copy number alteration.", response = IndicatorQueryResp.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = IndicatorQueryResp.class),
@@ -205,6 +221,8 @@ public class AnnotationsApiController {
         return new ResponseEntity<>(indicatorQueryResp, status);
     }
 
+    @PublicApi
+    @PremiumPublicApi
     @ApiOperation(value = "", notes = "Annotate copy number alterations.", response = IndicatorQueryResp.class, responseContainer = "List")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = IndicatorQueryResp.class, responseContainer = "List"),
@@ -230,6 +248,8 @@ public class AnnotationsApiController {
     }
 
     // Annotate structural variants
+    @PublicApi
+    @PremiumPublicApi
     @ApiOperation(value = "", notes = "Annotate structural variant.", response = IndicatorQueryResp.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = IndicatorQueryResp.class),
@@ -278,6 +298,8 @@ public class AnnotationsApiController {
         return new ResponseEntity<>(indicatorQueryResp, status);
     }
 
+    @PublicApi
+    @PremiumPublicApi
     @ApiOperation(value = "", notes = "Annotate structural variants.", response = IndicatorQueryResp.class, responseContainer = "List")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = IndicatorQueryResp.class, responseContainer = "List"),
