@@ -199,8 +199,8 @@ public class IndicatorUtilsTest {
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, "cbioportal", true, null);
         assertEquals("Gene should exist", true, indicatorQueryResp.getGeneExist());
         assertEquals("The Oncogenicity is not Likely Oncogenic, but it should be.", Oncogenicity.LIKELY.getOncogenic(), indicatorQueryResp.getOncogenic());
-        assertEquals("The highest sensitive level should be 2A, but it is not.",
-            LevelOfEvidence.LEVEL_2, indicatorQueryResp.getHighestSensitiveLevel());
+        assertEquals("The highest sensitive level should be 1, but it is not.",
+            LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
         assertEquals("The highest resistance level should be null, but it is not.",
             null, indicatorQueryResp.getHighestResistanceLevel());
         assertEquals("The number of treatments should be two",
