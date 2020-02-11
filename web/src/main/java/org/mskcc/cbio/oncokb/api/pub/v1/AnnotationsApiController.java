@@ -7,10 +7,7 @@ import org.mskcc.cbio.oncokb.config.annotation.PremiumPublicApi;
 import org.mskcc.cbio.oncokb.config.annotation.PublicApi;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.util.AlterationUtils;
-import org.mskcc.cbio.oncokb.util.GeneAnnotatorMyGeneInfo2;
-import org.mskcc.cbio.oncokb.util.GeneUtils;
-import org.mskcc.cbio.oncokb.util.IndicatorUtils;
+import org.mskcc.cbio.oncokb.util.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -20,7 +17,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by Hongxin Zhang on 2019-03-25.
@@ -28,6 +27,8 @@ import java.util.List;
 @Api(tags = "Annotations", description = "Providing annotation services")
 @Controller
 public class AnnotationsApiController {
+    final String EVIDENCE_TYPES_DESCRIPTION = "Evidence type to compute. This could help to improve the performance if you only look for sub-content. Example: ONCOGENIC. All available evidence type are GENE_SUMMARY, MUTATION_SUMMARY, TUMOR_TYPE_SUMMARY, PROGNOSTIC_SUMMARY, DIAGNOSTIC_SUMMARY, ONCOGENIC, MUTATION_EFFECT, PROGNOSTIC_IMPLICATION, DIAGNOSTIC_IMPLICATION, STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY, STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE, INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY, INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE. For multiple evidence types query, use ',' as separator.";
+
     // Annotate mutations by protein change
     @PublicApi
     @PremiumPublicApi
@@ -46,6 +47,7 @@ public class AnnotationsApiController {
         , @ApiParam(value = "Protein Start. Example: 600") @RequestParam(value = "proteinStart", required = false) Integer proteinStart
         , @ApiParam(value = "Protein End. Example: 600") @RequestParam(value = "proteinEnd", required = false) Integer proteinEnd
         , @ApiParam(value = "OncoTree(http://oncotree.mskcc.org) tumor type name. The field supports OncoTree Code, OncoTree Name and OncoTree Main type. Example: Melanoma") @RequestParam(value = "tumorType", required = false) String tumorType
+        , @ApiParam(value = EVIDENCE_TYPES_DESCRIPTION) @RequestParam(value = "evidenceType", required = false) String evidenceTypes
     ) {
         HttpStatus status = HttpStatus.OK;
         IndicatorQueryResp indicatorQueryResp = null;
@@ -54,7 +56,7 @@ public class AnnotationsApiController {
             status = HttpStatus.BAD_REQUEST;
         } else {
             Query query = new Query(null, AnnotationQueryType.REGULAR.getName(), entrezGeneId, hugoSymbol, proteinChange, null, null, tumorType, consequence, proteinStart, proteinEnd, null);
-            indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, false, null);
+            indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, false, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
         }
         return new ResponseEntity<>(indicatorQueryResp, status);
     }
@@ -79,7 +81,7 @@ public class AnnotationsApiController {
             status = HttpStatus.BAD_REQUEST;
         } else {
             for (AnnotateMutationByProteinChangeQuery query : body) {
-                result.add(IndicatorUtils.processQuery(new Query(query), null, null, null, false, null));
+                result.add(IndicatorUtils.processQuery(new Query(query), null, null, null, false, query.getEvidenceTypes()));
             }
         }
         return new ResponseEntity<>(result, status);
@@ -98,11 +100,12 @@ public class AnnotationsApiController {
     public ResponseEntity<IndicatorQueryResp> annotateMutationsByGenomicChangeGet(
         @ApiParam(value = "Genomic location. Example: 7,140453136,140453136,A,T", required = true) @RequestParam(value = "genomicLocation", required = true) String genomicLocation
         , @ApiParam(value = "OncoTree(http://oncotree.mskcc.org) tumor type name. The field supports OncoTree Code, OncoTree Name and OncoTree Main type. Example: Melanoma") @RequestParam(value = "tumorType", required = false) String tumorType
+        , @ApiParam(value = EVIDENCE_TYPES_DESCRIPTION) @RequestParam(value = "evidenceType", required = false) String evidenceTypes
     ) {
         HttpStatus status = HttpStatus.OK;
         IndicatorQueryResp indicatorQueryResp = null;
 
-        indicatorQueryResp = getIndicatorQueryFromGenomicLocation(genomicLocation, tumorType);
+        indicatorQueryResp = getIndicatorQueryFromGenomicLocation(genomicLocation, tumorType, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
         return new ResponseEntity<>(indicatorQueryResp, status);
     }
 
@@ -126,19 +129,19 @@ public class AnnotationsApiController {
             status = HttpStatus.BAD_REQUEST;
         } else {
             for (AnnotateMutationByGenomicChangeQuery query : body) {
-                result.add(getIndicatorQueryFromGenomicLocation(query.getGenomicLocation(), query.getTumorType()));
+                result.add(getIndicatorQueryFromGenomicLocation(query.getGenomicLocation(), query.getTumorType(), query.getEvidenceTypes()));
             }
         }
         return new ResponseEntity<>(result, status);
     }
 
-    private IndicatorQueryResp getIndicatorQueryFromGenomicLocation(String genomicLocation, String tumorType) {
+    private IndicatorQueryResp getIndicatorQueryFromGenomicLocation(String genomicLocation, String tumorType, Set<EvidenceType> evidenceTypes) {
         Alteration alteration = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, genomicLocation);
         Query query = new Query();
         if (alteration != null) {
             query = new Query(null, AnnotationQueryType.REGULAR.getName(), null, alteration.getGene().getHugoSymbol(), alteration.getAlteration(), null, null, tumorType, alteration.getConsequence() == null ? null : alteration.getConsequence().getTerm(), alteration.getProteinStart(), alteration.getProteinEnd(), null);
         }
-        return IndicatorUtils.processQuery(query, null, null, null, false, null);
+        return IndicatorUtils.processQuery(query, null, null, null, false, evidenceTypes);
     }
 
     // Annotate mutations by HGVSg
@@ -154,6 +157,7 @@ public class AnnotationsApiController {
     public ResponseEntity<IndicatorQueryResp> annotateMutationsByHGVSgGet(
         @ApiParam(value = "HGVS genomic format. Example: 7:g.140453136A>T", required = true) @RequestParam(value = "hgvsg", required = true) String hgvsg
         , @ApiParam(value = "OncoTree(http://oncotree.mskcc.org) tumor type name. The field supports OncoTree Code, OncoTree Name and OncoTree Main type. Example: Melanoma") @RequestParam(value = "tumorType", required = false) String tumorType
+        , @ApiParam(value = EVIDENCE_TYPES_DESCRIPTION) @RequestParam(value = "evidenceType", required = false) String evidenceTypes
     ) {
         HttpStatus status = HttpStatus.OK;
         IndicatorQueryResp indicatorQueryResp = null;
@@ -162,7 +166,7 @@ public class AnnotationsApiController {
             status = HttpStatus.BAD_REQUEST;
         } else {
             Query query = new Query(null, "regular", null, null, null, null, null, tumorType, null, null, null, hgvsg);
-            indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, false, null);
+            indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, false, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
         }
         return new ResponseEntity<>(indicatorQueryResp, status);
     }
@@ -187,7 +191,7 @@ public class AnnotationsApiController {
             status = HttpStatus.BAD_REQUEST;
         } else {
             for (AnnotateMutationByHGVSgQuery query : body) {
-                result.add(IndicatorUtils.processQuery(new Query(query), null, null, null, false, null));
+                result.add(IndicatorUtils.processQuery(new Query(query), null, null, null, false, query.getEvidenceTypes()));
             }
         }
         return new ResponseEntity<>(result, status);
@@ -208,6 +212,7 @@ public class AnnotationsApiController {
         , @ApiParam(value = "The entrez gene ID. (Higher priority than hugoSymbol). Example: 673") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
         , @ApiParam(value = "Copy number alteration type", required = true) @RequestParam(value = "copyNameAlterationType", required = true) CopyNumberAlterationType copyNameAlterationType
         , @ApiParam(value = "OncoTree(http://oncotree.mskcc.org) tumor type name. The field supports OncoTree Code, OncoTree Name and OncoTree Main type. Example: Melanoma") @RequestParam(value = "tumorType", required = false) String tumorType
+        , @ApiParam(value = EVIDENCE_TYPES_DESCRIPTION) @RequestParam(value = "evidenceType", required = false) String evidenceTypes
     ) {
         HttpStatus status = HttpStatus.OK;
         IndicatorQueryResp indicatorQueryResp = null;
@@ -216,7 +221,7 @@ public class AnnotationsApiController {
             status = HttpStatus.BAD_REQUEST;
         } else {
             Query query = new Query(null, AnnotationQueryType.REGULAR.getName(), entrezGeneId, hugoSymbol, StringUtils.capitalize(copyNameAlterationType.name().toLowerCase()), null, null, tumorType, null, null, null, null);
-            indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, false, null);
+            indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, false, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
         }
         return new ResponseEntity<>(indicatorQueryResp, status);
     }
@@ -241,7 +246,7 @@ public class AnnotationsApiController {
             status = HttpStatus.BAD_REQUEST;
         } else {
             for (AnnotateCopyNumberAlterationQuery query : body) {
-                result.add(IndicatorUtils.processQuery(new Query(query), null, null, null, false, null));
+                result.add(IndicatorUtils.processQuery(new Query(query), null, null, null, false, query.getEvidenceTypes()));
             }
         }
         return new ResponseEntity<>(result, status);
@@ -265,6 +270,7 @@ public class AnnotationsApiController {
         , @ApiParam(value = "Structural variant type", required = true) @RequestParam(value = "structuralVariantType", required = true) StructuralVariantType structuralVariantType
         , @ApiParam(value = "Whether is functional fusion", required = true) @RequestParam(value = "isFunctionalFusion", defaultValue = "FALSE", required = true) Boolean isFunctionalFusion
         , @ApiParam(value = "OncoTree(http://oncotree.mskcc.org) tumor type name. The field supports OncoTree Code, OncoTree Name and OncoTree Main type. Example: Melanoma") @RequestParam(value = "tumorType", required = false) String tumorType
+        , @ApiParam(value = EVIDENCE_TYPES_DESCRIPTION) @RequestParam(value = "evidenceType", required = false) String evidenceTypes
     ) {
         HttpStatus status = HttpStatus.OK;
         IndicatorQueryResp indicatorQueryResp = null;
@@ -292,7 +298,7 @@ public class AnnotationsApiController {
                 status = HttpStatus.BAD_REQUEST;
             } else {
                 Query query = new Query(null, AnnotationQueryType.REGULAR.getName(), null, hugoSymbolA + "-" + hugoSymbolB, null, AlterationType.STRUCTURAL_VARIANT.name(), structuralVariantType, tumorType, isFunctionalFusion ? "fusion" : null, null, null, null);
-                indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, false, null);
+                indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, false, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
             }
         }
         return new ResponseEntity<>(indicatorQueryResp, status);
@@ -318,7 +324,7 @@ public class AnnotationsApiController {
             status = HttpStatus.BAD_REQUEST;
         } else {
             for (AnnotateStructuralVariantQuery query : body) {
-                result.add(IndicatorUtils.processQuery(new Query(query), null, null, null, false, null));
+                result.add(IndicatorUtils.processQuery(new Query(query), null, null, null, false, query.getEvidenceTypes()));
             }
         }
         return new ResponseEntity<>(result, status);
