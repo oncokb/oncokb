@@ -1,6 +1,7 @@
 package org.mskcc.cbio.oncokb.api.pub.v1;
 
 import io.swagger.annotations.*;
+import org.mskcc.cbio.oncokb.config.annotation.PremiumPublicApi;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.VariantSearchQuery;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import java.util.List;
 @Api(tags = "Variants", description = "Endpoints related to OncoKB variants")
 public interface VariantsApi {
 
+    @PremiumPublicApi
     @ApiOperation(value = "", notes = "Get all annotated variants.", response = Alteration.class, responseContainer = "List")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = Alteration.class, responseContainer = "List")})
@@ -27,6 +29,7 @@ public interface VariantsApi {
     );
 
 
+    @PremiumPublicApi
     @ApiOperation(value = "", notes = "Search for variants.", response = Alteration.class, responseContainer = "List")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = Alteration.class, responseContainer = "List")})
@@ -45,6 +48,7 @@ public interface VariantsApi {
         , @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
     );
 
+    @PremiumPublicApi
     @ApiOperation(value = "", notes = "Search for variants.", response = List.class, responseContainer = "List")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = List.class, responseContainer = "List")})
@@ -55,66 +59,5 @@ public interface VariantsApi {
         @ApiParam(value = "List of queries.", required = true) @RequestBody(required = true) List<VariantSearchQuery> body
         , @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
     );
-
-//    @ApiOperation(value = "", notes = "Get list of evidences for specific variant.", response = Evidence.class, responseContainer = "List", tags = {"Evidence",})
-//    @ApiResponses(value = {
-//        @ApiResponse(code = 200, message = "OK", response = Evidence.class, responseContainer = "List"),
-//    @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiErrorResp.class)})
-//    @RequestMapping(value = "/variants/{variantId}/evidences",
-//        produces = {"application/json"},
-//        method = RequestMethod.GET)
-//    ResponseEntity<ApiListResp> variantsVariantIdEvidencesGet(
-//        @ApiParam(value = "Variant unique identifier, maintained by OncoKB. The ID may be changed.", required = true) @PathVariable("variantId") Integer variantId
-//        , @ApiParam(value = "Separate by comma. Evidence type includes MUTATION_SUMMARY, ONCOGENIC, MUTATION_EFFECT, VUS") @RequestParam(value = "evidenceTypes", required = false) String evidenceTypes
-//    );
-//
-//
-//    @ApiOperation(value = "", notes = "Get the sepecific variant.", response = Alteration.class)
-//    @ApiResponses(value = {
-//        @ApiResponse(code = 200, message = "OK", response = Alteration.class),
-//        @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiErrorResp.class)})
-//    @RequestMapping(value = "/variants/{variantId}",
-//        produces = {"application/json"},
-//        method = RequestMethod.GET)
-//    ResponseEntity<ApiObjectResp> variantsVariantIdGet(
-//        @ApiParam(value = "Variant unique identifier, maintained by OncoKB. The ID may be changed.", required = true) @PathVariable("variantId") Integer variantId
-//    );
-//
-//
-//    @ApiOperation(value = "", notes = "Get list of treatments for specific variant.", response = Treatment.class, responseContainer = "List")
-//    @ApiResponses(value = {
-//        @ApiResponse(code = 200, message = "OK", response = Treatment.class, responseContainer = "List"),
-//        @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiErrorResp.class)})
-//    @RequestMapping(value = "/variants/{variantId}/treatments",
-//        produces = {"application/json"},
-//        method = RequestMethod.GET)
-//    ResponseEntity<ApiObjectResp> variantsVariantIdTreatmentsGet(
-//        @ApiParam(value = "Variant unique identifier, maintained by OncoKB. The ID may be changed.", required = true) @PathVariable("variantId") Integer variantId
-//    );
-//
-//
-//    @ApiOperation(value = "", notes = "Get list of annotated tumor types for specific variant.", response = TumorType.class, responseContainer = "List")
-//    @ApiResponses(value = {
-//        @ApiResponse(code = 200, message = "OK", response = TumorType.class, responseContainer = "List"),
-//        @ApiResponse(code = 400, message = "variant is not available.", response = ApiErrorResp.class)})
-//    @RequestMapping(value = "/variants/{variantId}/tumorTypes",
-//        produces = {"application/json"},
-//        method = RequestMethod.GET)
-//    ResponseEntity<ApiListResp> variantsVariantIdTumorTypesGet(
-//        @ApiParam(value = "Variant unique identifier, maintained by OncoKB. The ID may be changed.", required = true) @PathVariable("variantId") Integer variantId
-//    );
-//
-//
-//    @ApiOperation(value = "", notes = "Get list of treatments for specific variant, tumor type.", response = Treatment.class, responseContainer = "List")
-//    @ApiResponses(value = {
-//        @ApiResponse(code = 200, message = "OK", response = Treatment.class, responseContainer = "List"),
-//        @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiErrorResp.class)})
-//    @RequestMapping(value = "/variants/{variantId}/tumorTypes/{oncoTreeCode}/treatments",
-//        produces = {"application/json"},
-//        method = RequestMethod.GET)
-//    ResponseEntity<ApiListResp> variantsVariantIdTumorTypesOncoTreeCodeTreatmentsGet(
-//        @ApiParam(value = "Variant unique identifier, maintained by OncoKB. The ID may be changed.", required = true) @PathVariable("variantId") Integer variantId
-//        , @ApiParam(value = "OncoTree tumor types unique code.", required = true) @PathVariable("oncoTreeCode") String oncoTreeCode
-//    );
 
 }

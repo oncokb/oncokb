@@ -125,7 +125,7 @@ public class UtilsApiController implements UtilsApi {
         @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
     ) {
         if (version != null) {
-            return getDataDownloadResponseEntity(version, FileName.ALL_ANNOTATED_VARIANTS, FileExtension.TEXT);
+            return getDataDownloadResponseEntity(version, FileName.ALL_ACTIONABLE_VARIANTS, FileExtension.TEXT);
         }
         String separator = "\t";
         String newLine = "\n";

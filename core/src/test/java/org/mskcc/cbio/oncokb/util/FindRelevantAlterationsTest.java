@@ -91,7 +91,7 @@ public class FindRelevantAlterationsTest {
                 {"MAP2K1", "E41_F53del", null, "E41_F53del, E41_L54del, E51_Q58del, F53_Q58del, F53_Q58delinsL, Oncogenic Mutations"},
 
                 // Truncating Mutations in the Oncogene should not be mapped to any range mutation unless the consequence is truncating
-                {"KIT", "K509Nfs*2", null, ""},
+                {"KIT", "K509Nfs*2", null, "K509Nfs*2"},
                 {"MED12", "Q1836Lfs*57", null, "Truncating Mutations"},
                 {"PIK3CA", "*1069Ffs*5", null, ""},
 

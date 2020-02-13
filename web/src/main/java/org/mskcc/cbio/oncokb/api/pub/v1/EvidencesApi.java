@@ -1,6 +1,7 @@
 package org.mskcc.cbio.oncokb.api.pub.v1;
 
 import io.swagger.annotations.*;
+import org.mskcc.cbio.oncokb.config.annotation.PremiumPublicApi;
 import org.mskcc.cbio.oncokb.model.Evidence;
 import org.mskcc.cbio.oncokb.model.EvidenceQueries;
 import org.mskcc.cbio.oncokb.model.EvidenceQueryRes;
@@ -15,6 +16,7 @@ import java.util.Set;
 @Api(tags = "Evidences", description = "OncoKB Evidence")
 public interface EvidencesApi {
 
+    @PremiumPublicApi
     @ApiOperation(value = "", notes = "Get specific evidence.", response = Evidence.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = Evidence.class),
@@ -27,6 +29,7 @@ public interface EvidencesApi {
         , @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
     );
 
+    @PremiumPublicApi
     @ApiOperation(value = "", notes = "Get specific evidences.", response = Evidence.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = Evidence.class),
@@ -40,6 +43,7 @@ public interface EvidencesApi {
     );
 
 
+    @PremiumPublicApi
     @ApiOperation(value = "", notes = "Search evidences. Multi-queries are supported.", response = Evidence.class, responseContainer = "List")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = Evidence.class, responseContainer = "List")})
@@ -61,6 +65,7 @@ public interface EvidencesApi {
         , @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
     );
 
+    @PremiumPublicApi
     @ApiOperation(value = "", notes = "Search evidences.", response = EvidenceQueryRes.class, responseContainer = "List")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = EvidenceQueryRes.class, responseContainer = "List")})

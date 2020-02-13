@@ -19,7 +19,7 @@ import java.util.List;
 public class GenomeNexusUtils {
     private static final String HGVS_ENDPOINT = "annotation";
     private static final String GENOMIC_LOCATION_ENDPOINT = "annotation/genomic";
-    private static final String GENOME_NEXUS_DEFAULT_API = "http://genomenexus.org/";
+    private static final String GENOME_NEXUS_DEFAULT_API = "https://genomenexus.org/";
 
     public static TranscriptConsequence getTranscriptConsequence(GNVariantAnnotationType type, String query) {
         VariantAnnotation annotation = getVariantAnnotation(type, query);

@@ -1,6 +1,7 @@
 package org.mskcc.cbio.oncokb.util;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.ListUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.model.*;
@@ -125,8 +126,9 @@ public class SummaryUtils {
 
         List<Alteration> alternativeAlleles = new ArrayList<>();
         alternativeAlleles.add(alteration);
-        alternativeAlleles.addAll(AlterationUtils.getAlleleAlterations(alteration));
         alternativeAlleles.addAll(AlterationUtils.getPositionedAlterations(alteration));
+
+        alternativeAlleles = ListUtils.intersection(alternativeAlleles, relevantAlterations);
 
         // Get all tumor type summary evidences for the exact alteration + alternative alleles
         // Tumor type has high priority. Get relevant tumor type summary across all alternative alleles, then look for other tumor types summary

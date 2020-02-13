@@ -14,11 +14,13 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
+import java.util.ArrayList;
+
 @Configuration
 @ComponentScan(basePackages = "org.mskcc.cbio.oncokb.api.pvt")
 @EnableWebMvc
 @EnableSwagger2
-public class MvcConfigurationPrivate extends MvcConfiguration {
+public class MvcConfigurationPrivate extends WebMvcConfigurerAdapter {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/swagger-ui.html")
@@ -32,13 +34,21 @@ public class MvcConfigurationPrivate extends MvcConfiguration {
 //        registry.addViewController("/api/private").setViewName("redirect:/api/private/swagger-ui.html");
 //        registry.addViewController("/api/private/").setViewName("redirect:/api/private/swagger-ui.html");
     }
-    
+
     @Bean
     public Docket api() {
         return new Docket(DocumentationType.SWAGGER_2)
             .select()
             .apis(RequestHandlerSelectors.basePackage("org.mskcc.cbio.oncokb.api.pvt"))
             .build()
-            .apiInfo(apiInfo());
+            .apiInfo(new ApiInfo(
+                "OncoKB APIs",
+                "OncoKB, a comprehensive and curated precision oncology knowledge base, offers oncologists detailed, evidence-based information about individual somatic mutations and structural alterations present in patient tumors with the goal of supporting optimal treatment decisions.",
+                "v1.0.0",
+                "https://www.oncokb.org/terms",
+                new Contact("OncoKB", "https://www.oncokb.org", "contact@oncokb.org"),
+                "Terms of Use",
+                "https://www.oncokb.org/terms"
+            ));
     }
 }
