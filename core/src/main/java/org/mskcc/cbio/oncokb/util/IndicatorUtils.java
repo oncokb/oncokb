@@ -644,6 +644,9 @@ public class IndicatorUtils {
                     Set<Treatment> sameLevelTreatments = new HashSet<>();
                     Map<Treatment, Set<String>> pmidsMap = new HashMap<>();
                     Map<Treatment, Set<ArticleAbstract>> abstractsMap = new HashMap<>();
+                    Map<Treatment, List<String>> alterationsMap = new HashMap<>();
+                    Map<Treatment, TumorType> tumorTypeMap = new HashMap<>();
+                    Map<Treatment, String> descriptionMap = new HashMap<>();
 
                     for (Evidence evidence : evidenceSetMap.get(level)) {
                         Citations citations = MainUtils.getCitationsByEvidence(evidence);
@@ -654,8 +657,14 @@ public class IndicatorUtils {
                             if (!abstractsMap.containsKey(treatment)) {
                                 abstractsMap.put(treatment, new HashSet<ArticleAbstract>());
                             }
+                            if (!alterationsMap.containsKey(treatment)) {
+                                alterationsMap.put(treatment, new ArrayList<>());
+                            }
                             pmidsMap.put(treatment, citations.getPmids());
                             abstractsMap.put(treatment, citations.getAbstracts());
+                            alterationsMap.put(treatment, evidence.getAlterations().stream().map(alteration -> alteration.getName()).collect(Collectors.toList()));
+                            tumorTypeMap.put(treatment, evidence.getOncoTreeType());
+                            descriptionMap.put(treatment, evidence.getDescription());
                         }
                         sameLevelTreatments.addAll(evidence.getTreatments());
                     }
@@ -669,6 +678,9 @@ public class IndicatorUtils {
                             indicatorQueryTreatment.setLevel(level);
                             indicatorQueryTreatment.setPmids(pmidsMap.get(treatment));
                             indicatorQueryTreatment.setAbstracts(abstractsMap.get(treatment));
+                            indicatorQueryTreatment.setAlterations(alterationsMap.get(treatment));
+                            indicatorQueryTreatment.setLevelAssociatedCancerType(tumorTypeMap.get(treatment));
+                            indicatorQueryTreatment.setDescription(descriptionMap.get(treatment));
                             treatments.add(indicatorQueryTreatment);
                         }
                     }
