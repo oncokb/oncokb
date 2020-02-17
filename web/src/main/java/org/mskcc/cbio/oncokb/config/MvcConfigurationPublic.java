@@ -63,13 +63,13 @@ public class MvcConfigurationPublic extends WebMvcConfigurerAdapter{
     @Bean
     public Docket PremiumPublicApi() {
         return new Docket(DocumentationType.SWAGGER_2)
-            .groupName("Public APIs for Premium Users")
+            .groupName("Private APIs")
             .select()
             .apis(RequestHandlerSelectors.withMethodAnnotation(PremiumPublicApi.class))
             .build()
             .apiInfo(new ApiInfo(
-                "OncoKB APIs for Premium Users",
-                "These endpoints are designed for premium users. Please contact OncoKB team(contact@oncokb.org) if you want to be upgraded.",
+                "OncoKB Private APIs",
+                "These endpoints are for private use only.",
                 "v1.0.0",
                 "https://www.oncokb.org/terms",
                 new Contact("OncoKB", "https://www.oncokb.org", "contact@oncokb.org"),
