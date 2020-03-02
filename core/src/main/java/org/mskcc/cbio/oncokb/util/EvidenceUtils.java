@@ -55,7 +55,7 @@ public class EvidenceUtils {
     }
 
     public static Set<Evidence> getRelevantEvidences(
-        Query query, String source, String geneStatus, Alteration matchedAlt,
+        Query query, String geneStatus, Alteration matchedAlt,
         Set<EvidenceType> evidenceTypes, Set<LevelOfEvidence> levelOfEvidences, List<Alteration> relevantAlterations, List<Alteration> alternativeAlleles) {
         if (query == null) {
             return new HashSet<>();
@@ -63,7 +63,6 @@ public class EvidenceUtils {
         Gene gene = GeneUtils.getGene(query.getEntrezGeneId(), query.getHugoSymbol());
         if (gene != null) {
             String variantId = query.getQueryId() +
-                (source != null ? ("&" + source) : "") +
                 "&" + evidenceTypes.toString() +
                 (levelOfEvidences == null ? "" : ("&" + levelOfEvidences.toString()));
             if (matchedAlt == null) {
@@ -75,7 +74,7 @@ public class EvidenceUtils {
             Set<Evidence> relevantEvidences;
             List<TumorType> relevantTumorTypes = new ArrayList<>();
             if (query.getTumorType() != null) {
-                relevantTumorTypes = TumorTypeUtils.getMappedOncoTreeTypesBySource(query.getTumorType(), source);
+                relevantTumorTypes = TumorTypeUtils.getMappedOncoTreeTypesBySource(query.getTumorType());
             }
             EvidenceQueryRes evidenceQueryRes = new EvidenceQueryRes();
             evidenceQueryRes.setGene(gene);
@@ -858,13 +857,9 @@ public class EvidenceUtils {
 
     // Temporary move evidence process methods here in order to share the code between new APIs and legacies
     public static List<EvidenceQueryRes> processRequest(List<Query> requestQueries, Set<EvidenceType> evidenceTypes,
-                                                        String geneStatus, String source,
+                                                        String geneStatus,
                                                         Set<LevelOfEvidence> levelOfEvidences, Boolean highestLevelOnly) {
         List<EvidenceQueryRes> evidenceQueries = new ArrayList<>();
-
-        if (source == null) {
-            source = "quest";
-        }
 
         if (evidenceTypes == null) {
             evidenceTypes = new HashSet<>(EvidenceTypeUtils.getAllEvidenceTypes());
@@ -911,7 +906,7 @@ public class EvidenceUtils {
                 if (query.getGene() != null) {
                     if (requestQuery.getTumorType() != null && !requestQuery.getTumorType().isEmpty()) {
                         query.setOncoTreeTypes(
-                            TumorTypeUtils.getMappedOncoTreeTypesBySource(requestQuery.getTumorType(), source));
+                            TumorTypeUtils.getMappedOncoTreeTypesBySource(requestQuery.getTumorType()));
                     }
 
                     if (!com.mysql.jdbc.StringUtils.isNullOrEmpty(requestQuery.getAlteration())) {

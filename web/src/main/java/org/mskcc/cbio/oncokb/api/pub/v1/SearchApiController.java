@@ -38,7 +38,6 @@ public class SearchApiController implements SearchApi {
         , @ApiParam(value = "Protein Start") @RequestParam(value = "proteinStart", required = false) Integer proteinStart
         , @ApiParam(value = "Protein End") @RequestParam(value = "proteinEnd", required = false) Integer proteinEnd
         , @ApiParam(value = "Tumor type name. OncoTree code is supported.") @RequestParam(value = "tumorType", required = false) String tumorType
-        , @ApiParam(value = "Tumor type source. OncoTree tumor types are the default setting. We may have customized version, like Quest.", defaultValue = "oncotree") @RequestParam(value = "source", required = false, defaultValue = "oncotree") String source
         , @ApiParam(value = "Level of evidences.") @RequestParam(value = "levels", required = false) String levels
         , @ApiParam(value = "Only show treatments of highest level") @RequestParam(value = "highestLevelOnly", required = false, defaultValue = "FALSE") Boolean highestLevelOnly
         , @ApiParam(value = "Query type. There maybe slight differences between different query types. Currently support web or regular.") @RequestParam(value = "queryType", required = false, defaultValue = "regular") String queryType
@@ -53,10 +52,9 @@ public class SearchApiController implements SearchApi {
             status = HttpStatus.BAD_REQUEST;
         } else {
             Query query = new Query(id, queryType, entrezGeneId, hugoSymbol, variant, variantType, svType, tumorType, consequence, proteinStart, proteinEnd, hgvs);
-            source = source == null ? "oncokb" : source;
 
             Set<LevelOfEvidence> levelOfEvidences = levels == null ? null : LevelUtils.parseStringLevelOfEvidences(levels);
-            indicatorQueryResp = IndicatorUtils.processQuery(query, null, levelOfEvidences, source, highestLevelOnly, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceType, ",")));
+            indicatorQueryResp = IndicatorUtils.processQuery(query, null, levelOfEvidences, highestLevelOnly, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceType, ",")));
         }
         return ResponseEntity.status(status.value()).body(JsonResultFactory.getIndicatorQueryResp(indicatorQueryResp, fields));
     }
@@ -72,13 +70,10 @@ public class SearchApiController implements SearchApi {
         if (body == null || body.getQueries() == null) {
             status = HttpStatus.BAD_REQUEST;
         } else {
-
-            String source = body.getSource() == null ? "oncokb" : body.getSource();
-
             for (Query query : body.getQueries()) {
                 result.add(IndicatorUtils.processQuery(query, null,
                     body.getLevels() == null ? null : body.getLevels(),
-                    source, body.getHighestLevelOnly(), new HashSet<>(stringToEvidenceTypes(body.getEvidenceTypes(), ","))));
+                    body.getHighestLevelOnly(), new HashSet<>(stringToEvidenceTypes(body.getEvidenceTypes(), ","))));
             }
         }
         return ResponseEntity.status(status.value()).body(JsonResultFactory.getIndicatorQueryResp(result, fields));

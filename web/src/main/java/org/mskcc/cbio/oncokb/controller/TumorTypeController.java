@@ -31,9 +31,8 @@ public class TumorTypeController {
     public
     @ResponseBody
     List<TumorType> getRelevantTumorType(
-        @RequestParam(value = "query", required = false) String query,
-        @RequestParam(value = "source", required = false) String source
+        @RequestParam(value = "query", required = false) String query
     ) {
-        return TumorTypeUtils.findTumorTypes(query, source);
+        return TumorTypeUtils.findTumorTypes(query);
     }
 }

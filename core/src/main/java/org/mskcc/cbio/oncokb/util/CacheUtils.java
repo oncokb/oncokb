@@ -16,7 +16,7 @@ import java.util.*;
  * Created by Hongxin on 4/1/16.
  * <p/>
  * CacheUtils is used to manage cached variant summaries, relevant alterations, alterations which all gene based.
- * It also includes mapped tumor types which is based on query tumor type name + source.
+ * It also includes mapped tumor types which is based on query tumor type name.
  * <p/>
  * The GeneObservable manages all gene based caches. Any updates happen on gene will automatically trigger
  * GeneObservable to notify all observers to update relative cache.
@@ -371,16 +371,16 @@ public class CacheUtils {
         }
     }
 
-    public static List<TumorType> getMappedTumorTypes(String queryTumorType, String source) {
-        return mappedTumorTypes.get(queryTumorType + "&" + source);
+    public static List<TumorType> getMappedTumorTypes(String queryTumorType) {
+        return mappedTumorTypes.get(queryTumorType);
     }
 
-    public static Boolean containMappedTumorTypes(String queryTumorType, String source) {
-        return mappedTumorTypes.containsKey(queryTumorType + "&" + source) ? true : false;
+    public static Boolean containMappedTumorTypes(String queryTumorType) {
+        return mappedTumorTypes.containsKey(queryTumorType) ? true : false;
     }
 
-    public static void setMappedTumorTypes(String queryTumorType, String source, List<TumorType> tumorTypes) {
-        mappedTumorTypes.put(queryTumorType + "&" + source, tumorTypes);
+    public static void setMappedTumorTypes(String queryTumorType, List<TumorType> tumorTypes) {
+        mappedTumorTypes.put(queryTumorType, tumorTypes);
     }
 
     public static List<TumorType> getAllCancerTypes() {

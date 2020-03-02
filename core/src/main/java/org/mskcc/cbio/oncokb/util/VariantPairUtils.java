@@ -22,19 +22,14 @@ public class VariantPairUtils {
      * @param alterationStr
      * @param tumorTypeStr
      * @param consequenceStr
-     * @param tumorTypeSource
      * @return
      */
     public static List<VariantQuery> getGeneAlterationTumorTypeConsequence(
         Integer entrezGeneId, String hugoSymbolStr, String alterationStr, String tumorTypeStr,
-        String consequenceStr, Integer proteinStartStr, Integer proteinEndStr, String tumorTypeSource) {
+        String consequenceStr, Integer proteinStartStr, Integer proteinEndStr) {
         List<VariantQuery> pairs = new ArrayList<>();
 
         AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
-
-        if (tumorTypeSource == null) {
-            tumorTypeSource = "quest";
-        }
 
         VariantQuery query = new VariantQuery();
         Gene gene = GeneUtils.getGene(entrezGeneId, hugoSymbolStr);
@@ -61,7 +56,7 @@ public class VariantPairUtils {
 
         List<TumorType> relevantTumorTypes = new ArrayList<>();
         if (tumorTypeStr != null) {
-            relevantTumorTypes = TumorTypeUtils.getMappedOncoTreeTypesBySource(tumorTypeStr, tumorTypeSource);
+            relevantTumorTypes = TumorTypeUtils.getMappedOncoTreeTypesBySource(tumorTypeStr);
         }
         query.setTumorTypes(relevantTumorTypes);
 

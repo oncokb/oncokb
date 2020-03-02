@@ -56,7 +56,6 @@ public class EvidencesApiController implements EvidencesApi {
         , @ApiParam(value = "Consequence. Possible value: feature_truncation, frameshift_variant, inframe_deletion, inframe_insertion, start_lost, missense_variant, splice_region_variant, stop_gained, synonymous_variant") @RequestParam(value = "consequence", required = false) String consequence
         , @ApiParam(value = "Protein Start.") @RequestParam(value = "proteinStart", required = false) String proteinStart
         , @ApiParam(value = "Protein End.") @RequestParam(value = "proteinEnd", required = false) String proteinEnd
-        , @ApiParam(value = "Tumor type source. OncoTree tumor types are the default setting. We may have customized version, like Quest.", defaultValue = "oncotree") @RequestParam(value = "source", required = false, defaultValue = "oncotree") String source
         , @ApiParam(value = "Only show highest level evidences") @RequestParam(value = "highestLevelOnly", required = false, defaultValue = "FALSE") Boolean highestLevelOnly
         , @ApiParam(value = "Separate by comma. LEVEL_1, LEVEL_2A, LEVEL_2B, LEVEL_3A, LEVEL_3B, LEVEL_4, LEVEL_R1, LEVEL_R2, LEVEL_R3") @RequestParam(value = "levelOfEvidence", required = false) String levels
         , @ApiParam(value = "Separate by comma. Evidence type includes GENE_SUMMARY, GENE_BACKGROUND, MUTATION_SUMMARY, ONCOGENIC, MUTATION_EFFECT, VUS, PROGNOSTIC_IMPLICATION, DIAGNOSTIC_IMPLICATION, TUMOR_TYPE_SUMMARY, DIAGNOSTIC_SUMMARY, PROGNOSTIC_SUMMARY, STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY, STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE, INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY, INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE") @RequestParam(value = "evidenceTypes", required = false) String evidenceTypes
@@ -66,7 +65,7 @@ public class EvidencesApiController implements EvidencesApi {
         List<Evidence> evidences = new ArrayList<>();
 
         Map<String, Object> requestQueries = MainUtils.GetRequestQueries(entrezGeneId == null ? null : Integer.toString(entrezGeneId), hugoSymbol, variant,
-            tumorType, evidenceTypes, consequence, proteinStart, proteinEnd, null, source, levels);
+            tumorType, evidenceTypes, consequence, proteinStart, proteinEnd, null, levels);
 
         if (requestQueries == null) {
             return new ResponseEntity<>(evidences, HttpStatus.OK);
@@ -75,7 +74,7 @@ public class EvidencesApiController implements EvidencesApi {
         List<EvidenceQueryRes> evidenceQueries = EvidenceUtils.processRequest(
             (List<Query>) requestQueries.get("queries"),
             new HashSet<>((List<EvidenceType>) requestQueries.get("evidenceTypes")),
-            null, source, requestQueries.get("levels") == null ? null : new HashSet<>((List<LevelOfEvidence>) requestQueries.get("levels")), highestLevelOnly);
+            null, requestQueries.get("levels") == null ? null : new HashSet<>((List<LevelOfEvidence>) requestQueries.get("levels")), highestLevelOnly);
 
         if (evidenceQueries != null) {
             for (EvidenceQueryRes query : evidenceQueries) {
@@ -106,7 +105,7 @@ public class EvidencesApiController implements EvidencesApi {
                 evidenceTypes.add(EvidenceType.GENE_BACKGROUND);
             }
 
-            result = EvidenceUtils.processRequest(requestQueries, evidenceTypes, null, body.getSource(),
+            result = EvidenceUtils.processRequest(requestQueries, evidenceTypes, null,
                 body.getLevels(), body.getHighestLevelOnly());
         }
 

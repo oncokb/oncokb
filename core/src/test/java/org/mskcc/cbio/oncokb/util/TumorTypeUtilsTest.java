@@ -18,36 +18,36 @@ import java.util.Set;
  */
 public class TumorTypeUtilsTest extends TestCase {
     public void testFindTumorTypesWithSource() throws Exception {
-        List<TumorType> tumorTypes = TumorTypeUtils.findTumorTypes("LIPO", "oncotree");
+        List<TumorType> tumorTypes = TumorTypeUtils.findTumorTypes("LIPO");
         String expectedResult = "Liposarcoma, M:Soft Tissue Sarcoma, M:All Solid Tumors, M:All Tumors";
         assertEquals(expectedResult, tumorTypesToString(tumorTypes));
 
-        tumorTypes = TumorTypeUtils.findTumorTypes("DDLS", "oncotree");
+        tumorTypes = TumorTypeUtils.findTumorTypes("DDLS");
         expectedResult = "Dedifferentiated Liposarcoma, M:Soft Tissue Sarcoma, Liposarcoma, M:All Solid Tumors, M:All Tumors";
         assertEquals(expectedResult, tumorTypesToString(tumorTypes));
 
-        tumorTypes = TumorTypeUtils.findTumorTypes("NSCLC", "oncotree");
+        tumorTypes = TumorTypeUtils.findTumorTypes("NSCLC");
         expectedResult = "Non-Small Cell Lung Cancer, M:Non-Small Cell Lung Cancer, M:All Solid Tumors, M:All Tumors";
         assertEquals(expectedResult, tumorTypesToString(tumorTypes));
 
-        tumorTypes = TumorTypeUtils.findTumorTypes("Chronic Myeloid Leukemia, BCR-ABL1+", "oncotree");
+        tumorTypes = TumorTypeUtils.findTumorTypes("Chronic Myeloid Leukemia, BCR-ABL1+");
         expectedResult = "Chronic Myeloid Leukemia, BCR-ABL1+, M:Myeloproliferative Neoplasms, Chronic Myelogenous Leukemia, Myeloproliferative Neoplasms, M:All Liquid Tumors, M:All Tumors";
         assertEquals(expectedResult, tumorTypesToString(tumorTypes));
 
-        tumorTypes = TumorTypeUtils.findTumorTypes("All Liquid Tumors", "oncotree");
+        tumorTypes = TumorTypeUtils.findTumorTypes("All Liquid Tumors");
         expectedResult = "M:All Liquid Tumors, M:All Tumors";
         assertEquals(expectedResult, tumorTypesToString(tumorTypes));
 
-        tumorTypes = TumorTypeUtils.findTumorTypes("All Solid Tumors", "oncotree");
+        tumorTypes = TumorTypeUtils.findTumorTypes("All Solid Tumors");
         expectedResult = "M:All Solid Tumors, M:All Tumors";
         assertEquals(expectedResult, tumorTypesToString(tumorTypes));
 
-        tumorTypes = TumorTypeUtils.findTumorTypes("All Tumors", "oncotree");
+        tumorTypes = TumorTypeUtils.findTumorTypes("All Tumors");
         expectedResult = "M:All Tumors";
         assertEquals(expectedResult, tumorTypesToString(tumorTypes));
 
         // When parent node's main type does not match with child, it should not be listed as relevant tumor type
-        tumorTypes = TumorTypeUtils.findTumorTypes("Small Cell Lung Cancer", "oncotree");
+        tumorTypes = TumorTypeUtils.findTumorTypes("Small Cell Lung Cancer");
         expectedResult = "Small Cell Lung Cancer, M:Small Cell Lung Cancer, M:All Solid Tumors, M:All Tumors";
         assertEquals(expectedResult, tumorTypesToString(tumorTypes));
 
