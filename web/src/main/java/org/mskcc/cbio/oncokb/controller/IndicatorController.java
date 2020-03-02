@@ -41,7 +41,6 @@ public class IndicatorController {
         @RequestParam(value = "consequence", required = false) String consequence,
         @RequestParam(value = "proteinStart", required = false) Integer proteinStart,
         @RequestParam(value = "proteinEnd", required = false) Integer proteinEnd,
-        @RequestParam(value = "geneStatus", required = false) String geneStatus,
         @RequestParam(value = "levels", required = false) String levels,
         @RequestParam(value = "queryType", required = false) String queryType,
         @RequestParam(value = "highestLevelOnly", required = false) Boolean highestLevelOnly,
@@ -50,7 +49,7 @@ public class IndicatorController {
     ) {
         Query query = new Query(id, queryType, entrezGeneId, hugoSymbol, alteration, alterationType, svType, tumorType, consequence, proteinStart, proteinEnd, hgvs);
         Set<LevelOfEvidence> levelOfEvidences = levels == null ? null : LevelUtils.parseStringLevelOfEvidences(levels);
-        IndicatorQueryResp resp = IndicatorUtils.processQuery(query, geneStatus, levelOfEvidences, highestLevelOnly, null);
+        IndicatorQueryResp resp = IndicatorUtils.processQuery(query, levelOfEvidences, highestLevelOnly, null);
 
         return JsonResultFactory.getIndicatorQueryResp(resp, fields);
     }
@@ -70,7 +69,7 @@ public class IndicatorController {
         }
 
         for (Query query : body.getQueries()) {
-            result.add(IndicatorUtils.processQuery(query, null,
+            result.add(IndicatorUtils.processQuery(query,
                 body.getLevels() == null ? null : body.getLevels(),
                 body.getHighestLevelOnly(),  new HashSet<>(stringToEvidenceTypes(body.getEvidenceTypes(), ","))));
         }

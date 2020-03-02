@@ -65,7 +65,7 @@ public class EvidencesApiController implements EvidencesApi {
         List<Evidence> evidences = new ArrayList<>();
 
         Map<String, Object> requestQueries = MainUtils.GetRequestQueries(entrezGeneId == null ? null : Integer.toString(entrezGeneId), hugoSymbol, variant,
-            tumorType, evidenceTypes, consequence, proteinStart, proteinEnd, null, levels);
+            tumorType, evidenceTypes, consequence, proteinStart, proteinEnd, levels);
 
         if (requestQueries == null) {
             return new ResponseEntity<>(evidences, HttpStatus.OK);
@@ -74,7 +74,7 @@ public class EvidencesApiController implements EvidencesApi {
         List<EvidenceQueryRes> evidenceQueries = EvidenceUtils.processRequest(
             (List<Query>) requestQueries.get("queries"),
             new HashSet<>((List<EvidenceType>) requestQueries.get("evidenceTypes")),
-            null, requestQueries.get("levels") == null ? null : new HashSet<>((List<LevelOfEvidence>) requestQueries.get("levels")), highestLevelOnly);
+            requestQueries.get("levels") == null ? null : new HashSet<>((List<LevelOfEvidence>) requestQueries.get("levels")), highestLevelOnly);
 
         if (evidenceQueries != null) {
             for (EvidenceQueryRes query : evidenceQueries) {
@@ -105,7 +105,7 @@ public class EvidencesApiController implements EvidencesApi {
                 evidenceTypes.add(EvidenceType.GENE_BACKGROUND);
             }
 
-            result = EvidenceUtils.processRequest(requestQueries, evidenceTypes, null,
+            result = EvidenceUtils.processRequest(requestQueries, evidenceTypes,
                 body.getLevels(), body.getHighestLevelOnly());
         }
 

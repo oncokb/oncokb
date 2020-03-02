@@ -56,7 +56,7 @@ public class AnnotationsApiController {
             status = HttpStatus.BAD_REQUEST;
         } else {
             Query query = new Query(null, AnnotationQueryType.REGULAR.getName(), entrezGeneId, hugoSymbol, proteinChange, null, null, tumorType, consequence, proteinStart, proteinEnd, null);
-            indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, false, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
+            indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
         }
         return new ResponseEntity<>(indicatorQueryResp, status);
     }
@@ -81,7 +81,7 @@ public class AnnotationsApiController {
             status = HttpStatus.BAD_REQUEST;
         } else {
             for (AnnotateMutationByProteinChangeQuery query : body) {
-                result.add(IndicatorUtils.processQuery(new Query(query), null, null, false, query.getEvidenceTypes()));
+                result.add(IndicatorUtils.processQuery(new Query(query), null, false, query.getEvidenceTypes()));
             }
         }
         return new ResponseEntity<>(result, status);
@@ -141,7 +141,7 @@ public class AnnotationsApiController {
         if (alteration != null) {
             query = new Query(null, AnnotationQueryType.REGULAR.getName(), null, alteration.getGene().getHugoSymbol(), alteration.getAlteration(), null, null, tumorType, alteration.getConsequence() == null ? null : alteration.getConsequence().getTerm(), alteration.getProteinStart(), alteration.getProteinEnd(), null);
         }
-        return IndicatorUtils.processQuery(query, null, null, false, evidenceTypes);
+        return IndicatorUtils.processQuery(query, null, false, evidenceTypes);
     }
 
     // Annotate mutations by HGVSg
@@ -166,7 +166,7 @@ public class AnnotationsApiController {
             status = HttpStatus.BAD_REQUEST;
         } else {
             Query query = new Query(null, "regular", null, null, null, null, null, tumorType, null, null, null, hgvsg);
-            indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, false, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
+            indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
         }
         return new ResponseEntity<>(indicatorQueryResp, status);
     }
@@ -191,7 +191,7 @@ public class AnnotationsApiController {
             status = HttpStatus.BAD_REQUEST;
         } else {
             for (AnnotateMutationByHGVSgQuery query : body) {
-                result.add(IndicatorUtils.processQuery(new Query(query), null, null, false, query.getEvidenceTypes()));
+                result.add(IndicatorUtils.processQuery(new Query(query), null, false, query.getEvidenceTypes()));
             }
         }
         return new ResponseEntity<>(result, status);
@@ -221,7 +221,7 @@ public class AnnotationsApiController {
             status = HttpStatus.BAD_REQUEST;
         } else {
             Query query = new Query(null, AnnotationQueryType.REGULAR.getName(), entrezGeneId, hugoSymbol, StringUtils.capitalize(copyNameAlterationType.name().toLowerCase()), null, null, tumorType, null, null, null, null);
-            indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, false, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
+            indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
         }
         return new ResponseEntity<>(indicatorQueryResp, status);
     }
@@ -246,7 +246,7 @@ public class AnnotationsApiController {
             status = HttpStatus.BAD_REQUEST;
         } else {
             for (AnnotateCopyNumberAlterationQuery query : body) {
-                result.add(IndicatorUtils.processQuery(new Query(query), null, null, false, query.getEvidenceTypes()));
+                result.add(IndicatorUtils.processQuery(new Query(query), null, false, query.getEvidenceTypes()));
             }
         }
         return new ResponseEntity<>(result, status);
@@ -298,7 +298,7 @@ public class AnnotationsApiController {
                 status = HttpStatus.BAD_REQUEST;
             } else {
                 Query query = new Query(null, AnnotationQueryType.REGULAR.getName(), null, hugoSymbolA + "-" + hugoSymbolB, null, AlterationType.STRUCTURAL_VARIANT.name(), structuralVariantType, tumorType, isFunctionalFusion ? "fusion" : null, null, null, null);
-                indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, false, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
+                indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
             }
         }
         return new ResponseEntity<>(indicatorQueryResp, status);
@@ -324,7 +324,7 @@ public class AnnotationsApiController {
             status = HttpStatus.BAD_REQUEST;
         } else {
             for (AnnotateStructuralVariantQuery query : body) {
-                result.add(IndicatorUtils.processQuery(new Query(query), null, null, false, query.getEvidenceTypes()));
+                result.add(IndicatorUtils.processQuery(new Query(query), null, false, query.getEvidenceTypes()));
             }
         }
         return new ResponseEntity<>(result, status);

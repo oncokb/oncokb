@@ -55,7 +55,7 @@ public class EvidenceUtils {
     }
 
     public static Set<Evidence> getRelevantEvidences(
-        Query query, String geneStatus, Alteration matchedAlt,
+        Query query, Alteration matchedAlt,
         Set<EvidenceType> evidenceTypes, Set<LevelOfEvidence> levelOfEvidences, List<Alteration> relevantAlterations, List<Alteration> alternativeAlleles) {
         if (query == null) {
             return new HashSet<>();
@@ -84,7 +84,7 @@ public class EvidenceUtils {
             evidenceQueryRes.setExactMatchedAlteration(matchedAlt);
             evidenceQueryRes.setLevelOfEvidences(levelOfEvidences == null ? null : new ArrayList<>(levelOfEvidences));
 
-            relevantEvidences = getEvidence(evidenceQueryRes, evidenceTypes, geneStatus, levelOfEvidences);
+            relevantEvidences = getEvidence(evidenceQueryRes, evidenceTypes, levelOfEvidences);
 
             Set<Evidence> evidencesToRemove = new HashSet<>();
             Set<Alteration> excludeAlternativeAlleles = new HashSet<>();
@@ -188,7 +188,7 @@ public class EvidenceUtils {
         }
     }
 
-    private static Set<Evidence> getEvidence(EvidenceQueryRes query, Set<EvidenceType> evidenceTypes, String geneStatus, Set<LevelOfEvidence> levelOfEvidences) {
+    private static Set<Evidence> getEvidence(EvidenceQueryRes query, Set<EvidenceType> evidenceTypes, Set<LevelOfEvidence> levelOfEvidences) {
         Set<Evidence> evidences = new HashSet<>();
 
         Map<Integer, Gene> genes = new HashMap<>(); //Get gene evidences
@@ -857,7 +857,6 @@ public class EvidenceUtils {
 
     // Temporary move evidence process methods here in order to share the code between new APIs and legacies
     public static List<EvidenceQueryRes> processRequest(List<Query> requestQueries, Set<EvidenceType> evidenceTypes,
-                                                        String geneStatus,
                                                         Set<LevelOfEvidence> levelOfEvidences, Boolean highestLevelOnly) {
         List<EvidenceQueryRes> evidenceQueries = new ArrayList<>();
 
@@ -943,7 +942,7 @@ public class EvidenceUtils {
                     }
                 }
                 query.setLevelOfEvidences(levelOfEvidences == null ? null : new ArrayList<>(levelOfEvidences));
-                Set<Evidence> relevantEvidences = getEvidence(query, evidenceTypes, geneStatus, levelOfEvidences);
+                Set<Evidence> relevantEvidences = getEvidence(query, evidenceTypes, levelOfEvidences);
                 query = assignEvidence(relevantEvidences,
                     Collections.singletonList(query), highestLevelOnly).iterator().next();
 

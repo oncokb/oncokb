@@ -54,7 +54,7 @@ public class SearchApiController implements SearchApi {
             Query query = new Query(id, queryType, entrezGeneId, hugoSymbol, variant, variantType, svType, tumorType, consequence, proteinStart, proteinEnd, hgvs);
 
             Set<LevelOfEvidence> levelOfEvidences = levels == null ? null : LevelUtils.parseStringLevelOfEvidences(levels);
-            indicatorQueryResp = IndicatorUtils.processQuery(query, null, levelOfEvidences, highestLevelOnly, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceType, ",")));
+            indicatorQueryResp = IndicatorUtils.processQuery(query, levelOfEvidences, highestLevelOnly, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceType, ",")));
         }
         return ResponseEntity.status(status.value()).body(JsonResultFactory.getIndicatorQueryResp(indicatorQueryResp, fields));
     }
@@ -71,7 +71,7 @@ public class SearchApiController implements SearchApi {
             status = HttpStatus.BAD_REQUEST;
         } else {
             for (Query query : body.getQueries()) {
-                result.add(IndicatorUtils.processQuery(query, null,
+                result.add(IndicatorUtils.processQuery(query,
                     body.getLevels() == null ? null : body.getLevels(),
                     body.getHighestLevelOnly(), new HashSet<>(stringToEvidenceTypes(body.getEvidenceTypes(), ","))));
             }
