@@ -13,8 +13,6 @@ import java.util.logging.Level;
  */
 public class EvidenceQueries implements java.io.Serializable {
     private List<Query> queries; //Optional, This id is passed from request. The identifier used to distinguish the query
-    @JsonIgnore
-    private String geneStatus;
     private String evidenceTypes;
     private Set<LevelOfEvidence> levels;
     private Boolean highestLevelOnly;
@@ -28,14 +26,6 @@ public class EvidenceQueries implements java.io.Serializable {
 
     public void setQueries(List<Query> queries) {
         this.queries = queries;
-    }
-
-    public String getGeneStatus() {
-        return geneStatus;
-    }
-
-    public void setGeneStatus(String geneStatus) {
-        this.geneStatus = geneStatus;
     }
 
     public String getEvidenceTypes() {

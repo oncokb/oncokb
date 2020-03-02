@@ -20,10 +20,9 @@ import static org.mskcc.cbio.oncokb.util.LevelUtils.getTherapeuticLevelsWithPrio
  * Created by hongxinzhang on 4/5/16.
  */
 public class IndicatorUtils {
-    public static IndicatorQueryResp processQuery(Query query, String geneStatus,
+    public static IndicatorQueryResp processQuery(Query query,
                                                   Set<LevelOfEvidence> levels, Boolean highestLevelOnly,
                                                   Set<EvidenceType> evidenceTypes) {
-        geneStatus = geneStatus != null ? geneStatus : "complete";
         highestLevelOnly = highestLevelOnly == null ? false : highestLevelOnly;
 
         levels = levels == null ? LevelUtils.getPublicLevels() :
@@ -171,7 +170,7 @@ public class IndicatorUtils {
                     tmpGene.getHugoSymbol(), query.getAlteration(), null, query.getSvType(),
                     query.getTumorType(), query.getConsequence(), query.getProteinStart(),
                     query.getProteinEnd(), query.getHgvs());
-                result.add(IndicatorUtils.processQuery(tmpQuery, geneStatus, levels, highestLevelOnly, evidenceTypes));
+                result.add(IndicatorUtils.processQuery(tmpQuery, levels, highestLevelOnly, evidenceTypes));
             }
             return result.iterator().next();
         }
@@ -282,7 +281,7 @@ public class IndicatorUtils {
 
                 if (hasTreatmentEvidence) {
                     treatmentEvidences = EvidenceUtils.keepHighestLevelForSameTreatments(
-                        EvidenceUtils.getRelevantEvidences(query, geneStatus, matchedAlt,
+                        EvidenceUtils.getRelevantEvidences(query, matchedAlt,
                             selectedTreatmentEvidence, levels, relevantAlterationsWithoutAlternativeAlleles, alleles), matchedAlt);
                 }
 
