@@ -42,14 +42,13 @@ public class EvidenceController {
         @RequestParam(value = "proteinStart", required = false) String proteinStart,
         @RequestParam(value = "proteinEnd", required = false) String proteinEnd,
         @RequestParam(value = "geneStatus", required = false) String geneStatus,
-        @RequestParam(value = "source", required = false) String source,
         @RequestParam(value = "levels", required = false) String levels,
         @RequestParam(value = "highestLevelOnly", required = false) Boolean highestLevelOnly) {
 
         List<List<Evidence>> evidences = new ArrayList<>();
 
         Map<String, Object> requestQueries = MainUtils.GetRequestQueries(entrezGeneId, hugoSymbol, alteration,
-            tumorType, evidenceType, consequence, proteinStart, proteinEnd, geneStatus, source, levels);
+            tumorType, evidenceType, consequence, proteinStart, proteinEnd, geneStatus, levels);
 
         if (requestQueries == null) {
             return new ArrayList<>();
@@ -58,7 +57,7 @@ public class EvidenceController {
         List<EvidenceQueryRes> evidenceQueries = EvidenceUtils.processRequest(
             (List<Query>) requestQueries.get("queries"),
             new HashSet<>((List<EvidenceType>) requestQueries.get("evidenceTypes")),
-            geneStatus, source, requestQueries.get("levels") == null ? null : new HashSet<>((List<LevelOfEvidence>) requestQueries.get("levels")), highestLevelOnly);
+            geneStatus, requestQueries.get("levels") == null ? null : new HashSet<>((List<LevelOfEvidence>) requestQueries.get("levels")), highestLevelOnly);
 
         if (evidenceQueries != null) {
             for (EvidenceQueryRes query : evidenceQueries) {
@@ -90,7 +89,7 @@ public class EvidenceController {
                 evidenceTypes.add(EvidenceType.GENE_BACKGROUND);
             }
 
-            result = EvidenceUtils.processRequest(requestQueries, evidenceTypes, null, body.getSource(),
+            result = EvidenceUtils.processRequest(requestQueries, evidenceTypes, null,
                 body.getLevels(), body.getHighestLevelOnly());
         }
 

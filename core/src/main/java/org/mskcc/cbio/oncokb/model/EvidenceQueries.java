@@ -17,7 +17,6 @@ public class EvidenceQueries implements java.io.Serializable {
     private String geneStatus;
     private String evidenceTypes;
     private Set<LevelOfEvidence> levels;
-    private String source;
     private Boolean highestLevelOnly;
 
     public EvidenceQueries() {
@@ -53,14 +52,6 @@ public class EvidenceQueries implements java.io.Serializable {
 
     public void setLevels(Set<LevelOfEvidence> levels) {
         this.levels = levels;
-    }
-
-    public String getSource() {
-        return source;
-    }
-
-    public void setSource(String source) {
-        this.source = source;
     }
 
     public Boolean getHighestLevelOnly() {

@@ -21,7 +21,7 @@ import static org.mskcc.cbio.oncokb.util.LevelUtils.getTherapeuticLevelsWithPrio
  */
 public class IndicatorUtils {
     public static IndicatorQueryResp processQuery(Query query, String geneStatus,
-                                                  Set<LevelOfEvidence> levels, String source, Boolean highestLevelOnly,
+                                                  Set<LevelOfEvidence> levels, Boolean highestLevelOnly,
                                                   Set<EvidenceType> evidenceTypes) {
         geneStatus = geneStatus != null ? geneStatus : "complete";
         highestLevelOnly = highestLevelOnly == null ? false : highestLevelOnly;
@@ -59,8 +59,6 @@ public class IndicatorUtils {
         }
 
         query.enrich();
-
-        source = source == null ? "oncokb" : source;
 
         // Temporary forward previous production annotation
         if (!com.mysql.jdbc.StringUtils.isNullOrEmpty(query.getAlteration()) && query.getAlteration().equals("EGFRvIII")) {
@@ -173,7 +171,7 @@ public class IndicatorUtils {
                     tmpGene.getHugoSymbol(), query.getAlteration(), null, query.getSvType(),
                     query.getTumorType(), query.getConsequence(), query.getProteinStart(),
                     query.getProteinEnd(), query.getHgvs());
-                result.add(IndicatorUtils.processQuery(tmpQuery, geneStatus, levels, source, highestLevelOnly, evidenceTypes));
+                result.add(IndicatorUtils.processQuery(tmpQuery, geneStatus, levels, highestLevelOnly, evidenceTypes));
             }
             return result.iterator().next();
         }
@@ -227,7 +225,7 @@ public class IndicatorUtils {
             }
 
             if (query.getTumorType() != null) {
-                relevantUpwardTumorTypes = TumorTypeUtils.getMappedOncoTreeTypesBySource(query.getTumorType(), source);
+                relevantUpwardTumorTypes = TumorTypeUtils.getMappedOncoTreeTypesBySource(query.getTumorType());
             }
 
             relevantDownwardTumorTypes = TumorTypeUtils.findTumorTypes(query.getTumorType(), RelevantTumorTypeDirection.DOWNWARD);
@@ -284,7 +282,7 @@ public class IndicatorUtils {
 
                 if (hasTreatmentEvidence) {
                     treatmentEvidences = EvidenceUtils.keepHighestLevelForSameTreatments(
-                        EvidenceUtils.getRelevantEvidences(query, source, geneStatus, matchedAlt,
+                        EvidenceUtils.getRelevantEvidences(query, geneStatus, matchedAlt,
                             selectedTreatmentEvidence, levels, relevantAlterationsWithoutAlternativeAlleles, alleles), matchedAlt);
                 }
 
