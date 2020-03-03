@@ -233,6 +233,11 @@ public class EvidenceUtilsTest extends TestCase {
         e5.setLevelOfEvidence(LevelOfEvidence.LEVEL_R2);
         filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets, alteration);
         assertEquals("1", getIds(filtered));
+
+        e1.setLevelOfEvidence(LevelOfEvidence.LEVEL_4);
+        e5.setLevelOfEvidence(LevelOfEvidence.LEVEL_R2);
+        filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets, alteration);
+        assertEquals("1", getIds(filtered));
     }
 
     private String getIds(Set<Evidence> evidences) {
