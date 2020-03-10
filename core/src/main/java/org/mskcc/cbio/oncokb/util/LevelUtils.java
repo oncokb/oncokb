@@ -60,6 +60,11 @@ public class LevelUtils {
         Arrays.asList(LevelOfEvidence.LEVEL_Dx3, LevelOfEvidence.LEVEL_Dx2, LevelOfEvidence.LEVEL_Dx1)
     );
 
+    // levels that should be provided as additional info. Highest level calculation should not remove it.
+    public static final List<LevelOfEvidence> INFO_LEVELS = Collections.unmodifiableList(
+        Arrays.asList(LevelOfEvidence.LEVEL_R2)
+    );
+
     public static Integer compareLevel(LevelOfEvidence a, LevelOfEvidence b) {
         return compareLevel(a, b, PUBLIC_LEVELS);
     }
