@@ -92,8 +92,8 @@ public class ValidationUtils {
 
     private static JSONObject getErrorMessage(String target, String reason) {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.append("target", target);
-        jsonObject.append("reason", reason);
+        jsonObject.put("target", target);
+        jsonObject.put("reason", reason);
         return jsonObject;
     }
 
