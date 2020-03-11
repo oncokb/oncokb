@@ -7,10 +7,8 @@ import org.mskcc.cbio.oncokb.util.ValidationUtils;
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 
-import static org.mskcc.cbio.oncokb.api.websocket.ValidationTest.MISSING_CLINICAL_INFO_VARIANTS;
+import static org.mskcc.cbio.oncokb.api.websocket.ValidationTest.*;
 
 /**
  * Created by Hongxin on 12/12/16.
@@ -26,7 +24,11 @@ public class CurationValidationApiController {
         this.session = session;
         sendText("Validation started");
 
+        validateGeneInfo();
+
         validateEmptyClinicalVariants();
+
+        validateEmptyBiologicalVariants();
 
         sendText("Validation is finished.");
     }
@@ -52,13 +54,35 @@ public class CurationValidationApiController {
     }
 
     private void validateEmptyClinicalVariants() throws IOException {
-        sendText(generateInfo(MISSING_CLINICAL_INFO_VARIANTS, ValidationStatus.IS_PENDING, new JSONArray()));
+        sendText(generateInfo(MISSING_CLINICAL_ALTERATION_INFO, ValidationStatus.IS_PENDING, new JSONArray()));
 
         JSONArray data = ValidationUtils.getEmptyClinicalVariants();
         if (data.length() == 0) {
-            sendText(generateInfo(MISSING_CLINICAL_INFO_VARIANTS, ValidationStatus.IS_COMPLETE, new JSONArray()));
+            sendText(generateInfo(MISSING_CLINICAL_ALTERATION_INFO, ValidationStatus.IS_COMPLETE, new JSONArray()));
         } else {
-            sendText(generateInfo(MISSING_CLINICAL_INFO_VARIANTS, ValidationStatus.IS_ERROR, data));
+            sendText(generateInfo(MISSING_CLINICAL_ALTERATION_INFO, ValidationStatus.IS_ERROR, data));
+        }
+    }
+
+    private void validateEmptyBiologicalVariants() throws IOException {
+        sendText(generateInfo(MISSING_BIOLOGICAL_ALTERATION_INFO, ValidationStatus.IS_PENDING, new JSONArray()));
+
+        JSONArray data = ValidationUtils.getEmptyBiologicalVariants();
+        if (data.length() == 0) {
+            sendText(generateInfo(MISSING_BIOLOGICAL_ALTERATION_INFO, ValidationStatus.IS_COMPLETE, new JSONArray()));
+        } else {
+            sendText(generateInfo(MISSING_BIOLOGICAL_ALTERATION_INFO, ValidationStatus.IS_ERROR, data));
+        }
+    }
+
+    private void validateGeneInfo() throws IOException {
+        sendText(generateInfo(MISSING_GENE_INFO, ValidationStatus.IS_PENDING, new JSONArray()));
+
+        JSONArray data = ValidationUtils.checkGeneSummaryBackground();
+        if (data.length() == 0) {
+            sendText(generateInfo(MISSING_GENE_INFO, ValidationStatus.IS_COMPLETE, new JSONArray()));
+        } else {
+            sendText(generateInfo(MISSING_GENE_INFO, ValidationStatus.IS_ERROR, data));
         }
     }
 
@@ -68,7 +92,7 @@ public class CurationValidationApiController {
 
     private static String generateInfo(ValidationTest test, ValidationStatus status, JSONArray data) {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.append(TEST_KEY, test);
+        jsonObject.append(TEST_KEY, test.getName());
         jsonObject.append(STATUS_KEY, status);
         jsonObject.append(DATA_KEY, data);
         return jsonObject.toString();
