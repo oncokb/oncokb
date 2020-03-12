@@ -56,13 +56,13 @@ public class CurationValidationApiController {
     }
 
     private void validateEmptyClinicalVariants() throws IOException {
-        sendText(generateInfo(MISSING_CLINICAL_ALTERATION_INFO, ValidationStatus.IS_PENDING, new JSONArray()));
+        sendText(generateInfo(MISSING_TREATMENT_INFO, ValidationStatus.IS_PENDING, new JSONArray()));
 
-        JSONArray data = ValidationUtils.getEmptyClinicalVariants();
+        JSONArray data = ValidationUtils.getMissingTreatmentInfoData();
         if (data.length() == 0) {
-            sendText(generateInfo(MISSING_CLINICAL_ALTERATION_INFO, ValidationStatus.IS_COMPLETE, new JSONArray()));
+            sendText(generateInfo(MISSING_TREATMENT_INFO, ValidationStatus.IS_COMPLETE, new JSONArray()));
         } else {
-            sendText(generateInfo(MISSING_CLINICAL_ALTERATION_INFO, ValidationStatus.IS_ERROR, data));
+            sendText(generateInfo(MISSING_TREATMENT_INFO, ValidationStatus.IS_ERROR, data));
         }
     }
 
