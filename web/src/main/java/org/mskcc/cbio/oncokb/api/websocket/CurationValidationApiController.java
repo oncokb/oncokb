@@ -14,7 +14,7 @@ import static org.mskcc.cbio.oncokb.api.websocket.ValidationTest.*;
  * Created by Hongxin on 12/12/16.
  */
 
-@ServerEndpoint(value = "/websocket/curation/validation")
+@ServerEndpoint(value = "/api/websocket/curation/validation")
 public class CurationValidationApiController {
     private Session session;
 
@@ -31,6 +31,8 @@ public class CurationValidationApiController {
         validateEmptyBiologicalVariants();
 
         sendText("Validation is finished.");
+
+        this.session.close();
     }
 
     @OnMessage
@@ -54,13 +56,13 @@ public class CurationValidationApiController {
     }
 
     private void validateEmptyClinicalVariants() throws IOException {
-        sendText(generateInfo(MISSING_CLINICAL_ALTERATION_INFO, ValidationStatus.IS_PENDING, new JSONArray()));
+        sendText(generateInfo(MISSING_TREATMENT_INFO, ValidationStatus.IS_PENDING, new JSONArray()));
 
-        JSONArray data = ValidationUtils.getEmptyClinicalVariants();
+        JSONArray data = ValidationUtils.getMissingTreatmentInfoData();
         if (data.length() == 0) {
-            sendText(generateInfo(MISSING_CLINICAL_ALTERATION_INFO, ValidationStatus.IS_COMPLETE, new JSONArray()));
+            sendText(generateInfo(MISSING_TREATMENT_INFO, ValidationStatus.IS_COMPLETE, new JSONArray()));
         } else {
-            sendText(generateInfo(MISSING_CLINICAL_ALTERATION_INFO, ValidationStatus.IS_ERROR, data));
+            sendText(generateInfo(MISSING_TREATMENT_INFO, ValidationStatus.IS_ERROR, data));
         }
     }
 
@@ -92,9 +94,9 @@ public class CurationValidationApiController {
 
     private static String generateInfo(ValidationTest test, ValidationStatus status, JSONArray data) {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.append(TEST_KEY, test.getName());
-        jsonObject.append(STATUS_KEY, status);
-        jsonObject.append(DATA_KEY, data);
+        jsonObject.put(TEST_KEY, test.getName());
+        jsonObject.put(STATUS_KEY, status);
+        jsonObject.put(DATA_KEY, data);
         return jsonObject.toString();
     }
 }
