@@ -22,15 +22,12 @@ public class CurationValidationApiController {
     public void onOpen(Session session) throws IOException {
         // Get session and WebSocket connection
         this.session = session;
-        sendText("Validation started");
 
         validateGeneInfo();
 
         validateEmptyClinicalVariants();
 
         validateEmptyBiologicalVariants();
-
-        sendText("Validation is finished.");
 
         this.session.close();
     }
