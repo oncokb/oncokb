@@ -1,11 +1,15 @@
 package org.mskcc.cbio.oncokb.util;
 
 import com.mysql.jdbc.StringUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.mskcc.cbio.oncokb.bo.ArticleBo;
 import org.mskcc.cbio.oncokb.model.*;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class ValidationUtils {
@@ -19,7 +23,7 @@ public class ValidationUtils {
             Set<Evidence> evidences = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, EvidenceTypeUtils.getTreatmentEvidenceTypes());
             for (Evidence evidence : evidences) {
                 String hugoSymbol = gene.getHugoSymbol();
-                String alterationsName = evidence.getAlterations().stream().map(alteration -> alteration.getName()).collect(Collectors.joining(", "));
+                String alterationsName = getEvidenceAlterationsName(evidence);
                 String tumorTypeName = TumorTypeUtils.getTumorTypeName(evidence.getOncoTreeType());
                 if (evidence.getTreatments().isEmpty()) {
                     data.put(getErrorMessage(getTarget(hugoSymbol, alterationsName, tumorTypeName), NO_TREATMENT));
@@ -40,7 +44,7 @@ public class ValidationUtils {
     public static JSONArray getEmptyBiologicalVariants() {
         final String NO_ONCOGENECITY = "No oncogenicity is specified";
         final String NO_MUTATION_EFFECT = "No mutation effect is specified";
-        final String NO_MUTATION_EFFECT_REFERENCE = "Mutation effect does not have any reference(pmids, abstracts)";
+        final String NO_MUTATION_EFFECT_REFERENCE = "Mutation effect does not have any reference (pmids, abstracts)";
         JSONArray data = new JSONArray();
         for (Gene gene : GeneUtils.getAllGenes()) {
             Set<BiologicalVariant> variants = MainUtils.getBiologicalVariants(gene);
@@ -67,6 +71,9 @@ public class ValidationUtils {
         JSONArray data = new JSONArray();
 
         for (Gene gene : GeneUtils.getAllGenes()) {
+            if (gene.getEntrezGeneId() < 1) {
+                continue;
+            }
             // Summary
             Set<Evidence> evidences = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Collections.singleton(EvidenceType.GENE_SUMMARY));
             if (evidences.size() > 1) {
@@ -86,8 +93,124 @@ public class ValidationUtils {
         return data;
     }
 
+    public static JSONArray checkEvidenceDescriptionReferenceFormat() {
+        final String HTML_RESERVED_CHARS_EXIST = "HTML reserved characters exist";
+        final String HTML_TAGS_EXIST = "HTML tag exists";
+        final String CANNOT_FIND_PMIDS = "Following PMID(s) cannot be identified: ";
+
+        Pattern reservedCharsRegex = Pattern.compile("&[\\w]{4};");
+        Pattern htmlFragmentRegex = Pattern.compile("<\\s*a[^>]*>");
+
+        JSONArray data = new JSONArray();
+
+        for (Evidence evidence : CacheUtils.getAllEvidences()) {
+            if (evidence.getDescription() != null) {
+                Matcher matcher = reservedCharsRegex.matcher(evidence.getDescription());
+                if (matcher.find()) {
+                    data.put(getErrorMessage(getTarget(evidence.getGene().getHugoSymbol(), getEvidenceAlterationsName(evidence), TumorTypeUtils.getTumorTypeName(evidence.getOncoTreeType()), TreatmentUtils.getTreatmentName(evidence.getTreatments())), HTML_RESERVED_CHARS_EXIST));
+                }
+
+                matcher = htmlFragmentRegex.matcher(evidence.getDescription());
+                if (matcher.find()) {
+                    data.put(getErrorMessage(getTarget(evidence.getGene().getHugoSymbol(), getEvidenceAlterationsName(evidence), TumorTypeUtils.getTumorTypeName(evidence.getOncoTreeType()), TreatmentUtils.getTreatmentName(evidence.getTreatments())), HTML_TAGS_EXIST));
+                }
+
+                Set<String> incorrectPmids = findIncorrectPmids(evidence);
+                if (incorrectPmids.size() > 0) {
+                    data.put(getErrorMessage(getTarget(evidence.getGene().getHugoSymbol(), getEvidenceAlterationsName(evidence), TumorTypeUtils.getTumorTypeName(evidence.getOncoTreeType()), TreatmentUtils.getTreatmentName(evidence.getTreatments())), CANNOT_FIND_PMIDS + String.join(", ", incorrectPmids)));
+                }
+            }
+        }
+        return data;
+    }
+
+    public static JSONArray checkAlterationNameFormat() {
+        final String ALTERATION_NAME_IS_EMPTY = "The alteration does not have a name";
+        final String UNSUPPORTED_ALTERATION_NAME = "The alteration name is not supported";
+        final String INDEL_IS_NOT_SUPPORTED = "Indel is not supported";
+        final String EXON_RANGE_NEEDED = "Exon does not have a range defined";
+        final String FUSION_NAME_IS_INCORRECT = "Fusion name is incorrect";
+        final String VARIANT_CONSEQUENCE_IS_NOT_AVAILABLE = "The alteration does not have variant consequence";
+        final String VARIANT_CONSEQUENCE_ANY_IS_INAPPROPRIATE = "The consequence any is assigned to incorrect alteration";
+
+        JSONArray data = new JSONArray();
+
+        Pattern unsupportedAlterationNameRegex = Pattern.compile("[^\\w\\s\\*-]");
+        for (Alteration alteration : AlterationUtils.getAllAlterations()) {
+            if (StringUtils.isNullOrEmpty(alteration.getAlteration())) {
+                data.put(getErrorMessage(getTarget(alteration.getGene().getHugoSymbol()), ALTERATION_NAME_IS_EMPTY));
+            } else {
+                Matcher matcher = unsupportedAlterationNameRegex.matcher(alteration.getAlteration());
+                if (matcher.find() && !specialAlterationNames().contains(alteration.getName())) {
+                    data.put(getErrorMessage(getTarget(alteration.getGene().getHugoSymbol(), getAlterationName(alteration)), UNSUPPORTED_ALTERATION_NAME));
+                } else {
+                    if (alteration.getAlteration().toLowerCase().contains("indel")) {
+                        data.put(getErrorMessage(getTarget(alteration.getGene().getHugoSymbol(), getAlterationName(alteration)), INDEL_IS_NOT_SUPPORTED));
+                    }
+                    if (alteration.getName().toLowerCase().contains("exon") && (alteration.getProteinStart() == null || alteration.getProteinEnd() == null || alteration.getProteinStart().equals(alteration.getProteinEnd()) || alteration.getProteinStart().equals(-1))) {
+                        data.put(getErrorMessage(getTarget(alteration.getGene().getHugoSymbol(), getAlterationName(alteration)), EXON_RANGE_NEEDED));
+                    }
+                    if (alteration.getAlteration().contains("-") && !alteration.getAlteration().toLowerCase().contains("fusion") && !specialAlterationNames().contains(alteration.getName())) {
+                        data.put(getErrorMessage(getTarget(alteration.getGene().getHugoSymbol(), getAlterationName(alteration)), FUSION_NAME_IS_INCORRECT));
+                    }
+                    if (alteration.getConsequence() == null) {
+                        data.put(getErrorMessage(getTarget(alteration.getGene().getHugoSymbol(), getAlterationName(alteration)), VARIANT_CONSEQUENCE_IS_NOT_AVAILABLE));
+                    } else {
+                        if (alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm("any")) && !alteration.getAlteration().contains("mut")) {
+                            data.put(getErrorMessage(getTarget(alteration.getGene().getHugoSymbol(), getAlterationName(alteration)), VARIANT_CONSEQUENCE_ANY_IS_INAPPROPRIATE));
+                        }
+                    }
+                }
+            }
+        }
+        return data;
+    }
+
+    private static Set<String> specialAlterationNames() {
+        Set<String> names = new HashSet<>();
+        names.addAll(NamingUtils.getAllAbbreviations());
+        names.addAll(NamingUtils.getAllAbbreviationFullNames());
+        names.add("MSI-H");
+        names.add("M1?");
+        return names;
+    }
+
+    private static Set<String> findIncorrectPmids(Evidence evidence) {
+        ArticleBo articleBo = ApplicationContextSingleton.getArticleBo();
+        Pattern pmidPattern = Pattern.compile("PMIDs?:\\s*([\\d,\\s*]+)", Pattern.CASE_INSENSITIVE);
+        Matcher m = pmidPattern.matcher(evidence.getDescription());
+        int start = 0;
+        Set<String> pmidToSearch = new LinkedHashSet<>();
+        while (m.find(start)) {
+            String pmids = m.group(1).trim();
+            for (String pmid : pmids.split(", *(PMID:)? *")) {
+                if (!pmid.isEmpty()) {
+                    Article doc = articleBo.findArticleByPmid(pmid);
+                    if (doc == null) {
+                        pmidToSearch.add(pmid);
+                    }
+                }
+            }
+            start = m.end();
+        }
+
+        return pmidToSearch;
+    }
+
+    private static String getEvidenceAlterationsName(Evidence evidence) {
+        return evidence.getAlterations().stream().map(alteration -> getAlterationName(alteration)).collect(Collectors.joining(", "));
+    }
+
     private static String getTargetByAlteration(Alteration alteration) {
-        return getTarget(alteration.getGene().getHugoSymbol(), alteration.getAlteration());
+        return getTarget(alteration.getGene().getHugoSymbol(), getAlterationName(alteration));
+    }
+
+    private static String getAlterationName(Alteration alteration) {
+        if (alteration.getName().equals(alteration.getAlteration())) {
+            return alteration.getName();
+        } else {
+            return alteration.getName() + " (" + alteration.getAlteration() + ")";
+        }
     }
 
     private static JSONObject getErrorMessage(String target, String reason) {
