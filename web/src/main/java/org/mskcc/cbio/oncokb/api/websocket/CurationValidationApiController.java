@@ -29,6 +29,10 @@ public class CurationValidationApiController {
 
         validateEmptyBiologicalVariants();
 
+        validateEvidenceDescriptionInfo();
+
+        validateAlterationName();
+
         this.session.close();
     }
 
@@ -82,6 +86,28 @@ public class CurationValidationApiController {
             sendText(generateInfo(MISSING_GENE_INFO, ValidationStatus.IS_COMPLETE, new JSONArray()));
         } else {
             sendText(generateInfo(MISSING_GENE_INFO, ValidationStatus.IS_ERROR, data));
+        }
+    }
+
+    private void validateEvidenceDescriptionInfo() throws IOException {
+        sendText(generateInfo(INCORRECT_EVIDENCE_DESCRIPTION_FORMAT, ValidationStatus.IS_PENDING, new JSONArray()));
+
+        JSONArray data = ValidationUtils.checkEvidenceDescriptionReferenceFormat();
+        if (data.length() == 0) {
+            sendText(generateInfo(INCORRECT_EVIDENCE_DESCRIPTION_FORMAT, ValidationStatus.IS_COMPLETE, new JSONArray()));
+        } else {
+            sendText(generateInfo(INCORRECT_EVIDENCE_DESCRIPTION_FORMAT, ValidationStatus.IS_ERROR, data));
+        }
+    }
+
+    private void validateAlterationName() throws IOException {
+        sendText(generateInfo(INCORRECT_ALTERATION_NAME_FORMAT, ValidationStatus.IS_PENDING, new JSONArray()));
+
+        JSONArray data = ValidationUtils.checkAlterationNameFormat();
+        if (data.length() == 0) {
+            sendText(generateInfo(INCORRECT_ALTERATION_NAME_FORMAT, ValidationStatus.IS_COMPLETE, new JSONArray()));
+        } else {
+            sendText(generateInfo(INCORRECT_ALTERATION_NAME_FORMAT, ValidationStatus.IS_ERROR, data));
         }
     }
 
