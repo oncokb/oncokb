@@ -8,7 +8,7 @@ import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
 
-import static org.mskcc.cbio.oncokb.api.websocket.ValidationTest.*;
+import static org.mskcc.cbio.oncokb.api.websocket.ValidationCategory.*;
 
 /**
  * Created by Hongxin on 12/12/16.
@@ -19,7 +19,7 @@ public class CurationValidationApiController {
     private Session session;
 
     @OnOpen
-    public void onOpen(Session session) throws IOException {
+    public void onOpen(Session session) {
         // Get session and WebSocket connection
         this.session = session;
 
@@ -33,11 +33,17 @@ public class CurationValidationApiController {
 
         validateAlterationName();
 
-        this.session.close();
+        compareActionableGenes();
+
+        try {
+            this.session.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @OnMessage
-    public void onMessage(String message, Session session) throws IOException {
+    public void onMessage(String message, Session session) {
         // Handle new messages
     }
 
@@ -52,11 +58,20 @@ public class CurationValidationApiController {
         // Do error handling here
     }
 
-    private void sendText(String text) throws IOException {
-        this.session.getBasicRemote().sendText(text);
+    private void sendText(String text) {
+        try {
+            this.session.getBasicRemote().sendText(text);
+        } catch (IOException e) {
+            e.printStackTrace();
+            try {
+                this.session.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
     }
 
-    private void validateEmptyClinicalVariants() throws IOException {
+    private void validateEmptyClinicalVariants() {
         sendText(generateInfo(MISSING_TREATMENT_INFO, ValidationStatus.IS_PENDING, new JSONArray()));
 
         JSONArray data = ValidationUtils.getMissingTreatmentInfoData();
@@ -67,7 +82,7 @@ public class CurationValidationApiController {
         }
     }
 
-    private void validateEmptyBiologicalVariants() throws IOException {
+    private void validateEmptyBiologicalVariants() {
         sendText(generateInfo(MISSING_BIOLOGICAL_ALTERATION_INFO, ValidationStatus.IS_PENDING, new JSONArray()));
 
         JSONArray data = ValidationUtils.getEmptyBiologicalVariants();
@@ -78,7 +93,7 @@ public class CurationValidationApiController {
         }
     }
 
-    private void validateGeneInfo() throws IOException {
+    private void validateGeneInfo() {
         sendText(generateInfo(MISSING_GENE_INFO, ValidationStatus.IS_PENDING, new JSONArray()));
 
         JSONArray data = ValidationUtils.checkGeneSummaryBackground();
@@ -89,7 +104,7 @@ public class CurationValidationApiController {
         }
     }
 
-    private void validateEvidenceDescriptionInfo() throws IOException {
+    private void validateEvidenceDescriptionInfo() {
         sendText(generateInfo(INCORRECT_EVIDENCE_DESCRIPTION_FORMAT, ValidationStatus.IS_PENDING, new JSONArray()));
 
         JSONArray data = ValidationUtils.checkEvidenceDescriptionReferenceFormat();
@@ -100,7 +115,7 @@ public class CurationValidationApiController {
         }
     }
 
-    private void validateAlterationName() throws IOException {
+    private void validateAlterationName() {
         sendText(generateInfo(INCORRECT_ALTERATION_NAME_FORMAT, ValidationStatus.IS_PENDING, new JSONArray()));
 
         JSONArray data = ValidationUtils.checkAlterationNameFormat();
@@ -111,13 +126,31 @@ public class CurationValidationApiController {
         }
     }
 
-    private static final String TEST_KEY = "test";
+    private void compareActionableGenes() {
+        sendText(generateInfo(ACTIONABLE_INFO, ValidationStatus.IS_PENDING, new JSONArray()));
+
+        JSONArray data = new JSONArray();
+        try {
+            data = ValidationUtils.compareActionableGene();
+            if (data.length() == 0) {
+                sendText(generateInfo(ACTIONABLE_INFO, ValidationStatus.IS_COMPLETE, new JSONArray()));
+            } else {
+                sendText(generateInfo(ACTIONABLE_INFO, ValidationStatus.IS_ERROR, data));
+            }
+        } catch (IOException e) {
+            sendText(generateInfo(ACTIONABLE_INFO, ValidationStatus.IS_ERROR, data));
+        }
+    }
+
+    private static final String KEY = "key";
+    private static final String TYPE = "type";
     private static final String STATUS_KEY = "status";
     private static final String DATA_KEY = "data";
 
-    private static String generateInfo(ValidationTest test, ValidationStatus status, JSONArray data) {
+    private static String generateInfo(ValidationCategory test, ValidationStatus status, JSONArray data) {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put(TEST_KEY, test.getName());
+        jsonObject.put(TYPE, test.getType());
+        jsonObject.put(KEY, test.getName());
         jsonObject.put(STATUS_KEY, status);
         jsonObject.put(DATA_KEY, data);
         return jsonObject.toString();
