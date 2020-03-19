@@ -1,5 +1,9 @@
 package org.mskcc.cbio.oncokb.util;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Sets;
 import com.mysql.jdbc.StringUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.json.JSONArray;
@@ -7,6 +11,7 @@ import org.json.JSONObject;
 import org.mskcc.cbio.oncokb.bo.ArticleBo;
 import org.mskcc.cbio.oncokb.model.*;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -103,21 +108,24 @@ public class ValidationUtils {
 
         JSONArray data = new JSONArray();
 
+        ArticleBo articleBo = ApplicationContextSingleton.getArticleBo();
+        List<Article> allArticles = articleBo.findAll();
+
         for (Evidence evidence : CacheUtils.getAllEvidences()) {
             if (evidence.getDescription() != null) {
                 Matcher matcher = reservedCharsRegex.matcher(evidence.getDescription());
                 if (matcher.find()) {
-                    data.put(getErrorMessage(getTarget(evidence.getGene().getHugoSymbol(), getEvidenceAlterationsName(evidence), TumorTypeUtils.getTumorTypeName(evidence.getOncoTreeType()), TreatmentUtils.getTreatmentName(evidence.getTreatments())), HTML_RESERVED_CHARS_EXIST));
+                    data.put(getErrorMessage(getTarget(evidence.getGene().getHugoSymbol(), evidence.getEvidenceType(), getEvidenceAlterationsName(evidence), TumorTypeUtils.getTumorTypeName(evidence.getOncoTreeType()), TreatmentUtils.getTreatmentName(evidence.getTreatments())), HTML_RESERVED_CHARS_EXIST));
                 }
 
                 matcher = htmlFragmentRegex.matcher(evidence.getDescription());
                 if (matcher.find()) {
-                    data.put(getErrorMessage(getTarget(evidence.getGene().getHugoSymbol(), getEvidenceAlterationsName(evidence), TumorTypeUtils.getTumorTypeName(evidence.getOncoTreeType()), TreatmentUtils.getTreatmentName(evidence.getTreatments())), HTML_TAGS_EXIST));
+                    data.put(getErrorMessage(getTarget(evidence.getGene().getHugoSymbol(), evidence.getEvidenceType(), getEvidenceAlterationsName(evidence), TumorTypeUtils.getTumorTypeName(evidence.getOncoTreeType()), TreatmentUtils.getTreatmentName(evidence.getTreatments())), HTML_TAGS_EXIST));
                 }
 
-                Set<String> incorrectPmids = findIncorrectPmids(evidence);
+                Set<String> incorrectPmids = findIncorrectPmids(evidence, allArticles);
                 if (incorrectPmids.size() > 0) {
-                    data.put(getErrorMessage(getTarget(evidence.getGene().getHugoSymbol(), getEvidenceAlterationsName(evidence), TumorTypeUtils.getTumorTypeName(evidence.getOncoTreeType()), TreatmentUtils.getTreatmentName(evidence.getTreatments())), CANNOT_FIND_PMIDS + String.join(", ", incorrectPmids)));
+                    data.put(getErrorMessage(getTarget(evidence.getGene().getHugoSymbol(), evidence.getEvidenceType(), getEvidenceAlterationsName(evidence), TumorTypeUtils.getTumorTypeName(evidence.getOncoTreeType()), TreatmentUtils.getTreatmentName(evidence.getTreatments())), CANNOT_FIND_PMIDS + String.join(", ", incorrectPmids)));
                 }
             }
         }
@@ -166,6 +174,43 @@ public class ValidationUtils {
         return data;
     }
 
+    public static JSONArray compareActionableGene() throws IOException {
+        String json = null;
+        JSONArray data = new JSONArray();
+        json = FileUtils.readPublicOncoKBRemote("https://www.oncokb.org/api/v1/evidences/lookup?levelOfEvidence=" + org.apache.commons.lang3.StringUtils.join(LevelUtils.getTherapeuticLevels(), ","));
+
+        ObjectMapper mapper = new ObjectMapper()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        List<Evidence> publicTherapeuticEvidences = mapper.readValue(json,new TypeReference<ArrayList<Evidence>>() {});
+        Set<String> publicEvidenceStrings = publicTherapeuticEvidences.stream().map(evidence -> evidenceUniqueString(evidence)).collect(Collectors.toSet());
+
+        Set<Evidence> latestTherapeuticEvidences = EvidenceUtils.getEvidenceByEvidenceTypesAndLevels(EvidenceTypeUtils.getTreatmentEvidenceTypes(), LevelUtils.getTherapeuticLevels());
+        Set<String> latestEvidenceStrings = latestTherapeuticEvidences.stream().map(evidence -> evidenceUniqueString(evidence)).collect(Collectors.toSet());
+
+        Set<String> commons = new HashSet<>(Sets.intersection(latestEvidenceStrings, publicEvidenceStrings));
+        publicEvidenceStrings.removeAll(commons);
+        latestEvidenceStrings.removeAll(commons);
+
+
+        publicEvidenceStrings.stream().forEach(string -> data.put(getErrorMessage(string, "Public")));
+        latestEvidenceStrings.stream().forEach(string -> data.put(getErrorMessage(string, "Latest")));
+
+        return data;
+    }
+
+    private static String evidenceUniqueString(Evidence evidence) {
+        List<String> strings = new ArrayList<>();
+        strings.add(evidence.getLevelOfEvidence().name());
+        strings.add(evidence.getGene().getHugoSymbol());
+        strings.add(getEvidenceSortedAlterationsName(evidence));
+        strings.add(TumorTypeUtils.getTumorTypeName(evidence.getOncoTreeType()));
+        strings.add(TreatmentUtils.getTreatmentName(evidence.getTreatments()));
+        List<String> pmids = EvidenceUtils.getPmids(Collections.singleton(evidence)).stream().sorted().collect(Collectors.toList());
+        strings.add(pmids.size() > 0 ? String.join(", ", pmids) : " 0 pmids");
+        strings.add(EvidenceUtils.getAbstracts(Collections.singleton(evidence)).size() + " abstract(s)");
+        return String.join(" / ", strings);
+    }
+
     private static Set<String> specialAlterationNames() {
         Set<String> names = new HashSet<>();
         names.addAll(NamingUtils.getAllAbbreviations());
@@ -175,8 +220,7 @@ public class ValidationUtils {
         return names;
     }
 
-    private static Set<String> findIncorrectPmids(Evidence evidence) {
-        ArticleBo articleBo = ApplicationContextSingleton.getArticleBo();
+    private static Set<String> findIncorrectPmids(Evidence evidence, List<Article> allArticles) {
         Pattern pmidPattern = Pattern.compile("PMIDs?:\\s*([\\d,\\s*]+)", Pattern.CASE_INSENSITIVE);
         Matcher m = pmidPattern.matcher(evidence.getDescription());
         int start = 0;
@@ -185,8 +229,8 @@ public class ValidationUtils {
             String pmids = m.group(1).trim();
             for (String pmid : pmids.split(", *(PMID:)? *")) {
                 if (!pmid.isEmpty()) {
-                    Article doc = articleBo.findArticleByPmid(pmid);
-                    if (doc == null) {
+                    Optional<Article> articleOptional = allArticles.stream().filter(article -> article.getPmid() != null && article.getPmid().equals(pmid)).findFirst();
+                    if (!articleOptional.isPresent()) {
                         pmidToSearch.add(pmid);
                     }
                 }
@@ -199,6 +243,10 @@ public class ValidationUtils {
 
     private static String getEvidenceAlterationsName(Evidence evidence) {
         return evidence.getAlterations().stream().map(alteration -> getAlterationName(alteration)).collect(Collectors.joining(", "));
+    }
+
+    private static String getEvidenceSortedAlterationsName(Evidence evidence) {
+        return evidence.getAlterations().stream().map(alteration -> getAlterationName(alteration)).sorted().collect(Collectors.joining(", "));
     }
 
     private static String getTargetByAlteration(Alteration alteration) {
@@ -233,9 +281,16 @@ public class ValidationUtils {
     }
 
     private static String getTarget(String hugoSymbol, String alteration, String tumorType, String treatment) {
+        return getTarget(hugoSymbol, null, alteration, tumorType, treatment);
+    }
+
+    private static String getTarget(String hugoSymbol, EvidenceType evidenceType, String alteration, String tumorType, String treatment) {
         List<String> items = new ArrayList<>();
         if (!StringUtils.isNullOrEmpty(hugoSymbol)) {
             items.add(hugoSymbol);
+        }
+        if (evidenceType != null) {
+            items.add(evidenceType.name());
         }
         if (!StringUtils.isNullOrEmpty(alteration)) {
             items.add(alteration);
