@@ -68,24 +68,14 @@ public final class TreatmentUtils {
         return treatments;
     }
 
+    public static void sortTreatmentsByPriority(List<Treatment> treatments) {
+        Collections.sort(treatments, new TreatmentComparatorByPriority());
+    }
+
     public static List<String> getTreatments(Set<Treatment> treatments) {
         List<String> treatmentNames = new ArrayList<>();
         List<Treatment> sortedTreatment = new ArrayList<>(treatments);
-        Collections.sort(sortedTreatment, new Comparator<Treatment>() {
-            public int compare(Treatment t1, Treatment t2) {
-                if (t1.getPriority() == null) {
-                    if (t2.getPriority() == null) {
-                        return TreatmentUtils.getTreatmentName(Collections.singleton(t1)).compareTo(TreatmentUtils.getTreatmentName(Collections.singleton(t2)));
-                    } else {
-                        return 1;
-                    }
-                }
-                if (t2.getPriority() == null) {
-                    return -1;
-                }
-                return t1.getPriority() - t2.getPriority();
-            }
-        });
+        sortTreatmentsByPriority(sortedTreatment);
 
         for (Treatment treatment : sortedTreatment) {
             List<String> drugNames = new ArrayList<>();
@@ -125,5 +115,23 @@ public final class TreatmentUtils {
         }
 
         return treatments;
+    }
+}
+
+
+class TreatmentComparatorByPriority implements Comparator<Treatment> {
+    @Override
+    public int compare(Treatment t1, Treatment t2) {
+        if (t1.getPriority() == null) {
+            if (t2.getPriority() == null) {
+                return TreatmentUtils.getTreatmentName(Collections.singleton(t1)).compareTo(TreatmentUtils.getTreatmentName(Collections.singleton(t2)));
+            } else {
+                return 1;
+            }
+        }
+        if (t2.getPriority() == null) {
+            return -1;
+        }
+        return t1.getPriority() - t2.getPriority();
     }
 }

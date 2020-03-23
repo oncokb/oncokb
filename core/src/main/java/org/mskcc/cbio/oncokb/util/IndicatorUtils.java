@@ -666,7 +666,7 @@ public class IndicatorUtils {
                         sameLevelTreatments.addAll(evidence.getTreatments());
                     }
                     List<Treatment> list = new ArrayList<>(sameLevelTreatments);
-                    TreatmentUtils.sortTreatmentsByName(list);
+                    TreatmentUtils.sortTreatmentsByPriority(list);
                     for (Treatment treatment : list) {
                         if (!treatmentExist(treatments, treatment.getDrugs())) {
                             IndicatorQueryTreatment indicatorQueryTreatment = new IndicatorQueryTreatment();
