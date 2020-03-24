@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.mskcc.cbio.oncokb.Constants.MISSENSE_VARIANT;
+
 /**
  * Created by Hongxin on 8/10/15.
  */
@@ -38,8 +40,8 @@ public class VariantConsequenceUtils {
         put("in_frame_ins", "inframe_insertion");
         put("indel", "inframe_indel");
         put("intron", "intron_variant");
-        put("missense", "missense_variant");
-        put("missense_mutation", "missense_variant");
+        put("missense", MISSENSE_VARIANT);
+        put("missense_mutation", MISSENSE_VARIANT);
         put("nonsense", "stop_gained");
         put("nonsense_mutation", "stop_gained");
         put("nonstop_mutation", "stop_lost");
@@ -57,7 +59,7 @@ public class VariantConsequenceUtils {
     }};
 
     private static final Map<String, String> GNMapping = new HashMap<String, String>() {{
-        put("missense_variant", "Missense_Mutation");
+        put(MISSENSE_VARIANT, "Missense_Mutation");
         put("inframe_insertion", "In_Frame_Ins");
         put("inframe_deletion", "In_Frame_Del");
         put("splice_region_variant", "Splice_Region");

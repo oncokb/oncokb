@@ -10,6 +10,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mskcc.cbio.oncokb.Constants.MISSENSE_VARIANT;
 
 /**
  * Created by Hongxin on 12/23/16.
@@ -165,11 +166,11 @@ public class IndicatorUtilsTest {
             LevelOfEvidence.LEVEL_R2, indicatorQueryResp.getHighestResistanceLevel());
 
         // Test cases generated through MSK-IMPACT reports which ran into issue before
-        query = new Query(null, null, null, "EGFR", "S768_V769delinsIL", null, null, "Non-Small Cell Lung Cancer", "missense_variant", null, null, null);
+        query = new Query(null, null, null, "EGFR", "S768_V769delinsIL", null, null, "Non-Small Cell Lung Cancer", MISSENSE_VARIANT, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
         assertEquals("Gene should exist", true, indicatorQueryResp.getGeneExist());
-        assertEquals("Variant should not exist", false, indicatorQueryResp.getVariantExist());
-        assertEquals("Is expected to be likely oncogenic", Oncogenicity.LIKELY.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("Variant should exist(mapped to S768I)", true, indicatorQueryResp.getVariantExist());
+        assertEquals("Is expected to be likely oncogenic", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The highest sensitive level should be 1",
             LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
 
@@ -360,7 +361,7 @@ public class IndicatorUtilsTest {
         assertEquals("The tumor type summary is not expected.", SummaryUtils.TERT_PROMOTER_NO_THERAPY_TUMOR_TYPE_SUMMARY.replace("[[tumor type]]", "ovarian cancer"), indicatorQueryResp.getTumorTypeSummary());
 
         // Check the case when alteration is empty but consequence is specified. This avoids positional variants
-        query = new Query(null, null, null, "KIT", "", null, null, "Ovarian Cancer", "missense_variant", null, null, null);
+        query = new Query(null, null, null, "KIT", "", null, null, "Ovarian Cancer", MISSENSE_VARIANT, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
         assertEquals("The Oncogenicity is not empty, but it should be.", "", indicatorQueryResp.getOncogenic());
         assertTrue("There should not be any treatments", indicatorQueryResp.getTreatments().isEmpty());

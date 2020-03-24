@@ -13,6 +13,8 @@ import org.mskcc.cbio.oncokb.util.*;
 
 import java.util.*;
 
+import static org.mskcc.cbio.oncokb.Constants.MISSENSE_VARIANT;
+
 /**
  * @author jgao
  */
@@ -279,7 +281,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         }
 
         //Find Alternative Alleles for missense variant
-        if (alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant"))) {
+        if (alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm(MISSENSE_VARIANT))) {
             alterations.addAll(AlterationUtils.getAlleleAlterations(alteration, fullAlterations));
             List<Alteration> includeRangeAlts = new ArrayList<>();
 
@@ -441,7 +443,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         boolean isSpecial = false;
         if (alteration != null && alteration.getGene().getEntrezGeneId() == 3815) {
             String[] speicalVariants = {"V654A", "T670I"};
-            VariantConsequence consequence = VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant");
+            VariantConsequence consequence = VariantConsequenceUtils.findVariantConsequenceByTerm(MISSENSE_VARIANT);
             for (int i = 0; i < speicalVariants.length; i++) {
                 if (alteration.getGene() != null && alteration.getGene().getEntrezGeneId() == 3815
                     && alteration.getAlteration() != null && alteration.getAlteration().equals(speicalVariants[i])
@@ -468,7 +470,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
     }
 
     private boolean isKIT816(Alteration alteration) {
-        return isVariantByLocation(alteration, 3815, 816, 816, VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant"));
+        return isVariantByLocation(alteration, 3815, 816, 816, VariantConsequenceUtils.findVariantConsequenceByTerm(MISSENSE_VARIANT));
     }
 
     private boolean isInExon17(Alteration alteration) {
