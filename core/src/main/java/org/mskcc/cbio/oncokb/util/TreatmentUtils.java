@@ -132,6 +132,10 @@ class TreatmentComparatorByPriority implements Comparator<Treatment> {
         if (t2.getPriority() == null) {
             return -1;
         }
+
+        if (t1.getPriority().equals(t2.getPriority())) {
+            return TreatmentUtils.getTreatmentName(Collections.singleton(t1)).compareTo(TreatmentUtils.getTreatmentName(Collections.singleton(t2)));
+        }
         return t1.getPriority() - t2.getPriority();
     }
 }

@@ -707,27 +707,6 @@ public final class AlterationUtils {
             }
         }
 
-        Map<Integer, List<String>> speicalVariants = new HashMap<>();
-        speicalVariants.put(25, Arrays.asList(new String[]{"T315I"}));
-        speicalVariants.put(3845, Arrays.asList(new String[]{"G12C"}));
-        speicalVariants.put(3815, Arrays.asList(new String[]{"K642E", "V654A", "T670I"}));
-        if (alteration.getGene() != null && speicalVariants.containsKey(alteration.getGene().getEntrezGeneId())) {
-            VariantConsequence missense = VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant");
-            Iterator<Alteration> iter = alleles.iterator();
-            while (iter.hasNext()) {
-                Alteration altAllele = iter.next();
-                for (Map.Entry<Integer, List<String>> geneList : speicalVariants.entrySet()) {
-                    for (String alt : geneList.getValue()) {
-                        if (altAllele.getGene() != null && altAllele.getGene().getEntrezGeneId().equals(geneList.getKey())
-                            && altAllele.getAlteration() != null && altAllele.getAlteration().equals(alt)
-                            && altAllele.getConsequence().equals(missense)) {
-                            iter.remove();
-                        }
-                    }
-                }
-            }
-        }
-
         // Special case for PDGFRA: don't match D842V as alternative allele to other alleles
         if (alteration.getGene() != null && alteration.getGene().getEntrezGeneId() == 5156 && !alteration.getAlteration().equals("D842V")) {
             Alteration d842v = AlterationUtils.findAlteration(alteration.getGene(), "D842V");
