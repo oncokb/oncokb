@@ -654,14 +654,15 @@ public class EvidenceUtils {
             }
         }
 
+        // if the levels include more than one evidence, we only return one
         if (highestLevel != null) {
             if (tagAlongEvidences.size() > 0) {
                 Set<Evidence> mergeResult = new HashSet<>();
-                mergeResult.addAll(levels.get(highestLevel));
+                mergeResult.add(levels.get(highestLevel).iterator().next());
                 mergeResult.addAll(tagAlongEvidences);
                 return mergeResult;
             } else {
-                return levels.get(highestLevel);
+                return Collections.singleton(levels.get(highestLevel).iterator().next());
             }
         } else {
             return new HashSet<>();

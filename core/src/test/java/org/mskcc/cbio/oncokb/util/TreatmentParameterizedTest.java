@@ -62,9 +62,7 @@ public class TreatmentParameterizedTest {
         }
         String tl = stringBuilder.toString().trim();
 
-        if (!treatmentLevel.equalsIgnoreCase(tl) || treatmentLevel.equalsIgnoreCase("")) {
-            System.out.println("New: " + gene + "&&" + variant + "&&" + tumorType + "&&" + treatmentLevel + "&&" + tl);
-        }
+//        System.out.println("New: " + gene + "&&" + variant + "&&" + tumorType + "&&" + treatmentLevel + "&&" + tl);
 
         assertEquals("Gene summary, Query: " + gene + " " + variant + " " + tumorType, treatmentLevel, tl);
 

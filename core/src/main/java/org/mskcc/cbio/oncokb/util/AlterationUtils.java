@@ -948,7 +948,7 @@ public final class AlterationUtils {
                     int proteinStart = alteration.getProteinStart() + i;
                     List<Alteration> alterations = alterationBo.findMutationsByConsequenceAndPosition(alteration.getGene(), alteration.getConsequence(), proteinStart, proteinStart, allAlterations);
                     for (Alteration alt : alterations) {
-                        if (alt.getVariantResidues().charAt(0) == varAA) {
+                        if (alt.getVariantResidues() != null && alt.getVariantResidues().charAt(0) == varAA) {
                             matches.add(alt);
                         }
                     }

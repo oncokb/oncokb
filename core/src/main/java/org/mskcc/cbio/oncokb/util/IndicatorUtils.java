@@ -735,8 +735,9 @@ public class IndicatorUtils {
 
     private static boolean treatmentExist(List<IndicatorQueryTreatment> treatments, LevelOfEvidence newTreatmentLevel,  List<Drug> newTreatment) {
         boolean exists = false;
+        // Info level treatment can be included even the drug(s) is the same
         for (IndicatorQueryTreatment treatment : treatments) {
-            if (getSortedTreatmentName(treatment.getDrugs()).equals(getSortedTreatmentName(newTreatment)) && newTreatmentLevel.getLevel().equals(treatment.getLevel())) {
+            if (getSortedTreatmentName(treatment.getDrugs()).equals(getSortedTreatmentName(newTreatment)) && !LevelUtils.INFO_LEVELS.contains(newTreatmentLevel)) {
                 exists = true;
                 break;
             }
