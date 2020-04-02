@@ -29,10 +29,14 @@ public class CancerGeneUtils {
         // We need to include all annotated genes
         Set<Gene> allAnnotatedGenes = GeneUtils.getAllGenes();
         allAnnotatedGenes
+            .stream()
+            .filter(gene -> gene.getEntrezGeneId() > 0)
             .forEach(gene -> {
                 CancerGene cancerGene = new CancerGene();
                 cancerGene.setEntrezGeneId(gene.getEntrezGeneId());
                 cancerGene.setHugoSymbol(gene.getHugoSymbol());
+                cancerGene.setIsoform(gene.getCuratedIsoform());
+                cancerGene.setRefSeq(gene.getCuratedRefSeq());
                 cancerGene.setOncokbAnnotated(true);
                 cancerGene.setOccurrenceCount(1);
                 cancerGene.setOncogene(gene.getOncogene());
