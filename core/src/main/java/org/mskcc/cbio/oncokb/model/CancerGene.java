@@ -8,6 +8,8 @@ import java.util.Objects;
 public class CancerGene {
     private String hugoSymbol;
     private Integer entrezGeneId;
+    private String isoform = "";
+    private String refSeq = "";
     private Boolean oncokbAnnotated = false;
     private Integer occurrenceCount = 0;
     private Boolean mSKImpact = false;
@@ -33,6 +35,22 @@ public class CancerGene {
 
     public void setEntrezGeneId(Integer entrezGeneId) {
         this.entrezGeneId = entrezGeneId;
+    }
+
+    public String getIsoform() {
+        return isoform;
+    }
+
+    public void setIsoform(String isoform) {
+        this.isoform = isoform;
+    }
+
+    public String getRefSeq() {
+        return refSeq;
+    }
+
+    public void setRefSeq(String refSeq) {
+        this.refSeq = refSeq;
     }
 
     public Boolean getOncokbAnnotated() {
