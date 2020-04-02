@@ -29,6 +29,8 @@ public class CancerGeneUtils {
         // We need to include all annotated genes
         Set<Gene> allAnnotatedGenes = GeneUtils.getAllGenes();
         allAnnotatedGenes
+            .stream()
+            .filter(gene -> gene.getEntrezGeneId() > 0)
             .forEach(gene -> {
                 CancerGene cancerGene = new CancerGene();
                 cancerGene.setEntrezGeneId(gene.getEntrezGeneId());
