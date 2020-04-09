@@ -71,6 +71,29 @@ KIT	D816A	Melanoma	2: Imatinib; 3B: Regorafenib; 3B: Sorafenib; 3B: Avapritinib;
 KIT	D816A	Colorectal Cancer 3B: Regorafenib; 3B: Sorafenib;
 KIT	D816A	Mastocytosis	3A: Avapritinib;
 KIT	D816A	Thymic Tumor	2: Sunitinib; 3B: Regorafenib; 3B: Sorafenib; 3B: Avapritinib;
+KIT	Y823D	Gastrointestinal Stromal Tumor
+KIT	Y823D	Melanoma
+KIT	Y823D	Thymic Tumor
+KIT	Y823D	Colorectal Cancer
+KIT	Y823G	Gastrointestinal Stromal Tumor
+KIT	Y823G	Melanoma
+KIT	Y823G	Thymic Tumor
+KIT	Y823G	Colorectal Cancer
+KIT	A829P	Gastrointestinal Stromal Tumor
+KIT	A829P	Melanoma
+KIT	A829P	Thymic Tumor
+KIT	A829P	Colorectal Cancer
+KIT	D820G	Gastrointestinal Stromal Tumor
+KIT	D820G	Melanoma
+KIT	D820G	Thymic Tumor
+KIT	D820G	Colorectal Cancer
+KIT	D820G	Mastocytosis
+KIT	N822E	Gastrointestinal Stromal Tumor
+KIT	N822E	Melanoma
+KIT	N822E	Thymic Tumor
+KIT	N822E	Colorectal Cancer
+
+
 MTOR	L2427Q	Renal Clear Cell Carcinoma	3A: Temsirolimus; 4: Everolimus;
 PDGFRA	D842I	GIST	2: Imatinib;
 PDGFRA	D842I	Thymic Tumor	3B: Imatinib;

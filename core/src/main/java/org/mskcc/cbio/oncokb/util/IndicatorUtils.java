@@ -714,7 +714,7 @@ public class IndicatorUtils {
                     List<Treatment> list = new ArrayList<>(sameLevelTreatments);
                     TreatmentUtils.sortTreatmentsByPriority(list);
                     for (Treatment treatment : list) {
-                        if (!treatmentExist(treatments, treatment.getDrugs())) {
+                        if (!treatmentExist(treatments, level, treatment.getDrugs())) {
                             IndicatorQueryTreatment indicatorQueryTreatment = new IndicatorQueryTreatment();
                             indicatorQueryTreatment.setDrugs(treatment.getDrugs());
                             indicatorQueryTreatment.setApprovedIndications(treatment.getApprovedIndications());
@@ -733,10 +733,11 @@ public class IndicatorUtils {
         return treatments;
     }
 
-    private static boolean treatmentExist(List<IndicatorQueryTreatment> treatments, List<Drug> newTreatment) {
+    private static boolean treatmentExist(List<IndicatorQueryTreatment> treatments, LevelOfEvidence newTreatmentLevel,  List<Drug> newTreatment) {
         boolean exists = false;
+        // Info level treatment can be included even the drug(s) is the same
         for (IndicatorQueryTreatment treatment : treatments) {
-            if (getSortedTreatmentName(treatment.getDrugs()).equals(getSortedTreatmentName(newTreatment))) {
+            if (getSortedTreatmentName(treatment.getDrugs()).equals(getSortedTreatmentName(newTreatment)) && !LevelUtils.INFO_LEVELS.contains(newTreatmentLevel)) {
                 exists = true;
                 break;
             }

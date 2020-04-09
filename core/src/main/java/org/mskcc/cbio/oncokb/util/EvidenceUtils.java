@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.*;
 import static org.mskcc.cbio.oncokb.model.RelevantTumorTypeDirection.DOWNWARD;
+import static org.mskcc.cbio.oncokb.util.LevelUtils.INFO_LEVELS;
 
 /**
  * Created by Hongxin on 8/10/15.
@@ -621,6 +622,11 @@ public class EvidenceUtils {
         LevelOfEvidence highestLevel = LevelUtils.getHighestLevel(keys);
         LevelOfEvidence highestSensitiveLevel = LevelUtils.getHighestSensitiveLevel(keys);
 
+        Set<Evidence> tagAlongEvidences = (highestLevel == null || INFO_LEVELS.contains(highestLevel)) ? new HashSet<>() :
+            evidences.stream().filter(
+                evidence -> INFO_LEVELS.contains(evidence.getLevelOfEvidence())
+            ).collect(Collectors.toSet());
+
         // When resistance level is not null, we need to consider whether the sensitive/resistance level is alteration specific
         // if so the resistance level is broader
         if (highestLevel != highestSensitiveLevel && highestSensitiveLevel != null) {
@@ -648,8 +654,16 @@ public class EvidenceUtils {
             }
         }
 
+        // if the levels include more than one evidence, we only return one
         if (highestLevel != null) {
-            return levels.get(highestLevel);
+            if (tagAlongEvidences.size() > 0) {
+                Set<Evidence> mergeResult = new HashSet<>();
+                mergeResult.add(levels.get(highestLevel).iterator().next());
+                mergeResult.addAll(tagAlongEvidences);
+                return mergeResult;
+            } else {
+                return Collections.singleton(levels.get(highestLevel).iterator().next());
+            }
         } else {
             return new HashSet<>();
         }
@@ -741,7 +755,8 @@ public class EvidenceUtils {
         for (Map.Entry<String, Set<Evidence>> entry : maps.entrySet()) {
             Set<Evidence> highestEvis = EvidenceUtils.getOnlyHighestLevelEvidences(entry.getValue(), exactMatch);
 
-            // If highestEvis has more than 1 items, find highest original level if the level is 2B, 3B
+            // If highestEvis has more than 1 items, find highest original level if the level is 3B
+            // We also return R2 when the same treatment has sensitive level
             if (highestEvis.size() > 1) {
                 Set<LevelOfEvidence> checkLevels = new HashSet<>();
                 checkLevels.add(LevelOfEvidence.LEVEL_3B);
