@@ -404,6 +404,20 @@ public class TumorTypeUtils {
         return new ArrayList<>(new LinkedHashSet<>(mappedTumorTypesFromSource));
     }
 
+    public static String getTumorTypeName(TumorType tumorType) {
+        if (tumorType == null) {
+            return "";
+        } else {
+            if (tumorType.getName() != null) {
+                return tumorType.getName();
+            } else if (tumorType.getMainType() != null && tumorType.getMainType().getName() != null) {
+                return tumorType.getMainType().getName();
+            } else {
+                return "";
+            }
+        }
+    }
+
     public static String getOncoTreeVersion() {
         return ONCO_TREE_ONCOKB_VERSION;
     }

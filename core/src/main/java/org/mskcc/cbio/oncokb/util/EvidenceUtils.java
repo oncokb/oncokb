@@ -14,6 +14,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.*;
 import static org.mskcc.cbio.oncokb.model.RelevantTumorTypeDirection.DOWNWARD;
 
 /**
@@ -725,6 +726,18 @@ public class EvidenceUtils {
             }
         }
 
+        List<TumorType> mostFrequentTumorTypes = new ArrayList<>();
+        evidences.stream().collect(
+            groupingBy(Evidence::getOncoTreeType)
+        ).entrySet().stream().sorted((o1, o2) -> {
+            int result = o2.getValue().size() - o1.getValue().size();
+            if (result == 0) {
+                return TumorTypeUtils.getTumorTypeName(o1.getKey()).compareTo(TumorTypeUtils.getTumorTypeName(o2.getKey()));
+            } else {
+                return result;
+            }
+        }).forEach(tumorTypeListEntry -> mostFrequentTumorTypes.add(tumorTypeListEntry.getKey()));
+
         for (Map.Entry<String, Set<Evidence>> entry : maps.entrySet()) {
             Set<Evidence> highestEvis = EvidenceUtils.getOnlyHighestLevelEvidences(entry.getValue(), exactMatch);
 
@@ -750,12 +763,25 @@ public class EvidenceUtils {
                         for (Evidence evidence : highestOriginalEvis) {
                             filteredIds.add(evidence.getId());
                         }
+                        List<Evidence> sameLevelEvidences = new ArrayList<>();
                         for (Evidence evidence : highestEvis) {
                             if (filteredIds.contains(evidence.getId())) {
-                                filtered.add(evidence);
-                                // Only add one
-                                break;
+                                sameLevelEvidences.add(evidence);
                             }
+                        }
+                        if (sameLevelEvidences.size() == 1) {
+                            filtered.add(sameLevelEvidences.iterator().next());
+                        } else if (sameLevelEvidences.size() > 1) {
+                            // Select evidence with most frequently occurred tumor type when the level and the treatment are the same
+                            sameLevelEvidences.sort((o1, o2) -> {
+                                int result = mostFrequentTumorTypes.indexOf(o1.getOncoTreeType()) - mostFrequentTumorTypes.indexOf(o2.getOncoTreeType());
+                                if (result == 0) {
+                                    return -1;
+                                } else {
+                                    return result;
+                                }
+                            });
+                            filtered.add(sameLevelEvidences.iterator().next());
                         }
                     } else {
                         filtered.add(highestEvi);
