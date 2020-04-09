@@ -14,6 +14,7 @@ public class CurationPlatformConfigs {
     String privateApiLink;
     String internalPrivateApiLink;
     String publicApiLink;
+    String websocketApiLink;
     Boolean testing;
     Boolean production;
     FirebaseConfig firebaseConfig;
@@ -56,6 +57,14 @@ public class CurationPlatformConfigs {
 
     public void setPublicApiLink(String publicApiLink) {
         this.publicApiLink = publicApiLink;
+    }
+
+    public String getWebsocketApiLink() {
+        return websocketApiLink;
+    }
+
+    public void setWebsocketApiLink(String websocketApiLink) {
+        this.websocketApiLink = websocketApiLink;
     }
 
     public Boolean getTesting() {

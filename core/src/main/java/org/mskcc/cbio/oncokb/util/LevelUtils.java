@@ -252,6 +252,13 @@ public class LevelUtils {
         return new HashSet<>(CollectionUtils.intersection(PUBLIC_LEVELS, THERAPEUTIC_RESISTANCE_LEVELS));
     }
 
+    public static Set<LevelOfEvidence> getTherapeuticLevels() {
+        Set<LevelOfEvidence> levels = new HashSet<>();
+        levels.addAll(new HashSet<>(CollectionUtils.intersection(PUBLIC_LEVELS, THERAPEUTIC_SENSITIVE_LEVELS)));
+        levels.addAll(new HashSet<>(CollectionUtils.intersection(PUBLIC_LEVELS, THERAPEUTIC_RESISTANCE_LEVELS)));
+        return levels;
+    }
+
     public static int getSensitiveLevelIndex(LevelOfEvidence levelOfEvidence) {
         return THERAPEUTIC_SENSITIVE_LEVELS.indexOf(levelOfEvidence);
     }

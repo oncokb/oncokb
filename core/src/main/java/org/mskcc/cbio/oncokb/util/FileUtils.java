@@ -11,6 +11,8 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -65,6 +67,14 @@ public class FileUtils {
     public static String readRemote(String urlToFile) throws IOException {
         URL url = new URL(urlToFile);
         return readStream(url.openStream());
+    }
+
+    public static String readPublicOncoKBRemote(String urlToFile) throws IOException {
+        URL myURL = new URL(urlToFile);
+        HttpURLConnection myURLConnection = (HttpURLConnection)myURL.openConnection();
+        myURLConnection.setRequestProperty ("Authorization", "Bearer " + PropertiesUtils.getProperties("public_oncokb.token"));
+        myURLConnection.setRequestMethod("GET");
+        return readStream(myURLConnection.getInputStream());
     }
 
     /**
