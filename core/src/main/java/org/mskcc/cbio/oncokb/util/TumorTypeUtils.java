@@ -235,20 +235,6 @@ public class TumorTypeUtils {
         return null;
     }
 
-    public static String getTumorTypeName(TumorType tumorType) {
-        if (tumorType == null) {
-            return "";
-        }
-        if (tumorType.getName() != null) {
-            return tumorType.getName();
-        }
-        if (tumorType.getMainType() != null && tumorType.getMainType().getName() != null) {
-            return tumorType.getMainType().getName();
-        } else {
-            return "";
-        }
-    }
-
     /**
      * The 'All Tumors' OncoTree instance
      *

@@ -49,7 +49,6 @@ public class CurationValidationApiController {
 
     @OnClose
     public void onClose(Session session) throws IOException {
-//        allAvailableRequests.remove(session);
         session.close();
     }
 
