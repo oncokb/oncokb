@@ -662,7 +662,7 @@ public class EvidenceUtils {
                 mergeResult.addAll(tagAlongEvidences);
                 return mergeResult;
             } else {
-                return Collections.singleton(levels.get(highestLevel).iterator().next());
+                return levels.get(highestLevel);
             }
         } else {
             return new HashSet<>();
