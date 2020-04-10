@@ -16,6 +16,8 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 import java.util.ArrayList;
 
+import static org.mskcc.cbio.oncokb.Constants.PRIVATE_API_VERSION;
+
 @Configuration
 @ComponentScan(basePackages = "org.mskcc.cbio.oncokb.api.pvt")
 @EnableWebMvc
@@ -44,7 +46,7 @@ public class MvcConfigurationPrivate extends WebMvcConfigurerAdapter {
             .apiInfo(new ApiInfo(
                 "OncoKB APIs",
                 "OncoKB, a comprehensive and curated precision oncology knowledge base, offers oncologists detailed, evidence-based information about individual somatic mutations and structural alterations present in patient tumors with the goal of supporting optimal treatment decisions.",
-                "v1.0.0",
+                PRIVATE_API_VERSION,
                 "https://www.oncokb.org/terms",
                 new Contact("OncoKB", "https://www.oncokb.org", "contact@oncokb.org"),
                 "Terms of Use",

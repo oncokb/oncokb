@@ -1,15 +1,12 @@
-name-template: 'v$NEXT_MAJOR_VERSION'
-tag-template: 'v$NEXT_MAJOR_VERSION'
+name-template: 'v$NEXT_MINOR_VERSION'
+tag-template: 'v$NEXT_MINOR_VERSION'
 categories:
   - title: '🧬 Features'
     labels:
       - 'feature'
-      - 'enhancement'
   - title: '🐛 Bug Fixes'
     labels:
       - 'fix'
-      - 'bugfix'
-      - 'bug'
   - title: '🏎 Performance Tweaks'
     labels:
       - 'performance'
@@ -37,5 +34,5 @@ template: |
 
   ## 🕵️‍♀️ Full commit logs
 
-  - https://github.com/oncokb/oncokb/compare/v$PREVIOUS_TAG...v$NEXT_MAJOR_VERSION
+  - https://github.com/oncokb/oncokb/compare/$PREVIOUS_TAG...v$NEXT_MINOR_VERSION
 

@@ -14,7 +14,9 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.*;
 import static org.mskcc.cbio.oncokb.model.RelevantTumorTypeDirection.DOWNWARD;
+import static org.mskcc.cbio.oncokb.util.LevelUtils.INFO_LEVELS;
 
 /**
  * Created by Hongxin on 8/10/15.
@@ -55,7 +57,7 @@ public class EvidenceUtils {
     }
 
     public static Set<Evidence> getRelevantEvidences(
-        Query query, String source, String geneStatus, Alteration matchedAlt,
+        Query query, Alteration matchedAlt,
         Set<EvidenceType> evidenceTypes, Set<LevelOfEvidence> levelOfEvidences, List<Alteration> relevantAlterations, List<Alteration> alternativeAlleles) {
         if (query == null) {
             return new HashSet<>();
@@ -63,7 +65,6 @@ public class EvidenceUtils {
         Gene gene = GeneUtils.getGene(query.getEntrezGeneId(), query.getHugoSymbol());
         if (gene != null) {
             String variantId = query.getQueryId() +
-                (source != null ? ("&" + source) : "") +
                 "&" + evidenceTypes.toString() +
                 (levelOfEvidences == null ? "" : ("&" + levelOfEvidences.toString()));
             if (matchedAlt == null) {
@@ -75,7 +76,7 @@ public class EvidenceUtils {
             Set<Evidence> relevantEvidences;
             List<TumorType> relevantTumorTypes = new ArrayList<>();
             if (query.getTumorType() != null) {
-                relevantTumorTypes = TumorTypeUtils.getMappedOncoTreeTypesBySource(query.getTumorType(), source);
+                relevantTumorTypes = TumorTypeUtils.getMappedOncoTreeTypesBySource(query.getTumorType());
             }
             EvidenceQueryRes evidenceQueryRes = new EvidenceQueryRes();
             evidenceQueryRes.setGene(gene);
@@ -85,7 +86,7 @@ public class EvidenceUtils {
             evidenceQueryRes.setExactMatchedAlteration(matchedAlt);
             evidenceQueryRes.setLevelOfEvidences(levelOfEvidences == null ? null : new ArrayList<>(levelOfEvidences));
 
-            relevantEvidences = getEvidence(evidenceQueryRes, evidenceTypes, geneStatus, levelOfEvidences);
+            relevantEvidences = getEvidence(evidenceQueryRes, evidenceTypes, levelOfEvidences);
 
             Set<Evidence> evidencesToRemove = new HashSet<>();
             Set<Alteration> excludeAlternativeAlleles = new HashSet<>();
@@ -189,7 +190,7 @@ public class EvidenceUtils {
         }
     }
 
-    private static Set<Evidence> getEvidence(EvidenceQueryRes query, Set<EvidenceType> evidenceTypes, String geneStatus, Set<LevelOfEvidence> levelOfEvidences) {
+    private static Set<Evidence> getEvidence(EvidenceQueryRes query, Set<EvidenceType> evidenceTypes, Set<LevelOfEvidence> levelOfEvidences) {
         Set<Evidence> evidences = new HashSet<>();
 
         Map<Integer, Gene> genes = new HashMap<>(); //Get gene evidences
@@ -621,6 +622,11 @@ public class EvidenceUtils {
         LevelOfEvidence highestLevel = LevelUtils.getHighestLevel(keys);
         LevelOfEvidence highestSensitiveLevel = LevelUtils.getHighestSensitiveLevel(keys);
 
+        Set<Evidence> tagAlongEvidences = (highestLevel == null || INFO_LEVELS.contains(highestLevel)) ? new HashSet<>() :
+            evidences.stream().filter(
+                evidence -> INFO_LEVELS.contains(evidence.getLevelOfEvidence())
+            ).collect(Collectors.toSet());
+
         // When resistance level is not null, we need to consider whether the sensitive/resistance level is alteration specific
         // if so the resistance level is broader
         if (highestLevel != highestSensitiveLevel && highestSensitiveLevel != null) {
@@ -648,8 +654,16 @@ public class EvidenceUtils {
             }
         }
 
+        // if the levels include more than one evidence, we only return one
         if (highestLevel != null) {
-            return levels.get(highestLevel);
+            if (tagAlongEvidences.size() > 0) {
+                Set<Evidence> mergeResult = new HashSet<>();
+                mergeResult.add(levels.get(highestLevel).iterator().next());
+                mergeResult.addAll(tagAlongEvidences);
+                return mergeResult;
+            } else {
+                return levels.get(highestLevel);
+            }
         } else {
             return new HashSet<>();
         }
@@ -726,10 +740,23 @@ public class EvidenceUtils {
             }
         }
 
+        List<TumorType> mostFrequentTumorTypes = new ArrayList<>();
+        evidences.stream().collect(
+            groupingBy(Evidence::getOncoTreeType)
+        ).entrySet().stream().sorted((o1, o2) -> {
+            int result = o2.getValue().size() - o1.getValue().size();
+            if (result == 0) {
+                return TumorTypeUtils.getTumorTypeName(o1.getKey()).compareTo(TumorTypeUtils.getTumorTypeName(o2.getKey()));
+            } else {
+                return result;
+            }
+        }).forEach(tumorTypeListEntry -> mostFrequentTumorTypes.add(tumorTypeListEntry.getKey()));
+
         for (Map.Entry<String, Set<Evidence>> entry : maps.entrySet()) {
             Set<Evidence> highestEvis = EvidenceUtils.getOnlyHighestLevelEvidences(entry.getValue(), exactMatch);
 
-            // If highestEvis has more than 1 items, find highest original level if the level is 2B, 3B
+            // If highestEvis has more than 1 items, find highest original level if the level is 3B
+            // We also return R2 when the same treatment has sensitive level
             if (highestEvis.size() > 1) {
                 Set<LevelOfEvidence> checkLevels = new HashSet<>();
                 checkLevels.add(LevelOfEvidence.LEVEL_3B);
@@ -751,12 +778,25 @@ public class EvidenceUtils {
                         for (Evidence evidence : highestOriginalEvis) {
                             filteredIds.add(evidence.getId());
                         }
+                        List<Evidence> sameLevelEvidences = new ArrayList<>();
                         for (Evidence evidence : highestEvis) {
                             if (filteredIds.contains(evidence.getId())) {
-                                filtered.add(evidence);
-                                // Only add one
-                                break;
+                                sameLevelEvidences.add(evidence);
                             }
+                        }
+                        if (sameLevelEvidences.size() == 1) {
+                            filtered.add(sameLevelEvidences.iterator().next());
+                        } else if (sameLevelEvidences.size() > 1) {
+                            // Select evidence with most frequently occurred tumor type when the level and the treatment are the same
+                            sameLevelEvidences.sort((o1, o2) -> {
+                                int result = mostFrequentTumorTypes.indexOf(o1.getOncoTreeType()) - mostFrequentTumorTypes.indexOf(o2.getOncoTreeType());
+                                if (result == 0) {
+                                    return -1;
+                                } else {
+                                    return result;
+                                }
+                            });
+                            filtered.add(sameLevelEvidences.iterator().next());
                         }
                     } else {
                         filtered.add(highestEvi);
@@ -858,13 +898,8 @@ public class EvidenceUtils {
 
     // Temporary move evidence process methods here in order to share the code between new APIs and legacies
     public static List<EvidenceQueryRes> processRequest(List<Query> requestQueries, Set<EvidenceType> evidenceTypes,
-                                                        String geneStatus, String source,
                                                         Set<LevelOfEvidence> levelOfEvidences, Boolean highestLevelOnly) {
         List<EvidenceQueryRes> evidenceQueries = new ArrayList<>();
-
-        if (source == null) {
-            source = "quest";
-        }
 
         if (evidenceTypes == null) {
             evidenceTypes = new HashSet<>(EvidenceTypeUtils.getAllEvidenceTypes());
@@ -911,7 +946,7 @@ public class EvidenceUtils {
                 if (query.getGene() != null) {
                     if (requestQuery.getTumorType() != null && !requestQuery.getTumorType().isEmpty()) {
                         query.setOncoTreeTypes(
-                            TumorTypeUtils.getMappedOncoTreeTypesBySource(requestQuery.getTumorType(), source));
+                            TumorTypeUtils.getMappedOncoTreeTypesBySource(requestQuery.getTumorType()));
                     }
 
                     if (!com.mysql.jdbc.StringUtils.isNullOrEmpty(requestQuery.getAlteration())) {
@@ -948,7 +983,7 @@ public class EvidenceUtils {
                     }
                 }
                 query.setLevelOfEvidences(levelOfEvidences == null ? null : new ArrayList<>(levelOfEvidences));
-                Set<Evidence> relevantEvidences = getEvidence(query, evidenceTypes, geneStatus, levelOfEvidences);
+                Set<Evidence> relevantEvidences = getEvidence(query, evidenceTypes, levelOfEvidences);
                 query = assignEvidence(relevantEvidences,
                     Collections.singletonList(query), highestLevelOnly).iterator().next();
 

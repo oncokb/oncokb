@@ -60,6 +60,11 @@ public class LevelUtils {
         Arrays.asList(LevelOfEvidence.LEVEL_Dx3, LevelOfEvidence.LEVEL_Dx2, LevelOfEvidence.LEVEL_Dx1)
     );
 
+    // levels that should be provided as additional info. Highest level calculation should not remove it.
+    public static final List<LevelOfEvidence> INFO_LEVELS = Collections.unmodifiableList(
+        Arrays.asList(LevelOfEvidence.LEVEL_R2)
+    );
+
     public static Integer compareLevel(LevelOfEvidence a, LevelOfEvidence b) {
         return compareLevel(a, b, PUBLIC_LEVELS);
     }
@@ -250,6 +255,13 @@ public class LevelUtils {
 
     public static Set<LevelOfEvidence> getResistanceLevels() {
         return new HashSet<>(CollectionUtils.intersection(PUBLIC_LEVELS, THERAPEUTIC_RESISTANCE_LEVELS));
+    }
+
+    public static Set<LevelOfEvidence> getTherapeuticLevels() {
+        Set<LevelOfEvidence> levels = new HashSet<>();
+        levels.addAll(new HashSet<>(CollectionUtils.intersection(PUBLIC_LEVELS, THERAPEUTIC_SENSITIVE_LEVELS)));
+        levels.addAll(new HashSet<>(CollectionUtils.intersection(PUBLIC_LEVELS, THERAPEUTIC_RESISTANCE_LEVELS)));
+        return levels;
     }
 
     public static int getSensitiveLevelIndex(LevelOfEvidence levelOfEvidence) {

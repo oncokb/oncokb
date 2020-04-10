@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import static org.junit.Assert.assertTrue;
+import static org.mskcc.cbio.oncokb.Constants.MISSENSE_VARIANT;
 
 /**
  * Created by Hongxin on 12/23/16.
@@ -45,10 +46,10 @@ public class AnnotateAlterationTest {
                 {"449_514mut", "449", "514", "449", "514", null, null, "any"},
 
                 // Missense variant
-                {"V600E", "600", "600", "600", "600", "V", "E", "missense_variant"},
-                {"F53_Q53delinsL", "53", "53", "53", "53", null, null, "missense_variant"},
-                {"D842_I843delinsIM", "842", "843", "842", "843", null, null, "missense_variant"},
-                {"IK744KI", "744", "745", "744", "745", "IK", "KI", "missense_variant"},
+                {"V600E", "600", "600", "600", "600", "V", "E", MISSENSE_VARIANT},
+                {"F53_Q53delinsL", "53", "53", "53", "53", null, null, MISSENSE_VARIANT},
+                {"D842_I843delinsIM", "842", "843", "842", "843", null, null, MISSENSE_VARIANT},
+                {"IK744KI", "744", "745", "744", "745", "IK", "KI", MISSENSE_VARIANT},
 
                 // feature_truncating variant
                 {"D286_L292trunc", "286", "292", "286", "292", null, null, "feature_truncation"},

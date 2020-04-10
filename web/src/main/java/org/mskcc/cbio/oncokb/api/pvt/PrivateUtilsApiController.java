@@ -297,7 +297,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     public ResponseEntity<List<TumorType>> utilRelevantTumorTypesGet(
         @ApiParam(value = "OncoTree tumor type name/main type/code") @RequestParam(value = "tumorType") String tumorType
     ) {
-        return new ResponseEntity<>(TumorTypeUtils.findTumorTypes(tumorType, "oncotree"), HttpStatus.OK);
+        return new ResponseEntity<>(TumorTypeUtils.findTumorTypes(tumorType), HttpStatus.OK);
     }
 
     @Override
@@ -313,13 +313,13 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             alterationModel = AlterationUtils.getAlteration(gene.getHugoSymbol(), alteration, null, null, null, null);
         }
 
-        List<TumorType> relevantTumorTypes = TumorTypeUtils.findTumorTypes(tumorType, "oncotree");
+        List<TumorType> relevantTumorTypes = TumorTypeUtils.findTumorTypes(tumorType);
 
         Query query = new Query(alterationModel);
         query.setTumorType(tumorType);
 
-        List<EvidenceQueryRes> responses = EvidenceUtils.processRequest(Collections.singletonList(query), new HashSet<>(EvidenceTypeUtils.getAllEvidenceTypes()), null, null, LevelUtils.getPublicLevels(), false);
-        IndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuery(query, null, null, null, false, null);
+        List<EvidenceQueryRes> responses = EvidenceUtils.processRequest(Collections.singletonList(query), new HashSet<>(EvidenceTypeUtils.getAllEvidenceTypes()),LevelUtils.getPublicLevels(), false);
+        IndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuery(query,null, false, null);
 
         EvidenceQueryRes response = responses.iterator().next();
 

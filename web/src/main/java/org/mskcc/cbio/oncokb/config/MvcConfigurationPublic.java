@@ -20,6 +20,8 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 
+import static org.mskcc.cbio.oncokb.Constants.PUBLIC_API_VERSION;
+
 @Configuration
 @ComponentScan(basePackages = "org.mskcc.cbio.oncokb.api.pub.v1")
 @EnableWebMvc
@@ -51,7 +53,7 @@ public class MvcConfigurationPublic extends WebMvcConfigurerAdapter{
             .apiInfo(new ApiInfo(
                 "OncoKB APIs",
                 "OncoKB, a comprehensive and curated precision oncology knowledge base, offers oncologists detailed, evidence-based information about individual somatic mutations and structural alterations present in patient tumors with the goal of supporting optimal treatment decisions.",
-                "v1.0.0",
+                PUBLIC_API_VERSION,
                 "https://www.oncokb.org/terms",
                 new Contact("OncoKB", "https://www.oncokb.org", "contact@oncokb.org"),
                 "Terms of Use",
@@ -63,14 +65,14 @@ public class MvcConfigurationPublic extends WebMvcConfigurerAdapter{
     @Bean
     public Docket PremiumPublicApi() {
         return new Docket(DocumentationType.SWAGGER_2)
-            .groupName("Public APIs for Premium Users")
+            .groupName("Private APIs")
             .select()
             .apis(RequestHandlerSelectors.withMethodAnnotation(PremiumPublicApi.class))
             .build()
             .apiInfo(new ApiInfo(
-                "OncoKB APIs for Premium Users",
-                "These endpoints are designed for premium users. Please contact OncoKB team(contact@oncokb.org) if you want to be upgraded.",
-                "v1.0.0",
+                "OncoKB Private APIs",
+                "These endpoints are for private use only.",
+                PUBLIC_API_VERSION,
                 "https://www.oncokb.org/terms",
                 new Contact("OncoKB", "https://www.oncokb.org", "contact@oncokb.org"),
                 "Terms of Use",

@@ -2,6 +2,8 @@ package org.mskcc.cbio.oncokb.model;
 
 
 
+import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -12,14 +14,41 @@ import java.util.Set;
  */
 
 public class IndicatorQueryTreatment implements java.io.Serializable {
+    private List<String> alterations = new ArrayList<>();
     private List<Drug> drugs = new ArrayList<>(0);
     private Set<String> approvedIndications = new HashSet<String>(0);
     private Boolean fdaApproved;
     private LevelOfEvidence level;
+    private TumorType levelAssociatedCancerType;
     private Set<String> pmids = new HashSet<String>(0);
     private Set<ArticleAbstract> abstracts = new HashSet<ArticleAbstract>(0);
+    private String description = "";
 
     public IndicatorQueryTreatment() {
+    }
+
+    public List<String> getAlterations() {
+        return alterations;
+    }
+
+    public void setAlterations(List<String> alterations) {
+        this.alterations = alterations;
+    }
+
+    public TumorType getLevelAssociatedCancerType() {
+        return levelAssociatedCancerType;
+    }
+
+    public void setLevelAssociatedCancerType(TumorType levelAssociatedCancerType) {
+        this.levelAssociatedCancerType = levelAssociatedCancerType;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public List<Drug> getDrugs() {

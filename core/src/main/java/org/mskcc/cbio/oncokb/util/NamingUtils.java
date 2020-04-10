@@ -1,9 +1,7 @@
 package org.mskcc.cbio.oncokb.util;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class NamingUtils {
     private static Map<String, String> abbreviations = new HashMap<>();
@@ -33,5 +31,13 @@ public class NamingUtils {
 
     public static boolean hasAbbreviation(String abbreviation) {
         return abbreviation == null ? false : abbreviations.containsKey(abbreviation);
+    }
+
+    public static Set<String> getAllAbbreviations() {
+        return abbreviations.keySet();
+    }
+
+    public static Set<String> getAllAbbreviationFullNames() {
+        return abbreviations.values().stream().collect(Collectors.toSet());
     }
 }

@@ -49,7 +49,7 @@ public class MainUtils {
     public static Map<String, Object> GetRequestQueries(
         String entrezGeneId, String hugoSymbol, String alteration, String tumorType,
         String evidenceType, String consequence, String proteinStart, String proteinEnd,
-        String geneStatus, String source, String levels) {
+        String levels) {
 
         Map<String, Object> requestQueries = new HashMap<>();
 
@@ -134,8 +134,6 @@ public class MainUtils {
 
         requestQueries.put("queries", queries);
         requestQueries.put("evidenceTypes", evidenceTypes);
-        requestQueries.put("source", source == null ? "quest" : source);
-        requestQueries.put("geneStatus", geneStatus == null ? "complete" : geneStatus);
         requestQueries.put("levels", levelOfEvidences);
         return requestQueries;
     }

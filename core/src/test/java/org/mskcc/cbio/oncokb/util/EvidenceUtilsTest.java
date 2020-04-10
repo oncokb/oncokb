@@ -3,6 +3,8 @@ package org.mskcc.cbio.oncokb.util;
 import junit.framework.TestCase;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.model.*;
+import org.mskcc.cbio.oncokb.model.tumor_type.MainType;
+import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
 
 import java.util.*;
 
@@ -149,6 +151,17 @@ public class EvidenceUtilsTest extends TestCase {
         e4.setLevelOfEvidence(LevelOfEvidence.LEVEL_2);
         e5.setLevelOfEvidence(LevelOfEvidence.LEVEL_R1);
 
+        TumorType tumorType = new TumorType();
+        MainType mainType = new MainType();
+        mainType.setName("Melanoma");
+        tumorType.setName("Melanoma");
+
+        e1.setOncoTreeType(tumorType);
+        e2.setOncoTreeType(tumorType);
+        e3.setOncoTreeType(tumorType);
+        e4.setOncoTreeType(tumorType);
+        e5.setOncoTreeType(tumorType);
+
         Drug d1 = new Drug("Vemurafinib");
         Drug d2 = new Drug("Dabrafinib");
 
@@ -232,7 +245,12 @@ public class EvidenceUtilsTest extends TestCase {
         e1.setLevelOfEvidence(LevelOfEvidence.LEVEL_2);
         e5.setLevelOfEvidence(LevelOfEvidence.LEVEL_R2);
         filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets, alteration);
-        assertEquals("1", getIds(filtered));
+        assertEquals("1,5", getIds(filtered));
+
+        e1.setLevelOfEvidence(LevelOfEvidence.LEVEL_4);
+        e5.setLevelOfEvidence(LevelOfEvidence.LEVEL_R2);
+        filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets, alteration);
+        assertEquals("1,5", getIds(filtered));
     }
 
     private String getIds(Set<Evidence> evidences) {

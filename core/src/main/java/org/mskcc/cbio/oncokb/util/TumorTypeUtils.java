@@ -51,8 +51,6 @@ public class TumorTypeUtils {
 
     private static List<TumorType> allOncoTreeSubtypes = getOncoTreeSubtypesFromSource();
     private static Map<String, TumorType> allNestedOncoTreeSubtypes = getAllNestedOncoTreeSubtypesFromSource();
-    private static Map<String, List<TumorType>> questTumorTypeMap = null;
-    private static Map<String, List<TumorType>> cbioTumorTypeMap = null;
 
     /**
      * Get all exist OncoTree tumor types including cancer types and subtypes
@@ -252,50 +250,19 @@ public class TumorTypeUtils {
     }
 
     /**
-     * TODO:
-     *
-     * @param cancerTypeQueries
-     * @return
-     */
-    public static List<TumorType> generalMapping(List<TumorType> cancerTypeQueries) {
-        List<TumorType> matches = new ArrayList<>();
-        List<TumorType> allCancerTypes = getAllCancerTypes();
-        List<TumorType> allSubtypes = getAllSubtypes();
-        TumorType allTumor = getMappedSpecialTumor(SpecialTumorType.ALL_TUMORS);
-
-        for (TumorType query : cancerTypeQueries) {
-            if (query != null && !query.equals(allTumor)) {
-                for (TumorType subtype : allSubtypes) {
-                    if (subtype.equals(query)) {
-                        matches.add(subtype);
-                    }
-                }
-                for (TumorType cancerType : allCancerTypes) {
-                    if (cancerType.equals(query)) {
-                        matches.add(cancerType);
-                    }
-                }
-            }
-        }
-        matches.add(allTumor);
-        return matches;
-    }
-
-    /**
      * Get list of OncoTreeTypes based on query which constructed by name and source
      *
      * @param tumorType
-     * @param source
      * @return
      */
-    public static List<TumorType> getMappedOncoTreeTypesBySource(String tumorType, String source) {
+    public static List<TumorType> getMappedOncoTreeTypesBySource(String tumorType) {
         if (CacheUtils.isEnabled()) {
-            if (!CacheUtils.containMappedTumorTypes(tumorType, source)) {
-                CacheUtils.setMappedTumorTypes(tumorType, source, findTumorTypes(tumorType, source));
+            if (!CacheUtils.containMappedTumorTypes(tumorType)) {
+                CacheUtils.setMappedTumorTypes(tumorType, findTumorTypes(tumorType));
             }
-            return CacheUtils.getMappedTumorTypes(tumorType, source);
+            return CacheUtils.getMappedTumorTypes(tumorType);
         } else {
-            return findTumorTypes(tumorType, source);
+            return findTumorTypes(tumorType);
         }
     }
 
@@ -350,7 +317,7 @@ public class TumorTypeUtils {
         return false;
     }
 
-    public static List<TumorType> findTumorTypes(String tumorType, String source) {
+    public static List<TumorType> findTumorTypes(String tumorType) {
         return findTumorTypes(tumorType, RelevantTumorTypeDirection.UPWARD);
     }
 
@@ -437,23 +404,24 @@ public class TumorTypeUtils {
         return new ArrayList<>(new LinkedHashSet<>(mappedTumorTypesFromSource));
     }
 
+    public static String getTumorTypeName(TumorType tumorType) {
+        if (tumorType == null) {
+            return "";
+        } else {
+            if (tumorType.getName() != null) {
+                return tumorType.getName();
+            } else if (tumorType.getMainType() != null && tumorType.getMainType().getName() != null) {
+                return tumorType.getMainType().getName();
+            } else {
+                return "";
+            }
+        }
+    }
+
     public static String getOncoTreeVersion() {
         return ONCO_TREE_ONCOKB_VERSION;
     }
 
-    /*-- PRIVATE --*/
-    private static List<TumorType> filterOutDiffMainType(List<TumorType> tumorTypes, TumorType searchedTumorType) {
-        List<TumorType> filteredResult = new ArrayList<>();
-        if (searchedTumorType == null || searchedTumorType.getMainType() == null) {
-            return filteredResult;
-        }
-        for (TumorType tumorType : tumorTypes) {
-            if (tumorType.getMainType() != null && tumorType.getMainType().equals(searchedTumorType.getMainType())) {
-                filteredResult.add(tumorType);
-            }
-        }
-        return filteredResult;
-    }
 
     private static Integer convertStringToInteger(String string) {
         if (string == null) {
@@ -580,62 +548,6 @@ public class TumorTypeUtils {
         return matchedTumorTypes;
     }
 
-    private static Set<TumorType> fromQuestTumorType(String questTumorType) {
-        if (questTumorTypeMap == null) {
-            questTumorTypeMap = new HashMap<String, List<TumorType>>();
-
-            TumorType tumorTypeAll = getMappedSpecialTumor(SpecialTumorType.ALL_TUMORS);
-
-            List<String> lines;
-            try {
-                lines = FileUtils.readTrimedLinesStream(TumorTypeUtils.class.getResourceAsStream("/data/quest-tumor-types.txt"));
-            } catch (IOException e) {
-                e.printStackTrace();
-                return Collections.singleton(tumorTypeAll);
-            }
-            for (String line : lines) {
-                if (line.startsWith("#")) {
-                    continue;
-                }
-
-                String[] parts = line.split("\t");
-                String questType = parts[0].toLowerCase();
-                TumorType oncokbType = getOncoTreeSubtypeByCode(parts[1]);
-                if (oncokbType == null) {
-                    oncokbType = getOncoTreeCancerType(parts[1]);
-
-                    if (oncokbType == null) {
-                        System.err.println("no " + parts[1] + " as tumor type in oncokb");
-                        continue;
-                    }
-                }
-
-                List<TumorType> types = questTumorTypeMap.get(questType);
-                if (types == null) {
-                    types = new LinkedList<>();
-                    questTumorTypeMap.put(questType, types);
-                }
-                types.add(oncokbType);
-            }
-
-            if (tumorTypeAll != null) {
-                for (List<TumorType> list : questTumorTypeMap.values()) {
-                    list.add(tumorTypeAll);
-                }
-            }
-        }
-
-        questTumorType = questTumorType == null ? null : questTumorType.toLowerCase();
-
-        if (questTumorType == null) {
-            return new LinkedHashSet<>();
-        }
-
-        List<TumorType> ret = questTumorTypeMap.get(questTumorType);
-
-        return ret == null ? new LinkedHashSet<TumorType>() : new LinkedHashSet<>(ret);
-    }
-
     private static LinkedHashSet<TumorType> getOncoTreeTypesByTumorType(String tumorType) {
         LinkedHashSet<TumorType> types = new LinkedHashSet<>();
         TumorType mapped;
@@ -660,20 +572,6 @@ public class TumorTypeUtils {
             types.add(getOncoTreeCancerType(mapped.getMainType().getName()));
         }
         return types;
-    }
-
-    private static TumorType getOncoTreeTypeByTumorType(String tumorType) {
-        TumorType mapped;
-
-        mapped = getOncoTreeSubtypeByCode(tumorType);
-        if (mapped == null) {
-            mapped = getOncoTreeSubtypeByName(tumorType);
-        }
-
-        if (mapped == null) {
-            mapped = getOncoTreeCancerType(tumorType);
-        }
-        return mapped;
     }
 
     private static List<TumorType> getAllChildrenTumorTypes(List<TumorType> tumorTypes) {
@@ -849,23 +747,5 @@ public class TumorTypeUtils {
         } else {
             return uniqueTumorForms.iterator().next();
         }
-    }
-
-    private static boolean hasMatchingElementIgnoreCase(List<String> list, String soughtFor) {
-        for (String current : list) {
-            if (current.equalsIgnoreCase(soughtFor)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static boolean hasElementWhichContainsStringIgnoreCase(List<String> list, String soughtFor) {
-        for (String current : list) {
-            if (StringUtils.containsIgnoreCase(current, soughtFor)) {
-                return true;
-            }
-        }
-        return false;
     }
 }

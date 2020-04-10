@@ -33,9 +33,9 @@ public class PortalAlterationImporter {
             String sampleListId = jObject.getString("sampleListId");
             if (category != null && category.equalsIgnoreCase("other") && sampleListId != null && !sampleListId.equalsIgnoreCase("msk_impact_2017_NA")) {
                 String cancerType = jObject.getString("name");
-                String mutationUrl = "http://www.cbioportal.org/api/molecular-profiles/msk_impact_2017_mutations/mutations?sampleListId=" + sampleListId + "&projection=DETAILED";
-                String muttionResult = FileUtils.readRemote(mutationUrl);
-                JSONArray mutationJSONResult = new JSONArray(muttionResult);
+                String mutationUrl = "https://cbioportal.mskcc.org/api/molecular-profiles/msk_impact_2017_mutations/mutations?sampleListId=" + sampleListId + "&projection=DETAILED";
+                String mutationResult = FileUtils.readMSKPortal(mutationUrl);
+                JSONArray mutationJSONResult = new JSONArray(mutationResult);
                 System.out.println("*****************************************************************************");
                 System.out.println("Importing for " + cancerType);
                 for (int j = 0; j < mutationJSONResult.length(); j++) {

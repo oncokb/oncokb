@@ -18,7 +18,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Api(tags = "Info", description = "OncoKB General Information")
 public interface InfoApi {
     @PublicApi
-    @PremiumPublicApi@ApiOperation(value = "", response = OncoKBInfo.class)
+    @PremiumPublicApi
+    @ApiOperation(value = "", response = OncoKBInfo.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = OncoKBInfo.class)})
     @RequestMapping(value = "/info", produces = {"application/json"},

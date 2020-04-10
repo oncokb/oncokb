@@ -13,6 +13,8 @@ import org.mskcc.cbio.oncokb.util.*;
 
 import java.util.*;
 
+import static org.mskcc.cbio.oncokb.Constants.MISSENSE_VARIANT;
+
 /**
  * @author jgao
  */
@@ -279,7 +281,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         }
 
         //Find Alternative Alleles for missense variant
-        if (alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant"))) {
+        if (alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm(MISSENSE_VARIANT))) {
             alterations.addAll(AlterationUtils.getAlleleAlterations(alteration, fullAlterations));
             List<Alteration> includeRangeAlts = new ArrayList<>();
 
@@ -371,19 +373,6 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
                 alterations.add(alt);
             }
         }
-
-        // Remove exon 17 for KIT D816
-        if (isKIT816(alteration)) {
-            Iterator<Alteration> iter = alterations.iterator();
-            while (iter.hasNext()) {
-                Alteration alt = iter.next();
-                if (alt.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm("any"))
-                    && alt.getProteinStart() != null && alt.getProteinStart().equals(788)
-                    && alt.getProteinEnd() != null && alt.getProteinEnd().equals(828)) {
-                    iter.remove();
-                }
-            }
-        }
         return alterations;
     }
 
@@ -409,7 +398,6 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
 
     private boolean addOncogenicMutations(Alteration exactAlt, Set<Alteration> relevantAlts) {
         boolean add = false;
-        if (!isKitSpecialVariants(exactAlt)) {
             if (!exactAlt.getAlteration().trim().equalsIgnoreCase("amplification")) {
                 Set<Oncogenicity> oncogenicities = AlterationUtils.getCuratedOncogenicity(exactAlt);
                 boolean has = AlterationUtils.hasImportantCuratedOncogenicity(oncogenicities);
@@ -426,35 +414,14 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
                     for (Alteration alt : AlterationUtils.excludeVUS(new ArrayList<>(relevantAlts))) {
                         Boolean isOncogenic = AlterationUtils.isOncogenicAlteration(alt);
 
-                        if (isOncogenic != null && isOncogenic && !isKitSpecialVariants(alt)) {
+                        if (isOncogenic != null && isOncogenic) {
                             add = true;
                             break;
                         }
                     }
                 }
             }
-        }
         return add;
-    }
-
-    private boolean isKitSpecialVariants(Alteration alteration) {
-        boolean isSpecial = false;
-        if (alteration != null && alteration.getGene().getEntrezGeneId() == 3815) {
-            String[] speicalVariants = {"V654A", "T670I"};
-            VariantConsequence consequence = VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant");
-            for (int i = 0; i < speicalVariants.length; i++) {
-                if (alteration.getGene() != null && alteration.getGene().getEntrezGeneId() == 3815
-                    && alteration.getAlteration() != null && alteration.getAlteration().equals(speicalVariants[i])
-                    && alteration.getConsequence().equals(consequence)) {
-                    isSpecial = true;
-                    break;
-                }
-            }
-            if (!isSpecial) {
-                isSpecial = isInExon17(alteration);
-            }
-        }
-        return isSpecial;
     }
 
     private boolean isVariantByLocation(Alteration alteration, int entrezGeneId, int proteinStart, int proteinEnd, VariantConsequence variantConsequence) {
@@ -465,10 +432,6 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             return true;
         }
         return false;
-    }
-
-    private boolean isKIT816(Alteration alteration) {
-        return isVariantByLocation(alteration, 3815, 816, 816, VariantConsequenceUtils.findVariantConsequenceByTerm("missense_variant"));
     }
 
     private boolean isInExon17(Alteration alteration) {

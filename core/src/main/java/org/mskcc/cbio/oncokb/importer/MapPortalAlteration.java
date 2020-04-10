@@ -17,6 +17,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
+import static org.mskcc.cbio.oncokb.Constants.MISSENSE_VARIANT;
+
 /**
  * @author jiaojiao Sep/8/2017 Import alteration data from portal database
  */
@@ -40,8 +42,8 @@ public class MapPortalAlteration {
         mapper.put("Frame_Shift_Ins", new String[]{"frameshift_variant"});
         mapper.put("Fusion", new String[]{"fusion"});
         mapper.put("In_Frame_Ins", new String[]{"inframe_insertion"});
-        mapper.put("Missense", new String[]{"missense_variant"});
-        mapper.put("Missense_Mutation", new String[]{"missense_variant"});
+        mapper.put("Missense", new String[]{MISSENSE_VARIANT});
+        mapper.put("Missense_Mutation", new String[]{MISSENSE_VARIANT});
         mapper.put("Nonsense_Mutation", new String[]{"stop_gained"});
         mapper.put("Nonstop_Mutation", new String[]{"stop_lost"});
         mapper.put("Splice_Site", new String[]{"splice_region_variant"});

@@ -232,6 +232,8 @@ public class UtilsApiController implements UtilsApi {
         List<String> header = new ArrayList<>();
         header.add("Hugo Symbol");
         header.add("Entrez Gene ID");
+        header.add("Isoform");
+        header.add("RefSeq");
         header.add("# of occurrence within resources (Column D-J)");
         header.add("OncoKB Annotated");
         header.add("Is Oncogene");
@@ -249,6 +251,8 @@ public class UtilsApiController implements UtilsApi {
             List<String> row = new ArrayList<>();
             row.add(cancerGene.getHugoSymbol());
             row.add(cancerGene.getEntrezGeneId().toString());
+            row.add(cancerGene.getIsoform());
+            row.add(cancerGene.getRefSeq());
             row.add(String.valueOf(cancerGene.getOccurrenceCount()));
             row.add(getStringByBoolean(cancerGene.getOncokbAnnotated()));
             row.add(getStringByBoolean(cancerGene.getOncogene()));

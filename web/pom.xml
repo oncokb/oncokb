@@ -6,10 +6,10 @@
     <parent>
         <groupId>org.mskcc.cbio.oncokb</groupId>
         <artifactId>master</artifactId>
-        <version>2.0.0</version>
+        <version>2.3.0</version>
     </parent>
     <artifactId>web</artifactId>
-    <version>2.0.0</version>
+    <version>2.3.0</version>
     <packaging>war</packaging>
 
     <name>OncoKB Web</name>
@@ -80,7 +80,7 @@
         <profile>
             <id>curate</id>
             <properties>
-                <frontend.version>56940c136d</frontend.version>
+                <frontend.version>0.4.0</frontend.version>
                 <frontend.groupId>com.github.oncokb</frontend.groupId>
                 <frontend.artifactId>curation-platform</frontend.artifactId>
             </properties>
@@ -155,7 +155,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot</artifactId>
-            <version>1.5.10.RELEASE</version>
+            <version>1.5.11.RELEASE</version>
         </dependency>
 
         <!-- CGLib for @Configuration -->
@@ -253,6 +253,12 @@
             <groupId>io.sentry</groupId>
             <artifactId>sentry-spring</artifactId>
             <version>1.7.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.websocket</groupId>
+            <artifactId>javax.websocket-api</artifactId>
+            <version>1.1</version>
         </dependency>
     </dependencies>
 
