@@ -120,7 +120,7 @@ public class FindRelevantAlterationsTest {
 
                 // 654 is a hotspot position
                 {"KIT", "V654G", null, "V654A, Oncogenic Mutations"},
-                {"KIT", "T670A", null, "T670I, IT669MI"},
+                {"KIT", "T670A", null, "T670I, Oncogenic Mutations"},
 
 
                 // Do not mapping Oncogenic Mutations to Amplification
