@@ -62,7 +62,7 @@ public class TreatmentParameterizedTest {
         }
         String tl = stringBuilder.toString().trim();
 
-//        System.out.println("New: " + gene + "&&" + variant + "&&" + tumorType + "&&" + treatmentLevel + "&&" + tl);
+//        System.out.println("New: " + gene + "&&" + variant + "&&" + tumorType + "&&" + tl);
 
         assertEquals("Gene summary, Query: " + gene + " " + variant + " " + tumorType, treatmentLevel, tl);
 
