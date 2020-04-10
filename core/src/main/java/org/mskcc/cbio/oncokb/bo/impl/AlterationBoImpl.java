@@ -373,7 +373,21 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
                 alterations.add(alt);
             }
         }
+
+        if (isEGFRSpecialVariant(alteration)) {
+            Iterator<Alteration> iter = alterations.iterator();
+            while (iter.hasNext()) {
+                Alteration alt = iter.next();
+                if (alt.getAlteration().equals("762_823ins")) {
+                    iter.remove();
+                }
+            }
+        }
         return alterations;
+    }
+
+    private boolean isEGFRSpecialVariant(Alteration alteration) {
+        return alteration != null && alteration.getGene().getHugoSymbol().equals("EGFR") && alteration.getAlteration().equals("A763_Y764insFQEA");
     }
 
     @Override
