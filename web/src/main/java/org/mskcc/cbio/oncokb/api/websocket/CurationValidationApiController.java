@@ -14,7 +14,7 @@ import static org.mskcc.cbio.oncokb.api.websocket.ValidationCategory.*;
  * Created by Hongxin on 12/12/16.
  */
 
-@ServerEndpoint(value = "/api/websocket/curation/validation")
+//@ServerEndpoint(value = "/api/websocket/curation/validation")
 public class CurationValidationApiController {
     private Session session;
 
