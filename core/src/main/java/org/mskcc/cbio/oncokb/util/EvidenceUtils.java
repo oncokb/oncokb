@@ -740,9 +740,24 @@ public class EvidenceUtils {
             }
         }
 
+        TumorType tumorTypeNA = new TumorType();
+        tumorTypeNA.setName("NA");
         List<TumorType> mostFrequentTumorTypes = new ArrayList<>();
-        evidences.stream().collect(
-            groupingBy(Evidence::getOncoTreeType)
+        evidences.stream().filter(evidence -> evidence.getOncoTreeType() != null).collect(
+            groupingBy(evidence -> {
+                TumorType tumorType = evidence.getOncoTreeType();
+                if (tumorType == null) {
+                    SpecialTumorType specialTumorType = SpecialTumorType.valueOf(evidence.getCancerType());
+                    if (specialTumorType != null) {
+                        tumorType = TumorTypeUtils.getMappedSpecialTumor(specialTumorType);
+                    }
+                }
+
+                if (tumorType == null) {
+                    tumorType = tumorTypeNA;
+                }
+                return tumorType;
+            })
         ).entrySet().stream().sorted((o1, o2) -> {
             int result = o2.getValue().size() - o1.getValue().size();
             if (result == 0) {
