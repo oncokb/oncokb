@@ -4,10 +4,13 @@ import org.mskcc.cbio.oncokb.model.OncoKBInfo;
 import org.mskcc.cbio.oncokb.model.Version;
 import org.mskcc.cbio.oncokb.util.LevelUtils;
 import org.mskcc.cbio.oncokb.util.MainUtils;
+import org.mskcc.cbio.oncokb.util.PropertiesUtils;
 import org.mskcc.cbio.oncokb.util.TumorTypeUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+
+import static org.mskcc.cbio.oncokb.Constants.IS_PUBLIC_INSTANCE;
 
 /**
  * Created by Hongxin Zhang on 7/13/18.
@@ -25,6 +28,12 @@ public class InfoApiController implements InfoApi {
 
         oncoKBInfo.setLevels(LevelUtils.getInfoLevels());
         oncoKBInfo.setDataVersion(version);
+
+        String isPublicInstance = PropertiesUtils.getProperties(IS_PUBLIC_INSTANCE);
+
+        if (isPublicInstance != null && Boolean.valueOf(isPublicInstance)) {
+            oncoKBInfo.setPublicInstance(true);
+        }
 
         return new ResponseEntity<>(oncoKBInfo, HttpStatus.OK);
     }
