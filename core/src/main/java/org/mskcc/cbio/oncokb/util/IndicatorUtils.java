@@ -448,6 +448,9 @@ public class IndicatorUtils {
 
     // This should used by only for delins range missense mutation
     private static Alteration pickMatchedAlteration(List<Alteration> alterations, Query originalQuery, Set<LevelOfEvidence> levels, Boolean highestLevelOnly, Set<EvidenceType> evidenceTypes) {
+        if (alterations == null || alterations.size() == 0) {
+            return null;
+        }
         Map<Oncogenicity, List<Alteration>> groupedOncogenicities = new HashedMap();
         Map<LevelOfEvidence, List<Alteration>> groupedLevel = new HashedMap();
         for (Alteration alteration : alterations) {
@@ -466,6 +469,9 @@ public class IndicatorUtils {
 
         }
         Oncogenicity highestOncogenicity = MainUtils.findHighestOncogenicity(groupedOncogenicities.keySet());
+        if (highestOncogenicity == null) {
+            return alterations.iterator().next();
+        }
         // when the oncogenicity is the same, then the therapeutic info will be the same as well.
         return groupedOncogenicities.get(highestOncogenicity).get(0);
     }
