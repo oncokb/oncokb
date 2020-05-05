@@ -26,4 +26,6 @@ if [[ $FRONTEND_PATH == "yo" ]]
 then
     cp dist/index.html dist/content.jsp
 fi
+
+
 rm dist/index.html

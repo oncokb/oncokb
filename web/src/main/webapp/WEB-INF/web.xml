@@ -3,18 +3,12 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
 	<display-name>OncoKB</display-name>
-    <welcome-file-list>
-        <welcome-file>/index.jsp</welcome-file>
-    </welcome-file-list>
 	<context-param>
 		<param-name>contextClass</param-name>
 		<param-value>
 			org.springframework.web.context.support.AnnotationConfigWebApplicationContext
 		</param-value>
 	</context-param>
-    <welcome-file-list>
-        <welcome-file>/index.jsp</welcome-file>
-    </welcome-file-list>
 	<listener>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
@@ -64,27 +58,28 @@
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
+    <servlet>
+        <servlet-name>legacyApi</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <init-param>
+            <param-name>contextClass</param-name>
+            <param-value>
+                org.springframework.web.context.support.AnnotationConfigWebApplicationContext
+            </param-value>
+        </init-param>
+        <init-param>
+            <param-name>contextConfigLocation</param-name>
+            <param-value>org.mskcc.cbio.oncokb.config.MvcConfiguration</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
 	<servlet-mapping>
 		<servlet-name>SpringDispatcher</servlet-name>
 		<url-pattern>/</url-pattern>
 	</servlet-mapping>
-    <servlet>
-        <servlet-name>PublicSinglePage</servlet-name>
-        <jsp-file>/index.jsp</jsp-file>
-    </servlet>
     <servlet-mapping>
-        <servlet-name>PublicSinglePage</servlet-name>
-        <url-pattern>/gene/*</url-pattern>
-        <url-pattern>/genes/*</url-pattern>
-        <url-pattern>/levels/*</url-pattern>
-        <url-pattern>/team/*</url-pattern>
-        <url-pattern>/about/*</url-pattern>
-        <url-pattern>/actionableGenes/*</url-pattern>
-        <url-pattern>/terms/*</url-pattern>
-        <url-pattern>/news/*</url-pattern>
-        <url-pattern>/updates/*</url-pattern>
-        <url-pattern>/dataAccess/*</url-pattern>
-        <url-pattern>/cancerGenes/*</url-pattern>
+        <servlet-name>legacyApi</servlet-name>
+        <url-pattern>/*</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>publicApiV1</servlet-name>

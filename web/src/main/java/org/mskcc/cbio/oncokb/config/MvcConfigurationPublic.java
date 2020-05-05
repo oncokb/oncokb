@@ -65,23 +65,4 @@ public class MvcConfigurationPublic extends WebMvcConfigurerAdapter{
             ))
             .useDefaultResponseMessages(false);
     }
-
-    @Bean
-    public Docket PremiumPublicApi() {
-        return new Docket(DocumentationType.SWAGGER_2)
-            .groupName("Private APIs")
-            .select()
-            .apis(RequestHandlerSelectors.withMethodAnnotation(PremiumPublicApi.class))
-            .build()
-            .apiInfo(new ApiInfo(
-                "OncoKB Private APIs",
-                "These endpoints are for private use only.",
-                PUBLIC_API_VERSION,
-                "https://www.oncokb.org/terms",
-                new Contact("OncoKB", "https://www.oncokb.org", "contact@oncokb.org"),
-                "Terms of Use",
-                "https://www.oncokb.org/terms"
-            ))
-            .useDefaultResponseMessages(false);
-    }
 }
