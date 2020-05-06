@@ -33,3 +33,5 @@ indent_size = 2
 
 [*.txt]
 trim_trailing_whitespace = false
+insert_final_newline = false
+
