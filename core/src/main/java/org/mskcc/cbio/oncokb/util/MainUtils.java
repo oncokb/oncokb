@@ -24,6 +24,7 @@ public class MainUtils {
     static String DataVersionDate = null;
     private static final List<Oncogenicity> PRIORITIZED_ONCOGENICITY = Collections.unmodifiableList(
         Arrays.asList(
+            Oncogenicity.UNKNOWN,
             Oncogenicity.INCONCLUSIVE,
             Oncogenicity.LIKELY_NEUTRAL,
             Oncogenicity.PREDICTED,
@@ -39,7 +40,9 @@ public class MainUtils {
             MutationEffect.LIKELY_SWITCH_OF_FUNCTION,
             MutationEffect.SWITCH_OF_FUNCTION,
             MutationEffect.LIKELY_LOSS_OF_FUNCTION,
-            MutationEffect.LOSS_OF_FUNCTION)
+            MutationEffect.LOSS_OF_FUNCTION,
+            MutationEffect.UNKNOWN
+        )
     );
 
     public static boolean isEGFRTruncatingVariants(String alteration) {

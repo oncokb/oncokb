@@ -1117,7 +1117,7 @@ C128622	BET Inhibitor INCB057643	BET Inhibitor INCB057643|BET Inhibitor INCB0576
 C128627	Anti-TIM-3 Monoclonal Antibody TSR-022	Anti-TIM-3 Monoclonal Antibody TSR-022|Anti-TIM-3 Monoclonal Antibody TSR-022|Anti-TIM3 Checkpoint Inhibitor TSR-022|Anti-TIM3 Monoclonal Antibody TSR-022|TSR-022
 C128632	mTOR Kinase Inhibitor PP242	"2-(4-Amino-1-isopropyl-1H-pyrazolo(3,4-d)pyrimidin-3-yl)-1H-indol-5-ol|PP-242|PP-242|PP242|mTOR Kinase Inhibitor PP242"
 C128640	Gadolinium-based Contrast Agent P03277	GBCA P03277|Gadolinium-based Contrast Agent P03277|Gadolinium-based Contrast Agent P03277|Gadolinium-based Magnetic Resonance Contrast Agent P03277|P 03277|P03277
-C128799	Anti-HER2 ADC DS-8201a	ADC DS-8201a|Anti-HER2 ADC DS-8201a|Anti-HER2 ADC DS-8201a|Anti-HER2 Antibody-Drug Conjugate DS-8201a|Anti-HER2-DX-8951 Derivative ADC DS-8201a|DS-8201a
+C128799	Trastuzumab Deruxtecan	ADC DS-8201a|Anti-HER2 ADC DS-8201a|Anti-HER2 ADC DS-8201a|Anti-HER2 Antibody-Drug Conjugate DS-8201a|Anti-HER2-DX-8951 Derivative ADC DS-8201a|DS-8201a
 C128860	Ad5-survivin-transduced Autologous Dendritic Cell Vaccine	Ad5-survivin-transduced Autologous DC Vaccine|Ad5-survivin-transduced Autologous Dendritic Cell Vaccine|Ad5-survivin-transduced Autologous Dendritic Cell Vaccine|Autologous DC:AdmS|Autologous Dendritic Cell Adenovirus Type 5-Survivin Vaccine
 C128862	FGFR4 Inhibitor H3B-6527	FGFR4 Inhibitor H3B-6527|FGFR4 Inhibitor H3B-6527|Fibroblast Growth Factor Receptor 4 Inhibitor H3B-6527|H3B 6527|H3B-6527|H3B6527
 C128887	NY-ESO-1 Protein/Microparticle MDP/Bacterial DNA-containing MIS416 Vaccine	NY-ESO-1 Protein with MIS416|NY-ESO-1 Protein/MIS416|NY-ESO-1 Protein/Microparticle MDP/Bacterial DNA-containing MIS416 Vaccine
@@ -2675,7 +2675,7 @@ C29536	Valproic Acid	2-Propylpentanoic Acid|2-Propylvaleric Acid|Depakene|Depake
 C29560	Rilimogene Glafolivec	PROSTVAC-F|Recombinant Fowlpox-PSA(L155)/TRICOM Vaccine|Rilimogene Glafolivec|Rilimogene Glafolivec|rFowlpox-PSA(L155)/TRICOM Vaccine
 C29794	2-Fluoroadenine	"1H-Purin-6-amine, 2-fluoro- (9CI)|2-Fad|2-Fluoro-1H-purin-6-amine|2-Fluoroadenine|Adenine, 2-fluoro-|BRN 0610958|Purine, 6-amino-2-fluoro-|SRI 774"
 C29796	"2,6-Diaminopurine"	"1H-Purine-2,6-diamine|2,6-DIAMINOPURINE|2,6-Diaminopurine|2,6-Diaminopurine|9h-purine-2,6-diamine|DAP"
-C298	BCG Vaccine	BCG|BCG|BCG (Pasteur)|BCG TICE|BCG Tice|BCG Vaccine|BCG Vaccine|BCG Vaccine|Bacille Calmette-Guerin Live|Bacillius Calmette-Guerin Vaccine|Bacillus Calmette Guerin|Bacillus Calmette Guerin Vaccine|Bacillus Calmette-Guerin|Bacillus Calmette-Guerin|Bacillus Calmette-Guerin|Bacillus Calmette-Guérin Vaccine|Cultivo BCG|ImmuCyst|Imovax BCG|Live Intravesical BCG|Monovax|Mycobacterium bovis (Strain BCG)|Oncotice|Pacis|Pastimmun|TICE BCG
+C298	BCG Vaccine	BCG|BCG|BCG (Pasteur)|BCG TICE|BCG Tice|BCG Vaccine|BCG Vaccine|BCG Vaccine|Bacille Calmette-Guerin Live|Bacillius Calmette-Guerin Vaccine|Bacillus Calmette Guerin|Bacillus Calmette Guerin Vaccine|Bacillus Calmette-Guerin|Bacillus Calmette-Guerin|Bacillus Calmette-Guerin|Bacillus Calmette-Guï¿½rin Vaccine|Cultivo BCG|ImmuCyst|Imovax BCG|Live Intravesical BCG|Monovax|Mycobacterium bovis (Strain BCG)|Oncotice|Pacis|Pastimmun|TICE BCG
 C29858	Triethylenemelamine	TEM|TRIETHYLENEMELAMINE|Triethylene Melamine|Triethylenemelamine
 C29981	Ibritumomab Tiuxetan	IBRITUMOMAB TIUXETAN|IDEC-129|IDEC-2B8|Ibritumomab Tiuxetan|Ibritumomab Tiuxetan|Zevalin|Zevalin|ibritumomab tiuxetan
 C30136	Interferon Alfa-N3	Alfa-N3 Interferon|Alferon N|Altemol|Interferon Alfa-N3
@@ -4390,7 +4390,7 @@ C99766	Adagloxad Simolenin	ADAGLOXAD SIMOLENIN|Adagloxad Simolenin|Adagloxad Sim
 C99767	Erythrocyte-encapsulated L-asparaginase Suspension	Erythrocyte-encapsulated L-asparaginase Suspension|Erythrocyte-encapsulated L-asparaginase Suspension|GRASPA
 C99898	CNDO-109-activated Allogeneic Natural Killer Cells	CNDO-109-AANK Cells|CNDO-109-activated Allogeneic Natural Killer Cells|CNDO-109-activated Allogeneic Natural Killer Cells
 C99899	Anti-EGFR Monoclonal Antibody Mixture MM-151	Anti-EGFR Monoclonal Antibody Mixture MM-151|Anti-EGFR Monoclonal Antibody Mixture MM-151|MM-151
-C99901	Acai Berry Juice	Acai Berry Juice|Acai Juice|Açai Berry Juice|Açai Juice
+C99901	Acai Berry Juice	Acai Berry Juice|Acai Juice|Aï¿½ai Berry Juice|Aï¿½ai Juice
 C99902	Ilixadencel	COMBIG-DC|Ilixadencel|Ilixadencel|Intuvax
 C99903	HER2 ECD+TM Virus-like Replicon Particles Vaccine AVX901	AVX 901|AVX-901|AVX901|Alphavirus-like Replicon Particles-containing Self Amplifying Replicon RNA for HER2 AVX901|HER2 ECD+TM Virus-like Replicon Particles Vaccine AVX901|HER2 ECD+TM Virus-like Replicon Particles Vaccine AVX901|HER2 ECDTM VRP|VRP-HER2 AVX901|VRP-HER2 ECDTM
 C99905	Rociletinib	CO-1686|N-(3-((2-((4-(4-Acetylpiperazin-1-yl)-2-methoxyphenyl)amino)-5-(trifluoromethyl)pyrimidin-4-yl)amino)phenyl)prop-2-enamide|ROCILETINIB|Rociletinib|Rociletinib|Rociletinib

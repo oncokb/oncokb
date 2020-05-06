@@ -446,45 +446,36 @@ public class IndicatorUtils {
         return indicatorQuery;
     }
 
+    // This should used by only for delins range missense mutation
     private static Alteration pickMatchedAlteration(List<Alteration> alterations, Query originalQuery, Set<LevelOfEvidence> levels, Boolean highestLevelOnly, Set<EvidenceType> evidenceTypes) {
+        if (alterations == null || alterations.size() == 0) {
+            return null;
+        }
         Map<Oncogenicity, List<Alteration>> groupedOncogenicities = new HashedMap();
         Map<LevelOfEvidence, List<Alteration>> groupedLevel = new HashedMap();
-        Map<Alteration, IndicatorQueryResp> alterationQueryResps = new HashedMap();
-        Map<IndicatorQueryResp, Alteration> queryRespAlterations = new HashedMap();
         for (Alteration alteration : alterations) {
             Query tmpQuery = new Query(null, null, alteration.getGene().getEntrezGeneId(),
                 alteration.getGene().getHugoSymbol(), alteration.getAlteration(), null, null,
                 originalQuery.getTumorType(), alteration.getConsequence().getTerm(), alteration.getProteinStart(),
                 alteration.getProteinEnd(), null);
-            IndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuery(tmpQuery, levels, highestLevelOnly, evidenceTypes);
 
             // Add oncogenicity
-            Oncogenicity oncogenicity = Oncogenicity.getByEffect(indicatorQueryResp.getOncogenic());
+            IndicatorQueryOncogenicity indicatorQueryOncogenicity = getOncogenicity(alteration, new ArrayList<>(), new ArrayList<>());
+            Oncogenicity oncogenicity = indicatorQueryOncogenicity.oncogenicity;
             if (!groupedOncogenicities.containsKey(oncogenicity)) {
                 groupedOncogenicities.put(oncogenicity, new ArrayList<>());
             }
             groupedOncogenicities.get(oncogenicity).add(alteration);
 
-            alterationQueryResps.put(alteration, indicatorQueryResp);
-            queryRespAlterations.put(indicatorQueryResp, alteration);
         }
         Oncogenicity highestOncogenicity = MainUtils.findHighestOncogenicity(groupedOncogenicities.keySet());
-        if (groupedOncogenicities.get(highestOncogenicity).size() > 1) {
-            List<IndicatorQueryResp> pickedResps = groupedOncogenicities.get(highestOncogenicity).stream().map(alteration -> alterationQueryResps.get(alteration)).collect(Collectors.toList());
-
-            for (IndicatorQueryResp resp : pickedResps) {
-                // Add level comparison
-                if (!groupedLevel.containsKey(resp.getHighestSensitiveLevel())) {
-                    groupedLevel.put(resp.getHighestSensitiveLevel(), new ArrayList<>());
-                }
-                groupedLevel.get(resp.getHighestSensitiveLevel()).add(queryRespAlterations.get(resp));
-            }
-            LevelOfEvidence highestLevel = LevelUtils.getHighestLevel(groupedLevel.keySet());
-            return groupedLevel.get(highestLevel).get(0);
-        } else {
-            return groupedOncogenicities.get(highestOncogenicity).get(0);
+        if (highestOncogenicity == null) {
+            return alterations.iterator().next();
         }
+        // when the oncogenicity is the same, then the therapeutic info will be the same as well.
+        return groupedOncogenicities.get(highestOncogenicity).get(0);
     }
+
     private static Implication getImplicationFromEvidence(Evidence evidence) {
         if (evidence == null) {
             return null;
