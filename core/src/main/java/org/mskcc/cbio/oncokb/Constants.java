@@ -10,8 +10,12 @@ public final class Constants {
     public static final String PUBLIC_API_VERSION = "v1.0.2";
     public static final String PRIVATE_API_VERSION = "v1.0.0";
 
+    // Defaults
+    public static final String SWAGGER_DEFAULT_DESCRIPTION="OncoKB, a comprehensive and curated precision oncology knowledge base, offers oncologists detailed, evidence-based information about individual somatic mutations and structural alterations present in patient tumors with the goal of supporting optimal treatment decisions.";
+
     // Config property names
     public static final String IS_PUBLIC_INSTANCE = "is_public_instance";
+    public static final String SWAGGER_DESCRIPTION = "swagger_description";
 
     private Constants() {
     }
