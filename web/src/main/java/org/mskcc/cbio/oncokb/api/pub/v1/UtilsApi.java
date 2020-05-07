@@ -106,8 +106,9 @@ public interface UtilsApi {
         @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
     );
 
+    @PublicApi
     @PremiumPublicApi
-    @ApiOperation(value = "", notes = "Get list of genes OncoKB curated", tags = {"Genes"})
+    @ApiOperation(value = "", notes = "Get list of genes OncoKB curated", tags = {"Cancer Genes"})
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK"),
         @ApiResponse(code = 404, message = "Not Found"),
@@ -120,8 +121,9 @@ public interface UtilsApi {
         @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
     );
 
+    @PublicApi
     @PremiumPublicApi
-    @ApiOperation(value = "", notes = "Get list of genes OncoKB curated in text file.", tags = {"Genes"})
+    @ApiOperation(value = "", notes = "Get list of genes OncoKB curated in text file.", tags = {"Cancer Genes"})
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK"),
         @ApiResponse(code = 404, message = "Not Found"),
