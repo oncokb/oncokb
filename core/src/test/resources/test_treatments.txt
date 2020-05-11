@@ -233,5 +233,6 @@ KRAS	G12C	Histiocytosis	3A: Cobimetinib;
 KRAS	G12A	Histiocytosis	3A: Cobimetinib;
 IDH1	R132H	AML	1: Ivosidenib;
 IDH1	R132G	AML	1: Ivosidenib;
-FGFR    FGFR2-BICC1 Fusion  Cholangiocarcinoma  1: Pemigatinib;
-ERBB2   Amplification   Breast Cancer   1: Tucatinib + Trastuzumab + Capecitabine; 1: Trastuzumab Deruxtecan;
+FGFR2	FGFR2-BICC1 Fusion	Cholangiocarcinoma	1: Pemigatinib; 3A: Debio1347; 3A: BGJ398; 3A: AZD4547; 3A: Erdafitinib;
+ERBB2	Amplification	Breast Cancer	1: Capecitabine+Trastuzumab+Tucatinib; 1: Trastuzumab; 1: Trastuzumab Deruxtecan; 1: Ado-Trastuzumab Emtansine; 1: Lapatinib; 1: Pertuzumab+Trastuzumab; 1: Trastuzumab+Lapatinib; 1: Neratinib; 3B: Carboplatin-Taxol Regimen+Trastuzumab;
+RET	KIF5B-RET Fusion	NSCLC	1: Selpercatinib; 2: Cabozantinib; 2: Vandetanib; 3A: BLU-667;
