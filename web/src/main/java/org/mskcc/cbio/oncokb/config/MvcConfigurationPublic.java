@@ -1,7 +1,9 @@
 package org.mskcc.cbio.oncokb.config;
 
+import com.mysql.jdbc.StringUtils;
 import org.mskcc.cbio.oncokb.config.annotation.PremiumPublicApi;
 import org.mskcc.cbio.oncokb.config.annotation.PublicApi;
+import org.mskcc.cbio.oncokb.util.PropertiesUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -20,7 +22,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 
-import static org.mskcc.cbio.oncokb.Constants.PUBLIC_API_VERSION;
+import static org.mskcc.cbio.oncokb.Constants.*;
 
 @Configuration
 @ComponentScan(basePackages = "org.mskcc.cbio.oncokb.api.pub.v1")
@@ -45,6 +47,8 @@ public class MvcConfigurationPublic extends WebMvcConfigurerAdapter{
 
     @Bean
     public Docket publicApi() {
+        String swaggerDescription = PropertiesUtils.getProperties(SWAGGER_DESCRIPTION);
+        String finalDescription = StringUtils.isNullOrEmpty(swaggerDescription) ? SWAGGER_DEFAULT_DESCRIPTION : swaggerDescription;
         return new Docket(DocumentationType.SWAGGER_2)
             .groupName("Public APIs")
             .select()
@@ -52,7 +56,7 @@ public class MvcConfigurationPublic extends WebMvcConfigurerAdapter{
             .build()
             .apiInfo(new ApiInfo(
                 "OncoKB APIs",
-                "OncoKB, a comprehensive and curated precision oncology knowledge base, offers oncologists detailed, evidence-based information about individual somatic mutations and structural alterations present in patient tumors with the goal of supporting optimal treatment decisions.",
+                finalDescription,
                 PUBLIC_API_VERSION,
                 "https://www.oncokb.org/terms",
                 new Contact("OncoKB", "https://www.oncokb.org", "contact@oncokb.org"),
