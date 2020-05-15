@@ -723,8 +723,15 @@ public final class AlterationUtils {
         // the alternative alleles do not only include the different variant allele, but also include the delins but it's essentially the same thing.
         // For instance, S768_V769delinsIL. This is equivalent to S768I + V769L, S768I should be listed relevant and not be excluded.
         if (alteration != null && alteration.getConsequence() != null && alteration.getConsequence().getTerm().equals(MISSENSE_VARIANT)) {
+            // check for positional variant when the consequence is forced to be missense variant
+            boolean isMissensePositionalVariant = StringUtils.isEmpty(alteration.getVariantResidues()) && alteration.getProteinStart() != null && alteration.getProteinEnd() != null && alteration.getProteinStart().equals(alteration.getProteinEnd());
             List<Alteration> alternativeAlleles = alterationBo.findMutationsByConsequenceAndPosition(alteration.getGene(), alteration.getConsequence(), alteration.getProteinStart(), alteration.getProteinEnd(), new HashSet<>(relevantAlterations));
             for (Alteration allele : alternativeAlleles) {
+                // remove all alleles if the alteration variant residue is empty
+                if (isMissensePositionalVariant && !StringUtils.isEmpty(allele.getVariantResidues())) {
+                    relevantAlterations.remove(allele);
+                    return;
+                }
                 if (allele.getConsequence() != null && allele.getConsequence().getTerm().equals(MISSENSE_VARIANT)) {
                     if (alteration.getProteinStart().equals(alteration.getProteinEnd())) {
                         if (allele.getProteinStart().equals(allele.getProteinEnd())) {

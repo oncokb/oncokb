@@ -590,6 +590,14 @@ public class IndicatorUtilsTest {
         resp1 = IndicatorUtils.processQuery(query1, null, true, null);
         resp2 = IndicatorUtils.processQuery(query2, null, true, null);
         pairComparison(resp1, resp2);
+
+        // Test positional variant but with a missense variant consequence
+        query1 = new Query(null, null, null, "TP53", "R248", null, null, "RDD", null, null, null, null);
+        query2 = new Query(null, null, null, "TP53", "R248", null, null, "RDD", MISSENSE_VARIANT, null, null, null);
+        resp1 = IndicatorUtils.processQuery(query1, null, true, null);
+        resp2 = IndicatorUtils.processQuery(query2, null, true, null);
+        pairComparison(resp1, resp2);
+
     }
 
     private void pairComparison(IndicatorQueryResp resp1, IndicatorQueryResp resp2) {
