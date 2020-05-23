@@ -733,7 +733,7 @@ public final class AlterationUtils {
                     return;
                 }
                 if (allele.getConsequence() != null && allele.getConsequence().getTerm().equals(MISSENSE_VARIANT)) {
-                    if (alteration.getProteinStart().equals(alteration.getProteinEnd())) {
+                    if (alteration.getProteinStart().equals(alteration.getProteinEnd()) && !StringUtils.isEmpty(alteration.getVariantResidues())) {
                         if (allele.getProteinStart().equals(allele.getProteinEnd())) {
                             if (!alteration.getVariantResidues().equalsIgnoreCase(allele.getVariantResidues())) {
                                 relevantAlterations.remove(allele);
