@@ -624,7 +624,7 @@ public class MainUtils {
 
                         // Mutation Effect
                         if (result == 0) {
-                            result = a1.getMutationEffect().compareTo(a2.getMutationEffect());
+                            result = a1.getMutationEffect() == null ? 1 : a1.getMutationEffect().compareTo(a2.getMutationEffect());
                         }
                     }
                 }
