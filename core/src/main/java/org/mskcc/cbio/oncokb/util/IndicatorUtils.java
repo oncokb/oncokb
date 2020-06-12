@@ -373,7 +373,7 @@ public class IndicatorUtils {
 
             // Mutation summary
             if (evidenceTypes.contains(EvidenceType.MUTATION_SUMMARY)) {
-                indicatorQuery.setVariantSummary(SummaryUtils.oncogenicSummary(gene, matchedAlt,
+                indicatorQuery.setVariantSummary(SummaryUtils.variantSummary(gene, matchedAlt,
                     new ArrayList<>(relevantAlterations), query));
             }
 

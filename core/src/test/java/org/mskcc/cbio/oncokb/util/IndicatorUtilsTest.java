@@ -11,6 +11,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mskcc.cbio.oncokb.Constants.MISSENSE_VARIANT;
+import static org.mskcc.cbio.oncokb.util.SummaryUtils.ONCOGENIC_MUTATIONS_DEFAULT_SUMMARY;
 
 /**
  * Created by Hongxin on 12/23/16.
@@ -146,6 +147,15 @@ public class IndicatorUtilsTest {
             LevelOfEvidence.LEVEL_4, indicatorQueryResp.getHighestSensitiveLevel());
         assertEquals("The highest resistance level should be R1",
             LevelOfEvidence.LEVEL_R1, indicatorQueryResp.getHighestResistanceLevel());
+
+        // Check special variant Oncogenic Mutations
+        query = new Query(null, null, null, "BRAF", InferredMutation.ONCOGENIC_MUTATIONS.getVariant(), null, null, "Colorectal Cancer", null, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null);
+        assertEquals("The oncogenicity should be 'Unknown'", Oncogenicity.UNKNOWN.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The mutation effect is not unknown, but it should be.", MutationEffect.UNKNOWN.getMutationEffect(), indicatorQueryResp.getMutationEffect().getKnownEffect());
+
+        assertEquals("The variant summary does not match",
+            ONCOGENIC_MUTATIONS_DEFAULT_SUMMARY, indicatorQueryResp.getVariantSummary());
 
 
         // Test R2 data
