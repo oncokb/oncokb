@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 public class SummaryUtils {
     public static final String TERT_PROMOTER_MUTATION_SUMMARY = "Select hotspot mutations in the TERT promoter have been shown to be oncogenic.";
     public static final String TERT_PROMOTER_NO_THERAPY_TUMOR_TYPE_SUMMARY = "There are no FDA-approved or NCCN-compendium listed treatments specifically for patients with TERT promoter mutations in [[tumor type]].";
+    public static final String ONCOGENIC_MUTATIONS_DEFAULT_SUMMARY = "Oncogenic Mutations includes all variants annotated as oncogenic and likely oncogenic.";
 
     public static Map<String, Object> tumorTypeSummary(EvidenceType evidenceType, Gene gene, Query query, Alteration exactMatchedAlt, List<Alteration> alterations, List<TumorType> relevantTumorTypes) {
         Map<String, Object> tumorTypeSummary = newTumorTypeSummary();
@@ -205,12 +206,11 @@ public class SummaryUtils {
         return "This is a synonymous mutation and is not annotated by OncoKB.";
     }
 
-    public static String oncogenicSummary(Gene gene, Alteration exactMatchAlteration, List<Alteration> alterations, Query query) {
-        String key = query.getQueryId();
-
-        String summary = getOncogenicSummarySubFunc(gene, exactMatchAlteration, alterations, query);
-
-        return summary;
+    public static String variantSummary(Gene gene, Alteration exactMatchAlteration, List<Alteration> alterations, Query query) {
+        if (!StringUtils.isEmpty(query.getAlteration()) && query.getAlteration().equalsIgnoreCase(InferredMutation.ONCOGENIC_MUTATIONS.getVariant())) {
+            return ONCOGENIC_MUTATIONS_DEFAULT_SUMMARY;
+        }
+        return getOncogenicSummarySubFunc(gene, exactMatchAlteration, alterations, query);
     }
 
     private static String getOncogenicSummarySubFunc(Gene gene, Alteration exactMatchAlteration, List<Alteration> alterations, Query query) {
