@@ -1,5 +1,4 @@
-# OncoKB Core
-<a href="https://ascopubs.org/doi/full/10.1200/PO.17.00011"><img src="https://img.shields.io/badge/DOI-10.1200%2FPO.17.00011-1c75cd" /></a>  
+# OncoKB Core <a href="https://ascopubs.org/doi/full/10.1200/PO.17.00011"><img src="https://img.shields.io/badge/DOI-10.1200%2FPO.17.00011-1c75cd" /></a>  
 Repository for OncoKB, a precision oncology knowledge base.
 
 The core of OncoKB Annotation service.
@@ -31,14 +30,6 @@ Please choose one of the profile when building the war file
 * curate - core + API + curation website
 * public - core + API + public website
          
-
-License
---------------------
-
-OncoKB free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License, version 3, as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
-
-A public instance of OncoKB (https://www.oncokb.org) is hosted and maintained by Memorial Sloan Kettering Cancer Center. It provides access to all curators in MSKCC knowledgebase team.
-
-If you are interested in coordinating the development of new features, please contact contact@oncokb.org.
+## Questions?
+The best way is to send an email to contact@oncokb.org so all our team members can help.  
+We are also available on Gitter. [![Gitter](https://img.shields.io/gitter/room/oncokb/public-chat)](https://gitter.im/oncokb/public-chat)
