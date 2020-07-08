@@ -69,10 +69,10 @@ public class FindRelevantAlterationsTest {
                 {"EGFR", "vIVc", null, "C-terminal domain, Oncogenic Mutations"},
 
                 // Check range
-                {"MED12", "G44S", null, "G44S, G44A, G44C, G44D, G44V, 34_68mut"},
-                {"MED12", "G44D", null, "G44D, G44A, G44C, G44S, G44V, 34_68mut"},
-                {"MED12", "G44*", null, "34_68mut, Truncating Mutations"},
-                {"MED12", "K42_N46del", null, "34_68mut"},
+                {"MED12", "G44S", null, "G44S, G44A, G44C, G44D, G44V, 34_68mis"},
+                {"MED12", "G44D", null, "G44D, G44A, G44C, G44S, G44V, 34_68mis"},
+                {"MED12", "G44*", null, "Truncating Mutations"},
+                {"MED12", "K42_N46del", null, ""},
                 {"NOTCH1", "Q2405Rfs*17", null, "Q2405Rfs*17, T2375_K2555trunc, Truncating Mutations"},
 
                 // VUS should get mapped to hotspot VUS, but should not get Oncogenic Mutations from the hotspot VUS.
@@ -97,7 +97,7 @@ public class FindRelevantAlterationsTest {
 
                 // For oncogene, we do not map mut range to truncating mutations.
                 // But we do map if gene is oncogene and TSG. TSG here is a Oncogene+TSG
-                {"MED12", "A34*", null, "34_68mut, Truncating Mutations"},
+                {"MED12", "A34*", null, "Truncating Mutations"},
 
                 {"NOTCH1", "Q2405Rfs*17", null, "Q2405Rfs*17, T2375_K2555trunc, Truncating Mutations"},
 
