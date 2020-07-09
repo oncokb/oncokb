@@ -161,7 +161,7 @@ public class IndicatorUtilsTest {
         // Test R2 data
         query = new Query(null, null, null, "ALK", "I1171N", null, null, "Lung Adenocarcinoma", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null);
-        assertEquals("The oncogenicity should be 'Oncogenic'", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The oncogenicity should be 'Oncogenic'", Oncogenicity.LIKELY.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The highest sensitive level should be 4",
             LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
         assertEquals("The highest resistance level should be R1",
