@@ -35,7 +35,7 @@ The WAR file is under `/web/target/`
 ## Deploy with frontend
 Please choose one of the profile when building the war file
 * curate - core + API + curation website
-* public - core + API + public website
+* public - core + API + public website (deprecated)
 
 You could find specific instructions in curate or public repo,
          
