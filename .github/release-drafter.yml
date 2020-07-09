@@ -27,6 +27,7 @@ categories:
       - 'cleanup'
   - title: '👷‍♀️ Testing, Configuration & Deployment'
     labels:
+      - 'test'
       - 'devops'
   - title: '🧰 Maintenance'
     labels:
