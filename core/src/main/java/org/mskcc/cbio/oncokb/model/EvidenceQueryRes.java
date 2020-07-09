@@ -1,7 +1,7 @@
 package org.mskcc.cbio.oncokb.model;
 
 
-import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;;
+import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -5,7 +5,7 @@
 package org.mskcc.cbio.oncokb.controller;
 
 import org.mskcc.cbio.oncokb.util.TumorTypeUtils;
-import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;;
+import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;

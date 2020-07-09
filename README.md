@@ -2,6 +2,11 @@
 Repository for OncoKB, a precision oncology knowledge base.
 
 The core of OncoKB Annotation service.
+## Running Environment
+Please confirm your running environment is:
+* **Java version: 8**
+* **MySQL version: 5.7.28**
+
 
 ## Prepare properties files  
 ```
@@ -22,13 +27,17 @@ cp -r core/src/main/resources/properties-EXAMPLE core/src/main/resources/propert
     * data.version & data.version_date(Optional) : These two properties will be attached to API call.
     
     
-## Build the war file
+## Build the WAR file
 `mvn clean install -P public -DskipTests=true`
+
+The WAR file is under `/web/target/`
 
 ## Deploy with frontend
 Please choose one of the profile when building the war file
 * curate - core + API + curation website
-* public - core + API + public website
+* public - core + API + public website (deprecated)
+
+You could find specific instructions in curate or public repo,
          
 ## Questions?
 The best way is to send an email to contact@oncokb.org so all our team members can help.  
