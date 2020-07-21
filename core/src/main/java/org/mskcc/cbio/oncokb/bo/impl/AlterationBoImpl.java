@@ -344,6 +344,13 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             alterations.addAll(findMutationsByConsequenceAndPosition(alteration.getGene(), truncatingVariantConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations));
         }
 
+        if (addVUSMutation(alteration)){
+            Alteration VUSMutation = findAlteration(InferredMutation.VUS.getVariant(), fullAlterations);
+            if (VUSMutation != null){
+                alterations.add(VUSMutation);
+            }
+        }
+
         if (addOncogenicMutations(alteration, alterations)) {
             Alteration oncogenicMutations = findAlteration("oncogenic mutations", fullAlterations);
             if (oncogenicMutations != null) {
@@ -383,6 +390,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
                 }
             }
         }
+
         return alterations;
     }
 
@@ -436,6 +444,10 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
                 }
             }
         return add;
+    }
+
+    private boolean addVUSMutation(Alteration alteration){
+        return AlterationUtils.getVUS(alteration).contains(alteration);
     }
 
     private boolean isVariantByLocation(Alteration alteration, int entrezGeneId, int proteinStart, int proteinEnd, VariantConsequence variantConsequence) {

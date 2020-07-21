@@ -131,6 +131,8 @@ public class FindRelevantAlterationsTest {
 //                {"MED12", "A22*", null, "1_33mut, Truncating Mutations"},
 //                {"MED12", "G22D", null, "1_33nontrunc, 1_33mut"},
 
+                // Check VUS mutations
+                // {"BRD4", "N54K", null, "N54K, Variants of Unknown Significance"},
             });
     }
 

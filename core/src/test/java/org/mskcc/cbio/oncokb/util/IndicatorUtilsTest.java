@@ -157,7 +157,18 @@ public class IndicatorUtilsTest {
         assertEquals("The variant summary does not match",
             ONCOGENIC_MUTATIONS_DEFAULT_SUMMARY, indicatorQueryResp.getVariantSummary());
 
+        // // Check special variant VUS Mutations
+        // query = new Query(null, null, null, "BRD4", InferredMutation.VUS.getVariant(), null, null, null, null, null, null, null);
+        // indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null);
+        // assertTrue("The variantExist in the response is not true, but it should.", indicatorQueryResp.getVariantExist() == true);
+        // assertEquals("The oncogenicity should be 'Unknown'", Oncogenicity.UNKNOWN.getOncogenic(), indicatorQueryResp.getOncogenic());
+        // assertEquals("The mutation effect is not unknown, but it should be.", MutationEffect.UNKNOWN.getMutationEffect(), indicatorQueryResp.getMutationEffect().getKnownEffect());
 
+        // // Check special variant VUS abbreviation
+        // query = new Query(null, null, null, "BRD4", "VUS", null, null, null, null, null, null, null);
+        // indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null);
+        // assertTrue("The variantExist in the response is not true, but it should.", indicatorQueryResp.getVariantExist() == true);
+        
         // Test R2 data
         query = new Query(null, null, null, "ALK", "I1171N", null, null, "Lung Adenocarcinoma", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null);
