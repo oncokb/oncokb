@@ -459,17 +459,21 @@ public final class AlterationUtils {
         return alterations;
     }
 
+    public static Set<Alteration> getVUS(Alteration alteration){
+        Set<Alteration> result = new HashSet<>();
+        Gene gene = alteration.getGene();
+        if (CacheUtils.isEnabled()) {
+            result = CacheUtils.getVUS(gene.getEntrezGeneId());
+        } else {
+            result = AlterationUtils.findVUSFromEvidences(EvidenceUtils.getEvidenceByGenes(Collections.singleton(gene)).get(gene));
+        }
+        return result;
+    }
     public static List<Alteration> excludeVUS(List<Alteration> alterations) {
         List<Alteration> result = new ArrayList<>();
 
         for (Alteration alteration : alterations) {
-            Set<Alteration> VUS = new HashSet<>();
-            Gene gene = alteration.getGene();
-            if (CacheUtils.isEnabled()) {
-                VUS = CacheUtils.getVUS(gene.getEntrezGeneId());
-            } else {
-                VUS = AlterationUtils.findVUSFromEvidences(EvidenceUtils.getEvidenceByGenes(Collections.singleton(gene)).get(gene));
-            }
+            Set<Alteration> VUS = AlterationUtils.getVUS(alteration);
             if (!VUS.contains(alteration)) {
                 result.add(alteration);
             }
