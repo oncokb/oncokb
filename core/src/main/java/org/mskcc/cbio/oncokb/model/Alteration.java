@@ -85,6 +85,12 @@ public class Alteration implements java.io.Serializable {
     @Column(name = "variant_residues")
     private String variantResidues;
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "alteration_reference_genome", joinColumns = @JoinColumn(name = "alteration_id", nullable = false))
+    @Column(length = 10, name = "reference_genome")
+    @Enumerated(EnumType.STRING)
+    private Set<ReferenceGenome> referenceGenomes = new HashSet<>(0);
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "portal_alteration_oncokb_alteration", joinColumns = {
         @JoinColumn(name = "oncokb_alteration_id", nullable = false, updatable = false)},
@@ -193,6 +199,14 @@ public class Alteration implements java.io.Serializable {
 
     public void setVariantResidues(String variantResidues) {
         this.variantResidues = variantResidues;
+    }
+
+    public Set<ReferenceGenome> getReferenceGenomes() {
+        return referenceGenomes;
+    }
+
+    public void setReferenceGenomes(Set<ReferenceGenome> referenceGenomes) {
+        this.referenceGenomes = referenceGenomes;
     }
 
     @Override

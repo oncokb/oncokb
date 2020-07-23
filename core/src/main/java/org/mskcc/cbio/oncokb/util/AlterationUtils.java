@@ -55,6 +55,64 @@ public final class AlterationUtils {
         return overlaps;
     }
 
+    public static List<Alteration> parseMutationString(String mutationStr) {
+        List<Alteration> ret = new ArrayList<>();
+
+        mutationStr = mutationStr.replaceAll("\\([^\\)]+\\)", ""); // remove comments first
+
+        String[] parts = mutationStr.split(", *");
+
+        Pattern p = Pattern.compile("([A-Z][0-9]+)([^0-9/]+/.+)", Pattern.CASE_INSENSITIVE);
+        Pattern rgp = Pattern.compile("(((grch37)|(grch38)):\\s*).*", Pattern.CASE_INSENSITIVE);
+        for (String part : parts) {
+            String proteinChange, displayName;
+            part = part.trim();
+
+            Matcher rgm = rgp.matcher(part);
+            Set<ReferenceGenome> referenceGenomes = new HashSet<>();
+            if (rgm.find()) {
+                String referenceGenome = rgm.group(2);
+                ReferenceGenome matchedReferenceGenome = ReferenceGenome.valueOf(referenceGenome.toUpperCase());
+                if (matchedReferenceGenome != null) {
+                    referenceGenomes.add(matchedReferenceGenome);
+                }
+                part = part.replace(rgm.group(1), "");
+            } else {
+                referenceGenomes.add(ReferenceGenome.GRCH37);
+                referenceGenomes.add(ReferenceGenome.GRCH38);
+            }
+
+            if (part.contains("[")) {
+                int l = part.indexOf("[");
+                int r = part.indexOf("]");
+                proteinChange = part.substring(0, l).trim();
+                displayName = part.substring(l + 1, r).trim();
+            } else {
+                proteinChange = part;
+                displayName = part;
+            }
+
+            Matcher m = p.matcher(proteinChange);
+            if (m.find()) {
+                String ref = m.group(1);
+                for (String var : m.group(2).split("/")) {
+                    Alteration alteration = new Alteration();
+                    alteration.setAlteration(ref + var);
+                    alteration.setName(ref + var);
+                    alteration.setReferenceGenomes(referenceGenomes);
+                    ret.add(alteration);
+                }
+            } else {
+                Alteration alteration = new Alteration();
+                alteration.setAlteration(proteinChange);
+                alteration.setName(displayName);
+                alteration.setReferenceGenomes(referenceGenomes);
+                ret.add(alteration);
+            }
+        }
+        return ret;
+    }
+
     public static void annotateAlteration(Alteration alteration, String proteinChange) {
         String consequence = "NA";
         String ref = null;
@@ -459,7 +517,7 @@ public final class AlterationUtils {
         return alterations;
     }
 
-    public static Set<Alteration> getVUS(Alteration alteration){
+    public static Set<Alteration> getVUS(Alteration alteration) {
         Set<Alteration> result = new HashSet<>();
         Gene gene = alteration.getGene();
         if (CacheUtils.isEnabled()) {
@@ -469,6 +527,7 @@ public final class AlterationUtils {
         }
         return result;
     }
+
     public static List<Alteration> excludeVUS(List<Alteration> alterations) {
         List<Alteration> result = new ArrayList<>();
 
@@ -792,6 +851,7 @@ public final class AlterationUtils {
         }
         return null;
     }
+
     public static List<Alteration> lookupVariant(String query, Boolean exactMatch, Set<Alteration> alterations) {
         List<Alteration> alterationList = new ArrayList<>();
         // Only support columns(alteration/name) blur search.
@@ -933,7 +993,6 @@ public final class AlterationUtils {
     }
 
     /**
-     *
      * @param alteration Annotated alteration
      * @return A list of alterations we consider the same
      */
@@ -1064,7 +1123,7 @@ public final class AlterationUtils {
             && alteration.getVariantResidues() == null
             && alteration.getConsequence() != null
             && alteration.getConsequence().getTerm().equals("NA")
-            )
+        )
             isPositionVariant = true;
         return isPositionVariant;
     }
