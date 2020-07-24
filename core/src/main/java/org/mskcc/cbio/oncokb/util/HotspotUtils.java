@@ -103,7 +103,7 @@ public class HotspotUtils {
 
         AlterationUtils.annotateAlteration(alteration, alteration.getAlteration());
 
-        ProteinLocation proteinLocation = new ProteinLocation(alteration.getGene().getCuratedIsoform(), alteration.getProteinStart(), alteration.getProteinEnd(), toGNMutationType(alteration.getConsequence()));
+        ProteinLocation proteinLocation = new ProteinLocation(alteration.getGene().getGrch37Isoform(), alteration.getProteinStart(), alteration.getProteinEnd(), toGNMutationType(alteration.getConsequence()));
         List<EnrichedHotspot> hotspots = new ArrayList<>();
 
         if (hotspotMutations.get(alteration.getGene()) == null) {

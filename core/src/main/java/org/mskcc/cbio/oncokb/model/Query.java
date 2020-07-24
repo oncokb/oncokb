@@ -12,6 +12,7 @@ import org.mskcc.cbio.oncokb.util.QueryUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
 import static org.mskcc.cbio.oncokb.util.GeneAnnotatorMyGeneInfo2.findGeneFromCBioPortal;
 
 
@@ -20,6 +21,7 @@ import static org.mskcc.cbio.oncokb.util.GeneAnnotatorMyGeneInfo2.findGeneFromCB
  */
 public class Query implements java.io.Serializable {
     private String id; //Optional, This id is passed from request. The identifier used to distinguish the query
+    private ReferenceGenome referenceGenome = DEFAULT_REFERENCE_GENOME;
     private String type; // Query type. Different type may return different result.
     private String hugoSymbol;
     private Integer entrezGeneId;
@@ -130,10 +132,11 @@ public class Query implements java.io.Serializable {
         this.setTumorType(tumorType);
     }
 
-    public Query(String id, String type, Integer entrezGeneId, String hugoSymbol,
+    public Query(String id, ReferenceGenome referenceGenome, String type, Integer entrezGeneId, String hugoSymbol,
                  String alteration, String alterationType, StructuralVariantType svType,
                  String tumorType, String consequence, Integer proteinStart, Integer proteinEnd, String hgvs) {
         this.id = id;
+        this.referenceGenome = referenceGenome == null ? DEFAULT_REFERENCE_GENOME : referenceGenome;
         this.type = type;
         if (hugoSymbol != null && !hugoSymbol.isEmpty()) {
             this.hugoSymbol = hugoSymbol;
@@ -146,7 +149,7 @@ public class Query implements java.io.Serializable {
         this.consequence = consequence;
         this.proteinStart = proteinStart;
         this.proteinEnd = proteinEnd;
-        this.setHgvs(hgvs);
+        this.setHgvs(hgvs, referenceGenome);
     }
 
     public String getId() {
@@ -155,6 +158,14 @@ public class Query implements java.io.Serializable {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public ReferenceGenome getReferenceGenome() {
+        return referenceGenome;
+    }
+
+    public void setReferenceGenome(ReferenceGenome referenceGenome) {
+        this.referenceGenome = referenceGenome;
     }
 
     public String getType() {
@@ -247,10 +258,10 @@ public class Query implements java.io.Serializable {
         return hgvs;
     }
 
-    public void setHgvs(String hgvs) {
+    public void setHgvs(String hgvs, ReferenceGenome referenceGenome) {
         this.hgvs = hgvs;
         if (hgvs != null && !hgvs.trim().isEmpty()) {
-            Alteration alteration = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, hgvs);
+            Alteration alteration = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, hgvs, referenceGenome);
             if (alteration != null) {
                 if (alteration.getGene() != null) {
                     this.hugoSymbol = alteration.getGene().getHugoSymbol();

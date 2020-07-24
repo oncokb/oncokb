@@ -3,10 +3,7 @@ package org.mskcc.cbio.oncokb.api.pub.v1;
 import io.swagger.annotations.ApiParam;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
-import org.mskcc.cbio.oncokb.model.Alteration;
-import org.mskcc.cbio.oncokb.model.AlterationType;
-import org.mskcc.cbio.oncokb.model.Gene;
-import org.mskcc.cbio.oncokb.model.VariantSearchQuery;
+import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.service.JsonResultFactory;
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
@@ -44,9 +41,10 @@ public class VariantsApiController implements VariantsApi {
         , @ApiParam(value = "") @RequestParam(value = "proteinStart", required = false) Integer proteinStart
         , @ApiParam(value = "") @RequestParam(value = "proteinEnd", required = false) Integer proteinEnd
         , @ApiParam(value = "HGVS varaint. Its priority is higher than entrezGeneId/hugoSymbol + variant combination") @RequestParam(value = "hgvs", required = false) String hgvs
+        , @ApiParam(value = "Reference genome, either GRCH37 or GRCH38", required = true) @RequestParam(value = "referenceGenome", required = true) ReferenceGenome referenceGenome
         , @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
     ) {
-        VariantSearchQuery query = new VariantSearchQuery(entrezGeneId, hugoSymbol, variant, variantType, consequence, proteinStart, proteinEnd, hgvs);
+        VariantSearchQuery query = new VariantSearchQuery(entrezGeneId, hugoSymbol, variant, variantType, consequence, proteinStart, proteinEnd, hgvs, referenceGenome);
         return ResponseEntity.ok().body(JsonResultFactory.getAlteration(getVariants(query), fields));
     }
 
@@ -69,7 +67,7 @@ public class VariantsApiController implements VariantsApi {
         List<Alteration> alterationList = new ArrayList<>();
         if (query != null) {
             if (query.getHgvs() != null && !query.getHgvs().isEmpty()) {
-                Alteration alteration = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, query.getHgvs());
+                Alteration alteration = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, query.getHgvs(), query.getReferenceGenome());
                 if (alteration != null && alteration.getGene() != null) {
                     Set<Alteration> allAlterations = AlterationUtils.getAllAlterations(alteration.getGene());
                     alterationList.addAll(ApplicationContextSingleton.getAlterationBo().findRelevantAlterations(alteration, allAlterations, true));

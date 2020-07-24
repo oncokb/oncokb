@@ -7,6 +7,7 @@ import org.mskcc.cbio.oncokb.genomenexus.TranscriptConsequence;
 import org.mskcc.cbio.oncokb.genomenexus.VEPDetailedEnrichmentService;
 import org.mskcc.cbio.oncokb.genomenexus.VariantAnnotation;
 import org.mskcc.cbio.oncokb.model.Gene;
+import org.mskcc.cbio.oncokb.model.ReferenceGenome;
 
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -19,22 +20,44 @@ import java.util.List;
 public class GenomeNexusUtils {
     private static final String HGVS_ENDPOINT = "annotation";
     private static final String GENOMIC_LOCATION_ENDPOINT = "annotation/genomic";
-    private static final String GENOME_NEXUS_DEFAULT_API = "https://genomenexus.org/";
+    private static final String GENOME_NEXUS_GRCH37_API = "https://www.genomenexus.org/";
+    private static final String GENOME_NEXUS_GRCH38_API = "https://grch38.genomenexus.org/";
 
-    public static TranscriptConsequence getTranscriptConsequence(GNVariantAnnotationType type, String query) {
-        VariantAnnotation annotation = getVariantAnnotation(type, query);
-        return getConsequence(annotation);
+    public static TranscriptConsequence getTranscriptConsequence(GNVariantAnnotationType type, String query, ReferenceGenome referenceGenome) {
+        VariantAnnotation annotation = getVariantAnnotation(type, query, referenceGenome);
+        return getConsequence(annotation, referenceGenome);
     }
 
-    private static VariantAnnotation getVariantAnnotation(GNVariantAnnotationType type, String query) {
+    private static String getGenomeNexusApi(ReferenceGenome referenceGenome) {
+        switch (referenceGenome) {
+            case GRCH37:
+                return GENOME_NEXUS_GRCH37_API;
+            case GRCH38:
+                return GENOME_NEXUS_GRCH38_API;
+            default:
+                return "";
+        }
+    }
+
+    private static String getIsoform(Gene gene, ReferenceGenome referenceGenome) {
+        switch (referenceGenome) {
+            case GRCH37:
+                return gene.getGrch37Isoform();
+            case GRCH38:
+                return gene.getGrch38Isoform();
+            default:
+                return "";
+        }
+    }
+
+    private static VariantAnnotation getVariantAnnotation(GNVariantAnnotationType type, String query, ReferenceGenome referenceGenome) {
         VariantAnnotation variantAnnotation = null;
         if (query != null && type != null) {
             String encodedQuery = "";
-            String genomeNexusApi = GENOME_NEXUS_DEFAULT_API;
+            String genomeNexusApi = getGenomeNexusApi(referenceGenome);
             try {
-                genomeNexusApi = PropertiesUtils.getProperties("genomenexus.api");
-                if (genomeNexusApi == null) {
-                    genomeNexusApi = GENOME_NEXUS_DEFAULT_API;
+                if (StringUtils.isEmpty(genomeNexusApi)) {
+                    return null;
                 }
                 encodedQuery = URLEncoder.encode(query, "UTF-8");
             } catch (IOException e) {
@@ -61,7 +84,7 @@ public class GenomeNexusUtils {
         return variantAnnotation;
     }
 
-    private static TranscriptConsequence getConsequence(VariantAnnotation variantAnnotation) {
+    private static TranscriptConsequence getConsequence(VariantAnnotation variantAnnotation, ReferenceGenome referenceGenome) {
         List<TranscriptConsequence> transcripts = new ArrayList<>();
 
         if (variantAnnotation == null) {
@@ -72,7 +95,8 @@ public class GenomeNexusUtils {
             for (TranscriptConsequence transcript : variantAnnotation.getTranscriptConsequences()) {
                 if (transcript.getGeneSymbol() != null && transcript.getTranscriptId() != null) {
                     Gene gene = GeneUtils.getGeneByHugoSymbol(transcript.getGeneSymbol());
-                    if (gene != null && (gene.getCuratedIsoform() == null || gene.getCuratedIsoform().equals(transcript.getTranscriptId()))) {
+                    String isoform = getIsoform(gene, referenceGenome);
+                    if (gene != null && (StringUtils.isEmpty(isoform) || isoform.equals(transcript.getTranscriptId()))) {
                         transcripts.add(transcript);
                     }
                 }
