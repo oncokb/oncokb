@@ -1072,12 +1072,13 @@ public class EvidenceUtils {
         }
 
         evidence.setGene(gene);
-        Set<Alteration> queryAlterations = evidence.getAlterations();
-        if (queryAlterations != null && !queryAlterations.isEmpty()) {
+        List<Alteration> parsedAlterations = new ArrayList<>();
+        if (evidence.getAlterations() != null && !evidence.getAlterations().isEmpty()) {
             AlterationType type = AlterationType.MUTATION;
             Set<Alteration> alterations = new HashSet<Alteration>();
             AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
-            for (Alteration alt : queryAlterations) {
+            evidence.getAlterations().stream().forEach(alteration -> parsedAlterations.addAll(AlterationUtils.parseMutationString(alteration.getAlteration())));
+            for (Alteration alt : parsedAlterations) {
                 String proteinChange = alt.getAlteration();
                 String displayName = alt.getName();
                 Alteration alteration = alterationBo.findAlterationFromDao(gene, type, proteinChange, displayName);
@@ -1087,6 +1088,7 @@ public class EvidenceUtils {
                     alteration.setAlterationType(type);
                     alteration.setAlteration(proteinChange);
                     alteration.setName(displayName);
+                    alteration.setReferenceGenomes(alt.getReferenceGenomes());
                     AlterationUtils.annotateAlteration(alteration, proteinChange);
                     alterationBo.save(alteration);
                 }
