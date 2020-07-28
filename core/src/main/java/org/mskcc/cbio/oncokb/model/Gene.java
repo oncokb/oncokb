@@ -45,11 +45,17 @@ public class Gene implements Serializable {
     private Boolean TSG;
     private Boolean oncogene;
 
-    @Column(name = "curated_isoform", length = 100)
-    private String curatedIsoform;
+    @Column(name = "grch37_isoform", length = 100)
+    private String grch37Isoform;
 
-    @Column(name = "curated_ref_seq", length = 100)
-    private String curatedRefSeq;
+    @Column(name = "grch37_ref_seq", length = 100)
+    private String grch37RefSeq;
+
+    @Column(name = "grch38_isoform", length = 100)
+    private String grch38Isoform;
+
+    @Column(name = "grch38_ref_seq", length = 100)
+    private String grch38RefSeq;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "gene_alias", joinColumns = @JoinColumn(name = "entrez_gene_id", nullable = false))
@@ -130,20 +136,36 @@ public class Gene implements Serializable {
         this.oncogene = oncogene;
     }
 
-    public String getCuratedIsoform() {
-        return curatedIsoform;
+    public String getGrch37Isoform() {
+        return grch37Isoform;
     }
 
-    public void setCuratedIsoform(String curatedIsoform) {
-        this.curatedIsoform = curatedIsoform;
+    public void setGrch37Isoform(String grch37Isoform) {
+        this.grch37Isoform = grch37Isoform;
     }
 
-    public String getCuratedRefSeq() {
-        return curatedRefSeq;
+    public String getGrch37RefSeq() {
+        return grch37RefSeq;
     }
 
-    public void setCuratedRefSeq(String curatedRefSeq) {
-        this.curatedRefSeq = curatedRefSeq;
+    public void setGrch37RefSeq(String grch37RefSeq) {
+        this.grch37RefSeq = grch37RefSeq;
+    }
+
+    public String getGrch38Isoform() {
+        return grch38Isoform;
+    }
+
+    public void setGrch38Isoform(String grch38Isoform) {
+        this.grch38Isoform = grch38Isoform;
+    }
+
+    public String getGrch38RefSeq() {
+        return grch38RefSeq;
+    }
+
+    public void setGrch38RefSeq(String grch38RefSeq) {
+        this.grch38RefSeq = grch38RefSeq;
     }
 
     public Set<Geneset> getGenesets() {

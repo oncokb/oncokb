@@ -21,6 +21,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
+
 /**
  * Created by Hongxin Zhang on 2019-03-25.
  */
@@ -55,7 +57,7 @@ public class AnnotationsApiController {
         if (entrezGeneId != null && hugoSymbol != null && !GeneUtils.isSameGene(entrezGeneId, hugoSymbol)) {
             status = HttpStatus.BAD_REQUEST;
         } else {
-            Query query = new Query(null, AnnotationQueryType.REGULAR.getName(), entrezGeneId, hugoSymbol, proteinChange, null, null, tumorType, consequence, proteinStart, proteinEnd, null);
+            Query query = new Query(null, DEFAULT_REFERENCE_GENOME, AnnotationQueryType.REGULAR.getName(), entrezGeneId, hugoSymbol, proteinChange, null, null, tumorType, consequence, proteinStart, proteinEnd, null);
             indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
         }
         return new ResponseEntity<>(indicatorQueryResp, status);
@@ -99,13 +101,14 @@ public class AnnotationsApiController {
         method = RequestMethod.GET)
     public ResponseEntity<IndicatorQueryResp> annotateMutationsByGenomicChangeGet(
         @ApiParam(value = "Genomic location. Example: 7,140453136,140453136,A,T", required = true) @RequestParam(value = "genomicLocation", required = true) String genomicLocation
+        , @ApiParam(value = "Reference genome, either GRCH37 or GRCH38", required = true) @RequestParam(value = "referenceGenome", required = true) ReferenceGenome referenceGenome
         , @ApiParam(value = "OncoTree(http://oncotree.mskcc.org) tumor type name. The field supports OncoTree Code, OncoTree Name and OncoTree Main type. Example: Melanoma") @RequestParam(value = "tumorType", required = false) String tumorType
         , @ApiParam(value = EVIDENCE_TYPES_DESCRIPTION) @RequestParam(value = "evidenceType", required = false) String evidenceTypes
     ) {
         HttpStatus status = HttpStatus.OK;
         IndicatorQueryResp indicatorQueryResp = null;
 
-        indicatorQueryResp = getIndicatorQueryFromGenomicLocation(genomicLocation, tumorType, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
+        indicatorQueryResp = getIndicatorQueryFromGenomicLocation(referenceGenome, genomicLocation, tumorType, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
         return new ResponseEntity<>(indicatorQueryResp, status);
     }
 
@@ -129,17 +132,17 @@ public class AnnotationsApiController {
             status = HttpStatus.BAD_REQUEST;
         } else {
             for (AnnotateMutationByGenomicChangeQuery query : body) {
-                result.add(getIndicatorQueryFromGenomicLocation(query.getGenomicLocation(), query.getTumorType(), query.getEvidenceTypes()));
+                result.add(getIndicatorQueryFromGenomicLocation(query.getReferenceGenome(), query.getGenomicLocation(), query.getTumorType(), query.getEvidenceTypes()));
             }
         }
         return new ResponseEntity<>(result, status);
     }
 
-    private IndicatorQueryResp getIndicatorQueryFromGenomicLocation(String genomicLocation, String tumorType, Set<EvidenceType> evidenceTypes) {
-        Alteration alteration = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, genomicLocation);
+    private IndicatorQueryResp getIndicatorQueryFromGenomicLocation(ReferenceGenome referenceGenome, String genomicLocation, String tumorType, Set<EvidenceType> evidenceTypes) {
+        Alteration alteration = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, genomicLocation, referenceGenome);
         Query query = new Query();
         if (alteration != null) {
-            query = new Query(null, AnnotationQueryType.REGULAR.getName(), null, alteration.getGene().getHugoSymbol(), alteration.getAlteration(), null, null, tumorType, alteration.getConsequence() == null ? null : alteration.getConsequence().getTerm(), alteration.getProteinStart(), alteration.getProteinEnd(), null);
+            query = new Query(null, referenceGenome, AnnotationQueryType.REGULAR.getName(), null, alteration.getGene().getHugoSymbol(), alteration.getAlteration(), null, null, tumorType, alteration.getConsequence() == null ? null : alteration.getConsequence().getTerm(), alteration.getProteinStart(), alteration.getProteinEnd(), null);
         }
         return IndicatorUtils.processQuery(query, null, false, evidenceTypes);
     }
@@ -156,6 +159,7 @@ public class AnnotationsApiController {
         method = RequestMethod.GET)
     public ResponseEntity<IndicatorQueryResp> annotateMutationsByHGVSgGet(
         @ApiParam(value = "HGVS genomic format. Example: 7:g.140453136A>T", required = true) @RequestParam(value = "hgvsg", required = true) String hgvsg
+        , @ApiParam(value = "Reference genome, either GRCH37 or GRCH38", required = true) @RequestParam(value = "referenceGenome", required = true) ReferenceGenome referenceGenome
         , @ApiParam(value = "OncoTree(http://oncotree.mskcc.org) tumor type name. The field supports OncoTree Code, OncoTree Name and OncoTree Main type. Example: Melanoma") @RequestParam(value = "tumorType", required = false) String tumorType
         , @ApiParam(value = EVIDENCE_TYPES_DESCRIPTION) @RequestParam(value = "evidenceType", required = false) String evidenceTypes
     ) {
@@ -165,7 +169,7 @@ public class AnnotationsApiController {
         if (hgvsg == null) {
             status = HttpStatus.BAD_REQUEST;
         } else {
-            Query query = new Query(null, "regular", null, null, null, null, null, tumorType, null, null, null, hgvsg);
+            Query query = new Query(null, referenceGenome, "regular", null, null, null, null, null, tumorType, null, null, null, hgvsg);
             indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
         }
         return new ResponseEntity<>(indicatorQueryResp, status);
@@ -220,7 +224,7 @@ public class AnnotationsApiController {
         if (entrezGeneId != null && hugoSymbol != null && !GeneUtils.isSameGene(entrezGeneId, hugoSymbol)) {
             status = HttpStatus.BAD_REQUEST;
         } else {
-            Query query = new Query(null, AnnotationQueryType.REGULAR.getName(), entrezGeneId, hugoSymbol, StringUtils.capitalize(copyNameAlterationType.name().toLowerCase()), null, null, tumorType, null, null, null, null);
+            Query query = new Query(null, DEFAULT_REFERENCE_GENOME, AnnotationQueryType.REGULAR.getName(), entrezGeneId, hugoSymbol, StringUtils.capitalize(copyNameAlterationType.name().toLowerCase()), null, null, tumorType, null, null, null, null);
             indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
         }
         return new ResponseEntity<>(indicatorQueryResp, status);
@@ -297,7 +301,7 @@ public class AnnotationsApiController {
             if (hugoSymbolA == null || hugoSymbolB == null) {
                 status = HttpStatus.BAD_REQUEST;
             } else {
-                Query query = new Query(null, AnnotationQueryType.REGULAR.getName(), null, hugoSymbolA + "-" + hugoSymbolB, null, AlterationType.STRUCTURAL_VARIANT.name(), structuralVariantType, tumorType, isFunctionalFusion ? "fusion" : null, null, null, null);
+                Query query = new Query(null, DEFAULT_REFERENCE_GENOME, AnnotationQueryType.REGULAR.getName(), null, hugoSymbolA + "-" + hugoSymbolB, null, AlterationType.STRUCTURAL_VARIANT.name(), structuralVariantType, tumorType, isFunctionalFusion ? "fusion" : null, null, null, null);
                 indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
             }
         }

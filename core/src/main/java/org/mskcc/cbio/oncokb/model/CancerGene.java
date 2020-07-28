@@ -8,8 +8,10 @@ import java.util.Objects;
 public class CancerGene {
     private String hugoSymbol;
     private Integer entrezGeneId;
-    private String isoform = "";
-    private String refSeq = "";
+    private String grch37Isoform = "";
+    private String grch37RefSeq = "";
+    private String grch38Isoform = "";
+    private String grch38RefSeq = "";
     private Boolean oncokbAnnotated = false;
     private Integer occurrenceCount = 0;
     private Boolean mSKImpact = false;
@@ -37,20 +39,36 @@ public class CancerGene {
         this.entrezGeneId = entrezGeneId;
     }
 
-    public String getIsoform() {
-        return isoform;
+    public String getGrch37Isoform() {
+        return grch37Isoform;
     }
 
-    public void setIsoform(String isoform) {
-        this.isoform = isoform;
+    public void setGrch37Isoform(String grch37Isoform) {
+        this.grch37Isoform = grch37Isoform;
     }
 
-    public String getRefSeq() {
-        return refSeq;
+    public String getGrch37RefSeq() {
+        return grch37RefSeq;
     }
 
-    public void setRefSeq(String refSeq) {
-        this.refSeq = refSeq;
+    public void setGrch37RefSeq(String grch37RefSeq) {
+        this.grch37RefSeq = grch37RefSeq;
+    }
+
+    public String getGrch38Isoform() {
+        return grch38Isoform;
+    }
+
+    public void setGrch38Isoform(String grch38Isoform) {
+        this.grch38Isoform = grch38Isoform;
+    }
+
+    public String getGrch38RefSeq() {
+        return grch38RefSeq;
+    }
+
+    public void setGrch38RefSeq(String grch38RefSeq) {
+        this.grch38RefSeq = grch38RefSeq;
     }
 
     public Boolean getOncokbAnnotated() {

@@ -437,10 +437,10 @@ public final class AlterationUtils {
         return alt;
     }
 
-    public static Alteration getAlterationFromGenomeNexus(GNVariantAnnotationType type, String query) {
+    public static Alteration getAlterationFromGenomeNexus(GNVariantAnnotationType type, String query, ReferenceGenome referenceGenome) {
         Alteration alteration = null;
         if (query != null && !query.trim().isEmpty()) {
-            TranscriptConsequence transcriptConsequence = GenomeNexusUtils.getTranscriptConsequence(type, query);
+            TranscriptConsequence transcriptConsequence = GenomeNexusUtils.getTranscriptConsequence(type, query, referenceGenome);
             if (transcriptConsequence != null) {
                 String hugoSymbol = transcriptConsequence.getGeneSymbol();
                 Gene gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);

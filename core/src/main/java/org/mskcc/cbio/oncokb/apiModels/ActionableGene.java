@@ -6,8 +6,10 @@ import io.swagger.annotations.ApiModelProperty;
  * Created by Hongxin on 10/28/16.
  */
 public class ActionableGene {
-    String isoform;
-    String refSeq;
+    String grch37Isoform;
+    String grch37RefSeq;
+    String grch38Isoform;
+    String grch38RefSeq;
     Integer entrezGeneId;
     String gene;
     String variant;
@@ -18,20 +20,36 @@ public class ActionableGene {
     String pmids;
     String abstracts;
 
-    public String getIsoform() {
-        return isoform;
+    public String getGrch37Isoform() {
+        return grch37Isoform;
     }
 
-    public void setIsoform(String isoform) {
-        this.isoform = isoform;
+    public void setGrch37Isoform(String grch37Isoform) {
+        this.grch37Isoform = grch37Isoform;
     }
 
-    public String getRefSeq() {
-        return refSeq;
+    public String getGrch37RefSeq() {
+        return grch37RefSeq;
     }
 
-    public void setRefSeq(String refSeq) {
-        this.refSeq = refSeq;
+    public void setGrch37RefSeq(String grch37RefSeq) {
+        this.grch37RefSeq = grch37RefSeq;
+    }
+
+    public String getGrch38Isoform() {
+        return grch38Isoform;
+    }
+
+    public void setGrch38Isoform(String grch38Isoform) {
+        this.grch38Isoform = grch38Isoform;
+    }
+
+    public String getGrch38RefSeq() {
+        return grch38RefSeq;
+    }
+
+    public void setGrch38RefSeq(String grch38RefSeq) {
+        this.grch38RefSeq = grch38RefSeq;
     }
 
     public Integer getEntrezGeneId() {
@@ -106,9 +124,11 @@ public class ActionableGene {
         this.abstracts = abstracts;
     }
 
-    public ActionableGene(String isoform, String refSeq, Integer entrezGeneId, String gene, String variant, String proteinChange, String cancerType, String level, String drugs, String pmids, String abstracts) {
-        this.isoform = isoform;
-        this.refSeq = refSeq;
+    public ActionableGene(String grch37Isoform, String grch37RefSeq, String grch38Isoform, String grch38RefSeq, Integer entrezGeneId, String gene, String variant, String proteinChange, String cancerType, String level, String drugs, String pmids, String abstracts) {
+        this.grch37Isoform = grch37Isoform;
+        this.grch37RefSeq = grch37RefSeq;
+        this.grch38Isoform = grch38Isoform;
+        this.grch38RefSeq = grch38RefSeq;
         this.entrezGeneId = entrezGeneId;
         this.gene = gene;
         this.variant = variant;

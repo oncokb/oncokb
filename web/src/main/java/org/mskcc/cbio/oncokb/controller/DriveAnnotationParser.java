@@ -136,14 +136,22 @@ public class DriveAnnotationParser {
             }
         }
 
-        String isoform = geneInfo.has("isoform_override") ? geneInfo.getString("isoform_override") : null;
-        String refSeq = geneInfo.has("dmp_refseq_id") ? geneInfo.getString("dmp_refseq_id") : null;
+        String grch37Isoform = geneInfo.has("isoform_override") ? geneInfo.getString("isoform_override") : null;
+        String grch37RefSeq = geneInfo.has("dmp_refseq_id") ? geneInfo.getString("dmp_refseq_id") : null;
+        String grch38Isoform = geneInfo.has("isoform_override_grch38") ? geneInfo.getString("isoform_override_grch38") : null;
+        String grch38RefSeq = geneInfo.has("dmp_refseq_id_grch38") ? geneInfo.getString("dmp_refseq_id_grch38") : null;
 
-        if (isoform != null) {
-            gene.setCuratedIsoform(isoform);
+        if (grch37Isoform != null) {
+            gene.setGrch37Isoform(grch37Isoform);
         }
-        if (refSeq != null) {
-            gene.setCuratedRefSeq(refSeq);
+        if (grch37RefSeq != null) {
+            gene.setGrch37RefSeq(grch37RefSeq);
+        }
+        if (grch38Isoform != null) {
+            gene.setGrch38Isoform(grch38Isoform);
+        }
+        if (grch38RefSeq != null) {
+            gene.setGrch38RefSeq(grch38RefSeq);
         }
     }
 
