@@ -324,7 +324,7 @@ public class DriveAnnotationParser {
                     alteration.setGene(gene);
                     alteration.setAlterationType(type);
                     alteration.setAlteration(mutation.getAlteration());
-                    alteration.setName(alteration.getName());
+                    alteration.setName(mutation.getName());
                     alteration.setReferenceGenomes(mutation.getReferenceGenomes());
                     AlterationUtils.annotateAlteration(alteration, mutation.getAlteration());
                     alterationBo.save(alteration);

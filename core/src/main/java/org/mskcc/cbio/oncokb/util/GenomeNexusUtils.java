@@ -40,6 +40,9 @@ public class GenomeNexusUtils {
     }
 
     private static String getIsoform(Gene gene, ReferenceGenome referenceGenome) {
+        if (gene == null) {
+            return null;
+        }
         switch (referenceGenome) {
             case GRCH37:
                 return gene.getGrch37Isoform();

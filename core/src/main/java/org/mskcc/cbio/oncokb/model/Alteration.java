@@ -23,6 +23,10 @@ import java.util.*;
         query = "select a from Alteration a where a.gene=? and a.alteration=?"
     ),
     @NamedQuery(
+        name = "findAlterationAndReferenceGenome",
+        query = "select a from Alteration a join a.referenceGenomes r where a.gene=? and a.alteration=? and r=?"
+    ),
+    @NamedQuery(
         name = "findAlterationByAlterationAndName",
         query = "select a from Alteration a where a.gene=? and a.alteration=? and a.name=?"
     ),

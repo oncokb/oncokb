@@ -175,7 +175,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
 
             for (MatchVariant matchVariantRequestVariant : body.getOncokbVariants()) {
                 if (query.getHugoSymbol().equals(matchVariantRequestVariant.getHugoSymbol())) {
-                    boolean isMatch = matchVariant(query.getHugoSymbol(), matchVariantRequestVariant.getAlteration(), query.getAlteration());
+                    boolean isMatch = matchVariant(query.getHugoSymbol(), query.getReferenceGenome(), matchVariantRequestVariant.getAlteration(), query.getAlteration());
                     if (isMatch) {
                         match.add(matchVariantRequestVariant);
                     }
@@ -212,15 +212,15 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     }
 
     @Override
-    public ResponseEntity<Map<String, Boolean>> validateVariantExampleGet(String hugoSymbol, String variant, String examples) throws ParserConfigurationException, SAXException, IOException {
+    public ResponseEntity<Map<String, Boolean>> validateVariantExampleGet(String hugoSymbol, ReferenceGenome referenceGenome, String variant, String examples) throws ParserConfigurationException, SAXException, IOException {
         Map<String, Boolean> validation = new HashMap<>();
         for (String example : examples.split(",")) {
-            validation.put(example, matchVariant(hugoSymbol, variant, example));
+            validation.put(example, matchVariant(hugoSymbol, referenceGenome, variant, example));
         }
         return new ResponseEntity<>(validation, HttpStatus.OK);
     }
 
-    private boolean matchVariant(String hugoSymbol, String variant, String example) {
+    private boolean matchVariant(String hugoSymbol, ReferenceGenome referenceGenome, String variant, String example) {
         Gene gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
         boolean isMatched = false;
         if (gene != null) {
@@ -243,16 +243,16 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
 
             LinkedHashSet<Alteration> relevantAlterations = new LinkedHashSet<>();
             if (isGeneralAlteration) {
-                Set<Alteration> allAlterations = AlterationUtils.getAllAlterations(gene);
+                Set<Alteration> allAlterations = AlterationUtils.getAllAlterations(referenceGenome, gene);
 
                 // If the general alteration is not annotated system, at least we need to add
                 // it into the list for mapping.
-                Alteration exactMatch = AlterationUtils.findAlteration(gene, variant);
+                Alteration exactMatch = AlterationUtils.findAlteration(gene, referenceGenome, variant);
                 if (exactMatch == null) {
                     allAlterations = new HashSet<>(allAlterations);
                     allAlterations.add(oncokbVariant);
                 }
-                relevantAlterations = alterationBo.findRelevantAlterations(exampleVariant, allAlterations, true);
+                relevantAlterations = alterationBo.findRelevantAlterations(referenceGenome, exampleVariant, allAlterations, true);
                 for (Alteration alteration : relevantAlterations) {
                     if (alteration.getAlteration().toLowerCase().equals(variant.toLowerCase())) {
                         isMatched = true;
@@ -260,11 +260,11 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
                     }
                 }
             } else {
-                relevantAlterations = alterationBo.findRelevantAlterations(exampleVariant, Collections.singleton(oncokbVariant), false);
+                relevantAlterations = alterationBo.findRelevantAlterations(referenceGenome, exampleVariant, Collections.singleton(oncokbVariant), false);
 
 
                 // We should not do alternative allele rule in here
-                List<Alteration> alternativeAlleles = AlterationUtils.getAlleleAlterations(exampleVariant, Collections.singleton(oncokbVariant));
+                List<Alteration> alternativeAlleles = AlterationUtils.getAlleleAlterations(referenceGenome, exampleVariant, Collections.singleton(oncokbVariant));
                 relevantAlterations.removeAll(alternativeAlleles);
 
                 isMatched = relevantAlterations.size() > 0;
@@ -302,13 +302,14 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
 
     @Override
     public ResponseEntity<VariantAnnotation> utilVariantAnnotationGet(
-        @ApiParam(value = "hugoSymbol") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
-        , @ApiParam(value = "entrezGeneId") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
-        , @ApiParam(value = "Alteration") @RequestParam(value = "alteration", required = false) String alteration
-        , @ApiParam(value = "OncoTree tumor type name/main type/code") @RequestParam(value = "tumorType", required = false) String tumorType) {
+        String hugoSymbol
+        , Integer entrezGeneId
+        , ReferenceGenome referenceGenome
+        , String alteration
+        , String tumorType) {
 
         Gene gene = GeneUtils.getGene(entrezGeneId, hugoSymbol);
-        Alteration alterationModel = AlterationUtils.findAlteration(gene, alteration);
+        Alteration alterationModel = AlterationUtils.findAlteration(gene, referenceGenome, alteration);
         if (alterationModel == null) {
             alterationModel = AlterationUtils.getAlteration(gene.getHugoSymbol(), alteration, null, null, null, null);
         }

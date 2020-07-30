@@ -23,7 +23,7 @@ public class GenomeNexusUtilsTest extends TestCase {
         assertEquals("Picked transcript protein end is not 600, but it should.",
             "600", consequence.getProteinEnd());
         assertEquals("Picked transcript RefSeq is not the same with MSKIMPACT BRAF RefSeq, but it should.",
-            gene.getGrch37Isoform(), consequence.getRefSeq());
+            gene.getGrch37RefSeq(), consequence.getRefSeq());
         assertEquals("Picked transcript isoform is not the same with MSKIMPACT BRAF isoform, but it should.",
             gene.getGrch37Isoform(), consequence.getTranscriptId());
 

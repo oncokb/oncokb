@@ -71,7 +71,7 @@ public class SummaryUtils {
 
         List<Alteration> alternativeAlleles = new ArrayList<>();
         alternativeAlleles.add(alteration);
-        alternativeAlleles.addAll(AlterationUtils.getPositionedAlterations(alteration));
+        alternativeAlleles.addAll(AlterationUtils.getPositionedAlterations(query.getReferenceGenome(), alteration));
 
         alternativeAlleles = ListUtils.intersection(alternativeAlleles, relevantAlterations);
 
@@ -163,7 +163,7 @@ public class SummaryUtils {
             tumorTypeSummary.put("summary", tmpSummary);
         }
 
-        tumorTypeSummary.put("summary", replaceSpecialCharacterInTumorTypeSummary((String) tumorTypeSummary.get("summary"), gene, query.getAlteration(), query.getTumorType()));
+        tumorTypeSummary.put("summary", replaceSpecialCharacterInTumorTypeSummary((String) tumorTypeSummary.get("summary"), gene, query.getReferenceGenome(), query.getAlteration(), query.getTumorType()));
 
         return tumorTypeSummary;
     }
@@ -196,8 +196,8 @@ public class SummaryUtils {
         return null;
     }
 
-    public static String unknownOncogenicSummary(Gene gene, String queryAlteration) {
-        String str = gene == null ? "variant" : getGeneMutationNameInVariantSummary(gene, queryAlteration);
+    public static String unknownOncogenicSummary(Gene gene, ReferenceGenome referenceGenome, String queryAlteration) {
+        String str = gene == null ? "variant" : getGeneMutationNameInVariantSummary(gene, referenceGenome, queryAlteration);
         return "The " + str +
             " has not specifically been reviewed by the OncoKB team, and its oncogenic function is considered unknown.";
     }
@@ -277,12 +277,12 @@ public class SummaryUtils {
 
         if (oncogenic == null || oncogenic.equals(Oncogenicity.INCONCLUSIVE)) {
             // Get oncogenic summary from alternative alleles
-            List<Alteration> alternativeAlleles = AlterationUtils.getAlleleAlterations(alteration);
+            List<Alteration> alternativeAlleles = AlterationUtils.getAlleleAlterations(query.getReferenceGenome(), alteration);
             List<Alteration> alternativeAllelesWithoutVUS = AlterationUtils.excludeVUS(gene, alternativeAlleles);
 
             // VUS alternative alleles are not accounted into oncogenic summary calculation
             if (alternativeAllelesWithoutVUS.size() > 0) {
-                sb.append(alleleSummary(alteration));
+                sb.append(alleleSummary(query.getReferenceGenome(), alteration));
                 return sb.toString();
             }
 
@@ -326,12 +326,12 @@ public class SummaryUtils {
             return hotspotSummary(alteration, query, false);
         }
 
-        return unknownOncogenicSummary(gene, query.getAlteration());
+        return unknownOncogenicSummary(gene, query.getReferenceGenome(), query.getAlteration());
     }
 
-    private static String getVUSOncogenicSummary(Alteration alteration) {
+    private static String getVUSOncogenicSummary(ReferenceGenome referenceGenome, Alteration alteration) {
         List<Evidence> evidences = EvidenceUtils.getEvidence(Collections.singletonList(alteration), Collections.singleton(EvidenceType.VUS), null);
-        String summary = "there was no available functional data about the " + getGeneMutationNameInVariantSummary(alteration.getGene(), alteration.getAlteration()) + ".";
+        String summary = "there was no available functional data about the " + getGeneMutationNameInVariantSummary(alteration.getGene(), referenceGenome, alteration.getAlteration()) + ".";
         Date lastEdit = null;
         for (Evidence evidence : evidences) {
             if (evidence.getLastEdit() == null) {
@@ -353,7 +353,7 @@ public class SummaryUtils {
     private static String getOncogenicSummaryFromOncogenicity(Oncogenicity oncogenicity, Alteration alteration, Query query, Boolean isHotspot) {
         StringBuilder sb = new StringBuilder();
         String queryAlteration = query.getAlteration();
-        String altName = getGeneMutationNameInVariantSummary(alteration.getGene(), queryAlteration);
+        String altName = getGeneMutationNameInVariantSummary(alteration.getGene(), query.getReferenceGenome(), queryAlteration);
         Boolean appendThe = appendThe(queryAlteration);
         Boolean isPlural = false;
 
@@ -372,7 +372,7 @@ public class SummaryUtils {
                 if (isHotspot) {
                     return inconclusiveHotSpotSummary(alteration, query);
                 } else {
-                    return inconclusiveSummary(alteration.getGene(), queryAlteration);
+                    return inconclusiveSummary(alteration.getGene(), query.getReferenceGenome(), queryAlteration);
                 }
             }
             if (appendThe) {
@@ -444,14 +444,14 @@ public class SummaryUtils {
         return summary;
     }
 
-    public static String alleleSummary(Alteration alteration) {
+    public static String alleleSummary(ReferenceGenome referenceGenome, Alteration alteration) {
         StringBuilder sb = new StringBuilder();
 
-        String altStr = getGeneMutationNameInVariantSummary(alteration.getGene(), alteration.getAlteration());
+        String altStr = getGeneMutationNameInVariantSummary(alteration.getGene(), referenceGenome, alteration.getAlteration());
 
         sb.append("The " + altStr + " has not been functionally or clinically validated.");
 
-        Set<Alteration> alleles = new HashSet<>(AlterationUtils.getAlleleAlterations(alteration));
+        Set<Alteration> alleles = new HashSet<>(AlterationUtils.getAlleleAlterations(referenceGenome, alteration));
 
         Map<String, Object> map = geAlterationsWithHighestOncogenicity(new HashSet<>(alleles));
         Oncogenicity highestOncogenicity = (Oncogenicity) map.get("oncogenicity");
@@ -473,17 +473,17 @@ public class SummaryUtils {
         return sb.toString();
     }
 
-    public static String inconclusiveSummary(Gene gene, String queryAlteration) {
+    public static String inconclusiveSummary(Gene gene, ReferenceGenome referenceGenome, String queryAlteration) {
         StringBuilder sb = new StringBuilder();
         sb.append("There is conflicting and/or weak data describing the oncogenic function of the ");
-        sb.append(getGeneMutationNameInVariantSummary(gene, queryAlteration));
+        sb.append(getGeneMutationNameInVariantSummary(gene, referenceGenome, queryAlteration));
         sb.append(".");
         return sb.toString();
     }
 
     public static String inconclusiveHotSpotSummary(Alteration alteration, Query query) {
         StringBuilder sb = new StringBuilder();
-        sb.append(inconclusiveSummary(alteration.getGene(), query.getAlteration()));
+        sb.append(inconclusiveSummary(alteration.getGene(), query.getReferenceGenome(), query.getAlteration()));
         sb.append(" However, ");
         String hotspotSummary = hotspotSummary(alteration, query, true);
         sb.append(StringUtils.uncapitalize(hotspotSummary));
@@ -498,7 +498,7 @@ public class SummaryUtils {
         if (usePronoun) {
             sb.append("It");
         } else {
-            sb.append("The " + getGeneMutationNameInVariantSummary(alteration.getGene(), query.getAlteration()));
+            sb.append("The " + getGeneMutationNameInVariantSummary(alteration.getGene(), query.getReferenceGenome(), query.getAlteration()));
         }
         sb.append(" has been identified as a statistically significant hotspot and is predicted to be oncogenic");
         sb.append(hotspotLink(query));
@@ -529,7 +529,7 @@ public class SummaryUtils {
 
     private static String vusAndHotspotSummary(Alteration alteration, Query query, Boolean isHotspot) {
         StringBuilder sb = new StringBuilder();
-        sb.append(getVUSOncogenicSummary(alteration));
+        sb.append(getVUSOncogenicSummary(query.getReferenceGenome(), alteration));
 
         if (isHotspot) {
             sb.append(" However, it has been identified as a statistically significant hotspot and is predicted to be oncogenic");
@@ -665,14 +665,14 @@ public class SummaryUtils {
         return summary;
     }
 
-    public static String getGeneMutationNameInVariantSummary(Gene gene, String queryAlteration) {
+    public static String getGeneMutationNameInVariantSummary(Gene gene, ReferenceGenome referenceGenome, String queryAlteration) {
         StringBuilder sb = new StringBuilder();
         if (queryAlteration == null) {
             return "";
         } else {
             queryAlteration = queryAlteration.trim();
         }
-        Alteration alteration = AlterationUtils.findAlteration(gene, queryAlteration);
+        Alteration alteration = AlterationUtils.findAlteration(gene, referenceGenome, queryAlteration);
         if (alteration == null) {
             alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), queryAlteration, null, null, null, null);
             AlterationUtils.annotateAlteration(alteration, queryAlteration);
@@ -729,14 +729,14 @@ public class SummaryUtils {
         return sb.toString();
     }
 
-    public static String getGeneMutationNameInTumorTypeSummary(Gene gene, String queryAlteration) {
+    public static String getGeneMutationNameInTumorTypeSummary(Gene gene, ReferenceGenome referenceGenome, String queryAlteration) {
         StringBuilder sb = new StringBuilder();
         if (queryAlteration == null) {
             return "";
         } else {
             queryAlteration = queryAlteration.trim();
         }
-        Alteration alteration = AlterationUtils.findAlteration(gene, queryAlteration);
+        Alteration alteration = AlterationUtils.findAlteration(gene, referenceGenome, queryAlteration);
         if (alteration == null) {
             alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), queryAlteration, null, null, null, null);
             AlterationUtils.annotateAlteration(alteration, queryAlteration);
@@ -780,9 +780,9 @@ public class SummaryUtils {
         return sb.toString();
     }
 
-    private static String replaceSpecialCharacterInTumorTypeSummary(String summary, Gene gene, String queryAlteration, String queryTumorType) {
-        String altName = getGeneMutationNameInTumorTypeSummary(gene, queryAlteration);
-        String alterationName = getGeneMutationNameInVariantSummary(gene, queryAlteration);
+    private static String replaceSpecialCharacterInTumorTypeSummary(String summary, Gene gene, ReferenceGenome referenceGenome, String queryAlteration, String queryTumorType) {
+        String altName = getGeneMutationNameInTumorTypeSummary(gene, referenceGenome, queryAlteration);
+        String alterationName = getGeneMutationNameInVariantSummary(gene, referenceGenome, queryAlteration);
         String variantStr = altName + " " + queryTumorType;
         if (queryAlteration.contains("deletion")) {
             variantStr = queryTumorType + " harboring a " + altName;

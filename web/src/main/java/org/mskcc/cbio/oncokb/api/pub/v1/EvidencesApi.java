@@ -1,10 +1,9 @@
 package org.mskcc.cbio.oncokb.api.pub.v1;
 
 import io.swagger.annotations.*;
+import io.swagger.models.auth.In;
 import org.mskcc.cbio.oncokb.config.annotation.PremiumPublicApi;
-import org.mskcc.cbio.oncokb.model.Evidence;
-import org.mskcc.cbio.oncokb.model.EvidenceQueries;
-import org.mskcc.cbio.oncokb.model.EvidenceQueryRes;
+import org.mskcc.cbio.oncokb.model.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

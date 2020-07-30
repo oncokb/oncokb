@@ -41,7 +41,7 @@ public class VariantsApiController implements VariantsApi {
         , @ApiParam(value = "") @RequestParam(value = "proteinStart", required = false) Integer proteinStart
         , @ApiParam(value = "") @RequestParam(value = "proteinEnd", required = false) Integer proteinEnd
         , @ApiParam(value = "HGVS varaint. Its priority is higher than entrezGeneId/hugoSymbol + variant combination") @RequestParam(value = "hgvs", required = false) String hgvs
-        , @ApiParam(value = "Reference genome, either GRCH37 or GRCH38", required = true) @RequestParam(value = "referenceGenome", required = true) ReferenceGenome referenceGenome
+        , @ApiParam(value = "Reference genome, either GRCH37 or GRCH38. The default is GRCH37", required = false, defaultValue = "GRCH37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCH37") ReferenceGenome referenceGenome
         , @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
     ) {
         VariantSearchQuery query = new VariantSearchQuery(entrezGeneId, hugoSymbol, variant, variantType, consequence, proteinStart, proteinEnd, hgvs, referenceGenome);
@@ -69,15 +69,15 @@ public class VariantsApiController implements VariantsApi {
             if (query.getHgvs() != null && !query.getHgvs().isEmpty()) {
                 Alteration alteration = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, query.getHgvs(), query.getReferenceGenome());
                 if (alteration != null && alteration.getGene() != null) {
-                    Set<Alteration> allAlterations = AlterationUtils.getAllAlterations(alteration.getGene());
-                    alterationList.addAll(ApplicationContextSingleton.getAlterationBo().findRelevantAlterations(alteration, allAlterations, true));
+                    Set<Alteration> allAlterations = AlterationUtils.getAllAlterations(query.getReferenceGenome(), alteration.getGene());
+                    alterationList.addAll(ApplicationContextSingleton.getAlterationBo().findRelevantAlterations(query.getReferenceGenome(), alteration, allAlterations, true));
                 }
             } else if (query.getHugoSymbol() != null || query.getEntrezGeneId() != null) {
                 Gene gene = GeneUtils.getGene(query.getEntrezGeneId(), query.getHugoSymbol());
                 if (gene != null) {
                     if (AlterationUtils.isInferredAlterations(query.getVariant())) {
                         // If inferred alteration has been manually curated, it should be returned in the list
-                        Alteration alteration = AlterationUtils.findAlteration(gene, query.getVariant());
+                        Alteration alteration = AlterationUtils.findAlteration(gene, query.getReferenceGenome(), query.getVariant());
                         if (alteration != null) {
                             alterationSet.add(alteration);
                         }
@@ -85,7 +85,7 @@ public class VariantsApiController implements VariantsApi {
                     } else if (AlterationUtils.isLikelyInferredAlterations(query.getVariant())) {
                         alterationSet.addAll(AlterationUtils.getAlterationsByKnownEffectInGene(gene, AlterationUtils.getInferredAlterationsKnownEffect(query.getVariant()), false));
                     } else {
-                        Set<Alteration> allAlterations = AlterationUtils.getAllAlterations(gene);
+                        Set<Alteration> allAlterations = AlterationUtils.getAllAlterations(query.getReferenceGenome(), gene);
                         if (query.getVariant() == null && query.getProteinStart() == null && query.getProteinEnd() == null) {
                             alterationSet.addAll(allAlterations);
                         } else {
@@ -100,7 +100,7 @@ public class VariantsApiController implements VariantsApi {
                                 }
                             }
                             for (Alteration alteration : alterations) {
-                                alterationSet.addAll(alterationBo.findRelevantAlterations(alteration, allAlterations, true));
+                                alterationSet.addAll(alterationBo.findRelevantAlterations(query.getReferenceGenome(), alteration, allAlterations, true));
                             }
                         }
                     }
@@ -109,7 +109,7 @@ public class VariantsApiController implements VariantsApi {
                 if (AlterationUtils.isInferredAlterations(query.getVariant())) {
                     for (Gene gene : GeneUtils.getAllGenes()) {
                         // If inferred alteration has been manually curated, it should be returned in the list
-                        Alteration alteration = AlterationUtils.findAlteration(gene, query.getVariant());
+                        Alteration alteration = AlterationUtils.findAlteration(gene, query.getReferenceGenome(), query.getVariant());
                         if (alteration != null) {
                             alterationSet.add(alteration);
                         }
