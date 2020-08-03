@@ -93,7 +93,7 @@ public class GeneController {
         Gene gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
         if (gene != null) {
             ApplicationContextSingleton.getEvidenceBo().deleteAll(new ArrayList<>(CacheUtils.getEvidences(gene)));
-            ApplicationContextSingleton.getAlterationBo().deleteAll(new ArrayList<>(AlterationUtils.getAllAlterations(gene)));
+            ApplicationContextSingleton.getAlterationBo().deleteAll(new ArrayList<>(AlterationUtils.getAllAlterations(null, gene)));
             ApplicationContextSingleton.getGeneBo().delete(gene);
             CacheUtils.updateGene(Collections.singleton(gene.getEntrezGeneId()), true);
         }

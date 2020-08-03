@@ -46,7 +46,7 @@ public interface VariantsApi {
         , @ApiParam(value = "") @RequestParam(value = "proteinStart", required = false) Integer proteinStart
         , @ApiParam(value = "") @RequestParam(value = "proteinEnd", required = false) Integer proteinEnd
         , @ApiParam(value = "HGVS varaint. Its priority is higher than entrezGeneId/hugoSymbol + variant combination") @RequestParam(value = "hgvs", required = false) String hgvs
-        , @ApiParam(value = "Reference genome, either GRCH37 or GRCH38", required = true) @RequestParam(value = "referenceGenome", required = true) ReferenceGenome referenceGenome
+        , @ApiParam(value = "Reference genome, either GRCH37 or GRCH38. The default is GRCH37", required = false, defaultValue = "GRCH37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCH37") ReferenceGenome referenceGenome
         , @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
     );
 

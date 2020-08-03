@@ -26,7 +26,7 @@ public class NumberUtils {
             geneNumber.setHighestSensitiveLevel(highestSensitiveLevel != null ? highestSensitiveLevel.name() : null);
             geneNumber.setHighestResistanceLevel(highestResistanceLevel != null ? highestResistanceLevel.name() : null);
 
-            Set<Alteration> alterations = AlterationUtils.getAllAlterations(pair.getKey());
+            Set<Alteration> alterations = AlterationUtils.getAllAlterations(null, pair.getKey());
             List<Alteration> excludeVUS = AlterationUtils.excludeVUS(pair.getKey(), new ArrayList<>(alterations));
             geneNumber.setAlteration(excludeVUS.size());
             geneNumbers.add(geneNumber);
@@ -54,7 +54,7 @@ public class NumberUtils {
             geneNumber.setHighestSensitiveLevel(highestSensitiveLevel != null ? highestSensitiveLevel.name() : null);
             geneNumber.setHighestResistanceLevel(highestResistanceLevel != null ? highestResistanceLevel.name() : null);
 
-            Set<Alteration> alterations = AlterationUtils.getAllAlterations(pair.getKey());
+            Set<Alteration> alterations = AlterationUtils.getAllAlterations(null, pair.getKey());
             List<Alteration> excludeVUS = AlterationUtils.excludeVUS(pair.getKey(), new ArrayList<>(alterations));
             geneNumber.setAlteration(excludeVUS.size());
             geneNumbers.add(geneNumber);

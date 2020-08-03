@@ -30,7 +30,7 @@ public interface SearchApi {
         method = RequestMethod.GET)
     ResponseEntity<IndicatorQueryResp> searchGet(
         @ApiParam(value = "The query ID") @RequestParam(value = "id", required = false) String id
-        , @ApiParam(value = "Reference genome, either GRCH37 or GRCH38", required = true) @RequestParam(value = "referenceGenome", required = true) ReferenceGenome referenceGenome
+        , @ApiParam(value = "Reference genome, either GRCH37 or GRCH38. The default is GRCH37", required = false, defaultValue = "GRCH37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCH37") ReferenceGenome referenceGenome
         , @ApiParam(value = "The gene symbol used in Human Genome Organisation.") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
         , @ApiParam(value = "The entrez gene ID.") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
         , @ApiParam(value = "Variant name.") @RequestParam(value = "variant", required = false) String variant

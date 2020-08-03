@@ -50,7 +50,7 @@ public class MainUtils {
     }
 
     public static Map<String, Object> GetRequestQueries(
-        String entrezGeneId, String hugoSymbol, String alteration, String tumorType,
+        String entrezGeneId, String hugoSymbol, ReferenceGenome referenceGenome, String alteration, String tumorType,
         String evidenceType, String consequence, String proteinStart, String proteinEnd,
         String levels) {
 
@@ -410,7 +410,7 @@ public class MainUtils {
             Long oldTime = new Date().getTime();
             List<Alteration> alterations;
 
-            alterations = AlterationUtils.excludeVUS(gene, new ArrayList<>(AlterationUtils.getAllAlterations(gene)));
+            alterations = AlterationUtils.excludeVUS(gene, new ArrayList<>(AlterationUtils.getAllAlterations(null, gene)));
             alterations = AlterationUtils.excludeInferredAlterations(alterations);
             alterations = AlterationUtils.excludePositionedAlterations(alterations);
 
@@ -468,7 +468,7 @@ public class MainUtils {
         Set<ClinicalVariant> variants = new HashSet<>();
         if (gene != null) {
             List<Alteration> alterations;
-            alterations = AlterationUtils.excludeVUS(gene, new ArrayList<>(AlterationUtils.getAllAlterations(gene)));
+            alterations = AlterationUtils.excludeVUS(gene, new ArrayList<>(AlterationUtils.getAllAlterations(null, gene)));
             Set<EvidenceType> evidenceTypes = EvidenceTypeUtils.getTreatmentEvidenceTypes();
             Map<Alteration, Map<TumorType, Map<LevelOfEvidence, Set<Evidence>>>> evidences = new HashMap<>();
             Set<LevelOfEvidence> publicLevels = LevelUtils.getPublicLevels();
@@ -503,7 +503,7 @@ public class MainUtils {
 
             for (Map.Entry<Alteration, Map<TumorType, Map<LevelOfEvidence, Set<Evidence>>>> entry : evidences.entrySet()) {
                 Alteration alteration = entry.getKey();
-                IndicatorQueryOncogenicity oncogenicity = IndicatorUtils.getOncogenicity(alteration, AlterationUtils.getAlleleAlterations(alteration), AlterationUtils.getRelevantAlterations(alteration));
+                IndicatorQueryOncogenicity oncogenicity = IndicatorUtils.getOncogenicity(alteration, AlterationUtils.getAlleleAlterations(null, alteration), AlterationUtils.getRelevantAlterations(null, alteration));
                 String oncogenicityString = null;
                 if (oncogenicity.getOncogenicity() != null) {
                     oncogenicityString = oncogenicity.getOncogenicity().getOncogenic();
