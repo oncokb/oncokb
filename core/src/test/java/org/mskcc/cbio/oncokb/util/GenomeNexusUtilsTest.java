@@ -1,10 +1,13 @@
 package org.mskcc.cbio.oncokb.util;
 
 import junit.framework.TestCase;
+import org.apache.commons.collections.CollectionUtils;
+import org.genome_nexus.client.TranscriptConsequence;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
-import org.mskcc.cbio.oncokb.genomenexus.TranscriptConsequence;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.ReferenceGenome;
+
+import java.util.stream.Collectors;
 
 /**
  * Created by Hongxin Zhang on 7/20/17.
@@ -17,13 +20,13 @@ public class GenomeNexusUtilsTest extends TestCase {
         assertEquals("Picked transcript gene symbol is not BRAF, but it should.",
             gene.getHugoSymbol(), consequence.getGeneSymbol());
         assertEquals("Picked transcript hgvs p short is not p.V600E, but it should.",
-            "p.V600E", consequence.getHgvspShort());
+            "p.V600E", consequence.getHgvsp());
         assertEquals("Picked transcript protein start is not 600, but it should.",
-            "600", consequence.getProteinStart());
+            "600", Integer.toString(consequence.getProteinStart()));
         assertEquals("Picked transcript protein end is not 600, but it should.",
-            "600", consequence.getProteinEnd());
+            "600", Integer.toString(consequence.getProteinEnd()));
         assertEquals("Picked transcript RefSeq is not the same with MSKIMPACT BRAF RefSeq, but it should.",
-            gene.getGrch37RefSeq(), consequence.getRefSeq());
+            gene.getGrch37RefSeq(), consequence.getRefseqTranscriptIds().stream().collect(Collectors.joining()));
         assertEquals("Picked transcript isoform is not the same with MSKIMPACT BRAF isoform, but it should.",
             gene.getGrch37Isoform(), consequence.getTranscriptId());
 
@@ -39,9 +42,9 @@ public class GenomeNexusUtilsTest extends TestCase {
         // Test frame shift variant
         consequence = GenomeNexusUtils.getTranscriptConsequence(GNVariantAnnotationType.HGVS_G, "22:g.41574678_41574679insC", mskReferenceGenome);
         assertEquals("Picked transcript protein change is not tH2324Pfs*55, but it should.",
-            "p.H2324Pfs*55", consequence.getHgvspShort());
+            "p.H2324Pfs*55", consequence.getHgvsp());
         assertEquals("Picked transcript protein change is not tH2324Pfs*55, but it should.",
-            VariantConsequenceUtils.findVariantConsequenceByTerm("frameshift_variant"), VariantConsequenceUtils.findVariantConsequenceByTerm(consequence.getConsequence()));
+            VariantConsequenceUtils.findVariantConsequenceByTerm("frameshift_variant"), VariantConsequenceUtils.findVariantConsequenceByTerm(consequence.getConsequenceTerms().iterator().next()));
 
         // BRAF V600E genomic location
         consequence = GenomeNexusUtils.getTranscriptConsequence(GNVariantAnnotationType.GENOMIC_LOCATION, "7,140453136,140453136,A,T", mskReferenceGenome);
@@ -49,13 +52,13 @@ public class GenomeNexusUtilsTest extends TestCase {
         assertEquals("Picked transcript gene symbol is not BRAF, but it should.",
             gene.getHugoSymbol(), consequence.getGeneSymbol());
         assertEquals("Picked transcript hgvs p short is not p.V600E, but it should.",
-            "p.V600E", consequence.getHgvspShort());
+            "p.V600E", consequence.getHgvsp());
         assertEquals("Picked transcript protein start is not 600, but it should.",
-            "600", consequence.getProteinStart());
+            "600", Integer.toString(consequence.getProteinStart()));
         assertEquals("Picked transcript protein end is not 600, but it should.",
-            "600", consequence.getProteinEnd());
+            "600", Integer.toString(consequence.getProteinEnd()));
         assertEquals("Picked transcript RefSeq is not the same with MSKIMPACT BRAF RefSeq, but it should.",
-            gene.getGrch37RefSeq(), consequence.getRefSeq());
+            gene.getGrch37RefSeq(), consequence.getRefseqTranscriptIds().stream().collect(Collectors.joining()));
         assertEquals("Picked transcript isoform is not the same with MSKIMPACT BRAF isoform, but it should.",
             gene.getGrch37Isoform(), consequence.getTranscriptId());
 
@@ -66,13 +69,13 @@ public class GenomeNexusUtilsTest extends TestCase {
         assertEquals("Picked transcript gene symbol is not PIK3CA, but it should.",
             gene.getHugoSymbol(), consequence.getGeneSymbol());
         assertEquals("Picked transcript hgvs p short is not p.V600E, but it should.",
-            "p.G118D", consequence.getHgvspShort());
+            "p.G118D", consequence.getHgvsp());
         assertEquals("Picked transcript protein start is not 118, but it should.",
-            "118", consequence.getProteinStart());
+            "118", Integer.toString(consequence.getProteinStart()));
         assertEquals("Picked transcript protein end is not 118, but it should.",
-            "118", consequence.getProteinEnd());
+            "118", Integer.toString(consequence.getProteinEnd()));
         assertEquals("Picked transcript RefSeq is not the same with MSKIMPACT PIK3CA RefSeq, but it should.",
-            gene.getGrch37RefSeq(), consequence.getRefSeq());
+            gene.getGrch37RefSeq(), consequence.getRefseqTranscriptIds().stream().collect(Collectors.joining()));
         assertEquals("Picked transcript isoform is not the same with MSKIMPACT BRAF isoform, but it should.",
             gene.getGrch37Isoform(), consequence.getTranscriptId());
         assertTrue("There are multiple consequences", consequence.getConsequenceTerms().size() > 1);
