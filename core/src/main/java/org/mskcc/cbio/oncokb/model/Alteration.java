@@ -31,6 +31,10 @@ import java.util.*;
         query = "select a from Alteration a where a.gene=? and a.alteration=? and a.name=?"
     ),
     @NamedQuery(
+        name = "findAlterationByAlterationAndNameAndReferenceGenome",
+        query = "select a from Alteration a join a.referenceGenomes r where a.gene=? and a.alteration=? and a.name=? and r=?"
+    ),
+    @NamedQuery(
         name = "findMutationsByConsequence",
         query = "select a from Alteration a where a.gene=? and a.consequence=?"
     ),
