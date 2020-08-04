@@ -7,10 +7,10 @@
 package org.mskcc.cbio.oncokb.util;
 
 import org.apache.commons.lang3.StringUtils;
+import org.genome_nexus.client.TranscriptConsequence;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
-import org.mskcc.cbio.oncokb.genomenexus.TranscriptConsequence;
 import org.mskcc.cbio.oncokb.model.*;
 
 import java.util.*;
@@ -449,17 +449,17 @@ public final class AlterationUtils {
                     alteration = new Alteration();
                     alteration.setGene(gene);
                     alteration.setAlterationType(null);
-                    if (transcriptConsequence.getHgvspShort() != null) {
-                        alteration.setAlteration(transcriptConsequence.getHgvspShort());
+                    if (transcriptConsequence.getHgvsp() != null) {
+                        alteration.setAlteration(transcriptConsequence.getHgvsp());
                     }
                     if (transcriptConsequence.getProteinStart() != null) {
-                        alteration.setProteinStart(Integer.parseInt(transcriptConsequence.getProteinStart()));
+                        alteration.setProteinStart(transcriptConsequence.getProteinStart());
                     }
                     if (transcriptConsequence.getProteinEnd() != null) {
-                        alteration.setProteinEnd(Integer.parseInt(transcriptConsequence.getProteinEnd()));
+                        alteration.setProteinEnd(transcriptConsequence.getProteinEnd());
                     }
-                    if (transcriptConsequence.getConsequence() != null) {
-                        alteration.setConsequence(VariantConsequenceUtils.findVariantConsequenceByTerm(transcriptConsequence.getConsequence()));
+                    if (!transcriptConsequence.getConsequenceTerms().isEmpty()) {
+                        alteration.setConsequence(VariantConsequenceUtils.findVariantConsequenceByTerm(transcriptConsequence.getConsequenceTerms().iterator().next()));
                     }
                     return alteration;
                 }
