@@ -1091,6 +1091,9 @@ public class EvidenceUtils {
                     alteration.setReferenceGenomes(alt.getReferenceGenomes());
                     AlterationUtils.annotateAlteration(alteration, proteinChange);
                     alterationBo.save(alteration);
+                } else if (!alteration.getReferenceGenomes().equals(alt.getReferenceGenomes())) {
+                    alteration.setReferenceGenomes(alt.getReferenceGenomes());
+                    alterationBo.save(alteration);
                 }
                 alterations.add(alteration);
             }

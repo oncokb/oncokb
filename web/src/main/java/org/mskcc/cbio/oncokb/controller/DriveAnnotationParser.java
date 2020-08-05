@@ -88,6 +88,9 @@ public class DriveAnnotationParser {
                             alteration.setReferenceGenomes(mutation.getReferenceGenomes());
                             AlterationUtils.annotateAlteration(alteration, mutation.getAlteration());
                             alterationBo.save(alteration);
+                        } else if (!alteration.getReferenceGenomes().equals(mutation.getReferenceGenomes())) {
+                            alteration.setReferenceGenomes(mutation.getReferenceGenomes());
+                            alterationBo.save(alteration);
                         }
                         alterations.add(alteration);
                     }
@@ -327,6 +330,9 @@ public class DriveAnnotationParser {
                     alteration.setName(mutation.getName());
                     alteration.setReferenceGenomes(mutation.getReferenceGenomes());
                     AlterationUtils.annotateAlteration(alteration, mutation.getAlteration());
+                    alterationBo.save(alteration);
+                } else if (!alteration.getReferenceGenomes().equals(mutation.getReferenceGenomes())) {
+                    alteration.setReferenceGenomes(mutation.getReferenceGenomes());
                     alterationBo.save(alteration);
                 }
                 alterations.add(alteration);
