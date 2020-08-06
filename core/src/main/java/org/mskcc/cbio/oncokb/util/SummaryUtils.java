@@ -198,8 +198,7 @@ public class SummaryUtils {
 
     public static String unknownOncogenicSummary(Gene gene, String queryAlteration) {
         String str = gene == null ? "variant" : getGeneMutationNameInVariantSummary(gene, queryAlteration);
-        return "The " + str +
-            " has not specifically been reviewed by the OncoKB team, and its oncogenic function is considered unknown.";
+        return "The biologic significance of the " + str + " is unknown.";
     }
 
     public static String synonymousSummary() {
@@ -331,7 +330,11 @@ public class SummaryUtils {
 
     private static String getVUSOncogenicSummary(Alteration alteration) {
         List<Evidence> evidences = EvidenceUtils.getEvidence(Collections.singletonList(alteration), Collections.singleton(EvidenceType.VUS), null);
-        String summary = "there was no available functional data about the " + getGeneMutationNameInVariantSummary(alteration.getGene(), alteration.getAlteration()) + ".";
+        StringBuilder sb = new StringBuilder();
+        sb.append("The biologic significance of the ");
+        sb.append(getGeneMutationNameInVariantSummary(alteration.getGene(), alteration.getAlteration()));
+        sb.append(" is unknown");
+
         Date lastEdit = null;
         for (Evidence evidence : evidences) {
             if (evidence.getLastEdit() == null) {
@@ -345,9 +348,12 @@ public class SummaryUtils {
         }
         if (lastEdit != null) {
             SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
-            summary = "as of " + sdf.format(lastEdit) + ", " + summary;
+            sb.append(" (last reviewed ");
+            sb.append(sdf.format(lastEdit));
+            sb.append(")");
         }
-        return StringUtils.capitalize(summary);
+        sb.append(".");
+        return StringUtils.capitalize(sb.toString());
     }
 
     private static String getOncogenicSummaryFromOncogenicity(Oncogenicity oncogenicity, Alteration alteration, Query query, Boolean isHotspot) {
@@ -475,7 +481,7 @@ public class SummaryUtils {
 
     public static String inconclusiveSummary(Gene gene, String queryAlteration) {
         StringBuilder sb = new StringBuilder();
-        sb.append("There is conflicting and/or weak data describing the oncogenic function of the ");
+        sb.append("There is conflicting and/or weak data describing the biological significance of the ");
         sb.append(getGeneMutationNameInVariantSummary(gene, queryAlteration));
         sb.append(".");
         return sb.toString();

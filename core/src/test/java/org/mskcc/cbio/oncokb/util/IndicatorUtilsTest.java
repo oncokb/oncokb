@@ -133,7 +133,7 @@ public class IndicatorUtilsTest {
         query = new Query(null, null, null, "ALK", "R401Q", null, null, "Colon Adenocarcinoma", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null);
         assertEquals("The oncogenicity should not be 'Predicted Oncogenic'", "", indicatorQueryResp.getOncogenic());
-        assertEquals("The variant summary is not expected.", "As of 02/01/2019, there was no available functional data about the ALK R401Q mutation.", indicatorQueryResp.getVariantSummary());
+        assertEquals("The variant summary is not expected.", "The biologic significance of the ALK R401Q mutation is unknown (last reviewed 02/01/2019).", indicatorQueryResp.getVariantSummary());
         assertEquals("The isHotspot is not false, but it should be.", Boolean.FALSE, indicatorQueryResp.getHotspot());
 
         // No longer test 3A. KRAS has been downgraded to level 4
@@ -168,7 +168,7 @@ public class IndicatorUtilsTest {
         // query = new Query(null, null, null, "BRD4", "VUS", null, null, null, null, null, null, null);
         // indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null);
         // assertTrue("The variantExist in the response is not true, but it should.", indicatorQueryResp.getVariantExist() == true);
-        
+
         // Test R2 data
         query = new Query(null, null, null, "ALK", "I1171N", null, null, "Lung Adenocarcinoma", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null);
