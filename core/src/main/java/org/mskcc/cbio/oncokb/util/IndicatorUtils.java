@@ -535,7 +535,7 @@ public class IndicatorUtils {
                 implications.addAll(getImplicationFromEvidence(altEvis));
             }
         }
-        return implications;
+        return implications.stream().filter(implication -> implication.getLevelOfEvidence() != null).collect(Collectors.toList());
     }
 
     private static Set<Evidence> removeNoneTumorTypeRelatedEvidence(List<Evidence> evidences, Set<TumorType> tumorTypes) {
