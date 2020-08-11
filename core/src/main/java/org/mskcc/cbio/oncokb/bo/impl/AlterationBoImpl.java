@@ -139,7 +139,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         // Don't search for NA cases
         if (gene != null && consequence != null && !consequence.getTerm().equals("NA")) {
             if (alterations != null && alterations.size() > 0) {
-                result.addAll(AlterationUtils.findOverlapAlteration(alterations, gene, consequence, start, end));
+                result.addAll(AlterationUtils.findOverlapAlteration(alterations, gene, referenceGenome, consequence, start, end));
             } else {
                 Collection<Alteration> queryResult;
                 if (CacheUtils.isEnabled()) {

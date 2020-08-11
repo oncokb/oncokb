@@ -344,7 +344,7 @@ public class CacheUtils {
     }
 
     public static Set<Alteration> findMutationsByConsequenceAndPosition(Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end) {
-        return AlterationUtils.findOverlapAlteration(getAlterations(gene.getEntrezGeneId()), gene, consequence, start, end);
+        return AlterationUtils.findOverlapAlteration(getAlterations(gene.getEntrezGeneId()), gene, referenceGenome, consequence, start, end);
     }
 
     public static Set<Alteration> findMutationsByConsequenceAndPositionOnSamePosition(Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end) {
