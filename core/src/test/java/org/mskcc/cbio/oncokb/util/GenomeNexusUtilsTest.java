@@ -9,13 +9,16 @@ import org.mskcc.cbio.oncokb.model.ReferenceGenome;
 
 import java.util.stream.Collectors;
 
+import static org.junit.Assert.assertNotEquals;
+
 /**
  * Created by Hongxin Zhang on 7/20/17.
  */
 public class GenomeNexusUtilsTest extends TestCase {
     public void testGetTranscriptConsequence() throws Exception {
+        final String BRAF_V600E_37 = "7:g.140453136A>T";
         ReferenceGenome mskReferenceGenome = ReferenceGenome.GRCH37;
-        TranscriptConsequence consequence = GenomeNexusUtils.getTranscriptConsequence(GNVariantAnnotationType.HGVS_G, "7:g.140453136A>T", mskReferenceGenome);
+        TranscriptConsequence consequence = GenomeNexusUtils.getTranscriptConsequence(GNVariantAnnotationType.HGVS_G, BRAF_V600E_37, mskReferenceGenome);
         Gene gene = GeneUtils.getGeneByHugoSymbol("BRAF");
         assertEquals("Picked transcript gene symbol is not BRAF, but it should.",
             gene.getHugoSymbol(), consequence.getGeneSymbol());
@@ -29,6 +32,23 @@ public class GenomeNexusUtilsTest extends TestCase {
             gene.getGrch37RefSeq(), consequence.getRefseqTranscriptIds().stream().collect(Collectors.joining()));
         assertEquals("Picked transcript isoform is not the same with MSKIMPACT BRAF isoform, but it should.",
             gene.getGrch37Isoform(), consequence.getTranscriptId());
+
+        // the same BRAF V600E GRCh37 change should not get annotated by GN in GRCh38
+        TranscriptConsequence consequence38 = GenomeNexusUtils.getTranscriptConsequence(GNVariantAnnotationType.HGVS_G, BRAF_V600E_37, ReferenceGenome.GRCH38);
+        assertNotEquals("The consequence should not be the same", consequence, consequence38);
+
+
+        final String BRAF_V600E_38 = "7:g.140753336A>T";
+        consequence = GenomeNexusUtils.getTranscriptConsequence(GNVariantAnnotationType.HGVS_G, BRAF_V600E_38, ReferenceGenome.GRCH38);
+        gene = GeneUtils.getGeneByHugoSymbol("BRAF");
+        assertEquals("Picked transcript gene symbol is not BRAF, but it should.",
+            gene.getHugoSymbol(), consequence.getGeneSymbol());
+        assertEquals("Picked transcript hgvs p short is not p.V600E, but it should.",
+            "p.V600E", consequence.getHgvsp());
+        assertEquals("Picked transcript protein start is not 600, but it should.",
+            "600", Integer.toString(consequence.getProteinStart()));
+        assertEquals("Picked transcript protein end is not 600, but it should.",
+            "600", Integer.toString(consequence.getProteinEnd()));
 
 
         // Isoform of TCF3 should be ENST00000344749, uniport default isoform is ENST00000262965

@@ -36,10 +36,10 @@ public final class AlterationUtils {
         throw new AssertionError();
     }
 
-    public static Set<Alteration> findOverlapAlteration(Set<Alteration> alterations, Gene gene, VariantConsequence consequence, int start, int end) {
+    public static Set<Alteration> findOverlapAlteration(Set<Alteration> alterations, Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end) {
         Set<Alteration> overlaps = new HashSet<>();
         for (Alteration alteration : alterations) {
-            if (alteration.getGene().equals(gene) && alteration.getConsequence() != null && alteration.getConsequence().equals(consequence)) {
+            if (alteration.getGene().equals(gene) && alteration.getConsequence() != null && alteration.getConsequence().equals(consequence) && (referenceGenome == null || alteration.getReferenceGenomes().contains(referenceGenome))) {
                 //For alteration without specific position, do not do intersection
                 if (start <= AlterationPositionBoundary.START.getValue() || end >= AlterationPositionBoundary.END.getValue()) {
                     if (start >= alteration.getProteinStart()

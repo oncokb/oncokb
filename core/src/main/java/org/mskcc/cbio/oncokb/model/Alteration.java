@@ -241,7 +241,8 @@ public class Alteration implements java.io.Serializable {
             Objects.equals(getRefResidues(), that.getRefResidues()) &&
             Objects.equals(getProteinStart(), that.getProteinStart()) &&
             Objects.equals(getProteinEnd(), that.getProteinEnd()) &&
-            Objects.equals(getVariantResidues(), that.getVariantResidues());
+            Objects.equals(getVariantResidues(), that.getVariantResidues()) &&
+            Objects.equals(getReferenceGenomes(), that.getReferenceGenomes());
     }
 
     @Override
