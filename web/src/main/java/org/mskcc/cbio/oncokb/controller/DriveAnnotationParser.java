@@ -173,7 +173,7 @@ public class DriveAnnotationParser {
                         gene = GeneAnnotator.findGene(hugo);
                         if (gene == null) {
                             System.out.println("!!!!!!!!!Could not find gene " + hugo + " either.");
-                            return;
+                            throw new IOException("!!!!!!!!!Could not find gene " + hugo + ".");
                         } else {
                             updateGeneInfo(geneInfo, gene);
                             geneBo.save(gene);
