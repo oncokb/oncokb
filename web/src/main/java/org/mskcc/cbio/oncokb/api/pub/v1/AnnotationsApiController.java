@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Set;
 
 import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
-import static org.mskcc.cbio.oncokb.model.ReferenceGenome.GRCH37;
 
 /**
  * Created by Hongxin Zhang on 2019-03-25.
@@ -288,10 +287,10 @@ public class AnnotationsApiController {
             Gene geneB = GeneUtils.getGene(entrezGeneIdB, hugoSymbolB);
 
             if (geneA == null && entrezGeneIdA != null) {
-                geneA = GeneAnnotatorMyGeneInfo2.findGeneFromCBioPortal(entrezGeneIdA.toString());
+                geneA = GeneAnnotator.findGene(entrezGeneIdA.toString());
             }
             if (geneB == null && entrezGeneIdB != null) {
-                geneB = GeneAnnotatorMyGeneInfo2.findGeneFromCBioPortal(entrezGeneIdB.toString());
+                geneB = GeneAnnotator.findGene(entrezGeneIdB.toString());
             }
 
             if (geneA != null) {

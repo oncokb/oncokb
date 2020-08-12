@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
-import static org.mskcc.cbio.oncokb.util.GeneAnnotatorMyGeneInfo2.findGeneFromCBioPortal;
+import static org.mskcc.cbio.oncokb.util.GeneAnnotator.findGene;
 
 
 /**
@@ -78,7 +78,7 @@ public class Query implements java.io.Serializable {
         String geneHugoSymbol = gene == null ? queryGene.getHugoSymbol() : gene.getHugoSymbol();
         if (com.mysql.jdbc.StringUtils.isNullOrEmpty(geneHugoSymbol)) {
             if (queryGene.getEntrezGeneId() != null) {
-                gene = findGeneFromCBioPortal(Integer.toString(queryGene.getEntrezGeneId()));
+                gene = findGene(Integer.toString(queryGene.getEntrezGeneId()));
                 geneHugoSymbol = gene.getHugoSymbol();
             }
             if (com.mysql.jdbc.StringUtils.isNullOrEmpty(geneHugoSymbol)) {

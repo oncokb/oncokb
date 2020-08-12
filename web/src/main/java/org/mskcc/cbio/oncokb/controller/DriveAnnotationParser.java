@@ -170,10 +170,10 @@ public class DriveAnnotationParser {
                 if (gene == null) {
                     System.out.println(spaceStrByNestLevel(nestLevel) + "Gene " + hugo + " is not in the released list.");
                     if (releaseGene) {
-                        gene = GeneAnnotatorMyGeneInfo2.findGeneFromCBioPortal(hugo);
+                        gene = GeneAnnotator.findGene(hugo);
                         if (gene == null) {
                             System.out.println("!!!!!!!!!Could not find gene " + hugo + " either.");
-                            return;
+                            throw new IOException("!!!!!!!!!Could not find gene " + hugo + ".");
                         } else {
                             updateGeneInfo(geneInfo, gene);
                             geneBo.save(gene);
