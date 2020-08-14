@@ -37,9 +37,6 @@ public class Gene implements Serializable {
     @Column(name = "hugo_symbol", length = 50, unique = true)
     private String hugoSymbol;
 
-    @Column(length = 500)
-    private String name;
-
     @Column(name = "tsg")
     @ApiModelProperty(value = "tumorSuppressorGene")
     private Boolean TSG;
@@ -70,17 +67,9 @@ public class Gene implements Serializable {
     }
 
 
-    public Gene(int entrezGeneId, String hugoSymbol, String name) {
+    public Gene(int entrezGeneId, String hugoSymbol) {
         this.entrezGeneId = entrezGeneId;
         this.hugoSymbol = hugoSymbol;
-        this.name = name;
-    }
-
-    public Gene(int entrezGeneId, String hugoSymbol, String name, String summary, Set<String> geneLabels, Set<String> geneAliases) {
-        this.entrezGeneId = entrezGeneId;
-        this.hugoSymbol = hugoSymbol;
-        this.name = name;
-        this.geneAliases = geneAliases;
     }
 
 
@@ -100,15 +89,6 @@ public class Gene implements Serializable {
 
     public void setHugoSymbol(String hugoSymbol) {
         this.hugoSymbol = hugoSymbol;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public Set<String> getGeneAliases() {
