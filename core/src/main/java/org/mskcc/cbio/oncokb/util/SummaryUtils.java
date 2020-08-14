@@ -274,7 +274,7 @@ public class SummaryUtils {
 
         isHotspot = HotspotUtils.isHotspot(alteration);
 
-        if (oncogenic == null || oncogenic.equals(Oncogenicity.INCONCLUSIVE)) {
+        if (oncogenic == null || oncogenic.equals(Oncogenicity.UNKNOWN)) {
             // Get oncogenic summary from alternative alleles
             List<Alteration> alternativeAlleles = AlterationUtils.getAlleleAlterations(alteration);
             List<Alteration> alternativeAllelesWithoutVUS = AlterationUtils.excludeVUS(gene, alternativeAlleles);
