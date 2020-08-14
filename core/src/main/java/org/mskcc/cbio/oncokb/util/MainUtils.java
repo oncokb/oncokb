@@ -400,6 +400,7 @@ public class MainUtils {
         oncogenicities.add(Oncogenicity.LIKELY);
         oncogenicities.add(Oncogenicity.PREDICTED);
         oncogenicities.add(Oncogenicity.LIKELY_NEUTRAL);
+        oncogenicities.add(Oncogenicity.INCONCLUSIVE);
 
         return oncogenicities.contains(oncogenicity);
     }

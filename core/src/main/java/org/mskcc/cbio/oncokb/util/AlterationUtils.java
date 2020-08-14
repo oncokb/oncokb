@@ -999,6 +999,7 @@ public final class AlterationUtils {
         curatedOncogenicities.add(Oncogenicity.YES);
         curatedOncogenicities.add(Oncogenicity.LIKELY);
         curatedOncogenicities.add(Oncogenicity.LIKELY_NEUTRAL);
+        curatedOncogenicities.add(Oncogenicity.INCONCLUSIVE);
         return !Collections.disjoint(curatedOncogenicities, oncogenicities);
     }
 
