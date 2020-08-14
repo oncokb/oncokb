@@ -69,13 +69,13 @@ public class EvidencesApiController implements EvidencesApi {
 
         Query tmpQuery = new Query(null, DEFAULT_REFERENCE_GENOME, null, entrezGeneId,
             hugoSymbol, variant, null, null,
-            tumorType, consequence, Integer.parseInt(proteinStart),
-            Integer.parseInt(proteinEnd), null);
+            tumorType, consequence, proteinStart == null ? null : Integer.parseInt(proteinStart),
+            proteinEnd == null ? null : Integer.parseInt(proteinEnd), null);
 
         List<EvidenceQueryRes> evidenceQueries = EvidenceUtils.processRequest(
             Collections.singletonList(tmpQuery),
-            Arrays.stream(evidenceTypes.split(",")).map(evidence->EvidenceType.valueOf(evidence.trim())).collect(Collectors.toSet()),
-            Arrays.stream(levels.split(",")).map(level->LevelOfEvidence.getByLevel(level.trim())).collect(Collectors.toSet()), highestLevelOnly);
+            evidenceTypes == null ? null : Arrays.stream(evidenceTypes.split(",")).map(evidence -> EvidenceType.valueOf(evidence.trim())).collect(Collectors.toSet()),
+            levels == null ? null : Arrays.stream(levels.split(",")).map(level -> LevelOfEvidence.getByLevel(level.trim())).collect(Collectors.toSet()), highestLevelOnly);
 
         if (evidenceQueries != null) {
             for (EvidenceQueryRes query : evidenceQueries) {

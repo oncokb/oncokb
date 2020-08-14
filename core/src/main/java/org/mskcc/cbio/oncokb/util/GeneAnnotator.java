@@ -136,7 +136,7 @@ public final class GeneAnnotator {
                 int entrez = hit.getInt(ENTREZ_GENE_KEY);
                 String symbol = hit.getString(HUGO_SYMBOL_KEY);
 
-                Gene gene = new Gene(entrez, symbol, "");
+                Gene gene = new Gene(entrez, symbol);
                 genes.add(gene);
             }
         }
