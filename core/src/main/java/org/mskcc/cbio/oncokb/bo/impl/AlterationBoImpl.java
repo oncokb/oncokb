@@ -384,9 +384,9 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             }
         }
 
-        if (addVUSMutation(alteration)){
+        if (addVUSMutation(alteration, matchedAlt != null)) {
             Alteration VUSMutation = findAlteration(InferredMutation.VUS.getVariant(), fullAlterations);
-            if (VUSMutation != null){
+            if (VUSMutation != null) {
                 alterations.add(VUSMutation);
             }
         }
@@ -446,8 +446,8 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         return add;
     }
 
-    private boolean addVUSMutation(Alteration alteration){
-        return AlterationUtils.getVUS(alteration).contains(alteration);
+    private boolean addVUSMutation(Alteration alteration, boolean alterationIsCurated){
+        return !alterationIsCurated || AlterationUtils.getVUS(alteration).contains(alteration);
     }
 
     private boolean isVariantByLocation(Alteration alteration, int entrezGeneId, int proteinStart, int proteinEnd, VariantConsequence variantConsequence) {
