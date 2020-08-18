@@ -302,21 +302,30 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
 
     @Override
     public ResponseEntity<VariantAnnotation> utilVariantAnnotationGet(
-        String hugoSymbol
-        , Integer entrezGeneId
-        , ReferenceGenome referenceGenome
-        , String alteration
-        , String tumorType) {
+        @ApiParam(value = "hugoSymbol") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
+        , @ApiParam(value = "entrezGeneId") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
+        , @ApiParam(value = "Reference genome, either GRCH37 or GRCH38. The default is GRCH37", defaultValue = "GRCH37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCH37") ReferenceGenome referenceGenome
+        , @ApiParam(value = "Alteration") @RequestParam(value = "alteration", required = false) String alteration
+        , @ApiParam(value = "HGVS genomic format. Example: 7:g.140453136A>T") @RequestParam(value = "hgvsg", required = false) String hgvsg
+        , @ApiParam(value = "OncoTree tumor type name/main type/code") @RequestParam(value = "tumorType", required = false) String tumorType) {
 
-        Gene gene = GeneUtils.getGene(entrezGeneId, hugoSymbol);
-        Alteration alterationModel = AlterationUtils.findAlteration(gene, referenceGenome, alteration);
-        if (alterationModel == null) {
-            alterationModel = AlterationUtils.getAlteration(gene.getHugoSymbol(), alteration, null, null, null, null);
-        }
+
 
         List<TumorType> relevantTumorTypes = TumorTypeUtils.findTumorTypes(tumorType);
 
-        Query query = new Query(alterationModel);
+        Query query;
+        Gene gene;
+        if (StringUtils.isNullOrEmpty(hgvsg)) {
+            gene = GeneUtils.getGene(entrezGeneId, hugoSymbol);
+            Alteration alterationModel = AlterationUtils.findAlteration(gene, referenceGenome, alteration);
+            if (alterationModel == null) {
+                alterationModel = AlterationUtils.getAlteration(gene.getHugoSymbol(), alteration, null, null, null, null);
+            }
+            query = new Query(alterationModel);
+        } else {
+            query = new Query(null, referenceGenome, "regular", null, null, null, null, null, tumorType, null, null, null, hgvsg);
+            gene = GeneUtils.getGeneByEntrezId(query.getEntrezGeneId());
+        }
         query.setTumorType(tumorType);
 
         List<EvidenceQueryRes> responses = EvidenceUtils.processRequest(Collections.singletonList(query), new HashSet<>(EvidenceTypeUtils.getAllEvidenceTypes()),LevelUtils.getPublicLevels(), false);

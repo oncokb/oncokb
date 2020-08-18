@@ -151,6 +151,7 @@ public interface PrivateUtilsApi {
         , @ApiParam(value = "entrezGeneId") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
         , @ApiParam(value = "Reference genome, either GRCH37 or GRCH38. The default is GRCH37", required = false, defaultValue = "GRCH37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCH37") ReferenceGenome referenceGenome
         , @ApiParam(value = "Alteration") @RequestParam(value = "alteration", required = false) String alteration
+        , @ApiParam(value = "HGVS genomic format. Example: 7:g.140453136A>T") @RequestParam(value = "hgvsg", required = false) String hgvsg
         , @ApiParam(value = "OncoTree tumor type name/main type/code") @RequestParam(value = "tumorType", required = false) String tumorType
     );
 
