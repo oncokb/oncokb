@@ -400,6 +400,7 @@ public class MainUtils {
         oncogenicities.add(Oncogenicity.LIKELY);
         oncogenicities.add(Oncogenicity.PREDICTED);
         oncogenicities.add(Oncogenicity.LIKELY_NEUTRAL);
+        oncogenicities.add(Oncogenicity.INCONCLUSIVE);
 
         return oncogenicities.contains(oncogenicity);
     }
@@ -624,7 +625,7 @@ public class MainUtils {
 
                         // Mutation Effect
                         if (result == 0) {
-                            result = a1.getMutationEffect().compareTo(a2.getMutationEffect());
+                            result = a1.getMutationEffect() == null ? 1 : a1.getMutationEffect().compareTo(a2.getMutationEffect());
                         }
                     }
                 }

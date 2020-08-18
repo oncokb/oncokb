@@ -8,7 +8,7 @@ package org.mskcc.cbio.oncokb.controller;
 import org.apache.commons.collections.map.HashedMap;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.*;
-import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;;
+import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;

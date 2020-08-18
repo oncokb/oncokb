@@ -55,7 +55,7 @@ public interface PrivateSearchApi {
 //        produces = {"application/json"},
 //        method = RequestMethod.GET)
     ResponseEntity<LinkedHashSet<TypeaheadSearchResp>> searchTypeAheadGet(
-        @ApiParam(value = "The search query, it could be hugoSymbol, entrezGeneId or variant. Maximum two keywords are supported, separated by space", required = true) @RequestParam(value = "query") String query,
+        @ApiParam(value = "The search query, it could be hugoSymbol, entrezGeneId or variant. At least two characters. Maximum two keywords are supported, separated by space", required = true) @RequestParam(value = "query") String query,
         @ApiParam(value = "The limit of returned result.") @RequestParam(value = "limit", defaultValue = "5", required = false) Integer limit
     );
 

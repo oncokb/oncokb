@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 public class SummaryUtils {
     public static final String TERT_PROMOTER_MUTATION_SUMMARY = "Select hotspot mutations in the TERT promoter have been shown to be oncogenic.";
     public static final String TERT_PROMOTER_NO_THERAPY_TUMOR_TYPE_SUMMARY = "There are no FDA-approved or NCCN-compendium listed treatments specifically for patients with TERT promoter mutations in [[tumor type]].";
+    public static final String ONCOGENIC_MUTATIONS_DEFAULT_SUMMARY = "Oncogenic Mutations includes all variants annotated as oncogenic and likely oncogenic.";
 
     public static Map<String, Object> tumorTypeSummary(EvidenceType evidenceType, Gene gene, Query query, Alteration exactMatchedAlt, List<Alteration> alterations, List<TumorType> relevantTumorTypes) {
         Map<String, Object> tumorTypeSummary = newTumorTypeSummary();
@@ -197,20 +198,18 @@ public class SummaryUtils {
 
     public static String unknownOncogenicSummary(Gene gene, String queryAlteration) {
         String str = gene == null ? "variant" : getGeneMutationNameInVariantSummary(gene, queryAlteration);
-        return "The " + str +
-            " has not specifically been reviewed by the OncoKB team, and its oncogenic function is considered unknown.";
+        return "The biologic significance of the " + str + " is unknown.";
     }
 
     public static String synonymousSummary() {
         return "This is a synonymous mutation and is not annotated by OncoKB.";
     }
 
-    public static String oncogenicSummary(Gene gene, Alteration exactMatchAlteration, List<Alteration> alterations, Query query) {
-        String key = query.getQueryId();
-
-        String summary = getOncogenicSummarySubFunc(gene, exactMatchAlteration, alterations, query);
-
-        return summary;
+    public static String variantSummary(Gene gene, Alteration exactMatchAlteration, List<Alteration> alterations, Query query) {
+        if (!StringUtils.isEmpty(query.getAlteration()) && query.getAlteration().equalsIgnoreCase(InferredMutation.ONCOGENIC_MUTATIONS.getVariant())) {
+            return ONCOGENIC_MUTATIONS_DEFAULT_SUMMARY;
+        }
+        return getOncogenicSummarySubFunc(gene, exactMatchAlteration, alterations, query);
     }
 
     private static String getOncogenicSummarySubFunc(Gene gene, Alteration exactMatchAlteration, List<Alteration> alterations, Query query) {
@@ -275,7 +274,7 @@ public class SummaryUtils {
 
         isHotspot = HotspotUtils.isHotspot(alteration);
 
-        if (oncogenic == null || oncogenic.equals(Oncogenicity.INCONCLUSIVE)) {
+        if (oncogenic == null || oncogenic.equals(Oncogenicity.UNKNOWN)) {
             // Get oncogenic summary from alternative alleles
             List<Alteration> alternativeAlleles = AlterationUtils.getAlleleAlterations(alteration);
             List<Alteration> alternativeAllelesWithoutVUS = AlterationUtils.excludeVUS(gene, alternativeAlleles);
@@ -331,7 +330,11 @@ public class SummaryUtils {
 
     private static String getVUSOncogenicSummary(Alteration alteration) {
         List<Evidence> evidences = EvidenceUtils.getEvidence(Collections.singletonList(alteration), Collections.singleton(EvidenceType.VUS), null);
-        String summary = "there was no available functional data about the " + getGeneMutationNameInVariantSummary(alteration.getGene(), alteration.getAlteration()) + ".";
+        StringBuilder sb = new StringBuilder();
+        sb.append("The biologic significance of the ");
+        sb.append(getGeneMutationNameInVariantSummary(alteration.getGene(), alteration.getAlteration()));
+        sb.append(" is unknown");
+
         Date lastEdit = null;
         for (Evidence evidence : evidences) {
             if (evidence.getLastEdit() == null) {
@@ -345,9 +348,12 @@ public class SummaryUtils {
         }
         if (lastEdit != null) {
             SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
-            summary = "as of " + sdf.format(lastEdit) + ", " + summary;
+            sb.append(" (last reviewed ");
+            sb.append(sdf.format(lastEdit));
+            sb.append(")");
         }
-        return StringUtils.capitalize(summary);
+        sb.append(".");
+        return StringUtils.capitalize(sb.toString());
     }
 
     private static String getOncogenicSummaryFromOncogenicity(Oncogenicity oncogenicity, Alteration alteration, Query query, Boolean isHotspot) {
@@ -475,7 +481,7 @@ public class SummaryUtils {
 
     public static String inconclusiveSummary(Gene gene, String queryAlteration) {
         StringBuilder sb = new StringBuilder();
-        sb.append("There is conflicting and/or weak data describing the oncogenic function of the ");
+        sb.append("There is conflicting and/or weak data describing the biological significance of the ");
         sb.append(getGeneMutationNameInVariantSummary(gene, queryAlteration));
         sb.append(".");
         return sb.toString();

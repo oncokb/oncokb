@@ -10,7 +10,8 @@ public enum InferredMutation implements OncoKBVariant {
     ONCOGENIC_MUTATIONS("Oncogenic Mutations"),
     GAIN_OF_FUNCTION_MUTATIONS("Gain-of-function Mutations"),
     LOSS_OF_FUNCTION_MUTATIONS("Loss-of-function Mutations"),
-    SWITCH_OF_FUNCTION_MUTATIONS("Switch-of-function Mutations");
+    SWITCH_OF_FUNCTION_MUTATIONS("Switch-of-function Mutations"),
+    VUS("Variants of Unknown Significance");
 
     private final String mutation;
 

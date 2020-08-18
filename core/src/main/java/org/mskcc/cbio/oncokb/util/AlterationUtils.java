@@ -459,17 +459,21 @@ public final class AlterationUtils {
         return alterations;
     }
 
+    public static Set<Alteration> getVUS(Alteration alteration){
+        Set<Alteration> result = new HashSet<>();
+        Gene gene = alteration.getGene();
+        if (CacheUtils.isEnabled()) {
+            result = CacheUtils.getVUS(gene.getEntrezGeneId());
+        } else {
+            result = AlterationUtils.findVUSFromEvidences(EvidenceUtils.getEvidenceByGenes(Collections.singleton(gene)).get(gene));
+        }
+        return result;
+    }
     public static List<Alteration> excludeVUS(List<Alteration> alterations) {
         List<Alteration> result = new ArrayList<>();
 
         for (Alteration alteration : alterations) {
-            Set<Alteration> VUS = new HashSet<>();
-            Gene gene = alteration.getGene();
-            if (CacheUtils.isEnabled()) {
-                VUS = CacheUtils.getVUS(gene.getEntrezGeneId());
-            } else {
-                VUS = AlterationUtils.findVUSFromEvidences(EvidenceUtils.getEvidenceByGenes(Collections.singleton(gene)).get(gene));
-            }
+            Set<Alteration> VUS = AlterationUtils.getVUS(alteration);
             if (!VUS.contains(alteration)) {
                 result.add(alteration);
             }
@@ -723,10 +727,17 @@ public final class AlterationUtils {
         // the alternative alleles do not only include the different variant allele, but also include the delins but it's essentially the same thing.
         // For instance, S768_V769delinsIL. This is equivalent to S768I + V769L, S768I should be listed relevant and not be excluded.
         if (alteration != null && alteration.getConsequence() != null && alteration.getConsequence().getTerm().equals(MISSENSE_VARIANT)) {
+            // check for positional variant when the consequence is forced to be missense variant
+            boolean isMissensePositionalVariant = StringUtils.isEmpty(alteration.getVariantResidues()) && alteration.getProteinStart() != null && alteration.getProteinEnd() != null && alteration.getProteinStart().equals(alteration.getProteinEnd());
             List<Alteration> alternativeAlleles = alterationBo.findMutationsByConsequenceAndPosition(alteration.getGene(), alteration.getConsequence(), alteration.getProteinStart(), alteration.getProteinEnd(), new HashSet<>(relevantAlterations));
             for (Alteration allele : alternativeAlleles) {
+                // remove all alleles if the alteration variant residue is empty
+                if (isMissensePositionalVariant && !StringUtils.isEmpty(allele.getVariantResidues())) {
+                    relevantAlterations.remove(allele);
+                    return;
+                }
                 if (allele.getConsequence() != null && allele.getConsequence().getTerm().equals(MISSENSE_VARIANT)) {
-                    if (alteration.getProteinStart().equals(alteration.getProteinEnd())) {
+                    if (alteration.getProteinStart().equals(alteration.getProteinEnd()) && !StringUtils.isEmpty(alteration.getVariantResidues())) {
                         if (allele.getProteinStart().equals(allele.getProteinEnd())) {
                             if (!alteration.getVariantResidues().equalsIgnoreCase(allele.getVariantResidues())) {
                                 relevantAlterations.remove(allele);
@@ -988,6 +999,7 @@ public final class AlterationUtils {
         curatedOncogenicities.add(Oncogenicity.YES);
         curatedOncogenicities.add(Oncogenicity.LIKELY);
         curatedOncogenicities.add(Oncogenicity.LIKELY_NEUTRAL);
+        curatedOncogenicities.add(Oncogenicity.INCONCLUSIVE);
         return !Collections.disjoint(curatedOncogenicities, oncogenicities);
     }
 

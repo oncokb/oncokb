@@ -17,7 +17,6 @@ public class IndicatorQueryTreatment implements java.io.Serializable {
     private List<String> alterations = new ArrayList<>();
     private List<Drug> drugs = new ArrayList<>(0);
     private Set<String> approvedIndications = new HashSet<String>(0);
-    private Boolean fdaApproved;
     private LevelOfEvidence level;
     private TumorType levelAssociatedCancerType;
     private Set<String> pmids = new HashSet<String>(0);
@@ -67,14 +66,6 @@ public class IndicatorQueryTreatment implements java.io.Serializable {
         this.approvedIndications = approvedIndications;
     }
 
-    public Boolean getFdaApproved() {
-        return fdaApproved;
-    }
-
-    public void setFdaApproved(Boolean fdaApproved) {
-        this.fdaApproved = fdaApproved;
-    }
-
     public LevelOfEvidence getLevel() {
         return level;
     }
@@ -109,8 +100,6 @@ public class IndicatorQueryTreatment implements java.io.Serializable {
         if (getDrugs() != null ? !getDrugs().equals(treatment.getDrugs()) : treatment.getDrugs() != null) return false;
         if (getApprovedIndications() != null ? !getApprovedIndications().equals(treatment.getApprovedIndications()) : treatment.getApprovedIndications() != null)
             return false;
-        if (getFdaApproved() != null ? !getFdaApproved().equals(treatment.getFdaApproved()) : treatment.getFdaApproved() != null)
-            return false;
         if (getLevel() != treatment.getLevel()) return false;
         if (getPmids() != null ? !getPmids().equals(treatment.getPmids()) : treatment.getPmids() != null) return false;
         return getAbstracts() != null ? getAbstracts().equals(treatment.getAbstracts()) : treatment.getAbstracts() == null;
@@ -121,7 +110,6 @@ public class IndicatorQueryTreatment implements java.io.Serializable {
     public int hashCode() {
         int result = getDrugs() != null ? getDrugs().hashCode() : 0;
         result = 31 * result + (getApprovedIndications() != null ? getApprovedIndications().hashCode() : 0);
-        result = 31 * result + (getFdaApproved() != null ? getFdaApproved().hashCode() : 0);
         result = 31 * result + (getLevel() != null ? getLevel().hashCode() : 0);
         result = 31 * result + (getPmids() != null ? getPmids().hashCode() : 0);
         result = 31 * result + (getAbstracts() != null ? getAbstracts().hashCode() : 0);
