@@ -23,25 +23,6 @@ public final class GeneAnnotator {
     private static final String URL_MY_GENE_INFO_3 = "http://mygene.info/v3/";
     private static final String CBIOPORTAL_GENES_ENDPOINT = "https://www.cbioportal.org/api/genes/";
 
-    public static Gene readByEntrezId(int entrezId) throws IOException {
-        String url = URL_MY_GENE_INFO_3 + "query?species=human&entrezonly=true&q=" + entrezId;
-        String json = FileUtils.readRemote(url);
-
-        List<Gene> genes = parseMyGeneResponse(json);
-
-        if (genes.isEmpty()) {
-            return null;
-        }
-
-        if (genes.size()>1) {
-            System.out.println("More than one hits:\n"+url);
-        }
-
-        Gene gene = genes.get(0);
-        includeGeneAlias(gene);
-
-        return gene;
-    }
 
     public static Gene findGene(String symbol) {
         Gene gene = findGeneFromCBioPortal(symbol);
@@ -57,6 +38,7 @@ public final class GeneAnnotator {
             // Swap the hugo symbol with gene alias so that the gene is always using the hugo symbol from input
             if (!gene.getHugoSymbol().equals(symbol)) {
                 gene.getGeneAliases().add(gene.getHugoSymbol());
+                gene.getGeneAliases().remove(symbol);
                 gene.setHugoSymbol(symbol);
             }
         }
@@ -104,18 +86,6 @@ public final class GeneAnnotator {
         includeGeneAlias(gene);
 
         return gene;
-    }
-
-    public static List<Gene> readByAlias(String alias) throws IOException {
-        String url = URL_MY_GENE_INFO_3 + "query?species=human&q=" + alias;
-        String json = FileUtils.readRemote(url);
-
-        List<Gene> genes = parseMyGeneResponse(json);
-        for (Gene gene : genes) {
-            includeGeneAlias(gene);
-        }
-
-        return genes;
     }
 
     private static List<Gene> parseMyGeneResponse(String json) {
