@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.apiModels.Citations;
 import org.mskcc.cbio.oncokb.apiModels.Implication;
 import org.mskcc.cbio.oncokb.apiModels.MutationEffectResp;
+import org.mskcc.cbio.oncokb.apiModels.NCITDrug;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
 
@@ -14,6 +15,8 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toCollection;
 import static org.mskcc.cbio.oncokb.util.LevelUtils.getTherapeuticLevelsWithPriorityLIstIterator;
 
 /**
@@ -535,8 +538,18 @@ public class IndicatorUtils {
                 implications.addAll(getImplicationFromEvidence(altEvis));
             }
         }
-        return implications.stream().filter(implication -> implication.getLevelOfEvidence() != null).collect(Collectors.toList());
+        return filterImplication(implications);
     }
+
+
+    public static List<Implication> filterImplication(List<Implication> implications) {
+        return implications.stream().filter(implication -> implication.getLevelOfEvidence() != null)
+            .map(UniqueImplication::new)
+            .distinct()
+            .map(UniqueImplication::unwrap)
+            .collect(Collectors.toList());
+    }
+
 
     private static Set<Evidence> removeNoneTumorTypeRelatedEvidence(List<Evidence> evidences, Set<TumorType> tumorTypes) {
         return new HashSet<>();
@@ -977,5 +990,30 @@ class IndicatorQueryMutationEffect {
 
     public void setMutationEffectEvidence(Evidence mutationEffectEvidence) {
         this.mutationEffectEvidence = mutationEffectEvidence;
+    }
+}
+
+class UniqueImplication {
+    private Implication e;
+
+    public UniqueImplication(Implication e) {
+        this.e = e;
+    }
+
+    public Implication unwrap() {
+        return this.e;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UniqueImplication that = (UniqueImplication) o;
+        return Objects.equals(e.getLevelOfEvidence(), that.e.getLevelOfEvidence()) && Objects.equals(e.getTumorType(), that.e.getTumorType());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(e.getLevelOfEvidence()) + Objects.hashCode(e.getTumorType());
     }
 }
