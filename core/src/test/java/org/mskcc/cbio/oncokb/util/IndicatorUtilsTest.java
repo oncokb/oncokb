@@ -1,10 +1,14 @@
 package org.mskcc.cbio.oncokb.util;
 
 import org.junit.Test;
+import org.mskcc.cbio.oncokb.apiModels.Implication;
 import org.mskcc.cbio.oncokb.model.*;
+import org.mskcc.cbio.oncokb.model.tumor_type.MainType;
+import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -620,6 +624,61 @@ public class IndicatorUtilsTest {
         resp2 = IndicatorUtils.processQuery(query2, null, true, null);
         pairComparison(resp1, resp2);
 
+    }
+
+    @Test
+    public void testFilterImplication() {
+        TumorType melanoma = new TumorType();
+        melanoma.setName("Melanoma");
+        melanoma.setCode("MEL");
+        MainType mainType = new MainType();
+        mainType.setName("Melanoma");
+        melanoma.setMainType(mainType);
+
+        TumorType nsclc = new TumorType();
+        nsclc.setName("Non-Small Cell Lung Cancer");
+        nsclc.setCode("NSCLC");
+        MainType nsclcMainType = new MainType();
+        nsclcMainType.setName("Non-Small Cell Lung Cancer");
+        nsclc.setMainType(mainType);
+
+        Implication implication1 = new Implication();
+        implication1.setDescription("implication1");
+        implication1.setTumorType(melanoma);
+        implication1.setLevelOfEvidence(LevelOfEvidence.LEVEL_Dx1);
+
+        Implication implication2 = new Implication();
+        implication2.setDescription("implication2");
+        implication2.setTumorType(melanoma);
+        implication2.setLevelOfEvidence(LevelOfEvidence.LEVEL_Dx1);
+
+        Implication implication3 = new Implication();
+        implication3.setDescription("implication3");
+        implication3.setTumorType(nsclc);
+        implication3.setLevelOfEvidence(LevelOfEvidence.LEVEL_Dx1);
+
+        // only keep one if the tumor type and level is the same, and the one has lower index should be picked;
+        List<Implication> implications = new ArrayList<>();
+        implications.add(implication1);
+        implications.add(implication2);
+        implications.add(implication3);
+
+        List<Implication> filteredImplications = IndicatorUtils.filterImplication(implications);
+        assertEquals(2, filteredImplications.size());
+        assertEquals("implication1", filteredImplications.get(0).getDescription());
+        assertEquals("implication3", filteredImplications.get(1).getDescription());
+
+
+        // if the level of evidence is null, filter the result out
+        Implication implication4 = new Implication();
+        implication4.setDescription("implication3");
+        implication4.setTumorType(melanoma);
+        implication4.setLevelOfEvidence(null);
+
+        implications = new ArrayList<>();
+        implications.add(implication4);
+        filteredImplications = IndicatorUtils.filterImplication(implications);
+        assertEquals(0, filteredImplications.size());
     }
 
     private void pairComparison(IndicatorQueryResp resp1, IndicatorQueryResp resp2) {
