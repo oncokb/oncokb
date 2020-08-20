@@ -375,11 +375,7 @@ public class SummaryUtils {
             }
 
             if (oncogenicity.equals(Oncogenicity.INCONCLUSIVE)) {
-                if (isHotspot) {
-                    return inconclusiveHotSpotSummary(alteration, query);
-                } else {
-                    return inconclusiveSummary(alteration.getGene(), queryAlteration);
-                }
+                return inconclusiveSummary(alteration.getGene(), queryAlteration);
             }
             if (appendThe) {
                 sb.append("The ");
