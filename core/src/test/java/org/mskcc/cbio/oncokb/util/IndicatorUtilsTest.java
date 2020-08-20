@@ -365,6 +365,7 @@ public class IndicatorUtilsTest {
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
         assertEquals("The alteration should exist.", true, indicatorQueryResp.getVariantExist());
         assertEquals("The Oncogenicity is not inconclusive, but it should be.", Oncogenicity.INCONCLUSIVE.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The mutation summary does not match.", "There is conflicting and/or weak data describing the biological significance of the PIK3CA C378Y mutation. However, it has been identified as a statistically significant hotspot.", indicatorQueryResp.getVariantSummary());
         assertEquals("There should not be any sensitive therapeutic associated.", null, indicatorQueryResp.getHighestSensitiveLevel());
         assertEquals("There should not be any resistance therapeutic associated.", null, indicatorQueryResp.getHighestResistanceLevel());
 
