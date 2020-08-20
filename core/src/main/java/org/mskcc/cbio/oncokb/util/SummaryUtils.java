@@ -313,7 +313,7 @@ public class SummaryUtils {
             }
         }
 
-        if (oncogenic != null) {
+        if (oncogenic != null && !oncogenic.equals(Oncogenicity.UNKNOWN)) {
             return getOncogenicSummaryFromOncogenicity(oncogenic, alteration, query, isHotspot);
         }
 
@@ -322,7 +322,7 @@ public class SummaryUtils {
         }
 
         if (isHotspot) {
-            return hotspotSummary(alteration, query, false);
+            return hotspotSummary(alteration, query, false, oncogenic);
         }
 
         return unknownOncogenicSummary(gene, query.getAlteration());
@@ -491,12 +491,12 @@ public class SummaryUtils {
         StringBuilder sb = new StringBuilder();
         sb.append(inconclusiveSummary(alteration.getGene(), query.getAlteration()));
         sb.append(" However, ");
-        String hotspotSummary = hotspotSummary(alteration, query, true);
+        String hotspotSummary = hotspotSummary(alteration, query, true, Oncogenicity.INCONCLUSIVE);
         sb.append(StringUtils.uncapitalize(hotspotSummary));
         return sb.toString();
     }
 
-    public static String hotspotSummary(Alteration alteration, Query query, Boolean usePronoun) {
+    public static String hotspotSummary(Alteration alteration, Query query, Boolean usePronoun, Oncogenicity oncogenicity) {
         StringBuilder sb = new StringBuilder();
         if (usePronoun == null) {
             usePronoun = false;
@@ -506,7 +506,10 @@ public class SummaryUtils {
         } else {
             sb.append("The " + getGeneMutationNameInVariantSummary(alteration.getGene(), query.getAlteration()));
         }
-        sb.append(" has been identified as a statistically significant hotspot and is predicted to be oncogenic");
+        sb.append(" has been identified as a statistically significant hotspot");
+        if (oncogenicity == null || !MainUtils.isValidHotspotOncogenicity(oncogenicity)) {
+            sb.append(" and is predicted to be oncogenic");
+        }
         sb.append(hotspotLink(query));
         sb.append(".");
         return sb.toString();
