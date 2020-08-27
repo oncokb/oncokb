@@ -21,7 +21,7 @@ import static org.junit.Assert.assertEquals;
  */
 @RunWith(Parameterized.class)
 public class SummaryUtilsParameterizedTest {
-    private static String TUMOR_TYPE_SUMMARY_EXAMPLES_PATH = "src/test/resources/test_tumor_type_summaries.txt";
+    private static String TUMOR_TYPE_SUMMARY_EXAMPLES_PATH = "src/test/resources/test_tumor_type_summaries.tsv";
 
     private String gene;
     private String variant;

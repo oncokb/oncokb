@@ -88,7 +88,7 @@ public class FindRelevantAlterationsTest {
                 {"PDGFRA", "D842V", null, "D842V, D842H, D842I, D842Y, D842_I843delinsIM, Oncogenic Mutations"},
 
                 // Check whether the overlapped variants(with the same consequence) will be mapped
-                {"MAP2K1", "E41_F53del", null, "E41_F53del, E41_L54del, E51_Q58del, F53_Q58del, F53_Q58delinsL, Oncogenic Mutations"},
+                {"MAP2K1", "E41_F53del", null, "E41_F53del, E41_L54del, L42_K57del, E51_Q58del, F53_Q58del, F53_Q58delinsL, Oncogenic Mutations"},
 
                 // Truncating Mutations in the Oncogene should not be mapped to any range mutation unless the consequence is truncating
                 {"KIT", "K509Nfs*2", null, "K509Nfs*2"},
@@ -125,6 +125,7 @@ public class FindRelevantAlterationsTest {
 
                 // Do not mapping Oncogenic Mutations to Amplification
                 {"KIT", "Amplification", null, "Amplification"},
+
 
 
                 // Check non_truncating_variant
