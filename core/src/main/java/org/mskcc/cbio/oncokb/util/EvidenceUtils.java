@@ -1016,7 +1016,7 @@ public class EvidenceUtils {
                         updatedEvidences.add(evidence);
                     }
                 });
-                query.setEvidences(new ArrayList<>(keepHighestLevelForSameTreatments(updatedEvidences, query.getExactMatchedAlteration())));
+                query.setEvidences(new ArrayList<>(StringUtils.isEmpty(query.getQuery().getTumorType()) ? updatedEvidences : keepHighestLevelForSameTreatments(updatedEvidences, query.getExactMatchedAlteration())));
                 evidenceQueries.add(query);
             }
         }
