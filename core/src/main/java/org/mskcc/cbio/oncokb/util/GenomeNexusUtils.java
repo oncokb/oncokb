@@ -83,9 +83,9 @@ public class GenomeNexusUtils {
 
     private static EnsemblControllerApi getEnsemblControllerApi(ReferenceGenome referenceGenome) {
         switch (referenceGenome) {
-            case GRCH37:
+            case GRCh37:
                 return getGNEnsemblControllerApi(GN_37_URL);
-            case GRCH38:
+            case GRCh38:
                 return getGNEnsemblControllerApi(GN_38_URL);
             default:
                 return new EnsemblControllerApi();
@@ -94,9 +94,9 @@ public class GenomeNexusUtils {
 
     private static AnnotationControllerApi getAnnotationControllerApi(ReferenceGenome referenceGenome) {
         switch (referenceGenome) {
-            case GRCH37:
+            case GRCh37:
                 return getGNAnnotationControllerApi(GN_37_URL);
-            case GRCH38:
+            case GRCh38:
                 return getGNAnnotationControllerApi(GN_38_URL);
             default:
                 return new AnnotationControllerApi();
@@ -109,9 +109,9 @@ public class GenomeNexusUtils {
 
     public static String getEnsemblAPIUrl(ReferenceGenome referenceGenome) {
         switch (referenceGenome) {
-            case GRCH37:
+            case GRCh37:
                 return ENSEMBL_37_API_URL;
-            case GRCH38:
+            case GRCh38:
                 return ENSEMBL_38_API_URL;
             default:
                 return "";
@@ -128,9 +128,9 @@ public class GenomeNexusUtils {
             return null;
         }
         switch (referenceGenome) {
-            case GRCH37:
+            case GRCh37:
                 return gene.getGrch37Isoform();
-            case GRCH38:
+            case GRCh38:
                 return gene.getGrch38Isoform();
             default:
                 return "";

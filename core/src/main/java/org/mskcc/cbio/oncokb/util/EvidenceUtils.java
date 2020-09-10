@@ -1093,7 +1093,7 @@ public class EvidenceUtils {
                     alterationBo.save(alteration);
                 } else if (!alteration.getReferenceGenomes().equals(alt.getReferenceGenomes())) {
                     alteration.setReferenceGenomes(alt.getReferenceGenomes());
-                    alterationBo.save(alteration);
+                    alterationBo.update(alteration);
                 }
                 alterations.add(alteration);
             }

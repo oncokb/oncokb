@@ -32,7 +32,7 @@ public class IndicatorController {
     IndicatorQueryResp getEvidence(
         HttpMethod method,
         @RequestParam(value = "id", required = false) String id,
-        @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCH37") ReferenceGenome referenceGenome,
+        @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") ReferenceGenome referenceGenome,
         @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId,
         @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol,
         @RequestParam(value = "alteration", required = false) String alteration,

@@ -23,13 +23,18 @@ public class AlterationDaoImpl extends GenericDaoImpl<Alteration, Integer> imple
 
     @Override
     public Alteration findAlteration(Gene gene, AlterationType alterationType, ReferenceGenome referenceGenome, String alteration) {
-        List<Alteration> alterations = findByNamedQuery("findAlterationAndReferenceGenome", gene, alteration, referenceGenome);
+        List<Alteration> alterations = referenceGenome == null ?
+            findByNamedQuery("findAlteration", gene, alteration) :
+            findByNamedQuery("findAlterationAndReferenceGenome", gene, alteration, referenceGenome);
         return alterations.isEmpty() ? null : alterations.get(0);
     }
 
     @Override
     public Alteration findAlteration(Gene gene, AlterationType alterationType, ReferenceGenome referenceGenome, String alteration, String name) {
-        List<Alteration> alterations = findByNamedQuery("findAlterationByAlterationAndNameAndReferenceGenome", gene, alteration, name, referenceGenome);
+
+        List<Alteration> alterations = referenceGenome == null ?
+            findByNamedQuery("findAlterationByAlterationAndName", gene, alteration, name) :
+            findByNamedQuery("findAlterationByAlterationAndNameAndReferenceGenome", gene, alteration, name, referenceGenome);
         return alterations.isEmpty() ? null : alterations.get(0);
     }
 

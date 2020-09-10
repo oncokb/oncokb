@@ -17,7 +17,7 @@ import static org.junit.Assert.assertNotEquals;
 public class GenomeNexusUtilsTest extends TestCase {
     public void testGetTranscriptConsequence() throws Exception {
         final String BRAF_V600E_37 = "7:g.140453136A>T";
-        ReferenceGenome mskReferenceGenome = ReferenceGenome.GRCH37;
+        ReferenceGenome mskReferenceGenome = ReferenceGenome.GRCh37;
         TranscriptConsequence consequence = GenomeNexusUtils.getTranscriptConsequence(GNVariantAnnotationType.HGVS_G, BRAF_V600E_37, mskReferenceGenome);
         Gene gene = GeneUtils.getGeneByHugoSymbol("BRAF");
         assertEquals("Picked transcript gene symbol is not BRAF, but it should.",
@@ -34,12 +34,12 @@ public class GenomeNexusUtilsTest extends TestCase {
             gene.getGrch37Isoform(), consequence.getTranscriptId());
 
         // the same BRAF V600E GRCh37 change should not get annotated by GN in GRCh38
-        TranscriptConsequence consequence38 = GenomeNexusUtils.getTranscriptConsequence(GNVariantAnnotationType.HGVS_G, BRAF_V600E_37, ReferenceGenome.GRCH38);
+        TranscriptConsequence consequence38 = GenomeNexusUtils.getTranscriptConsequence(GNVariantAnnotationType.HGVS_G, BRAF_V600E_37, ReferenceGenome.GRCh38);
         assertNotEquals("The consequence should not be the same", consequence, consequence38);
 
 
         final String BRAF_V600E_38 = "7:g.140753336A>T";
-        consequence = GenomeNexusUtils.getTranscriptConsequence(GNVariantAnnotationType.HGVS_G, BRAF_V600E_38, ReferenceGenome.GRCH38);
+        consequence = GenomeNexusUtils.getTranscriptConsequence(GNVariantAnnotationType.HGVS_G, BRAF_V600E_38, ReferenceGenome.GRCh38);
         gene = GeneUtils.getGeneByHugoSymbol("BRAF");
         assertEquals("Picked transcript gene symbol is not BRAF, but it should.",
             gene.getHugoSymbol(), consequence.getGeneSymbol());

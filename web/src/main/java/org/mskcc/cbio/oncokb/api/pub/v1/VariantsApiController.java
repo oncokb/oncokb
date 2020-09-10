@@ -1,6 +1,7 @@
 package org.mskcc.cbio.oncokb.api.pub.v1;
 
 import io.swagger.annotations.ApiParam;
+import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.model.*;
@@ -8,6 +9,8 @@ import org.mskcc.cbio.oncokb.service.JsonResultFactory;
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
+import org.mskcc.cbio.oncokb.util.MainUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -41,10 +44,17 @@ public class VariantsApiController implements VariantsApi {
         , @ApiParam(value = "") @RequestParam(value = "proteinStart", required = false) Integer proteinStart
         , @ApiParam(value = "") @RequestParam(value = "proteinEnd", required = false) Integer proteinEnd
         , @ApiParam(value = "HGVS varaint. Its priority is higher than entrezGeneId/hugoSymbol + variant combination") @RequestParam(value = "hgvs", required = false) String hgvs
-        , @ApiParam(value = "Reference genome, either GRCH37 or GRCH38. The default is GRCH37", required = false, defaultValue = "GRCH37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCH37") ReferenceGenome referenceGenome
+        , @ApiParam(value = "Reference genome, either GRCh37 or GRCh38. The default is GRCh37", required = false, defaultValue = "GRCh37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") String referenceGenome
         , @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
     ) {
-        VariantSearchQuery query = new VariantSearchQuery(entrezGeneId, hugoSymbol, variant, variantType, consequence, proteinStart, proteinEnd, hgvs, referenceGenome);
+        ReferenceGenome matchedRG = null;
+        if (!StringUtils.isEmpty(referenceGenome)) {
+            matchedRG = MainUtils.searchEnum(ReferenceGenome.class, referenceGenome);
+            if (matchedRG == null) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+        }
+        VariantSearchQuery query = new VariantSearchQuery(entrezGeneId, hugoSymbol, variant, variantType, consequence, proteinStart, proteinEnd, hgvs, matchedRG);
         return ResponseEntity.ok().body(JsonResultFactory.getAlteration(getVariants(query), fields));
     }
 

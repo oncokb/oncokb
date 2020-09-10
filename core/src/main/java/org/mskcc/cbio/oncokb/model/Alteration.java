@@ -8,6 +8,7 @@ import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author jgao
@@ -223,6 +224,7 @@ public class Alteration implements java.io.Serializable {
         hash = 83 * hash + (this.gene != null ? this.gene.hashCode() : 0);
         hash = 83 * hash + (this.alteration != null ? this.alteration.hashCode() : 0);
         hash = 83 * hash + (this.alterationType != null ? this.alterationType.hashCode() : 0);
+        hash = 83 * hash + (this.referenceGenomes != null ? this.referenceGenomes.hashCode() : 0);
         return hash;
     }
 
@@ -297,6 +299,11 @@ public class Alteration implements java.io.Serializable {
         }
         if (this.variantResidues != null) {
             content.add(this.variantResidues);
+        } else {
+            content.add("");
+        }
+        if (this.referenceGenomes != null) {
+            content.add(this.referenceGenomes.stream().map(referenceGenome -> referenceGenome.name()).collect(Collectors.joining(",")));
         } else {
             content.add("");
         }

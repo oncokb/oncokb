@@ -32,11 +32,11 @@ public class PrivateGenomeNexusController {
     public ResponseEntity<TranscriptResult> getTranscript(
         @PathVariable String hugoSymbol
     ) throws ApiException {
-        EnsemblTranscript grch37Transcript = getCanonicalEnsemblTranscript(hugoSymbol, ReferenceGenome.GRCH37);
+        EnsemblTranscript grch37Transcript = getCanonicalEnsemblTranscript(hugoSymbol, ReferenceGenome.GRCh37);
         TranscriptPair transcriptPair = new TranscriptPair();
-        transcriptPair.setReferenceGenome(ReferenceGenome.GRCH37);
+        transcriptPair.setReferenceGenome(ReferenceGenome.GRCh37);
         transcriptPair.setTranscript(grch37Transcript.getTranscriptId());
-        TranscriptMatchResult transcriptMatchResult = matchTranscript(transcriptPair, ReferenceGenome.GRCH38, hugoSymbol);
+        TranscriptMatchResult transcriptMatchResult = matchTranscript(transcriptPair, ReferenceGenome.GRCh38, hugoSymbol);
 
         TranscriptResult transcriptResult = new TranscriptResult();
         transcriptResult.setGrch37Transcript(transcriptMatchResult.getOriginalEnsemblTranscript());

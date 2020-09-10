@@ -11,7 +11,7 @@ import java.util.Set;
  */
 public class AnnotationQuery implements java.io.Serializable{
     private String id; //Optional, This id is passed from request. The identifier used to distinguish the query
-    private ReferenceGenome referenceGenome = ReferenceGenome.GRCH37;
+    private ReferenceGenome referenceGenome = ReferenceGenome.GRCh37;
     private String tumorType;
     private Set<EvidenceType> evidenceTypes = new HashSet<>();
 
