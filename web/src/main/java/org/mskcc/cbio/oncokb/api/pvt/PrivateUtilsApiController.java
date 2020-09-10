@@ -212,10 +212,17 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     }
 
     @Override
-    public ResponseEntity<Map<String, Boolean>> validateVariantExampleGet(String hugoSymbol, ReferenceGenome referenceGenome, String variant, String examples) throws ParserConfigurationException, SAXException, IOException {
+    public ResponseEntity<Map<String, Boolean>> validateVariantExampleGet(String hugoSymbol, String referenceGenome, String variant, String examples) throws ParserConfigurationException, SAXException, IOException {
         Map<String, Boolean> validation = new HashMap<>();
+        ReferenceGenome matchedRG = null;
+        if (!org.apache.commons.lang3.StringUtils.isEmpty(referenceGenome)) {
+            matchedRG = MainUtils.searchEnum(ReferenceGenome.class, referenceGenome);
+            if (matchedRG == null) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+        }
         for (String example : examples.split(",")) {
-            validation.put(example, matchVariant(hugoSymbol, referenceGenome, variant, example));
+            validation.put(example, matchVariant(hugoSymbol, matchedRG, variant, example));
         }
         return new ResponseEntity<>(validation, HttpStatus.OK);
     }
@@ -304,7 +311,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     public ResponseEntity<VariantAnnotation> utilVariantAnnotationGet(
         @ApiParam(value = "hugoSymbol") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
         , @ApiParam(value = "entrezGeneId") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
-        , @ApiParam(value = "Reference genome, either GRCH37 or GRCH38. The default is GRCH37", defaultValue = "GRCH37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCH37") ReferenceGenome referenceGenome
+        , @ApiParam(value = "Reference genome, either GRCh37 or GRCh38. The default is GRCh37", defaultValue = "GRCh37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") String referenceGenome
         , @ApiParam(value = "Alteration") @RequestParam(value = "alteration", required = false) String alteration
         , @ApiParam(value = "HGVS genomic format. Example: 7:g.140453136A>T") @RequestParam(value = "hgvsg", required = false) String hgvsg
         , @ApiParam(value = "OncoTree tumor type name/main type/code") @RequestParam(value = "tumorType", required = false) String tumorType) {
@@ -315,15 +322,22 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
 
         Query query;
         Gene gene;
+        ReferenceGenome matchedRG = null;
+        if (!org.apache.commons.lang3.StringUtils.isEmpty(referenceGenome)) {
+            matchedRG = MainUtils.searchEnum(ReferenceGenome.class, referenceGenome);
+            if (matchedRG == null) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+        }
         if (StringUtils.isNullOrEmpty(hgvsg)) {
             gene = GeneUtils.getGene(entrezGeneId, hugoSymbol);
-            Alteration alterationModel = AlterationUtils.findAlteration(gene, referenceGenome, alteration);
+            Alteration alterationModel = AlterationUtils.findAlteration(gene, matchedRG, alteration);
             if (alterationModel == null) {
                 alterationModel = AlterationUtils.getAlteration(gene.getHugoSymbol(), alteration, null, null, null, null);
             }
             query = new Query(alterationModel);
         } else {
-            query = new Query(null, referenceGenome, "regular", null, null, null, null, null, tumorType, null, null, null, hgvsg);
+            query = new Query(null, matchedRG, "regular", null, null, null, null, null, tumorType, null, null, null, hgvsg);
             gene = GeneUtils.getGeneByEntrezId(query.getEntrezGeneId());
         }
         query.setTumorType(tumorType);

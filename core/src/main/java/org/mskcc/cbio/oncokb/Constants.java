@@ -19,7 +19,7 @@ public final class Constants {
     public static final String IS_PUBLIC_INSTANCE = "is_public_instance";
     public static final String SWAGGER_DESCRIPTION = "swagger_description";
 
-    public static final ReferenceGenome DEFAULT_REFERENCE_GENOME = ReferenceGenome.GRCH37;
+    public static final ReferenceGenome DEFAULT_REFERENCE_GENOME = ReferenceGenome.GRCh37;
 
     private Constants() {
     }

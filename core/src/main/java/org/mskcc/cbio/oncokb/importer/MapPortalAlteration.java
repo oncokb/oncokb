@@ -71,7 +71,7 @@ public class MapPortalAlteration {
                 Alteration alt = AlterationUtils.getAlteration(gene == null ? null : gene.getHugoSymbol(),
                     proteinChange, null, consequence, proteinStartPosition, proteinEndPosition);
                 AlterationUtils.annotateAlteration(alt, alt.getAlteration());
-                alterations.addAll(AlterationUtils.getRelevantAlterations(ReferenceGenome.GRCH37, alt));
+                alterations.addAll(AlterationUtils.getRelevantAlterations(ReferenceGenome.GRCh37, alt));
             }
             alterationsSet = AlterationUtils.excludeVUS(alterations);
         }

@@ -22,7 +22,7 @@ public class FindRelevantAlterationsIndependentTest extends TestCase {
         Alteration alt1 = new Alteration();
         alt1.setGene(braf);
         alt1.setAlteration("V600E");
-        alt1.setReferenceGenomes(Collections.singleton(ReferenceGenome.GRCH37));
+        alt1.setReferenceGenomes(Collections.singleton(ReferenceGenome.GRCh37));
         AlterationUtils.annotateAlteration(alt1, alt1.getAlteration());
 
 
@@ -33,13 +33,13 @@ public class FindRelevantAlterationsIndependentTest extends TestCase {
 
         LinkedHashSet<Alteration> relevantAlterations =
             ApplicationContextSingleton.getAlterationBo()
-                .findRelevantAlterations(ReferenceGenome.GRCH37, query, Collections.singleton(alt1), true);
+                .findRelevantAlterations(ReferenceGenome.GRCh37, query, Collections.singleton(alt1), true);
 
         assertEquals(1, relevantAlterations.size());
 
         relevantAlterations =
             ApplicationContextSingleton.getAlterationBo()
-                .findRelevantAlterations(ReferenceGenome.GRCH38, query, Collections.singleton(alt1), true);
+                .findRelevantAlterations(ReferenceGenome.GRCh38, query, Collections.singleton(alt1), true);
 
         assertEquals(0, relevantAlterations.size());
 
@@ -48,8 +48,8 @@ public class FindRelevantAlterationsIndependentTest extends TestCase {
         bothRG.setGene(braf);
         bothRG.setAlteration("V600E");
         Set<ReferenceGenome> referenceGenomes = new HashSet<>();
-        referenceGenomes.add(ReferenceGenome.GRCH37);
-        referenceGenomes.add(ReferenceGenome.GRCH38);
+        referenceGenomes.add(ReferenceGenome.GRCh37);
+        referenceGenomes.add(ReferenceGenome.GRCh38);
         bothRG.setReferenceGenomes(referenceGenomes);
         AlterationUtils.annotateAlteration(bothRG, bothRG.getAlteration());
 
@@ -59,13 +59,13 @@ public class FindRelevantAlterationsIndependentTest extends TestCase {
 
         relevantAlterations =
             ApplicationContextSingleton.getAlterationBo()
-                .findRelevantAlterations(ReferenceGenome.GRCH37, query, allAlterations, true);
+                .findRelevantAlterations(ReferenceGenome.GRCh37, query, allAlterations, true);
 
         assertEquals(2, relevantAlterations.size());
 
         relevantAlterations =
             ApplicationContextSingleton.getAlterationBo()
-                .findRelevantAlterations(ReferenceGenome.GRCH38, query, allAlterations, true);
+                .findRelevantAlterations(ReferenceGenome.GRCh38, query, allAlterations, true);
 
         assertEquals(1, relevantAlterations.size());
     }

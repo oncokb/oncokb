@@ -73,14 +73,14 @@ public final class AlterationUtils {
             Set<ReferenceGenome> referenceGenomes = new HashSet<>();
             if (rgm.find()) {
                 String referenceGenome = rgm.group(2);
-                ReferenceGenome matchedReferenceGenome = ReferenceGenome.valueOf(referenceGenome.toUpperCase());
+                ReferenceGenome matchedReferenceGenome = MainUtils.searchEnum(ReferenceGenome.class, referenceGenome);
                 if (matchedReferenceGenome != null) {
                     referenceGenomes.add(matchedReferenceGenome);
                 }
                 part = part.replace(rgm.group(1), "");
             } else {
-                referenceGenomes.add(ReferenceGenome.GRCH37);
-                referenceGenomes.add(ReferenceGenome.GRCH38);
+                referenceGenomes.add(ReferenceGenome.GRCh37);
+                referenceGenomes.add(ReferenceGenome.GRCh38);
             }
 
             if (part.contains("[")) {
