@@ -362,7 +362,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             alterations.addAll(findMutationsByConsequenceAndPosition(alteration.getGene(), referenceGenome, truncatingVariantConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations));
         }
 
-        if (addVUSMutation(alteration)){
+        if (addVUSMutation(alteration, matchedAlt != null)){
             Alteration VUSMutation = findAlteration(referenceGenome, InferredMutation.VUS.getVariant(), fullAlterations);
             if (VUSMutation != null){
                 alterations.add(VUSMutation);
@@ -410,7 +410,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         }
 
         if (addVUSMutation(alteration, matchedAlt != null)) {
-            Alteration VUSMutation = findAlteration(InferredMutation.VUS.getVariant(), fullAlterations);
+            Alteration VUSMutation = findAlteration(referenceGenome, InferredMutation.VUS.getVariant(), fullAlterations);
             if (VUSMutation != null) {
                 alterations.add(VUSMutation);
             }
