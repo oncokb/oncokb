@@ -41,15 +41,15 @@ public enum Oncogenicity {
         return map.get(oncogenicity);
     }
 
-    public static int compare(Oncogenicity o1, Oncogenicity o2){
+    public static int compare(Oncogenicity o1, Oncogenicity o2) {
         //0 indicates o1 has the same oncogenicity with o2
         //positive number indicates o1 has higher oncogenicity than o2
         //negative number indicates o2 has higher oncogenicity than o1
-        List<String> oncogenicityValues = new ArrayList<>(Arrays.asList("Inconclusive", "Likely Neutral", "Likely Oncogenic", "Oncogenic"));
-        if(o1 == null && o2 == null)return 0;
-        else if(o1 == null) return -1;
-        else if(o2 == null)return 1;
-        else return oncogenicityValues.indexOf(o1.getOncogenic()) - oncogenicityValues.indexOf(o2.getOncogenic());
+        List<Oncogenicity> oncogenicityValues = new ArrayList<>(Arrays.asList(INCONCLUSIVE, LIKELY_NEUTRAL, LIKELY, YES));
+        if (o1 == null && o2 == null) return 0;
+        else if (o1 == null) return -1;
+        else if (o2 == null) return 1;
+        else return oncogenicityValues.indexOf(o1) - oncogenicityValues.indexOf(o2);
     }
 
     public static Oncogenicity getByEvidence(Evidence evidence) {

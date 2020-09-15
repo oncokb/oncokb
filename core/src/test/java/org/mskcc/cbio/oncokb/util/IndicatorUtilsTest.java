@@ -1,10 +1,14 @@
 package org.mskcc.cbio.oncokb.util;
 
 import org.junit.Test;
+import org.mskcc.cbio.oncokb.apiModels.Implication;
 import org.mskcc.cbio.oncokb.model.*;
+import org.mskcc.cbio.oncokb.model.tumor_type.MainType;
+import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -134,7 +138,7 @@ public class IndicatorUtilsTest {
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "ALK", "R401Q", null, null, "Colon Adenocarcinoma", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null);
         assertEquals("The oncogenicity should not be 'Predicted Oncogenic'", "", indicatorQueryResp.getOncogenic());
-        assertEquals("The variant summary is not expected.", "As of 02/01/2019, there was no available functional data about the ALK R401Q mutation.", indicatorQueryResp.getVariantSummary());
+        assertEquals("The variant summary is not expected.", "The biologic significance of the ALK R401Q mutation is unknown (last reviewed 02/01/2019).", indicatorQueryResp.getVariantSummary());
         assertEquals("The isHotspot is not false, but it should be.", Boolean.FALSE, indicatorQueryResp.getHotspot());
 
         // No longer test 3A. KRAS has been downgraded to level 4
@@ -360,14 +364,15 @@ public class IndicatorUtilsTest {
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
         assertEquals("The Oncogenicity is not Oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
 
-        // Oncogenicity of Alternative Allele overwrites Inconclusive
-        // C24Y is annotated as Inconclusive but C24R is Likely Oncogenic
-//        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "BRCA1", "C24Y", null, "Colon Adenocarcinoma", null, null, null, null);
-//        indicatorQueryResp = IndicatorUtils.processQuery(query, null, true);
-//        assertEquals("Gene should exist", true, indicatorQueryResp.getGeneExist());
-//        assertEquals("The Oncogenicity is not Likely Oncogenic, but it should be.", Oncogenicity.LIKELY.getOncogenic(), indicatorQueryResp.getOncogenic());
-//        assertEquals("Summary is not expected.", "The BRCA1 C24Y mutation has not been functionally or clinically validated. However, BRCA1 C24R is likely oncogenic, and therefore BRCA1 C24Y is considered likely oncogenic.", indicatorQueryResp.getVariantSummary());
-
+        // Inconclusive should be respected
+        // PIK3CA C378Y is inconclusive, even C378R is likely oncogenic, we should still use inconclusive for C378Y
+        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "PIK3CA", "C378Y", null, null, null, null, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
+        assertEquals("The alteration should exist.", true, indicatorQueryResp.getVariantExist());
+        assertEquals("The Oncogenicity is not inconclusive, but it should be.", Oncogenicity.INCONCLUSIVE.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The mutation summary does not match.", "There is conflicting and/or weak data describing the biological significance of the PIK3CA C378Y mutation.", indicatorQueryResp.getVariantSummary());
+        assertEquals("There should not be any sensitive therapeutic associated.", null, indicatorQueryResp.getHighestSensitiveLevel());
+        assertEquals("There should not be any resistance therapeutic associated.", null, indicatorQueryResp.getHighestResistanceLevel());
 
         // Check the predefined TERT Promoter summary
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "TERT", "Promoter", null, null, "Ovarian Cancer", null, null, null, null);
@@ -620,6 +625,61 @@ public class IndicatorUtilsTest {
         resp2 = IndicatorUtils.processQuery(query2, null, true, null);
         pairComparison(resp1, resp2);
 
+    }
+
+    @Test
+    public void testFilterImplication() {
+        TumorType melanoma = new TumorType();
+        melanoma.setName("Melanoma");
+        melanoma.setCode("MEL");
+        MainType mainType = new MainType();
+        mainType.setName("Melanoma");
+        melanoma.setMainType(mainType);
+
+        TumorType nsclc = new TumorType();
+        nsclc.setName("Non-Small Cell Lung Cancer");
+        nsclc.setCode("NSCLC");
+        MainType nsclcMainType = new MainType();
+        nsclcMainType.setName("Non-Small Cell Lung Cancer");
+        nsclc.setMainType(mainType);
+
+        Implication implication1 = new Implication();
+        implication1.setDescription("implication1");
+        implication1.setTumorType(melanoma);
+        implication1.setLevelOfEvidence(LevelOfEvidence.LEVEL_Dx1);
+
+        Implication implication2 = new Implication();
+        implication2.setDescription("implication2");
+        implication2.setTumorType(melanoma);
+        implication2.setLevelOfEvidence(LevelOfEvidence.LEVEL_Dx1);
+
+        Implication implication3 = new Implication();
+        implication3.setDescription("implication3");
+        implication3.setTumorType(nsclc);
+        implication3.setLevelOfEvidence(LevelOfEvidence.LEVEL_Dx1);
+
+        // only keep one if the tumor type and level is the same, and the one has lower index should be picked;
+        List<Implication> implications = new ArrayList<>();
+        implications.add(implication1);
+        implications.add(implication2);
+        implications.add(implication3);
+
+        List<Implication> filteredImplications = IndicatorUtils.filterImplication(implications);
+        assertEquals(2, filteredImplications.size());
+        assertEquals("implication1", filteredImplications.get(0).getDescription());
+        assertEquals("implication3", filteredImplications.get(1).getDescription());
+
+
+        // if the level of evidence is null, filter the result out
+        Implication implication4 = new Implication();
+        implication4.setDescription("implication3");
+        implication4.setTumorType(melanoma);
+        implication4.setLevelOfEvidence(null);
+
+        implications = new ArrayList<>();
+        implications.add(implication4);
+        filteredImplications = IndicatorUtils.filterImplication(implications);
+        assertEquals(0, filteredImplications.size());
     }
 
     private void pairComparison(IndicatorQueryResp resp1, IndicatorQueryResp resp2) {

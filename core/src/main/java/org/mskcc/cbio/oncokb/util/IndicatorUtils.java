@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.apiModels.Citations;
 import org.mskcc.cbio.oncokb.apiModels.Implication;
 import org.mskcc.cbio.oncokb.apiModels.MutationEffectResp;
+import org.mskcc.cbio.oncokb.apiModels.NCITDrug;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
 
@@ -14,6 +15,8 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toCollection;
 import static org.mskcc.cbio.oncokb.util.LevelUtils.getTherapeuticLevelsWithPriorityLIstIterator;
 
 /**
@@ -535,8 +538,18 @@ public class IndicatorUtils {
                 implications.addAll(getImplicationFromEvidence(altEvis));
             }
         }
-        return implications;
+        return filterImplication(implications);
     }
+
+
+    public static List<Implication> filterImplication(List<Implication> implications) {
+        return implications.stream().filter(implication -> implication.getLevelOfEvidence() != null)
+            .map(UniqueImplication::new)
+            .distinct()
+            .map(UniqueImplication::unwrap)
+            .collect(Collectors.toList());
+    }
+
 
     private static Set<Evidence> removeNoneTumorTypeRelatedEvidence(List<Evidence> evidences, Set<TumorType> tumorTypes) {
         return new HashSet<>();
@@ -557,30 +570,32 @@ public class IndicatorUtils {
             }
         }
 
-        // Find Oncogenicity from alternative alleles
-        if ((oncogenicity == null || oncogenicity.equals(Oncogenicity.INCONCLUSIVE))
-            && alternativeAllele.size() > 0) {
-            oncogenicityEvidence = MainUtils.findHighestOncogenicEvidenceByEvidences(new HashSet<>(EvidenceUtils.getEvidence(new ArrayList<>(alternativeAllele), Collections.singleton(EvidenceType.ONCOGENIC), null)));
-            if (oncogenicityEvidence != null) {
-                Oncogenicity tmpOncogenicity = MainUtils.setToAlleleOncogenicity(Oncogenicity.getByEffect(oncogenicityEvidence.getKnownEffect()));
-                if (tmpOncogenicity != null) {
-                    oncogenicity = tmpOncogenicity;
+        if (oncogenicity == null || oncogenicity.equals(Oncogenicity.UNKNOWN)) {
+            // Find Oncogenicity from alternative alleles
+            if (alternativeAllele.size() > 0) {
+                oncogenicityEvidence = MainUtils.findHighestOncogenicEvidenceByEvidences(new HashSet<>(EvidenceUtils.getEvidence(new ArrayList<>(alternativeAllele), Collections.singleton(EvidenceType.ONCOGENIC), null)));
+                if (oncogenicityEvidence != null) {
+                    Oncogenicity tmpOncogenicity = MainUtils.setToAlleleOncogenicity(Oncogenicity.getByEffect(oncogenicityEvidence.getKnownEffect()));
+                    if (tmpOncogenicity != null) {
+                        oncogenicity = tmpOncogenicity;
+                    }
                 }
             }
-        }
 
-        // If there is no oncogenic info available for this variant, find oncogenicity from relevant variants
-        if (oncogenicity == null || oncogenicity.equals(Oncogenicity.INCONCLUSIVE)) {
-            List<Alteration> listToBeRemoved = new ArrayList<>(alternativeAllele);
-            listToBeRemoved.add(alteration);
+            // If there is no oncogenic info available for this variant, find oncogenicity from relevant variants
+            // This also includes inconclusive check cause if the best oncogenicity from alternative allele, we should continue find better one in other relevant alterations
+            if (oncogenicity == null || oncogenicity.equals(Oncogenicity.UNKNOWN) || oncogenicity.equals(Oncogenicity.INCONCLUSIVE)) {
+                List<Alteration> listToBeRemoved = new ArrayList<>(alternativeAllele);
+                listToBeRemoved.add(alteration);
 
-            oncogenicityEvidence = MainUtils.findHighestOncogenicEvidenceByEvidences(
-                new HashSet<>(EvidenceUtils.getEvidence(new ArrayList<>(AlterationUtils.removeAlterationsFromList(relevantAlterations, listToBeRemoved)), Collections.singleton(EvidenceType.ONCOGENIC), null))
-            );
-            if (oncogenicityEvidence != null) {
-                Oncogenicity tmpOncogenicity = Oncogenicity.getByEffect(oncogenicityEvidence.getKnownEffect());
-                if (tmpOncogenicity != null) {
-                    oncogenicity = tmpOncogenicity;
+                oncogenicityEvidence = MainUtils.findHighestOncogenicEvidenceByEvidences(
+                    new HashSet<>(EvidenceUtils.getEvidence(new ArrayList<>(AlterationUtils.removeAlterationsFromList(relevantAlterations, listToBeRemoved)), Collections.singleton(EvidenceType.ONCOGENIC), null))
+                );
+                if (oncogenicityEvidence != null) {
+                    Oncogenicity tmpOncogenicity = Oncogenicity.getByEffect(oncogenicityEvidence.getKnownEffect());
+                    if (tmpOncogenicity != null) {
+                        oncogenicity = tmpOncogenicity;
+                    }
                 }
             }
         }
@@ -600,33 +615,35 @@ public class IndicatorUtils {
             indicatorQueryMutationEffect = MainUtils.findHighestMutationEffectByEvidence(new HashSet<>(selfAltMEEvis));
         }
 
-        // Find mutation effect from alternative alleles
-        if ((indicatorQueryMutationEffect.getMutationEffect() == null || indicatorQueryMutationEffect.getMutationEffect().equals(MutationEffect.INCONCLUSIVE))
-            && alternativeAllele.size() > 0) {
-            indicatorQueryMutationEffect =
-                MainUtils.setToAlternativeAlleleMutationEffect(
-                    MainUtils.findHighestMutationEffectByEvidence(
-                        new HashSet<>(
-                            EvidenceUtils.getEvidence(
-                                new ArrayList<>(alternativeAllele)
-                                , Collections.singleton(EvidenceType.MUTATION_EFFECT)
-                                , null
+        if (indicatorQueryMutationEffect.getMutationEffect() == null || indicatorQueryMutationEffect.getMutationEffect().equals(MutationEffect.UNKNOWN)) {
+            // Find mutation effect from alternative alleles
+            if (alternativeAllele.size() > 0) {
+                indicatorQueryMutationEffect =
+                    MainUtils.setToAlternativeAlleleMutationEffect(
+                        MainUtils.findHighestMutationEffectByEvidence(
+                            new HashSet<>(
+                                EvidenceUtils.getEvidence(
+                                    new ArrayList<>(alternativeAllele)
+                                    , Collections.singleton(EvidenceType.MUTATION_EFFECT)
+                                    , null
+                                )
                             )
                         )
-                    )
+                    );
+            }
+
+            // If there is no mutation effect info available for this variant, find mutation effect from relevant variants
+            // This also includes inconclusive check cause if the best mutation effect from alternative allele, we should continue find better one in other relevant alterations
+            if (indicatorQueryMutationEffect.getMutationEffect() == null || indicatorQueryMutationEffect.getMutationEffect().equals(MutationEffect.INCONCLUSIVE) || indicatorQueryMutationEffect.getMutationEffect().equals(MutationEffect.UNKNOWN)) {
+                List<Alteration> listToBeRemoved = new ArrayList<>(alternativeAllele);
+                listToBeRemoved.add(alteration);
+
+                indicatorQueryMutationEffect = MainUtils.findHighestMutationEffectByEvidence(
+                    new HashSet<>(EvidenceUtils.getEvidence(AlterationUtils.removeAlterationsFromList(relevantAlterations, listToBeRemoved), Collections.singleton(EvidenceType.MUTATION_EFFECT), null))
                 );
+            }
+
         }
-
-        // If there is no mutation effect info available for this variant, find mutation effect from relevant variants
-        if (indicatorQueryMutationEffect.getMutationEffect() == null || indicatorQueryMutationEffect.getMutationEffect().equals(MutationEffect.INCONCLUSIVE)) {
-            List<Alteration> listToBeRemoved = new ArrayList<>(alternativeAllele);
-            listToBeRemoved.add(alteration);
-
-            indicatorQueryMutationEffect = MainUtils.findHighestMutationEffectByEvidence(
-                new HashSet<>(EvidenceUtils.getEvidence(AlterationUtils.removeAlterationsFromList(relevantAlterations, listToBeRemoved), Collections.singleton(EvidenceType.MUTATION_EFFECT), null))
-            );
-        }
-
         if (indicatorQueryMutationEffect.getMutationEffect() == null) {
             indicatorQueryMutationEffect.setMutationEffect(MutationEffect.UNKNOWN);
         }
@@ -973,5 +990,30 @@ class IndicatorQueryMutationEffect {
 
     public void setMutationEffectEvidence(Evidence mutationEffectEvidence) {
         this.mutationEffectEvidence = mutationEffectEvidence;
+    }
+}
+
+class UniqueImplication {
+    private Implication e;
+
+    public UniqueImplication(Implication e) {
+        this.e = e;
+    }
+
+    public Implication unwrap() {
+        return this.e;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UniqueImplication that = (UniqueImplication) o;
+        return Objects.equals(e.getLevelOfEvidence(), that.e.getLevelOfEvidence()) && Objects.equals(e.getTumorType(), that.e.getTumorType());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(e.getLevelOfEvidence()) + Objects.hashCode(e.getTumorType());
     }
 }
