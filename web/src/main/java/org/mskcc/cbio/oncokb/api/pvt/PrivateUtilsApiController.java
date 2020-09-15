@@ -335,7 +335,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             if (alterationModel == null) {
                 alterationModel = AlterationUtils.getAlteration(gene.getHugoSymbol(), alteration, null, null, null, null);
             }
-            query = new Query(alterationModel);
+            query = new Query(alterationModel, matchedRG);
         } else {
             query = new Query(null, matchedRG, "regular", null, null, null, null, null, tumorType, null, null, null, hgvsg);
             gene = GeneUtils.getGeneByEntrezId(query.getEntrezGeneId());
