@@ -18,6 +18,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
 import static org.mskcc.cbio.oncokb.Constants.MISSENSE_VARIANT;
 
 /**
@@ -339,6 +340,10 @@ public final class AlterationUtils {
             } else {
                 alteration.setName(alteration.getAlteration());
             }
+        }
+
+        if(alteration.getReferenceGenomes() == null || alteration.getReferenceGenomes().isEmpty()) {
+            alteration.setReferenceGenomes(Collections.singleton(DEFAULT_REFERENCE_GENOME));
         }
     }
 
