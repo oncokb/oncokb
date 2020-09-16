@@ -72,7 +72,7 @@ public class HotspotUtils {
 
     private static void getHotspotsFromDataFile() {
         List<EnrichedHotspot> hotspots = new ArrayList<>();
-        Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
+        Gson gson = new GsonBuilder().create();
         Hotspot[] mutations = gson.fromJson(new BufferedReader(new InputStreamReader(HotspotUtils.class.getResourceAsStream(HOTSPOT_FILE_PATH))), Hotspot[].class);
         for (int i = 0; i < mutations.length; i++) {
             EnrichedHotspot enrichedHotspot = new EnrichedHotspot(mutations[i]);
