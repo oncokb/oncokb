@@ -3,9 +3,9 @@ package org.mskcc.cbio.oncokb.util;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.mskcc.cbio.oncokb.genomenexus.Hotspot;
-import org.mskcc.cbio.oncokb.genomenexus.IntegerRange;
-import org.mskcc.cbio.oncokb.genomenexus.ProteinLocation;
+import org.genome_nexus.client.Hotspot;
+import org.genome_nexus.client.IntegerRange;
+import org.genome_nexus.client.ProteinLocation;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.AlterationPositionBoundary;
 import org.mskcc.cbio.oncokb.model.Gene;
@@ -31,7 +31,6 @@ class EnrichedHotspot extends Hotspot {
         this.setHugoSymbol(hotspot.getHugoSymbol());
         this.setType(hotspot.getType());
         this.setResidue(hotspot.getResidue());
-        this.setId(hotspot.getId());
         this.setTranscriptId(hotspot.getTranscriptId());
         this.setInframeCount(hotspot.getInframeCount());
         this.setTumorCount(hotspot.getTumorCount());
@@ -73,7 +72,7 @@ public class HotspotUtils {
 
     private static void getHotspotsFromDataFile() {
         List<EnrichedHotspot> hotspots = new ArrayList<>();
-        Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
+        Gson gson = new GsonBuilder().create();
         Hotspot[] mutations = gson.fromJson(new BufferedReader(new InputStreamReader(HotspotUtils.class.getResourceAsStream(HOTSPOT_FILE_PATH))), Hotspot[].class);
         for (int i = 0; i < mutations.length; i++) {
             EnrichedHotspot enrichedHotspot = new EnrichedHotspot(mutations[i]);
@@ -103,7 +102,10 @@ public class HotspotUtils {
 
         AlterationUtils.annotateAlteration(alteration, alteration.getAlteration());
 
-        ProteinLocation proteinLocation = new ProteinLocation(alteration.getGene().getCuratedIsoform(), alteration.getProteinStart(), alteration.getProteinEnd(), toGNMutationType(alteration.getConsequence()));
+        ProteinLocation proteinLocation = new ProteinLocation();
+        proteinLocation.setStart(alteration.getProteinStart());
+        proteinLocation.setEnd(alteration.getProteinEnd());
+        proteinLocation.setMutationType(toGNMutationType(alteration.getConsequence()));
         List<EnrichedHotspot> hotspots = new ArrayList<>();
 
         if (hotspotMutations.get(alteration.getGene()) == null) {
@@ -166,7 +168,9 @@ public class HotspotUtils {
         }
 
         if (!start.equals(-1)) {
-            proteinPos = new IntegerRange(start, end);
+            proteinPos = new IntegerRange();
+            proteinPos.setStart(start);
+            proteinPos.setEnd(end);
         }
 
         return proteinPos;

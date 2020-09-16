@@ -9,6 +9,7 @@ import org.mskcc.cbio.oncokb.model.AlterationType;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
+import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
 
 /**
  * Created by Hongxin on 12/23/16.
@@ -145,7 +146,7 @@ public class FindRelevantAlterationsTest {
 
         LinkedHashSet<Alteration> relevantAlterations =
             ApplicationContextSingleton.getAlterationBo()
-                .findRelevantAlterations(alt, AlterationUtils.getAllAlterations(alt.getGene()), true);
+                .findRelevantAlterations(DEFAULT_REFERENCE_GENOME, alt, AlterationUtils.getAllAlterations(DEFAULT_REFERENCE_GENOME, alt.getGene()), true);
         String relevantAltsName = AlterationUtils.toString(relevantAlterations);
 
         assertEquals("Relevant alterations are not matched on case " +

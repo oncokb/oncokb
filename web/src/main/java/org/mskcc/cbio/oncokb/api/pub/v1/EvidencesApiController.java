@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
 
 
 @javax.annotation.Generated(value = "class io.swagger.codegen.languages.SpringCodegen", date = "2016-10-19T19:28:21.941Z")
@@ -64,17 +67,15 @@ public class EvidencesApiController implements EvidencesApi {
         HttpStatus status = HttpStatus.OK;
         List<Evidence> evidences = new ArrayList<>();
 
-        Map<String, Object> requestQueries = MainUtils.GetRequestQueries(entrezGeneId == null ? null : Integer.toString(entrezGeneId), hugoSymbol, variant,
-            tumorType, evidenceTypes, consequence, proteinStart, proteinEnd, levels);
-
-        if (requestQueries == null) {
-            return new ResponseEntity<>(evidences, HttpStatus.OK);
-        }
+        Query tmpQuery = new Query(null, DEFAULT_REFERENCE_GENOME, null, entrezGeneId,
+            hugoSymbol, variant, null, null,
+            tumorType, consequence, proteinStart == null ? null : Integer.parseInt(proteinStart),
+            proteinEnd == null ? null : Integer.parseInt(proteinEnd), null);
 
         List<EvidenceQueryRes> evidenceQueries = EvidenceUtils.processRequest(
-            (List<Query>) requestQueries.get("queries"),
-            new HashSet<>((List<EvidenceType>) requestQueries.get("evidenceTypes")),
-            requestQueries.get("levels") == null ? null : new HashSet<>((List<LevelOfEvidence>) requestQueries.get("levels")), highestLevelOnly);
+            Collections.singletonList(tmpQuery),
+            evidenceTypes == null ? null : Arrays.stream(evidenceTypes.split(",")).map(evidence -> EvidenceType.valueOf(evidence.trim())).collect(Collectors.toSet()),
+            levels == null ? null : Arrays.stream(levels.split(",")).map(level -> LevelOfEvidence.getByLevel(level.trim())).collect(Collectors.toSet()), highestLevelOnly);
 
         if (evidenceQueries != null) {
             for (EvidenceQueryRes query : evidenceQueries) {

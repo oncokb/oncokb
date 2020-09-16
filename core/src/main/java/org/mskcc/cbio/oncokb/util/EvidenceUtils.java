@@ -86,7 +86,7 @@ public class EvidenceUtils {
             evidenceQueryRes.setExactMatchedAlteration(matchedAlt);
             evidenceQueryRes.setLevelOfEvidences(levelOfEvidences == null ? null : new ArrayList<>(levelOfEvidences));
 
-            relevantEvidences = getEvidence(evidenceQueryRes, evidenceTypes, levelOfEvidences);
+            relevantEvidences = getEvidence(query.getReferenceGenome(), evidenceQueryRes, evidenceTypes, levelOfEvidences);
 
             Set<Evidence> evidencesToRemove = new HashSet<>();
             Set<Alteration> excludeAlternativeAlleles = new HashSet<>();
@@ -190,7 +190,7 @@ public class EvidenceUtils {
         }
     }
 
-    private static Set<Evidence> getEvidence(EvidenceQueryRes query, Set<EvidenceType> evidenceTypes, Set<LevelOfEvidence> levelOfEvidences) {
+    private static Set<Evidence> getEvidence(ReferenceGenome referenceGenome, EvidenceQueryRes query, Set<EvidenceType> evidenceTypes, Set<LevelOfEvidence> levelOfEvidences) {
         Set<Evidence> evidences = new HashSet<>();
 
         Map<Integer, Gene> genes = new HashMap<>(); //Get gene evidences
@@ -239,7 +239,7 @@ public class EvidenceUtils {
 
         List<Alteration> uniqueAlterations = new ArrayList<>(alterations.values());
         List<Alteration> uniqueAlterationsWithoutAlternativeAlleles = new ArrayList<>(alterations.values());
-        AlterationUtils.removeAlternativeAllele(query.getExactMatchedAlteration(), uniqueAlterationsWithoutAlternativeAlleles);
+        AlterationUtils.removeAlternativeAllele(referenceGenome, query.getExactMatchedAlteration(), uniqueAlterationsWithoutAlternativeAlleles);
         // Get all mutation related evidences
 
         Set<EvidenceType> common = Sets.intersection(EvidenceTypeUtils.getMutationEvidenceTypes(), evidenceTypes);
@@ -615,7 +615,7 @@ public class EvidenceUtils {
         return filtered;
     }
 
-    public static Set<Evidence> getOnlyHighestLevelEvidences(Set<Evidence> evidences, Alteration exactMatch) {
+    public static Set<Evidence> getOnlyHighestLevelEvidences(Set<Evidence> evidences, ReferenceGenome referenceGenome, Alteration exactMatch) {
         Map<LevelOfEvidence, Set<Evidence>> levels = separateEvidencesByLevel(evidences);
         Set<LevelOfEvidence> keys = levels.keySet();
 
@@ -635,7 +635,7 @@ public class EvidenceUtils {
             Set<Alteration> resistanceAlterations = AlterationUtils.getEvidencesAlterations(levels.get(highestResistanceLevel));
             Set<Alteration> resistanceRelevantAlts = new HashSet<>();
             for (Alteration alteration : resistanceAlterations) {
-                List<Alteration> relevantAlterations = AlterationUtils.getRelevantAlterations(alteration);
+                List<Alteration> relevantAlterations = AlterationUtils.getRelevantAlterations(referenceGenome, alteration);
 
                 // we need to remove the ranges that overlap but not fully cover the alteration
                 Iterator<Alteration> i = relevantAlterations.iterator();
@@ -720,7 +720,7 @@ public class EvidenceUtils {
         return map;
     }
 
-    public static Set<Evidence> keepHighestLevelForSameTreatments(Set<Evidence> evidences, Alteration exactMatch) {
+    public static Set<Evidence> keepHighestLevelForSameTreatments(Set<Evidence> evidences, ReferenceGenome referenceGenome, Alteration exactMatch) {
         Map<String, Set<Evidence>> maps = new HashedMap();
         Set<Evidence> filtered = new HashSet<>();
 
@@ -768,7 +768,7 @@ public class EvidenceUtils {
         }).forEach(tumorTypeListEntry -> mostFrequentTumorTypes.add(tumorTypeListEntry.getKey()));
 
         for (Map.Entry<String, Set<Evidence>> entry : maps.entrySet()) {
-            Set<Evidence> highestEvis = EvidenceUtils.getOnlyHighestLevelEvidences(entry.getValue(), exactMatch);
+            Set<Evidence> highestEvis = EvidenceUtils.getOnlyHighestLevelEvidences(entry.getValue(), referenceGenome, exactMatch);
 
             // If highestEvis has more than 1 items, find highest original level if the level is 3B
             // We also return R2 when the same treatment has sensitive level
@@ -788,7 +788,7 @@ public class EvidenceUtils {
 
                         Set<Evidence> originalEvis = EvidenceUtils.getEvidencesByGenesAndIds(genes, evidenceIds);
 
-                        Set<Evidence> highestOriginalEvis = EvidenceUtils.getOnlyHighestLevelEvidences(originalEvis, exactMatch);
+                        Set<Evidence> highestOriginalEvis = EvidenceUtils.getOnlyHighestLevelEvidences(originalEvis, referenceGenome, exactMatch);
                         Set<Integer> filteredIds = new HashSet<>();
                         for (Evidence evidence : highestOriginalEvis) {
                             filteredIds.add(evidence.getId());
@@ -965,7 +965,7 @@ public class EvidenceUtils {
                     }
 
                     if (!com.mysql.jdbc.StringUtils.isNullOrEmpty(requestQuery.getAlteration())) {
-                        Alteration alt = AlterationUtils.findAlteration(query.getGene(), requestQuery.getAlteration());
+                        Alteration alt = AlterationUtils.findAlteration(query.getGene(), requestQuery.getReferenceGenome(), requestQuery.getAlteration());
 
                         if (alt == null) {
                             alt = AlterationUtils.getAlteration(query.getGene().getHugoSymbol(),
@@ -974,12 +974,12 @@ public class EvidenceUtils {
                             AlterationUtils.annotateAlteration(alt, alt.getAlteration());
                         }
                         query.setExactMatchedAlteration(alt);
-                        List<Alteration> relevantAlts = AlterationUtils.getRelevantAlterations(alt);
+                        List<Alteration> relevantAlts = AlterationUtils.getRelevantAlterations(requestQuery.getReferenceGenome(), alt);
 
                         // Look for Oncogenic Mutations if no relevantAlt found for alt and alt is hotspot
                         if (relevantAlts.isEmpty()
                             && HotspotUtils.isHotspot(alt)) {
-                            Alteration oncogenicMutations = AlterationUtils.findAlteration(alt.getGene(), "Oncogenic Mutations");
+                            Alteration oncogenicMutations = AlterationUtils.findAlteration(alt.getGene(),requestQuery.getReferenceGenome(), "Oncogenic Mutations");
                             if (oncogenicMutations != null) {
                                 relevantAlts.add(oncogenicMutations);
                             }
@@ -987,18 +987,18 @@ public class EvidenceUtils {
 
                         Alteration alteration = AlterationUtils.getAlteration(query.getGene().getHugoSymbol(), requestQuery.getAlteration(), AlterationType.MUTATION, requestQuery.getConsequence(), requestQuery.getProteinStart(), requestQuery.getProteinEnd());
                         AlterationUtils.annotateAlteration(alteration, alteration.getAlteration());
-                        List<Alteration> allelesAlts = AlterationUtils.getAlleleAlterations(alteration);
+                        List<Alteration> allelesAlts = AlterationUtils.getAlleleAlterations(requestQuery.getReferenceGenome(), alteration);
                         relevantAlts.removeAll(allelesAlts);
                         query.setAlterations(relevantAlts);
 
                         query.setAlleles(new ArrayList<>(allelesAlts));
                     } else {
                         // if no alteration assigned, but has tumor type
-                        query.setAlterations(new ArrayList<>(AlterationUtils.getAllAlterations(query.getGene())));
+                        query.setAlterations(new ArrayList<>(AlterationUtils.getAllAlterations(requestQuery.getReferenceGenome(), query.getGene())));
                     }
                 }
                 query.setLevelOfEvidences(levelOfEvidences == null ? null : new ArrayList<>(levelOfEvidences));
-                Set<Evidence> relevantEvidences = getEvidence(query, evidenceTypes, levelOfEvidences);
+                Set<Evidence> relevantEvidences = getEvidence(requestQuery.getReferenceGenome(), query, evidenceTypes, levelOfEvidences);
                 query = assignEvidence(relevantEvidences,
                     Collections.singletonList(query), highestLevelOnly).iterator().next();
 
@@ -1016,7 +1016,7 @@ public class EvidenceUtils {
                         updatedEvidences.add(evidence);
                     }
                 });
-                query.setEvidences(new ArrayList<>(StringUtils.isEmpty(query.getQuery().getTumorType()) ? updatedEvidences : keepHighestLevelForSameTreatments(updatedEvidences, query.getExactMatchedAlteration())));
+                query.setEvidences(new ArrayList<>(StringUtils.isEmpty(query.getQuery().getTumorType()) ? updatedEvidences : keepHighestLevelForSameTreatments(updatedEvidences, requestQuery.getReferenceGenome(), query.getExactMatchedAlteration())));
                 evidenceQueries.add(query);
             }
         }
@@ -1033,11 +1033,11 @@ public class EvidenceUtils {
 
                 // Get highest sensitive evidences
                 Set<Evidence> sensitiveEvidences = EvidenceUtils.getSensitiveEvidences(filteredEvidences);
-                filteredHighestEvidences.addAll(EvidenceUtils.getOnlyHighestLevelEvidences(sensitiveEvidences, query.getExactMatchedAlteration()));
+                filteredHighestEvidences.addAll(EvidenceUtils.getOnlyHighestLevelEvidences(sensitiveEvidences, query.getQuery().getReferenceGenome(), query.getExactMatchedAlteration()));
 
                 // Get highest resistance evidences
                 Set<Evidence> resistanceEvidences = EvidenceUtils.getResistanceEvidences(filteredEvidences);
-                filteredHighestEvidences.addAll(EvidenceUtils.getOnlyHighestLevelEvidences(resistanceEvidences, query.getExactMatchedAlteration()));
+                filteredHighestEvidences.addAll(EvidenceUtils.getOnlyHighestLevelEvidences(resistanceEvidences, query.getQuery().getReferenceGenome(), query.getExactMatchedAlteration()));
 
 
                 // Also include all non-treatment evidences
@@ -1059,7 +1059,7 @@ public class EvidenceUtils {
         return evidenceQueries;
     }
 
-    public static void annotateEvidence(Evidence evidence) throws ParserConfigurationException {
+    public static void annotateEvidence(Evidence evidence, ReferenceGenome referenceGenome) throws ParserConfigurationException {
         // If evidence does not have gene info, we can not help with anything here.
         if (evidence.getGene() == null) {
             return;
@@ -1072,23 +1072,28 @@ public class EvidenceUtils {
         }
 
         evidence.setGene(gene);
-        Set<Alteration> queryAlterations = evidence.getAlterations();
-        if (queryAlterations != null && !queryAlterations.isEmpty()) {
+        List<Alteration> parsedAlterations = new ArrayList<>();
+        if (evidence.getAlterations() != null && !evidence.getAlterations().isEmpty()) {
             AlterationType type = AlterationType.MUTATION;
             Set<Alteration> alterations = new HashSet<Alteration>();
             AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
-            for (Alteration alt : queryAlterations) {
+            evidence.getAlterations().stream().forEach(alteration -> parsedAlterations.addAll(AlterationUtils.parseMutationString(alteration.getAlteration())));
+            for (Alteration alt : parsedAlterations) {
                 String proteinChange = alt.getAlteration();
                 String displayName = alt.getName();
-                Alteration alteration = alterationBo.findAlterationFromDao(gene, type, proteinChange, displayName);
+                Alteration alteration = alterationBo.findAlterationFromDao(gene, type, referenceGenome, proteinChange, displayName);
                 if (alteration == null) {
                     alteration = new Alteration();
                     alteration.setGene(gene);
                     alteration.setAlterationType(type);
                     alteration.setAlteration(proteinChange);
                     alteration.setName(displayName);
+                    alteration.setReferenceGenomes(alt.getReferenceGenomes());
                     AlterationUtils.annotateAlteration(alteration, proteinChange);
                     alterationBo.save(alteration);
+                } else if (!alteration.getReferenceGenomes().equals(alt.getReferenceGenomes())) {
+                    alteration.setReferenceGenomes(alt.getReferenceGenomes());
+                    alterationBo.update(alteration);
                 }
                 alterations.add(alteration);
             }

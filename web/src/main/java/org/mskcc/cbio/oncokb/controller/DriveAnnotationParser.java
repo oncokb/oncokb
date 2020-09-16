@@ -75,19 +75,21 @@ public class DriveAnnotationParser {
                 }
 //                JSONArray nameComments = variant.has("nameComments") ? variant.getJSONArray("nameComments") : null;
                 if (mutationStr != null) {
-                    Map<String, String> mutations = parseMutationString(mutationStr);
+                    List<Alteration> mutations = AlterationUtils.parseMutationString(mutationStr);
                     Set<Alteration> alterations = new HashSet<>();
-                    for (Map.Entry<String, String> mutation : mutations.entrySet()) {
-                        String proteinChange = mutation.getKey();
-                        String displayName = mutation.getValue();
-                        Alteration alteration = alterationBo.findAlteration(gene, type, proteinChange);
+                    for (Alteration mutation : mutations) {
+                        Alteration alteration = alterationBo.findAlteration(gene, type, mutation.getAlteration());
                         if (alteration == null) {
                             alteration = new Alteration();
                             alteration.setGene(gene);
                             alteration.setAlterationType(type);
-                            alteration.setAlteration(proteinChange);
-                            alteration.setName(displayName);
-                            AlterationUtils.annotateAlteration(alteration, proteinChange);
+                            alteration.setAlteration(mutation.getAlteration());
+                            alteration.setName(mutation.getName());
+                            alteration.setReferenceGenomes(mutation.getReferenceGenomes());
+                            AlterationUtils.annotateAlteration(alteration, mutation.getAlteration());
+                            alterationBo.save(alteration);
+                        } else if (!alteration.getReferenceGenomes().equals(mutation.getReferenceGenomes())) {
+                            alteration.setReferenceGenomes(mutation.getReferenceGenomes());
                             alterationBo.save(alteration);
                         }
                         alterations.add(alteration);
@@ -137,14 +139,22 @@ public class DriveAnnotationParser {
             }
         }
 
-        String isoform = geneInfo.has("isoform_override") ? geneInfo.getString("isoform_override") : null;
-        String refSeq = geneInfo.has("dmp_refseq_id") ? geneInfo.getString("dmp_refseq_id") : null;
+        String grch37Isoform = geneInfo.has("isoform_override") ? geneInfo.getString("isoform_override") : null;
+        String grch37RefSeq = geneInfo.has("dmp_refseq_id") ? geneInfo.getString("dmp_refseq_id") : null;
+        String grch38Isoform = geneInfo.has("isoform_override_grch38") ? geneInfo.getString("isoform_override_grch38") : null;
+        String grch38RefSeq = geneInfo.has("dmp_refseq_id_grch38") ? geneInfo.getString("dmp_refseq_id_grch38") : null;
 
-        if (isoform != null) {
-            gene.setCuratedIsoform(isoform);
+        if (grch37Isoform != null) {
+            gene.setGrch37Isoform(grch37Isoform);
         }
-        if (refSeq != null) {
-            gene.setCuratedRefSeq(refSeq);
+        if (grch37RefSeq != null) {
+            gene.setGrch37RefSeq(grch37RefSeq);
+        }
+        if (grch38Isoform != null) {
+            gene.setGrch38Isoform(grch38Isoform);
+        }
+        if (grch38RefSeq != null) {
+            gene.setGrch38RefSeq(grch38RefSeq);
         }
     }
 
@@ -160,10 +170,10 @@ public class DriveAnnotationParser {
                 if (gene == null) {
                     System.out.println(spaceStrByNestLevel(nestLevel) + "Gene " + hugo + " is not in the released list.");
                     if (releaseGene) {
-                        gene = GeneAnnotatorMyGeneInfo2.findGeneFromCBioPortal(hugo);
+                        gene = GeneAnnotator.findGene(hugo);
                         if (gene == null) {
                             System.out.println("!!!!!!!!!Could not find gene " + hugo + " either.");
-                            return;
+                            throw new IOException("!!!!!!!!!Could not find gene " + hugo + ".");
                         } else {
                             updateGeneInfo(geneInfo, gene);
                             geneBo.save(gene);
@@ -309,18 +319,20 @@ public class DriveAnnotationParser {
 //            addDateToLastReviewSetFromLong(lastReviewDatesEffect, mutationEffect, "effect");
             String effect_uuid = getUUID(mutationEffect, "effect");
 
-            Map<String, String> mutations = parseMutationString(mutationStr);
-            for (Map.Entry<String, String> mutation : mutations.entrySet()) {
-                String proteinChange = mutation.getKey();
-                String displayName = mutation.getValue();
-                Alteration alteration = alterationBo.findAlteration(gene, type, proteinChange);
+            List<Alteration> mutations = AlterationUtils.parseMutationString(mutationStr);
+            for (Alteration mutation : mutations) {
+                Alteration alteration = alterationBo.findAlteration(gene, type, mutation.getAlteration());
                 if (alteration == null) {
                     alteration = new Alteration();
                     alteration.setGene(gene);
                     alteration.setAlterationType(type);
-                    alteration.setAlteration(proteinChange);
-                    alteration.setName(displayName);
-                    AlterationUtils.annotateAlteration(alteration, proteinChange);
+                    alteration.setAlteration(mutation.getAlteration());
+                    alteration.setName(mutation.getName());
+                    alteration.setReferenceGenomes(mutation.getReferenceGenomes());
+                    AlterationUtils.annotateAlteration(alteration, mutation.getAlteration());
+                    alterationBo.save(alteration);
+                } else if (!alteration.getReferenceGenomes().equals(mutation.getReferenceGenomes())) {
+                    alteration.setReferenceGenomes(mutation.getReferenceGenomes());
                     alterationBo.save(alteration);
                 }
                 alterations.add(alteration);
@@ -440,40 +452,6 @@ public class DriveAnnotationParser {
                 evidenceBo.update(evidences.get(0));
             }
         }
-    }
-
-    private static Map<String, String> parseMutationString(String mutationStr) {
-        Map<String, String> ret = new HashMap<>();
-
-        mutationStr = mutationStr.replaceAll("\\([^\\)]+\\)", ""); // remove comments first
-
-        String[] parts = mutationStr.split(", *");
-
-        Pattern p = Pattern.compile("([A-Z][0-9]+)([^0-9/]+/.+)", Pattern.CASE_INSENSITIVE);
-        for (String part : parts) {
-            String proteinChange, displayName;
-            part = part.trim();
-            if (part.contains("[")) {
-                int l = part.indexOf("[");
-                int r = part.indexOf("]");
-                proteinChange = part.substring(0, l).trim();
-                displayName = part.substring(l + 1, r).trim();
-            } else {
-                proteinChange = part;
-                displayName = part;
-            }
-
-            Matcher m = p.matcher(proteinChange);
-            if (m.find()) {
-                String ref = m.group(1);
-                for (String var : m.group(2).split("/")) {
-                    ret.put(ref + var, ref + var);
-                }
-            } else {
-                ret.put(proteinChange, displayName);
-            }
-        }
-        return ret;
     }
 
     private static void saveTumorLevelSummaries(JSONObject cancerObj, String summaryKey, Gene gene, Set<Alteration> alterations, TumorType oncoTreeType, EvidenceType evidenceType, Integer nestLevel) {

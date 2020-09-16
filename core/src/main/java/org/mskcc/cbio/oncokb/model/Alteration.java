@@ -8,6 +8,7 @@ import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author jgao
@@ -23,8 +24,16 @@ import java.util.*;
         query = "select a from Alteration a where a.gene=? and a.alteration=?"
     ),
     @NamedQuery(
+        name = "findAlterationAndReferenceGenome",
+        query = "select a from Alteration a join a.referenceGenomes r where a.gene=? and a.alteration=? and r=?"
+    ),
+    @NamedQuery(
         name = "findAlterationByAlterationAndName",
         query = "select a from Alteration a where a.gene=? and a.alteration=? and a.name=?"
+    ),
+    @NamedQuery(
+        name = "findAlterationByAlterationAndNameAndReferenceGenome",
+        query = "select a from Alteration a join a.referenceGenomes r where a.gene=? and a.alteration=? and a.name=? and r=?"
     ),
     @NamedQuery(
         name = "findMutationsByConsequence",
@@ -84,6 +93,12 @@ public class Alteration implements java.io.Serializable {
 
     @Column(name = "variant_residues")
     private String variantResidues;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "alteration_reference_genome", joinColumns = @JoinColumn(name = "alteration_id", nullable = false))
+    @Column(length = 10, name = "reference_genome")
+    @Enumerated(EnumType.STRING)
+    private Set<ReferenceGenome> referenceGenomes = new HashSet<>(0);
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "portal_alteration_oncokb_alteration", joinColumns = {
@@ -195,12 +210,21 @@ public class Alteration implements java.io.Serializable {
         this.variantResidues = variantResidues;
     }
 
+    public Set<ReferenceGenome> getReferenceGenomes() {
+        return referenceGenomes;
+    }
+
+    public void setReferenceGenomes(Set<ReferenceGenome> referenceGenomes) {
+        this.referenceGenomes = referenceGenomes;
+    }
+
     @Override
     public int hashCode() {
         int hash = 7;
         hash = 83 * hash + (this.gene != null ? this.gene.hashCode() : 0);
         hash = 83 * hash + (this.alteration != null ? this.alteration.hashCode() : 0);
         hash = 83 * hash + (this.alterationType != null ? this.alterationType.hashCode() : 0);
+        hash = 83 * hash + (this.referenceGenomes != null ? this.referenceGenomes.hashCode() : 0);
         return hash;
     }
 
@@ -219,7 +243,8 @@ public class Alteration implements java.io.Serializable {
             Objects.equals(getRefResidues(), that.getRefResidues()) &&
             Objects.equals(getProteinStart(), that.getProteinStart()) &&
             Objects.equals(getProteinEnd(), that.getProteinEnd()) &&
-            Objects.equals(getVariantResidues(), that.getVariantResidues());
+            Objects.equals(getVariantResidues(), that.getVariantResidues()) &&
+            Objects.equals(getReferenceGenomes(), that.getReferenceGenomes());
     }
 
     @Override
@@ -274,6 +299,11 @@ public class Alteration implements java.io.Serializable {
         }
         if (this.variantResidues != null) {
             content.add(this.variantResidues);
+        } else {
+            content.add("");
+        }
+        if (this.referenceGenomes != null) {
+            content.add(this.referenceGenomes.stream().map(referenceGenome -> referenceGenome.name()).collect(Collectors.joining(",")));
         } else {
             content.add("");
         }

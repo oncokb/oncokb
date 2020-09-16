@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import static junit.framework.TestCase.assertEquals;
+import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
 
 /**
  * Created by Hongxin on 12/14/16.
@@ -38,7 +39,7 @@ public class IsOncogenicAlterationTest {
     @Test
     public void test_is_oncogenic() {
         Gene gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
-        Alteration alteration = AlterationUtils.findAlteration(gene, alterationName);
+        Alteration alteration = AlterationUtils.findAlteration(gene, DEFAULT_REFERENCE_GENOME, alterationName);
         assertEquals(isOncogenic, AlterationUtils.isOncogenicAlteration(alteration));
     }
 }

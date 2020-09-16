@@ -3,6 +3,7 @@ package org.mskcc.cbio.oncokb.api.pub.v1;
 import io.swagger.annotations.*;
 import org.mskcc.cbio.oncokb.config.annotation.PremiumPublicApi;
 import org.mskcc.cbio.oncokb.model.Alteration;
+import org.mskcc.cbio.oncokb.model.ReferenceGenome;
 import org.mskcc.cbio.oncokb.model.VariantSearchQuery;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -45,6 +46,7 @@ public interface VariantsApi {
         , @ApiParam(value = "") @RequestParam(value = "proteinStart", required = false) Integer proteinStart
         , @ApiParam(value = "") @RequestParam(value = "proteinEnd", required = false) Integer proteinEnd
         , @ApiParam(value = "HGVS varaint. Its priority is higher than entrezGeneId/hugoSymbol + variant combination") @RequestParam(value = "hgvs", required = false) String hgvs
+        , @ApiParam(value = "Reference genome, either GRCh37 or GRCh38. The default is GRCh37", required = false, defaultValue = "GRCh37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") String referenceGenome
         , @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
     );
 

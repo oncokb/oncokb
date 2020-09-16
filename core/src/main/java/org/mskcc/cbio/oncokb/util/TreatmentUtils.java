@@ -22,7 +22,7 @@ public final class TreatmentUtils {
         if (gene == null) {
             return new HashSet<>();
         }
-        Set<Alteration> alterations = AlterationUtils.getAllAlterations(gene);
+        Set<Alteration> alterations = AlterationUtils.getAllAlterations(null, gene);
         List<Evidence> evidences = EvidenceUtils.getEvidence(new ArrayList<Alteration>(alterations),
             EvidenceTypeUtils.getTreatmentEvidenceTypes(), null);
         Set<Treatment> treatments = new HashSet<>();

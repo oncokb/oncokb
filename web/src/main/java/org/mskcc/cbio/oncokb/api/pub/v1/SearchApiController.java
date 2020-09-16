@@ -2,6 +2,7 @@ package org.mskcc.cbio.oncokb.api.pub.v1;
 
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.service.JsonResultFactory;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
@@ -29,6 +30,7 @@ public class SearchApiController implements SearchApi {
 
     public ResponseEntity<IndicatorQueryResp> searchGet(
         @ApiParam(value = "The query ID") @RequestParam(value = "id", required = false) String id
+        , @ApiParam(value = "Reference genome, either GRCh37 or GRCh38. The default is GRCh37", required = false, defaultValue = "GRCh37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") String referenceGenome
         , @ApiParam(value = "The gene symbol used in Human Genome Organisation.") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
         , @ApiParam(value = "The entrez gene ID.") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
         , @ApiParam(value = "Variant name.") @RequestParam(value = "variant", required = false) String variant
@@ -51,7 +53,14 @@ public class SearchApiController implements SearchApi {
         if (entrezGeneId != null && hugoSymbol != null && !GeneUtils.isSameGene(entrezGeneId, hugoSymbol)) {
             status = HttpStatus.BAD_REQUEST;
         } else {
-            Query query = new Query(id, queryType, entrezGeneId, hugoSymbol, variant, variantType, svType, tumorType, consequence, proteinStart, proteinEnd, hgvs);
+            ReferenceGenome matchedRG = null;
+            if (!StringUtils.isEmpty(referenceGenome)) {
+                matchedRG = MainUtils.searchEnum(ReferenceGenome.class, referenceGenome);
+                if (matchedRG == null) {
+                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                }
+            }
+            Query query = new Query(id,matchedRG, queryType, entrezGeneId, hugoSymbol, variant, variantType, svType, tumorType, consequence, proteinStart, proteinEnd, hgvs);
 
             Set<LevelOfEvidence> levelOfEvidences = levels == null ? null : LevelUtils.parseStringLevelOfEvidences(levels);
             indicatorQueryResp = IndicatorUtils.processQuery(query, levelOfEvidences, highestLevelOnly, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceType, ",")));

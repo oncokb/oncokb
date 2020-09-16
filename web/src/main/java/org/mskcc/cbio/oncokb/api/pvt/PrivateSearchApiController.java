@@ -187,7 +187,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
             if (entry.getValue().size() > 0) {
                 for (Gene gene : entry.getValue()) {
 
-                    Set<Alteration> alterations = AlterationUtils.getAllAlterations(gene);
+                    Set<Alteration> alterations = AlterationUtils.getAllAlterations(null, gene);
                     // When more than two keywords present, the index does not matter anymore.
                     // As long as there is match, return it.
                     if (keywords.size() > 2) {
@@ -378,7 +378,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
         typeaheadSearchResp.setAnnotation(resp.getVariantSummary());
         // TODO: populate treatment info.
 
-        Set<Evidence> evidenceList = new HashSet<>(EvidenceUtils.getEvidence(AlterationUtils.getRelevantAlterations(alteration), null, null, null));
+        Set<Evidence> evidenceList = new HashSet<>(EvidenceUtils.getEvidence(AlterationUtils.getRelevantAlterations(null, alteration), null, null, null));
         LevelOfEvidence highestSensitiveLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(evidenceList, LevelUtils.getSensitiveLevels());
         LevelOfEvidence highestResistanceLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(evidenceList, LevelUtils.getResistanceLevels());
 

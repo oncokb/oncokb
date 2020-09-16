@@ -1,5 +1,7 @@
 package org.mskcc.cbio.oncokb;
 
+import org.mskcc.cbio.oncokb.model.ReferenceGenome;
+
 /**
  * Application constants.
  */
@@ -16,6 +18,8 @@ public final class Constants {
     // Config property names
     public static final String IS_PUBLIC_INSTANCE = "is_public_instance";
     public static final String SWAGGER_DESCRIPTION = "swagger_description";
+
+    public static final ReferenceGenome DEFAULT_REFERENCE_GENOME = ReferenceGenome.GRCh37;
 
     private Constants() {
     }

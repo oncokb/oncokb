@@ -5,6 +5,7 @@ import org.mskcc.cbio.oncokb.config.annotation.PremiumPublicApi;
 import org.mskcc.cbio.oncokb.config.annotation.PublicApi;
 import org.mskcc.cbio.oncokb.model.EvidenceQueries;
 import org.mskcc.cbio.oncokb.model.IndicatorQueryResp;
+import org.mskcc.cbio.oncokb.model.ReferenceGenome;
 import org.mskcc.cbio.oncokb.model.StructuralVariantType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,6 +30,7 @@ public interface SearchApi {
         method = RequestMethod.GET)
     ResponseEntity<IndicatorQueryResp> searchGet(
         @ApiParam(value = "The query ID") @RequestParam(value = "id", required = false) String id
+        , @ApiParam(value = "Reference genome, either GRCh37 or GRCh38. The default is GRCh37", required = false, defaultValue = "GRCh37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") String referenceGenome
         , @ApiParam(value = "The gene symbol used in Human Genome Organisation.") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
         , @ApiParam(value = "The entrez gene ID.") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
         , @ApiParam(value = "Variant name.") @RequestParam(value = "variant", required = false) String variant
