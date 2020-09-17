@@ -33,6 +33,8 @@
 package org.mskcc.cbio.oncokb.genomenexus;
 
 import org.apache.commons.lang3.StringUtils;
+import org.genome_nexus.client.TranscriptConsequence;
+import org.genome_nexus.client.VariantAnnotation;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -62,10 +64,10 @@ public class VEPDetailedEnrichmentService {
     public VariantAnnotation enrich(VariantAnnotation variantAnnotation) {
         if (variantAnnotation.getTranscriptConsequences() != null) {
             for (TranscriptConsequence transcriptConsequence : variantAnnotation.getTranscriptConsequences()) {
-                transcriptConsequence.setCodonChange(resolveCodonChange(transcriptConsequence.getCodons()));
-                transcriptConsequence.setConsequence(resolveConsequence(transcriptConsequence.getConsequenceTerms()));
-                transcriptConsequence.setHgvspShort(resolveHgvspShort(transcriptConsequence));
-                transcriptConsequence.setRefSeq(resolveRefSeq(transcriptConsequence.getRefseqTranscriptIds()));
+                transcriptConsequence.setCodons(transcriptConsequence.getCodons());
+                transcriptConsequence.setConsequenceTerms(transcriptConsequence.getConsequenceTerms());
+                transcriptConsequence.setHgvsp(resolveHgvspShort(transcriptConsequence));
+                transcriptConsequence.setRefseqTranscriptIds(transcriptConsequence.getRefseqTranscriptIds());
             }
         }
         return variantAnnotation;

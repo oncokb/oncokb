@@ -19,7 +19,7 @@ public class TypeaheadSearchResp {
     private Boolean variantExist;
     private Boolean isVUS;
     private String annotation;
-    private String queryType;
+    private TypeaheadQueryType queryType;
     private String link;
 
     public Gene getGene() {
@@ -94,11 +94,11 @@ public class TypeaheadSearchResp {
         this.variantExist = variantExist;
     }
 
-    public String getQueryType() {
+    public TypeaheadQueryType getQueryType() {
         return queryType;
     }
 
-    public void setQueryType(String queryType) {
+    public void setQueryType(TypeaheadQueryType queryType) {
         this.queryType = queryType;
     }
 

@@ -4,10 +4,7 @@
  */
 package org.mskcc.cbio.oncokb.dao;
 
-import org.mskcc.cbio.oncokb.model.Alteration;
-import org.mskcc.cbio.oncokb.model.AlterationType;
-import org.mskcc.cbio.oncokb.model.Gene;
-import org.mskcc.cbio.oncokb.model.VariantConsequence;
+import org.mskcc.cbio.oncokb.model.*;
 
 import java.util.List;
 
@@ -30,7 +27,7 @@ public interface AlterationDao extends GenericDao<Alteration, Integer> {
      * @param alteration
      * @return
      */
-    Alteration findAlteration(Gene gene, AlterationType alterationType, String alteration);
+    Alteration findAlteration(Gene gene, AlterationType alterationType, ReferenceGenome referenceGenome, String alteration);
 
 
     /**
@@ -40,7 +37,7 @@ public interface AlterationDao extends GenericDao<Alteration, Integer> {
      * @param name
      * @return
      */
-    Alteration findAlteration(Gene gene, AlterationType alterationType, String alteration, String name);
+    Alteration findAlteration(Gene gene, AlterationType alterationType, ReferenceGenome referenceGenome, String alteration, String name);
 
     /**
      * @param gene
@@ -49,7 +46,7 @@ public interface AlterationDao extends GenericDao<Alteration, Integer> {
      * @param end
      * @return
      */
-    List<Alteration> findMutationsByConsequenceAndPosition(Gene gene, VariantConsequence consequence, int start, int end);
+    List<Alteration> findMutationsByConsequenceAndPosition(Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end);
 
     /**
      * @param gene
@@ -58,5 +55,5 @@ public interface AlterationDao extends GenericDao<Alteration, Integer> {
      * @param end
      * @return
      */
-    List<Alteration> findMutationsByConsequenceAndPositionOnSamePosition(Gene gene, VariantConsequence consequence, int start, int end);
+    List<Alteration> findMutationsByConsequenceAndPositionOnSamePosition(Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end);
 }

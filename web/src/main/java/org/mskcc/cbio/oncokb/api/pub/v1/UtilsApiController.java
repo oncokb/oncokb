@@ -45,8 +45,10 @@ public class UtilsApiController implements UtilsApi {
 
         StringBuilder sb = new StringBuilder();
         List<String> header = new ArrayList<>();
-        header.add("Isoform");
-        header.add("RefSeq");
+        header.add("GRCh37 Isoform");
+        header.add("GRCh37 RefSeq");
+        header.add("GRCh38 Isoform");
+        header.add("GRCh38 RefSeq");
         header.add("Entrez Gene ID");
         header.add("Hugo Symbol");
         header.add("Alteration");
@@ -60,8 +62,10 @@ public class UtilsApiController implements UtilsApi {
 
         for (AnnotatedVariant annotatedVariant : getAllAnnotatedVariants()) {
             List<String> row = new ArrayList<>();
-            row.add(annotatedVariant.getIsoform());
-            row.add(annotatedVariant.getRefSeq());
+            row.add(annotatedVariant.getGrch37Isoform());
+            row.add(annotatedVariant.getGrch37RefSeq());
+            row.add(annotatedVariant.getGrch38Isoform());
+            row.add(annotatedVariant.getGrch38RefSeq());
             row.add(String.valueOf(annotatedVariant.getEntrezGeneId()));
             row.add(annotatedVariant.getGene());
             row.add(annotatedVariant.getVariant());
@@ -95,8 +99,9 @@ public class UtilsApiController implements UtilsApi {
                     abstracts.add(articleAbstract.getAbstractContent() + " " + articleAbstract.getLink());
                 }
                 annotatedVariants.add(new AnnotatedVariant(
-                    gene.getCuratedIsoform(), gene.getCuratedRefSeq(), gene.getEntrezGeneId(),
-                    gene.getHugoSymbol(), biologicalVariant.getVariant().getName(),
+                    gene.getGrch37Isoform(), gene.getGrch37RefSeq(),
+                    gene.getGrch38Isoform(), gene.getGrch38RefSeq(),
+                    gene.getEntrezGeneId(), gene.getHugoSymbol(), biologicalVariant.getVariant().getName(),
                     biologicalVariant.getVariant().getAlteration(),
                     biologicalVariant.getOncogenic(),
                     biologicalVariant.getMutationEffect(),
@@ -131,8 +136,10 @@ public class UtilsApiController implements UtilsApi {
         String newLine = "\n";
         StringBuilder sb = new StringBuilder();
         List<String> header = new ArrayList<>();
-        header.add("Isoform");
-        header.add("RefSeq");
+        header.add("GRCh37 Isoform");
+        header.add("GRCh37 RefSeq");
+        header.add("GRCh38 Isoform");
+        header.add("GRCh38 RefSeq");
         header.add("Entrez Gene ID");
         header.add("Hugo Symbol");
         header.add("Alteration");
@@ -147,8 +154,10 @@ public class UtilsApiController implements UtilsApi {
 
         for (ActionableGene actionableGene : getAllActionableVariants()) {
             List<String> row = new ArrayList<>();
-            row.add(actionableGene.getIsoform());
-            row.add(actionableGene.getRefSeq());
+            row.add(actionableGene.getGrch37Isoform());
+            row.add(actionableGene.getGrch37RefSeq());
+            row.add(actionableGene.getGrch38Isoform());
+            row.add(actionableGene.getGrch38RefSeq());
             row.add(String.valueOf(actionableGene.getEntrezGeneId()));
             row.add(actionableGene.getGene());
             row.add(actionableGene.getVariant());
@@ -184,7 +193,9 @@ public class UtilsApiController implements UtilsApi {
                 }
 
                 actionableGenes.add(new ActionableGene(
-                    gene.getCuratedIsoform(), gene.getCuratedRefSeq(), gene.getEntrezGeneId(),
+                    gene.getGrch37Isoform(), gene.getGrch37RefSeq(),
+                    gene.getGrch38Isoform(), gene.getGrch38RefSeq(),
+                    gene.getEntrezGeneId(),
                     gene.getHugoSymbol(),
                     clinicalVariant.getVariant().getName(),
                     clinicalVariant.getVariant().getAlteration(),
@@ -232,8 +243,10 @@ public class UtilsApiController implements UtilsApi {
         List<String> header = new ArrayList<>();
         header.add("Hugo Symbol");
         header.add("Entrez Gene ID");
-        header.add("Isoform");
-        header.add("RefSeq");
+        header.add("GRCh37 Isoform");
+        header.add("GRCh37 RefSeq");
+        header.add("GRCh38 Isoform");
+        header.add("GRCh38 RefSeq");
         header.add("# of occurrence within resources (Column D-J)");
         header.add("OncoKB Annotated");
         header.add("Is Oncogene");
@@ -251,8 +264,10 @@ public class UtilsApiController implements UtilsApi {
             List<String> row = new ArrayList<>();
             row.add(cancerGene.getHugoSymbol());
             row.add(cancerGene.getEntrezGeneId().toString());
-            row.add(cancerGene.getIsoform());
-            row.add(cancerGene.getRefSeq());
+            row.add(cancerGene.getGrch37Isoform());
+            row.add(cancerGene.getGrch37RefSeq());
+            row.add(cancerGene.getGrch38Isoform());
+            row.add(cancerGene.getGrch37RefSeq());
             row.add(String.valueOf(cancerGene.getOccurrenceCount()));
             row.add(getStringByBoolean(cancerGene.getOncokbAnnotated()));
             row.add(getStringByBoolean(cancerGene.getOncogene()));
@@ -291,8 +306,10 @@ public class UtilsApiController implements UtilsApi {
         String newLine = "\n";
         StringBuilder sb = new StringBuilder();
         List<String> header = new ArrayList<>();
-        header.add("Isoform");
-        header.add("RefSeq");
+        header.add("GRCh37 Isoform");
+        header.add("GRCh37 RefSeq");
+        header.add("GRCh38 Isoform");
+        header.add("GRCh38 RefSeq");
         header.add("Entrez Gene ID");
         header.add("Hugo Symbol");
         header.add("Is Oncogene");
@@ -306,8 +323,10 @@ public class UtilsApiController implements UtilsApi {
         List<CuratedGene> genes = getCuratedGenes();
         for (CuratedGene gene : genes) {
             List<String> row = new ArrayList<>();
-            row.add(gene.getIsoform());
-            row.add(gene.getRefSeq());
+            row.add(gene.getGrch37Isoform());
+            row.add(gene.getGrch37RefSeq());
+            row.add(gene.getGrch38Isoform());
+            row.add(gene.getGrch38RefSeq());
             row.add(String.valueOf(gene.getEntrezGeneId()));
             row.add(gene.getHugoSymbol());
             row.add(getStringByBoolean(gene.getOncogene()));
@@ -325,7 +344,7 @@ public class UtilsApiController implements UtilsApi {
         List<CuratedGene> genes = new ArrayList<>();
         for (Gene gene : GeneUtils.getAllGenes()) {
             // Skip all genes without entrez gene id
-            if(gene.getEntrezGeneId() == null) {
+            if (gene.getEntrezGeneId() == null) {
                 continue;
             }
             String summary = "";
@@ -338,8 +357,8 @@ public class UtilsApiController implements UtilsApi {
             String highestSensitiveLevel = "";
             String highestResistanceLevel = "";
             Set<Evidence> therapeuticEvidences = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, EvidenceTypeUtils.getTreatmentEvidenceTypes());
-            Set<Evidence> highestSensitiveLevelEvidences = EvidenceUtils.getOnlyHighestLevelEvidences(EvidenceUtils.getSensitiveEvidences(therapeuticEvidences), null);
-            Set<Evidence> highestResistanceLevelEvidences = EvidenceUtils.getOnlyHighestLevelEvidences(EvidenceUtils.getResistanceEvidences(therapeuticEvidences), null);
+            Set<Evidence> highestSensitiveLevelEvidences = EvidenceUtils.getOnlyHighestLevelEvidences(EvidenceUtils.getSensitiveEvidences(therapeuticEvidences), null, null);
+            Set<Evidence> highestResistanceLevelEvidences = EvidenceUtils.getOnlyHighestLevelEvidences(EvidenceUtils.getResistanceEvidences(therapeuticEvidences), null, null);
             if (!highestSensitiveLevelEvidences.isEmpty()) {
                 highestSensitiveLevel = highestSensitiveLevelEvidences.iterator().next().getLevelOfEvidence().getLevel();
             }
@@ -347,11 +366,15 @@ public class UtilsApiController implements UtilsApi {
                 highestResistanceLevel = highestResistanceLevelEvidences.iterator().next().getLevelOfEvidence().getLevel();
             }
 
-            genes.add(new CuratedGene(gene.getCuratedIsoform(), gene.getCuratedRefSeq(), gene.getEntrezGeneId(), gene.getHugoSymbol(), gene.getTSG(), gene.getOncogene(), highestSensitiveLevel, highestResistanceLevel, summary));
+            genes.add(new CuratedGene(
+                gene.getGrch37Isoform(), gene.getGrch37RefSeq(),
+                gene.getGrch38Isoform(), gene.getGrch38RefSeq(),
+                gene.getEntrezGeneId(), gene.getHugoSymbol(), gene.getTSG(), gene.getOncogene(), highestSensitiveLevel, highestResistanceLevel, summary));
         }
         MainUtils.sortCuratedGenes(genes);
         return genes;
     }
+
     private String getStringByBoolean(Boolean val) {
         return val ? "Yes" : "No";
     }

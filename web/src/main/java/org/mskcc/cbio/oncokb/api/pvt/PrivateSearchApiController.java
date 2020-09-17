@@ -85,11 +85,12 @@ public class PrivateSearchApiController implements PrivateSearchApi {
     public ResponseEntity<LinkedHashSet<TypeaheadSearchResp>> searchTypeAheadGet(
         @ApiParam(value = "The search query, it could be hugoSymbol, entrezGeneId or variant. At least two characters. Maximum two keywords are supported, separated by space", required = true) @RequestParam(value = "query") String query,
         @ApiParam(value = "The limit of returned result.") @RequestParam(value = "limit", defaultValue = "5", required = false) Integer limit) {
+        final int QUERY_MIN_LENGTH = 2;
         LinkedHashSet<TypeaheadSearchResp> result = new LinkedHashSet<>();
         if (limit == null) {
             limit = DEFAULT_RETURN_LIMIT;
         }
-        if (query != null && query.length() > 1) {
+        if (query != null && query.length() >= QUERY_MIN_LENGTH) {
             List<String> keywords = Arrays.asList(query.trim().split("\\s+"));
 
             if (keywords.size() == 1) {
@@ -158,6 +159,11 @@ public class PrivateSearchApiController implements PrivateSearchApi {
                     }
                 }
             }
+        } else {
+            TypeaheadSearchResp typeaheadSearchResp = new TypeaheadSearchResp();
+            typeaheadSearchResp.setAnnotation("Please search at least " + QUERY_MIN_LENGTH + " characters.");
+            typeaheadSearchResp.setQueryType(TypeaheadQueryType.TEXT);
+            result.add(typeaheadSearchResp);
         }
         return new ResponseEntity<>(getLimit(result, limit), HttpStatus.OK);
     }
@@ -181,7 +187,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
             if (entry.getValue().size() > 0) {
                 for (Gene gene : entry.getValue()) {
 
-                    Set<Alteration> alterations = AlterationUtils.getAllAlterations(gene);
+                    Set<Alteration> alterations = AlterationUtils.getAllAlterations(null, gene);
                     // When more than two keywords present, the index does not matter anymore.
                     // As long as there is match, return it.
                     if (keywords.size() > 2) {
@@ -223,7 +229,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
                 typeaheadSearchResp.setGene(gene);
                 typeaheadSearchResp.setVariantExist(false);
                 typeaheadSearchResp.setLink("/gene/" + gene.getHugoSymbol());
-                typeaheadSearchResp.setQueryType("gene");
+                typeaheadSearchResp.setQueryType(TypeaheadQueryType.GENE);
 
                 if (evidences.containsKey(gene)) {
                     LevelOfEvidence highestSensitiveLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(evidences.get(gene), LevelUtils.getSensitiveLevels());
@@ -259,7 +265,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
         } else {
             typeaheadSearchResp.setHighestResistanceLevel(drugMatch.getLevelOfEvidence().getLevel());
         }
-        typeaheadSearchResp.setQueryType("drug");
+        typeaheadSearchResp.setQueryType(TypeaheadQueryType.DRUG);
 
         if (drugMatch.getAlterations().size() > 1 || drugMatch.getAlterations().size() == 0) {
             typeaheadSearchResp.setLink("/gene/" + drugMatch.getGene().getHugoSymbol());
@@ -372,7 +378,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
         typeaheadSearchResp.setAnnotation(resp.getVariantSummary());
         // TODO: populate treatment info.
 
-        Set<Evidence> evidenceList = new HashSet<>(EvidenceUtils.getEvidence(AlterationUtils.getRelevantAlterations(alteration), null, null, null));
+        Set<Evidence> evidenceList = new HashSet<>(EvidenceUtils.getEvidence(AlterationUtils.getRelevantAlterations(null, alteration), null, null, null));
         LevelOfEvidence highestSensitiveLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(evidenceList, LevelUtils.getSensitiveLevels());
         LevelOfEvidence highestResistanceLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(evidenceList, LevelUtils.getResistanceLevels());
 
@@ -387,7 +393,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
             typeaheadSearchResp.setOncogenicity(Oncogenicity.YES.getOncogenic());
         }
 
-        typeaheadSearchResp.setQueryType("variant");
+        typeaheadSearchResp.setQueryType(TypeaheadQueryType.VARIANT);
 
         // TODO: switch to variant page once it's ready.
         typeaheadSearchResp.setLink("/gene/" + alteration.getGene().getHugoSymbol() + "/" + alteration.getAlteration());

@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.xml.parsers.ParserConfigurationException;
 import java.util.*;
 
+import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
 import static org.mskcc.cbio.oncokb.util.MainUtils.stringToEvidenceTypes;
 
 /**
@@ -46,7 +47,7 @@ public class EvidenceController {
 
         List<List<Evidence>> evidences = new ArrayList<>();
 
-        Map<String, Object> requestQueries = MainUtils.GetRequestQueries(entrezGeneId, hugoSymbol, alteration,
+        Map<String, Object> requestQueries = MainUtils.GetRequestQueries(entrezGeneId, hugoSymbol, DEFAULT_REFERENCE_GENOME, alteration,
             tumorType, evidenceType, consequence, proteinStart, proteinEnd, levels);
 
         if (requestQueries == null) {
@@ -212,7 +213,7 @@ public class EvidenceController {
             Gene gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
             if (gene != null) {
                 List<Evidence> evidences = EvidenceUtils.getEvidence(
-                    new ArrayList<>(AlterationUtils.getAllAlterations(gene)),
+                    new ArrayList<>(AlterationUtils.getAllAlterations(null, gene)),
                     Collections.singleton(EvidenceType.VUS), null);
                 deleteEvidencesAndAlts(evidences);
                 DriveAnnotationParser.parseVUS(gene, new JSONArray(vus), 1);
@@ -278,7 +279,7 @@ public class EvidenceController {
     }
 
     private List<Evidence> updateEvidenceBasedOnUuid(String uuid, Evidence queryEvidence) throws ParserConfigurationException {
-        EvidenceUtils.annotateEvidence(queryEvidence);
+        EvidenceUtils.annotateEvidence(queryEvidence, null);
         Gene gene = null;
 
         if (queryEvidence.getGene() != null) {

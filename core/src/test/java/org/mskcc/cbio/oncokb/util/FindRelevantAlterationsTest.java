@@ -9,6 +9,7 @@ import org.mskcc.cbio.oncokb.model.AlterationType;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
+import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
 
 /**
  * Created by Hongxin on 12/23/16.
@@ -88,7 +89,7 @@ public class FindRelevantAlterationsTest {
                 {"PDGFRA", "D842V", null, "D842V, D842H, D842I, D842Y, D842_I843delinsIM, Oncogenic Mutations"},
 
                 // Check whether the overlapped variants(with the same consequence) will be mapped
-                {"MAP2K1", "E41_F53del", null, "E41_F53del, E41_L54del, E51_Q58del, F53_Q58del, F53_Q58delinsL, Oncogenic Mutations"},
+                {"MAP2K1", "E41_F53del", null, "E41_F53del, E41_L54del, L42_K57del, E51_Q58del, F53_Q58del, F53_Q58delinsL, Oncogenic Mutations"},
 
                 // Truncating Mutations in the Oncogene should not be mapped to any range mutation unless the consequence is truncating
                 {"KIT", "K509Nfs*2", null, "K509Nfs*2"},
@@ -127,6 +128,7 @@ public class FindRelevantAlterationsTest {
                 {"KIT", "Amplification", null, "Amplification"},
 
 
+
                 // Check non_truncating_variant
 //                {"MED12", "A22*", null, "1_33mut, Truncating Mutations"},
 //                {"MED12", "G22D", null, "1_33nontrunc, 1_33mut"},
@@ -144,7 +146,7 @@ public class FindRelevantAlterationsTest {
 
         LinkedHashSet<Alteration> relevantAlterations =
             ApplicationContextSingleton.getAlterationBo()
-                .findRelevantAlterations(alt, AlterationUtils.getAllAlterations(alt.getGene()), true);
+                .findRelevantAlterations(DEFAULT_REFERENCE_GENOME, alt, AlterationUtils.getAllAlterations(DEFAULT_REFERENCE_GENOME, alt.getGene()), true);
         String relevantAltsName = AlterationUtils.toString(relevantAlterations);
 
         assertEquals("Relevant alterations are not matched on case " +

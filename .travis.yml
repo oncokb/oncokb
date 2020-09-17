@@ -28,5 +28,5 @@ after_success:
         if [[ "$TRAVIS_TAG" ]]
         then
             docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS && \
-            docker push cbioportal/oncokb
+            docker push oncokb/oncokb
         fi

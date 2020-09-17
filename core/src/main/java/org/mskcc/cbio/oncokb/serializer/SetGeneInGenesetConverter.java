@@ -20,9 +20,10 @@ public class SetGeneInGenesetConverter extends StdConverter<Set<Gene>, Set<Gene>
             newGene.setEntrezGeneId(gene.getEntrezGeneId());
             newGene.setOncogene(gene.getOncogene());
             newGene.setTSG(gene.getTSG());
-            newGene.setName(gene.getName());
-            newGene.setCuratedIsoform(gene.getCuratedIsoform());
-            newGene.setCuratedRefSeq(gene.getCuratedRefSeq());
+            newGene.setGrch37Isoform(gene.getGrch37Isoform());
+            newGene.setGrch37RefSeq(gene.getGrch37RefSeq());
+            newGene.setGrch38Isoform(gene.getGrch38Isoform());
+            newGene.setGrch38RefSeq(gene.getGrch38RefSeq());
             newGenes.add(newGene);
         }
         return newGenes;

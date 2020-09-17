@@ -32,6 +32,7 @@ public class IndicatorController {
     IndicatorQueryResp getEvidence(
         HttpMethod method,
         @RequestParam(value = "id", required = false) String id,
+        @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") ReferenceGenome referenceGenome,
         @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId,
         @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol,
         @RequestParam(value = "alteration", required = false) String alteration,
@@ -47,7 +48,7 @@ public class IndicatorController {
         @RequestParam(value = "fields", required = false) String fields,
         @RequestParam(value = "hgvs", required = false) String hgvs
     ) {
-        Query query = new Query(id, queryType, entrezGeneId, hugoSymbol, alteration, alterationType, svType, tumorType, consequence, proteinStart, proteinEnd, hgvs);
+        Query query = new Query(id, referenceGenome, queryType, entrezGeneId, hugoSymbol, alteration, alterationType, svType, tumorType, consequence, proteinStart, proteinEnd, hgvs);
         Set<LevelOfEvidence> levelOfEvidences = levels == null ? null : LevelUtils.parseStringLevelOfEvidences(levels);
         IndicatorQueryResp resp = IndicatorUtils.processQuery(query, levelOfEvidences, highestLevelOnly, null);
 

@@ -55,13 +55,13 @@ public class CacheController {
         Gene gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
 
         if (gene != null) {
-            result.put("allVars", AlterationUtils.getAllAlterations(gene));
-            result.put("excludedVars", AlterationUtils.excludeVUS(gene, new ArrayList<>(AlterationUtils.getAllAlterations(gene))));
+            result.put("allVars", AlterationUtils.getAllAlterations(null, gene));
+            result.put("excludedVars", AlterationUtils.excludeVUS(gene, new ArrayList<>(AlterationUtils.getAllAlterations(null, gene))));
 
             Map<Alteration, Map<TumorType, Map<LevelOfEvidence, Set<Evidence>>>> evidences = new HashMap<>();
             Set<EvidenceType> evidenceTypes = EvidenceTypeUtils.getTreatmentEvidenceTypes();
 
-            for (Alteration alteration : AlterationUtils.excludeVUS(gene, new ArrayList<>(AlterationUtils.getAllAlterations(gene)))) {
+            for (Alteration alteration : AlterationUtils.excludeVUS(gene, new ArrayList<>(AlterationUtils.getAllAlterations(null, gene)))) {
                 evidences.put(alteration, new HashMap<TumorType, Map<LevelOfEvidence, Set<Evidence>>>());
             }
 

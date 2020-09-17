@@ -23,7 +23,7 @@ import static org.junit.Assert.assertEquals;
  */
 @RunWith(Parameterized.class)
 public class TreatmentParameterizedTest {
-    private static String TREATMENT_EXAMPLES_PATH = "src/test/resources/test_treatments.txt";
+    private static String TREATMENT_EXAMPLES_PATH = "src/test/resources/test_treatments.tsv";
 
     private String gene;
     private String variant;

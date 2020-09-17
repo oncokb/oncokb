@@ -1,6 +1,7 @@
 package org.mskcc.cbio.oncokb.apiModels.annotation;
 
 import org.mskcc.cbio.oncokb.model.EvidenceType;
+import org.mskcc.cbio.oncokb.model.ReferenceGenome;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -10,6 +11,7 @@ import java.util.Set;
  */
 public class AnnotationQuery implements java.io.Serializable{
     private String id; //Optional, This id is passed from request. The identifier used to distinguish the query
+    private ReferenceGenome referenceGenome = ReferenceGenome.GRCh37;
     private String tumorType;
     private Set<EvidenceType> evidenceTypes = new HashSet<>();
 
@@ -19,6 +21,14 @@ public class AnnotationQuery implements java.io.Serializable{
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public ReferenceGenome getReferenceGenome() {
+        return referenceGenome;
+    }
+
+    public void setReferenceGenome(ReferenceGenome referenceGenome) {
+        this.referenceGenome = referenceGenome;
     }
 
     public String getTumorType() {

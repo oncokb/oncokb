@@ -35,8 +35,10 @@ public class CancerGeneUtils {
                 CancerGene cancerGene = new CancerGene();
                 cancerGene.setEntrezGeneId(gene.getEntrezGeneId());
                 cancerGene.setHugoSymbol(gene.getHugoSymbol());
-                cancerGene.setIsoform(gene.getCuratedIsoform());
-                cancerGene.setRefSeq(gene.getCuratedRefSeq());
+                cancerGene.setGrch37Isoform(gene.getGrch37Isoform());
+                cancerGene.setGrch37RefSeq(gene.getGrch37RefSeq());
+                cancerGene.setGrch38Isoform(gene.getGrch38Isoform());
+                cancerGene.setGrch38RefSeq(gene.getGrch38RefSeq());
                 cancerGene.setOncokbAnnotated(true);
                 cancerGene.setOccurrenceCount(1);
                 cancerGene.setOncogene(gene.getOncogene());

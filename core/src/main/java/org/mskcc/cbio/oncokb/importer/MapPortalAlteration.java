@@ -8,6 +8,7 @@ package org.mskcc.cbio.oncokb.importer;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.PortalAlteration;
+import org.mskcc.cbio.oncokb.model.ReferenceGenome;
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 
@@ -70,7 +71,7 @@ public class MapPortalAlteration {
                 Alteration alt = AlterationUtils.getAlteration(gene == null ? null : gene.getHugoSymbol(),
                     proteinChange, null, consequence, proteinStartPosition, proteinEndPosition);
                 AlterationUtils.annotateAlteration(alt, alt.getAlteration());
-                alterations.addAll(AlterationUtils.getRelevantAlterations(alt));
+                alterations.addAll(AlterationUtils.getRelevantAlterations(ReferenceGenome.GRCh37, alt));
             }
             alterationsSet = AlterationUtils.excludeVUS(alterations);
         }
