@@ -392,21 +392,21 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     }
 
     @Override
-    public ResponseEntity<List<DownloadAvailability>> utilDataReleaseDownloadAvailabilityGet() {
+    public ResponseEntity<List<DownloadAvailability>> utilDataAvailabilityGet() {
         return new ResponseEntity<>(CacheUtils.getDownloadAvailabilities(), HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<String> utilDataReleaseReadmeGet(
+    public ResponseEntity<String> utilDataReadmeGet(
         @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
     ) {
         return getDataDownloadResponseEntity(version, FileName.README, FileExtension.MARK_DOWN);
     }
 
     @Override
-    public ResponseEntity<byte[]> utilDataReleaseSqlDumpGet(
+    public ResponseEntity<byte[]> utilDataSqlDumpGet(
         @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
     ) {
-        return getDataDownloadResponseEntity(version, getOncoKBSqlDumpFileName(version), FileExtension.ZIP);
+        return getDataDownloadResponseEntity(version, getOncoKBSqlDumpFileName(version), FileExtension.GZ);
     }
 }

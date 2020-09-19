@@ -180,10 +180,10 @@ public interface PrivateUtilsApi {
         @ApiResponse(code = 200, message = "OK", response = DownloadAvailability.class, responseContainer = "List"),
         @ApiResponse(code = 503, message = "Service Unavailable")
     })
-    @RequestMapping(value = "/utils/dataRelease/downloadAvailability",
+    @RequestMapping(value = "/utils/data/availability",
         produces = {"application/json"},
         method = RequestMethod.GET)
-    ResponseEntity<List<DownloadAvailability>> utilDataReleaseDownloadAvailabilityGet();
+    ResponseEntity<List<DownloadAvailability>> utilDataAvailabilityGet();
 
     @ApiOperation(value = "", notes = "Get readme info for specific data release version", response = String.class)
     @ApiResponses(value = {
@@ -191,16 +191,17 @@ public interface PrivateUtilsApi {
         @ApiResponse(code = 404, message = "Not Found"),
         @ApiResponse(code = 503, message = "Service Unavailable")
     })
-    @RequestMapping(value = "/utils/dataRelease/readme",
+    @RequestMapping(value = "/utils/data/readme",
         produces = {"text/plain"},
         method = RequestMethod.GET)
-    ResponseEntity<String> utilDataReleaseReadmeGet(
+    ResponseEntity<String> utilDataReadmeGet(
         @ApiParam(value = "version", required = true) @RequestParam(value = "version") String version
     );
-    @RequestMapping(value = "/utils/dataRelease/sqlDump",
-        produces = {"application/zip"},
+
+    @RequestMapping(value = "/utils/data/sqlDump",
+        produces = {"application/gz"},
         method = RequestMethod.GET)
-    ResponseEntity<byte[]> utilDataReleaseSqlDumpGet(
+    ResponseEntity<byte[]> utilDataSqlDumpGet(
         @ApiParam(value = "version", required = true) @RequestParam(value = "version") String version
     );
 }

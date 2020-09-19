@@ -79,12 +79,12 @@ public class HttpUtils {
         try {
             if (fileExtension.equals(FileExtension.JSON)) {
                 return new ResponseEntity<>((T) JsonUtils.jsonToArray(GitHubUtils.getOncoKBData(version, fileName)), HttpStatus.OK);
-            } else if (fileExtension.equals(FileExtension.ZIP)) {
+            } else if (fileExtension.equals(FileExtension.GZ)) {
                 HttpHeaders headers = new HttpHeaders();
                 headers.add("Content-Disposition", "attachment; filename=" + fileName);
                 return (ResponseEntity<T>) ResponseEntity.ok()
                     .headers(headers)
-                    .contentType(new MediaType("application", "zip"))
+                    .contentType(new MediaType("application", "gz"))
                     .body(GitHubUtils.getOncoKBDataInBytes(version, fileName));
             } else {
                 return new ResponseEntity<>((T) GitHubUtils.getOncoKBData(version, fileName), HttpStatus.OK);

@@ -58,7 +58,10 @@ public class GitHubUtils {
     }
 
     public static String getOncoKBSqlDumpFileName(String version) {
-        return "oncokb_" + version + ".sql" + FileExtension.ZIP.getExtension();
+        if (version == null) {
+            return "";
+        }
+        return "oncokb_" + version.replace(".", "_") + ".sql" + FileExtension.GZ.getExtension();
     }
 
     private static Boolean checkFileNameExists(List<GHContent> files, String fileName) {
