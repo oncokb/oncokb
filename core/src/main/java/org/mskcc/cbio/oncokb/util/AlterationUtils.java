@@ -1055,7 +1055,7 @@ public final class AlterationUtils {
                 && (oncogenicity.equals(Oncogenicity.YES) || oncogenicity.equals(Oncogenicity.LIKELY))) {
                 isOncogenic = true;
                 break;
-            } else if (oncogenicity != null && oncogenicity.equals(Oncogenicity.LIKELY_NEUTRAL)) {
+            } else if (oncogenicity != null && oncogenicity.equals(Oncogenicity.LIKELY_NEUTRAL) && oncogenicity.equals(Oncogenicity.INCONCLUSIVE)) {
                 isOncogenic = false;
             }
             if (isOncogenic != null) {

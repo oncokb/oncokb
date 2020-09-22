@@ -16,6 +16,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.mskcc.cbio.oncokb.Constants.MISSENSE_VARIANT;
 import static org.mskcc.cbio.oncokb.util.HotspotUtils.extractProteinPos;
 import static org.mskcc.cbio.oncokb.util.VariantConsequenceUtils.toGNMutationType;
 
@@ -109,6 +110,11 @@ public class HotspotUtils {
         List<EnrichedHotspot> hotspots = new ArrayList<>();
 
         if (hotspotMutations.get(alteration.getGene()) == null) {
+            return false;
+        }
+
+        // for alteration that is missense but ends as mis, it is a range mutation
+        if(alteration.getConsequence() != null && alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm(MISSENSE_VARIANT)) && alteration.getAlteration().endsWith("mis")) {
             return false;
         }
 
