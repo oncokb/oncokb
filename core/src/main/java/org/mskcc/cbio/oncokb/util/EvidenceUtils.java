@@ -219,16 +219,16 @@ public class EvidenceUtils {
                     alterations.put(altId, alt);
                 }
             }
+        }
 
-            if (query.getOncoTreeTypes() != null) {
-                for (TumorType tumorType : query.getOncoTreeTypes()) {
-                    if (!upwardTumorTypes.contains(tumorType)) {
-                        upwardTumorTypes.add(tumorType);
-                    }
+        if (query.getOncoTreeTypes() != null) {
+            for (TumorType tumorType : query.getOncoTreeTypes()) {
+                if (!upwardTumorTypes.contains(tumorType)) {
+                    upwardTumorTypes.add(tumorType);
                 }
             }
-            downwardTumorTypes.addAll(TumorTypeUtils.findTumorTypes(query.getQuery().getTumorType(), DOWNWARD));
         }
+        downwardTumorTypes.addAll(TumorTypeUtils.findTumorTypes(query.getQuery().getTumorType(), DOWNWARD));
 
         // Get all gene related evidences
         Map<Gene, Set<Evidence>> mappedEvidences =
@@ -247,26 +247,31 @@ public class EvidenceUtils {
             evidences.addAll(getEvidence(uniqueAlterations, common, null));
         }
 
-        // For sensitive evidences, get all ignore tumor types. They will be propagated to other tumor types
-        // in assignEvidence function
-        common = Sets.intersection(EvidenceTypeUtils.getSensitiveTreatmentEvidenceTypes(), evidenceTypes);
-        if (common.size() > 0) {
-            evidences.addAll(getEvidence(uniqueAlterationsWithoutAlternativeAlleles, common, levelOfEvidences));
-        }
+        if (uniqueAlterationsWithoutAlternativeAlleles.size() > 0) {
+            // For sensitive evidences, get all ignore tumor types. They will be propagated to other tumor types
+            // in assignEvidence function
+            common = Sets.intersection(EvidenceTypeUtils.getSensitiveTreatmentEvidenceTypes(), evidenceTypes);
+            if (common.size() > 0) {
+                evidences.addAll(getEvidence(uniqueAlterationsWithoutAlternativeAlleles, common, levelOfEvidences));
+            }
 
-        // Get diagnostic implication evidences
-        if (evidenceTypes.contains(EvidenceType.DIAGNOSTIC_IMPLICATION)) {
-            evidences.addAll(getEvidence(uniqueAlterationsWithoutAlternativeAlleles, Collections.singleton(EvidenceType.DIAGNOSTIC_IMPLICATION), downwardTumorTypes, levelOfEvidences));
-        }
+            // Get diagnostic implication evidences
+            if (evidenceTypes.contains(EvidenceType.DIAGNOSTIC_IMPLICATION)) {
+                evidences.addAll(getEvidence(uniqueAlterationsWithoutAlternativeAlleles, Collections.singleton(EvidenceType.DIAGNOSTIC_IMPLICATION), downwardTumorTypes, levelOfEvidences));
+            }
 
-        // Get other tumor type related evidences
-        Set<EvidenceType> restTTevidenceTypes = EvidenceTypeUtils.getTumorTypeEvidenceTypes();
-        restTTevidenceTypes.removeAll(EvidenceTypeUtils.getSensitiveTreatmentEvidenceTypes());
-        restTTevidenceTypes.remove(EvidenceType.DIAGNOSTIC_IMPLICATION);
-        common = Sets.intersection(restTTevidenceTypes, evidenceTypes);
-        if (common.size() > 0) {
+            // Get other tumor type related evidences
+            Set<EvidenceType> restTTevidenceTypes = EvidenceTypeUtils.getTumorTypeEvidenceTypes();
+            restTTevidenceTypes.removeAll(EvidenceTypeUtils.getSensitiveTreatmentEvidenceTypes());
+            restTTevidenceTypes.remove(EvidenceType.DIAGNOSTIC_IMPLICATION);
+            common = Sets.intersection(restTTevidenceTypes, evidenceTypes);
+            if (common.size() > 0) {
 
-            evidences.addAll(getEvidence(uniqueAlterationsWithoutAlternativeAlleles, common, upwardTumorTypes, levelOfEvidences));
+                evidences.addAll(getEvidence(uniqueAlterationsWithoutAlternativeAlleles, common, upwardTumorTypes, levelOfEvidences));
+            }
+        } else if (query.getOncoTreeTypes() != null && query.getOncoTreeTypes().size() > 0) {
+            final Set<EvidenceType> tumorTypeEvidenceTypes = Sets.intersection(EvidenceTypeUtils.getTumorTypeEvidenceTypes(), evidenceTypes);
+            evidences.addAll(CacheUtils.getAllEvidences().stream().filter(evidence -> tumorTypeEvidenceTypes.contains(evidence.getEvidenceType()) && upwardTumorTypes.contains(evidence.getOncoTreeType())).collect(toSet()));
         }
 
         return evidences;
@@ -958,11 +963,11 @@ public class EvidenceUtils {
 
                 query.setGene(GeneUtils.getGene(requestQuery.getEntrezGeneId(), requestQuery.getHugoSymbol()));
 
+                if (requestQuery.getTumorType() != null && !requestQuery.getTumorType().isEmpty()) {
+                    query.setOncoTreeTypes(
+                        TumorTypeUtils.getMappedOncoTreeTypesBySource(requestQuery.getTumorType()));
+                }
                 if (query.getGene() != null) {
-                    if (requestQuery.getTumorType() != null && !requestQuery.getTumorType().isEmpty()) {
-                        query.setOncoTreeTypes(
-                            TumorTypeUtils.getMappedOncoTreeTypesBySource(requestQuery.getTumorType()));
-                    }
 
                     if (!com.mysql.jdbc.StringUtils.isNullOrEmpty(requestQuery.getAlteration())) {
                         Alteration alt = AlterationUtils.findAlteration(query.getGene(), requestQuery.getReferenceGenome(), requestQuery.getAlteration());
