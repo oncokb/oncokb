@@ -62,7 +62,7 @@ public class Query implements java.io.Serializable {
         this.type = AnnotationQueryType.REGULAR.getName();
         this.setTumorType(mutationQuery.getTumorType());
 
-        this.hgvs = mutationQuery.getHgvsg();
+        this.setHgvs(mutationQuery.getHgvsg(), referenceGenome);
         this.referenceGenome = mutationQuery.getReferenceGenome();
         if (this.referenceGenome == null) {
             this.referenceGenome = DEFAULT_REFERENCE_GENOME;
