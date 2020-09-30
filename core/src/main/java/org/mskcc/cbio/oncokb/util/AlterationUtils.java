@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 
 import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
 import static org.mskcc.cbio.oncokb.Constants.MISSENSE_VARIANT;
+import static org.mskcc.cbio.oncokb.Constants.UPSTREAM_GENE;
 
 /**
  * @author jgao
@@ -319,10 +320,13 @@ public final class AlterationUtils {
         if (alteration.getAlteration() == null || alteration.getAlteration().isEmpty()) {
             alteration.setAlteration(proteinChange);
         }
-        if (alteration.getAlteration().isEmpty()) {
-            if (variantConsequence != null) {
-                if (variantConsequence.getTerm().equals("splice_region_variant")) {
+        if (StringUtils.isEmpty(alteration.getAlteration())) {
+            if (alteration.getConsequence() != null) {
+                if (alteration.getConsequence().getTerm().equals("splice_region_variant")) {
                     alteration.setAlteration("splice mutation");
+                }
+                if (alteration.getConsequence().getTerm().equals(UPSTREAM_GENE)) {
+                    alteration.setAlteration(SpecialVariant.PROMOTER.getVariant());
                 }
             }
         } else {
@@ -1042,6 +1046,7 @@ public final class AlterationUtils {
                 }
             }
         }
+
         return matches;
     }
 
