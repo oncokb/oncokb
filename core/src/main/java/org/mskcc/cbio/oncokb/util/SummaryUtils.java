@@ -243,8 +243,11 @@ public class SummaryUtils {
         }
 
         // Give predefined TERT promoter summary
-        if(gene.getHugoSymbol().equals("TERT") && query.getAlteration().trim().equalsIgnoreCase("promoter")) {
-            return TERT_PROMOTER_MUTATION_SUMMARY;
+        if (gene.getHugoSymbol().equals("TERT")) {
+            String altStr = exactMatchAlteration == null ? query.getAlteration().trim() : exactMatchAlteration.getAlteration();
+            if (altStr.toLowerCase().contains("promoter")) {
+                return TERT_PROMOTER_MUTATION_SUMMARY;
+            }
         }
 
         if (exactMatchAlteration != null) {

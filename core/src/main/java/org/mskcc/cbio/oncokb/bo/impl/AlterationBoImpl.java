@@ -13,7 +13,7 @@ import org.mskcc.cbio.oncokb.util.*;
 
 import java.util.*;
 
-import static org.mskcc.cbio.oncokb.Constants.MISSENSE_VARIANT;
+import static org.mskcc.cbio.oncokb.Constants.*;
 
 /**
  * @author jgao
