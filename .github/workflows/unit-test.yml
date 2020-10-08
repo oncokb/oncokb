@@ -1,0 +1,39 @@
+# This workflow will run unit tests based on latest data version
+
+name: Unit Tests
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Start Default MySQL (SUDO)
+        run: sudo systemctl start mysql
+
+      - name: Import Data
+        env:
+          ONCOKB_OAUTH_TOKEN: ${{ secrets.ONCOKB_OAUTH_TOKEN }}
+        run: |
+          MYSQL_FILE_NAME=mysql.sql.gz
+          curl -s https://"${ONCOKB_OAUTH_TOKEN}"@raw.githubusercontent.com/knowledgesystems/oncokb-data/master/RELEASE/latest/"${MYSQL_FILE_NAME}" -O
+
+          mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test"
+          zcat "${MYSQL_FILE_NAME}" | mysql -uroot -proot test
+
+      - uses: actions/setup-java@v1
+        with:
+          java-version: '11.x'
+
+      - name: Run unit tests
+        run: |
+          mvn -ntp test \
+          -Djdbc.driverClassName=com.mysql.jdbc.Driver \
+          -Djdbc.url=jdbc:mysql://localhost:3306/test \
+          -Djdbc.username=root \
+          -Djdbc.password=root
+

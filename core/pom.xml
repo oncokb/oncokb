@@ -152,6 +152,11 @@
             <artifactId>genome-nexus-java-api-client</artifactId>
             <version>0709b8232b</version>
         </dependency>
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+            <version>1.3.2</version>
+        </dependency>
     </dependencies>
 
     <build>

@@ -1,14 +1,10 @@
 package org.mskcc.cbio.oncokb.util;
 
 import junit.framework.TestCase;
-import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.tumor_type.MainType;
-import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
 
 import java.util.*;
 
-import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
 
 /**
  * Created by Hongxin on 3/8/17.

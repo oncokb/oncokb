@@ -8,7 +8,6 @@ import org.mskcc.cbio.oncokb.apiModels.Implication;
 import org.mskcc.cbio.oncokb.model.IndicatorQueryResp;
 import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
 import org.mskcc.cbio.oncokb.model.Query;
-import org.omg.CORBA.IMP_LIMIT;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -17,10 +16,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 
 /**
