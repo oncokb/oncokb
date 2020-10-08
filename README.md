@@ -1,7 +1,16 @@
-# OncoKB Core <a href="https://ascopubs.org/doi/full/10.1200/PO.17.00011"><img src="https://img.shields.io/badge/DOI-10.1200%2FPO.17.00011-1c75cd" /></a>  
+# OncoKB Core
 Repository for OncoKB, a precision oncology knowledge base.
 
 The core of OncoKB Annotation service.
+
+## Status
+
+[![Build Status](https://travis-ci.org/oncokb/oncokb.svg?branch=master)](https://travis-ci.org/oncokb/oncokb) [![Release Management](https://github.com/oncokb/oncokb/workflows/Release%20Management/badge.svg)](https://github.com/oncokb/oncokb/actions?query=workflow%3A"Release+Management") [![Sentrey Release](https://github.com/oncokb/oncokb/workflows/Sentrey%20Release/badge.svg)](https://github.com/oncokb/oncokb/actions?query=workflow%3A%22Sentrey+Release%22) 
+
+## Info
+
+[![Gitter](https://img.shields.io/gitter/room/oncokb/public-chat)](https://gitter.im/oncokb/public-chat) <a href="https://ascopubs.org/doi/full/10.1200/PO.17.00011"><img src="https://img.shields.io/badge/DOI-10.1200%2FPO.17.00011-1c75cd" /></a>
+
 ## Running Environment
 Please confirm your running environment is:
 * **Java version: 8**
@@ -40,5 +49,4 @@ Please choose one of the profile when building the war file
 You could find specific instructions in curate or public repo,
          
 ## Questions?
-The best way is to send an email to contact@oncokb.org so all our team members can help.  
-We are also available on Gitter. [![Gitter](https://img.shields.io/gitter/room/oncokb/public-chat)](https://gitter.im/oncokb/public-chat)
+The best way is to send an email to contact@oncokb.org so all our team members can help.
