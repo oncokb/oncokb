@@ -1,7 +1,6 @@
 package org.mskcc.cbio.oncokb.util;
 
 import junit.framework.TestCase;
-import org.apache.commons.collections.CollectionUtils;
 import org.genome_nexus.client.TranscriptConsequence;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.model.Gene;
