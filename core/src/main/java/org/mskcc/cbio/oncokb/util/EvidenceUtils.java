@@ -272,6 +272,11 @@ public class EvidenceUtils {
         } else if (query.getOncoTreeTypes() != null && query.getOncoTreeTypes().size() > 0) {
             final Set<EvidenceType> tumorTypeEvidenceTypes = Sets.intersection(EvidenceTypeUtils.getTumorTypeEvidenceTypes(), evidenceTypes);
             evidences.addAll(CacheUtils.getAllEvidences().stream().filter(evidence -> tumorTypeEvidenceTypes.contains(evidence.getEvidenceType()) && upwardTumorTypes.contains(evidence.getOncoTreeType())).collect(toSet()));
+        } else {
+            // return all evidences requested by the evidence type
+            // this is when user only specify the evidence type in the query
+            final Set<EvidenceType> tumorTypeEvidenceTypes = Sets.intersection(EvidenceTypeUtils.getTumorTypeEvidenceTypes(), evidenceTypes);
+            evidences.addAll(CacheUtils.getAllEvidences().stream().filter(evidence -> tumorTypeEvidenceTypes.contains(evidence.getEvidenceType())).collect(toSet()));
         }
 
         return evidences;
