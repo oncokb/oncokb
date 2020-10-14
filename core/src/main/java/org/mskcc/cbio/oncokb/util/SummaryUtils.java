@@ -58,8 +58,7 @@ public class SummaryUtils {
         if (exactMatchedAlt != null) {
             alteration = exactMatchedAlt;
         } else {
-            alteration = AlterationUtils.getAlteration(query.getHugoSymbol(), query.getAlteration(), AlterationType.getByName(query.getAlterationType()), query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
-            AlterationUtils.annotateAlteration(alteration, query.getAlteration());
+            alteration = AlterationUtils.getAlteration(query.getHugoSymbol(), query.getAlteration(), AlterationType.getByName(query.getAlterationType()), query.getConsequence(), query.getProteinStart(), query.getProteinEnd(), query.getReferenceGenome());
         }
 
         if (alteration.getConsequence().getTerm().equals("synonymous_variant")) {
@@ -271,8 +270,7 @@ public class SummaryUtils {
             alteration = exactMatchAlteration;
         } else {
             alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getAlteration(),
-                AlterationType.getByName(query.getAlterationType()), query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
-            AlterationUtils.annotateAlteration(alteration, queryAlteration);
+                AlterationType.getByName(query.getAlterationType()), query.getConsequence(), query.getProteinStart(), query.getProteinEnd(), query.getReferenceGenome());
         }
 
         isHotspot = HotspotUtils.isHotspot(alteration);
@@ -682,7 +680,7 @@ public class SummaryUtils {
         }
         Alteration alteration = AlterationUtils.findAlteration(gene, referenceGenome, queryAlteration);
         if (alteration == null) {
-            alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), queryAlteration, null, null, null, null);
+            alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), queryAlteration, null, null, null, null, referenceGenome);
             AlterationUtils.annotateAlteration(alteration, queryAlteration);
         }
         if (AlterationUtils.isGeneralAlterations(queryAlteration, true)) {
@@ -746,8 +744,7 @@ public class SummaryUtils {
         }
         Alteration alteration = AlterationUtils.findAlteration(gene, referenceGenome, queryAlteration);
         if (alteration == null) {
-            alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), queryAlteration, null, null, null, null);
-            AlterationUtils.annotateAlteration(alteration, queryAlteration);
+            alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), queryAlteration, null, null, null, null, referenceGenome);
         }
         if (StringUtils.containsIgnoreCase(queryAlteration, "fusion")) {
             if (queryAlteration.toLowerCase().equals("fusions")) {

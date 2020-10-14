@@ -156,9 +156,7 @@ public class IndicatorUtils {
             gene = GeneUtils.getGene(query.getEntrezGeneId(), query.getHugoSymbol());
             if (gene != null) {
                 Alteration alt = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getAlteration(),
-                    null, query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
-
-                AlterationUtils.annotateAlteration(alt, alt.getAlteration());
+                    null, query.getConsequence(), query.getProteinStart(), query.getProteinEnd(), query.getReferenceGenome());
 
                 relevantAlterations = AlterationUtils.getRelevantAlterations(query.getReferenceGenome(), alt);
             }
@@ -193,8 +191,7 @@ public class IndicatorUtils {
             }
 
             alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getAlteration(),
-                null, query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
-            AlterationUtils.annotateAlteration(alteration, alteration.getAlteration());
+                null, query.getConsequence(), query.getProteinStart(), query.getProteinEnd(), query.getReferenceGenome());
 
             List<Alteration> nonVUSRelevantAlts = AlterationUtils.excludeVUS(relevantAlterations);
             Map<String, LevelOfEvidence> highestLevels = new HashMap<>();
@@ -809,8 +806,7 @@ public class IndicatorUtils {
     private static List<Alteration> findRelevantAlts(Gene gene, ReferenceGenome referenceGenome, String alteration) {
         Set<Alteration> relevantAlts = new LinkedHashSet<>();
         Alteration alt = AlterationUtils.getAlteration(gene.getHugoSymbol(), alteration,
-            null, null, null, null);
-        AlterationUtils.annotateAlteration(alt, alt.getAlteration());
+            null, null, null, null, referenceGenome);
 
         relevantAlts.addAll(AlterationUtils.getRelevantAlterations(referenceGenome, alt));
 
@@ -885,8 +881,7 @@ public class IndicatorUtils {
                 if (tmpGene != null) {
                     gene = tmpGene;
                     Alteration alt = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getAlteration(),
-                        AlterationType.getByName(query.getAlterationType()), query.getConsequence(), null, null);
-                    AlterationUtils.annotateAlteration(alt, alt.getAlteration());
+                        AlterationType.getByName(query.getAlterationType()), query.getConsequence(), null, null, query.getReferenceGenome());
                     if (!com.mysql.jdbc.StringUtils.isNullOrEmpty(query.getAlteration())) {
                         relevantAlterations = findRelevantAlts(gene, query.getReferenceGenome(), query.getAlteration());
                     } else {

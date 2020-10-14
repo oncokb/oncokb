@@ -139,8 +139,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
                                 for (String keyword : keywords) {
                                     if (!keyword.equals(entry.getKey())) {
                                         Alteration alteration =
-                                            AlterationUtils.getAlteration(gene.getHugoSymbol(), keyword, null, null, null, null);
-                                        AlterationUtils.annotateAlteration(alteration, keyword);
+                                            AlterationUtils.getAlteration(gene.getHugoSymbol(), keyword, null, null, null, null, null);
                                         TypeaheadSearchResp typeaheadSearchResp = newTypeaheadVariant(alteration);
                                         typeaheadSearchResp.setVariantExist(false);
                                         result.add(typeaheadSearchResp);

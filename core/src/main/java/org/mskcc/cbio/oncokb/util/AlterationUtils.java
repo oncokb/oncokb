@@ -404,7 +404,7 @@ public final class AlterationUtils {
     }
 
     public static Alteration getAlteration(String hugoSymbol, String alteration, AlterationType alterationType,
-                                           String consequence, Integer proteinStart, Integer proteinEnd) {
+                                           String consequence, Integer proteinStart, Integer proteinEnd, ReferenceGenome referenceGenome) {
         Alteration alt = new Alteration();
 
         if (alteration != null) {
@@ -443,6 +443,11 @@ public final class AlterationUtils {
         alt.setProteinStart(proteinStart);
         alt.setProteinEnd(proteinEnd);
 
+        if (referenceGenome == null) {
+            alt.getReferenceGenomes().add(DEFAULT_REFERENCE_GENOME);
+        } else {
+            alt.getReferenceGenomes().add(referenceGenome);
+        }
         AlterationUtils.annotateAlteration(alt, alt.getAlteration());
         return alt;
     }
@@ -694,6 +699,7 @@ public final class AlterationUtils {
                 alt.setGene(gene);
                 alt.setProteinStart(proteinStart);
                 alt.setProteinEnd(proteinEnd);
+                alt.getReferenceGenomes().add(referenceGenome);
 
                 AlterationUtils.annotateAlteration(alt, alt.getAlteration());
 
@@ -708,6 +714,7 @@ public final class AlterationUtils {
                 alt.setGene(gene);
                 alt.setProteinStart(proteinStart);
                 alt.setProteinEnd(proteinEnd);
+                alt.getReferenceGenomes().add(referenceGenome);
 
                 AlterationUtils.annotateAlteration(alt, alt.getAlteration());
 

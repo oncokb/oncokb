@@ -141,8 +141,7 @@ public class FindRelevantAlterationsTest {
     @Test
     public void testAnnotateAlteration() throws Exception {
         // Particularly test consequence
-        Alteration alt = AlterationUtils.getAlteration(hugoSymbol, alteration, AlterationType.getByName(alterationType), null, null, null);
-        AlterationUtils.annotateAlteration(alt, alteration);
+        Alteration alt = AlterationUtils.getAlteration(hugoSymbol, alteration, AlterationType.getByName(alterationType), null, null, null, null);
 
         LinkedHashSet<Alteration> relevantAlterations =
             ApplicationContextSingleton.getAlterationBo()
