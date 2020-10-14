@@ -1,6 +1,5 @@
 package org.mskcc.cbio.oncokb.util;
 
-import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.genome_nexus.client.Hotspot;
@@ -9,6 +8,7 @@ import org.genome_nexus.client.ProteinLocation;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.AlterationPositionBoundary;
 import org.mskcc.cbio.oncokb.model.Gene;
+import org.mskcc.cbio.oncokb.model.ReferenceGenome;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -98,6 +98,16 @@ public class HotspotUtils {
 
     public static boolean isHotspot(Alteration alteration) {
         if (alteration == null || alteration.getGene() == null || alteration.getProteinStart().intValue() == AlterationPositionBoundary.START.getValue() || alteration.getProteinEnd().intValue() == AlterationPositionBoundary.END.getValue()) {
+            return false;
+        }
+
+        // There are few genes we cannot map to GRCh38 yet
+        Set<String> notMappedHugos = new HashSet<>();
+        notMappedHugos.add("MYD88");
+        notMappedHugos.add("TET3");
+        notMappedHugos.add("RYBP");
+        notMappedHugos.add("WT1");
+        if (notMappedHugos.contains(alteration.getGene().getHugoSymbol()) && !alteration.getReferenceGenomes().contains(ReferenceGenome.GRCh37)) {
             return false;
         }
 

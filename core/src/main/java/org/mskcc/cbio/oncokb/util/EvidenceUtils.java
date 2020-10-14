@@ -69,8 +69,7 @@ public class EvidenceUtils {
                 (levelOfEvidences == null ? "" : ("&" + levelOfEvidences.toString()));
             if (matchedAlt == null) {
                 matchedAlt = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getAlteration(),
-                    AlterationType.getByName(query.getAlterationType()), query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
-                AlterationUtils.annotateAlteration(matchedAlt, matchedAlt.getAlteration());
+                    AlterationType.getByName(query.getAlterationType()), query.getConsequence(), query.getProteinStart(), query.getProteinEnd(), query.getReferenceGenome());
             }
 
             Set<Evidence> relevantEvidences;
@@ -980,7 +979,7 @@ public class EvidenceUtils {
                         if (alt == null) {
                             alt = AlterationUtils.getAlteration(query.getGene().getHugoSymbol(),
                                 requestQuery.getAlteration(), null, requestQuery.getConsequence(),
-                                requestQuery.getProteinStart(), requestQuery.getProteinEnd());
+                                requestQuery.getProteinStart(), requestQuery.getProteinEnd(), requestQuery.getReferenceGenome());
                             AlterationUtils.annotateAlteration(alt, alt.getAlteration());
                         }
                         query.setExactMatchedAlteration(alt);
@@ -995,8 +994,7 @@ public class EvidenceUtils {
                             }
                         }
 
-                        Alteration alteration = AlterationUtils.getAlteration(query.getGene().getHugoSymbol(), requestQuery.getAlteration(), AlterationType.MUTATION, requestQuery.getConsequence(), requestQuery.getProteinStart(), requestQuery.getProteinEnd());
-                        AlterationUtils.annotateAlteration(alteration, alteration.getAlteration());
+                        Alteration alteration = AlterationUtils.getAlteration(query.getGene().getHugoSymbol(), requestQuery.getAlteration(), AlterationType.MUTATION, requestQuery.getConsequence(), requestQuery.getProteinStart(), requestQuery.getProteinEnd(), requestQuery.getReferenceGenome());
                         List<Alteration> allelesAlts = AlterationUtils.getAlleleAlterations(requestQuery.getReferenceGenome(), alteration);
                         relevantAlts.removeAll(allelesAlts);
                         query.setAlterations(relevantAlts);

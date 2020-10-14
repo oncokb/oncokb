@@ -52,7 +52,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
 
         Boolean isHotspot = false;
 
-        Alteration alteration = AlterationUtils.getAlteration(hugoSymbol, variant, null, null, null, null);
+        Alteration alteration = AlterationUtils.getAlteration(hugoSymbol, variant, null, null, null, null, null);
 
         if (alteration != null) {
             isHotspot = HotspotUtils.isHotspot(alteration);
@@ -333,7 +333,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             gene = GeneUtils.getGene(entrezGeneId, hugoSymbol);
             Alteration alterationModel = AlterationUtils.findAlteration(gene, matchedRG, alteration);
             if (alterationModel == null) {
-                alterationModel = AlterationUtils.getAlteration(gene.getHugoSymbol(), alteration, null, null, null, null);
+                alterationModel = AlterationUtils.getAlteration(gene.getHugoSymbol(), alteration, null, null, null, null, matchedRG);
             }
             query = new Query(alterationModel, matchedRG);
         } else {
