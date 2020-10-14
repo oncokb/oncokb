@@ -25,4 +25,4 @@ jobs:
           TAG_NAME: ${{ github.event.release.tag_name }}
         run: |
           mvn -ntp package -DskipTests -P public,production
-          docker push oncokb/oncokb:${TAG_NAME}
+          docker push oncokb/oncokb:${TAG_NAME:1}
