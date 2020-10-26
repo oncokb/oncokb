@@ -34,16 +34,11 @@ public class GeneUtils {
 
     public static Gene getGeneByHugoSymbol(String hugoSymbol) {
         if (hugoSymbol != null) {
-            if (CacheUtils.isEnabled()) {
-                Gene gene = CacheUtils.getGeneByHugoSymbol(hugoSymbol);
-                if (gene == null) {
-                    gene = getGeneByAlias(hugoSymbol);
-                }
-                return gene;
-            } else {
-                GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
-                return geneBo.findGeneByHugoSymbol(hugoSymbol);
+            Gene gene = CacheUtils.getGeneByHugoSymbol(hugoSymbol);
+            if (gene == null) {
+                gene = getGeneByAlias(hugoSymbol);
             }
+            return gene;
         }
         return null;
     }
@@ -51,35 +46,27 @@ public class GeneUtils {
     public static Gene getGeneByEntrezId(Integer entrezId) {
         if (entrezId != null) {
             GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
-            if (CacheUtils.isEnabled()) {
-                return CacheUtils.getGeneByEntrezId(entrezId);
-            } else {
-                return geneBo.findGeneByEntrezGeneId(entrezId);
-            }
+            return CacheUtils.getGeneByEntrezId(entrezId);
         }
         return null;
     }
 
     public static Gene getGeneByAlias(String geneAlias) {
         if (geneAlias != null) {
-            if (CacheUtils.isEnabled()) {
-                Set<Gene> genes = getAllGenes();
-                Set<Gene> matches = new HashSet<>();
-                for (Gene gene : genes) {
-                    if (gene.getGeneAliases().contains(geneAlias)) {
-                        matches.add(gene);
-                    }
-                    if (matches.size() > 0) {
-                        break;
-                    }
+            Set<Gene> genes = CacheUtils.getAllGenes();
+            Set<Gene> matches = new HashSet<>();
+            for (Gene gene : genes) {
+                if (gene.getGeneAliases().contains(geneAlias)) {
+                    matches.add(gene);
                 }
-                if (matches.isEmpty() || matches.size() > 1) {
-                    return null;
-                } else {
-                    return matches.iterator().next();
+                if (matches.size() > 0) {
+                    break;
                 }
+            }
+            if (matches.isEmpty() || matches.size() > 1) {
+                return null;
             } else {
-                return ApplicationContextSingleton.getGeneBo().findGeneByAlias(geneAlias);
+                return matches.iterator().next();
             }
         }
         return null;
@@ -90,7 +77,7 @@ public class GeneUtils {
         if (exactSearch == null)
             exactSearch = false;
         if (keyword != null && keyword != "") {
-            Set<Gene> allGenes = GeneUtils.getAllGenes();
+            Set<Gene> allGenes = CacheUtils.getAllGenes();
             if (org.apache.commons.lang3.math.NumberUtils.isNumber(keyword)) {
                 for (Gene gene : allGenes) {
                     String entrezId = Integer.toString(gene.getEntrezGeneId());
@@ -146,15 +133,6 @@ public class GeneUtils {
         }
 
         return genes;
-    }
-
-    public static Set<Gene> getAllGenes() {
-        if (CacheUtils.isEnabled()) {
-            return CacheUtils.getAllGenes();
-        } else {
-            GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
-            return new HashSet<>(geneBo.findAll());
-        }
     }
 
     public static Set<Gene> getGenesWithDrug(Drug drug) {

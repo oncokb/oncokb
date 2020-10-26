@@ -498,14 +498,10 @@ public final class AlterationUtils {
 
     public static Set<Alteration> getAllAlterations(ReferenceGenome referenceGenome, Gene gene) {
         Set<Alteration> alterations = new HashSet<>();
-        if (CacheUtils.isEnabled()) {
-            if (!CacheUtils.containAlterations(gene.getEntrezGeneId())) {
-                CacheUtils.setAlterations(gene);
-            }
-            alterations = CacheUtils.getAlterations(gene.getEntrezGeneId());
-        } else {
-            alterations = new HashSet<>(alterationBo.findAlterationsByGene(Collections.singleton(gene)));
+        if (!CacheUtils.containAlterations(gene.getEntrezGeneId())) {
+            CacheUtils.setAlterations(gene);
         }
+        alterations = CacheUtils.getAlterations(gene.getEntrezGeneId());
 
         if (referenceGenome == null) {
             return alterations;
@@ -515,7 +511,7 @@ public final class AlterationUtils {
     }
 
     public static Set<Alteration> getAllAlterations() {
-        Set<Gene> genes = GeneUtils.getAllGenes();
+        Set<Gene> genes = CacheUtils.getAllGenes();
         Set<Alteration> alterations = new HashSet<>();
         for (Gene gene : genes) {
             alterations.addAll(getAllAlterations(null, gene));
@@ -542,11 +538,7 @@ public final class AlterationUtils {
     public static Set<Alteration> getVUS(Alteration alteration) {
         Set<Alteration> result = new HashSet<>();
         Gene gene = alteration.getGene();
-        if (CacheUtils.isEnabled()) {
-            result = CacheUtils.getVUS(gene.getEntrezGeneId());
-        } else {
-            result = AlterationUtils.findVUSFromEvidences(EvidenceUtils.getEvidenceByGenes(Collections.singleton(gene)).get(gene));
-        }
+        result = CacheUtils.getVUS(gene.getEntrezGeneId());
         return result;
     }
 

@@ -102,24 +102,12 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
 
     @Override
     public Alteration findAlteration(Gene gene, AlterationType alterationType, ReferenceGenome referenceGenome, String alteration) {
-        if (CacheUtils.isEnabled()) {
-            return findAlteration(referenceGenome, alteration, CacheUtils.getAlterations(gene.getEntrezGeneId()));
-        } else {
-            Alteration alt = getDao().findAlteration(gene, alterationType, referenceGenome, alteration);
-            if (alt == null && NamingUtils.hasAbbreviation(alteration)) {
-                alt = getDao().findAlteration(gene, alterationType, referenceGenome, NamingUtils.getFullName(alteration));
-            }
-            return alt;
-        }
+        return findAlteration(referenceGenome, alteration, CacheUtils.getAlterations(gene.getEntrezGeneId()));
     }
 
     @Override
     public Alteration findAlteration(Gene gene, AlterationType alterationType, ReferenceGenome referenceGenome, String alteration, String name) {
-        if (CacheUtils.isEnabled()) {
-            return findAlteration(referenceGenome, alteration, name, CacheUtils.getAlterations(gene.getEntrezGeneId()));
-        } else {
-            return findAlterationFromDao(gene, alterationType, referenceGenome, alteration, name);
-        }
+        return findAlteration(referenceGenome, alteration, name, CacheUtils.getAlterations(gene.getEntrezGeneId()));
     }
 
     @Override
@@ -142,11 +130,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
                 result.addAll(AlterationUtils.findOverlapAlteration(alterations, gene, referenceGenome, consequence, start, end));
             } else {
                 Collection<Alteration> queryResult;
-                if (CacheUtils.isEnabled()) {
-                    queryResult = CacheUtils.findMutationsByConsequenceAndPosition(gene,referenceGenome, consequence, start, end);
-                } else {
-                    queryResult = getDao().findMutationsByConsequenceAndPosition(gene,referenceGenome, consequence, start, end);
-                }
+                queryResult = CacheUtils.findMutationsByConsequenceAndPosition(gene,referenceGenome, consequence, start, end);
                 if (queryResult != null) {
                     result.addAll(queryResult);
                 }
@@ -177,11 +161,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             }
         } else {
             Collection<Alteration> queryResult;
-            if (CacheUtils.isEnabled()) {
-                queryResult = CacheUtils.findMutationsByConsequenceAndPositionOnSamePosition(gene, referenceGenome, consequence, start, end);
-            } else {
-                queryResult = getDao().findMutationsByConsequenceAndPositionOnSamePosition(gene,referenceGenome, consequence, start, end);
-            }
+            queryResult = CacheUtils.findMutationsByConsequenceAndPositionOnSamePosition(gene, referenceGenome, consequence, start, end);
             if (queryResult != null) {
                 result.addAll(queryResult);
             }
@@ -426,9 +406,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
     @Override
     public void save(Alteration alteration) {
         super.save(alteration);
-        if (CacheUtils.isEnabled()) {
-            CacheUtils.forceUpdateGeneAlterations(alteration.getGene().getEntrezGeneId());
-        }
+        CacheUtils.forceUpdateGeneAlterations(alteration.getGene().getEntrezGeneId());
     }
 
 
