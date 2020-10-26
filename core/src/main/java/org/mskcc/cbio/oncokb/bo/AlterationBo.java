@@ -35,14 +35,6 @@ public interface AlterationBo extends GenericBo<Alteration> {
      * @param gene
      * @param alterationType
      * @param alteration
-     * @return
-     */
-    Alteration findAlterationFromDao(Gene gene, AlterationType alterationType, ReferenceGenome referenceGenome, String alteration);
-
-    /**
-     * @param gene
-     * @param alterationType
-     * @param alteration
      * @param name
      * @return
      */

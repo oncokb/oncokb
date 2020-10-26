@@ -15,28 +15,21 @@ import org.mskcc.cbio.oncokb.model.Drug;
  * @author jgao
  */
 public interface DrugBo extends GenericBo<Drug> {
-    /**
-     * 
-     * @param drugNames
-     * @return 
-     */
-    List<Drug> findDrugsByNames(Collection<String> drugNames);
-
 
     Drug findDrugById(Integer id);
 
-    
+
     /**
-     * 
+     *
      * @param drugName
-     * @return 
+     * @return
      */
     Drug findDrugByName(String drugName);
-    
+
     /**
-     * 
+     *
      * @param synonym
-     * @return 
+     * @return
      */
     List<Drug> findDrugsBySynonym(String synonym);
 
@@ -46,18 +39,18 @@ public interface DrugBo extends GenericBo<Drug> {
      * @return
      */
     Drug findDrugsByNcitCode(String ncitCode);
-    
+
     /**
-     * 
+     *
      * @param drugNameOrSynonym
-     * @return 
+     * @return
      */
     List<Drug> guessDrugs(String drugNameOrSynonym);
-    
+
     /**
-     * 
+     *
      * @param drugNameOrSynonym
-     * @return 
+     * @return
      */
     Drug guessUnambiguousDrug(String drugNameOrSynonym);
 }
