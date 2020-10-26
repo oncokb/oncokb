@@ -129,18 +129,6 @@ public class NCITDrugUtils {
         }
         System.out.println("Cached all all NCIT Drugs.");
     }
-
-    private static Set<String> getAcceptedSemanticTypes() {
-        List<String> lines = null;
-        try {
-            lines = FileUtils.readTrimedLinesStream(
-                NCITDrugUtils.class.getResourceAsStream("/data/accepted_ncit_semantic_types.txt"));
-        } catch (IOException e) {
-            e.printStackTrace();
-            lines = new ArrayList<>();
-        }
-        return new HashSet<>(lines);
-    }
 }
 
 class NCTIDrugComp implements Comparator<NCITDrug> {

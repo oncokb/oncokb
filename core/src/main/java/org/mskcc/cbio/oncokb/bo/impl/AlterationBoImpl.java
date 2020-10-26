@@ -111,11 +111,6 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
     }
 
     @Override
-    public Alteration findAlterationFromDao(Gene gene, AlterationType alterationType, ReferenceGenome referenceGenome, String alteration) {
-        return getDao().findAlteration(gene, alterationType, referenceGenome, alteration);
-    }
-
-    @Override
     public Alteration findAlterationFromDao(Gene gene, AlterationType alterationType, ReferenceGenome referenceGenome, String alteration, String name) {
         return getDao().findAlteration(gene, alterationType, referenceGenome, alteration, name);
     }
@@ -451,24 +446,6 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
 
     private boolean addVUSMutation(Alteration alteration, boolean alterationIsCurated){
         return !alterationIsCurated || AlterationUtils.getVUS(alteration).contains(alteration);
-    }
-
-    private boolean isVariantByLocation(Alteration alteration, int entrezGeneId, int proteinStart, int proteinEnd, VariantConsequence variantConsequence) {
-        if (alteration.getGene() != null && alteration.getGene().getEntrezGeneId() == entrezGeneId
-            && alteration.getProteinStart() != null && alteration.getProteinStart().equals(proteinStart)
-            && alteration.getProteinEnd() != null && alteration.getProteinEnd().equals(proteinEnd)
-            && alteration.getConsequence().equals(variantConsequence)) {
-            return true;
-        }
-        return false;
-    }
-
-    private boolean isInExon17(Alteration alteration) {
-        if (alteration.getProteinStart() != null && alteration.getProteinStart() <= 828
-            && alteration.getProteinEnd() != null && alteration.getProteinEnd() >= 788) {
-            return true;
-        }
-        return false;
     }
 
     private LinkedHashSet<Alteration> oncogeneTruncMuts(Alteration alteration, LinkedHashSet<Alteration> relevantAlts) {

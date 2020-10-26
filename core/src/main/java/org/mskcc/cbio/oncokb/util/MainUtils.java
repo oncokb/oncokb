@@ -141,11 +141,6 @@ public class MainUtils {
         return requestQueries;
     }
 
-    public static Long printTimeDiff(Long oldDate, Long newDate, String message) {
-        System.out.println(message + ": " + (newDate - oldDate));
-        return newDate;
-    }
-
     public static MutationEffect findHighestMutationEffect(Set<MutationEffect> mutationEffect) {
         Integer index = 100;
         for (MutationEffect effect : mutationEffect) {
