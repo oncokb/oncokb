@@ -125,14 +125,14 @@ public class NumberUtils {
     }
 
     public static Set<GeneNumber> getAllGeneNumberList() {
-        return getGeneNumberList(GeneUtils.getAllGenes());
+        return getGeneNumberList(CacheUtils.getAllGenes());
     }
 
     public static Set<GeneNumber> getAllGeneNumberListByLevels(Set<LevelOfEvidence> levels) {
         if (levels == null) {
             return getAllGeneNumberList();
         }
-        return getGeneNumberListWithLevels(GeneUtils.getAllGenes(), levels);
+        return getGeneNumberListWithLevels(CacheUtils.getAllGenes(), levels);
     }
 
     public static Integer getDrugsCount() {

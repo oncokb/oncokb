@@ -29,7 +29,7 @@ public class GeneController {
         , @RequestParam(value = "fields", required = false) String fields
     ) {
         if (entrezGeneIds == null && hugoSymbols == null) {
-            return new ArrayList<>(GeneUtils.getAllGenes());
+            return new ArrayList<>(CacheUtils.getAllGenes());
         }
 
         Set<Gene> genes = new HashSet<>();

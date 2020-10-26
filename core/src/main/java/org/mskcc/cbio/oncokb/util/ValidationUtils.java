@@ -24,7 +24,7 @@ public class ValidationUtils {
         final String NO_REFERENCE = "No reference is specified";
         final String NO_TREATMENT = "No treatment is specified";
         JSONArray data = new JSONArray();
-        for (Gene gene : GeneUtils.getAllGenes()) {
+        for (Gene gene : CacheUtils.getAllGenes()) {
             Set<Evidence> evidences = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, EvidenceTypeUtils.getTreatmentEvidenceTypes());
             for (Evidence evidence : evidences) {
                 String hugoSymbol = gene.getHugoSymbol();
@@ -51,7 +51,7 @@ public class ValidationUtils {
         final String NO_MUTATION_EFFECT = "No mutation effect is specified";
         final String NO_MUTATION_EFFECT_REFERENCE = "Mutation effect does not have any reference (pmids, abstracts)";
         JSONArray data = new JSONArray();
-        for (Gene gene : GeneUtils.getAllGenes()) {
+        for (Gene gene : CacheUtils.getAllGenes()) {
             Set<BiologicalVariant> variants = MainUtils.getBiologicalVariants(gene);
             for (BiologicalVariant variant : variants) {
                 if (StringUtils.isNullOrEmpty(variant.getOncogenic())) {
@@ -75,7 +75,7 @@ public class ValidationUtils {
         final String MULTIPLE_BACKGROUND = "Multiple gene background exist";
         JSONArray data = new JSONArray();
 
-        for (Gene gene : GeneUtils.getAllGenes()) {
+        for (Gene gene : CacheUtils.getAllGenes()) {
             if (gene.getEntrezGeneId() < 1) {
                 continue;
             }

@@ -5,8 +5,6 @@ import org.apache.commons.collections.map.HashedMap;
 import org.mskcc.cbio.oncokb.apiModels.download.DownloadAvailability;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
 import java.io.IOException;
 import java.util.*;
@@ -39,7 +37,6 @@ public class CacheUtils {
 
     private static List<DownloadAvailability> downloadAvailabilities = new ArrayList<>();
 
-    private static String status = "enabled"; //Current cacheUtils status. Applicable value: disabled enabled
 
     // Cache data from database
     private static Set<Gene> genes = new HashSet<>();
@@ -172,42 +169,38 @@ public class CacheUtils {
             GeneObservable.getInstance().addObserver(numbersObserver);
             GeneObservable.getInstance().addObserver(drugsObserver);
 
-            if (status.equals("enabled")) {
-                System.out.println("Observer: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
+            System.out.println("Observer: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
 
-                cacheAllGenes();
+            cacheAllGenes();
 
-                setAllAlterations();
+            setAllAlterations();
 
-                current = MainUtils.getCurrentTimestamp();
-                drugs = new HashSet<>(ApplicationContextSingleton.getDrugBo().findAll());
-                System.out.println("Cached all drugs: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
-                current = MainUtils.getCurrentTimestamp();
+            current = MainUtils.getCurrentTimestamp();
+            drugs = new HashSet<>(ApplicationContextSingleton.getDrugBo().findAll());
+            System.out.println("Cached all drugs: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
+            current = MainUtils.getCurrentTimestamp();
 
-                Set<Evidence> geneEvidences = new HashSet<>(ApplicationContextSingleton.getEvidenceBo().findAll());
-                System.out.println("Get all evidences: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
-                current = MainUtils.getCurrentTimestamp();
+            Set<Evidence> geneEvidences = new HashSet<>(ApplicationContextSingleton.getEvidenceBo().findAll());
+            System.out.println("Get all evidences: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
+            current = MainUtils.getCurrentTimestamp();
 
-                Map<Gene, Set<Evidence>> mappedEvidence = EvidenceUtils.separateEvidencesByGene(genes, geneEvidences);
+            Map<Gene, Set<Evidence>> mappedEvidence = EvidenceUtils.separateEvidencesByGene(genes, geneEvidences);
 
-                System.out.println("Separate all evidences: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
-                current = MainUtils.getCurrentTimestamp();
+            System.out.println("Separate all evidences: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
+            current = MainUtils.getCurrentTimestamp();
 
-                Iterator it = mappedEvidence.entrySet().iterator();
-                while (it.hasNext()) {
-                    Map.Entry<Gene, Set<Evidence>> pair = (Map.Entry) it.next();
-                    evidences.put(pair.getKey().getEntrezGeneId(), pair.getValue());
-                }
-                System.out.println("Cached all evidences: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
-                current = MainUtils.getCurrentTimestamp();
-
-                for (Map.Entry<Integer, Set<Evidence>> entry : evidences.entrySet()) {
-                    setVUS(entry.getKey(), entry.getValue());
-                }
-                System.out.println("Cached all VUSs: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
-            } else {
-                System.out.println("CacheUtil is disabled at " + MainUtils.getCurrentTime());
+            Iterator it = mappedEvidence.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry<Gene, Set<Evidence>> pair = (Map.Entry) it.next();
+                evidences.put(pair.getKey().getEntrezGeneId(), pair.getValue());
             }
+            System.out.println("Cached all evidences: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
+            current = MainUtils.getCurrentTimestamp();
+
+            for (Map.Entry<Integer, Set<Evidence>> entry : evidences.entrySet()) {
+                setVUS(entry.getKey(), entry.getValue());
+            }
+            System.out.println("Cached all VUSs: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
             current = MainUtils.getCurrentTimestamp();
 
             allOncoTreeTypes.put("main", TumorTypeUtils.getOncoTreeCancerTypes(ApplicationContextSingleton.getEvidenceBo().findAllCancerTypes()));
@@ -385,19 +378,11 @@ public class CacheUtils {
     }
 
     public static List<TumorType> getAllCancerTypes() {
-        if (isEnabled()) {
-            return allOncoTreeTypes.get("main");
-        } else {
-            return TumorTypeUtils.getOncoTreeCancerTypes(ApplicationContextSingleton.getEvidenceBo().findAllCancerTypes());
-        }
+        return allOncoTreeTypes.get("main");
     }
 
     public static List<TumorType> getAllSubtypes() {
-        if (isEnabled()) {
-            return allOncoTreeTypes.get("subtype");
-        } else {
-            return TumorTypeUtils.getOncoTreeSubtypesByCode(ApplicationContextSingleton.getEvidenceBo().findAllSubtypes());
-        }
+        return allOncoTreeTypes.get("subtype");
     }
 
     public static Set<Gene> getAllGenes() {
@@ -594,33 +579,6 @@ public class CacheUtils {
         }
     }
 
-    public static void enableCacheUtils() {
-        status = "enabled";
-    }
-
-    public static void disableCacheUtils() {
-        status = "disabled";
-    }
-
-    public static String getCacheUtilsStatus() {
-        return status;
-    }
-
-    public static Boolean isEnabled() {
-        if (status == "enabled") {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    public static Boolean isDisabled() {
-        if (status == "disabled") {
-            return true;
-        } else {
-            return false;
-        }
-    }
 
     private static void cacheAllEvidencesByGenes() {
         Long current = MainUtils.getCurrentTimestamp();
