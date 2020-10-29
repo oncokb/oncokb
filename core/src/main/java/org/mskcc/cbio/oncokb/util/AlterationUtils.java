@@ -309,11 +309,16 @@ public final class AlterationUtils {
         if (alteration.getConsequence() == null && variantConsequence != null) {
             alteration.setConsequence(variantConsequence);
         } else if (alteration.getConsequence() != null && variantConsequence != null &&
-            !alteration.getConsequence().equals(variantConsequence) &&
-            alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm("any"))) {
+            !alteration.getConsequence().equals(variantConsequence)) {
             // For the query which already contains consequence but different with OncoKB algorithm,
             // we should keep query consequence unless it is `any`
-            alteration.setConsequence(variantConsequence);
+            if (alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm("any"))) {
+                alteration.setConsequence(variantConsequence);
+            }
+            // if alteration is a positional vairant and the consequence is manually assigned to others than NA, we should change it
+            if (isPositionedAlteration(alteration) && alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm(MISSENSE_VARIANT))) {
+                alteration.setConsequence(variantConsequence);
+            }
         }
 
         // Annotate alteration based on consequence and special rules
@@ -809,7 +814,7 @@ public final class AlterationUtils {
                 // remove all alleles if the alteration variant residue is empty
                 if (isMissensePositionalVariant && !StringUtils.isEmpty(allele.getVariantResidues())) {
                     relevantAlterations.remove(allele);
-                    return;
+                    continue;
                 }
                 if (allele.getConsequence() != null && allele.getConsequence().getTerm().equals(MISSENSE_VARIANT)) {
                     if (alteration.getProteinStart().equals(alteration.getProteinEnd()) && !StringUtils.isEmpty(alteration.getVariantResidues())) {
@@ -1144,7 +1149,7 @@ public final class AlterationUtils {
             && alteration.getRefResidues() != null && alteration.getRefResidues().length() == 1
             && alteration.getVariantResidues() == null
             && alteration.getConsequence() != null
-            && alteration.getConsequence().getTerm().equals("NA")
+            && (alteration.getConsequence().getTerm().equals("NA") || alteration.getConsequence().getTerm().equals(MISSENSE_VARIANT))
         )
             isPositionVariant = true;
         return isPositionVariant;
