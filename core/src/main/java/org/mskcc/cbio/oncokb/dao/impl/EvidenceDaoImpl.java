@@ -29,16 +29,6 @@ public class EvidenceDaoImpl
     }
 
     @Override
-    public List<Evidence> findEvidencesByAlterationAndCancerType(Alteration alteration, String cancerType) {
-        return findByNamedQuery("findEvidencesByAlterationAndCancerType", alteration.getId(), cancerType);
-    }
-
-    @Override
-    public List<Evidence> findEvidencesByAlterationAndCancerTypeNoSubtype(Alteration alteration, String cancerType) {
-        return findByNamedQuery("findEvidencesByAlterationAndCancerTypeNoSubtype", alteration.getId(), cancerType);
-    }
-
-    @Override
     public List<Evidence> findEvidencesByAlterationAndSubtype(Alteration alteration, String subtype) {
         return findByNamedQuery("findEvidencesByAlterationAndSubtype", alteration.getId(), subtype);
     }
@@ -67,19 +57,6 @@ public class EvidenceDaoImpl
         List[] values = {alterationIds, cancerTypes, evidenceTypes};
 
         return findByNamedQueryAndNamedParam("findEvidencesByAlterationsAndCancerTypesAndEvidenceTypes", params, values);
-    }
-
-    @Override
-    public List<Evidence> findEvidencesByAlterationsAndCancerTypesAndEvidenceTypesNoSubtype(List<Alteration> alterations, List<String> cancerTypes, List<EvidenceType> evidenceTypes) {
-        List<Integer> alterationIds = new ArrayList<>();
-        for (Alteration alteration : alterations) {
-            alterationIds.add(alteration.getId());
-        }
-
-        String[] params = {"alts", "tts", "ets"};
-        List[] values = {alterationIds, cancerTypes, evidenceTypes};
-
-        return findByNamedQueryAndNamedParam("findEvidencesByAlterationsAndCancerTypesAndEvidenceTypesNoSubtype", params, values);
     }
 
     @Override
@@ -171,18 +148,6 @@ public class EvidenceDaoImpl
     }
 
     @Override
-    public List<Evidence> findEvidencesByAlterationAndCancerType(Alteration alteration, EvidenceType evidenceType, String cancerType) {
-        if (cancerType == null) return findEvidencesByAlteration(alteration, evidenceType);
-        return findByNamedQuery("findEvidencesByAlterationAndEvidenceTypeAndCancerType", alteration.getId(), evidenceType, cancerType);
-    }
-
-    @Override
-    public List<Evidence> findEvidencesByAlterationAndCancerTypeNoSubtype(Alteration alteration, EvidenceType evidenceType, String cancerType) {
-        if (cancerType == null) return findEvidencesByAlteration(alteration, evidenceType);
-        return findByNamedQuery("findEvidencesByAlterationAndEvidenceTypeAndCancerTypeNoSubtype", alteration.getId(), evidenceType, cancerType);
-    }
-
-    @Override
     public List<Evidence> findEvidencesByAlterationAndSubtype(Alteration alteration, EvidenceType evidenceType, String subtype) {
         if (subtype == null) return findEvidencesByAlteration(alteration, evidenceType);
         return findByNamedQuery("findEvidencesByAlterationAndEvidenceTypeAndSubtype", alteration.getId(), evidenceType, subtype);
@@ -197,32 +162,6 @@ public class EvidenceDaoImpl
     public List<Evidence> findEvidencesByGene(Gene gene, EvidenceType evidenceType) {
         if (evidenceType == null) return findEvidencesByGene(gene);
         return findByNamedQuery("findEvidencesByGeneAndEvidenceType", gene, evidenceType);
-    }
-
-    @Override
-    public List<Evidence> findEvidencesByGeneAndTumorType(Gene gene, EvidenceType evidenceType, String tumorType) {
-        if (tumorType == null) return findEvidencesByGene(gene, evidenceType);
-        String[] params = {"gene", "et", "tt"};
-        Object[] values = {gene, evidenceType, tumorType};
-        return findByNamedQuery("findEvidencesByGeneAndEvidenceTypeAndTumorType", params, values);
-    }
-
-    @Override
-    public List<Evidence> findEvidencesByGeneAndCancerType(Gene gene, EvidenceType evidenceType, String cancerType) {
-        if (cancerType == null) return findEvidencesByGene(gene, evidenceType);
-        return findByNamedQuery("findEvidencesByGeneAndEvidenceTypeAndCancerType", gene, evidenceType, cancerType);
-    }
-
-    @Override
-    public List<Evidence> findEvidencesByGeneAndCancerTypeNoSubtype(Gene gene, EvidenceType evidenceType, String cancerType) {
-        if (cancerType == null) return findEvidencesByGene(gene, evidenceType);
-        return findByNamedQuery("findEvidencesByGeneAndEvidenceTypeAndCancerTypeNoSubtype", gene, evidenceType, cancerType);
-    }
-
-    @Override
-    public List<Evidence> findEvidencesByGeneAndSubtype(Gene gene, EvidenceType evidenceType, String subtype) {
-        if (subtype == null) return findEvidencesByGene(gene, evidenceType);
-        return findByNamedQuery("findEvidencesByGeneAndEvidenceTypeAndSubtype", gene, evidenceType, subtype);
     }
 
     @Override

@@ -547,11 +547,6 @@ public class IndicatorUtils {
             .collect(Collectors.toList());
     }
 
-
-    private static Set<Evidence> removeNoneTumorTypeRelatedEvidence(List<Evidence> evidences, Set<TumorType> tumorTypes) {
-        return new HashSet<>();
-    }
-
     public static IndicatorQueryOncogenicity getOncogenicity(Alteration alteration, List<Alteration> alternativeAllele, List<Alteration> relevantAlterations) {
         Oncogenicity oncogenicity = null;
         Evidence oncogenicityEvidence = null;

@@ -39,17 +39,6 @@ public class AlterationDaoImpl extends GenericDaoImpl<Alteration, Integer> imple
     }
 
     @Override
-    public List<Alteration> findMutationsByConsequenceAndPosition(Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end) {
-        List<Alteration> result = new ArrayList<>();
-        if (start <= AlterationPositionBoundary.START.getValue() || end >= AlterationPositionBoundary.END.getValue()) {
-            result = findByNamedQuery("findMutationsByConsequenceAndPosition", gene, consequence, start, end);
-        } else {
-            result = findByNamedQuery("findMutationsByConsequenceAndPosition", gene, consequence, end, start);
-        }
-        return filterAlterationsByReferenceGenome(result, referenceGenome);
-    }
-
-    @Override
     public List<Alteration> findMutationsByConsequenceAndPositionOnSamePosition(Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end) {
         List<Alteration> result = findByNamedQuery("findMutationsByConsequenceAndPositionOnSamePosition", gene, consequence, start, end);
         return filterAlterationsByReferenceGenome(result, referenceGenome);

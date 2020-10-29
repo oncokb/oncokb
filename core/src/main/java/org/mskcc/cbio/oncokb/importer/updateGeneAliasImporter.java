@@ -4,6 +4,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
+import org.mskcc.cbio.oncokb.util.CacheUtils;
 import org.mskcc.cbio.oncokb.util.FileUtils;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
 
@@ -34,7 +35,7 @@ public class updateGeneAliasImporter {
             hugoSymbols.add(object.getString("symbol"));
         }
 
-        Set<Gene> genes = GeneUtils.getAllGenes();
+        Set<Gene> genes = CacheUtils.getAllGenes();
 
         for (Gene gene : genes) {
             List<String> aliases = new ArrayList<>(gene.getGeneAliases());

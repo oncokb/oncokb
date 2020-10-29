@@ -156,7 +156,7 @@ public class validation {
     private static void getEmptyClinicalVariants() {
         URL feedUrl = getFeedUrl(WorkSheetEntryEnum.EMPTY_CLINICAL);
         if (feedUrl != null) {
-            for (Gene gene : GeneUtils.getAllGenes()) {
+            for (Gene gene : CacheUtils.getAllGenes()) {
                 Set<ClinicalVariant> variants = MainUtils.getClinicalVariants(gene);
                 for (ClinicalVariant variant : variants) {
                     if (variant.getOncoTreeType() == null || StringUtils.isNullOrEmpty(variant.getLevel())
@@ -181,7 +181,7 @@ public class validation {
     private static void getEmptyBiologicalVariants() {
         URL feedUrl = getFeedUrl(WorkSheetEntryEnum.EMPTY_BIOLOGICAL);
         if (feedUrl != null) {
-            for (Gene gene : GeneUtils.getAllGenes()) {
+            for (Gene gene : CacheUtils.getAllGenes()) {
                 Set<BiologicalVariant> variants = MainUtils.getBiologicalVariants(gene);
                 for (BiologicalVariant variant : variants) {
                     if (variant.getOncogenic() == null || variant.getMutationEffect() == null
@@ -258,7 +258,7 @@ public class validation {
         evidenceTypes.add(EvidenceType.DIAGNOSTIC_SUMMARY);
         evidenceTypes.add(EvidenceType.PROGNOSTIC_SUMMARY);
         if (feedUrl != null) {
-            for (Gene gene : GeneUtils.getAllGenes()) {
+            for (Gene gene : CacheUtils.getAllGenes()) {
                 Set<Evidence> evidences = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, evidenceTypes);
                 for (Evidence evidence : evidences) {
                     ListEntry row = new ListEntry();
@@ -279,7 +279,7 @@ public class validation {
     private static void checkGeneSummaryBackground() {
         URL feedUrl = getFeedUrl(WorkSheetEntryEnum.GENE_SUMMARY_BACKGROUND);
         if (feedUrl != null) {
-            for (Gene gene : GeneUtils.getAllGenes()) {
+            for (Gene gene : CacheUtils.getAllGenes()) {
                 ListEntry row = new ListEntry();
                 setValue(row, "Gene", gene.getHugoSymbol());
 

@@ -49,14 +49,6 @@ public interface GenericDao<T, ID extends Serializable> {
 
     /**
      *
-     * @param params
-     * @param values values must be the same number as params
-     * @return
-     */
-    List<T> findByParamValues(String[] params, Object[] values);
-
-    /**
-     *
      * @param queryName
      * @return
      */

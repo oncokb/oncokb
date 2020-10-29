@@ -102,29 +102,12 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
 
     @Override
     public Alteration findAlteration(Gene gene, AlterationType alterationType, ReferenceGenome referenceGenome, String alteration) {
-        if (CacheUtils.isEnabled()) {
-            return findAlteration(referenceGenome, alteration, CacheUtils.getAlterations(gene.getEntrezGeneId()));
-        } else {
-            Alteration alt = getDao().findAlteration(gene, alterationType, referenceGenome, alteration);
-            if (alt == null && NamingUtils.hasAbbreviation(alteration)) {
-                alt = getDao().findAlteration(gene, alterationType, referenceGenome, NamingUtils.getFullName(alteration));
-            }
-            return alt;
-        }
+        return findAlteration(referenceGenome, alteration, CacheUtils.getAlterations(gene.getEntrezGeneId()));
     }
 
     @Override
     public Alteration findAlteration(Gene gene, AlterationType alterationType, ReferenceGenome referenceGenome, String alteration, String name) {
-        if (CacheUtils.isEnabled()) {
-            return findAlteration(referenceGenome, alteration, name, CacheUtils.getAlterations(gene.getEntrezGeneId()));
-        } else {
-            return findAlterationFromDao(gene, alterationType, referenceGenome, alteration, name);
-        }
-    }
-
-    @Override
-    public Alteration findAlterationFromDao(Gene gene, AlterationType alterationType, ReferenceGenome referenceGenome, String alteration) {
-        return getDao().findAlteration(gene, alterationType, referenceGenome, alteration);
+        return findAlteration(referenceGenome, alteration, name, CacheUtils.getAlterations(gene.getEntrezGeneId()));
     }
 
     @Override
@@ -142,11 +125,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
                 result.addAll(AlterationUtils.findOverlapAlteration(alterations, gene, referenceGenome, consequence, start, end));
             } else {
                 Collection<Alteration> queryResult;
-                if (CacheUtils.isEnabled()) {
-                    queryResult = CacheUtils.findMutationsByConsequenceAndPosition(gene,referenceGenome, consequence, start, end);
-                } else {
-                    queryResult = getDao().findMutationsByConsequenceAndPosition(gene,referenceGenome, consequence, start, end);
-                }
+                queryResult = CacheUtils.findMutationsByConsequenceAndPosition(gene,referenceGenome, consequence, start, end);
                 if (queryResult != null) {
                     result.addAll(queryResult);
                 }
@@ -177,11 +156,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             }
         } else {
             Collection<Alteration> queryResult;
-            if (CacheUtils.isEnabled()) {
-                queryResult = CacheUtils.findMutationsByConsequenceAndPositionOnSamePosition(gene, referenceGenome, consequence, start, end);
-            } else {
-                queryResult = getDao().findMutationsByConsequenceAndPositionOnSamePosition(gene,referenceGenome, consequence, start, end);
-            }
+            queryResult = CacheUtils.findMutationsByConsequenceAndPositionOnSamePosition(gene, referenceGenome, consequence, start, end);
             if (queryResult != null) {
                 result.addAll(queryResult);
             }
@@ -426,9 +401,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
     @Override
     public void save(Alteration alteration) {
         super.save(alteration);
-        if (CacheUtils.isEnabled()) {
-            CacheUtils.forceUpdateGeneAlterations(alteration.getGene().getEntrezGeneId());
-        }
+        CacheUtils.forceUpdateGeneAlterations(alteration.getGene().getEntrezGeneId());
     }
 
 
@@ -473,24 +446,6 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
 
     private boolean addVUSMutation(Alteration alteration, boolean alterationIsCurated){
         return !alterationIsCurated || AlterationUtils.getVUS(alteration).contains(alteration);
-    }
-
-    private boolean isVariantByLocation(Alteration alteration, int entrezGeneId, int proteinStart, int proteinEnd, VariantConsequence variantConsequence) {
-        if (alteration.getGene() != null && alteration.getGene().getEntrezGeneId() == entrezGeneId
-            && alteration.getProteinStart() != null && alteration.getProteinStart().equals(proteinStart)
-            && alteration.getProteinEnd() != null && alteration.getProteinEnd().equals(proteinEnd)
-            && alteration.getConsequence().equals(variantConsequence)) {
-            return true;
-        }
-        return false;
-    }
-
-    private boolean isInExon17(Alteration alteration) {
-        if (alteration.getProteinStart() != null && alteration.getProteinStart() <= 828
-            && alteration.getProteinEnd() != null && alteration.getProteinEnd() >= 788) {
-            return true;
-        }
-        return false;
     }
 
     private LinkedHashSet<Alteration> oncogeneTruncMuts(Alteration alteration, LinkedHashSet<Alteration> relevantAlts) {

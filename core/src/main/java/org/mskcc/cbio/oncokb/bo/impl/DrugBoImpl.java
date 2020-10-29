@@ -28,18 +28,6 @@ public class DrugBoImpl extends GenericBoImpl<Drug, DrugDao> implements DrugBo {
     }
 
     @Override
-    public List<Drug> findDrugsByNames(Collection<String> drugNames) {
-        List<Drug> drugs = new ArrayList<Drug>();
-        for (String drugName : drugNames) {
-            Drug drug = getDao().findDrugByName(drugName);
-            if (drug != null) {
-                drugs.add(drug);
-            }
-        }
-        return drugs;
-    }
-
-    @Override
     public List<Drug> findDrugsBySynonym(String synonym) {
         return getDao().findDrugBySynonym(synonym);
     }

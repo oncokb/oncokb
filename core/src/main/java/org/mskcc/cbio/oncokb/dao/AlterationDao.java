@@ -46,14 +46,5 @@ public interface AlterationDao extends GenericDao<Alteration, Integer> {
      * @param end
      * @return
      */
-    List<Alteration> findMutationsByConsequenceAndPosition(Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end);
-
-    /**
-     * @param gene
-     * @param consequence
-     * @param start
-     * @param end
-     * @return
-     */
     List<Alteration> findMutationsByConsequenceAndPositionOnSamePosition(Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end);
 }

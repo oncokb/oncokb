@@ -23,16 +23,10 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
     @Override
     public List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations) {
         Set<Evidence> set = new LinkedHashSet<Evidence>();
-        if (CacheUtils.isEnabled()) {
-            Set<Alteration> alterationSet = new HashSet<>(alterations);
-            for (Evidence evidence : EvidenceUtils.getAllEvidencesByAlterationsGenes(alterations)) {
-                if (!Collections.disjoint(evidence.getAlterations(), alterationSet)) {
-                    set.add(evidence);
-                }
-            }
-        } else {
-            for (Alteration alteration : alterations) {
-                set.addAll(getDao().findEvidencesByAlteration(alteration));
+        Set<Alteration> alterationSet = new HashSet<>(alterations);
+        for (Evidence evidence : EvidenceUtils.getAllEvidencesByAlterationsGenes(alterations)) {
+            if (!Collections.disjoint(evidence.getAlterations(), alterationSet)) {
+                set.add(evidence);
             }
         }
         return new ArrayList<Evidence>(set);
@@ -42,17 +36,9 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
     public List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes) {
         Set<Evidence> set = new LinkedHashSet<Evidence>();
         Set<Alteration> altsSet = new HashSet<>(alterations);
-        if (CacheUtils.isEnabled()) {
-            for (Evidence evidence : EvidenceUtils.getAllEvidencesByAlterationsGenes(alterations)) {
-                if (evidenceTypes.contains(evidence.getEvidenceType()) && !Collections.disjoint(evidence.getAlterations(), altsSet)) {
-                    set.add(evidence);
-                }
-            }
-        } else {
-            for (Alteration alteration : alterations) {
-                for (EvidenceType evidenceType : evidenceTypes) {
-                    set.addAll(getDao().findEvidencesByAlteration(alteration, evidenceType));
-                }
+        for (Evidence evidence : EvidenceUtils.getAllEvidencesByAlterationsGenes(alterations)) {
+            if (evidenceTypes.contains(evidence.getEvidenceType()) && !Collections.disjoint(evidence.getAlterations(), altsSet)) {
+                set.add(evidence);
             }
         }
         return new ArrayList<Evidence>(set);
@@ -65,21 +51,11 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
         }
         Set<Evidence> set = new LinkedHashSet<Evidence>();
 
-        if (CacheUtils.isEnabled()) {
-            for (Evidence evidence : EvidenceUtils.getAllEvidencesByAlterationsGenes(alterations)) {
-                if (Sets.intersection(evidence.getAlterations(), new HashSet(alterations)).size() > 0
-                    && evidenceTypes.contains(evidence.getEvidenceType())
-                    && levelOfEvidences.contains(evidence.getLevelOfEvidence())) {
-                    set.add(evidence);
-                }
-            }
-        } else {
-            for (Alteration alteration : alterations) {
-                for (EvidenceType evidenceType : evidenceTypes) {
-                    for (LevelOfEvidence levelOfEvidence : levelOfEvidences) {
-                        set.addAll(getDao().findEvidencesByAlterationAndLevels(alteration, evidenceType, levelOfEvidence));
-                    }
-                }
+        for (Evidence evidence : EvidenceUtils.getAllEvidencesByAlterationsGenes(alterations)) {
+            if (Sets.intersection(evidence.getAlterations(), new HashSet(alterations)).size() > 0
+                && evidenceTypes.contains(evidence.getEvidenceType())
+                && levelOfEvidences.contains(evidence.getLevelOfEvidence())) {
+                set.add(evidence);
             }
         }
         return new ArrayList<Evidence>(set);
@@ -117,47 +93,36 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
 
         if (subTypes.size() > 0) {
             List<String> tts = subTypes;
-            if (CacheUtils.isEnabled()) {
-                List<Evidence> evidences = findEvidencesByAlteration(alterations);
-                for (Evidence evidence : evidences) {
-                    if ((ets.contains(evidence.getEvidenceType())) && tts.contains(evidence.getSubtype())) {
-                        set.add(evidence);
-                    }
+            List<Evidence> evidences = findEvidencesByAlteration(alterations);
+            for (Evidence evidence : evidences) {
+                if ((ets.contains(evidence.getEvidenceType())) && tts.contains(evidence.getSubtype())) {
+                    set.add(evidence);
                 }
-            } else {
-                set.addAll(getDao().findEvidencesByAlterationsAndSubtypesAndEvidenceTypes(alts, tts, ets));
             }
         }
 
         if (cancerTypesOfSubtypes.size() > 0) {
             List<String> tts = cancerTypesOfSubtypes;
 
-            if (CacheUtils.isEnabled()) {
-                List<Evidence> evidences = findEvidencesByAlteration(alterations);
-                for (Evidence evidence : evidences) {
-                    if ((ets.contains(evidence.getEvidenceType())) && tts.contains(evidence.getCancerType())
-                        && evidence.getSubtype() == null) {
-                        set.add(evidence);
-                    }
+
+            List<Evidence> evidences = findEvidencesByAlteration(alterations);
+            for (Evidence evidence : evidences) {
+                if ((ets.contains(evidence.getEvidenceType())) && tts.contains(evidence.getCancerType())
+                    && evidence.getSubtype() == null) {
+                    set.add(evidence);
                 }
-            } else {
-                set.addAll(getDao().findEvidencesByAlterationsAndCancerTypesAndEvidenceTypesNoSubtype(alts, tts, ets));
             }
         }
 
         if (cancerTypes.size() > 0) {
             List<String> tts = cancerTypes;
-            if (CacheUtils.isEnabled()) {
-                List<Evidence> evidences = findEvidencesByAlteration(alterations);
-                for (Evidence evidence : evidences) {
-                    if ((ets.contains(evidence.getEvidenceType())) && tts.contains(evidence.getCancerType()) && StringUtils.isNullOrEmpty(evidence.getSubtype())) {
-                        set.add(evidence);
-                    }
-                }
-            } else {
-                set.addAll(getDao().findEvidencesByAlterationsAndCancerTypesAndEvidenceTypesNoSubtype(alts, tts, ets));
-            }
 
+            List<Evidence> evidences = findEvidencesByAlteration(alterations);
+            for (Evidence evidence : evidences) {
+                if ((ets.contains(evidence.getEvidenceType())) && tts.contains(evidence.getCancerType()) && StringUtils.isNullOrEmpty(evidence.getSubtype())) {
+                    set.add(evidence);
+                }
+            }
         }
         return new ArrayList<>(set);
     }
@@ -193,31 +158,25 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
 
         if (subTypes.size() > 0) {
             List<String> tts = subTypes;
-            if (CacheUtils.isEnabled()) {
-                List<Evidence> evidences = findEvidencesByAlteration(alterations);
-                for (Evidence evidence : evidences) {
-                    if ((ets.contains(evidence.getEvidenceType())) && tts.contains(evidence.getSubtype())
-                        && les.contains(evidence.getLevelOfEvidence())) {
-                        set.add(evidence);
-                    }
+
+            List<Evidence> evidences = findEvidencesByAlteration(alterations);
+            for (Evidence evidence : evidences) {
+                if ((ets.contains(evidence.getEvidenceType())) && tts.contains(evidence.getSubtype())
+                    && les.contains(evidence.getLevelOfEvidence())) {
+                    set.add(evidence);
                 }
-            } else {
-                set.addAll(getDao().findEvidencesByAlterationsAndSubtypesAndEvidenceTypesAndLevelOfEvidence(alts, tts, ets, les));
             }
         }
 
         if (cancerTypes.size() > 0) {
             List<String> tts = cancerTypes;
-            if (CacheUtils.isEnabled()) {
-                List<Evidence> evidences = findEvidencesByAlteration(alterations);
-                for (Evidence evidence : evidences) {
-                    if ((ets.contains(evidence.getEvidenceType())) && tts.contains(evidence.getCancerType())
-                        && les.contains(evidence.getLevelOfEvidence()) && StringUtils.isNullOrEmpty(evidence.getSubtype())) {
-                        set.add(evidence);
-                    }
+
+            List<Evidence> evidences = findEvidencesByAlteration(alterations);
+            for (Evidence evidence : evidences) {
+                if ((ets.contains(evidence.getEvidenceType())) && tts.contains(evidence.getCancerType())
+                    && les.contains(evidence.getLevelOfEvidence()) && StringUtils.isNullOrEmpty(evidence.getSubtype())) {
+                    set.add(evidence);
                 }
-            } else {
-                set.addAll(getDao().findEvidencesByAlterationsAndCancerTypesAndEvidenceTypesAndLevelOfEvidenceNoSubtype(alts, tts, ets, les));
             }
         }
 
@@ -226,15 +185,11 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
 
     @Override
     public List<Evidence> findEvidencesByGene(Collection<Gene> genes) {
-        if (CacheUtils.isEnabled()) {
-            Set<Evidence> set = new LinkedHashSet<Evidence>();
-            for (Gene gene : genes) {
-                set.addAll(CacheUtils.getEvidences(gene));
-            }
-            return new ArrayList<Evidence>(set);
-        } else {
-            return findEvidencesByGeneFromDB(genes);
+        Set<Evidence> set = new LinkedHashSet<Evidence>();
+        for (Gene gene : genes) {
+            set.addAll(CacheUtils.getEvidences(gene));
         }
+        return new ArrayList<Evidence>(set);
     }
 
     @Override
@@ -250,15 +205,9 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
     public List<Evidence> findEvidencesByGene(Collection<Gene> genes, Collection<EvidenceType> evidenceTypes) {
         Set<Evidence> set = new LinkedHashSet<Evidence>();
         for (Gene gene : genes) {
-            if (CacheUtils.isEnabled()) {
-                for (Evidence evidence : CacheUtils.getEvidences(gene)) {
-                    if (evidenceTypes.contains(evidence.getEvidenceType())) {
-                        set.add(evidence);
-                    }
-                }
-            } else {
-                for (EvidenceType evidenceType : evidenceTypes) {
-                    set.addAll(getDao().findEvidencesByGene(gene, evidenceType));
+            for (Evidence evidence : CacheUtils.getEvidences(gene)) {
+                if (evidenceTypes.contains(evidence.getEvidenceType())) {
+                    set.add(evidence);
                 }
             }
         }
@@ -269,35 +218,20 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
     public List<Evidence> findEvidencesByGene(Collection<Gene> genes, Collection<EvidenceType> evidenceTypes, Collection<TumorType> tumorTypes) {
         Set<Evidence> set = new LinkedHashSet<Evidence>();
         for (Gene gene : genes) {
-            if (CacheUtils.isEnabled()) {
-                for (Evidence evidence : CacheUtils.getEvidences(gene)) {
-                    if (evidenceTypes.contains(evidence.getEvidenceType())) {
-                        for (TumorType oncoTreeType : tumorTypes) {
-                            if (oncoTreeType.getCode() != null) {
-                                if (oncoTreeType.getCode().equals(evidence.getSubtype())) {
-                                    set.add(evidence);
-                                }
-                                if (oncoTreeType.getMainType() != null && oncoTreeType.getMainType().getName().equals(evidence.getCancerType()) && evidence.getSubtype() == null) {
-                                    set.add(evidence);
-                                }
-                            } else if (oncoTreeType.getMainType() != null) {
-                                if (oncoTreeType.getMainType().getName().equals(evidence.getCancerType()) && evidence.getSubtype() == null) {
-                                    set.add(evidence);
-                                }
-                            }
-                        }
-                    }
-                }
-            } else {
-                for (EvidenceType evidenceType : evidenceTypes) {
+            for (Evidence evidence : CacheUtils.getEvidences(gene)) {
+                if (evidenceTypes.contains(evidence.getEvidenceType())) {
                     for (TumorType oncoTreeType : tumorTypes) {
                         if (oncoTreeType.getCode() != null) {
-                            set.addAll(getDao().findEvidencesByGeneAndSubtype(gene, evidenceType, oncoTreeType.getCode()));
-                            if (oncoTreeType.getMainType() != null) {
-                                set.addAll(getDao().findEvidencesByGeneAndCancerTypeNoSubtype(gene, evidenceType, oncoTreeType.getMainType().getName()));
+                            if (oncoTreeType.getCode().equals(evidence.getSubtype())) {
+                                set.add(evidence);
+                            }
+                            if (oncoTreeType.getMainType() != null && oncoTreeType.getMainType().getName().equals(evidence.getCancerType()) && evidence.getSubtype() == null) {
+                                set.add(evidence);
                             }
                         } else if (oncoTreeType.getMainType() != null) {
-                            set.addAll(getDao().findEvidencesByGeneAndCancerType(gene, evidenceType, oncoTreeType.getMainType().getName()));
+                            if (oncoTreeType.getMainType().getName().equals(evidence.getCancerType()) && evidence.getSubtype() == null) {
+                                set.add(evidence);
+                            }
                         }
                     }
                 }
@@ -308,37 +242,26 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
 
     @Override
     public List<Evidence> findEvidencesByIds(List<Integer> ids) {
-        if (CacheUtils.isEnabled()) {
-            List<Evidence> evidences = new ArrayList<>();
-            for (Evidence evidence : CacheUtils.getAllEvidences()) {
-                if (ids.contains(evidence.getId())) {
-                    evidences.add(evidence);
-                }
-                if (evidences.size() == ids.size()) {
-                    break;
-                }
+        List<Evidence> evidences = new ArrayList<>();
+        for (Evidence evidence : CacheUtils.getAllEvidences()) {
+            if (ids.contains(evidence.getId())) {
+                evidences.add(evidence);
             }
-            return evidences;
-        } else {
-            return getDao().findEvidencesByIds(ids);
+            if (evidences.size() == ids.size()) {
+                break;
+            }
         }
+        return evidences;
     }
 
     @Override
     public List<Drug> findDrugsByAlterations(Collection<Alteration> alterations) {
         List<Evidence> evidences = new ArrayList<Evidence>();
 
-        if (CacheUtils.isEnabled()) {
-            Set<EvidenceType> evidenceTypes = new HashSet<>();
-            evidenceTypes.add(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY);
-            evidenceTypes.add(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY);
-            evidences = findEvidencesByAlteration(alterations, evidenceTypes);
-        } else {
-            for (Alteration alteration : alterations) {
-                evidences.addAll(getDao().findEvidencesByAlteration(alteration, EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY));
-                evidences.addAll(getDao().findEvidencesByAlteration(alteration, EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY));
-            }
-        }
+        Set<EvidenceType> evidenceTypes = new HashSet<>();
+        evidenceTypes.add(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY);
+        evidenceTypes.add(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY);
+        evidences = findEvidencesByAlteration(alterations, evidenceTypes);
 
 
         Set<Drug> set = new HashSet<Drug>();
@@ -377,10 +300,6 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
 
     @Override
     public List<Evidence> findEvidenceByUUIDs(List<String> uuids) {
-        if (CacheUtils.isEnabled()) {
-            return new ArrayList<>(CacheUtils.getEvidencesByUUIDs(new HashSet<>(uuids)));
-        } else {
-            return getDao().findEvidenceByUUIDs(uuids);
-        }
+        return new ArrayList<>(CacheUtils.getEvidencesByUUIDs(new HashSet<>(uuids)));
     }
 }

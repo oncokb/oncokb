@@ -4,6 +4,7 @@ import io.swagger.annotations.ApiParam;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.service.JsonResultFactory;
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
+import org.mskcc.cbio.oncokb.util.CacheUtils;
 import org.mskcc.cbio.oncokb.util.EvidenceUtils;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
 import org.springframework.http.HttpStatus;
@@ -109,7 +110,7 @@ public class GenesApiController implements GenesApi {
     public ResponseEntity<List<Gene>> genesGet(
         @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
     ) {
-        Set<Gene> genes = GeneUtils.getAllGenes();
+        Set<Gene> genes = CacheUtils.getAllGenes();
         if (genes == null) {
             genes = new HashSet<>();
         }

@@ -82,7 +82,7 @@ public class UtilsApiController implements UtilsApi {
 
     private List<AnnotatedVariant> getAllAnnotatedVariants() {
         List<AnnotatedVariant> annotatedVariantList = new ArrayList<>();
-        Set<Gene> genes = GeneUtils.getAllGenes();
+        Set<Gene> genes = CacheUtils.getAllGenes();
         Map<Gene, Set<BiologicalVariant>> map = new HashMap<>();
 
         for (Gene gene : genes) {
@@ -175,7 +175,7 @@ public class UtilsApiController implements UtilsApi {
 
     private List<ActionableGene> getAllActionableVariants() {
         List<ActionableGene> actionableGeneList = new ArrayList<>();
-        Set<Gene> genes = GeneUtils.getAllGenes();
+        Set<Gene> genes = CacheUtils.getAllGenes();
         Map<Gene, Set<ClinicalVariant>> map = new HashMap<>();
 
         for (Gene gene : genes) {
@@ -342,7 +342,7 @@ public class UtilsApiController implements UtilsApi {
 
     private static List<CuratedGene> getCuratedGenes() {
         List<CuratedGene> genes = new ArrayList<>();
-        for (Gene gene : GeneUtils.getAllGenes()) {
+        for (Gene gene : CacheUtils.getAllGenes()) {
             // Skip all genes without entrez gene id
             if (gene.getEntrezGeneId() == null) {
                 continue;

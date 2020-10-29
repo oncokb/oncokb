@@ -182,39 +182,6 @@ public class LevelUtils {
         return result;
     }
 
-    // This is specifically designed to change level if it is for alternative allele.
-    // Change level based on indication has been changed to use propagation instead.
-    public static LevelOfEvidence setToAlleleLevel(LevelOfEvidence level, Boolean sameIndication) {
-        List<LevelOfEvidence> convertLevels = Arrays.asList(LevelOfEvidence.LEVEL_0, LevelOfEvidence.LEVEL_1,
-            LevelOfEvidence.LEVEL_2, LevelOfEvidence.LEVEL_2A, LevelOfEvidence.LEVEL_2B, LevelOfEvidence.LEVEL_3A);
-
-        if (level == null)
-            return null;
-
-        if (convertLevels.contains(level)) {
-            if (!sameIndication) {
-                return LevelOfEvidence.LEVEL_3B;
-            }
-        }
-
-        if (getResistanceLevels().contains(level) && !sameIndication) {
-            return null;
-        }
-
-        return level;
-    }
-
-    public static LevelOfEvidence updateOrKeepLevelByIndication(LevelOfEvidence level, LevelOfEvidence propagation, Boolean sameIndication) {
-        if (level == null)
-            return level;
-
-        if (!sameIndication && propagation != null) {
-            return propagation;
-        }
-
-        return level;
-    }
-
     public static Set<LevelOfEvidence> parseStringLevelOfEvidences(String levelOfEvidenceStr) {
         Set<LevelOfEvidence> levelOfEvidences = new HashSet<>();
         if (levelOfEvidenceStr != null) {
