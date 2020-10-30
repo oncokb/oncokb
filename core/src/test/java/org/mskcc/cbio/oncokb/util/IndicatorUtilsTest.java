@@ -621,7 +621,7 @@ public class IndicatorUtilsTest {
         query2 = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "ABL1-BCR", null, "structural_variant", StructuralVariantType.DELETION, "Lung Adenocarcinoma", "fusion", null, null, null);
         resp1 = IndicatorUtils.processQuery(query1, null, true, null);
         resp2 = IndicatorUtils.processQuery(query2, null, true, null);
-        pairComparison(resp1, resp2);
+        pairComparison(resp1, resp2, true);
 
         // handle mixed input for structural variant deletion
         query1 = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "EGFR", "KDD", "structural_variant", StructuralVariantType.DUPLICATION, "NSCLC", null, null, null, null);
@@ -649,6 +649,14 @@ public class IndicatorUtilsTest {
         resp1 = IndicatorUtils.processQuery(query1, null, true, null);
         resp2 = IndicatorUtils.processQuery(query2, null, true, null);
         pairComparison(resp1, resp2);
+
+        // Test using official hugo symbol and gene alias
+        query1 = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "BRAF", "V600E", null, null, "MEL", null, null, null, null);
+        query2 = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "B-RAF1", "V600E", null, null, "MEL", MISSENSE_VARIANT, null, null, null);
+        resp1 = IndicatorUtils.processQuery(query1, null, true, null);
+        resp2 = IndicatorUtils.processQuery(query2, null, true, null);
+        pairComparison(resp1, resp2, true);
+        assertEquals("The summary should not be the same, but it is.", resp1.getGeneSummary(), resp2.getGeneSummary());
 
     }
 
@@ -708,7 +716,7 @@ public class IndicatorUtilsTest {
     }
 
     private void pairComparison(IndicatorQueryResp resp1, IndicatorQueryResp resp2) {
-        pairComparison(resp1, resp1, false);
+        pairComparison(resp1, resp2, false);
     }
 
     private void pairComparison(IndicatorQueryResp resp1, IndicatorQueryResp resp2, boolean skipSummary) {
