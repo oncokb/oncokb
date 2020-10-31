@@ -69,21 +69,6 @@ public class GeneController {
         return "success";
     }
 
-    @RequestMapping(value = "/legacy-api/genes/create", method = RequestMethod.POST)
-    public @ResponseBody
-    String updateGene(@RequestBody(required = true) Gene queryGene) {
-        if (queryGene == null) {
-            return "error";
-        }
-        Gene gene = GeneUtils.getGene(queryGene.getEntrezGeneId(), queryGene.getHugoSymbol());
-        if (gene == null) {
-            GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
-            geneBo.save(queryGene);
-            CacheUtils.updateGene(Collections.singleton(gene.getEntrezGeneId()), true);
-        }
-        return "success";
-    }
-
     @RequestMapping(value = "/legacy-api/genes/remove/{hugoSymbol}", method = RequestMethod.POST)
     public @ResponseBody
     String updateGene(@ApiParam(value = "hugoSymbol", required = true) @PathVariable("hugoSymbol") String hugoSymbol) {
@@ -100,20 +85,4 @@ public class GeneController {
         return "success";
     }
 
-    @RequestMapping(value = "/legacy-api/genes/{hugoSymbol}/genesets/update", method = RequestMethod.POST)
-    public @ResponseBody
-    String updateGene(
-        @ApiParam(value = "hugoSymbol", required = true) @PathVariable("hugoSymbol") String hugoSymbol
-        , @RequestBody Set<Geneset> genesets
-    ) {
-        if (hugoSymbol == null) {
-            return "error";
-        }
-        Gene gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
-        if (gene != null) {
-            gene.setGenesets(genesets);
-            ApplicationContextSingleton.getGeneBo().update(gene);
-        }
-        return "success";
-    }
 }
