@@ -758,7 +758,10 @@ public class EvidenceUtils {
         if (uuid == null) {
             return new HashSet<>();
         }
-        return CacheUtils.getEvidencesByUUID(uuid);
+        return CacheUtils.getEvidencesByUUID(uuid).stream().map(evidence -> {
+            evidence.setDescription(SummaryUtils.enrichDescription(evidence.getDescription(), evidence.getGene().getHugoSymbol()));
+            return evidence;
+        }).collect(toSet());
     }
 
     public static Set<Evidence> getEvidencesByUUIDs(Set<String> uuids) {
@@ -919,6 +922,12 @@ public class EvidenceUtils {
                     } else {
                         updatedEvidences.add(evidence);
                     }
+                });
+
+                String hugoSymbol = StringUtils.isEmpty(requestQuery.getHugoSymbol()) ? query.getGene().getHugoSymbol() : requestQuery.getHugoSymbol();
+                updatedEvidences.stream().map(evidence -> {
+                    evidence.setDescription(SummaryUtils.enrichDescription(evidence.getDescription(), hugoSymbol));
+                    return evidence;
                 });
                 query.setEvidences(new ArrayList<>(StringUtils.isEmpty(query.getQuery().getTumorType()) ? updatedEvidences : keepHighestLevelForSameTreatments(updatedEvidences, requestQuery.getReferenceGenome(), query.getExactMatchedAlteration())));
                 evidenceQueries.add(query);
