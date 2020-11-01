@@ -924,11 +924,12 @@ public class EvidenceUtils {
                     }
                 });
 
-                String hugoSymbol = StringUtils.isEmpty(requestQuery.getHugoSymbol()) ? query.getGene().getHugoSymbol() : requestQuery.getHugoSymbol();
-                updatedEvidences.stream().map(evidence -> {
-                    evidence.setDescription(SummaryUtils.enrichDescription(evidence.getDescription(), hugoSymbol));
-                    return evidence;
-                });
+                if(!StringUtils.isEmpty(requestQuery.getHugoSymbol()) || query.getGene() != null) {
+                    String hugoSymbol = StringUtils.isEmpty(requestQuery.getHugoSymbol()) ? query.getGene().getHugoSymbol() : requestQuery.getHugoSymbol();
+                    for (Evidence evidence : updatedEvidences) {
+                        evidence.setDescription(SummaryUtils.enrichDescription(evidence.getDescription(), hugoSymbol));
+                    }
+                }
                 query.setEvidences(new ArrayList<>(StringUtils.isEmpty(query.getQuery().getTumorType()) ? updatedEvidences : keepHighestLevelForSameTreatments(updatedEvidences, requestQuery.getReferenceGenome(), query.getExactMatchedAlteration())));
                 evidenceQueries.add(query);
             }
