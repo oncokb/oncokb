@@ -762,10 +762,7 @@ public class EvidenceUtils {
         if (uuid == null) {
             return new HashSet<>();
         }
-        return CacheUtils.getEvidencesByUUID(uuid).stream().map(evidence -> {
-            evidence.setDescription(SummaryUtils.enrichDescription(evidence.getDescription(), evidence.getGene().getHugoSymbol()));
-            return evidence;
-        }).collect(toSet());
+        return CacheUtils.getEvidencesByUUID(uuid);
     }
 
     public static Set<Evidence> getEvidencesByUUIDs(Set<String> uuids) {
@@ -924,7 +921,7 @@ public class EvidenceUtils {
                             updatedEvidences.add(propagatedLevel);
                         }
                     } else {
-                        updatedEvidences.add(evidence);
+                        updatedEvidences.add(new Evidence(evidence, evidence.getId()));
                     }
                 });
 
