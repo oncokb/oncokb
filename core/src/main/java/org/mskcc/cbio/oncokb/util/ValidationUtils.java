@@ -177,7 +177,7 @@ public class ValidationUtils {
     public static JSONArray compareActionableGene() throws IOException {
         String json = null;
         JSONArray data = new JSONArray();
-        json = FileUtils.readPublicOncoKBRemote("https://www.oncokb.org/api/v1/evidences/lookup?levelOfEvidence=" + org.apache.commons.lang3.StringUtils.join(LevelUtils.getTherapeuticLevels(), ","));
+        json = FileUtils.readPublicOncoKBRemote("https://www.oncokb.org/api/v1/evidences/lookup?levelOfEvidence=" + org.apache.commons.lang3.StringUtils.join(LevelUtils.getTherapeuticLevels(), ",") + "&evidenceTypes=" + org.apache.commons.lang3.StringUtils.join(EvidenceTypeUtils.getTreatmentEvidenceTypes(), ","));
 
         ObjectMapper mapper = new ObjectMapper()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);

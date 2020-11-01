@@ -263,7 +263,11 @@ public class EvidenceUtils {
             // return all evidences requested by the evidence type
             // this is when user only specify the evidence type in the query
             final Set<EvidenceType> tumorTypeEvidenceTypes = Sets.intersection(EvidenceTypeUtils.getTumorTypeEvidenceTypes(), evidenceTypes);
-            evidences.addAll(CacheUtils.getAllEvidences().stream().filter(evidence -> tumorTypeEvidenceTypes.contains(evidence.getEvidenceType())).collect(toSet()));
+
+            evidences.addAll(CacheUtils.getAllEvidences().stream()
+                .filter(evidence -> tumorTypeEvidenceTypes.contains(evidence.getEvidenceType()))
+                .filter(evidence -> levelOfEvidences.isEmpty() ? true : levelOfEvidences.contains(evidence.getLevelOfEvidence()))
+                .collect(toSet()));
         }
 
         return evidences;
