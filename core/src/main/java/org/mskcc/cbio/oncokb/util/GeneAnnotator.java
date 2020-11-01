@@ -1,18 +1,14 @@
 package org.mskcc.cbio.oncokb.util;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mskcc.cbio.oncokb.model.Gene;
 
 /**
- *
  * @author jgao
  */
 public final class GeneAnnotator {
@@ -36,7 +32,7 @@ public final class GeneAnnotator {
         }
         if (gene != null) {
             // Swap the hugo symbol with gene alias so that the gene is always using the hugo symbol from input
-            if (!gene.getHugoSymbol().equals(symbol)) {
+            if (!gene.getHugoSymbol().equals(symbol) && !StringUtils.isNumeric(symbol)) {
                 gene.getGeneAliases().add(gene.getHugoSymbol());
                 gene.getGeneAliases().remove(symbol);
                 gene.setHugoSymbol(symbol);
@@ -78,8 +74,8 @@ public final class GeneAnnotator {
             return null;
         }
 
-        if (genes.size()>1) {
-            System.out.println("More than one hits:\n"+url);
+        if (genes.size() > 1) {
+            System.out.println("More than one hits:\n" + url);
         }
 
         Gene gene = genes.get(0);
@@ -116,19 +112,21 @@ public final class GeneAnnotator {
 
     private static void includeGeneAlias(Gene gene) throws IOException {
         String url = URL_MY_GENE_INFO_3 + "gene/" + gene.getEntrezGeneId()
-                + "?fields=alias";
+            + "?fields=alias";
         String json = FileUtils.readRemote(url);
 
-        Map<String,Object> map = JsonUtils.jsonToMap(json);
+        Map<String, Object> map = JsonUtils.jsonToMap(json);
         Object objAlias = map.get("alias");
-        if (objAlias!=null) {
+        if (objAlias != null) {
+            Set<String> aliases = new HashSet<>();
             if (objAlias instanceof String) {
                 String alias = String.class.cast(objAlias);
-                gene.setGeneAliases(Collections.singleton(alias));
+                aliases.add(alias);
             } else if (objAlias instanceof List) {
-                List<String> aliases = List.class.cast(objAlias);
-                gene.setGeneAliases(new HashSet<>(aliases));
+                List<String> aliasList = List.class.cast(objAlias);
+                aliases.addAll(aliasList);
             }
+            gene.setGeneAliases(aliases);
         }
     }
 }

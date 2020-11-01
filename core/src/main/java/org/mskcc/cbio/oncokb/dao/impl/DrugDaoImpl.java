@@ -45,8 +45,6 @@ public class DrugDaoImpl extends GenericDaoImpl<Drug, Integer> implements DrugDa
     @Override
     public void save(Drug drug) {
         super.save(drug);
-        if (CacheUtils.isEnabled()) {
-            CacheUtils.addDrug(drug);
-        }
+        CacheUtils.addDrug(drug);
     }
 }

@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 
 import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
 import static org.mskcc.cbio.oncokb.Constants.MISSENSE_VARIANT;
+import static org.mskcc.cbio.oncokb.Constants.UPSTREAM_GENE;
 
 /**
  * @author jgao
@@ -308,21 +309,29 @@ public final class AlterationUtils {
         if (alteration.getConsequence() == null && variantConsequence != null) {
             alteration.setConsequence(variantConsequence);
         } else if (alteration.getConsequence() != null && variantConsequence != null &&
-            !alteration.getConsequence().equals(variantConsequence) &&
-            alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm("any"))) {
+            !alteration.getConsequence().equals(variantConsequence)) {
             // For the query which already contains consequence but different with OncoKB algorithm,
             // we should keep query consequence unless it is `any`
-            alteration.setConsequence(variantConsequence);
+            if (alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm("any"))) {
+                alteration.setConsequence(variantConsequence);
+            }
+            // if alteration is a positional vairant and the consequence is manually assigned to others than NA, we should change it
+            if (isPositionedAlteration(alteration) && alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm(MISSENSE_VARIANT))) {
+                alteration.setConsequence(variantConsequence);
+            }
         }
 
         // Annotate alteration based on consequence and special rules
         if (alteration.getAlteration() == null || alteration.getAlteration().isEmpty()) {
             alteration.setAlteration(proteinChange);
         }
-        if (alteration.getAlteration().isEmpty()) {
-            if (variantConsequence != null) {
-                if (variantConsequence.getTerm().equals("splice_region_variant")) {
+        if (StringUtils.isEmpty(alteration.getAlteration())) {
+            if (alteration.getConsequence() != null) {
+                if (alteration.getConsequence().getTerm().equals("splice_region_variant")) {
                     alteration.setAlteration("splice mutation");
+                }
+                if (alteration.getConsequence().getTerm().equals(UPSTREAM_GENE)) {
+                    alteration.setAlteration(SpecialVariant.PROMOTER.getVariant());
                 }
             }
         } else {
@@ -400,7 +409,7 @@ public final class AlterationUtils {
     }
 
     public static Alteration getAlteration(String hugoSymbol, String alteration, AlterationType alterationType,
-                                           String consequence, Integer proteinStart, Integer proteinEnd) {
+                                           String consequence, Integer proteinStart, Integer proteinEnd, ReferenceGenome referenceGenome) {
         Alteration alt = new Alteration();
 
         if (alteration != null) {
@@ -439,6 +448,11 @@ public final class AlterationUtils {
         alt.setProteinStart(proteinStart);
         alt.setProteinEnd(proteinEnd);
 
+        if (referenceGenome == null) {
+            alt.getReferenceGenomes().add(DEFAULT_REFERENCE_GENOME);
+        } else {
+            alt.getReferenceGenomes().add(referenceGenome);
+        }
         AlterationUtils.annotateAlteration(alt, alt.getAlteration());
         return alt;
     }
@@ -489,14 +503,10 @@ public final class AlterationUtils {
 
     public static Set<Alteration> getAllAlterations(ReferenceGenome referenceGenome, Gene gene) {
         Set<Alteration> alterations = new HashSet<>();
-        if (CacheUtils.isEnabled()) {
-            if (!CacheUtils.containAlterations(gene.getEntrezGeneId())) {
-                CacheUtils.setAlterations(gene);
-            }
-            alterations = CacheUtils.getAlterations(gene.getEntrezGeneId());
-        } else {
-            alterations = new HashSet<>(alterationBo.findAlterationsByGene(Collections.singleton(gene)));
+        if (!CacheUtils.containAlterations(gene.getEntrezGeneId())) {
+            CacheUtils.setAlterations(gene);
         }
+        alterations = CacheUtils.getAlterations(gene.getEntrezGeneId());
 
         if (referenceGenome == null) {
             return alterations;
@@ -506,7 +516,7 @@ public final class AlterationUtils {
     }
 
     public static Set<Alteration> getAllAlterations() {
-        Set<Gene> genes = GeneUtils.getAllGenes();
+        Set<Gene> genes = CacheUtils.getAllGenes();
         Set<Alteration> alterations = new HashSet<>();
         for (Gene gene : genes) {
             alterations.addAll(getAllAlterations(null, gene));
@@ -533,11 +543,7 @@ public final class AlterationUtils {
     public static Set<Alteration> getVUS(Alteration alteration) {
         Set<Alteration> result = new HashSet<>();
         Gene gene = alteration.getGene();
-        if (CacheUtils.isEnabled()) {
-            result = CacheUtils.getVUS(gene.getEntrezGeneId());
-        } else {
-            result = AlterationUtils.findVUSFromEvidences(EvidenceUtils.getEvidenceByGenes(Collections.singleton(gene)).get(gene));
-        }
+        result = CacheUtils.getVUS(gene.getEntrezGeneId());
         return result;
     }
 
@@ -690,6 +696,7 @@ public final class AlterationUtils {
                 alt.setGene(gene);
                 alt.setProteinStart(proteinStart);
                 alt.setProteinEnd(proteinEnd);
+                alt.getReferenceGenomes().add(referenceGenome);
 
                 AlterationUtils.annotateAlteration(alt, alt.getAlteration());
 
@@ -704,6 +711,7 @@ public final class AlterationUtils {
                 alt.setGene(gene);
                 alt.setProteinStart(proteinStart);
                 alt.setProteinEnd(proteinEnd);
+                alt.getReferenceGenomes().add(referenceGenome);
 
                 AlterationUtils.annotateAlteration(alt, alt.getAlteration());
 
@@ -806,7 +814,7 @@ public final class AlterationUtils {
                 // remove all alleles if the alteration variant residue is empty
                 if (isMissensePositionalVariant && !StringUtils.isEmpty(allele.getVariantResidues())) {
                     relevantAlterations.remove(allele);
-                    return;
+                    continue;
                 }
                 if (allele.getConsequence() != null && allele.getConsequence().getTerm().equals(MISSENSE_VARIANT)) {
                     if (alteration.getProteinStart().equals(alteration.getProteinEnd()) && !StringUtils.isEmpty(alteration.getVariantResidues())) {
@@ -1042,6 +1050,7 @@ public final class AlterationUtils {
                 }
             }
         }
+
         return matches;
     }
 
@@ -1055,7 +1064,7 @@ public final class AlterationUtils {
                 && (oncogenicity.equals(Oncogenicity.YES) || oncogenicity.equals(Oncogenicity.LIKELY))) {
                 isOncogenic = true;
                 break;
-            } else if (oncogenicity != null && oncogenicity.equals(Oncogenicity.LIKELY_NEUTRAL)) {
+            } else if (oncogenicity != null && oncogenicity.equals(Oncogenicity.LIKELY_NEUTRAL) && oncogenicity.equals(Oncogenicity.INCONCLUSIVE)) {
                 isOncogenic = false;
             }
             if (isOncogenic != null) {
@@ -1140,7 +1149,7 @@ public final class AlterationUtils {
             && alteration.getRefResidues() != null && alteration.getRefResidues().length() == 1
             && alteration.getVariantResidues() == null
             && alteration.getConsequence() != null
-            && alteration.getConsequence().getTerm().equals("NA")
+            && (alteration.getConsequence().getTerm().equals("NA") || alteration.getConsequence().getTerm().equals(MISSENSE_VARIANT))
         )
             isPositionVariant = true;
         return isPositionVariant;

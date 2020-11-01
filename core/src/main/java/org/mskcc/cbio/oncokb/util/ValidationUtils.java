@@ -24,7 +24,7 @@ public class ValidationUtils {
         final String NO_REFERENCE = "No reference is specified";
         final String NO_TREATMENT = "No treatment is specified";
         JSONArray data = new JSONArray();
-        for (Gene gene : GeneUtils.getAllGenes()) {
+        for (Gene gene : CacheUtils.getAllGenes()) {
             Set<Evidence> evidences = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, EvidenceTypeUtils.getTreatmentEvidenceTypes());
             for (Evidence evidence : evidences) {
                 String hugoSymbol = gene.getHugoSymbol();
@@ -51,7 +51,7 @@ public class ValidationUtils {
         final String NO_MUTATION_EFFECT = "No mutation effect is specified";
         final String NO_MUTATION_EFFECT_REFERENCE = "Mutation effect does not have any reference (pmids, abstracts)";
         JSONArray data = new JSONArray();
-        for (Gene gene : GeneUtils.getAllGenes()) {
+        for (Gene gene : CacheUtils.getAllGenes()) {
             Set<BiologicalVariant> variants = MainUtils.getBiologicalVariants(gene);
             for (BiologicalVariant variant : variants) {
                 if (StringUtils.isNullOrEmpty(variant.getOncogenic())) {
@@ -75,7 +75,7 @@ public class ValidationUtils {
         final String MULTIPLE_BACKGROUND = "Multiple gene background exist";
         JSONArray data = new JSONArray();
 
-        for (Gene gene : GeneUtils.getAllGenes()) {
+        for (Gene gene : CacheUtils.getAllGenes()) {
             if (gene.getEntrezGeneId() < 1) {
                 continue;
             }
@@ -177,7 +177,7 @@ public class ValidationUtils {
     public static JSONArray compareActionableGene() throws IOException {
         String json = null;
         JSONArray data = new JSONArray();
-        json = FileUtils.readPublicOncoKBRemote("https://www.oncokb.org/api/v1/evidences/lookup?levelOfEvidence=" + org.apache.commons.lang3.StringUtils.join(LevelUtils.getTherapeuticLevels(), ","));
+        json = FileUtils.readPublicOncoKBRemote("https://www.oncokb.org/api/v1/evidences/lookup?levelOfEvidence=" + org.apache.commons.lang3.StringUtils.join(LevelUtils.getTherapeuticLevels(), ",") + "&evidenceTypes=" + org.apache.commons.lang3.StringUtils.join(EvidenceTypeUtils.getTreatmentEvidenceTypes(), ","));
 
         ObjectMapper mapper = new ObjectMapper()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);

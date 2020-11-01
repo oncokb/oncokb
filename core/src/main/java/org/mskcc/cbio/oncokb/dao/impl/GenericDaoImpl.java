@@ -64,13 +64,6 @@ public abstract class GenericDaoImpl<T, ID extends Serializable> extends Hiberna
     }
 
     @Override
-    public List<T> findByParamValues(String[] params, Object[] values) {
-        String queryString = "from " + getClassName() + " where " +
-                StringUtils.join(params, "=? AND ") + "=?";
-        return find(queryString, values);
-    }
-
-    @Override
     public List<T> findByNamedQuery(String queryName) {
         return (List<T>) getHibernateTemplate().findByNamedQuery(queryName);
     }

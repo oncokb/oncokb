@@ -119,6 +119,9 @@ public class GenomeNexusUtils {
     }
 
     public static TranscriptConsequence getTranscriptConsequence(GNVariantAnnotationType type, String query, ReferenceGenome referenceGenome) {
+        if (StringUtils.isEmpty(query) || StringUtils.isEmpty(query.replace(",", ""))) {
+            return null;
+        }
         VariantAnnotation annotation = getVariantAnnotation(type, query, referenceGenome);
         return getConsequence(annotation, referenceGenome);
     }

@@ -38,11 +38,7 @@ public class TreatmentDrugId implements Serializable {
 
     public void setDrug(Drug drug) {
         Drug persistence = null;
-        if (CacheUtils.isEnabled()) {
-            persistence = CacheUtils.getPersistentDrug(drug);
-        } else {
-            persistence = ApplicationContextSingleton.getDrugBo().guessUnambiguousDrug(drug.getDrugName());
-        }
+        persistence = CacheUtils.getPersistentDrug(drug);
         if (persistence == null) {
             ApplicationContextSingleton.getDrugBo().save(drug);
             persistence = drug;

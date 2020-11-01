@@ -26,13 +26,4 @@ public class TumorTypeController {
         @RequestParam(value = "tumorTypeId", required = false) List<String> tumorTypeIds) {
         return TumorTypeUtils.getAllTumorTypes();
     }
-
-    @RequestMapping(value = "/legacy-api/tumorType")
-    public
-    @ResponseBody
-    List<TumorType> getRelevantTumorType(
-        @RequestParam(value = "query", required = false) String query
-    ) {
-        return TumorTypeUtils.findTumorTypes(query);
-    }
 }

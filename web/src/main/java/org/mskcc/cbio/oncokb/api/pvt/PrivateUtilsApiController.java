@@ -52,7 +52,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
 
         Boolean isHotspot = false;
 
-        Alteration alteration = AlterationUtils.getAlteration(hugoSymbol, variant, null, null, null, null);
+        Alteration alteration = AlterationUtils.getAlteration(hugoSymbol, variant, null, null, null, null, null);
 
         if (alteration != null) {
             isHotspot = HotspotUtils.isHotspot(alteration);
@@ -83,17 +83,12 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
 
         Set<GeneNumber> genes = new HashSet<>();
 
-        if (CacheUtils.isEnabled()) {
-            if (CacheUtils.getNumbers("genes") == null) {
-                genes = NumberUtils.getAllGeneNumberListByLevels(LevelUtils.getPublicLevels());
-                CacheUtils.setNumbers("genes", genes);
-            } else {
-                genes = (Set<GeneNumber>) CacheUtils.getNumbers("genes");
-            }
-        } else {
+        if (CacheUtils.getNumbers("genes") == null) {
             genes = NumberUtils.getAllGeneNumberListByLevels(LevelUtils.getPublicLevels());
+            CacheUtils.setNumbers("genes", genes);
+        } else {
+            genes = (Set<GeneNumber>) CacheUtils.getNumbers("genes");
         }
-
         return new ResponseEntity<>(genes, HttpStatus.OK);
     }
 
@@ -101,41 +96,33 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     public ResponseEntity<MainNumber> utilsNumbersMainGet() {
         MainNumber mainNumber = new MainNumber();
 
-        if (CacheUtils.isEnabled()) {
-            if (CacheUtils.getNumbers("main") == null) {
-                Set<Gene> allGenes = GeneUtils.getAllGenes();
-                Integer numRealGenes = 0;
-                for (Gene gene : allGenes) {
-                    if (gene.getEntrezGeneId() > 0)
-                        numRealGenes++;
-                }
-                mainNumber.setGene(numRealGenes);
 
-                List<Alteration> alterations = new ArrayList<>(AlterationUtils.getAllAlterations());
-                alterations = AlterationUtils.excludeVUS(alterations);
-                alterations = AlterationUtils.excludeInferredAlterations(alterations);
-
-                mainNumber.setAlteration(alterations.size());
-                Set<Evidence> evidences = CacheUtils.getAllEvidences();
-                Set<TumorType> treatmentTumorTypes = new HashSet<>();
-                for (Evidence evidence : evidences) {
-                    if (evidence.getLevelOfEvidence() != null && evidence.getOncoTreeType() != null) {
-                        treatmentTumorTypes.add(evidence.getOncoTreeType());
-                    }
-                }
-                mainNumber.setTumorType(treatmentTumorTypes.size());
-                mainNumber.setDrug(NumberUtils.getDrugsCountByLevels(LevelUtils.getPublicLevels()));
-                CacheUtils.setNumbers("main", mainNumber);
-            } else {
-                mainNumber = (MainNumber) CacheUtils.getNumbers("main");
+        if (CacheUtils.getNumbers("main") == null) {
+            Set<Gene> allGenes = CacheUtils.getAllGenes();
+            Integer numRealGenes = 0;
+            for (Gene gene : allGenes) {
+                if (gene.getEntrezGeneId() > 0)
+                    numRealGenes++;
             }
-        } else {
-            List<Alteration> alterations = ApplicationContextSingleton.getAlterationBo().findAll();
-            List<Alteration> excludeVUS = AlterationUtils.excludeVUS(alterations);
+            mainNumber.setGene(numRealGenes);
 
-            mainNumber.setAlteration(excludeVUS.size());
-            mainNumber.setTumorType(TumorTypeUtils.getAllTumorTypes().size());
+            List<Alteration> alterations = new ArrayList<>(AlterationUtils.getAllAlterations());
+            alterations = AlterationUtils.excludeVUS(alterations);
+            alterations = AlterationUtils.excludeInferredAlterations(alterations);
+
+            mainNumber.setAlteration(alterations.size());
+            Set<Evidence> evidences = CacheUtils.getAllEvidences();
+            Set<TumorType> treatmentTumorTypes = new HashSet<>();
+            for (Evidence evidence : evidences) {
+                if (evidence.getLevelOfEvidence() != null && evidence.getOncoTreeType() != null) {
+                    treatmentTumorTypes.add(evidence.getOncoTreeType());
+                }
+            }
+            mainNumber.setTumorType(treatmentTumorTypes.size());
             mainNumber.setDrug(NumberUtils.getDrugsCountByLevels(LevelUtils.getPublicLevels()));
+            CacheUtils.setNumbers("main", mainNumber);
+        } else {
+            mainNumber = (MainNumber) CacheUtils.getNumbers("main");
         }
 
         return new ResponseEntity<>(mainNumber, HttpStatus.OK);
@@ -145,15 +132,12 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     public ResponseEntity<Set<LevelNumber>> utilsNumbersLevelsGet() {
         Set<LevelNumber> genes = new HashSet<>();
 
-        if (CacheUtils.isEnabled()) {
-            if (CacheUtils.getNumbers("levels") == null) {
-                genes = NumberUtils.getLevelNumberListByLevels(LevelUtils.getPublicLevels());
-                CacheUtils.setNumbers("levels", genes);
-            } else {
-                genes = (Set<LevelNumber>) CacheUtils.getNumbers("levels");
-            }
-        } else {
+
+        if (CacheUtils.getNumbers("levels") == null) {
             genes = NumberUtils.getLevelNumberListByLevels(LevelUtils.getPublicLevels());
+            CacheUtils.setNumbers("levels", genes);
+        } else {
+            genes = (Set<LevelNumber>) CacheUtils.getNumbers("levels");
         }
 
         return new ResponseEntity<>(genes, HttpStatus.OK);
@@ -333,7 +317,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             gene = GeneUtils.getGene(entrezGeneId, hugoSymbol);
             Alteration alterationModel = AlterationUtils.findAlteration(gene, matchedRG, alteration);
             if (alterationModel == null) {
-                alterationModel = AlterationUtils.getAlteration(gene.getHugoSymbol(), alteration, null, null, null, null);
+                alterationModel = AlterationUtils.getAlteration(gene.getHugoSymbol(), alteration, null, null, null, null, matchedRG);
             }
             query = new Query(alterationModel, matchedRG);
         } else {
@@ -392,21 +376,21 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     }
 
     @Override
-    public ResponseEntity<List<DownloadAvailability>> utilDataReleaseDownloadAvailabilityGet() {
+    public ResponseEntity<List<DownloadAvailability>> utilDataAvailabilityGet() {
         return new ResponseEntity<>(CacheUtils.getDownloadAvailabilities(), HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<String> utilDataReleaseReadmeGet(
+    public ResponseEntity<String> utilDataReadmeGet(
         @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
     ) {
         return getDataDownloadResponseEntity(version, FileName.README, FileExtension.MARK_DOWN);
     }
 
     @Override
-    public ResponseEntity<byte[]> utilDataReleaseSqlDumpGet(
+    public ResponseEntity<byte[]> utilDataSqlDumpGet(
         @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
     ) {
-        return getDataDownloadResponseEntity(version, getOncoKBSqlDumpFileName(version), FileExtension.ZIP);
+        return getDataDownloadResponseEntity(version, getOncoKBSqlDumpFileName(version), FileExtension.GZ);
     }
 }

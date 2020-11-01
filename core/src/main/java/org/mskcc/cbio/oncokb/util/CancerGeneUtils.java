@@ -27,7 +27,7 @@ public class CancerGeneUtils {
         Set<CancerGene> cancerGenes = new HashSet<>();
 
         // We need to include all annotated genes
-        Set<Gene> allAnnotatedGenes = GeneUtils.getAllGenes();
+        Set<Gene> allAnnotatedGenes = CacheUtils.getAllGenes();
         allAnnotatedGenes
             .stream()
             .filter(gene -> gene.getEntrezGeneId() > 0)

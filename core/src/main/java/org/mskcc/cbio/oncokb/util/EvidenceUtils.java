@@ -69,8 +69,7 @@ public class EvidenceUtils {
                 (levelOfEvidences == null ? "" : ("&" + levelOfEvidences.toString()));
             if (matchedAlt == null) {
                 matchedAlt = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getAlteration(),
-                    AlterationType.getByName(query.getAlterationType()), query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
-                AlterationUtils.annotateAlteration(matchedAlt, matchedAlt.getAlteration());
+                    AlterationType.getByName(query.getAlterationType()), query.getConsequence(), query.getProteinStart(), query.getProteinEnd(), query.getReferenceGenome());
             }
 
             Set<Evidence> relevantEvidences;
@@ -127,11 +126,7 @@ public class EvidenceUtils {
         if (alterations == null || alterations.size() == 0) {
             return new ArrayList<>();
         }
-        if (CacheUtils.isEnabled()) {
-            return getAlterationEvidences(alterations);
-        } else {
-            return evidenceBo.findEvidencesByAlteration(alterations);
-        }
+        return getAlterationEvidences(alterations);
     }
 
     public static List<Evidence> getEvidence(List<Alteration> alterations, Set<EvidenceType> evidenceTypes, Set<LevelOfEvidence> levelOfEvidences) {
@@ -150,27 +145,19 @@ public class EvidenceUtils {
         if (evidenceTypes.size() == 0 && levelOfEvidences.size() == 0) {
             return getEvidence(alterations);
         }
-        if (CacheUtils.isEnabled()) {
-            List<Evidence> alterationEvidences = getAlterationEvidences(alterations);
-            List<Evidence> result = new ArrayList<>();
+        List<Evidence> alterationEvidences = getAlterationEvidences(alterations);
+        List<Evidence> result = new ArrayList<>();
 
-            for (Evidence evidence : alterationEvidences) {
-                if (evidenceTypes.size() > 0 && !evidenceTypes.contains(evidence.getEvidenceType())) {
-                    continue;
-                }
-                if (levelOfEvidences.size() > 0 && !levelOfEvidences.contains(evidence.getLevelOfEvidence())) {
-                    continue;
-                }
-                result.add(evidence);
+        for (Evidence evidence : alterationEvidences) {
+            if (evidenceTypes.size() > 0 && !evidenceTypes.contains(evidence.getEvidenceType())) {
+                continue;
             }
-            return result;
-        } else {
-            if (levelOfEvidences.size() == 0) {
-                return evidenceBo.findEvidencesByAlteration(alterations, evidenceTypes);
-            } else {
-                return evidenceBo.findEvidencesByAlterationWithLevels(alterations, evidenceTypes, levelOfEvidences);
+            if (levelOfEvidences.size() > 0 && !levelOfEvidences.contains(evidence.getLevelOfEvidence())) {
+                continue;
             }
+            result.add(evidence);
         }
+        return result;
     }
 
     public static List<Evidence> getEvidence(List<Alteration> alterations, Set<EvidenceType> evidenceTypes, Set<TumorType> tumorTypes, Set<LevelOfEvidence> levelOfEvidences) {
@@ -219,16 +206,16 @@ public class EvidenceUtils {
                     alterations.put(altId, alt);
                 }
             }
+        }
 
-            if (query.getOncoTreeTypes() != null) {
-                for (TumorType tumorType : query.getOncoTreeTypes()) {
-                    if (!upwardTumorTypes.contains(tumorType)) {
-                        upwardTumorTypes.add(tumorType);
-                    }
+        if (query.getOncoTreeTypes() != null) {
+            for (TumorType tumorType : query.getOncoTreeTypes()) {
+                if (!upwardTumorTypes.contains(tumorType)) {
+                    upwardTumorTypes.add(tumorType);
                 }
             }
-            downwardTumorTypes.addAll(TumorTypeUtils.findTumorTypes(query.getQuery().getTumorType(), DOWNWARD));
         }
+        downwardTumorTypes.addAll(TumorTypeUtils.findTumorTypes(query.getQuery().getTumorType(), DOWNWARD));
 
         // Get all gene related evidences
         Map<Gene, Set<Evidence>> mappedEvidences =
@@ -247,26 +234,40 @@ public class EvidenceUtils {
             evidences.addAll(getEvidence(uniqueAlterations, common, null));
         }
 
-        // For sensitive evidences, get all ignore tumor types. They will be propagated to other tumor types
-        // in assignEvidence function
-        common = Sets.intersection(EvidenceTypeUtils.getSensitiveTreatmentEvidenceTypes(), evidenceTypes);
-        if (common.size() > 0) {
-            evidences.addAll(getEvidence(uniqueAlterationsWithoutAlternativeAlleles, common, levelOfEvidences));
-        }
+        if (uniqueAlterationsWithoutAlternativeAlleles.size() > 0) {
+            // For sensitive evidences, get all ignore tumor types. They will be propagated to other tumor types
+            // in assignEvidence function
+            common = Sets.intersection(EvidenceTypeUtils.getSensitiveTreatmentEvidenceTypes(), evidenceTypes);
+            if (common.size() > 0) {
+                evidences.addAll(getEvidence(uniqueAlterationsWithoutAlternativeAlleles, common, levelOfEvidences));
+            }
 
-        // Get diagnostic implication evidences
-        if (evidenceTypes.contains(EvidenceType.DIAGNOSTIC_IMPLICATION)) {
-            evidences.addAll(getEvidence(uniqueAlterationsWithoutAlternativeAlleles, Collections.singleton(EvidenceType.DIAGNOSTIC_IMPLICATION), downwardTumorTypes, levelOfEvidences));
-        }
+            // Get diagnostic implication evidences
+            if (evidenceTypes.contains(EvidenceType.DIAGNOSTIC_IMPLICATION)) {
+                evidences.addAll(getEvidence(uniqueAlterationsWithoutAlternativeAlleles, Collections.singleton(EvidenceType.DIAGNOSTIC_IMPLICATION), downwardTumorTypes, levelOfEvidences));
+            }
 
-        // Get other tumor type related evidences
-        Set<EvidenceType> restTTevidenceTypes = EvidenceTypeUtils.getTumorTypeEvidenceTypes();
-        restTTevidenceTypes.removeAll(EvidenceTypeUtils.getSensitiveTreatmentEvidenceTypes());
-        restTTevidenceTypes.remove(EvidenceType.DIAGNOSTIC_IMPLICATION);
-        common = Sets.intersection(restTTevidenceTypes, evidenceTypes);
-        if (common.size() > 0) {
+            // Get other tumor type related evidences
+            Set<EvidenceType> restTTevidenceTypes = EvidenceTypeUtils.getTumorTypeEvidenceTypes();
+            restTTevidenceTypes.removeAll(EvidenceTypeUtils.getSensitiveTreatmentEvidenceTypes());
+            restTTevidenceTypes.remove(EvidenceType.DIAGNOSTIC_IMPLICATION);
+            common = Sets.intersection(restTTevidenceTypes, evidenceTypes);
+            if (common.size() > 0) {
 
-            evidences.addAll(getEvidence(uniqueAlterationsWithoutAlternativeAlleles, common, upwardTumorTypes, levelOfEvidences));
+                evidences.addAll(getEvidence(uniqueAlterationsWithoutAlternativeAlleles, common, upwardTumorTypes, levelOfEvidences));
+            }
+        } else if (query.getOncoTreeTypes() != null && query.getOncoTreeTypes().size() > 0) {
+            final Set<EvidenceType> tumorTypeEvidenceTypes = Sets.intersection(EvidenceTypeUtils.getTumorTypeEvidenceTypes(), evidenceTypes);
+            evidences.addAll(CacheUtils.getAllEvidences().stream().filter(evidence -> tumorTypeEvidenceTypes.contains(evidence.getEvidenceType()) && upwardTumorTypes.contains(evidence.getOncoTreeType())).collect(toSet()));
+        } else {
+            // return all evidences requested by the evidence type
+            // this is when user only specify the evidence type in the query
+            final Set<EvidenceType> tumorTypeEvidenceTypes = Sets.intersection(EvidenceTypeUtils.getTumorTypeEvidenceTypes(), evidenceTypes);
+
+            evidences.addAll(CacheUtils.getAllEvidences().stream()
+                .filter(evidence -> tumorTypeEvidenceTypes.contains(evidence.getEvidenceType()))
+                .filter(evidence -> levelOfEvidences.isEmpty() ? true : levelOfEvidences.contains(evidence.getLevelOfEvidence()))
+                .collect(toSet()));
         }
 
         return evidences;
@@ -275,29 +276,21 @@ public class EvidenceUtils {
     public static List<Evidence> getAlterationEvidences(List<Alteration> alterations) {
         List<Evidence> evidences = new ArrayList<>();
 
-        if (CacheUtils.isEnabled()) {
-            Set<Evidence> geneEvidences = getAllEvidencesByAlterationsGenes(alterations);
-            for (Evidence evidence : geneEvidences) {
-                if (!Collections.disjoint(evidence.getAlterations(), alterations)) {
-                    evidences.add(evidence);
-                }
+        Set<Evidence> geneEvidences = getAllEvidencesByAlterationsGenes(alterations);
+        for (Evidence evidence : geneEvidences) {
+            if (!Collections.disjoint(evidence.getAlterations(), alterations)) {
+                evidences.add(evidence);
             }
-        } else {
-            evidences = evidenceBo.findEvidencesByAlteration(alterations);
         }
         return evidences;
     }
 
     public static Map<Gene, Set<Evidence>> getEvidenceByGenes(Set<Gene> genes) {
         Map<Gene, Set<Evidence>> evidences = new HashMap<>();
-        if (CacheUtils.isEnabled()) {
-            for (Gene gene : genes) {
-                if (gene != null) {
-                    evidences.put(gene, CacheUtils.getEvidences(gene));
-                }
+        for (Gene gene : genes) {
+            if (gene != null) {
+                evidences.put(gene, CacheUtils.getEvidences(gene));
             }
-        } else {
-            evidences = EvidenceUtils.separateEvidencesByGene(genes, new HashSet<Evidence>(ApplicationContextSingleton.getEvidenceBo().findAll()));
         }
         return evidences;
     }
@@ -306,29 +299,16 @@ public class EvidenceUtils {
         Map<Gene, Set<Evidence>> result = new HashMap<>();
         if (evidenceTypes == null || evidenceTypes.isEmpty())
             return result;
-        if (CacheUtils.isEnabled()) {
-            for (Gene gene : genes) {
-                if (gene != null) {
-                    Set<Evidence> evidences = CacheUtils.getEvidences(gene);
-                    Set<Evidence> filtered = new HashSet<>();
-                    for (Evidence evidence : evidences) {
-                        if (evidenceTypes.contains(evidence.getEvidenceType())) {
-                            filtered.add(evidence);
-                        }
-                    }
-                    result.put(gene, filtered);
-                }
-            }
-        } else {
-            result = EvidenceUtils.separateEvidencesByGene(genes, new HashSet<Evidence>(ApplicationContextSingleton.getEvidenceBo().findAll()));
-            for (Gene gene : genes) {
-                Set<Evidence> evidences = result.get(gene);
-
+        for (Gene gene : genes) {
+            if (gene != null) {
+                Set<Evidence> evidences = CacheUtils.getEvidences(gene);
+                Set<Evidence> filtered = new HashSet<>();
                 for (Evidence evidence : evidences) {
-                    if (!evidenceTypes.contains(evidence.getEvidenceType())) {
-                        evidences.remove(evidence);
+                    if (evidenceTypes.contains(evidence.getEvidenceType())) {
+                        filtered.add(evidence);
                     }
                 }
+                result.put(gene, filtered);
             }
         }
         return result;
@@ -337,17 +317,10 @@ public class EvidenceUtils {
     public static Set<Evidence> getEvidenceByGeneAndEvidenceTypes(Gene gene, Set<EvidenceType> evidenceTypes) {
         Set<Evidence> result = new HashSet<>();
         if (gene != null) {
-            if (CacheUtils.isEnabled()) {
-                Set<Evidence> evidences = CacheUtils.getEvidences(gene);
-                for (Evidence evidence : evidences) {
-                    if (evidenceTypes.contains(evidence.getEvidenceType())) {
-                        result.add(evidence);
-                    }
-                }
-            } else {
-                List<Evidence> evidences = evidenceBo.findEvidencesByGene(Collections.singleton(gene), evidenceTypes);
-                if (evidences != null) {
-                    result = new HashSet<>(evidences);
+            Set<Evidence> evidences = CacheUtils.getEvidences(gene);
+            for (Evidence evidence : evidences) {
+                if (evidenceTypes.contains(evidence.getEvidenceType())) {
+                    result.add(evidence);
                 }
             }
         }
@@ -471,21 +444,6 @@ public class EvidenceUtils {
         return propagatedEvidence;
     }
 
-    public static List<Evidence> filterAlteration(List<Evidence> evidences, List<Alteration> alterations) {
-        for (Evidence evidence : evidences) {
-            Set<Alteration> filterEvidences = new HashSet<>();
-            for (Alteration alt : evidence.getAlterations()) {
-                if (alterations.contains(alt)) {
-                    filterEvidences.add(alt);
-                }
-            }
-            evidence.getAlterations().clear();
-            evidence.setAlterations(filterEvidences);
-        }
-
-        return evidences;
-    }
-
     public static Map<Gene, Set<Evidence>> separateEvidencesByGene(Set<Gene> genes, Set<Evidence> evidences) {
         Map<Gene, Set<Evidence>> result = new HashMap<>();
 
@@ -584,7 +542,7 @@ public class EvidenceUtils {
     }
 
     public static Map<Gene, Set<Evidence>> getAllGeneBasedEvidences() {
-        Set<Gene> genes = GeneUtils.getAllGenes();
+        Set<Gene> genes = CacheUtils.getAllGenes();
         Map<Gene, Set<Evidence>> evidences = EvidenceUtils.getEvidenceByGenes(genes);
         return evidences;
     }
@@ -696,30 +654,6 @@ public class EvidenceUtils {
         return levels;
     }
 
-    private static Map<String, Object> getBiggerItem(List<String> query, Set<List<String>> keys) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("exist", false);
-        map.put("origin", false);
-        map.put("result", query);
-        for (List<String> key : keys) {
-            // Check whether key has all elements in query;
-            if (key.containsAll(query)) {
-                map.put("exist", true);
-                map.put("result", key);
-                return map;
-            }
-
-            // Check whether query has all elements in key;
-            if (query.containsAll(key)) {
-                map.put("exist", true);
-                map.put("origin", true);
-                map.put("result", key);
-                return map;
-            }
-        }
-        return map;
-    }
-
     public static Set<Evidence> keepHighestLevelForSameTreatments(Set<Evidence> evidences, ReferenceGenome referenceGenome, Alteration exactMatch) {
         Map<String, Set<Evidence>> maps = new HashedMap();
         Set<Evidence> filtered = new HashSet<>();
@@ -828,22 +762,14 @@ public class EvidenceUtils {
         if (uuid == null) {
             return new HashSet<>();
         }
-        if (CacheUtils.isEnabled()) {
-            return CacheUtils.getEvidencesByUUID(uuid);
-        } else {
-            return new HashSet<>(evidenceBo.findEvidenceByUUIDs(Collections.singletonList(uuid)));
-        }
+        return CacheUtils.getEvidencesByUUID(uuid);
     }
 
     public static Set<Evidence> getEvidencesByUUIDs(Set<String> uuids) {
         if (uuids == null) {
             return new HashSet<>();
         }
-        if (CacheUtils.isEnabled()) {
-            return CacheUtils.getEvidencesByUUIDs(uuids);
-        } else {
-            return new HashSet<>(evidenceBo.findEvidenceByUUIDs(new ArrayList<>(uuids)));
-        }
+        return CacheUtils.getEvidencesByUUIDs(uuids);
     }
 
     public static Evidence getEvidenceByEvidenceId(Integer id) {
@@ -851,16 +777,7 @@ public class EvidenceUtils {
             return null;
         }
         Set<Evidence> evidences = new HashSet<>();
-        if (CacheUtils.isEnabled()) {
-            evidences = CacheUtils.getEvidencesByIds(Collections.singleton(id));
-        } else {
-            List<Evidence> evidenceList = evidenceBo.findEvidencesByIds(Collections.singletonList(id));
-            if (evidenceList == null) {
-                evidences = null;
-            } else {
-                evidences = new HashSet<>(evidenceList);
-            }
-        }
+        evidences = CacheUtils.getEvidencesByIds(Collections.singleton(id));
         if (evidences == null || evidences.size() > 1) {
             return null;
         }
@@ -871,22 +788,14 @@ public class EvidenceUtils {
         if (ids == null) {
             return new HashSet<>();
         }
-        if (CacheUtils.isEnabled()) {
-            return CacheUtils.getEvidencesByGenesAndIds(genes, ids);
-        } else {
-            return new HashSet<>(evidenceBo.findEvidencesByIds(new ArrayList<>(ids)));
-        }
+        return CacheUtils.getEvidencesByGenesAndIds(genes, ids);
     }
 
     public static Set<Evidence> getEvidenceByEvidenceIds(Set<Integer> ids) {
         if (ids == null) {
             return new HashSet<>();
         }
-        if (CacheUtils.isEnabled()) {
-            return CacheUtils.getEvidencesByIds(ids);
-        } else {
-            return new HashSet<>(evidenceBo.findEvidencesByIds(new ArrayList<>(ids)));
-        }
+        return CacheUtils.getEvidencesByIds(ids);
     }
 
     public static Set<Evidence> filterEvidenceByKnownEffect(Set<Evidence> evidences, String knownEffect) {
@@ -958,11 +867,11 @@ public class EvidenceUtils {
 
                 query.setGene(GeneUtils.getGene(requestQuery.getEntrezGeneId(), requestQuery.getHugoSymbol()));
 
+                if (requestQuery.getTumorType() != null && !requestQuery.getTumorType().isEmpty()) {
+                    query.setOncoTreeTypes(
+                        TumorTypeUtils.getMappedOncoTreeTypesBySource(requestQuery.getTumorType()));
+                }
                 if (query.getGene() != null) {
-                    if (requestQuery.getTumorType() != null && !requestQuery.getTumorType().isEmpty()) {
-                        query.setOncoTreeTypes(
-                            TumorTypeUtils.getMappedOncoTreeTypesBySource(requestQuery.getTumorType()));
-                    }
 
                     if (!com.mysql.jdbc.StringUtils.isNullOrEmpty(requestQuery.getAlteration())) {
                         Alteration alt = AlterationUtils.findAlteration(query.getGene(), requestQuery.getReferenceGenome(), requestQuery.getAlteration());
@@ -970,7 +879,7 @@ public class EvidenceUtils {
                         if (alt == null) {
                             alt = AlterationUtils.getAlteration(query.getGene().getHugoSymbol(),
                                 requestQuery.getAlteration(), null, requestQuery.getConsequence(),
-                                requestQuery.getProteinStart(), requestQuery.getProteinEnd());
+                                requestQuery.getProteinStart(), requestQuery.getProteinEnd(), requestQuery.getReferenceGenome());
                             AlterationUtils.annotateAlteration(alt, alt.getAlteration());
                         }
                         query.setExactMatchedAlteration(alt);
@@ -985,8 +894,7 @@ public class EvidenceUtils {
                             }
                         }
 
-                        Alteration alteration = AlterationUtils.getAlteration(query.getGene().getHugoSymbol(), requestQuery.getAlteration(), AlterationType.MUTATION, requestQuery.getConsequence(), requestQuery.getProteinStart(), requestQuery.getProteinEnd());
-                        AlterationUtils.annotateAlteration(alteration, alteration.getAlteration());
+                        Alteration alteration = AlterationUtils.getAlteration(query.getGene().getHugoSymbol(), requestQuery.getAlteration(), AlterationType.MUTATION, requestQuery.getConsequence(), requestQuery.getProteinStart(), requestQuery.getProteinEnd(), requestQuery.getReferenceGenome());
                         List<Alteration> allelesAlts = AlterationUtils.getAlleleAlterations(requestQuery.getReferenceGenome(), alteration);
                         relevantAlts.removeAll(allelesAlts);
                         query.setAlterations(relevantAlts);
@@ -1013,9 +921,16 @@ public class EvidenceUtils {
                             updatedEvidences.add(propagatedLevel);
                         }
                     } else {
-                        updatedEvidences.add(evidence);
+                        updatedEvidences.add(new Evidence(evidence, evidence.getId()));
                     }
                 });
+
+                if(!StringUtils.isEmpty(requestQuery.getHugoSymbol()) || query.getGene() != null) {
+                    String hugoSymbol = StringUtils.isEmpty(requestQuery.getHugoSymbol()) ? query.getGene().getHugoSymbol() : requestQuery.getHugoSymbol();
+                    for (Evidence evidence : updatedEvidences) {
+                        evidence.setDescription(SummaryUtils.enrichDescription(evidence.getDescription(), hugoSymbol));
+                    }
+                }
                 query.setEvidences(new ArrayList<>(StringUtils.isEmpty(query.getQuery().getTumorType()) ? updatedEvidences : keepHighestLevelForSameTreatments(updatedEvidences, requestQuery.getReferenceGenome(), query.getExactMatchedAlteration())));
                 evidenceQueries.add(query);
             }

@@ -32,23 +32,6 @@ public class FileUtils {
         throw new AssertionError();
     }
 
-    public static List<String> getFilesInFolder(final String pathToFolder, final String suffix) {
-        File folder = new File(pathToFolder);
-
-        String[] files = folder.list(new FilenameFilter() {
-            public boolean accept(File dir, String name) {
-                return name.toUpperCase().endsWith(suffix.toUpperCase());
-            }
-        });
-
-        List<String> ret = new ArrayList<String>();
-        for (String file : files) {
-            ret.add(pathToFolder + File.separator + file);
-        }
-
-        return ret;
-    }
-
     /**
      * read local files and return content
      * @param pathToFile

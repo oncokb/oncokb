@@ -23,27 +23,6 @@ import java.util.*;
  */
 @Controller
 public class CacheController {
-//    @RequestMapping(value = "/legacy-api/cache", method = RequestMethod.GET, produces = "application/json")
-    public
-    @ResponseBody
-    Map<String, String> getAlteration(
-        HttpMethod method,
-        @RequestParam(value = "cmd", required = false) String cmd
-    ) {
-        Map<String, String> result = new HashMap<>();
-        if (cmd != null) {
-            switch (cmd) {
-                case "getStatus":
-                    result.put("status", getStatus());
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        return result;
-    }
-
     @RequestMapping(value = "/legacy-api/cache/getGeneCache", method = RequestMethod.GET, produces = "application/json")
     public
     @ResponseBody
@@ -92,12 +71,6 @@ public class CacheController {
                 case "reset":
                     resetCache(propagation);
                     break;
-                case "enable":
-                    disableCache(false);
-                    break;
-                case "disable":
-                    disableCache(true);
-                    break;
                 case "updateGene":
                     CacheUtils.updateGene(entrezGeneIds, propagation);
                     break;
@@ -112,28 +85,10 @@ public class CacheController {
         return result;
     }
 
-    private String getStatus() {
-        return CacheUtils.getCacheUtilsStatus();
-    }
-
     private Boolean resetCache(Boolean propagation) {
         Boolean operation = true;
         try {
             CacheUtils.resetAll(propagation);
-        } catch (Exception e) {
-            operation = false;
-        }
-        return operation;
-    }
-
-    private Boolean disableCache(Boolean cmd) {
-        Boolean operation = true;
-        try {
-            if (cmd) {
-                CacheUtils.disableCacheUtils();
-            } else {
-                CacheUtils.enableCacheUtils();
-            }
         } catch (Exception e) {
             operation = false;
         }

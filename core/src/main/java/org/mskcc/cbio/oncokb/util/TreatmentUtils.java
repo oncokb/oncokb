@@ -51,7 +51,7 @@ public final class TreatmentUtils {
         if (levels == null || levels.size() == 0) {
             return new HashSet<>();
         }
-        return getTreatmentsByGenesAndLevels(GeneUtils.getAllGenes(), levels);
+        return getTreatmentsByGenesAndLevels(CacheUtils.getAllGenes(), levels);
     }
 
     public static String getTreatmentName(Set<Treatment> treatments) {

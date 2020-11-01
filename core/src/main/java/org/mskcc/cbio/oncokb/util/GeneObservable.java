@@ -17,7 +17,7 @@ public class GeneObservable extends Observable {
     }
 
     public void update(String cmd, String value) {
-        if(CacheUtils.isEnabled() && cmd != null) {
+        if(cmd != null) {
             Map<String, String> operation = new HashMap<>();
             operation.put("cmd", cmd);
             operation.put("val", value);

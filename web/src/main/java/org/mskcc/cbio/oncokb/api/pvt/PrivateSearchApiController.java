@@ -139,8 +139,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
                                 for (String keyword : keywords) {
                                     if (!keyword.equals(entry.getKey())) {
                                         Alteration alteration =
-                                            AlterationUtils.getAlteration(gene.getHugoSymbol(), keyword, null, null, null, null);
-                                        AlterationUtils.annotateAlteration(alteration, keyword);
+                                            AlterationUtils.getAlteration(gene.getHugoSymbol(), keyword, null, null, null, null, null);
                                         TypeaheadSearchResp typeaheadSearchResp = newTypeaheadVariant(alteration);
                                         typeaheadSearchResp.setVariantExist(false);
                                         result.add(typeaheadSearchResp);
@@ -376,17 +375,12 @@ public class PrivateSearchApiController implements PrivateSearchApi {
         typeaheadSearchResp.setOncogenicity(resp.getOncogenic());
         typeaheadSearchResp.setVUS(resp.getVUS());
         typeaheadSearchResp.setAnnotation(resp.getVariantSummary());
-        // TODO: populate treatment info.
 
-        Set<Evidence> evidenceList = new HashSet<>(EvidenceUtils.getEvidence(AlterationUtils.getRelevantAlterations(null, alteration), null, null, null));
-        LevelOfEvidence highestSensitiveLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(evidenceList, LevelUtils.getSensitiveLevels());
-        LevelOfEvidence highestResistanceLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(evidenceList, LevelUtils.getResistanceLevels());
-
-        if (highestSensitiveLevel != null) {
-            typeaheadSearchResp.setHighestSensitiveLevel(highestSensitiveLevel.getLevel());
+        if (resp.getHighestSensitiveLevel() != null) {
+            typeaheadSearchResp.setHighestSensitiveLevel(resp.getHighestSensitiveLevel().getLevel());
         }
-        if (highestResistanceLevel != null) {
-            typeaheadSearchResp.setHighestResistanceLevel(highestResistanceLevel.getLevel());
+        if (resp.getHighestResistanceLevel() != null) {
+            typeaheadSearchResp.setHighestResistanceLevel(resp.getHighestResistanceLevel().getLevel());
         }
 
         if (alteration.getAlteration() != null && alteration.getAlteration().equalsIgnoreCase("oncogenic mutations")) {

@@ -29,72 +29,6 @@ import static org.mskcc.cbio.oncokb.util.MainUtils.stringToEvidenceTypes;
  */
 @Controller
 public class EvidenceController {
-//    @RequestMapping(value = "/legacy-api/evidence.json", method = RequestMethod.GET)
-    public
-    @ResponseBody
-    List<List<Evidence>> getEvidence(
-        HttpMethod method,
-        @RequestParam(value = "entrezGeneId", required = false) String entrezGeneId,
-        @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol,
-        @RequestParam(value = "alteration", required = false) String alteration,
-        @RequestParam(value = "tumorType", required = false) String tumorType,
-        @RequestParam(value = "evidenceType", required = false) String evidenceType,
-        @RequestParam(value = "consequence", required = false) String consequence,
-        @RequestParam(value = "proteinStart", required = false) String proteinStart,
-        @RequestParam(value = "proteinEnd", required = false) String proteinEnd,
-        @RequestParam(value = "levels", required = false) String levels,
-        @RequestParam(value = "highestLevelOnly", required = false) Boolean highestLevelOnly) {
-
-        List<List<Evidence>> evidences = new ArrayList<>();
-
-        Map<String, Object> requestQueries = MainUtils.GetRequestQueries(entrezGeneId, hugoSymbol, DEFAULT_REFERENCE_GENOME, alteration,
-            tumorType, evidenceType, consequence, proteinStart, proteinEnd, levels);
-
-        if (requestQueries == null) {
-            return new ArrayList<>();
-        }
-
-        List<EvidenceQueryRes> evidenceQueries = EvidenceUtils.processRequest(
-            (List<Query>) requestQueries.get("queries"),
-            new HashSet<>((List<EvidenceType>) requestQueries.get("evidenceTypes")),
-            requestQueries.get("levels") == null ? null : new HashSet<>((List<LevelOfEvidence>) requestQueries.get("levels")), highestLevelOnly);
-
-        if (evidenceQueries != null) {
-            for (EvidenceQueryRes query : evidenceQueries) {
-                evidences.add(query.getEvidences());
-            }
-        }
-
-        return evidences;
-    }
-
-//    @RequestMapping(value = "/legacy-api/evidence.json", method = RequestMethod.POST)
-    public
-    @ResponseBody
-    List<EvidenceQueryRes> getEvidence(
-        @RequestBody EvidenceQueries body) {
-
-        List<EvidenceQueryRes> result = new ArrayList<>();
-        if (body.getQueries().size() > 0) {
-            List<Query> requestQueries = body.getQueries();
-            Set<EvidenceType> evidenceTypes = new HashSet<>();
-
-            if (body.getEvidenceTypes() != null) {
-                evidenceTypes = new HashSet<>(stringToEvidenceTypes(body.getEvidenceTypes(), ","));
-            } else if (body.getEvidenceTypes().isEmpty()) {
-                // If the evidenceTypes has been defined but is empty, no result should be returned.
-                return result;
-            } else {
-                evidenceTypes.add(EvidenceType.GENE_SUMMARY);
-                evidenceTypes.add(EvidenceType.GENE_BACKGROUND);
-            }
-
-            result = EvidenceUtils.processRequest(requestQueries, evidenceTypes,
-                body.getLevels(), body.getHighestLevelOnly());
-        }
-
-        return result;
-    }
 
     @RequestMapping(value = "/legacy-api/evidences/update/{uuid}", method = RequestMethod.POST)
     public
@@ -140,21 +74,6 @@ public class EvidenceController {
         Map<String, Map<String, Integer>> map = new HashMap<>();
         map.put(uuid, newPriority);
         Set<Evidence> updatedEvidences = updateEvidencePriorityBasedOnUuid(map);
-
-        if (updatedEvidences != null) {
-            updateCacheBasedOnEvidences(updatedEvidences);
-        }
-
-        return new ResponseEntity(HttpStatus.OK);
-    }
-
-    @RequestMapping(value = "/legacy-api/evidences/lastReview/update", method = RequestMethod.POST)
-    public
-    @ResponseBody
-    synchronized ResponseEntity updateEvidenceLastReview(@RequestBody Map<String, Date> lastReviews
-    ) throws ParserConfigurationException {
-
-        Set<Evidence> updatedEvidences = updateEvidenceLastReviewBasedOnUuids(lastReviews);
 
         if (updatedEvidences != null) {
             updateCacheBasedOnEvidences(updatedEvidences);
@@ -486,23 +405,6 @@ public class EvidenceController {
                         }
                     }
                     ApplicationContextSingleton.getEvidenceBo().saveOrUpdate(evidence);
-                }
-                evidences.addAll(evidenceSet);
-            }
-        }
-        return evidences;
-    }
-
-    private Set<Evidence> updateEvidenceLastReviewBasedOnUuids(Map<String, Date> newDates) {
-        Set<Evidence> evidences = new HashSet<>();
-        if (newDates != null) {
-            for (Map.Entry<String, Date> map : newDates.entrySet()) {
-                Set<Evidence> evidenceSet = EvidenceUtils.getEvidencesByUUID(map.getKey());
-                for (Evidence evidence : evidenceSet) {
-                    if (evidence.getLastReview().before(map.getValue())) {
-                        evidence.setLastReview(map.getValue());
-                        ApplicationContextSingleton.getEvidenceBo().saveOrUpdate(evidence);
-                    }
                 }
                 evidences.addAll(evidenceSet);
             }

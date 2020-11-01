@@ -14,8 +14,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
-import static org.mskcc.cbio.oncokb.Constants.MISSENSE_VARIANT;
+import static org.mskcc.cbio.oncokb.Constants.*;
 import static org.mskcc.cbio.oncokb.util.SummaryUtils.ONCOGENIC_MUTATIONS_DEFAULT_SUMMARY;
 
 /**
@@ -575,6 +574,32 @@ public class IndicatorUtilsTest {
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
         assertEquals("The oncogenicity is not likely oncogenic, but it should be.", Oncogenicity.LIKELY.getOncogenic(), indicatorQueryResp.getOncogenic());
 
+        // Test for the promoter mutation
+        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "TERT", null, null, null, "Acute Myeloid Leukemia", UPSTREAM_GENE, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
+        assertEquals("The oncogenicity is not oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
+
+//        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "TERT", null, null, null, "Acute Myeloid Leukemia", FIVE_UTR, null, null, null);
+//        indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
+//        assertEquals("The oncogenicity is not oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
+
+        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "TERT", "", null, null, "Acute Myeloid Leukemia", UPSTREAM_GENE, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
+        assertEquals("The oncogenicity is not oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
+
+
+        // Check the same protein change in different reference genome
+        query = new Query(null, ReferenceGenome.GRCh37, null, null, "MYD88", "M232T", null, null, "Acute Myeloid Leukemia", null, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
+        assertEquals("The oncogenicity is not oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The mutation effect is not oncogenic, but it should be.", MutationEffect.GAIN_OF_FUNCTION.getMutationEffect(), indicatorQueryResp.getMutationEffect().getKnownEffect());
+        assertTrue("The mutation is not hotspot, but it should be.", indicatorQueryResp.getHotspot());
+
+        query = new Query(null, ReferenceGenome.GRCh38, null, null, "MYD88", "M232T", null, null, "Acute Myeloid Leukemia", null, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
+        assertEquals("The oncogenicity is not empty, but it should be.", "", indicatorQueryResp.getOncogenic());
+        assertEquals("The mutation effect is not unknown, but it should be.", MutationEffect.UNKNOWN.getMutationEffect(), indicatorQueryResp.getMutationEffect().getKnownEffect());
+        assertTrue("The mutation is not hotspot, but it should be.", !indicatorQueryResp.getHotspot());
 
         // Test Structural Variants
         // Fusion as alteration type should have same result from structural variant as alteration type and fusion as consequence
@@ -596,7 +621,7 @@ public class IndicatorUtilsTest {
         query2 = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "ABL1-BCR", null, "structural_variant", StructuralVariantType.DELETION, "Lung Adenocarcinoma", "fusion", null, null, null);
         resp1 = IndicatorUtils.processQuery(query1, null, true, null);
         resp2 = IndicatorUtils.processQuery(query2, null, true, null);
-        pairComparison(resp1, resp2);
+        pairComparison(resp1, resp2, true);
 
         // handle mixed input for structural variant deletion
         query1 = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "EGFR", "KDD", "structural_variant", StructuralVariantType.DUPLICATION, "NSCLC", null, null, null, null);
@@ -624,6 +649,14 @@ public class IndicatorUtilsTest {
         resp1 = IndicatorUtils.processQuery(query1, null, true, null);
         resp2 = IndicatorUtils.processQuery(query2, null, true, null);
         pairComparison(resp1, resp2);
+
+        // Test using official hugo symbol and gene alias
+        query1 = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "BRAF", "V600E", null, null, "MEL", null, null, null, null);
+        query2 = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "B-RAF1", "V600E", null, null, "MEL", MISSENSE_VARIANT, null, null, null);
+        resp1 = IndicatorUtils.processQuery(query1, null, true, null);
+        resp2 = IndicatorUtils.processQuery(query2, null, true, null);
+        pairComparison(resp1, resp2, true);
+        assertEquals("The summary should not be the same, but it is.", resp1.getGeneSummary(), resp2.getGeneSummary());
 
     }
 
@@ -683,7 +716,7 @@ public class IndicatorUtilsTest {
     }
 
     private void pairComparison(IndicatorQueryResp resp1, IndicatorQueryResp resp2) {
-        pairComparison(resp1, resp1, false);
+        pairComparison(resp1, resp2, false);
     }
 
     private void pairComparison(IndicatorQueryResp resp1, IndicatorQueryResp resp2, boolean skipSummary) {

@@ -6,10 +6,7 @@ import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.service.JsonResultFactory;
-import org.mskcc.cbio.oncokb.util.AlterationUtils;
-import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
-import org.mskcc.cbio.oncokb.util.GeneUtils;
-import org.mskcc.cbio.oncokb.util.MainUtils;
+import org.mskcc.cbio.oncokb.util.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -104,7 +101,7 @@ public class VariantsApiController implements VariantsApi {
 
                             // If this variant is not annotated
                             if (alterations == null || alterations.isEmpty()) {
-                                Alteration alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getVariant(), AlterationType.getByName(query.getVariantType()), query.getConsequence(), query.getProteinStart(), query.getProteinEnd());
+                                Alteration alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getVariant(), AlterationType.getByName(query.getVariantType()), query.getConsequence(), query.getProteinStart(), query.getProteinEnd(), query.getReferenceGenome());
                                 if (alteration != null) {
                                     alterations.add(alteration);
                                 }
@@ -117,7 +114,7 @@ public class VariantsApiController implements VariantsApi {
                 }
             } else if (query.getVariant() != null) {
                 if (AlterationUtils.isInferredAlterations(query.getVariant())) {
-                    for (Gene gene : GeneUtils.getAllGenes()) {
+                    for (Gene gene : CacheUtils.getAllGenes()) {
                         // If inferred alteration has been manually curated, it should be returned in the list
                         Alteration alteration = AlterationUtils.findAlteration(gene, query.getReferenceGenome(), query.getVariant());
                         if (alteration != null) {
@@ -127,7 +124,7 @@ public class VariantsApiController implements VariantsApi {
                         alterationSet.addAll(AlterationUtils.getAlterationsByKnownEffectInGene(gene, AlterationUtils.getInferredAlterationsKnownEffect(query.getVariant()), true));
                     }
                 } else if (AlterationUtils.isLikelyInferredAlterations(query.getVariant())) {
-                    for (Gene gene : GeneUtils.getAllGenes()) {
+                    for (Gene gene : CacheUtils.getAllGenes()) {
                         alterationSet.addAll(AlterationUtils.getAlterationsByKnownEffectInGene(gene, AlterationUtils.getInferredAlterationsKnownEffect(query.getVariant()), false));
                     }
                 } else {

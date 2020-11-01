@@ -62,14 +62,7 @@ public class DrugUtils {
 
     public static Set<Drug> getAllDrugs() {
         Set<Drug> drugs = new HashSet<>();
-        if (CacheUtils.isEnabled()) {
-            drugs = CacheUtils.getAllDrugs();
-        } else {
-            List<Drug> databaseDrugs = ApplicationContextSingleton.getDrugBo().findAll();
-            if (databaseDrugs != null) {
-                drugs = new HashSet<>(databaseDrugs);
-            }
-        }
+        drugs = CacheUtils.getAllDrugs();
         return drugs;
     }
 

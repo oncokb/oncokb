@@ -72,11 +72,7 @@ public class TumorTypeUtils {
      * @return
      */
     public static List<TumorType> getAllCancerTypes() {
-        if (CacheUtils.isEnabled()) {
-            return CacheUtils.getAllCancerTypes();
-        } else {
-            return getOncoTreeCancerTypes(ApplicationContextSingleton.getEvidenceBo().findAllCancerTypes());
-        }
+        return CacheUtils.getAllCancerTypes();
     }
 
     /**
@@ -85,11 +81,7 @@ public class TumorTypeUtils {
      * @return
      */
     public static List<TumorType> getAllSubtypes() {
-        if (CacheUtils.isEnabled()) {
-            return CacheUtils.getAllSubtypes();
-        } else {
-            return getOncoTreeSubtypesByCode(ApplicationContextSingleton.getEvidenceBo().findAllSubtypes());
-        }
+        return CacheUtils.getAllSubtypes();
     }
 
     /**
@@ -256,14 +248,10 @@ public class TumorTypeUtils {
      * @return
      */
     public static List<TumorType> getMappedOncoTreeTypesBySource(String tumorType) {
-        if (CacheUtils.isEnabled()) {
-            if (!CacheUtils.containMappedTumorTypes(tumorType)) {
-                CacheUtils.setMappedTumorTypes(tumorType, findTumorTypes(tumorType));
-            }
-            return CacheUtils.getMappedTumorTypes(tumorType);
-        } else {
-            return findTumorTypes(tumorType);
+        if (!CacheUtils.containMappedTumorTypes(tumorType)) {
+            CacheUtils.setMappedTumorTypes(tumorType, findTumorTypes(tumorType));
         }
+        return CacheUtils.getMappedTumorTypes(tumorType);
     }
 
     public static Boolean isSolidTumor(TumorType tumorType) {
