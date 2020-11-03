@@ -180,58 +180,49 @@ public class EvidenceUtils {
     private static Set<Evidence> getEvidence(ReferenceGenome referenceGenome, EvidenceQueryRes query, Set<EvidenceType> evidenceTypes, Set<LevelOfEvidence> levelOfEvidences) {
         Set<Evidence> evidences = new HashSet<>();
 
-        Map<Integer, Gene> genes = new HashMap<>(); //Get gene evidences
-        Map<Integer, Alteration> alterations = new HashMap<>();
+        Set<Gene> genes = new HashSet<>(); //Get gene evidences
+        Set<Alteration> alterations = new HashSet<>();
         Set<TumorType> upwardTumorTypes = new HashSet<>();
         Set<TumorType> downwardTumorTypes = new HashSet<>();
 
         if (query.getGene() != null) {
-            int entrezGeneId = query.getGene().getEntrezGeneId();
-            if (!genes.containsKey(entrezGeneId)) {
-                genes.put(entrezGeneId, query.getGene());
-            }
-
-
-            Set<Alteration> allAlts = new HashSet<>();
-            if (query.getAlterations() != null) {
-                allAlts.addAll(query.getAlterations());
-            }
-            if (query.getAlleles() != null) {
-                allAlts.addAll(query.getAlleles());
-            }
-
-            for (Alteration alt : allAlts) {
-                int altId = alt.getId();
-                if (!alterations.containsKey(altId)) {
-                    alterations.put(altId, alt);
+            genes.add(query.getGene());
+            if (query.getAlterations().isEmpty() && query.getAlleles().isEmpty()) {
+                alterations.addAll(AlterationUtils.getAllAlterations(referenceGenome, query.getGene()));
+            } else {
+                if (query.getAlterations() != null) {
+                    alterations.addAll(query.getAlterations());
+                }
+                if (query.getAlleles() != null) {
+                    alterations.addAll(query.getAlleles());
                 }
             }
+        } else {
+            genes.addAll(CacheUtils.getAllGenes());
+            alterations.addAll(AlterationUtils.getAllAlterations());
         }
 
         if (query.getOncoTreeTypes() != null) {
-            for (TumorType tumorType : query.getOncoTreeTypes()) {
-                if (!upwardTumorTypes.contains(tumorType)) {
-                    upwardTumorTypes.add(tumorType);
-                }
-            }
+            upwardTumorTypes.addAll(query.getOncoTreeTypes());
         }
         downwardTumorTypes.addAll(TumorTypeUtils.findTumorTypes(query.getQuery().getTumorType(), DOWNWARD));
 
         // Get all gene related evidences
         Map<Gene, Set<Evidence>> mappedEvidences =
-            EvidenceUtils.getEvidenceByGenesAndEvidenceTypes(new HashSet<>(genes.values()), Sets.intersection(EvidenceTypeUtils.getGeneEvidenceTypes(), evidenceTypes));
+            EvidenceUtils.getEvidenceByGenesAndEvidenceTypes(genes, Sets.intersection(EvidenceTypeUtils.getGeneEvidenceTypes(), evidenceTypes));
         for (Map.Entry<Gene, Set<Evidence>> cursor : mappedEvidences.entrySet()) {
             evidences.addAll(cursor.getValue());
         }
 
-        List<Alteration> uniqueAlterations = new ArrayList<>(alterations.values());
-        List<Alteration> uniqueAlterationsWithoutAlternativeAlleles = new ArrayList<>(alterations.values());
-        AlterationUtils.removeAlternativeAllele(referenceGenome, query.getExactMatchedAlteration(), uniqueAlterationsWithoutAlternativeAlleles);
+        List<Alteration> uniqueAlterationsWithoutAlternativeAlleles = new ArrayList<>(alterations);
+        if (query.getExactMatchedAlteration() != null) {
+            AlterationUtils.removeAlternativeAllele(referenceGenome, query.getExactMatchedAlteration(), uniqueAlterationsWithoutAlternativeAlleles);
+        }
         // Get all mutation related evidences
 
         Set<EvidenceType> common = Sets.intersection(EvidenceTypeUtils.getMutationEvidenceTypes(), evidenceTypes);
         if (common.size() > 0) {
-            evidences.addAll(getEvidence(uniqueAlterations, common, null));
+            evidences.addAll(getEvidence(new ArrayList<>(alterations), common, null));
         }
 
         if (uniqueAlterationsWithoutAlternativeAlleles.size() > 0) {
@@ -256,18 +247,6 @@ public class EvidenceUtils {
 
                 evidences.addAll(getEvidence(uniqueAlterationsWithoutAlternativeAlleles, common, upwardTumorTypes, levelOfEvidences));
             }
-        } else if (query.getOncoTreeTypes() != null && query.getOncoTreeTypes().size() > 0) {
-            final Set<EvidenceType> tumorTypeEvidenceTypes = Sets.intersection(EvidenceTypeUtils.getTumorTypeEvidenceTypes(), evidenceTypes);
-            evidences.addAll(CacheUtils.getAllEvidences().stream().filter(evidence -> tumorTypeEvidenceTypes.contains(evidence.getEvidenceType()) && upwardTumorTypes.contains(evidence.getOncoTreeType())).collect(toSet()));
-        } else {
-            // return all evidences requested by the evidence type
-            // this is when user only specify the evidence type in the query
-            final Set<EvidenceType> tumorTypeEvidenceTypes = Sets.intersection(EvidenceTypeUtils.getTumorTypeEvidenceTypes(), evidenceTypes);
-
-            evidences.addAll(CacheUtils.getAllEvidences().stream()
-                .filter(evidence -> tumorTypeEvidenceTypes.contains(evidence.getEvidenceType()))
-                .filter(evidence -> levelOfEvidences.isEmpty() ? true : levelOfEvidences.contains(evidence.getLevelOfEvidence()))
-                .collect(toSet()));
         }
 
         return evidences;
