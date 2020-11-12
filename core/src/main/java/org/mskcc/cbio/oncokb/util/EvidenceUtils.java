@@ -87,21 +87,6 @@ public class EvidenceUtils {
 
             relevantEvidences = getEvidence(query.getReferenceGenome(), evidenceQueryRes, evidenceTypes, levelOfEvidences);
 
-            Set<Evidence> evidencesToRemove = new HashSet<>();
-            Set<Alteration> excludeAlternativeAlleles = new HashSet<>();
-            for (Evidence tempEvidence : relevantEvidences) {
-                if (LevelUtils.isResistanceLevel(tempEvidence.getLevelOfEvidence())) {
-                    excludeAlternativeAlleles.addAll(Sets.intersection(tempEvidence.getAlterations(), new HashSet<>(alternativeAlleles)));
-                }
-            }
-
-            for (Evidence tempEvidence : relevantEvidences) {
-                if (!Collections.disjoint(excludeAlternativeAlleles, tempEvidence.getAlterations())) {
-                    evidencesToRemove.add(tempEvidence);
-                }
-            }
-            relevantEvidences.removeAll(evidencesToRemove);
-
             return filterEvidence(relevantEvidences, evidenceQueryRes);
         } else {
             return new HashSet<>();
