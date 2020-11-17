@@ -505,7 +505,7 @@ public class IndicatorUtilsTest {
         assertTrue("Highest resistance levels are not the same, but they should.", LevelUtils.areSameLevels(resp1.getHighestResistanceLevel(), resp2.getHighestResistanceLevel()));
 
 
-        //Other Biomarker tests
+        //Other Biomarker tests - MSI-H
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, null, "MSI-H", null, null, "Colorectal Cancer", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
         assertTrue("The geneExist is not false, but it should be.", indicatorQueryResp.getGeneExist() == false);
@@ -523,6 +523,16 @@ public class IndicatorUtilsTest {
         assertEquals("The gene summary is not empty, but it should be.", "", indicatorQueryResp.getGeneSummary());
         assertEquals("The variant summary is not expected.", "Genetic or epigenetic alterations resulting in loss of function of mismatch repair (MMR) genes can lead to a microsatellite instability-high (MSI-H)/mismatch repair deficient (MMR-D) phenotype.", indicatorQueryResp.getVariantSummary());
         assertEquals("The tumor type summary is not expected.", "The anti-PD-1 antibody pembrolizumab is an FDA-approved drug for therapy of adult and pediatric patients with unresectable or metastatic MSI-H/MMR-D solid cancers that have progressed following prior treatment.", indicatorQueryResp.getTumorTypeSummary());
+
+        //Other Biomarker tests - TMB-H
+        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, null, "TMB-H", null, null, "Colorectal Cancer", null, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
+        assertTrue("The geneExist is not false, but it should be.", indicatorQueryResp.getGeneExist() == false);
+        assertEquals("The oncogenicity is not Oncogenic, but it should be.", Oncogenicity.LIKELY.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The highest sensitive level is not 1, but it should be.", LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
+        assertEquals("The gene summary is not empty, but it should be.", "", indicatorQueryResp.getGeneSummary());
+        assertEquals("The variant summary is not expected.", "An association between high Tumor Mutational Burden (TMB), defined as the number of somatic mutations per megabase (mut/Mb) of genome sequenced, and response to immune checkpoint inhibitors has been reported in several solid tumor types.", indicatorQueryResp.getVariantSummary());
+        assertEquals("The tumor type summary is not expected.", "The TMB for this sample is ≥10 mut/Mb. The anti-PD-1 antibody pembrolizumab is FDA-approved for the treatment of adult and pediatric patients with unresectable or metastatic solid tumors with a mutation burden of ≥10 mut/Mb.", indicatorQueryResp.getTumorTypeSummary());
 
         // Test indicator endpoint supports HGVS
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, null, null, null, null, "Melanoma", null, null, null, "7:g.140453136A>T");

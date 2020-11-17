@@ -107,7 +107,7 @@ EGFR	N771delinsSTH	Lung Adenocarcinoma	R1: Erlotinib; R1: Gefitinib; R1: Afatini
 ABL1	T315I	Chronic Myelogenous Leukemia	R1: Imatinib; R1: Dasatinib; R1: Nilotinib; R1: Bosutinib; 1: Ponatinib;
 ABL1	T315I	Melanoma
 
-ABL1	T315A	Chronic Myelogenous Leukemia	2: Bosutinib; 2: Nilotinib;
+ABL1	T315A	Chronic Myelogenous Leukemia	R1: Dasatinib; R1: Imatinib; 2: Bosutinib; 2: Nilotinib;
 ABL1	T315A	Melanoma
 
 ABL1	T315V	Chronic Myelogenous Leukemia
@@ -136,10 +136,14 @@ ABL1	BCR-ABL1 Fusion	BLL	1: Imatinib; 1: Dasatinib; 1: Ponatinib; 2: Bosutinib; 
 ABL1	BCR-ABL1 Fusion	BLLNOS	1: Imatinib; 1: Dasatinib; 1: Ponatinib; 2: Bosutinib; 2: Nilotinib;
 ABL1	BCR-ABL1 Fusion	BLLBCRABL1	1: Imatinib; 1: Dasatinib; 1: Ponatinib; 2: Bosutinib; 2: Nilotinib;
 ABL1	BCR-ABL1 Fusion	Colorectal Cancer
-ABL1	E255K	CML	2: Bosutinib; 2: Dasatinib;
-ABL1	E255K	CMLBCRABL1	2: Bosutinib; 2: Dasatinib;
+ABL1	E255K	CML	R1: Imatinib; R1: Nilotinib; 2: Bosutinib; 2: Dasatinib;
+ABL1	E255K	CMLBCRABL1	R1: Imatinib; R1: Nilotinib; 2: Bosutinib; 2: Dasatinib;
 ABL1	E255K	AML
 ABL1	E255K	Colorectal Cancer
+ABL1	E255D	CML
+ABL1	E255D	CMLBCRABL1
+ABL1	E255D	AML
+ABL1	E255D	Colorectal Cancer
 KMT2	KMT2-MLLT3 Fusion	AML
 KMT2	KMT2-MLLT3 Fusion	APLPMLRARA
 KMT2	KMT2-MLLT3 Fusion	Colorectal Cacner
@@ -215,7 +219,7 @@ EGFR	A750G	NSCLC
 MTOR	E2014K	Bladder Cancer	3A: Everolimus; 4: Temsirolimus;
 MTOR	E2014L	Bladder Cancer	4: Everolimus; 4: Temsirolimus;
 MTOR	E2014K	NSCLC	3B: Everolimus; 4: Temsirolimus;
-ABL1	Y253H	CML	2: Bosutinib; 2: Dasatinib;
+ABL1	Y253H	CML	R1: Imatinib; R1: Nilotinib; 2: Bosutinib; 2: Dasatinib;
 ABL1	Y253H	TLL
 ABL1	Y253M	CML
 BRAF	L597R	Melanoma	3A: Trametinib; 4: PLX8394;
@@ -232,6 +236,6 @@ KRAS	G12A	Histiocytosis	3A: Cobimetinib;
 IDH1	R132H	AML	1: Ivosidenib;
 IDH1	R132G	AML	1: Ivosidenib;
 FGFR2	FGFR2-BICC1 Fusion	Cholangiocarcinoma	1: Pemigatinib; 3A: Debio1347; 3A: BGJ398; 3A: AZD4547; 3A: Erdafitinib;
-ERBB2	Amplification	Breast Cancer	1: Trastuzumab; 1: Ado-Trastuzumab Emtansine; 1: Lapatinib; 1: Pertuzumab+Trastuzumab; 1: Trastuzumab+Lapatinib; 1: Neratinib; 1: Capecitabine+Trastuzumab+Tucatinib; 1: Trastuzumab Deruxtecan; 3B: Carboplatin-Taxol Regimen+Trastuzumab;
+ERBB2	Amplification	Breast Cancer	1: Trastuzumab; 1: Ado-Trastuzumab Emtansine; 1: Lapatinib; 1: Pertuzumab+Trastuzumab; 1: Neratinib; 1: Capecitabine+Trastuzumab+Tucatinib; 1: Trastuzumab Deruxtecan; 3B: Carboplatin-Taxol Regimen+Trastuzumab; 3B: Lapatinib+Trastuzumab;
 RET	KIF5B-RET Fusion	NSCLC	1: Selpercatinib; 1: Pralsetinib; 2: Cabozantinib; 2: Vandetanib;
 RET	KIF5B-RET Fusion	Bladder Cancer	3B: Cabozantinib; 3B: Vandetanib; 3B: Selpercatinib; 3B: Pralsetinib;
