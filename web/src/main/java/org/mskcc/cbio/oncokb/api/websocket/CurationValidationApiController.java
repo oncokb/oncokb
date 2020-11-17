@@ -23,6 +23,8 @@ public class CurationValidationApiController {
         // Get session and WebSocket connection
         this.session = session;
 
+        validateHugoSymbols();
+
         validateGeneInfo();
 
         validateEmptyClinicalVariants();
@@ -122,6 +124,17 @@ public class CurationValidationApiController {
             sendText(generateInfo(INCORRECT_ALTERATION_NAME_FORMAT, ValidationStatus.IS_COMPLETE, new JSONArray()));
         } else {
             sendText(generateInfo(INCORRECT_ALTERATION_NAME_FORMAT, ValidationStatus.IS_ERROR, data));
+        }
+    }
+
+    private void validateHugoSymbols() {
+        sendText(generateInfo(OUTDATED_HUGO_SYMBOLS, ValidationStatus.IS_PENDING, new JSONArray()));
+
+        JSONArray data = ValidationUtils.validateHugoSymbols();
+        if (data.length() == 0) {
+            sendText(generateInfo(OUTDATED_HUGO_SYMBOLS, ValidationStatus.IS_COMPLETE, new JSONArray()));
+        } else {
+            sendText(generateInfo(OUTDATED_HUGO_SYMBOLS, ValidationStatus.IS_ERROR, data));
         }
     }
 
