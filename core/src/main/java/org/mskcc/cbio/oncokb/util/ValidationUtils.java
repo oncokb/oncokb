@@ -10,7 +10,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mskcc.cbio.oncokb.bo.ArticleBo;
 import org.mskcc.cbio.oncokb.model.*;
-import sun.misc.Cache;
 
 import java.io.IOException;
 import java.util.*;
