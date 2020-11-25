@@ -170,6 +170,11 @@ public class EvidenceUtils {
         Set<TumorType> upwardTumorTypes = new HashSet<>();
         Set<TumorType> downwardTumorTypes = new HashSet<>();
 
+        if (query.getOncoTreeTypes() != null) {
+            upwardTumorTypes.addAll(query.getOncoTreeTypes());
+        }
+        downwardTumorTypes.addAll(TumorTypeUtils.findTumorTypes(query.getQuery().getTumorType(), DOWNWARD));
+
         if (query.getGene() != null) {
             genes.add(query.getGene());
             if (query.getAlterations().isEmpty() && query.getAlleles().isEmpty()) {
@@ -183,14 +188,32 @@ public class EvidenceUtils {
                 }
             }
         } else {
-            genes.addAll(CacheUtils.getAllGenes());
-            alterations.addAll(AlterationUtils.getAllAlterations());
+            // this is really a performance blow if we compute based on all genes and all alterations, there is a collection disjoint in the base layer
+            // in this case, let's directly return all evidences with query, evidenceTypes and level of evidences filtered
+            Set<Evidence> evidenceToReturn = CacheUtils.getAllEvidences();
+            if (evidenceTypes != null && evidenceTypes.size() > 0) {
+                evidenceToReturn = evidenceToReturn.stream().filter(evidence -> evidenceTypes.contains(evidence.getEvidenceType())).collect(toSet());
+            }
+            if (levelOfEvidences != null && levelOfEvidences.size() > 0) {
+                evidenceToReturn = evidenceToReturn.stream().filter(evidence -> levelOfEvidences.contains(evidence.getLevelOfEvidence())).collect(toSet());
+            }
+            if (StringUtils.isNotEmpty(query.getQuery().getTumorType())) {
+                evidenceToReturn = evidenceToReturn.stream().filter(evidence -> {
+                    if (evidence.getEvidenceType() != null) {
+                        if (evidence.getEvidenceType().equals(EvidenceType.DIAGNOSTIC_IMPLICATION) && evidence.getLevelOfEvidence() != null && evidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_Dx1)) {
+                            return downwardTumorTypes.contains(evidence.getOncoTreeType());
+                        } else if (EvidenceTypeUtils.getTumorTypeEvidenceTypes().contains(evidence.getEvidenceType())) {
+                            return upwardTumorTypes.contains(evidence.getOncoTreeType());
+                        } else {
+                            return true;
+                        }
+                    } else {
+                        return true;
+                    }
+                }).collect(toSet());
+            }
+            return evidenceToReturn;
         }
-
-        if (query.getOncoTreeTypes() != null) {
-            upwardTumorTypes.addAll(query.getOncoTreeTypes());
-        }
-        downwardTumorTypes.addAll(TumorTypeUtils.findTumorTypes(query.getQuery().getTumorType(), DOWNWARD));
 
         // Get all gene related evidences
         Map<Gene, Set<Evidence>> mappedEvidences =
@@ -790,7 +813,11 @@ public class EvidenceUtils {
         List<EvidenceQueryRes> evidenceQueries = new ArrayList<>();
 
         if (evidenceTypes == null) {
-            evidenceTypes = new HashSet<>(EvidenceTypeUtils.getAllEvidenceTypes());
+            if (levelOfEvidences == null) {
+                evidenceTypes = new HashSet<>(EvidenceTypeUtils.getAllEvidenceTypes());
+            } else {
+                evidenceTypes = new HashSet<>(EvidenceTypeUtils.getTreatmentEvidenceTypes());
+            }
         }
 
         levelOfEvidences = levelOfEvidences == null ? levelOfEvidences :
