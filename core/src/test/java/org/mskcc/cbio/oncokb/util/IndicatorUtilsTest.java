@@ -393,6 +393,13 @@ public class IndicatorUtilsTest {
         assertTrue("There should not be any treatments", indicatorQueryResp.getTreatments().isEmpty());
 
         // Give a default mutation effect when it is not available: Unknown
+        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "CHEK2", "R346C", null, null, "Myelodysplastic Workup", null, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
+        assertEquals("The Oncogenicity is not empty, but it should be.", Oncogenicity.PREDICTED.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("There should not be any sensitive therapeutic associated.", null, indicatorQueryResp.getHighestSensitiveLevel());
+        assertEquals("There should not be any resistance therapeutic associated.", null, indicatorQueryResp.getHighestResistanceLevel());
+
+        // For hotspot mutation, if the tumor type is unknown from oncotree, we should not propagate the treatment from oncogenic mutations
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "PIK3R1", "W583del", null, null, null, null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
         assertTrue("The mutation effect is null, but it should not be.", indicatorQueryResp.getMutationEffect() != null);
