@@ -322,13 +322,11 @@ public class EvidenceUtils {
             Boolean flag = true;
             if (Collections.disjoint(Collections.singleton(tmpEvidence.getOncoTreeType()), tumorTypes)) {
                 if (tmpEvidence.getLevelOfEvidence() != null) {
-                    if (tumorForm != null) {
-                        LevelOfEvidence propagationLevel = getPropagationLevel(tmpEvidence, tumorForm);
-                        if (propagationLevel != null) {
-                            tmpEvidence.setLevelOfEvidence(propagationLevel);
-                        } else {
-                            flag = false;
-                        }
+                    LevelOfEvidence propagationLevel = getPropagationLevel(tmpEvidence, tumorForm);
+                    if (propagationLevel != null) {
+                        tmpEvidence.setLevelOfEvidence(propagationLevel);
+                    } else {
+                        flag = false;
                     }
 
                     // Don't include any resistance evidence if tumor type is not matched.
@@ -407,9 +405,22 @@ public class EvidenceUtils {
         return filtered;
     }
 
-    public static LevelOfEvidence getPropagationLevel(Evidence evidence, TumorForm queriedTumorForm) {
-        if (evidence == null || queriedTumorForm == null) {
+    private static LevelOfEvidence resolveUnknownTumorFormLevel(LevelOfEvidence solidPropagationLevel, LevelOfEvidence liquidPropagationLevel) {
+        if (solidPropagationLevel == null || liquidPropagationLevel == null) {
             return null;
+        } else if (solidPropagationLevel.equals(liquidPropagationLevel)) {
+            return liquidPropagationLevel;
+        } else {
+            return null;
+        }
+    }
+
+    public static LevelOfEvidence getPropagationLevel(Evidence evidence, TumorForm queriedTumorForm) {
+        if (evidence == null) {
+            return null;
+        }
+        if (queriedTumorForm == null) {
+            return resolveUnknownTumorFormLevel(evidence.getSolidPropagationLevel(), evidence.getLiquidPropagationLevel());
         }
         return queriedTumorForm.equals(TumorForm.SOLID) ? evidence.getSolidPropagationLevel() : evidence.getLiquidPropagationLevel();
     }
