@@ -58,7 +58,7 @@ public class HttpUtils {
             HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 
             // Set timeout to 10 seconds
-            con.setReadTimeout(10000);
+            con.setReadTimeout(10 * 60 * 1000);
             con.connect();
 
             int responseCode = con.getResponseCode();

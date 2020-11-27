@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Sets;
 import com.mysql.jdbc.StringUtils;
-import org.apache.commons.collections.CollectionUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mskcc.cbio.oncokb.bo.ArticleBo;
@@ -39,6 +38,38 @@ public class ValidationUtils {
                     }
                     if (evidence.getArticles().isEmpty()) {
                         data.put(getErrorMessage(getTarget(hugoSymbol, alterationsName, tumorTypeName, treatmentName), NO_REFERENCE));
+                    }
+                }
+            }
+        }
+        return data;
+    }
+
+    public static JSONArray getMismatchRefAAData() {
+        JSONArray data = new JSONArray();
+        for (Alteration alteration : AlterationUtils.getAllAlterations()) {
+            if (alteration.getGene().getEntrezGeneId() > 0 && alteration.getProteinStart() >= 0 && alteration.getReferenceGenomes() != null && alteration.getRefResidues() != null) {
+                String sequence = "";
+                ReferenceGenome referenceGenome = null;
+                for (ReferenceGenome ref : alteration.getReferenceGenomes()) {
+                    sequence = SequenceUtils.getSequence(ref, alteration.getGene().getEntrezGeneId());
+                    if (!StringUtils.isNullOrEmpty(sequence)) {
+                        referenceGenome = ref;
+                        break;
+                    }
+                }
+                if (StringUtils.isNullOrEmpty(sequence)) {
+                    data.put(getErrorMessage(getTarget(alteration.getGene().getHugoSymbol(), alteration.getName()), "No sequence available for " + alteration.getGene().getHugoSymbol()));
+                } else if (referenceGenome != null) {
+                    if (sequence.length() < alteration.getProteinStart()) {
+                        data.put(getErrorMessage(getTarget(alteration.getGene().getHugoSymbol(), alteration.getName()), "The gene only has " + sequence.length() + " AAs. But the variant protein start is " + alteration.getProteinStart()));
+                    } else if (sequence.length() < alteration.getProteinEnd()) {
+                        data.put(getErrorMessage(getTarget(alteration.getGene().getHugoSymbol(), alteration.getName()), "The gene only has " + sequence.length() + " AAs. But the variant protein end is " + alteration.getProteinEnd()));
+                    } else {
+                        String referenceAA = SequenceUtils.getAminoAcid(referenceGenome, alteration.getGene().getEntrezGeneId(), alteration.getProteinStart(), alteration.getRefResidues().length());
+                        if (!referenceAA.equals(alteration.getRefResidues())) {
+                            data.put(getErrorMessage(getTarget(alteration.getGene().getHugoSymbol(), alteration.getName()), "The reference amino acid does not match with the curated variant. The expected AA is " + referenceAA));
+                        }
                     }
                 }
             }

@@ -35,6 +35,8 @@ public class CurationValidationApiController {
 
         validateAlterationName();
 
+        validateMismatchedRefAA();
+
         compareActionableGenes();
 
         try {
@@ -124,6 +126,17 @@ public class CurationValidationApiController {
             sendText(generateInfo(INCORRECT_ALTERATION_NAME_FORMAT, ValidationStatus.IS_COMPLETE, new JSONArray()));
         } else {
             sendText(generateInfo(INCORRECT_ALTERATION_NAME_FORMAT, ValidationStatus.IS_ERROR, data));
+        }
+    }
+
+    private void validateMismatchedRefAA() {
+        sendText(generateInfo(MISMATCH_REF_AA, ValidationStatus.IS_PENDING, new JSONArray()));
+
+        JSONArray data = ValidationUtils.getMismatchRefAAData();
+        if (data.length() == 0) {
+            sendText(generateInfo(MISMATCH_REF_AA, ValidationStatus.IS_COMPLETE, new JSONArray()));
+        } else {
+            sendText(generateInfo(MISMATCH_REF_AA, ValidationStatus.IS_ERROR, data));
         }
     }
 
