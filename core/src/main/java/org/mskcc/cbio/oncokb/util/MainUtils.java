@@ -475,7 +475,7 @@ public class MainUtils {
         if (gene != null) {
             List<Alteration> alterations;
             alterations = AlterationUtils.excludeVUS(gene, new ArrayList<>(AlterationUtils.getAllAlterations(null, gene)));
-            Set<EvidenceType> evidenceTypes = EvidenceTypeUtils.getTreatmentEvidenceTypes();
+            Set<EvidenceType> evidenceTypes = EvidenceTypeUtils.getImplicationEvidenceTypes();
             Map<Alteration, Map<TumorType, Map<LevelOfEvidence, Set<Evidence>>>> evidences = new HashMap<>();
             Set<LevelOfEvidence> publicLevels = LevelUtils.getPublicLevels();
 
