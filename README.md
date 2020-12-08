@@ -31,7 +31,7 @@ cp -r core/src/main/resources/properties-EXAMPLE core/src/main/resources/propert
     * google.p_twelve : Your P12 private key path (You can generate this file from google developer console, more detials in Wiki)
     * google.service_account_email : Your service account email from google developer console.
     * cancerhotspots.single : [Cancer hotspots service](http://cancerhotspots.org). Default: http://cancerhotspots.org/api/hotspots/single
-    * oncotree.api: [OncoTree service](http://oncotree.mskcc.org/oncotree/). Default: http://oncotree.mskcc.org/oncotree/api/
+    * oncotree.api: [OncoTree service](http://oncotree.info/). Default: http://oncotree.info/api/
     * google.username & google.password(Optional) : Google account info. It is used to send email
     * data.version & data.version_date(Optional) : These two properties will be attached to API call.
     
