@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
@@ -37,7 +38,7 @@ public class DriveAnnotationParser {
         @RequestParam(value = "gene") String gene,
         @RequestParam(value = "releaseGene", defaultValue = "FALSE") Boolean releaseGene,
         @RequestParam(value = "vus", required = false) String vus
-    ) throws IOException, JSONException {
+    ) throws Exception {
 
         if (gene == null) {
             System.out.println("#No gene info available.");
@@ -158,7 +159,7 @@ public class DriveAnnotationParser {
         }
     }
 
-    private static void parseGene(JSONObject geneInfo, Boolean releaseGene, JSONArray vus) throws IOException, JSONException {
+    private static void parseGene(JSONObject geneInfo, Boolean releaseGene, JSONArray vus) throws Exception {
         GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
         Integer nestLevel = 1;
         if (geneInfo.has("name") && !geneInfo.getString("name").trim().isEmpty()) {
@@ -282,7 +283,7 @@ public class DriveAnnotationParser {
         }
     }
 
-    private static void parseMutations(Gene gene, JSONArray mutations, Integer nestLevel) throws JSONException {
+    private static void parseMutations(Gene gene, JSONArray mutations, Integer nestLevel) throws Exception {
         if (mutations != null) {
             System.out.println(spaceStrByNestLevel(nestLevel) + mutations.length() + " mutations.");
             for (int i = 0; i < mutations.length(); i++) {
@@ -293,7 +294,7 @@ public class DriveAnnotationParser {
         }
     }
 
-    private static void parseMutation(Gene gene, JSONObject mutationObj, Integer nestLevel) throws JSONException {
+    private static void parseMutation(Gene gene, JSONObject mutationObj, Integer nestLevel) throws Exception {
         String mutationStr = mutationObj.has("name") ? mutationObj.getString("name").trim() : null;
 
         if (mutationStr != null && !mutationStr.isEmpty() && !mutationStr.contains("?")) {
@@ -387,12 +388,30 @@ public class DriveAnnotationParser {
                 }
                 for (int i = 0; i < cancers.length(); i++) {
                     JSONArray subTumorTypes = cancers.getJSONObject(i).getJSONArray("cancerTypes");
+                    List<TumorType> tumorTypes = new ArrayList<>();
                     for (int j = 0; j < subTumorTypes.length(); j++) {
                         JSONObject subTT = subTumorTypes.getJSONObject(j);
-                        parseCancer(gene, alterations, cancers.getJSONObject(i),
-                            subTT.has("mainType") ? subTT.getString("mainType") : null,
-                            (subTT.has("code") && !subTT.getString("code").equals("")) ? subTT.getString("code") : null, nestLevel + 1);
+                        String code = (subTT.has("code") && !subTT.getString("code").equals("")) ? subTT.getString("code") : null;
+                        String mainType = subTT.has("mainType") ? subTT.getString("mainType") : null;
+                        if (code != null) {
+                            TumorType matchedTumorType = TumorTypeUtils.getByCode(code);
+                            if (matchedTumorType == null) {
+                                throw new Exception("The tumor type code does not exist: " + code);
+                            } else {
+                                tumorTypes.add(matchedTumorType);
+                            }
+                        } else if(mainType != null){
+                            TumorType matchedTumorType = TumorTypeUtils.getByMainType(mainType);
+                            if (matchedTumorType == null) {
+                                throw new Exception("The tumor main type does not exist: " + mainType);
+                            } else {
+                                tumorTypes.add(matchedTumorType);
+                            }
+                        } else {
+                            throw new Exception("The tumor type does not exist. Maintype: " + mainType + ". Subtype: " + code);
+                        }
                     }
+                    parseCancer(gene, alterations, cancers.getJSONObject(i), tumorTypes, nestLevel + 1);
                 }
             }
         } else {
@@ -454,7 +473,7 @@ public class DriveAnnotationParser {
         }
     }
 
-    private static void saveTumorLevelSummaries(JSONObject cancerObj, String summaryKey, Gene gene, Set<Alteration> alterations, TumorType oncoTreeType, EvidenceType evidenceType, Integer nestLevel) {
+    private static void saveTumorLevelSummaries(JSONObject cancerObj, String summaryKey, Gene gene, Set<Alteration> alterations, List<TumorType> tumorTypes, EvidenceType evidenceType, Integer nestLevel) {
         if (cancerObj.has(summaryKey) && !cancerObj.getString(summaryKey).isEmpty()) {
             EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
             System.out.println(spaceStrByNestLevel(nestLevel + 1) + " " + summaryKey);
@@ -472,12 +491,8 @@ public class DriveAnnotationParser {
                 System.out.println(spaceStrByNestLevel(nestLevel + 2) +
                     "Last update on: " + MainUtils.getTimeByDate(lastEdit));
             }
-//            if (lastReview != null) {
-//                System.out.println(spaceStrByNestLevel(nestLevel + 2) +
-//                    "Last review on: " + MainUtils.getTimeByDate(lastReview));
-//            }
-            if (oncoTreeType.getMainType() != null) {
-                evidence.getTumorTypes().add(oncoTreeType);
+            if (!tumorTypes.isEmpty()) {
+                evidence.setTumorTypes(new HashSet<>(tumorTypes));
             }
             setDocuments(cancerObj.getString(summaryKey), evidence);
             System.out.println(spaceStrByNestLevel(nestLevel + 2) +
@@ -486,42 +501,28 @@ public class DriveAnnotationParser {
         }
     }
 
-    private static void parseCancer(Gene gene, Set<Alteration> alterations, JSONObject cancerObj, String mainType, String code, Integer nestLevel) throws JSONException {
-        if (mainType == null || mainType.equals("")) {
+    private static void parseCancer(Gene gene, Set<Alteration> alterations, JSONObject cancerObj, List<TumorType> tumorTypes, Integer nestLevel) throws JSONException {
+        if (tumorTypes.isEmpty()) {
             return;
         }
 
-        TumorType oncoTreeType;
-
-        if (code != null && !code.equals("")) {
-            oncoTreeType = TumorTypeUtils.getByCode(code);
-        } else {
-            oncoTreeType = TumorTypeUtils.getByMainType(mainType);
-        }
-
-        if (oncoTreeType == null) {
-            System.out.println(spaceStrByNestLevel(nestLevel) + "WARNING: No mapped TumorType for " + mainType + " " + code);
-            return;
-        }
-
-        System.out.println(spaceStrByNestLevel(nestLevel) + "Cancer type: " + mainType);
-        System.out.println(spaceStrByNestLevel(nestLevel) + "Subtype code: " + code);
+        System.out.println(spaceStrByNestLevel(nestLevel) + "Tumor types: " + tumorTypes.stream().map(TumorTypeUtils::getTumorTypeName).collect(Collectors.joining(", ")));
 
         // cancer type summary
-        saveTumorLevelSummaries(cancerObj, "summary", gene, alterations, oncoTreeType, EvidenceType.TUMOR_TYPE_SUMMARY, nestLevel);
+        saveTumorLevelSummaries(cancerObj, "summary", gene, alterations, tumorTypes, EvidenceType.TUMOR_TYPE_SUMMARY, nestLevel);
         // diagnostic summary
-        saveTumorLevelSummaries(cancerObj, "diagnosticSummary", gene, alterations, oncoTreeType, EvidenceType.DIAGNOSTIC_SUMMARY, nestLevel);
+        saveTumorLevelSummaries(cancerObj, "diagnosticSummary", gene, alterations, tumorTypes, EvidenceType.DIAGNOSTIC_SUMMARY, nestLevel);
         // prognostic summary
-        saveTumorLevelSummaries(cancerObj, "prognosticSummary", gene, alterations, oncoTreeType, EvidenceType.PROGNOSTIC_SUMMARY, nestLevel);
+        saveTumorLevelSummaries(cancerObj, "prognosticSummary", gene, alterations, tumorTypes, EvidenceType.PROGNOSTIC_SUMMARY, nestLevel);
 
         // Prognostic implications
-        parseImplication(gene, alterations, oncoTreeType,
+        parseImplication(gene, alterations, tumorTypes,
             cancerObj.has("prognostic") ? cancerObj.getJSONObject("prognostic") : null,
             getUUID(cancerObj, "prognostic"),
             EvidenceType.PROGNOSTIC_IMPLICATION, nestLevel + 1);
 
         // Diagnostic implications
-        parseImplication(gene, alterations, oncoTreeType,
+        parseImplication(gene, alterations, tumorTypes,
             cancerObj.has("diagnostic") ? cancerObj.getJSONObject("diagnostic") : null,
             getUUID(cancerObj, "diagnostic"),
             EvidenceType.DIAGNOSTIC_IMPLICATION, nestLevel + 1);
@@ -548,13 +549,13 @@ public class DriveAnnotationParser {
                         evidenceType = EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE;
                         type = "Resistant";
                     }
-                    parseTherapeuticImplications(gene, alterations, oncoTreeType, implication, evidenceType, type, nestLevel + 1);
+                    parseTherapeuticImplications(gene, alterations, tumorTypes, implication, evidenceType, type, nestLevel + 1);
                 }
             }
         }
     }
 
-    private static void parseTherapeuticImplications(Gene gene, Set<Alteration> alterations, TumorType oncoTreeType, JSONObject implicationObj,
+    private static void parseTherapeuticImplications(Gene gene, Set<Alteration> alterations, List<TumorType> tumorTypes, JSONObject implicationObj,
                                                      EvidenceType evidenceType, String knownEffectOfEvidence, Integer nestLevel) throws JSONException {
         System.out.println(spaceStrByNestLevel(nestLevel) + evidenceType);
 
@@ -569,7 +570,7 @@ public class DriveAnnotationParser {
             evidence.setEvidenceType(evidenceType);
             evidence.setAlterations(alterations);
             evidence.setGene(gene);
-            evidence.getTumorTypes().add(oncoTreeType);
+            evidence.setTumorTypes(new HashSet<>(tumorTypes));
             evidence.setKnownEffect(knownEffectOfEvidence);
             evidence.setUuid(getUUID(implicationObj, "description"));
             evidence.setLastEdit(lastEdit);
@@ -611,7 +612,7 @@ public class DriveAnnotationParser {
             evidence.setEvidenceType(evidenceType);
             evidence.setAlterations(alterations);
             evidence.setGene(gene);
-            evidence.getTumorTypes().add(oncoTreeType);
+            evidence.setTumorTypes(new HashSet<>(tumorTypes));
             evidence.setKnownEffect(knownEffectOfEvidence);
             evidence.setUuid(getUUID(drugObj, "name"));
 
@@ -781,7 +782,7 @@ public class DriveAnnotationParser {
         }
     }
 
-    private static void parseImplication(Gene gene, Set<Alteration> alterations, TumorType oncoTreeType, JSONObject implication, String uuid, EvidenceType evidenceType, Integer nestLevel) throws JSONException {
+    private static void parseImplication(Gene gene, Set<Alteration> alterations, List<TumorType> tumorTypes, JSONObject implication, String uuid, EvidenceType evidenceType, Integer nestLevel) throws JSONException {
         if (evidenceType != null && implication != null &&
             ((implication.has("description") && !implication.getString("description").trim().isEmpty())
                 || (implication.has("level") && !implication.getString("level").trim().isEmpty()))) {
@@ -795,7 +796,7 @@ public class DriveAnnotationParser {
             evidence.setAlterations(alterations);
             evidence.setGene(gene);
             evidence.setUuid(uuid);
-            evidence.getTumorTypes().add(oncoTreeType);
+            evidence.setTumorTypes(new HashSet<>(tumorTypes));
             if (implication.has("level") && !implication.getString("level").trim().isEmpty()) {
                 LevelOfEvidence level = LevelOfEvidence.getByLevel(implication.getString("level").trim());
                 System.out.println(spaceStrByNestLevel(nestLevel + 1) + "Level of the implication: " + level);

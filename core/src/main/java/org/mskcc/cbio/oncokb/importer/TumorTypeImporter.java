@@ -2,11 +2,13 @@ package org.mskcc.cbio.oncokb.importer;
 
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.bo.TumorTypeBo;
+import org.mskcc.cbio.oncokb.model.TumorForm;
 import org.mskcc.cbio.oncokb.model.TumorType;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 import org.mskcc.cbio.oncokb.util.TumorTypeUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class TumorTypeImporter {
     private TumorTypeImporter() {
@@ -20,11 +22,43 @@ public class TumorTypeImporter {
         tumorTypes.forEach(tumorType -> ApplicationContextSingleton.getTumorTypeBo().save(tumorType));
 
         // Save all mainType
-        tumorTypes.stream().map(mainType -> {
-            TumorType tumorType = new TumorType();
-            tumorType.setMainType(mainType.getMainType());
-            return tumorType;
-        }).forEach(tumorType -> ApplicationContextSingleton.getTumorTypeBo().save(tumorType));
+        tumorTypes.stream()
+            .map(mainType -> {
+                TumorType tumorType = new TumorType();
+                tumorType.setName(mainType.getMainType());
+                return tumorType;
+            })
+            .distinct()
+            .filter(mainType -> StringUtils.isNotEmpty(mainType.getName()))
+            .forEach(mainType -> {
+                Set<TumorType> tumorTypesWithSameMainType = tumorTypes.stream().filter(tumorType -> StringUtils.isNotEmpty(tumorType.getMainType()) && tumorType.getMainType().equals(mainType.getName())).collect(Collectors.toSet());
+
+                Set<TumorForm> tumorForms = tumorTypesWithSameMainType.stream().map(tumorType -> tumorType.getTumorForm()).collect(Collectors.toSet());
+                if (tumorForms.size() > 0) {
+                    if (tumorForms.size() == 1) {
+                        mainType.setTumorForm(tumorForms.iterator().next());
+                    } else {
+                        mainType.setTumorForm(TumorForm.MIXED);
+                    }
+                }
+
+                Set<String> tissues = tumorTypesWithSameMainType.stream().map(tumorType -> tumorType.getTissue()).collect(Collectors.toSet());
+                if (tissues.size() > 0) {
+                    if (tissues.size() == 1) {
+                        mainType.setTissue(tissues.iterator().next());
+                    } else {
+                        mainType.setTissue(TumorForm.MIXED.name());
+                    }
+                }
+
+                Set<String> colors = tumorTypesWithSameMainType.stream().map(tumorType -> tumorType.getColor()).collect(Collectors.toSet());
+                if (colors.size() == 1) {
+                    mainType.setColor(colors.iterator().next());
+                }
+
+                mainType.setLevel(0);
+                ApplicationContextSingleton.getTumorTypeBo().save(mainType);
+            });
 
         // save all special types
         TumorTypeUtils.getAllSpecialTumorOncoTreeTypes().forEach(tumorType -> ApplicationContextSingleton.getTumorTypeBo().save(tumorType));

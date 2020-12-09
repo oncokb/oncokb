@@ -103,13 +103,13 @@ public interface PrivateUtilsApi {
     ResponseEntity<List<MatchVariantResult>> validateVariantExamplePost(@ApiParam(value = "List of queries. Please see swagger.json for request body format.", required = true) @RequestBody(required = true) MatchVariantRequest body
     );
 
-    @ApiOperation(value = "", notes = "Get the full list of OncoTree Subtypes.", response = TumorType.class, responseContainer = "List")
+    @ApiOperation(value = "", notes = "Get the full list of TumorTypes.", response = TumorType.class, responseContainer = "List")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK")})
-    @RequestMapping(value = "/utils/oncotree/subtypes",
+    @RequestMapping(value = "/utils/tumorTypes",
         produces = {"application/json"},
         method = RequestMethod.GET)
-    ResponseEntity<List<TumorType>> utilsOncoTreeSubtypesGet();
+    ResponseEntity<List<TumorType>> utilsTumorTypesGet();
 
     @ApiOperation(value = "", notes = "Get the list of evidences by levels.", response = Map.class)
     @ApiResponses(value = {

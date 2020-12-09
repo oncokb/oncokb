@@ -171,8 +171,8 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     }
 
     @Override
-    public ResponseEntity<List<TumorType>> utilsOncoTreeSubtypesGet() {
-        return new ResponseEntity<>(TumorTypeUtils.getAllSubtypes(), HttpStatus.OK);
+    public ResponseEntity<List<TumorType>> utilsTumorTypesGet() {
+        return new ResponseEntity<>(TumorTypeUtils.getAllTumorTypes(), HttpStatus.OK);
     }
 
     @Override

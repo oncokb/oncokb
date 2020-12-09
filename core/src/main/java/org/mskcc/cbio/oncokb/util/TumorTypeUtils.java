@@ -256,7 +256,11 @@ public class TumorTypeUtils {
             org.mskcc.oncotree.model.TumorType[] oncoTreeTumorTypes = gson.fromJson(new BufferedReader(new InputStreamReader(TumorTypeUtils.class.getResourceAsStream("/data/oncotree/tumortypes-flat.json"))), org.mskcc.oncotree.model.TumorType[].class);
             for (org.mskcc.oncotree.model.TumorType oncotreeTumorType : Arrays.asList(oncoTreeTumorTypes)) {
                 TumorType tumorType = new TumorType(oncotreeTumorType);
-                tumorType.setTumorForm(getTumorForm(tumorType.getTissue()));
+                if (tumorType.getLevel() != null && tumorType.getLevel() == 0) {
+                    tumorType.setTumorForm(TumorForm.MIXED);
+                } else {
+                    tumorType.setTumorForm(getTumorForm(tumorType.getTissue()));
+                }
                 tumorTypes.add(tumorType);
             }
         } catch (Exception e) {
@@ -270,7 +274,7 @@ public class TumorTypeUtils {
         Set<TumorType> types = new HashSet<>();
         for (SpecialTumorType specialTumorType : SpecialTumorType.values()) {
             TumorType tumorType = new TumorType();
-            tumorType.setMainType(specialTumorType.getTumorType());
+            tumorType.setName(specialTumorType.getTumorType());
             tumorType.setTumorForm(getTumorForm(specialTumorType));
             types.add(tumorType);
         }
@@ -299,7 +303,7 @@ public class TumorTypeUtils {
         } else if (specialTumorType.equals(SpecialTumorType.ALL_SOLID_TUMORS) || specialTumorType.equals(SpecialTumorType.OTHER_SOLID_TUMOR_TYPES)) {
             return TumorForm.SOLID;
         } else {
-            return null;
+            return TumorForm.MIXED;
         }
     }
 

@@ -10,6 +10,7 @@ public final class GeneralImporter {
 
     public static void main(String[] args) throws Exception {
         VariantConsequenceImporter.main(args);
+        TumorTypeImporter.main(args);
 
         // Save special genes
         Gene gene = new Gene();
