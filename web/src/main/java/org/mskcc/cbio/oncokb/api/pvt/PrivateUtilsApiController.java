@@ -9,8 +9,7 @@ import org.mskcc.cbio.oncokb.apiModels.download.FileName;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.PortalAlterationBo;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.tumor_type.MainType;
-import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
+import org.mskcc.cbio.oncokb.model.TumorType;
 import org.mskcc.cbio.oncokb.util.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -114,8 +113,8 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             Set<Evidence> evidences = CacheUtils.getAllEvidences();
             Set<TumorType> treatmentTumorTypes = new HashSet<>();
             for (Evidence evidence : evidences) {
-                if (evidence.getLevelOfEvidence() != null && evidence.getOncoTreeType() != null) {
-                    treatmentTumorTypes.add(evidence.getOncoTreeType());
+                if (evidence.getLevelOfEvidence() != null && !evidence.getTumorTypes().isEmpty()) {
+                    treatmentTumorTypes.addAll(evidence.getTumorTypes());
                 }
             }
             mainNumber.setTumorType(treatmentTumorTypes.size());
@@ -172,27 +171,8 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     }
 
     @Override
-    public ResponseEntity<Set<MainType>> utilsOncoTreeMainTypesGet(
-        @ApiParam(value = "Exclude special general tumor type") @RequestParam(value = "excludeSpecialTumorType", required = false) Boolean excludeSpecialTumorType
-    ) {
-        if (excludeSpecialTumorType == null) {
-            excludeSpecialTumorType = false;
-        }
-        Set<MainType> mainTypes = new HashSet<>();
-        for (TumorType tumorType : TumorTypeUtils.getAllOncoTreeCancerTypes()) {
-            mainTypes.add(tumorType.getMainType());
-        }
-        if (excludeSpecialTumorType) {
-            Set<String> specialTumorTypes = Arrays.stream(SpecialTumorType.values()).map(specialTumorType -> specialTumorType.getTumorType()).collect(Collectors.toSet());
-            return new ResponseEntity<>(mainTypes.stream().filter(mainType -> !specialTumorTypes.contains(mainType.getName())).collect(Collectors.toSet()), HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(mainTypes, HttpStatus.OK);
-        }
-    }
-
-    @Override
     public ResponseEntity<List<TumorType>> utilsOncoTreeSubtypesGet() {
-        return new ResponseEntity<>(TumorTypeUtils.getAllOncoTreeSubtypes(), HttpStatus.OK);
+        return new ResponseEntity<>(TumorTypeUtils.getAllSubtypes(), HttpStatus.OK);
     }
 
     @Override
@@ -288,7 +268,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     public ResponseEntity<List<TumorType>> utilRelevantTumorTypesGet(
         @ApiParam(value = "OncoTree tumor type name/main type/code") @RequestParam(value = "tumorType") String tumorType
     ) {
-        return new ResponseEntity<>(TumorTypeUtils.findTumorTypes(tumorType), HttpStatus.OK);
+        return new ResponseEntity<>(TumorTypeUtils.findRelevantTumorTypes(tumorType), HttpStatus.OK);
     }
 
     @Override
@@ -302,7 +282,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
 
 
 
-        List<TumorType> relevantTumorTypes = TumorTypeUtils.findTumorTypes(tumorType);
+        List<TumorType> relevantTumorTypes = TumorTypeUtils.findRelevantTumorTypes(tumorType);
 
         Query query;
         Gene gene;
@@ -338,11 +318,11 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             annotation.setBackground(background.iterator().next().getDescription());
         }
 
-        for (TumorType uniqueTumorType : response.getEvidences().stream().filter(evidence -> evidence.getOncoTreeType() != null).map(evidence -> evidence.getOncoTreeType()).collect(Collectors.toSet())) {
+        for (TumorType uniqueTumorType : response.getEvidences().stream().filter(evidence -> !evidence.getTumorTypes().isEmpty()).map(evidence -> evidence.getTumorTypes()).flatMap(Collection::stream).collect(Collectors.toSet())) {
             VariantAnnotationTumorType variantAnnotationTumorType = new VariantAnnotationTumorType();
             variantAnnotationTumorType.setRelevantTumorType(relevantTumorTypes.contains(uniqueTumorType));
             variantAnnotationTumorType.setTumorType(uniqueTumorType);
-            variantAnnotationTumorType.setEvidences(response.getEvidences().stream().filter(evidence -> evidence.getOncoTreeType() != null && evidence.getOncoTreeType().equals(uniqueTumorType)).collect(Collectors.toList()));
+            variantAnnotationTumorType.setEvidences(response.getEvidences().stream().filter(evidence -> !evidence.getTumorTypes().isEmpty() && evidence.getTumorTypes().contains(uniqueTumorType)).collect(Collectors.toList()));
             annotation.getTumorTypes().add(variantAnnotationTumorType);
         }
         return new ResponseEntity<>(annotation, HttpStatus.OK);

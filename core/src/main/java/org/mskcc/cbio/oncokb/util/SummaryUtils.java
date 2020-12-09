@@ -1,11 +1,9 @@
 package org.mskcc.cbio.oncokb.util;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.ListUtils;
-import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
+import org.mskcc.cbio.oncokb.model.TumorType;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -187,7 +185,7 @@ public class SummaryUtils {
             List<Evidence> evidences = EvidenceUtils.getEvidence(
                 Collections.singletonList(alteration),
                 Collections.singleton(evidenceType),
-                Collections.singleton(TumorTypeUtils.getMappedSpecialTumor(specialTumorType)), null);
+                Collections.singleton(TumorTypeUtils.getBySpecialTumor(specialTumorType)), null);
             if (evidences.size() > 0) {
                 return getTumorTypeSummaryFromEvidences(evidences);
             }

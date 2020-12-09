@@ -11,7 +11,7 @@ import org.json.JSONObject;
 import org.mskcc.cbio.oncokb.apiModels.NCITDrug;
 import org.mskcc.cbio.oncokb.bo.*;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
+import org.mskcc.cbio.oncokb.model.TumorType;
 import org.mskcc.cbio.oncokb.util.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -477,9 +477,8 @@ public class DriveAnnotationParser {
 //                    "Last review on: " + MainUtils.getTimeByDate(lastReview));
 //            }
             if (oncoTreeType.getMainType() != null) {
-                evidence.setCancerType(oncoTreeType.getMainType().getName());
+                evidence.getTumorTypes().add(oncoTreeType);
             }
-            evidence.setSubtype(oncoTreeType.getCode());
             setDocuments(cancerObj.getString(summaryKey), evidence);
             System.out.println(spaceStrByNestLevel(nestLevel + 2) +
                 "Has description.");
@@ -495,9 +494,9 @@ public class DriveAnnotationParser {
         TumorType oncoTreeType;
 
         if (code != null && !code.equals("")) {
-            oncoTreeType = TumorTypeUtils.getOncoTreeSubtypeByCode(code);
+            oncoTreeType = TumorTypeUtils.getByCode(code);
         } else {
-            oncoTreeType = TumorTypeUtils.getOncoTreeCancerType(mainType);
+            oncoTreeType = TumorTypeUtils.getByMainType(mainType);
         }
 
         if (oncoTreeType == null) {
@@ -570,10 +569,7 @@ public class DriveAnnotationParser {
             evidence.setEvidenceType(evidenceType);
             evidence.setAlterations(alterations);
             evidence.setGene(gene);
-            if (oncoTreeType.getMainType() != null) {
-                evidence.setCancerType(oncoTreeType.getMainType().getName());
-            }
-            evidence.setSubtype(oncoTreeType.getCode());
+            evidence.getTumorTypes().add(oncoTreeType);
             evidence.setKnownEffect(knownEffectOfEvidence);
             evidence.setUuid(getUUID(implicationObj, "description"));
             evidence.setLastEdit(lastEdit);
@@ -615,10 +611,7 @@ public class DriveAnnotationParser {
             evidence.setEvidenceType(evidenceType);
             evidence.setAlterations(alterations);
             evidence.setGene(gene);
-            if (oncoTreeType.getMainType() != null) {
-                evidence.setCancerType(oncoTreeType.getMainType().getName());
-            }
-            evidence.setSubtype(oncoTreeType.getCode());
+            evidence.getTumorTypes().add(oncoTreeType);
             evidence.setKnownEffect(knownEffectOfEvidence);
             evidence.setUuid(getUUID(drugObj, "name"));
 
@@ -802,13 +795,7 @@ public class DriveAnnotationParser {
             evidence.setAlterations(alterations);
             evidence.setGene(gene);
             evidence.setUuid(uuid);
-
-            if (oncoTreeType != null) {
-                if (oncoTreeType.getMainType() != null) {
-                    evidence.setCancerType(oncoTreeType.getMainType().getName());
-                }
-                evidence.setSubtype(oncoTreeType.getCode());
-            }
+            evidence.getTumorTypes().add(oncoTreeType);
             if (implication.has("level") && !implication.getString("level").trim().isEmpty()) {
                 LevelOfEvidence level = LevelOfEvidence.getByLevel(implication.getString("level").trim());
                 System.out.println(spaceStrByNestLevel(nestLevel + 1) + "Level of the implication: " + level);

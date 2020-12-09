@@ -3,12 +3,9 @@ package org.mskcc.cbio.oncokb.util;
 import junit.framework.TestCase;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.Tumor;
-import org.mskcc.cbio.oncokb.model.tumor_type.MainType;
-import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
+import org.mskcc.cbio.oncokb.model.TumorType;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
 
@@ -156,15 +153,14 @@ public class EvidenceUtilsTest extends TestCase {
         e5.setLevelOfEvidence(LevelOfEvidence.LEVEL_R1);
 
         TumorType tumorType = new TumorType();
-        MainType mainType = new MainType();
-        mainType.setName("Melanoma");
+        tumorType.setMainType("Melanoma");
         tumorType.setName("Melanoma");
 
-        e1.setOncoTreeType(tumorType);
-        e2.setOncoTreeType(tumorType);
-        e3.setOncoTreeType(tumorType);
-        e4.setOncoTreeType(tumorType);
-        e5.setOncoTreeType(tumorType);
+        e1.setTumorTypes(Collections.singleton(tumorType));
+        e2.setTumorTypes(Collections.singleton(tumorType));
+        e3.setTumorTypes(Collections.singleton(tumorType));
+        e4.setTumorTypes(Collections.singleton(tumorType));
+        e5.setTumorTypes(Collections.singleton(tumorType));
 
         Drug d1 = new Drug("Vemurafinib");
         Drug d2 = new Drug("Dabrafinib");
@@ -315,14 +311,14 @@ public class EvidenceUtilsTest extends TestCase {
         // Test with tumor type only
         query = new Query();
         query.setTumorType("MEL");
-        List<TumorType> upward = TumorTypeUtils.findTumorTypes("MEL", RelevantTumorTypeDirection.UPWARD);
-        List<TumorType> downward = TumorTypeUtils.findTumorTypes("MEL", RelevantTumorTypeDirection.DOWNWARD);
+        List<TumorType> upward = TumorTypeUtils.findRelevantTumorTypes("MEL", RelevantTumorTypeDirection.UPWARD);
+        List<TumorType> downward = TumorTypeUtils.findRelevantTumorTypes("MEL", RelevantTumorTypeDirection.DOWNWARD);
         responses = EvidenceUtils.processRequest(Collections.singletonList(query), null, null, true);
         assertTrue("The response should only tumor type relevant evidences", responses.get(0).getEvidences().stream().filter(evidence -> {
             if (evidence.getLevelOfEvidence() != null && evidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_Dx1)) {
-                return downward.contains(evidence.getOncoTreeType());
+                return !Collections.disjoint(downward, evidence.getTumorTypes());
             } else if (evidence.getLevelOfEvidence() != null) {
-                return upward.contains(evidence.getOncoTreeType());
+                return !Collections.disjoint(upward, evidence.getTumorTypes());
             } else {
                 return true;
             }

@@ -7,16 +7,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.apiModels.Citations;
 import org.mskcc.cbio.oncokb.apiModels.Implication;
 import org.mskcc.cbio.oncokb.apiModels.MutationEffectResp;
-import org.mskcc.cbio.oncokb.apiModels.NCITDrug;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
+import org.mskcc.cbio.oncokb.model.TumorType;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.collectingAndThen;
-import static java.util.stream.Collectors.toCollection;
 import static org.mskcc.cbio.oncokb.util.LevelUtils.getTherapeuticLevelsWithPriorityLIstIterator;
 
 /**
@@ -234,10 +231,10 @@ public class IndicatorUtils {
             }
 
             if (query.getTumorType() != null) {
-                relevantUpwardTumorTypes = TumorTypeUtils.getMappedOncoTreeTypesBySource(query.getTumorType());
+                relevantUpwardTumorTypes = TumorTypeUtils.findRelevantTumorTypes(query.getTumorType());
             }
 
-            relevantDownwardTumorTypes = TumorTypeUtils.findTumorTypes(query.getTumorType(), RelevantTumorTypeDirection.DOWNWARD);
+            relevantDownwardTumorTypes = TumorTypeUtils.findRelevantTumorTypes(query.getTumorType(), RelevantTumorTypeDirection.DOWNWARD);
 
             indicatorQuery.setVUS(isVUS(matchedAlt));
 
@@ -425,7 +422,7 @@ public class IndicatorUtils {
             if (gene != null && (gene.getHugoSymbol().equals("KRAS") || gene.getHugoSymbol().equals("NRAS"))
                 && query.getAlteration() != null
                 && StringUtils.containsIgnoreCase(query.getAlteration(), "wildtype")) {
-                if (relevantUpwardTumorTypes.contains(TumorTypeUtils.getOncoTreeCancerType("Colorectal Cancer"))) {
+                if (relevantUpwardTumorTypes.contains(TumorTypeUtils.getByMainType("Colorectal Cancer"))) {
                     indicatorQuery.setGeneSummary("RAS (KRAS/NRAS) which is wildtype (not mutated) in this sample, encodes an upstream activator of the pro-oncogenic MAP- and PI3-kinase pathways and is mutated in approximately 40% of late stage colorectal cancers.");
                     indicatorQuery.setVariantSummary("The absence of a mutation in the RAS genes is clinically important because it expands approved treatments available to treat this tumor. RAS status in stage IV colorectal cancer influences patient responses to the anti-EGFR antibody therapies cetuximab and panitumumab.");
                     indicatorQuery.setTumorTypeSummary("These drugs are FDA-approved for the treatment of KRAS wildtype colorectal tumors together with chemotherapy or alone following progression through standard chemotherapy.");
@@ -488,17 +485,19 @@ public class IndicatorUtils {
         return groupedOncogenicities.get(highestOncogenicity).get(0);
     }
 
-    private static Implication getImplicationFromEvidence(Evidence evidence, String queryHugoSymbol) {
+    private static Set<Implication> getImplicationsFromEvidence(Evidence evidence, String queryHugoSymbol) {
         if (evidence == null) {
             return null;
         }
-        Implication implication = new Implication();
-        implication.setLevelOfEvidence(evidence.getLevelOfEvidence());
-        implication.setAlterations(evidence.getAlterations().stream().map(alteration -> alteration.getName() == null ? alteration.getAlteration() : alteration.getAlteration()).collect(Collectors.toSet()));
-        implication.setTumorType(evidence.getOncoTreeType());
-        String hugoSymbol = StringUtils.isEmpty(queryHugoSymbol) ? evidence.getGene().getHugoSymbol() : queryHugoSymbol;
-        implication.setDescription(SummaryUtils.enrichDescription(evidence.getDescription(), hugoSymbol));
-        return implication;
+        return evidence.getTumorTypes().stream().map(tumorType -> {
+            Implication implication = new Implication();
+            implication.setLevelOfEvidence(evidence.getLevelOfEvidence());
+            implication.setAlterations(evidence.getAlterations().stream().map(alteration -> alteration.getName() == null ? alteration.getAlteration() : alteration.getAlteration()).collect(Collectors.toSet()));
+            implication.setTumorType(tumorType);
+            String hugoSymbol = StringUtils.isEmpty(queryHugoSymbol) ? evidence.getGene().getHugoSymbol() : queryHugoSymbol;
+            implication.setDescription(SummaryUtils.enrichDescription(evidence.getDescription(), hugoSymbol));
+            return implication;
+        }).collect(Collectors.toSet());
     }
 
     private static MutationEffectResp getDefaultMutationEffectResponse() {
@@ -513,7 +512,7 @@ public class IndicatorUtils {
             return implications;
         }
         for (Evidence evidence : evidences) {
-            implications.add(getImplicationFromEvidence(evidence, queryHugoSymbol));
+            implications.addAll(getImplicationsFromEvidence(evidence, queryHugoSymbol));
         }
         return implications;
     }
@@ -702,7 +701,7 @@ public class IndicatorUtils {
                     Map<Treatment, Set<String>> pmidsMap = new HashMap<>();
                     Map<Treatment, Set<ArticleAbstract>> abstractsMap = new HashMap<>();
                     Map<Treatment, List<String>> alterationsMap = new HashMap<>();
-                    Map<Treatment, TumorType> tumorTypeMap = new HashMap<>();
+                    Map<Treatment, Set<TumorType>> tumorTypeMap = new HashMap<>();
                     Map<Treatment, String> descriptionMap = new HashMap<>();
 
                     for (Evidence evidence : evidenceSetMap.get(level)) {
@@ -721,7 +720,7 @@ public class IndicatorUtils {
                             pmidsMap.put(treatment, citations.getPmids());
                             abstractsMap.put(treatment, citations.getAbstracts());
                             alterationsMap.put(treatment, evidence.getAlterations().stream().map(alteration -> alteration.getName()).collect(Collectors.toList()));
-                            tumorTypeMap.put(treatment, evidence.getOncoTreeType());
+                            tumorTypeMap.put(treatment, evidence.getTumorTypes());
                             descriptionMap.put(treatment, evidence.getDescription());
                         }
                         sameLevelTreatments.addAll(evidence.getTreatments());
@@ -738,7 +737,7 @@ public class IndicatorUtils {
                             indicatorQueryTreatment.setPmids(pmidsMap.get(treatment));
                             indicatorQueryTreatment.setAbstracts(abstractsMap.get(treatment));
                             indicatorQueryTreatment.setAlterations(alterationsMap.get(treatment));
-                            indicatorQueryTreatment.setLevelAssociatedCancerType(tumorTypeMap.get(treatment));
+                            indicatorQueryTreatment.setLevelAssociatedCancerType((tumorTypeMap.get(treatment) == null || tumorTypeMap.get(treatment).isEmpty()) ? null : tumorTypeMap.get(treatment).iterator().next());
                             indicatorQueryTreatment.setDescription(SummaryUtils.enrichDescription(descriptionMap.get(treatment), queryHugoSymbol));
                             treatments.add(indicatorQueryTreatment);
                         }

@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;;
+import org.mskcc.cbio.oncokb.model.TumorType;;
 
 /**
  *
@@ -125,10 +125,6 @@ public interface EvidenceBo extends GenericBo<Evidence> {
      * @return
      */
     List<Object> findSubtypesWithEvidencesForAlterations(List<Alteration> alterations);
-
-    List<String> findAllCancerTypes();
-
-    List<String> findAllSubtypes();
 
     List<Evidence> findEvidenceByUUIDs(List<String> uuids);
 }

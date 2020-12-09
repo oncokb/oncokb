@@ -5,7 +5,7 @@ import org.mskcc.cbio.oncokb.apiModels.AnnotatedVariant;
 import org.mskcc.cbio.oncokb.apiModels.Citations;
 import org.mskcc.cbio.oncokb.apiModels.CuratedGene;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
+import org.mskcc.cbio.oncokb.model.TumorType;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -487,21 +487,21 @@ public class MainUtils {
                 EvidenceUtils.getEvidenceByGenesAndEvidenceTypes(Collections.singleton(gene), evidenceTypes);
 
             for (Evidence evidence : geneEvidences.get(gene)) {
-                TumorType oncoTreeType = evidence.getOncoTreeType();
-
-                if (oncoTreeType != null) {
+                if (!evidence.getTumorTypes().isEmpty()) {
                     for (Alteration alteration : evidence.getAlterations()) {
                         if (evidences.containsKey(alteration)) {
-                            if (!evidences.get(alteration).containsKey(oncoTreeType)) {
-                                evidences.get(alteration).put(oncoTreeType, new HashMap<LevelOfEvidence, Set<Evidence>>());
-                            }
-                            if (publicLevels.contains(evidence.getLevelOfEvidence())) {
-                                LevelOfEvidence levelOfEvidence = evidence.getLevelOfEvidence();
-                                if (!evidences.get(alteration).get(oncoTreeType).containsKey(levelOfEvidence)) {
-                                    evidences.get(alteration).get(oncoTreeType).put(levelOfEvidence, new HashSet<Evidence>());
+                            evidence.getTumorTypes().forEach(tumorType -> {
+                                if (!evidences.get(alteration).containsKey(tumorType)) {
+                                    evidences.get(alteration).put(tumorType, new HashMap<>());
                                 }
-                                evidences.get(alteration).get(oncoTreeType).get(levelOfEvidence).add(evidence);
-                            }
+                                if (publicLevels.contains(evidence.getLevelOfEvidence())) {
+                                    LevelOfEvidence levelOfEvidence = evidence.getLevelOfEvidence();
+                                    if (!evidences.get(alteration).get(tumorType).containsKey(levelOfEvidence)) {
+                                        evidences.get(alteration).get(tumorType).put(levelOfEvidence, new HashSet<Evidence>());
+                                    }
+                                    evidences.get(alteration).get(tumorType).get(levelOfEvidence).add(evidence);
+                                }
+                            });
                         }
                     }
                 }

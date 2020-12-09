@@ -7,7 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.apiModels.DrugMatch;
 import org.mskcc.cbio.oncokb.apiModels.NCITDrug;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
+import org.mskcc.cbio.oncokb.model.TumorType;
 import org.mskcc.cbio.oncokb.util.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -278,7 +278,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
         return gene.getHugoSymbol() + drug.getDrugName() + level.getLevel();
     }
 
-    private static void updateMap( Map<String, DrugMatch> map, String key, Gene gene, Set<Alteration> alterations, Drug drug, LevelOfEvidence level, TumorType tumorType, Double weight ) {
+    private static void updateMap( Map<String, DrugMatch> map, String key, Gene gene, Set<Alteration> alterations, Drug drug, LevelOfEvidence level, Collection<TumorType> tumorTypes, Double weight ) {
         if(!map.containsKey(key)) {
             DrugMatch drugMatch = new DrugMatch();
             drugMatch.setGene(gene);
@@ -288,7 +288,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
             map.put(key, drugMatch);
         }
         map.get(key).getAlterations().addAll(alterations);
-        map.get(key).getTumorTypes().add(tumorType);
+        map.get(key).getTumorTypes().addAll(tumorTypes);
     }
     private static List<TypeaheadSearchResp> findEvidencesWithDrugAssociated(String query, Boolean exactMatch) {
         Set<Evidence> evidences = EvidenceUtils.getEvidenceByEvidenceTypesAndLevels(EvidenceTypeUtils.getTreatmentEvidenceTypes(), LevelUtils.getPublicLevels());
@@ -312,15 +312,15 @@ public class PrivateSearchApiController implements PrivateSearchApi {
                         break;
                     }
                     if (drug.getDrugName().toLowerCase().equals(query)) {
-                        updateMap(result, matchKey, evidence.getGene(), evidence.getAlterations(), drug, evidence.getLevelOfEvidence(), evidence.getOncoTreeType(), 4.0);
+                        updateMap(result, matchKey, evidence.getGene(), evidence.getAlterations(), drug, evidence.getLevelOfEvidence(), evidence.getTumorTypes(), 4.0);
                         isMatch = true;
                     } else if (drug.getNcitCode() != null && drug.getNcitCode().toLowerCase().equals(query)) {
-                        updateMap(result, matchKey, evidence.getGene(), evidence.getAlterations(), drug, evidence.getLevelOfEvidence(), evidence.getOncoTreeType(), 4.0);
+                        updateMap(result, matchKey, evidence.getGene(), evidence.getAlterations(), drug, evidence.getLevelOfEvidence(), evidence.getTumorTypes(), 4.0);
                         isMatch = true;
                     } else {
                         for (String synonym : drug.getSynonyms()) {
                             if (synonym.toLowerCase().equals(query)) {
-                                updateMap(result, matchKey, evidence.getGene(), evidence.getAlterations(), drug, evidence.getLevelOfEvidence(), evidence.getOncoTreeType(), 3.0);
+                                updateMap(result, matchKey, evidence.getGene(), evidence.getAlterations(), drug, evidence.getLevelOfEvidence(), evidence.getTumorTypes(), 3.0);
                                 isMatch = true;
                                 break;
                             }
@@ -329,21 +329,21 @@ public class PrivateSearchApiController implements PrivateSearchApi {
                     if(!exactMatch) {
                         String lowerCaseDrugName = drug.getDrugName().toLowerCase();
                         if (lowerCaseDrugName.startsWith(query)) {
-                            updateMap(result, matchKey, evidence.getGene(), evidence.getAlterations(), drug, evidence.getLevelOfEvidence(), evidence.getOncoTreeType(), 2.0);
+                            updateMap(result, matchKey, evidence.getGene(), evidence.getAlterations(), drug, evidence.getLevelOfEvidence(), evidence.getTumorTypes(), 2.0);
                             isMatch = true;
                         } else if (lowerCaseDrugName.contains(query)) {
-                            updateMap(result, matchKey, evidence.getGene(), evidence.getAlterations(), drug, evidence.getLevelOfEvidence(), evidence.getOncoTreeType(), 1.5);
+                            updateMap(result, matchKey, evidence.getGene(), evidence.getAlterations(), drug, evidence.getLevelOfEvidence(), evidence.getTumorTypes(), 1.5);
                             isMatch = true;
                         } else {
                             for (String synonym : drug.getSynonyms()) {
                                 String lower = synonym.toLowerCase();
 
                                 if(lower.startsWith(query)) {
-                                    updateMap(result, matchKey, evidence.getGene(), evidence.getAlterations(), drug, evidence.getLevelOfEvidence(), evidence.getOncoTreeType(), 1.0);
+                                    updateMap(result, matchKey, evidence.getGene(), evidence.getAlterations(), drug, evidence.getLevelOfEvidence(), evidence.getTumorTypes(), 1.0);
                                     isMatch = true;
                                     break;
                                 } else if (lower.contains(query)) {
-                                    updateMap(result, matchKey, evidence.getGene(), evidence.getAlterations(), drug, evidence.getLevelOfEvidence(), evidence.getOncoTreeType(), 0.5);
+                                    updateMap(result, matchKey, evidence.getGene(), evidence.getAlterations(), drug, evidence.getLevelOfEvidence(), evidence.getTumorTypes(), 0.5);
                                     isMatch = true;
                                     break;
                                 }

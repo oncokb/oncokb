@@ -3,8 +3,7 @@ package org.mskcc.cbio.oncokb.util;
 import org.junit.Test;
 import org.mskcc.cbio.oncokb.apiModels.Implication;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.tumor_type.MainType;
-import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
+import org.mskcc.cbio.oncokb.model.TumorType;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -682,16 +681,12 @@ public class IndicatorUtilsTest {
         TumorType melanoma = new TumorType();
         melanoma.setName("Melanoma");
         melanoma.setCode("MEL");
-        MainType mainType = new MainType();
-        mainType.setName("Melanoma");
-        melanoma.setMainType(mainType);
+        melanoma.setMainType("Melanoma");
 
         TumorType nsclc = new TumorType();
         nsclc.setName("Non-Small Cell Lung Cancer");
         nsclc.setCode("NSCLC");
-        MainType nsclcMainType = new MainType();
-        nsclcMainType.setName("Non-Small Cell Lung Cancer");
-        nsclc.setMainType(mainType);
+        nsclc.setMainType("Non-Small Cell Lung Cancer");
 
         Implication implication1 = new Implication();
         implication1.setDescription("implication1");
