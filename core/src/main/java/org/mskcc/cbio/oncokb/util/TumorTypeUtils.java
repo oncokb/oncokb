@@ -60,7 +60,7 @@ public class TumorTypeUtils {
     public static TumorType getByMainType(String mainType) {
         if (StringUtils.isEmpty(mainType)) return null;
         String lowercaseMainType = mainType.toLowerCase();
-        Optional<TumorType> matchedMainTypeOptional = getAllMainTypes().stream().filter(maintype -> StringUtils.isNotEmpty(maintype.getMainType()) && maintype.getMainType().toLowerCase().equals(lowercaseMainType)).findAny();
+        Optional<TumorType> matchedMainTypeOptional = getAllMainTypes().stream().filter(maintype -> StringUtils.isNotEmpty(maintype.getName()) && maintype.getName().toLowerCase().equals(lowercaseMainType)).findAny();
         return matchedMainTypeOptional.isPresent() ? matchedMainTypeOptional.get() : null;
     }
 
@@ -71,7 +71,7 @@ public class TumorTypeUtils {
 
     public static TumorType getBySpecialTumor(SpecialTumorType specialTumorType) {
         if (specialTumorType == null) return null;
-        return getAllMainTypes().stream().filter(mainType -> StringUtils.isNotEmpty(mainType.getMainType()) && mainType.getMainType().toLowerCase().equals(specialTumorType.getTumorType().toLowerCase())).findAny().orElse(null);
+        return getAllMainTypes().stream().filter(mainType -> StringUtils.isNotEmpty(mainType.getName()) && mainType.getName().toLowerCase().equals(specialTumorType.getTumorType().toLowerCase())).findAny().orElse(null);
     }
 
     public static Boolean isSolidTumor(TumorType tumorType) {
@@ -94,8 +94,8 @@ public class TumorTypeUtils {
 
         // when the code is null, we need to validate the main type
         if (tumorType.getCode() == null) {
-            TumorForm mainTypeTumorForm = getTumorForm(tumorType.getMainType());
-            if (tumorType.getMainType() != null && mainTypeTumorForm != null) {
+            TumorForm mainTypeTumorForm = getTumorForm(tumorType.getName());
+            if (tumorType.getName() != null && mainTypeTumorForm != null) {
                 return mainTypeTumorForm.equals(tumorForm);
             }
         } else {
@@ -182,7 +182,7 @@ public class TumorTypeUtils {
                 mappedTumorTypes.add(matchedTumorType);
 
                 // Add main type
-                TumorType matchedMainType = getByMainType(matchedTumorType.getMainType());
+                TumorType matchedMainType = getByMainType(matchedTumorType.getName());
                 if (matchedMainType != null) {
                     mappedTumorTypes.add(matchedMainType);
                 }
