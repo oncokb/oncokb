@@ -221,7 +221,7 @@ public class EvidenceController {
             return new ArrayList<>();
         }
 
-        Set<TumorType> cancerTypes = queryEvidence.getTumorTypes().stream().map(tumorType -> StringUtils.isNullOrEmpty(tumorType.getName()) ? TumorTypeUtils.getByMainType(tumorType.getMainType()) : TumorTypeUtils.getBySubtypeName(tumorType.getName())).collect(Collectors.toSet());
+        Set<TumorType> cancerTypes = queryEvidence.getTumorTypes().stream().map(tumorType -> StringUtils.isNullOrEmpty(tumorType.getCode()) ? TumorTypeUtils.getByMainType(tumorType.getMainType()) : TumorTypeUtils.getBySubtypeName(tumorType.getName())).collect(Collectors.toSet());
         Boolean isCancerEvidence = true;
         if (queryEvidence.getTumorTypes().isEmpty()) {
             isCancerEvidence = false;
