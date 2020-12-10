@@ -179,6 +179,9 @@ public class TumorType implements Serializable {
         TumorType tumorType = (TumorType) o;
         return Objects.equals(getId(), tumorType.getId()) &&
             Objects.equals(getCode(), tumorType.getCode()) &&
+            Objects.equals(getTissue(), tumorType.getTissue()) &&
+            Objects.equals(getLevel(), tumorType.getLevel()) &&
+            Objects.equals(getColor(), tumorType.getColor()) &&
             Objects.equals(getName(), tumorType.getName()) &&
             Objects.equals(getMainType(), tumorType.getMainType());
     }

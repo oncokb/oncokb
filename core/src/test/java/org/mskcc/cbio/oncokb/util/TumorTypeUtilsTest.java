@@ -114,8 +114,8 @@ public class TumorTypeUtilsTest extends TestCase {
         Set<TumorType> tumorTypeSet = new HashSet<>();
         TumorType tt1 = new TumorType();
         TumorType tt2 = new TumorType();
-        tt1.setId(new Long(0));
-        tt1.setId(new Long(1));
+        tt1.setId(0);
+        tt1.setId(0);
         tumorTypeSet.add(tt1);
         tumorTypeSet.add(tt2);
 
@@ -140,8 +140,8 @@ public class TumorTypeUtilsTest extends TestCase {
         Set<TumorType> tumorTypeSet = new HashSet<>();
         TumorType tt1 = new TumorType();
         TumorType tt2 = new TumorType();
-        tt1.setId(new Long(0));
-        tt1.setId(new Long(1));
+        tt1.setId(0);
+        tt1.setId(0);
         tumorTypeSet.add(tt1);
         tumorTypeSet.add(tt2);
 

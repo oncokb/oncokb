@@ -22,14 +22,17 @@ public class TumorTypeImporter {
         tumorTypes.forEach(tumorType -> ApplicationContextSingleton.getTumorTypeBo().save(tumorType));
 
         // Save all mainType
-        tumorTypes.stream()
+        List<TumorType> distinctTumorTypes = tumorTypes.stream()
+            .filter(tumorType -> StringUtils.isNotEmpty(tumorType.getMainType()) && tumorType.getLevel() > 1)
             .map(mainType -> {
                 TumorType tumorType = new TumorType();
                 tumorType.setName(mainType.getMainType());
                 return tumorType;
             })
             .distinct()
-            .filter(mainType -> StringUtils.isNotEmpty(mainType.getName()))
+            .collect(Collectors.toList());
+
+        distinctTumorTypes.stream()
             .forEach(mainType -> {
                 Set<TumorType> tumorTypesWithSameMainType = tumorTypes.stream().filter(tumorType -> StringUtils.isNotEmpty(tumorType.getMainType()) && tumorType.getMainType().equals(mainType.getName())).collect(Collectors.toSet());
 
