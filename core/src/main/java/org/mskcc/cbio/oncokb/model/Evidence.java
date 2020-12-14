@@ -108,6 +108,12 @@ public class Evidence implements java.io.Serializable {
         inverseJoinColumns = @JoinColumn(name = "tumor_type_id", referencedColumnName = "id"))
     private Set<TumorType> tumorTypes = new HashSet<>();
 
+    @ManyToMany
+    @JoinTable(name = "evidence_relevant_tumor_type",
+        joinColumns = @JoinColumn(name = "evidence_id", referencedColumnName = "id"),
+        inverseJoinColumns = @JoinColumn(name = "tumor_type_id", referencedColumnName = "id"))
+    private Set<TumorType> relevantTumorTypes = new HashSet<>();
+
 
     @ManyToOne(fetch = FetchType.EAGER)
     @Fetch(FetchMode.JOIN)
@@ -193,6 +199,14 @@ public class Evidence implements java.io.Serializable {
 
     public void setTumorTypes(Set<TumorType> tumorTypes) {
         this.tumorTypes = tumorTypes;
+    }
+
+    public Set<TumorType> getRelevantTumorTypes() {
+        return relevantTumorTypes;
+    }
+
+    public void setRelevantTumorTypes(Set<TumorType> relevantTumorTypes) {
+        this.relevantTumorTypes = relevantTumorTypes;
     }
 
     public Boolean getForGermline() {
@@ -378,6 +392,7 @@ public class Evidence implements java.io.Serializable {
         this.uuid = e.uuid;
         this.evidenceType = e.evidenceType;
         this.tumorTypes = e.tumorTypes;
+        this.relevantTumorTypes = e.relevantTumorTypes;
         this.gene = e.gene;
         this.description = e.description;
         this.additionalInfo = e.additionalInfo;
@@ -393,7 +408,7 @@ public class Evidence implements java.io.Serializable {
         this.articles = new HashSet<>(e.articles);
     }
 
-    public Evidence(String uuid, EvidenceType evidenceType, Set<TumorType> tumorTypes, Gene gene, Set<Alteration> alterations, String description, String additionalInfo, List<Treatment> treatments,
+    public Evidence(String uuid, EvidenceType evidenceType, Set<TumorType> tumorTypes, Set<TumorType> relevantTumorTypes, Gene gene, Set<Alteration> alterations, String description, String additionalInfo, List<Treatment> treatments,
                     String knownEffect, Date lastEdit, Date lastReview,
                     LevelOfEvidence levelOfEvidence,
                     LevelOfEvidence solidPropagationLevel, LevelOfEvidence liquidPropagationLevel,
@@ -401,6 +416,7 @@ public class Evidence implements java.io.Serializable {
         this.uuid = uuid;
         this.evidenceType = evidenceType;
         this.tumorTypes = tumorTypes;
+        this.relevantTumorTypes = relevantTumorTypes;
         this.gene = gene;
         this.alterations = alterations;
         this.description = description;
