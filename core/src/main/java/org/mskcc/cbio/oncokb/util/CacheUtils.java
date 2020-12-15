@@ -65,10 +65,6 @@ public class CacheUtils {
             if (operation.get("cmd") == "update") {
                 Integer entrezGeneId = Integer.parseInt(operation.get("val"));
                 VUS.remove(entrezGeneId);
-                Gene gene = ApplicationContextSingleton.getGeneBo().findGeneByEntrezGeneId(entrezGeneId);
-                if (gene != null) {
-                    setVUS(entrezGeneId, getEvidences(gene));
-                }
             } else if (operation.get("cmd") == "reset") {
                 VUS.clear();
             }
@@ -297,9 +293,6 @@ public class CacheUtils {
     }
 
     private static void setVUS(Integer entrezGeneId, Set<Evidence> evidences) {
-        if (!VUS.containsKey(entrezGeneId)) {
-            VUS.put(entrezGeneId, new HashSet<Alteration>());
-        }
         VUS.put(entrezGeneId, AlterationUtils.findVUSFromEvidences(evidences));
     }
 
@@ -313,6 +306,7 @@ public class CacheUtils {
             Gene gene = GeneUtils.getGeneByEntrezId(entrezGeneId);
             if (gene != null) {
                 synEvidences();
+                setVUS(entrezGeneId, getEvidences(gene));
             }
             return VUS.get(entrezGeneId) == null ? new HashSet<Alteration>() : Collections.unmodifiableSet(VUS.get(entrezGeneId));
         }
