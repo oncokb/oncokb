@@ -129,6 +129,19 @@ public interface PrivateUtilsApi {
         @ApiParam(value = "OncoTree tumor type name/main type/code") @RequestParam(value = "tumorType") String tumorType
     );
 
+    @ApiOperation(value = "", notes = "Get the list of relevant tumor types.", response = TumorType.class, responseContainer = "List")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK")})
+    @RequestMapping(value = "/utils/relevantCancerTypes",
+        consumes = {"application/json"},
+        produces = {"application/json"},
+        method = RequestMethod.POST)
+    ResponseEntity<List<TumorType>> utilRelevantCancerTypesPost(
+        @ApiParam(value = "Level of Evidence") @RequestParam(value = "levelOfEvidence", required = false) LevelOfEvidence levelOfEvidence,
+        @ApiParam(value = "Return only Detailed Cancer Type.") @RequestParam(value = "onlyDetailedCancerType", required = false) Boolean onlyDetailedCancerType,
+        @ApiParam(value = "List of queries.", required = true) @RequestBody List<RelevantCancerTypeQuery> body
+    );
+
     @ApiOperation(value = "", notes = "Get all the info for the query", response = VariantAnnotation.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = VariantAnnotation.class)})

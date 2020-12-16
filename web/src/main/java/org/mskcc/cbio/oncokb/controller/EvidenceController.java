@@ -59,18 +59,21 @@ public class EvidenceController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/legacy-api/evidences/updateRelevantTumorTypes", method = RequestMethod.POST)
+    @RequestMapping(value = "/legacy-api/evidences/updateRelevantCancerTypes", method = RequestMethod.POST)
     public
     @ResponseBody
     synchronized ResponseEntity updateEvidence(@RequestBody Set<Evidence> evidences) {
+        Set<Evidence> updatedEvidenceSet = new HashSet<>();
         evidences.forEach(evidence -> {
-            Set<TumorType> cancerTypes = evidence.getTumorTypes().stream().map(tumorType -> StringUtils.isNullOrEmpty(tumorType.getCode()) ? TumorTypeUtils.getByMainType(tumorType.getName()) : TumorTypeUtils.getBySubtypeName(tumorType.getName())).collect(Collectors.toSet());
+            Set<TumorType> cancerTypes = evidence.getRelevantTumorTypes().stream().map(tumorType -> StringUtils.isNullOrEmpty(tumorType.getCode()) ? TumorTypeUtils.getByMainType(tumorType.getName()) : TumorTypeUtils.getByCode(tumorType.getCode())).collect(Collectors.toSet());
             List<Evidence> persistenceEvidences = ApplicationContextSingleton.getEvidenceBo().findEvidenceByUUIDs(Collections.singletonList(evidence.getUuid()));
             persistenceEvidences.forEach(persistenceEvidence -> {
                 persistenceEvidence.setRelevantTumorTypes(cancerTypes);
+                updatedEvidenceSet.add(persistenceEvidence);
                 ApplicationContextSingleton.getEvidenceBo().update(persistenceEvidence);
             });
         });
+        updateCacheBasedOnEvidences(updatedEvidenceSet);
         return new ResponseEntity(HttpStatus.OK);
     }
 

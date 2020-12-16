@@ -156,7 +156,10 @@ public class TumorTypeUtils {
 
     public static List<TumorType> findRelevantTumorTypes(String tumorType, RelevantTumorTypeDirection direction) {
         LinkedHashSet<TumorType> mappedTumorTypes = new LinkedHashSet<>();
-        TumorType matchedTumorType = getBySubtypeName(tumorType);
+        TumorType matchedTumorType = getByCode(tumorType);
+        if (matchedTumorType == null) {
+            matchedTumorType = getBySubtypeName(tumorType);
+        }
 
         if (direction.equals(RelevantTumorTypeDirection.UPWARD)) {
             if (matchedTumorType != null) {

@@ -272,6 +272,27 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     }
 
     @Override
+    public ResponseEntity<List<TumorType>> utilRelevantCancerTypesPost(
+        @ApiParam(value = "Level of Evidence") @RequestParam(value = "levelOfEvidence", required = false) LevelOfEvidence levelOfEvidence,
+        @ApiParam(value = "Return only Detailed Cancer Type.") @RequestParam(value = "onlyDetailedCancerType", required = false) Boolean onlyDetailedCancerType,
+        @ApiParam(value = "List of queries.", required = true) @RequestBody List<RelevantCancerTypeQuery> body
+    ) {
+        RelevantTumorTypeDirection direction = levelOfEvidence != null && levelOfEvidence.equals(LevelOfEvidence.LEVEL_Dx1) ? RelevantTumorTypeDirection.UPWARD : RelevantTumorTypeDirection.DOWNWARD;
+        Set<TumorType> tumorTypes = body.stream()
+            .map(relevantCancerTypeQuery -> StringUtils.isNullOrEmpty(relevantCancerTypeQuery.getCode()) ? TumorTypeUtils.findRelevantTumorTypes(relevantCancerTypeQuery.getMainType(), direction) : TumorTypeUtils.findRelevantTumorTypes(relevantCancerTypeQuery.getCode(), direction))
+            .flatMap(Collection::stream)
+            .collect(Collectors.toSet());
+
+        if (onlyDetailedCancerType) {
+            tumorTypes = tumorTypes.stream().filter(tumorType -> tumorType.getLevel() > 0).collect(Collectors.toSet());
+        }
+        return new ResponseEntity<>(
+            new ArrayList<>(tumorTypes)
+            , HttpStatus.OK
+        );
+    }
+
+    @Override
     public ResponseEntity<VariantAnnotation> utilVariantAnnotationGet(
         @ApiParam(value = "hugoSymbol") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
         , @ApiParam(value = "entrezGeneId") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
