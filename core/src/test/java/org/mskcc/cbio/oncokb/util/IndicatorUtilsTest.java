@@ -12,8 +12,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mskcc.cbio.oncokb.Constants.*;
 import static org.mskcc.cbio.oncokb.util.SummaryUtils.ONCOGENIC_MUTATIONS_DEFAULT_SUMMARY;
 
@@ -674,6 +673,24 @@ public class IndicatorUtilsTest {
         resp2 = IndicatorUtils.processQuery(query2, null, true, null);
         pairComparison(resp1, resp2, true);
         assertEquals("The summary should not be the same, but it is.", resp1.getGeneSummary(), resp2.getGeneSummary());
+
+        // The annotation service should return all treatments without changing the level when tumor type is specified
+        query1 = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "KRAS", "G12C", null, null, null, null, null, null, null);
+        query2 = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "KRAS", "G12C", null, null, "NSCLC", MISSENSE_VARIANT, null, null, null);
+        resp1 = IndicatorUtils.processQuery(query1, null, true, null);
+        resp2 = IndicatorUtils.processQuery(query2, null, true, null);
+
+        assertTrue("The gene exist should be the same.", resp1.getGeneExist().equals(resp2.getGeneExist()));
+        assertTrue("The variant exist should be the same.", resp1.getVariantExist().equals(resp2.getVariantExist()));
+        assertTrue("The oncogenicity should be the same.", resp1.getOncogenic().equals(resp2.getOncogenic()));
+        assertTrue("The VUS info should be the same", resp1.getVUS().equals(resp2.getVUS()));
+        assertTrue("The gene summary should be the same.", resp1.getGeneSummary().equals(resp2.getGeneSummary()));
+        assertTrue("The variant summary should be the same.", resp1.getVariantSummary().equals(resp2.getVariantSummary()));
+
+        assertSame("The highest sensitive level should be the same.", resp1.getHighestSensitiveLevel(), resp2.getHighestSensitiveLevel());
+        assertNotSame("The highest resistance level should not be the same. R1 belongs to colorectal", resp1.getHighestResistanceLevel(), resp2.getHighestResistanceLevel());
+
+        assertNotSame("The annotation without tumor type should have more treatments", resp1.getTreatments().size(), resp2.getTreatments().size());
 
     }
 
