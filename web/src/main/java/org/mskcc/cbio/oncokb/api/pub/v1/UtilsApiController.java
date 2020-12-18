@@ -15,6 +15,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.*;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import static org.mskcc.cbio.oncokb.util.HttpUtils.getDataDownloadResponseEntity;
 
@@ -51,6 +53,7 @@ public class UtilsApiController implements UtilsApi {
         header.add("GRCh38 RefSeq");
         header.add("Entrez Gene ID");
         header.add("Hugo Symbol");
+        header.add("Reference Genome");
         header.add("Alteration");
         header.add("Protein Change");
         header.add("Oncogenicity");
@@ -68,6 +71,7 @@ public class UtilsApiController implements UtilsApi {
             row.add(annotatedVariant.getGrch38RefSeq());
             row.add(String.valueOf(annotatedVariant.getEntrezGeneId()));
             row.add(annotatedVariant.getGene());
+            row.add(annotatedVariant.getReferenceGenome());
             row.add(annotatedVariant.getVariant());
             row.add(annotatedVariant.getProteinChange());
             row.add(annotatedVariant.getOncogenicity());
@@ -99,9 +103,14 @@ public class UtilsApiController implements UtilsApi {
                     abstracts.add(articleAbstract.getAbstractContent() + " " + articleAbstract.getLink());
                 }
                 annotatedVariants.add(new AnnotatedVariant(
-                    gene.getGrch37Isoform(), gene.getGrch37RefSeq(),
-                    gene.getGrch38Isoform(), gene.getGrch38RefSeq(),
-                    gene.getEntrezGeneId(), gene.getHugoSymbol(), biologicalVariant.getVariant().getName(),
+                    gene.getGrch37Isoform(),
+                    gene.getGrch37RefSeq(),
+                    gene.getGrch38Isoform(),
+                    gene.getGrch38RefSeq(),
+                    gene.getEntrezGeneId(),
+                    gene.getHugoSymbol(),
+                    biologicalVariant.getVariant().getReferenceGenomes().stream().map(referenceGenome -> referenceGenome.name()).collect(Collectors.joining(", ")),
+                    biologicalVariant.getVariant().getName(),
                     biologicalVariant.getVariant().getAlteration(),
                     biologicalVariant.getOncogenic(),
                     biologicalVariant.getMutationEffect(),
@@ -142,6 +151,7 @@ public class UtilsApiController implements UtilsApi {
         header.add("GRCh38 RefSeq");
         header.add("Entrez Gene ID");
         header.add("Hugo Symbol");
+        header.add("Reference Genome");
         header.add("Alteration");
         header.add("Protein Change");
         header.add("Cancer Type");
@@ -160,6 +170,7 @@ public class UtilsApiController implements UtilsApi {
             row.add(actionableGene.getGrch38RefSeq());
             row.add(String.valueOf(actionableGene.getEntrezGeneId()));
             row.add(actionableGene.getGene());
+            row.add(actionableGene.getReferenceGenome());
             row.add(actionableGene.getVariant());
             row.add(actionableGene.getProteinChange());
             row.add(actionableGene.getCancerType());
@@ -197,6 +208,7 @@ public class UtilsApiController implements UtilsApi {
                     gene.getGrch38Isoform(), gene.getGrch38RefSeq(),
                     gene.getEntrezGeneId(),
                     gene.getHugoSymbol(),
+                    clinicalVariant.getVariant().getReferenceGenomes().stream().map(referenceGenome -> referenceGenome.name()).collect(Collectors.joining(", ")),
                     clinicalVariant.getVariant().getName(),
                     clinicalVariant.getVariant().getAlteration(),
                     getCancerType(clinicalVariant.getOncoTreeType()),

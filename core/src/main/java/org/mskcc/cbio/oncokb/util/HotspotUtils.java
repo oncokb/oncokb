@@ -129,7 +129,7 @@ public class HotspotUtils {
         }
 
         for (EnrichedHotspot hotspot : hotspotMutations.get(alteration.getGene())) {
-            if (hotspot.getType() != "3d") {
+            if (!hotspot.getType().equals("3d")) {
                 hotspots.add(hotspot);
             }
         }

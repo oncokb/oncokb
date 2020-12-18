@@ -2,11 +2,16 @@ package org.mskcc.cbio.oncokb.util;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
+import com.google.api.client.json.Json;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mskcc.cbio.oncokb.model.Gene;
+import org.springframework.util.CollectionUtils;
 
 /**
  * @author jgao
@@ -62,6 +67,65 @@ public final class GeneAnnotator {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public static List<Gene> findGenesFromMyGeneInfo(List<Integer> entrezGeneIds) {
+        // There is a limit of using mygene.info. The post can only allow no more than 1000 genes
+        int pageSize = 500;
+        List<Gene> genes = new ArrayList<>();
+        List<Integer> page = new ArrayList<>();
+        for (int i = 0; i < entrezGeneIds.size(); i++) {
+            if (i % pageSize == 0) {
+                if (page.size() > 0) {
+                    genes.addAll(getGenesFromMyGeneInfo(page));
+                }
+                page = new ArrayList<>();
+            }
+            page.add(entrezGeneIds.get(i));
+            if (i == entrezGeneIds.size() - 1) {
+                genes.addAll(getGenesFromMyGeneInfo(page));
+            }
+        }
+        return genes;
+    }
+
+    private static List<Gene> getGenesFromMyGeneInfo(List<Integer> entrezGeneIds) {
+        List<Gene> genes = new ArrayList<>();
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("ids", entrezGeneIds.stream().map(id -> id.toString()).collect(Collectors.joining(",")));
+        try {
+            String response = HttpUtils.postRequest(URL_MY_GENE_INFO_3 + "gene?fields=entrezgene,symbol,alias", jsonObject.toString());
+            JSONArray jsonArray = new JSONArray(response);
+            for (int i = 0; i < jsonArray.length(); i++) {
+                genes.add(parseGeneFromMyGeneInfo(jsonArray.getJSONObject(i)));
+            }
+            return genes;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return genes;
+        }
+    }
+
+    private static Gene parseGeneFromMyGeneInfo(JSONObject object) {
+        Gene gene = new Gene();
+        if (object.has("symbol")) {
+            gene.setHugoSymbol(object.getString("symbol"));
+        }
+        if (object.has("entrezgene")) {
+            gene.setEntrezGeneId(object.getInt("entrezgene"));
+        }
+        if (object.has("alias")) {
+            JSONArray aliases = object.optJSONArray("alias");
+            if (aliases == null) {
+                String alias = object.getString("alias");
+                gene.getGeneAliases().add(alias);
+            } else {
+                for (int i = 0; i < aliases.length(); i++) {
+                    gene.getGeneAliases().add(aliases.getString(i));
+                }
+            }
+        }
+        return gene;
     }
 
     private static Gene readByHugoSymbol(String symbol) throws IOException {
