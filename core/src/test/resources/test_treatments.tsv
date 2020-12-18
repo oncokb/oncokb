@@ -173,8 +173,8 @@ MAP2K1	K57N	Erdheim-Chester Disease	3A: Trametinib; 3A: Cobimetinib;
 MAP2K1	K57N	Lung Adenocarcinoma	3A: Trametinib; 3A: Cobimetinib;
 MAP2K1	K57N	Glioblastoma	3B: Trametinib; 3B: Cobimetinib;
 #MAP2K1	K57N	Diffuse Large B-Cell Lymphoma, NOS
-PIK3CA	E545K	Breast Cancer	1: Fulvestrant+Alpelisib; 3A: GDC-0077; 3A: Copanlisib+Fulvestrant;
-PIK3CA	E545K	Ovarian Cancer	3B: Fulvestrant+Alpelisib; 3B: GDC-0077; 3B: Copanlisib+Fulvestrant;
+PIK3CA	E545K	Breast Cancer	1: Fulvestrant+Alpelisib;
+PIK3CA	E545K	Ovarian Cancer	3B: Fulvestrant+Alpelisib;
 #PIK3CA	E545K	Acute Myeloid Leukemia
 NRAS	G12C	Breast Cancer	3B: Binimetinib; 3B: Binimetinib+Ribociclib;
 #NRAS	G12C	Chronic Myelogenous Leukemia
@@ -212,7 +212,7 @@ BRAF	V600K	HCL
 AKT1	E17K	Breast Cancer	3A: AZD5363;
 AKT1	E17K	NSCLC	3B: AZD5363;
 AKT1	E17G	Breast Cancer
-FGFR3	Y373C	Bladder Cancer	1: Erdafitinib; 3A: Debio1347; 3A: BGJ398; 3A: AZD4547;
+FGFR3	Y373C	Bladder Cancer	1: Erdafitinib; 4: Debio1347; 4: BGJ398; 4: AZD4547;
 FGFR3	Y373G	Bladder Cancer	4: Debio1347; 4: BGJ398; 4: Erdafitinib; 4: AZD4547;
 EGFR	A750P	NSCLC
 EGFR	A750G	NSCLC
@@ -235,7 +235,7 @@ KRAS	G12C	Histiocytosis	3A: Cobimetinib;
 KRAS	G12A	Histiocytosis	3A: Cobimetinib;
 IDH1	R132H	AML	1: Ivosidenib;
 IDH1	R132G	AML	1: Ivosidenib;
-FGFR2	FGFR2-BICC1 Fusion	Cholangiocarcinoma	1: Pemigatinib; 3A: Debio1347; 3A: BGJ398; 3A: AZD4547; 3A: Erdafitinib;
+FGFR2	FGFR2-BICC1 Fusion	Cholangiocarcinoma	1: Pemigatinib; 3B: Erdafitinib; 4: Debio1347; 4: BGJ398; 4: AZD4547;
 ERBB2	Amplification	Breast Cancer	1: Trastuzumab; 1: Ado-Trastuzumab Emtansine; 1: Lapatinib; 1: Pertuzumab+Trastuzumab; 1: Neratinib; 1: Capecitabine+Trastuzumab+Tucatinib; 1: Trastuzumab Deruxtecan; 3B: Carboplatin-Taxol Regimen+Trastuzumab; 3B: Lapatinib+Trastuzumab;
 RET	KIF5B-RET Fusion	NSCLC	1: Selpercatinib; 1: Pralsetinib; 2: Cabozantinib; 2: Vandetanib;
 RET	KIF5B-RET Fusion	Bladder Cancer	3B: Cabozantinib; 3B: Vandetanib; 3B: Selpercatinib; 3B: Pralsetinib;
