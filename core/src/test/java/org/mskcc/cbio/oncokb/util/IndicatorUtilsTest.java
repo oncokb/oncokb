@@ -131,6 +131,12 @@ public class IndicatorUtilsTest {
         assertEquals("The oncogenicity should be 'Predicted Oncogenic'", Oncogenicity.PREDICTED.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The isHotspot is not true, but it should be.", Boolean.TRUE, indicatorQueryResp.getHotspot());
 
+        // Test for 3d hotspot which should not be predicted oncogenic
+        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "KEAP1", "Y525S", null, null, "Pancreatic Adenocarcinoma", null, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null);
+        assertEquals("The oncogenicity should not be 'Predicted Oncogenic', it should be empty.", "", indicatorQueryResp.getOncogenic());
+        assertEquals("The isHotspot is true, but it should not be.", Boolean.FALSE, indicatorQueryResp.getHotspot());
+
         // ALK R401Q should not be hotspot. It later was removed from the hotspot list.
         // The position has high truncating rate
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "ALK", "R401Q", null, null, "Colon Adenocarcinoma", null, null, null, null);
