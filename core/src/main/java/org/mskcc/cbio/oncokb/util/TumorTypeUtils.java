@@ -669,7 +669,7 @@ public class TumorTypeUtils {
                 ONCO_TREE_API_URL = ONCO_TREE_API_URL.trim();
             }
             if (ONCO_TREE_API_URL == null || ONCO_TREE_API_URL.isEmpty()) {
-                ONCO_TREE_API_URL = "http://oncotree.mskcc.org/oncotree/api/";
+                ONCO_TREE_API_URL = "http://oncotree.info/api/";
             }
         }
         return ONCO_TREE_API_URL;
