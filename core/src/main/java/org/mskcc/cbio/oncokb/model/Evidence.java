@@ -22,15 +22,15 @@ import java.util.*;
     ),
     @NamedQuery(
         name = "findEvidencesByAlterationAndTumorType",
-        query = "select e from Evidence e join e.alterations a join e.tumorTypes tt where a.id=? and tt.id=?"
+        query = "select e from Evidence e join e.alterations a join e.cancerTypes tt where a.id=? and tt.id=?"
     ),
     @NamedQuery(
         name = "findEvidencesByAlterationsAndTumorTypesAndEvidenceTypes",
-        query = "select e from Evidence e join e.alterations a join e.tumorTypes tt where a.id in (:alts) and tt.id in (:tts) and  e.evidenceType in (:ets)"
+        query = "select e from Evidence e join e.alterations a join e.cancerTypes tt where a.id in (:alts) and tt.id in (:tts) and  e.evidenceType in (:ets)"
     ),
     @NamedQuery(
         name = "findEvidencesByAlterationsAndTumorTypesAndEvidenceTypesAndLevelOfEvidence",
-        query = "select e from Evidence e join e.alterations a join e.tumorTypes tt where a.id in (:alts) and tt.id in (:tts) and  e.evidenceType in (:ets) and e.levelOfEvidence in (:les)"
+        query = "select e from Evidence e join e.alterations a join e.cancerTypes tt where a.id in (:alts) and tt.id in (:tts) and  e.evidenceType in (:ets) and e.levelOfEvidence in (:les)"
     ),
     @NamedQuery(
         name = "findEvidencesByAlterationAndEvidenceType",
@@ -42,7 +42,7 @@ import java.util.*;
     ),
     @NamedQuery(
         name = "findEvidencesByAlterationAndEvidenceTypeAndTumorType",
-        query = "select e from Evidence e join e.alterations a join e.tumorTypes tt where a.id=:alt and e.evidenceType=:et and tt.id=:tt"
+        query = "select e from Evidence e join e.alterations a join e.cancerTypes tt where a.id=:alt and e.evidenceType=:et and tt.id=:tt"
     ),
     @NamedQuery(
         name = "findEvidencesByGene",
@@ -54,15 +54,15 @@ import java.util.*;
     ),
     @NamedQuery(
         name = "findEvidencesByGeneAndEvidenceTypeAndTumorType",
-        query = "select e from Evidence e join e.tumorTypes tt where e.gene=:g and e.evidenceType=:et and tt.id=:tt"
+        query = "select e from Evidence e join e.cancerTypes tt where e.gene=:g and e.evidenceType=:et and tt.id=:tt"
     ),
     @NamedQuery(
         name = "findEvidencesByTumorType",
-        query = "select e from Evidence e join e.tumorTypes tt where tt.id=:tt"
+        query = "select e from Evidence e join e.cancerTypes tt where tt.id=:tt"
     ),
     @NamedQuery(
         name = "findEvidencesByGeneAndTumorType",
-        query = "select e from Evidence e join e.alterations a join e.tumorTypes tt where e.gene=:g and tt.id=:tt"
+        query = "select e from Evidence e join e.alterations a join e.cancerTypes tt where e.gene=:g and tt.id=:tt"
     ),
     @NamedQuery(
         name = "findEvidencesByIds",
@@ -74,7 +74,7 @@ import java.util.*;
     ),
     @NamedQuery(
         name = "findTumorTypesWithEvidencesForAlterations",
-        query = "select distinct e.tumorTypes from Evidence e join e.alterations a where a.id in (:alts)"
+        query = "select distinct e.cancerTypes from Evidence e join e.alterations a where a.id in (:alts)"
     ),
     @NamedQuery(
         name = "findEvidenceByUUIDs",
@@ -102,17 +102,17 @@ public class Evidence implements java.io.Serializable {
     @Column(name = "for_germline")
     private Boolean forGermline = false;
 
-    @ManyToMany
-    @JoinTable(name = "evidence_tumor_type",
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "evidence_cancer_type",
         joinColumns = @JoinColumn(name = "evidence_id", referencedColumnName = "id"),
-        inverseJoinColumns = @JoinColumn(name = "tumor_type_id", referencedColumnName = "id"))
-    private Set<TumorType> tumorTypes = new HashSet<>();
+        inverseJoinColumns = @JoinColumn(name = "cancer_type_id", referencedColumnName = "id"))
+    private Set<TumorType> cancerTypes = new HashSet<>();
 
-    @ManyToMany
-    @JoinTable(name = "evidence_relevant_tumor_type",
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "evidence_relevant_cancer_type",
         joinColumns = @JoinColumn(name = "evidence_id", referencedColumnName = "id"),
-        inverseJoinColumns = @JoinColumn(name = "tumor_type_id", referencedColumnName = "id"))
-    private Set<TumorType> relevantTumorTypes = new HashSet<>();
+        inverseJoinColumns = @JoinColumn(name = "cancer_type_id", referencedColumnName = "id"))
+    private Set<TumorType> relevantCancerTypes = new HashSet<>();
 
 
     @ManyToOne(fetch = FetchType.EAGER)
@@ -193,20 +193,20 @@ public class Evidence implements java.io.Serializable {
         this.evidenceType = evidenceType;
     }
 
-    public Set<TumorType> getTumorTypes() {
-        return tumorTypes;
+    public Set<TumorType> getCancerTypes() {
+        return cancerTypes;
     }
 
-    public void setTumorTypes(Set<TumorType> tumorTypes) {
-        this.tumorTypes = tumorTypes;
+    public void setCancerTypes(Set<TumorType> cancerTypes) {
+        this.cancerTypes = cancerTypes;
     }
 
-    public Set<TumorType> getRelevantTumorTypes() {
-        return relevantTumorTypes;
+    public Set<TumorType> getRelevantCancerTypes() {
+        return relevantCancerTypes;
     }
 
-    public void setRelevantTumorTypes(Set<TumorType> relevantTumorTypes) {
-        this.relevantTumorTypes = relevantTumorTypes;
+    public void setRelevantCancerTypes(Set<TumorType> relevantCancerTypes) {
+        this.relevantCancerTypes = relevantCancerTypes;
     }
 
     public Boolean getForGermline() {
@@ -391,8 +391,8 @@ public class Evidence implements java.io.Serializable {
         }
         this.uuid = e.uuid;
         this.evidenceType = e.evidenceType;
-        this.tumorTypes = e.tumorTypes;
-        this.relevantTumorTypes = e.relevantTumorTypes;
+        this.cancerTypes = e.cancerTypes;
+        this.relevantCancerTypes = e.relevantCancerTypes;
         this.gene = e.gene;
         this.description = e.description;
         this.additionalInfo = e.additionalInfo;
@@ -408,15 +408,15 @@ public class Evidence implements java.io.Serializable {
         this.articles = new HashSet<>(e.articles);
     }
 
-    public Evidence(String uuid, EvidenceType evidenceType, Set<TumorType> tumorTypes, Set<TumorType> relevantTumorTypes, Gene gene, Set<Alteration> alterations, String description, String additionalInfo, List<Treatment> treatments,
+    public Evidence(String uuid, EvidenceType evidenceType, Set<TumorType> cancerTypes, Set<TumorType> relevantCancerTypes, Gene gene, Set<Alteration> alterations, String description, String additionalInfo, List<Treatment> treatments,
                     String knownEffect, Date lastEdit, Date lastReview,
                     LevelOfEvidence levelOfEvidence,
                     LevelOfEvidence solidPropagationLevel, LevelOfEvidence liquidPropagationLevel,
                     Set<Article> articles) {
         this.uuid = uuid;
         this.evidenceType = evidenceType;
-        this.tumorTypes = tumorTypes;
-        this.relevantTumorTypes = relevantTumorTypes;
+        this.cancerTypes = cancerTypes;
+        this.relevantCancerTypes = relevantCancerTypes;
         this.gene = gene;
         this.alterations = alterations;
         this.description = description;

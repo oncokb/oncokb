@@ -201,9 +201,9 @@ public class EvidenceUtils {
                 evidenceToReturn = evidenceToReturn.stream().filter(evidence -> {
                     if (evidence.getEvidenceType() != null) {
                         if (evidence.getEvidenceType().equals(EvidenceType.DIAGNOSTIC_IMPLICATION) && evidence.getLevelOfEvidence() != null && evidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_Dx1)) {
-                            return !Collections.disjoint(downwardTumorTypes, evidence.getTumorTypes());
+                            return !Collections.disjoint(downwardTumorTypes, evidence.getCancerTypes());
                         } else if (EvidenceTypeUtils.getTumorTypeEvidenceTypes().contains(evidence.getEvidenceType())) {
-                            return !Collections.disjoint(upwardTumorTypes, evidence.getTumorTypes());
+                            return !Collections.disjoint(upwardTumorTypes, evidence.getCancerTypes());
                         } else {
                             return true;
                         }
@@ -320,7 +320,7 @@ public class EvidenceUtils {
         for (Evidence evidence : evidences) {
             Evidence tmpEvidence = new Evidence(evidence, evidence.getId());
             Boolean flag = true;
-            if (Collections.disjoint(tmpEvidence.getTumorTypes(), tumorTypes)) {
+            if (Collections.disjoint(tmpEvidence.getCancerTypes(), tumorTypes)) {
                 if (tmpEvidence.getLevelOfEvidence() != null) {
                     LevelOfEvidence propagationLevel = getPropagationLevel(tmpEvidence, tumorForm);
                     if (propagationLevel != null) {
@@ -368,7 +368,7 @@ public class EvidenceUtils {
                             hasjointed = !Collections.disjoint(evidence.getAlterations(), evidenceQuery.getAlleles());
                         }
                         if (hasjointed) {
-                            if (evidence.getTumorTypes().isEmpty()) {
+                            if (evidence.getCancerTypes().isEmpty()) {
                                 if (evidence.getEvidenceType().equals(EvidenceType.ONCOGENIC)) {
                                     if (evidence.getDescription() == null) {
                                         List<Alteration> alterations = new ArrayList<>();
@@ -379,8 +379,8 @@ public class EvidenceUtils {
                             } else {
                                 List<TumorType> tumorType = new ArrayList<>();
 
-                                if (!evidence.getTumorTypes().isEmpty()) {
-                                    tumorType.addAll(evidence.getTumorTypes());
+                                if (!evidence.getCancerTypes().isEmpty()) {
+                                    tumorType.addAll(evidence.getCancerTypes());
                                 }
 
                                 TumorForm tumorForm = TumorTypeUtils.checkTumorForm(new HashSet<>(evidenceQuery.getOncoTreeTypes()));
@@ -673,10 +673,10 @@ public class EvidenceUtils {
         }
 
         TumorType tumorTypeNA = new TumorType();
-        tumorTypeNA.setName("NA");
+        tumorTypeNA.setSubtype("NA");
         List<TumorType> mostFrequentTumorTypes = new ArrayList<>();
         Map<TumorType, List<Evidence>> tumorTypeFrequency = new HashMap<>();
-        evidences.stream().filter(evidence -> !evidence.getTumorTypes().isEmpty()).forEach(evidence -> evidence.getTumorTypes().forEach(tumorType -> {
+        evidences.stream().filter(evidence -> !evidence.getCancerTypes().isEmpty()).forEach(evidence -> evidence.getCancerTypes().forEach(tumorType -> {
             if (!tumorTypeFrequency.containsKey(tumorType)) {
                 tumorTypeFrequency.put(tumorType, new ArrayList<>());
             }
@@ -728,8 +728,8 @@ public class EvidenceUtils {
                         } else if (sameLevelEvidences.size() > 1) {
                             // Select evidence with most frequently occurred tumor type when the level and the treatment are the same
                             sameLevelEvidences.sort((o1, o2) -> {
-                                int o1Index = o1.getTumorTypes().stream().map(mostFrequentTumorTypes::indexOf).sorted().findFirst().get();
-                                int o2Index = o2.getTumorTypes().stream().map(mostFrequentTumorTypes::indexOf).sorted().findFirst().get();
+                                int o1Index = o1.getCancerTypes().stream().map(mostFrequentTumorTypes::indexOf).sorted().findFirst().get();
+                                int o2Index = o2.getCancerTypes().stream().map(mostFrequentTumorTypes::indexOf).sorted().findFirst().get();
                                 int result = o1Index - o2Index;
                                 if (result == 0) {
                                     return -1;
@@ -911,7 +911,7 @@ public class EvidenceUtils {
                 final List<TumorType> upwardTumorTypes = query.getOncoTreeTypes();
                 TumorForm tumorForm = TumorTypeUtils.checkTumorForm(new HashSet<>(upwardTumorTypes));
                 query.getEvidences().stream().forEach(evidence -> {
-                    if (evidence.getLevelOfEvidence() != null && tumorForm != null && Collections.disjoint(upwardTumorTypes, evidence.getTumorTypes())) {
+                    if (evidence.getLevelOfEvidence() != null && tumorForm != null && Collections.disjoint(upwardTumorTypes, evidence.getCancerTypes())) {
                         Evidence propagatedLevel = getPropagateEvidence(allowedLevels, evidence, tumorForm);
                         if (propagatedLevel != null) {
                             updatedEvidences.add(propagatedLevel);

@@ -679,12 +679,12 @@ public class IndicatorUtilsTest {
     @Test
     public void testFilterImplication() {
         TumorType melanoma = new TumorType();
-        melanoma.setName("Melanoma");
+        melanoma.setSubtype("Melanoma");
         melanoma.setCode("MEL");
         melanoma.setMainType("Melanoma");
 
         TumorType nsclc = new TumorType();
-        nsclc.setName("Non-Small Cell Lung Cancer");
+        nsclc.setSubtype("Non-Small Cell Lung Cancer");
         nsclc.setCode("NSCLC");
         nsclc.setMainType("Non-Small Cell Lung Cancer");
 

@@ -487,10 +487,10 @@ public class MainUtils {
                 EvidenceUtils.getEvidenceByGenesAndEvidenceTypes(Collections.singleton(gene), evidenceTypes);
 
             for (Evidence evidence : geneEvidences.get(gene)) {
-                if (!evidence.getTumorTypes().isEmpty()) {
+                if (!evidence.getCancerTypes().isEmpty()) {
                     for (Alteration alteration : evidence.getAlterations()) {
                         if (evidences.containsKey(alteration)) {
-                            evidence.getTumorTypes().forEach(tumorType -> {
+                            evidence.getCancerTypes().forEach(tumorType -> {
                                 if (!evidences.get(alteration).containsKey(tumorType)) {
                                     evidences.get(alteration).put(tumorType, new HashMap<>());
                                 }

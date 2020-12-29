@@ -19,15 +19,15 @@ import java.util.*;
 })
 
 @Entity
-@Table(name = "tumor_type")
+@Table(name = "cancer_type")
 @ApiModel(description = "OncoTree Detailed Cancer Type")
 public class TumorType implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "name", nullable = false)
-    private String name = "";
+    @Column(name = "subtype", nullable = false)
+    private String subtype = "";
 
     @Column(name = "code", nullable = false)
     private String code = "";
@@ -55,10 +55,10 @@ public class TumorType implements Serializable {
     private TumorForm tumorForm = null;
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "tumor_type_children", joinColumns = {
-        @JoinColumn(name = "tumor_type_id", referencedColumnName = "id")
+    @JoinTable(name = "cancer_type_child", joinColumns = {
+        @JoinColumn(name = "cancer_type_id", referencedColumnName = "id")
     }, inverseJoinColumns = {
-        @JoinColumn(name = "tumor_type_child_id", referencedColumnName = "id")
+        @JoinColumn(name = "cancer_type_child_id", referencedColumnName = "id")
     })
     @JsonIgnore
     private Set<TumorType> children;
@@ -71,12 +71,12 @@ public class TumorType implements Serializable {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getSubtype() {
+        return subtype;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setSubtype(String subtype) {
+        this.subtype = subtype;
     }
 
     public String getCode() {
@@ -148,7 +148,7 @@ public class TumorType implements Serializable {
 
     public TumorType(org.mskcc.oncotree.model.TumorType oncoTreeTumorType) {
         if (!StringUtils.isNullOrEmpty(oncoTreeTumorType.getName())) {
-            this.setName(oncoTreeTumorType.getName());
+            this.setSubtype(oncoTreeTumorType.getName());
         }
         if (!StringUtils.isNullOrEmpty(oncoTreeTumorType.getTissue())) {
             this.setTissue(oncoTreeTumorType.getTissue());
@@ -182,12 +182,12 @@ public class TumorType implements Serializable {
             Objects.equals(getTissue(), tumorType.getTissue()) &&
             Objects.equals(getLevel(), tumorType.getLevel()) &&
             Objects.equals(getColor(), tumorType.getColor()) &&
-            Objects.equals(getName(), tumorType.getName()) &&
+            Objects.equals(getSubtype(), tumorType.getSubtype()) &&
             Objects.equals(getMainType(), tumorType.getMainType());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getCode(), getName(), getMainType());
+        return Objects.hash(getId(), getCode(), getSubtype(), getMainType());
     }
 }

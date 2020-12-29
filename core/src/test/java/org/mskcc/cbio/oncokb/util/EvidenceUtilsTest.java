@@ -154,13 +154,13 @@ public class EvidenceUtilsTest extends TestCase {
 
         TumorType tumorType = new TumorType();
         tumorType.setMainType("Melanoma");
-        tumorType.setName("Melanoma");
+        tumorType.setSubtype("Melanoma");
 
-        e1.setTumorTypes(Collections.singleton(tumorType));
-        e2.setTumorTypes(Collections.singleton(tumorType));
-        e3.setTumorTypes(Collections.singleton(tumorType));
-        e4.setTumorTypes(Collections.singleton(tumorType));
-        e5.setTumorTypes(Collections.singleton(tumorType));
+        e1.setCancerTypes(Collections.singleton(tumorType));
+        e2.setCancerTypes(Collections.singleton(tumorType));
+        e3.setCancerTypes(Collections.singleton(tumorType));
+        e4.setCancerTypes(Collections.singleton(tumorType));
+        e5.setCancerTypes(Collections.singleton(tumorType));
 
         Drug d1 = new Drug("Vemurafinib");
         Drug d2 = new Drug("Dabrafinib");
@@ -316,9 +316,9 @@ public class EvidenceUtilsTest extends TestCase {
         responses = EvidenceUtils.processRequest(Collections.singletonList(query), null, null, true);
         assertTrue("The response should only tumor type relevant evidences", responses.get(0).getEvidences().stream().filter(evidence -> {
             if (evidence.getLevelOfEvidence() != null && evidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_Dx1)) {
-                return !Collections.disjoint(downward, evidence.getTumorTypes());
+                return !Collections.disjoint(downward, evidence.getCancerTypes());
             } else if (evidence.getLevelOfEvidence() != null) {
-                return !Collections.disjoint(upward, evidence.getTumorTypes());
+                return !Collections.disjoint(upward, evidence.getCancerTypes());
             } else {
                 return true;
             }

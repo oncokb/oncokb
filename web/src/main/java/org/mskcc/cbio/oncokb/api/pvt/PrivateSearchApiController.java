@@ -312,15 +312,15 @@ public class PrivateSearchApiController implements PrivateSearchApi {
                         break;
                     }
                     if (drug.getDrugName().toLowerCase().equals(query)) {
-                        updateMap(result, matchKey, evidence.getGene(), evidence.getAlterations(), drug, evidence.getLevelOfEvidence(), evidence.getTumorTypes(), 4.0);
+                        updateMap(result, matchKey, evidence.getGene(), evidence.getAlterations(), drug, evidence.getLevelOfEvidence(), evidence.getCancerTypes(), 4.0);
                         isMatch = true;
                     } else if (drug.getNcitCode() != null && drug.getNcitCode().toLowerCase().equals(query)) {
-                        updateMap(result, matchKey, evidence.getGene(), evidence.getAlterations(), drug, evidence.getLevelOfEvidence(), evidence.getTumorTypes(), 4.0);
+                        updateMap(result, matchKey, evidence.getGene(), evidence.getAlterations(), drug, evidence.getLevelOfEvidence(), evidence.getCancerTypes(), 4.0);
                         isMatch = true;
                     } else {
                         for (String synonym : drug.getSynonyms()) {
                             if (synonym.toLowerCase().equals(query)) {
-                                updateMap(result, matchKey, evidence.getGene(), evidence.getAlterations(), drug, evidence.getLevelOfEvidence(), evidence.getTumorTypes(), 3.0);
+                                updateMap(result, matchKey, evidence.getGene(), evidence.getAlterations(), drug, evidence.getLevelOfEvidence(), evidence.getCancerTypes(), 3.0);
                                 isMatch = true;
                                 break;
                             }
@@ -329,21 +329,21 @@ public class PrivateSearchApiController implements PrivateSearchApi {
                     if(!exactMatch) {
                         String lowerCaseDrugName = drug.getDrugName().toLowerCase();
                         if (lowerCaseDrugName.startsWith(query)) {
-                            updateMap(result, matchKey, evidence.getGene(), evidence.getAlterations(), drug, evidence.getLevelOfEvidence(), evidence.getTumorTypes(), 2.0);
+                            updateMap(result, matchKey, evidence.getGene(), evidence.getAlterations(), drug, evidence.getLevelOfEvidence(), evidence.getCancerTypes(), 2.0);
                             isMatch = true;
                         } else if (lowerCaseDrugName.contains(query)) {
-                            updateMap(result, matchKey, evidence.getGene(), evidence.getAlterations(), drug, evidence.getLevelOfEvidence(), evidence.getTumorTypes(), 1.5);
+                            updateMap(result, matchKey, evidence.getGene(), evidence.getAlterations(), drug, evidence.getLevelOfEvidence(), evidence.getCancerTypes(), 1.5);
                             isMatch = true;
                         } else {
                             for (String synonym : drug.getSynonyms()) {
                                 String lower = synonym.toLowerCase();
 
                                 if(lower.startsWith(query)) {
-                                    updateMap(result, matchKey, evidence.getGene(), evidence.getAlterations(), drug, evidence.getLevelOfEvidence(), evidence.getTumorTypes(), 1.0);
+                                    updateMap(result, matchKey, evidence.getGene(), evidence.getAlterations(), drug, evidence.getLevelOfEvidence(), evidence.getCancerTypes(), 1.0);
                                     isMatch = true;
                                     break;
                                 } else if (lower.contains(query)) {
-                                    updateMap(result, matchKey, evidence.getGene(), evidence.getAlterations(), drug, evidence.getLevelOfEvidence(), evidence.getTumorTypes(), 0.5);
+                                    updateMap(result, matchKey, evidence.getGene(), evidence.getAlterations(), drug, evidence.getLevelOfEvidence(), evidence.getCancerTypes(), 0.5);
                                     isMatch = true;
                                     break;
                                 }

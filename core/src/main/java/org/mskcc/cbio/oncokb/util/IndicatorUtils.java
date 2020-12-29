@@ -489,7 +489,7 @@ public class IndicatorUtils {
         if (evidence == null) {
             return null;
         }
-        return evidence.getTumorTypes().stream().map(tumorType -> {
+        return evidence.getCancerTypes().stream().map(tumorType -> {
             Implication implication = new Implication();
             implication.setLevelOfEvidence(evidence.getLevelOfEvidence());
             implication.setAlterations(evidence.getAlterations().stream().map(alteration -> alteration.getName() == null ? alteration.getAlteration() : alteration.getAlteration()).collect(Collectors.toSet()));
@@ -720,7 +720,7 @@ public class IndicatorUtils {
                             pmidsMap.put(treatment, citations.getPmids());
                             abstractsMap.put(treatment, citations.getAbstracts());
                             alterationsMap.put(treatment, evidence.getAlterations().stream().map(alteration -> alteration.getName()).collect(Collectors.toList()));
-                            tumorTypeMap.put(treatment, evidence.getTumorTypes());
+                            tumorTypeMap.put(treatment, evidence.getCancerTypes());
                             descriptionMap.put(treatment, evidence.getDescription());
                         }
                         sameLevelTreatments.addAll(evidence.getTreatments());

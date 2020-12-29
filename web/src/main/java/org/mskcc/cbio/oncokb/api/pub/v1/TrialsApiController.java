@@ -197,7 +197,7 @@ public class TrialsApiController {
             case ALL_LIQUID_TUMORS:
                 return TumorTypeUtils.getAllTumorTypes().stream()
                     .filter(tumorType -> tumorType.getTumorForm() != null && tumorType.getTumorForm().equals(matchedSpecialTumorType.getTumorForm()))
-                    .map(tumorType -> getTrialsByCancerType(tumors, StringUtils.isNotEmpty(tumorType.getName()) ? tumorType.getName() : tumorType.getMainType()))
+                    .map(tumorType -> getTrialsByCancerType(tumors, StringUtils.isNotEmpty(tumorType.getSubtype()) ? tumorType.getSubtype() : tumorType.getMainType()))
                     .flatMap(Collection::stream).collect(Collectors.toList());
             default:
                 return trials;
@@ -220,7 +220,7 @@ public class TrialsApiController {
                     trials.addAll(getTumor(tumors, code).getTrials());
             }
         } else {
-            TumorType matchedSubtype = TumorTypeUtils.getBySubtypeName(cancerType);
+            TumorType matchedSubtype = TumorTypeUtils.getBySubtype(cancerType);
             if (matchedSubtype != null) {
                 String codeByName = matchedSubtype.getCode();
                 if (tumors.containsKey(codeByName))

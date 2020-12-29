@@ -46,21 +46,21 @@ public class TumorTypeUtils {
 
     public static TumorType getByName(String name) {
         if (StringUtils.isEmpty(name)) return null;
-        TumorType subtype = getBySubtypeName(name);
+        TumorType subtype = getBySubtype(name);
         return subtype == null ? getByMainType(name) : subtype;
     }
 
-    public static TumorType getBySubtypeName(String name) {
-        if (StringUtils.isEmpty(name)) return null;
-        String lowercaseName = name.toLowerCase();
-        Optional<TumorType> matchedSubtypeOptional = getAllSubtypes().stream().filter(subtype -> StringUtils.isNotEmpty(subtype.getName()) && subtype.getName().toLowerCase().equals(lowercaseName)).findAny();
+    public static TumorType getBySubtype(String subtype) {
+        if (StringUtils.isEmpty(subtype)) return null;
+        String lowercaseName = subtype.toLowerCase();
+        Optional<TumorType> matchedSubtypeOptional = getAllSubtypes().stream().filter(tumorType -> StringUtils.isNotEmpty(tumorType.getSubtype()) && tumorType.getSubtype().toLowerCase().equals(lowercaseName)).findAny();
         return matchedSubtypeOptional.isPresent() ? matchedSubtypeOptional.get() : null;
     }
 
     public static TumorType getByMainType(String mainType) {
         if (StringUtils.isEmpty(mainType)) return null;
         String lowercaseMainType = mainType.toLowerCase();
-        Optional<TumorType> matchedMainTypeOptional = getAllMainTypes().stream().filter(maintype -> StringUtils.isNotEmpty(maintype.getName()) && maintype.getName().toLowerCase().equals(lowercaseMainType)).findAny();
+        Optional<TumorType> matchedMainTypeOptional = getAllMainTypes().stream().filter(tumorType -> StringUtils.isNotEmpty(tumorType.getMainType()) && tumorType.getMainType().toLowerCase().equals(lowercaseMainType)).findAny();
         return matchedMainTypeOptional.isPresent() ? matchedMainTypeOptional.get() : null;
     }
 
@@ -71,7 +71,7 @@ public class TumorTypeUtils {
 
     public static TumorType getBySpecialTumor(SpecialTumorType specialTumorType) {
         if (specialTumorType == null) return null;
-        return getAllMainTypes().stream().filter(mainType -> StringUtils.isNotEmpty(mainType.getName()) && mainType.getName().toLowerCase().equals(specialTumorType.getTumorType().toLowerCase())).findAny().orElse(null);
+        return getAllMainTypes().stream().filter(mainType -> StringUtils.isNotEmpty(mainType.getMainType()) && mainType.getMainType().toLowerCase().equals(specialTumorType.getTumorType().toLowerCase())).findAny().orElse(null);
     }
 
     public static Boolean isSolidTumor(TumorType tumorType) {
@@ -94,8 +94,8 @@ public class TumorTypeUtils {
 
         // when the code is null, we need to validate the main type
         if (tumorType.getCode() == null) {
-            TumorForm mainTypeTumorForm = getTumorForm(tumorType.getName());
-            if (tumorType.getName() != null && mainTypeTumorForm != null) {
+            TumorForm mainTypeTumorForm = getTumorForm(tumorType.getMainType());
+            if (tumorType.getMainType() != null && mainTypeTumorForm != null) {
                 return mainTypeTumorForm.equals(tumorForm);
             }
         } else {
@@ -158,7 +158,7 @@ public class TumorTypeUtils {
         LinkedHashSet<TumorType> mappedTumorTypes = new LinkedHashSet<>();
         TumorType matchedTumorType = getByCode(tumorType);
         if (matchedTumorType == null) {
-            matchedTumorType = getBySubtypeName(tumorType);
+            matchedTumorType = getBySubtype(tumorType);
         }
 
         if (direction.equals(RelevantTumorTypeDirection.UPWARD)) {
@@ -185,7 +185,7 @@ public class TumorTypeUtils {
                 mappedTumorTypes.add(matchedTumorType);
 
                 // Add main type
-                TumorType matchedMainType = getByMainType(matchedTumorType.getName());
+                TumorType matchedMainType = getByMainType(matchedTumorType.getMainType());
                 if (matchedMainType != null) {
                     mappedTumorTypes.add(matchedMainType);
                 }
@@ -218,8 +218,8 @@ public class TumorTypeUtils {
         if (tumorType == null) {
             return "";
         } else {
-            if (tumorType.getName() != null) {
-                return tumorType.getName();
+            if (tumorType.getSubtype() != null) {
+                return tumorType.getSubtype();
             } else if (tumorType.getMainType() != null && tumorType.getMainType() != null) {
                 return tumorType.getMainType();
             } else {
@@ -277,7 +277,7 @@ public class TumorTypeUtils {
         Set<TumorType> types = new HashSet<>();
         for (SpecialTumorType specialTumorType : SpecialTumorType.values()) {
             TumorType tumorType = new TumorType();
-            tumorType.setName(specialTumorType.getTumorType());
+            tumorType.setMainType(specialTumorType.getTumorType());
             tumorType.setTumorForm(getTumorForm(specialTumorType));
             types.add(tumorType);
         }

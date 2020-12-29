@@ -113,8 +113,8 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             Set<Evidence> evidences = CacheUtils.getAllEvidences();
             Set<TumorType> treatmentTumorTypes = new HashSet<>();
             for (Evidence evidence : evidences) {
-                if (evidence.getLevelOfEvidence() != null && !evidence.getTumorTypes().isEmpty()) {
-                    treatmentTumorTypes.addAll(evidence.getTumorTypes());
+                if (evidence.getLevelOfEvidence() != null && !evidence.getCancerTypes().isEmpty()) {
+                    treatmentTumorTypes.addAll(evidence.getCancerTypes());
                 }
             }
             mainNumber.setTumorType(treatmentTumorTypes.size());
@@ -339,11 +339,11 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             annotation.setBackground(background.iterator().next().getDescription());
         }
 
-        for (TumorType uniqueTumorType : response.getEvidences().stream().filter(evidence -> !evidence.getTumorTypes().isEmpty()).map(evidence -> evidence.getTumorTypes()).flatMap(Collection::stream).collect(Collectors.toSet())) {
+        for (TumorType uniqueTumorType : response.getEvidences().stream().filter(evidence -> !evidence.getCancerTypes().isEmpty()).map(evidence -> evidence.getCancerTypes()).flatMap(Collection::stream).collect(Collectors.toSet())) {
             VariantAnnotationTumorType variantAnnotationTumorType = new VariantAnnotationTumorType();
             variantAnnotationTumorType.setRelevantTumorType(relevantTumorTypes.contains(uniqueTumorType));
             variantAnnotationTumorType.setTumorType(uniqueTumorType);
-            variantAnnotationTumorType.setEvidences(response.getEvidences().stream().filter(evidence -> !evidence.getTumorTypes().isEmpty() && evidence.getTumorTypes().contains(uniqueTumorType)).collect(Collectors.toList()));
+            variantAnnotationTumorType.setEvidences(response.getEvidences().stream().filter(evidence -> !evidence.getCancerTypes().isEmpty() && evidence.getCancerTypes().contains(uniqueTumorType)).collect(Collectors.toList()));
             annotation.getTumorTypes().add(variantAnnotationTumorType);
         }
         return new ResponseEntity<>(annotation, HttpStatus.OK);

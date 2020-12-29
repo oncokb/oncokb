@@ -65,10 +65,10 @@ public class EvidenceController {
     synchronized ResponseEntity updateEvidence(@RequestBody Set<Evidence> evidences) {
         Set<Evidence> updatedEvidenceSet = new HashSet<>();
         evidences.forEach(evidence -> {
-            Set<TumorType> cancerTypes = evidence.getRelevantTumorTypes().stream().map(tumorType -> StringUtils.isNullOrEmpty(tumorType.getCode()) ? TumorTypeUtils.getByMainType(tumorType.getName()) : TumorTypeUtils.getByCode(tumorType.getCode())).collect(Collectors.toSet());
+            Set<TumorType> cancerTypes = evidence.getRelevantCancerTypes().stream().map(tumorType -> StringUtils.isNullOrEmpty(tumorType.getCode()) ? TumorTypeUtils.getByMainType(tumorType.getMainType()) : TumorTypeUtils.getByCode(tumorType.getCode())).collect(Collectors.toSet());
             List<Evidence> persistenceEvidences = ApplicationContextSingleton.getEvidenceBo().findEvidenceByUUIDs(Collections.singletonList(evidence.getUuid()));
             persistenceEvidences.forEach(persistenceEvidence -> {
-                persistenceEvidence.setRelevantTumorTypes(cancerTypes);
+                persistenceEvidence.setRelevantCancerTypes(cancerTypes);
                 updatedEvidenceSet.add(persistenceEvidence);
                 ApplicationContextSingleton.getEvidenceBo().update(persistenceEvidence);
             });
@@ -183,7 +183,7 @@ public class EvidenceController {
 
     private String specialTypeCheck(Evidence queryEvidence) {
         if (queryEvidence.getAlterations() != null) return "MUTATION_NAME_CHANGE";
-        if (!queryEvidence.getTumorTypes().isEmpty()) return "TUMOR_NAME_CHANGE";
+        if (!queryEvidence.getCancerTypes().isEmpty()) return "TUMOR_NAME_CHANGE";
         if (queryEvidence.getTreatments() != null) return "TREATMENT_NAME_CHANGE";
         return "";
     }
@@ -239,14 +239,14 @@ public class EvidenceController {
             return new ArrayList<>();
         }
 
-        Set<TumorType> cancerTypes = queryEvidence.getTumorTypes().stream().map(tumorType -> StringUtils.isNullOrEmpty(tumorType.getCode()) ? TumorTypeUtils.getByMainType(tumorType.getName()) : TumorTypeUtils.getBySubtypeName(tumorType.getName())).collect(Collectors.toSet());
-        Set<TumorType> relevantCancerTypes = queryEvidence.getRelevantTumorTypes().stream().map(tumorType -> StringUtils.isNullOrEmpty(tumorType.getCode()) ? TumorTypeUtils.getByMainType(tumorType.getName()) : TumorTypeUtils.getBySubtypeName(tumorType.getName())).collect(Collectors.toSet());
+        Set<TumorType> cancerTypes = queryEvidence.getCancerTypes().stream().map(tumorType -> StringUtils.isNullOrEmpty(tumorType.getCode()) ? TumorTypeUtils.getByMainType(tumorType.getMainType()) : TumorTypeUtils.getByCode(tumorType.getCode())).collect(Collectors.toSet());
+        Set<TumorType> relevantCancerTypes = queryEvidence.getRelevantCancerTypes().stream().map(tumorType -> StringUtils.isNullOrEmpty(tumorType.getCode()) ? TumorTypeUtils.getByMainType(tumorType.getMainType()) : TumorTypeUtils.getByCode(tumorType.getCode())).collect(Collectors.toSet());
         Boolean isCancerEvidence = true;
-        if (queryEvidence.getTumorTypes().isEmpty()) {
+        if (queryEvidence.getCancerTypes().isEmpty()) {
             isCancerEvidence = false;
         }
         // if cancerTypes and subTypes are not the same length, return null
-        if (cancerTypes.size() != queryEvidence.getTumorTypes().size()) {
+        if (cancerTypes.size() != queryEvidence.getCancerTypes().size()) {
             return new ArrayList<>();
         }
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
@@ -283,7 +283,7 @@ public class EvidenceController {
                 evidences.removeAll(evidences);
 
                 Evidence tempEvidence = new Evidence(oldEvidence, null);
-                tempEvidence.setTumorTypes(queryEvidence.getTumorTypes().stream().map(tumorType -> StringUtils.isNullOrEmpty(tumorType.getCode()) ? TumorTypeUtils.getByMainType(tumorType.getName()) : TumorTypeUtils.getByName(tumorType.getName())).filter(tumorType -> tumorType != null).collect(Collectors.toSet()));
+                tempEvidence.setCancerTypes(queryEvidence.getCancerTypes().stream().map(tumorType -> StringUtils.isNullOrEmpty(tumorType.getCode()) ? TumorTypeUtils.getByMainType(tumorType.getMainType()) : TumorTypeUtils.getByCode(tumorType.getCode())).filter(tumorType -> tumorType != null).collect(Collectors.toSet()));
                 initEvidence(tempEvidence, new ArrayList<>(tempEvidence.getTreatments()));
 
                 evidenceBo.save(tempEvidence);
@@ -344,7 +344,7 @@ public class EvidenceController {
                     evidence.setAlterations(alterations);
                 }
                 evidence.setEvidenceType(evidenceType);
-                evidence.setTumorTypes(new HashSet<>());
+                evidence.setCancerTypes(new HashSet<>());
                 evidence.setKnownEffect(knownEffect);
                 evidence.setLevelOfEvidence(level);
                 evidence.setDescription(description);

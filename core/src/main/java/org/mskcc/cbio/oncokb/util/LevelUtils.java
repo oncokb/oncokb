@@ -291,7 +291,7 @@ public class LevelUtils {
     }
 
     public static TumorForm resolveEvidenceTumorForm(Evidence evidence) {
-        Set<TumorForm> tumorForms = evidence.getTumorTypes().stream().map(tumorType -> tumorType.getTumorForm()).distinct().collect(Collectors.toSet());
+        Set<TumorForm> tumorForms = evidence.getCancerTypes().stream().map(tumorType -> tumorType.getTumorForm()).distinct().collect(Collectors.toSet());
         if (tumorForms.size() == 1) {
             return tumorForms.iterator().next();
         } else {

@@ -26,7 +26,7 @@ public class TumorTypeImporter {
             .filter(tumorType -> StringUtils.isNotEmpty(tumorType.getMainType()) && tumorType.getLevel() > 1)
             .map(mainType -> {
                 TumorType tumorType = new TumorType();
-                tumorType.setName(mainType.getMainType());
+                tumorType.setMainType(mainType.getMainType());
                 return tumorType;
             })
             .distinct()
@@ -34,7 +34,7 @@ public class TumorTypeImporter {
 
         distinctTumorTypes.stream()
             .forEach(mainType -> {
-                Set<TumorType> tumorTypesWithSameMainType = tumorTypes.stream().filter(tumorType -> StringUtils.isNotEmpty(tumorType.getMainType()) && tumorType.getMainType().equals(mainType.getName())).collect(Collectors.toSet());
+                Set<TumorType> tumorTypesWithSameMainType = tumorTypes.stream().filter(tumorType -> StringUtils.isNotEmpty(tumorType.getMainType()) && tumorType.getMainType().equals(mainType.getMainType())).collect(Collectors.toSet());
 
                 Set<TumorForm> tumorForms = tumorTypesWithSameMainType.stream().map(tumorType -> tumorType.getTumorForm()).collect(Collectors.toSet());
                 if (tumorForms.size() > 0) {
@@ -55,8 +55,12 @@ public class TumorTypeImporter {
                 }
 
                 Set<String> colors = tumorTypesWithSameMainType.stream().map(tumorType -> tumorType.getColor()).collect(Collectors.toSet());
-                if (colors.size() == 1) {
-                    mainType.setColor(colors.iterator().next());
+                if (colors.size() > 0) {
+                    if (colors.size() == 1) {
+                        mainType.setColor(colors.iterator().next());
+                    } else {
+                        mainType.setColor(TumorForm.MIXED.name());
+                    }
                 }
 
                 mainType.setLevel(0);
