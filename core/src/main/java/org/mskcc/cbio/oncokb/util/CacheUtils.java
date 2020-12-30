@@ -8,6 +8,7 @@ import org.mskcc.cbio.oncokb.model.TumorType;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
@@ -41,6 +42,8 @@ public class CacheUtils {
     private static Map<Integer, Set<Evidence>> evidences = new HashMap<>(); //Gene based evidences
     private static Map<Integer, Set<Alteration>> alterations = new HashMap<>(); //Gene based alterations
     private static Map<Integer, Set<Alteration>> VUS = new HashMap<>(); //Gene based VUSs
+
+    private static List<TumorType> cancerTypes = new ArrayList<>();
 
     // Other services which will be defined in the property cache.update separated by comma
     // Every time the observer is triggered, all other services will be triggered as well
@@ -191,6 +194,7 @@ public class CacheUtils {
             System.out.println("Cached all VUSs: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
             current = MainUtils.getCurrentTimestamp();
 
+            cancerTypes = ApplicationContextSingleton.getTumorTypeBo().findAll();
             System.out.println("Cached all tumor types: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
             current = MainUtils.getCurrentTimestamp();
 
@@ -507,6 +511,14 @@ public class CacheUtils {
                 }
             }
         }
+    }
+
+    public static TumorType findTumorTypeByCode(String code) {
+        return cancerTypes.stream().filter(cancerType -> !StringUtils.isNullOrEmpty(cancerType.getCode()) && cancerType.getCode().equals(code)).findFirst().orElse(null);
+    }
+
+    public static List<TumorType> getAllCancerTypes() {
+        return cancerTypes.stream().collect(Collectors.toList());
     }
 
     public static void forceUpdateGeneAlterations(Integer entrezGeneId) {
