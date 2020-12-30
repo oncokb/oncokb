@@ -201,9 +201,9 @@ public class EvidenceUtils {
                 evidenceToReturn = evidenceToReturn.stream().filter(evidence -> {
                     if (evidence.getEvidenceType() != null) {
                         if (evidence.getEvidenceType().equals(EvidenceType.DIAGNOSTIC_IMPLICATION) && evidence.getLevelOfEvidence() != null && evidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_Dx1)) {
-                            return !Collections.disjoint(downwardTumorTypes, evidence.getCancerTypes());
+                            return !Collections.disjoint(downwardTumorTypes, evidence.getRelevantCancerTypes().isEmpty() ? evidence.getCancerTypes() : evidence.getRelevantCancerTypes());
                         } else if (EvidenceTypeUtils.getTumorTypeEvidenceTypes().contains(evidence.getEvidenceType())) {
-                            return !Collections.disjoint(upwardTumorTypes, evidence.getCancerTypes());
+                            return !Collections.disjoint(upwardTumorTypes, evidence.getRelevantCancerTypes().isEmpty() ? evidence.getCancerTypes() : evidence.getRelevantCancerTypes());
                         } else {
                             return true;
                         }
@@ -377,14 +377,10 @@ public class EvidenceUtils {
                                 }
                                 filtered.add(evidence);
                             } else {
-                                List<TumorType> tumorType = new ArrayList<>();
-
-                                if (!evidence.getCancerTypes().isEmpty()) {
-                                    tumorType.addAll(evidence.getCancerTypes());
-                                }
+                                Set<TumorType> tumorTypes = evidence.getRelevantCancerTypes().isEmpty() ? evidence.getCancerTypes() : evidence.getRelevantCancerTypes();
 
                                 TumorForm tumorForm = TumorTypeUtils.checkTumorForm(new HashSet<>(evidenceQuery.getOncoTreeTypes()));
-                                hasjointed = !Collections.disjoint(evidenceQuery.getOncoTreeTypes(), tumorType);
+                                hasjointed = !Collections.disjoint(evidenceQuery.getOncoTreeTypes(), tumorTypes);
                                 if (hasjointed || com.mysql.jdbc.StringUtils.isNullOrEmpty(evidenceQuery.getQuery().getTumorType())) {
                                     filtered.add(evidence);
                                 } else if (tumorForm != null) {
@@ -911,7 +907,7 @@ public class EvidenceUtils {
                 final List<TumorType> upwardTumorTypes = query.getOncoTreeTypes();
                 TumorForm tumorForm = TumorTypeUtils.checkTumorForm(new HashSet<>(upwardTumorTypes));
                 query.getEvidences().stream().forEach(evidence -> {
-                    if (evidence.getLevelOfEvidence() != null && tumorForm != null && Collections.disjoint(upwardTumorTypes, evidence.getCancerTypes())) {
+                    if (evidence.getLevelOfEvidence() != null && tumorForm != null && Collections.disjoint(upwardTumorTypes, evidence.getRelevantCancerTypes().isEmpty() ? evidence.getCancerTypes() : evidence.getRelevantCancerTypes())) {
                         Evidence propagatedLevel = getPropagateEvidence(allowedLevels, evidence, tumorForm);
                         if (propagatedLevel != null) {
                             updatedEvidences.add(propagatedLevel);

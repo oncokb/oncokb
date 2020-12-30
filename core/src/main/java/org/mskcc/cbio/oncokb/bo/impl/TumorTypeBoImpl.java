@@ -14,8 +14,7 @@ public class TumorTypeBoImpl extends GenericBoImpl<TumorType, TumorTypeDao> impl
         return CacheUtils.findTumorTypeByCode(code);
     }
 
-    @Override
-    public List<TumorType> findAll() {
+    public List<TumorType> findAllCached() {
         return CacheUtils.getAllCancerTypes();
     }
 }

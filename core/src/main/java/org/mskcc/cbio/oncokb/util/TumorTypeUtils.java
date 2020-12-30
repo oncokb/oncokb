@@ -25,7 +25,7 @@ public class TumorTypeUtils {
     );
 
     public static List<TumorType> getAllTumorTypes() {
-        return ApplicationContextSingleton.getTumorTypeBo().findAll().stream().filter(tumorType -> StringUtils.isEmpty(tumorType.getCode()) || tumorType.getLevel() > 1).collect(Collectors.toList());
+        return ApplicationContextSingleton.getTumorTypeBo().findAllCached().stream().filter(tumorType -> StringUtils.isEmpty(tumorType.getCode()) || tumorType.getLevel() > 1).collect(Collectors.toList());
     }
 
     /**
@@ -34,14 +34,14 @@ public class TumorTypeUtils {
      * @return
      */
     public static List<TumorType> getAllSubtypes() {
-        return ApplicationContextSingleton.getTumorTypeBo().findAll().stream().filter(tumorType -> StringUtils.isNotEmpty(tumorType.getCode()) && tumorType.getLevel() > 1).collect(Collectors.toList());
+        return ApplicationContextSingleton.getTumorTypeBo().findAllCached().stream().filter(tumorType -> StringUtils.isNotEmpty(tumorType.getCode()) && tumorType.getLevel() > 1).collect(Collectors.toList());
     }
 
     /**
      * Get all OncoTree main types
      */
     public static List<TumorType> getAllMainTypes() {
-        return ApplicationContextSingleton.getTumorTypeBo().findAll().stream().filter(tumorType -> StringUtils.isEmpty(tumorType.getCode())).collect(Collectors.toList());
+        return ApplicationContextSingleton.getTumorTypeBo().findAllCached().stream().filter(tumorType -> StringUtils.isEmpty(tumorType.getCode())).collect(Collectors.toList());
     }
 
     public static TumorType getByName(String name) {
@@ -53,8 +53,7 @@ public class TumorTypeUtils {
     public static TumorType getBySubtype(String subtype) {
         if (StringUtils.isEmpty(subtype)) return null;
         String lowercaseName = subtype.toLowerCase();
-        Optional<TumorType> matchedSubtypeOptional = getAllSubtypes().stream().filter(tumorType -> StringUtils.isNotEmpty(tumorType.getSubtype()) && tumorType.getSubtype().toLowerCase().equals(lowercaseName)).findAny();
-        return matchedSubtypeOptional.isPresent() ? matchedSubtypeOptional.get() : null;
+        return getAllSubtypes().stream().filter(tumorType -> StringUtils.isNotEmpty(tumorType.getSubtype()) && tumorType.getSubtype().toLowerCase().equals(lowercaseName)).findAny().orElse(null);
     }
 
     public static TumorType getByMainType(String mainType) {

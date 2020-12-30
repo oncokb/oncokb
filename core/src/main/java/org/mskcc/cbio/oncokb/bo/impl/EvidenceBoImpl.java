@@ -67,7 +67,7 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
         }
 
         return findEvidencesByAlteration(alterations).stream()
-            .filter(evidence -> !Collections.disjoint(evidence.getCancerTypes(), tumorTypes) && evidenceTypes.contains(evidence.getEvidenceType()))
+            .filter(evidence -> !Collections.disjoint(evidence.getRelevantCancerTypes().isEmpty() ? evidence.getCancerTypes() : evidence.getRelevantCancerTypes(), tumorTypes) && evidenceTypes.contains(evidence.getEvidenceType()))
             .collect(Collectors.toList());
     }
 
@@ -81,7 +81,7 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
         }
 
         return findEvidencesByAlteration(alterations).stream()
-            .filter(evidence -> !Collections.disjoint(evidence.getCancerTypes(), tumorTypes) && levelOfEvidences.contains(evidence.getLevelOfEvidence()) && evidenceTypes.contains(evidence.getEvidenceType()))
+            .filter(evidence -> !Collections.disjoint(evidence.getRelevantCancerTypes().isEmpty() ? evidence.getCancerTypes() : evidence.getRelevantCancerTypes(), tumorTypes) && levelOfEvidences.contains(evidence.getLevelOfEvidence()) && evidenceTypes.contains(evidence.getEvidenceType()))
             .collect(Collectors.toList());
     }
 
@@ -120,7 +120,7 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
     public List<Evidence> findEvidencesByGene(Collection<Gene> genes, Collection<EvidenceType> evidenceTypes, Collection<TumorType> tumorTypes) {
         Set<Evidence> set = new LinkedHashSet<Evidence>();
         for (Gene gene : genes) {
-            set.addAll(CacheUtils.getEvidences(gene).stream().filter(evidence -> evidenceTypes.contains(evidence.getEvidenceType()) && !Collections.disjoint(evidence.getCancerTypes(), tumorTypes)).collect(Collectors.toList()));
+            set.addAll(CacheUtils.getEvidences(gene).stream().filter(evidence -> evidenceTypes.contains(evidence.getEvidenceType()) && !Collections.disjoint(evidence.getRelevantCancerTypes().isEmpty() ? evidence.getCancerTypes() : evidence.getRelevantCancerTypes(), tumorTypes)).collect(Collectors.toList()));
         }
         return new ArrayList<>(set);
     }
