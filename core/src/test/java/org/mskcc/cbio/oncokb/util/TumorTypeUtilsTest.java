@@ -61,8 +61,8 @@ public class TumorTypeUtilsTest extends TestCase {
         expectedResult = "Chronic Myelogenous Leukemia, M:Myeloproliferative Neoplasms, Myeloproliferative Neoplasms, M:All Liquid Tumors, M:All Tumors";
         assertEquals(expectedResult, tumorTypesToString(tumorTypes));
 
-        // 863 subtypes, 1 tissue root  117 main types, 8 special(all solid, all liquid, all tumors)
-        assertEquals(989, ApplicationContextSingleton.getTumorTypeBo().findAllCached().size());
+        // 863 subtypes, 1 tissue root  117 main types, 7 special tumor types
+        assertEquals(988, ApplicationContextSingleton.getTumorTypeBo().findAllCached().size());
     }
 
     // Is solid tumor is decided on tissue level

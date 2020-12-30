@@ -2,6 +2,7 @@ package org.mskcc.cbio.oncokb.importer;
 
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.bo.TumorTypeBo;
+import org.mskcc.cbio.oncokb.model.SpecialTumorType;
 import org.mskcc.cbio.oncokb.model.TumorForm;
 import org.mskcc.cbio.oncokb.model.TumorType;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
@@ -9,6 +10,8 @@ import org.mskcc.cbio.oncokb.util.TumorTypeUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static org.mskcc.cbio.oncokb.util.TumorTypeUtils.getTumorForm;
 
 public class TumorTypeImporter {
     private TumorTypeImporter() {
@@ -68,7 +71,12 @@ public class TumorTypeImporter {
             });
 
         // save all special types
-        TumorTypeUtils.getAllSpecialTumorOncoTreeTypes().forEach(tumorType -> ApplicationContextSingleton.getTumorTypeBo().save(tumorType));
+        for (SpecialTumorType specialTumorType : SpecialTumorType.values()) {
+            TumorType tumorType = new TumorType();
+            tumorType.setMainType(specialTumorType.getTumorType());
+            tumorType.setTumorForm(getTumorForm(specialTumorType));
+            ApplicationContextSingleton.getTumorTypeBo().save(tumorType);
+        }
 
         // Set the tumor type child and parent
         Map<String, org.mskcc.oncotree.model.TumorType> tumorTypeMap = TumorTypeUtils.getAllNestedOncoTreeSubtypesFromSource();
