@@ -23,7 +23,7 @@ public class TumorTypeImporter {
 
         // Save all mainType
         List<TumorType> distinctTumorTypes = tumorTypes.stream()
-            .filter(tumorType -> StringUtils.isNotEmpty(tumorType.getMainType()) && tumorType.getLevel() > 1)
+            .filter(tumorType -> StringUtils.isNotEmpty(tumorType.getMainType()) && tumorType.getLevel() > 0)
             .map(mainType -> {
                 TumorType tumorType = new TumorType();
                 tumorType.setMainType(mainType.getMainType());

@@ -1,9 +1,11 @@
 package org.mskcc.cbio.oncokb.util;
 
 import junit.framework.TestCase;
+import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.model.RelevantTumorTypeDirection;
 import org.mskcc.cbio.oncokb.model.TumorType;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -17,47 +19,50 @@ public class TumorTypeUtilsTest extends TestCase {
     public void testFindTumorTypesWithSource() throws Exception {
         List<TumorType> tumorTypes = TumorTypeUtils.findRelevantTumorTypes("LIPO");
         String expectedResult = "Liposarcoma, M:Soft Tissue Sarcoma, M:All Solid Tumors, M:All Tumors";
-        assertEquals(expectedResult, TumorTypeUtils.getTumorTypesName(tumorTypes));
+        assertEquals(expectedResult, tumorTypesToString(tumorTypes));
 
         tumorTypes = TumorTypeUtils.findRelevantTumorTypes("DDLS");
         expectedResult = "Dedifferentiated Liposarcoma, M:Soft Tissue Sarcoma, Liposarcoma, M:All Solid Tumors, M:All Tumors";
-        assertEquals(expectedResult, TumorTypeUtils.getTumorTypesName(tumorTypes));
+        assertEquals(expectedResult, tumorTypesToString(tumorTypes));
 
         tumorTypes = TumorTypeUtils.findRelevantTumorTypes("NSCLC");
         expectedResult = "Non-Small Cell Lung Cancer, M:Non-Small Cell Lung Cancer, M:All Solid Tumors, M:All Tumors";
-        assertEquals(expectedResult, TumorTypeUtils.getTumorTypesName(tumorTypes));
+        assertEquals(expectedResult, tumorTypesToString(tumorTypes));
 
         tumorTypes = TumorTypeUtils.findRelevantTumorTypes("Chronic Myeloid Leukemia, BCR-ABL1+");
         expectedResult = "Chronic Myeloid Leukemia, BCR-ABL1+, M:Myeloproliferative Neoplasms, Chronic Myelogenous Leukemia, Myeloproliferative Neoplasms, M:All Liquid Tumors, M:All Tumors";
-        assertEquals(expectedResult, TumorTypeUtils.getTumorTypesName(tumorTypes));
+        assertEquals(expectedResult, tumorTypesToString(tumorTypes));
 
         tumorTypes = TumorTypeUtils.findRelevantTumorTypes("All Liquid Tumors");
         expectedResult = "M:All Liquid Tumors, M:All Tumors";
-        assertEquals(expectedResult, TumorTypeUtils.getTumorTypesName(tumorTypes));
+        assertEquals(expectedResult, tumorTypesToString(tumorTypes));
 
         tumorTypes = TumorTypeUtils.findRelevantTumorTypes("All Solid Tumors");
         expectedResult = "M:All Solid Tumors, M:All Tumors";
-        assertEquals(expectedResult, TumorTypeUtils.getTumorTypesName(tumorTypes));
+        assertEquals(expectedResult, tumorTypesToString(tumorTypes));
 
         tumorTypes = TumorTypeUtils.findRelevantTumorTypes("All Tumors");
         expectedResult = "M:All Tumors";
-        assertEquals(expectedResult, TumorTypeUtils.getTumorTypesName(tumorTypes));
+        assertEquals(expectedResult, tumorTypesToString(tumorTypes));
 
         // When parent node's main type does not match with child, it should not be listed as relevant tumor type
         tumorTypes = TumorTypeUtils.findRelevantTumorTypes("Small Cell Lung Cancer");
         expectedResult = "Small Cell Lung Cancer, M:Small Cell Lung Cancer, M:All Solid Tumors, M:All Tumors";
-        assertEquals(expectedResult, TumorTypeUtils.getTumorTypesName(tumorTypes));
+        assertEquals(expectedResult, tumorTypesToString(tumorTypes));
 
     }
 
     public void testFindTumorTypesWithDirection() throws Exception {
         List<TumorType> tumorTypes = TumorTypeUtils.findRelevantTumorTypes("CML", RelevantTumorTypeDirection.DOWNWARD);
         String expectedResult = "Chronic Myelogenous Leukemia, M:Myeloproliferative Neoplasms, Chronic Myeloid Leukemia, BCR-ABL1+, M:All Liquid Tumors, M:All Tumors";
-        assertEquals(expectedResult, TumorTypeUtils.getTumorTypesName(tumorTypes));
+        assertEquals(expectedResult, tumorTypesToString(tumorTypes));
 
-        tumorTypes = TumorTypeUtils.findRelevantTumorTypes("", RelevantTumorTypeDirection.DOWNWARD);
-        // 864 subtypes,  117 main types, 3 special(all solid, all liquid, all tumors)
-        assertEquals(984, tumorTypes.size());
+        tumorTypes = TumorTypeUtils.findRelevantTumorTypes("CML", RelevantTumorTypeDirection.UPWARD);
+        expectedResult = "Chronic Myelogenous Leukemia, M:Myeloproliferative Neoplasms, Myeloproliferative Neoplasms, M:All Liquid Tumors, M:All Tumors";
+        assertEquals(expectedResult, tumorTypesToString(tumorTypes));
+
+        // 863 subtypes, 1 tissue root  117 main types, 8 special(all solid, all liquid, all tumors)
+        assertEquals(989, ApplicationContextSingleton.getTumorTypeBo().findAllCached().size());
     }
 
     // Is solid tumor is decided on tissue level
@@ -156,5 +161,14 @@ public class TumorTypeUtilsTest extends TestCase {
         tt2.setTissue("Bone");
         tt2.setTumorForm(TumorTypeUtils.getTumorForm(tt2.getTissue()));
         assertTrue("Tumor types set does not have liquid tumor, but one of tumor types Blood is liquid tumor.", TumorTypeUtils.hasLiquidTumor(tumorTypeSet));
+    }
+
+    private String tumorTypesToString(List<TumorType> tumorTypes) {
+        List<String> name = new ArrayList<>();
+        for (TumorType tumorType : tumorTypes) {
+            name.add(StringUtils.isEmpty(tumorType.getSubtype()) ?
+                ("M:" + tumorType.getMainType()) : tumorType.getSubtype());
+        }
+        return org.apache.commons.lang3.StringUtils.join(name, ", ");
     }
 }

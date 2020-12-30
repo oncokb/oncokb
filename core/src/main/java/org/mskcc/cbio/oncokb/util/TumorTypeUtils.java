@@ -25,7 +25,7 @@ public class TumorTypeUtils {
     );
 
     public static List<TumorType> getAllTumorTypes() {
-        return ApplicationContextSingleton.getTumorTypeBo().findAllCached().stream().filter(tumorType -> StringUtils.isEmpty(tumorType.getCode()) || tumorType.getLevel() > 1).collect(Collectors.toList());
+        return ApplicationContextSingleton.getTumorTypeBo().findAllCached().stream().filter(tumorType -> StringUtils.isEmpty(tumorType.getCode()) || tumorType.getLevel() > 0).collect(Collectors.toList());
     }
 
     /**
@@ -34,7 +34,7 @@ public class TumorTypeUtils {
      * @return
      */
     public static List<TumorType> getAllSubtypes() {
-        return ApplicationContextSingleton.getTumorTypeBo().findAllCached().stream().filter(tumorType -> StringUtils.isNotEmpty(tumorType.getCode()) && tumorType.getLevel() > 1).collect(Collectors.toList());
+        return ApplicationContextSingleton.getTumorTypeBo().findAllCached().stream().filter(tumorType -> StringUtils.isNotEmpty(tumorType.getCode()) && tumorType.getLevel() > 0).collect(Collectors.toList());
     }
 
     /**
@@ -42,6 +42,10 @@ public class TumorTypeUtils {
      */
     public static List<TumorType> getAllMainTypes() {
         return ApplicationContextSingleton.getTumorTypeBo().findAllCached().stream().filter(tumorType -> StringUtils.isEmpty(tumorType.getCode())).collect(Collectors.toList());
+    }
+
+    public static Set<TumorType> getAllSpecialTumorOncoTreeTypes() {
+        return Arrays.stream(SpecialTumorType.values()).map(specialTumorType -> getBySpecialTumor(specialTumorType)).filter(persistenceTT -> persistenceTT != null).collect(Collectors.toSet());
     }
 
     public static TumorType getByName(String name) {
@@ -217,9 +221,9 @@ public class TumorTypeUtils {
         if (tumorType == null) {
             return "";
         } else {
-            if (tumorType.getSubtype() != null) {
+            if (!StringUtils.isEmpty(tumorType.getSubtype())) {
                 return tumorType.getSubtype();
-            } else if (tumorType.getMainType() != null && tumorType.getMainType() != null) {
+            } else if (!StringUtils.isEmpty(tumorType.getMainType())) {
                 return tumorType.getMainType();
             } else {
                 return "";
@@ -270,17 +274,6 @@ public class TumorTypeUtils {
             e.printStackTrace();
         }
         return tumorTypes;
-    }
-
-    public static Set<TumorType> getAllSpecialTumorOncoTreeTypes() {
-        Set<TumorType> types = new HashSet<>();
-        for (SpecialTumorType specialTumorType : SpecialTumorType.values()) {
-            TumorType tumorType = new TumorType();
-            tumorType.setMainType(specialTumorType.getTumorType());
-            tumorType.setTumorForm(getTumorForm(specialTumorType));
-            types.add(tumorType);
-        }
-        return types;
     }
 
     private static String getOncoTreeApiUrl() {
