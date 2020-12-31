@@ -4,12 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.model.RelevantTumorTypeDirection;
 import org.mskcc.cbio.oncokb.model.SpecialTumorType;
 import org.mskcc.cbio.oncokb.model.TumorForm;
 import org.mskcc.cbio.oncokb.model.TumorType;
+import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.Tumor;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -320,6 +322,20 @@ public class TumorTypeUtils {
     }
 
     public static TumorForm checkTumorForm(Set<TumorType> tumorTypes) {
+        Set<TumorType> withoutSpecial = new HashSet<>(tumorTypes);
+        withoutSpecial.removeAll(TumorTypeUtils.getAllSpecialTumorOncoTreeTypes());
+
+        TumorForm tumorForm = getTumorForm(withoutSpecial);
+        if (tumorForm == null) {
+            Set<TumorType> existSpecial = new HashSet<>(tumorTypes);
+            existSpecial.retainAll(TumorTypeUtils.getAllSpecialTumorOncoTreeTypes());
+            return getTumorForm(existSpecial.stream().filter(tumorType -> tumorType.getTumorForm() != null && !tumorType.getTumorForm().equals(TumorForm.MIXED)).collect(Collectors.toSet()));
+        } else {
+            return tumorForm;
+        }
+    }
+
+    private static TumorForm getTumorForm(Set<TumorType> tumorTypes) {
         if (tumorTypes == null)
             return null;
         Set<TumorForm> uniqueTumorForms = tumorTypes.stream()

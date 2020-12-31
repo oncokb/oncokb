@@ -379,10 +379,7 @@ public class EvidenceUtils {
                             } else {
                                 Set<TumorType> tumorTypes = evidence.getRelevantCancerTypes().isEmpty() ? evidence.getCancerTypes() : evidence.getRelevantCancerTypes();
 
-                                Set<TumorType> mappedTumorTypes = new HashSet<>(evidenceQuery.getOncoTreeTypes());
-                                mappedTumorTypes.removeAll(TumorTypeUtils.getAllSpecialTumorOncoTreeTypes());
-
-                                TumorForm tumorForm = TumorTypeUtils.checkTumorForm(mappedTumorTypes);
+                                TumorForm tumorForm = TumorTypeUtils.checkTumorForm(new HashSet<>(evidenceQuery.getOncoTreeTypes()));
                                 hasjointed = !Collections.disjoint(evidenceQuery.getOncoTreeTypes(), tumorTypes);
                                 if (hasjointed || com.mysql.jdbc.StringUtils.isNullOrEmpty(evidenceQuery.getQuery().getTumorType())) {
                                     filtered.add(evidence);
