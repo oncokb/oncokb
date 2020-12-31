@@ -1,9 +1,11 @@
 package org.mskcc.cbio.oncokb.bo.impl;
 
 import com.google.common.collect.Sets;
+import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.dao.EvidenceDao;
 import org.mskcc.cbio.oncokb.model.*;
+import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.Tumor;
 import org.mskcc.cbio.oncokb.util.CacheUtils;
 import org.mskcc.cbio.oncokb.model.TumorType;
 import org.mskcc.cbio.oncokb.util.EvidenceUtils;
@@ -67,22 +69,32 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
         }
 
         return findEvidencesByAlteration(alterations).stream()
-            .filter(evidence -> !Collections.disjoint(evidence.getRelevantCancerTypes().isEmpty() ? evidence.getCancerTypes() : evidence.getRelevantCancerTypes(), tumorTypes) && evidenceTypes.contains(evidence.getEvidenceType()))
+            .filter(evidence -> {
+                if (!evidenceTypes.contains(evidence.getEvidenceType())) {
+                    return false;
+                }
+                boolean hasJointOnSubtype = !Collections.disjoint(evidence.getRelevantCancerTypes().isEmpty() ? evidence.getCancerTypes() : evidence.getRelevantCancerTypes(), tumorTypes);
+                if (hasJointOnSubtype) {
+                    return true;
+                } else if (evidence.getRelevantCancerTypes().isEmpty()) {
+                    // we also like to check whether the evidence is assigned to a main type. Only check if the evidence relevant cancer type is empty.
+                    // If the evidence has the relevant cancer type curated, disjoin in the previous step should capture it
+                    Set<TumorType> evidenceMainTypes = evidence.getCancerTypes().stream().filter(cancerType -> StringUtils.isEmpty(cancerType.getCode()) && !StringUtils.isEmpty(cancerType.getMainType())).collect(Collectors.toSet());
+                    if (!evidenceMainTypes.isEmpty()) {
+                        return !Collections.disjoint(evidenceMainTypes.stream().map(tumorType -> tumorType.getMainType()).collect(Collectors.toSet()), tumorTypes.stream().map(tumorType -> tumorType.getMainType()).collect(Collectors.toSet()));
+                    } else {
+                        return false;
+                    }
+                } else {
+                    return false;
+                }
+            })
             .collect(Collectors.toList());
     }
 
     @Override
     public List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, Collection<TumorType> tumorTypes, Collection<LevelOfEvidence> levelOfEvidences) {
-        if (tumorTypes == null) {
-            if (evidenceTypes == null) {
-                return findEvidencesByAlteration(alterations);
-            }
-            return findEvidencesByAlteration(alterations, evidenceTypes);
-        }
-
-        return findEvidencesByAlteration(alterations).stream()
-            .filter(evidence -> !Collections.disjoint(evidence.getRelevantCancerTypes().isEmpty() ? evidence.getCancerTypes() : evidence.getRelevantCancerTypes(), tumorTypes) && levelOfEvidences.contains(evidence.getLevelOfEvidence()) && evidenceTypes.contains(evidence.getEvidenceType()))
-            .collect(Collectors.toList());
+        return findEvidencesByAlteration(alterations, evidenceTypes, tumorTypes).stream().filter(evidence -> levelOfEvidences.contains(evidence.getLevelOfEvidence())).collect(Collectors.toList());
     }
 
     @Override
