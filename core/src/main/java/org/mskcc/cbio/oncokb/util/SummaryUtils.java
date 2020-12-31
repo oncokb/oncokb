@@ -131,13 +131,24 @@ public class SummaryUtils {
 
             // Base on the priority of relevant alterations
             for (Alteration alt : relevantAlterations) {
-                tumorTypeSummary = getRelevantTumorTypeSummaryByAlt(evidenceType, alt, new HashSet<>(relevantTumorTypes));
+                for (TumorType tumorType : relevantTumorTypes) {
+                    tumorTypeSummary = getRelevantTumorTypeSummaryByAlt(evidenceType, alt, Collections.singleton(tumorType));
+                    if (tumorTypeSummary != null) {
+                        break;
+                    }
+                }
                 if (tumorTypeSummary != null) {
                     break;
                 }
 
                 // Get Other Tumor Types summary
-                tumorTypeSummary = getOtherTumorTypeSummaryByAlt(evidenceType, alt, new HashSet<>(relevantTumorTypes));
+
+                for (TumorType tumorType : relevantTumorTypes) {
+                    tumorTypeSummary = getOtherTumorTypeSummaryByAlt(evidenceType, alt, Collections.singleton(tumorType));
+                    if (tumorTypeSummary != null) {
+                        break;
+                    }
+                }
                 if (tumorTypeSummary != null) {
                     break;
                 }
