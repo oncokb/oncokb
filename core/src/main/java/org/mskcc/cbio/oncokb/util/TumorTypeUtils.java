@@ -138,6 +138,7 @@ public class TumorTypeUtils {
     public static LinkedHashSet<TumorType> getParentTumorTypes(TumorType tumorType, boolean onlySameMaintype) {
         if (tumorType == null || tumorType.getParent() == null) return new LinkedHashSet<>();
         LinkedHashSet parentTumorTypes = new LinkedHashSet();
+        // we do not want to include the tissue level which is 1
         if (tumorType.getParent() != null && tumorType.getLevel() > 2) {
             if (!onlySameMaintype || tumorType.getParent().getMainType().equals(tumorType.getMainType())) {
                 parentTumorTypes.add(tumorType.getParent());

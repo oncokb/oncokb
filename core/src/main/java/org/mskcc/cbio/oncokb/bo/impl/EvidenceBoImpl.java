@@ -60,8 +60,8 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
     }
 
     @Override
-    public List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, Collection<TumorType> tumorTypes) {
-        if (tumorTypes == null) {
+    public List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, TumorType matchedTumorType,  Collection<TumorType> relevantTumorTypes) {
+        if (relevantTumorTypes == null) {
             if (evidenceTypes == null) {
                 return findEvidencesByAlteration(alterations);
             }
@@ -73,7 +73,12 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
                 if (!evidenceTypes.contains(evidence.getEvidenceType())) {
                     return false;
                 }
-                boolean hasJointOnSubtype = !Collections.disjoint(evidence.getRelevantCancerTypes().isEmpty() ? evidence.getCancerTypes() : evidence.getRelevantCancerTypes(), tumorTypes);
+                boolean hasJointOnSubtype = false;
+                if (evidence.getRelevantCancerTypes().isEmpty()) {
+                    hasJointOnSubtype = !Collections.disjoint(evidence.getCancerTypes(), relevantTumorTypes);
+                } else {
+                    hasJointOnSubtype = matchedTumorType != null && evidence.getRelevantCancerTypes().contains(matchedTumorType);
+                }
                 if (hasJointOnSubtype) {
                     return true;
                 } else if (evidence.getRelevantCancerTypes().isEmpty()) {
@@ -81,7 +86,7 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
                     // If the evidence has the relevant cancer type curated, disjoin in the previous step should capture it
                     Set<TumorType> evidenceMainTypes = evidence.getCancerTypes().stream().filter(cancerType -> StringUtils.isEmpty(cancerType.getCode()) && !StringUtils.isEmpty(cancerType.getMainType())).collect(Collectors.toSet());
                     if (!evidenceMainTypes.isEmpty()) {
-                        return !Collections.disjoint(evidenceMainTypes.stream().map(tumorType -> tumorType.getMainType()).collect(Collectors.toSet()), tumorTypes.stream().map(tumorType -> tumorType.getMainType()).collect(Collectors.toSet()));
+                        return !Collections.disjoint(evidenceMainTypes.stream().map(tumorType -> tumorType.getMainType()).collect(Collectors.toSet()), relevantTumorTypes.stream().map(tumorType -> tumorType.getMainType()).collect(Collectors.toSet()));
                     } else {
                         return false;
                     }
@@ -93,8 +98,8 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
     }
 
     @Override
-    public List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, Collection<TumorType> tumorTypes, Collection<LevelOfEvidence> levelOfEvidences) {
-        return findEvidencesByAlteration(alterations, evidenceTypes, tumorTypes).stream().filter(evidence -> levelOfEvidences.contains(evidence.getLevelOfEvidence())).collect(Collectors.toList());
+    public List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, TumorType matchedTumorType, Collection<TumorType> tumorTypes, Collection<LevelOfEvidence> levelOfEvidences) {
+        return findEvidencesByAlteration(alterations, evidenceTypes, matchedTumorType, tumorTypes).stream().filter(evidence -> levelOfEvidences.contains(evidence.getLevelOfEvidence())).collect(Collectors.toList());
     }
 
     @Override

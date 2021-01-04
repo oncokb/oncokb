@@ -20,7 +20,7 @@ public class SummaryUtils {
     public static final String TERT_PROMOTER_NO_THERAPY_TUMOR_TYPE_SUMMARY = "There are no FDA-approved or NCCN-compendium listed treatments specifically for patients with TERT promoter mutations in [[tumor type]].";
     public static final String ONCOGENIC_MUTATIONS_DEFAULT_SUMMARY = "Oncogenic Mutations includes all variants annotated as oncogenic and likely oncogenic.";
 
-    public static Map<String, Object> tumorTypeSummary(EvidenceType evidenceType, Gene gene, Query query, Alteration exactMatchedAlt, List<Alteration> alterations, List<TumorType> relevantTumorTypes) {
+    public static Map<String, Object> tumorTypeSummary(EvidenceType evidenceType, Gene gene, Query query, Alteration exactMatchedAlt, List<Alteration> alterations, TumorType matchedTumorType, List<TumorType> relevantTumorTypes) {
         Map<String, Object> tumorTypeSummary = newTumorTypeSummary();
         String queryTumorType = query.getTumorType();
         String key = query.getQueryId();
@@ -39,12 +39,12 @@ public class SummaryUtils {
         }
 
         query.setTumorType(queryTumorType);
-        tumorTypeSummary = getTumorTypeSummarySubFunc(evidenceType, gene, query, exactMatchedAlt, alterations, relevantTumorTypes);
+        tumorTypeSummary = getTumorTypeSummarySubFunc(evidenceType, gene, query, exactMatchedAlt, alterations, matchedTumorType, relevantTumorTypes);
 
         return tumorTypeSummary;
     }
 
-    private static Map<String, Object> getTumorTypeSummarySubFunc(EvidenceType evidenceType, Gene gene, Query query, Alteration exactMatchedAlt, List<Alteration> relevantAlterations, List<TumorType> relevantTumorTypes) {
+    private static Map<String, Object> getTumorTypeSummarySubFunc(EvidenceType evidenceType, Gene gene, Query query, Alteration exactMatchedAlt, List<Alteration> relevantAlterations, TumorType matchedTumorType, List<TumorType> relevantTumorTypes) {
         Map<String, Object> tumorTypeSummary = newTumorTypeSummary();
         Alteration alteration = null;
 
@@ -77,7 +77,7 @@ public class SummaryUtils {
         if (tumorTypeSummary == null) {
             for (TumorType tumorType : relevantTumorTypes) {
                 for (Alteration allele : alternativeAlleles) {
-                    tumorTypeSummary = getRelevantTumorTypeSummaryByAlt(evidenceType, allele, Collections.singleton(tumorType));
+                    tumorTypeSummary = getRelevantTumorTypeSummaryByAlt(evidenceType, allele, tumorType, Collections.singleton(tumorType));
                     if (tumorTypeSummary != null) {
                         break;
                     }
@@ -132,7 +132,7 @@ public class SummaryUtils {
             // Base on the priority of relevant alterations
             for (Alteration alt : relevantAlterations) {
                 for (TumorType tumorType : relevantTumorTypes) {
-                    tumorTypeSummary = getRelevantTumorTypeSummaryByAlt(evidenceType, alt, Collections.singleton(tumorType));
+                    tumorTypeSummary = getRelevantTumorTypeSummaryByAlt(evidenceType, alt, tumorType, Collections.singleton(tumorType));
                     if (tumorTypeSummary != null) {
                         break;
                     }
@@ -176,8 +176,8 @@ public class SummaryUtils {
         return tumorTypeSummary;
     }
 
-    private static Map<String, Object> getRelevantTumorTypeSummaryByAlt(EvidenceType evidenceType, Alteration alteration, Set<TumorType> relevantTumorTypes) {
-        return getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(Collections.singletonList(alteration), Collections.singleton(evidenceType), relevantTumorTypes, null));
+    private static Map<String, Object> getRelevantTumorTypeSummaryByAlt(EvidenceType evidenceType, Alteration alteration, TumorType matchedTumorType, Set<TumorType> relevantTumorTypes) {
+        return getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(Collections.singletonList(alteration), Collections.singleton(evidenceType), matchedTumorType, relevantTumorTypes, null));
     }
 
     private static Map<String, Object> getOtherTumorTypeSummaryByAlt(EvidenceType evidenceType, Alteration alteration, Set<TumorType> relevantTumorTypes) {
@@ -196,6 +196,7 @@ public class SummaryUtils {
             List<Evidence> evidences = EvidenceUtils.getEvidence(
                 Collections.singletonList(alteration),
                 Collections.singleton(evidenceType),
+                TumorTypeUtils.getBySpecialTumor(specialTumorType),
                 Collections.singleton(TumorTypeUtils.getBySpecialTumor(specialTumorType)), null);
             if (evidences.size() > 0) {
                 return getTumorTypeSummaryFromEvidences(evidences);

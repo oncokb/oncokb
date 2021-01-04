@@ -145,7 +145,7 @@ public class EvidenceUtils {
         return result;
     }
 
-    public static List<Evidence> getEvidence(List<Alteration> alterations, Set<EvidenceType> evidenceTypes, Set<TumorType> tumorTypes, Set<LevelOfEvidence> levelOfEvidences) {
+    public static List<Evidence> getEvidence(List<Alteration> alterations, Set<EvidenceType> evidenceTypes, TumorType matchedTumorType, Set<TumorType> tumorTypes, Set<LevelOfEvidence> levelOfEvidences) {
         if (alterations == null || alterations.size() == 0) {
             return new ArrayList<>();
         }
@@ -156,9 +156,9 @@ public class EvidenceUtils {
             return getEvidence(alterations, evidenceTypes, levelOfEvidences);
         }
         if (levelOfEvidences == null || levelOfEvidences.size() == 0) {
-            return evidenceBo.findEvidencesByAlteration(alterations, evidenceTypes, tumorTypes);
+            return evidenceBo.findEvidencesByAlteration(alterations, evidenceTypes, matchedTumorType, tumorTypes);
         } else {
-            return evidenceBo.findEvidencesByAlteration(alterations, evidenceTypes, tumorTypes, levelOfEvidences);
+            return evidenceBo.findEvidencesByAlteration(alterations, evidenceTypes, matchedTumorType, tumorTypes, levelOfEvidences);
         }
     }
 
@@ -166,6 +166,7 @@ public class EvidenceUtils {
         Set<Evidence> evidences = new HashSet<>();
 
         Set<Gene> genes = new HashSet<>(); //Get gene evidences
+        TumorType matchedTumorType = TumorTypeUtils.getByName(query.getQuery().getTumorType());
         Set<Alteration> alterations = new HashSet<>();
         Set<TumorType> upwardTumorTypes = new HashSet<>();
         Set<TumorType> downwardTumorTypes = new HashSet<>();
@@ -243,7 +244,7 @@ public class EvidenceUtils {
 
             // Get diagnostic implication evidences
             if (evidenceTypes.contains(EvidenceType.DIAGNOSTIC_IMPLICATION)) {
-                evidences.addAll(getEvidence(uniqueAlterationsWithoutAlternativeAlleles, Collections.singleton(EvidenceType.DIAGNOSTIC_IMPLICATION), downwardTumorTypes, levelOfEvidences));
+                evidences.addAll(getEvidence(uniqueAlterationsWithoutAlternativeAlleles, Collections.singleton(EvidenceType.DIAGNOSTIC_IMPLICATION), matchedTumorType, downwardTumorTypes, levelOfEvidences));
             }
 
             // Get other tumor type related evidences
@@ -253,7 +254,7 @@ public class EvidenceUtils {
             common = Sets.intersection(restTTevidenceTypes, evidenceTypes);
             if (common.size() > 0) {
 
-                evidences.addAll(getEvidence(uniqueAlterationsWithoutAlternativeAlleles, common, upwardTumorTypes, levelOfEvidences));
+                evidences.addAll(getEvidence(uniqueAlterationsWithoutAlternativeAlleles, common, matchedTumorType, upwardTumorTypes, levelOfEvidences));
             }
         }
 
