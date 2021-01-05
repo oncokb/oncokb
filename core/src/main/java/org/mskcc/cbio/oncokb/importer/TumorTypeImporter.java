@@ -75,6 +75,8 @@ public class TumorTypeImporter {
             TumorType tumorType = new TumorType();
             tumorType.setMainType(specialTumorType.getTumorType());
             tumorType.setTumorForm(getTumorForm(specialTumorType));
+            // set the level to -1 to indicate the tumor type does not exist on oncotree
+            tumorType.setLevel(-1);
             ApplicationContextSingleton.getTumorTypeBo().save(tumorType);
         }
 
