@@ -52,8 +52,12 @@ public class TumorTypeUtils {
 
     public static TumorType getByName(String name) {
         if (StringUtils.isEmpty(name)) return null;
-        TumorType subtype = getBySubtype(name);
-        return subtype == null ? getByMainType(name) : subtype;
+        TumorType tumorType = getByCode(name);
+        if (tumorType != null) {
+            return tumorType;
+        }
+        tumorType = getBySubtype(name);
+        return tumorType == null ? getByMainType(name) : tumorType;
     }
 
     public static TumorType getBySubtype(String subtype) {
