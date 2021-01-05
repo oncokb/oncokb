@@ -59,7 +59,17 @@ public class EvidenceTypeUtils {
         types.add(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE);
         types.add(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE);
         types.add(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY);
+        return types;
+    }
 
+    public static Set<EvidenceType> getImplicationEvidenceTypes(){
+        Set<EvidenceType> types = new HashSet<>();
+        types.add(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY);
+        types.add(EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE);
+        types.add(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE);
+        types.add(EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY);
+        types.add(EvidenceType.DIAGNOSTIC_IMPLICATION);
+        types.add(EvidenceType.PROGNOSTIC_IMPLICATION);
         return types;
     }
 

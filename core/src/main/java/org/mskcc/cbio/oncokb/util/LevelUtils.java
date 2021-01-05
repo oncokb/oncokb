@@ -317,6 +317,8 @@ public class LevelUtils {
         List<LevelOfEvidence> levels = new ArrayList<>();
         levels.addAll(CollectionUtils.intersection(PUBLIC_LEVELS, THERAPEUTIC_RESISTANCE_LEVELS));
         levels.addAll(CollectionUtils.intersection(PUBLIC_LEVELS, THERAPEUTIC_SENSITIVE_LEVELS));
+        levels.addAll(CollectionUtils.intersection(PUBLIC_LEVELS, DIAGNOSTIC_LEVELS));
+        levels.addAll(CollectionUtils.intersection(PUBLIC_LEVELS, PROGNOSTIC_LEVELS));
         levels.sort(Comparator.comparing(LevelOfEvidence::getLevel));
 
         return levels.stream().map(levelOfEvidence -> new InfoLevel(levelOfEvidence)).collect(Collectors.toList());
