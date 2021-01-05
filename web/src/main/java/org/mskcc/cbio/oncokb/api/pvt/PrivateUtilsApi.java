@@ -4,8 +4,7 @@ import io.swagger.annotations.*;
 import org.mskcc.cbio.oncokb.apiModels.*;
 import org.mskcc.cbio.oncokb.apiModels.download.DownloadAvailability;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.tumor_type.MainType;
-import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
+import org.mskcc.cbio.oncokb.model.TumorType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.xml.sax.SAXException;
@@ -104,23 +103,13 @@ public interface PrivateUtilsApi {
     ResponseEntity<List<MatchVariantResult>> validateVariantExamplePost(@ApiParam(value = "List of queries. Please see swagger.json for request body format.", required = true) @RequestBody(required = true) MatchVariantRequest body
     );
 
-    @ApiOperation(value = "", notes = "Get the full list of OncoTree Maintype.", response = MainType.class, responseContainer = "Set")
+    @ApiOperation(value = "", notes = "Get the full list of TumorTypes.", response = TumorType.class, responseContainer = "List")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK")})
-    @RequestMapping(value = "/utils/oncotree/mainTypes",
+    @RequestMapping(value = "/utils/tumorTypes",
         produces = {"application/json"},
         method = RequestMethod.GET)
-    ResponseEntity<Set<MainType>> utilsOncoTreeMainTypesGet(
-        @ApiParam(value = "Exclude special general tumor type") @RequestParam(value = "excludeSpecialTumorType", required = false) Boolean excludeSpecialTumorType
-    );
-
-    @ApiOperation(value = "", notes = "Get the full list of OncoTree Subtypes.", response = TumorType.class, responseContainer = "List")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "OK")})
-    @RequestMapping(value = "/utils/oncotree/subtypes",
-        produces = {"application/json"},
-        method = RequestMethod.GET)
-    ResponseEntity<List<TumorType>> utilsOncoTreeSubtypesGet();
+    ResponseEntity<List<TumorType>> utilsTumorTypesGet();
 
     @ApiOperation(value = "", notes = "Get the list of evidences by levels.", response = Map.class)
     @ApiResponses(value = {
@@ -138,6 +127,19 @@ public interface PrivateUtilsApi {
         method = RequestMethod.GET)
     ResponseEntity<List<TumorType>> utilRelevantTumorTypesGet(
         @ApiParam(value = "OncoTree tumor type name/main type/code") @RequestParam(value = "tumorType") String tumorType
+    );
+
+    @ApiOperation(value = "", notes = "Get the list of relevant tumor types.", response = TumorType.class, responseContainer = "List")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK")})
+    @RequestMapping(value = "/utils/relevantCancerTypes",
+        consumes = {"application/json"},
+        produces = {"application/json"},
+        method = RequestMethod.POST)
+    ResponseEntity<List<TumorType>> utilRelevantCancerTypesPost(
+        @ApiParam(value = "Level of Evidence") @RequestParam(value = "levelOfEvidence", required = false) LevelOfEvidence levelOfEvidence,
+        @ApiParam(value = "Return only Detailed Cancer Type.") @RequestParam(value = "onlyDetailedCancerType", required = false) Boolean onlyDetailedCancerType,
+        @ApiParam(value = "List of queries.", required = true) @RequestBody List<RelevantCancerTypeQuery> body
     );
 
     @ApiOperation(value = "", notes = "Get all the info for the query", response = VariantAnnotation.class)
