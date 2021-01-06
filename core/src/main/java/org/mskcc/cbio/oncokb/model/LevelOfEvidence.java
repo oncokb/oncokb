@@ -25,14 +25,14 @@ public enum LevelOfEvidence {
     LEVEL_R3 ("R3", "", "", "#FCD6D3"),
 
     // Levels for prognostic implications
-    LEVEL_Px1("Px1", "FDA and/or professional guideline-recognized biomarker prognostic in this indication based on well-powered studie(s)", "FDA and/or professional guideline-recognized biomarker prognostic in this indication based on well-powered studie(s)", ""),
-    LEVEL_Px2("Px2", "FDA and/or professional guideline-recognized biomarker prognostic in this indication based on a single or multiple small studies", "FDA and/or professional guideline-recognized biomarker prognostic in this indication based on a single or multiple small studies", ""),
-    LEVEL_Px3("Px3", "Biomarker prognostic in this indication based on clinical evidence in well powered studies", "Biomarker prognostic in this indication based on clinical evidence in well powered studies", ""),
+    LEVEL_Px1("Px1", "FDA and/or professional guideline-recognized biomarker prognostic in this indication based on well-powered studie(s)", "<span><b>FDA and/or professional guideline-recognized</b> biomarker prognostic in this indication based on <b>well-powered studie(s)</b></span>", ""),
+    LEVEL_Px2("Px2", "FDA and/or professional guideline-recognized biomarker prognostic in this indication based on a single or multiple small studies", "<span><b>FDA and/or professional guideline-recognized</b> biomarker prognostic in this indication based on <b>a single or multiple small studies</b></span>", ""),
+    LEVEL_Px3("Px3", "Biomarker is prognostic in this indication based on clinical evidence in well-powered studies", "<span>Biomarker is prognostic in this indication based on <b>clinical evidence</b> in <b>well-powered studies</b></span>", ""),
 
     // Levels for diagnostic implications
-    LEVEL_Dx1("Dx1", "FDA and/or professional guideline-recognized biomarker required for diagnosis in this indication", "FDA and/or professional guideline-recognized biomarker required for diagnosis in this indication", ""),
-    LEVEL_Dx2("Dx2", "FDA and/or professional guideline-recognized biomarker that supports diagnosis in this indication", "FDA and/or professional guideline-recognized biomarker that supports diagnosis in this indication", ""),
-    LEVEL_Dx3("Dx3", "Biomarker that may assist disease diagnosis in this indication based on clinical evidence", "Biomarker that may assist disease diagnosis in this indication based on clinical evidence", ""),
+    LEVEL_Dx1("Dx1", "FDA and/or professional guideline-recognized biomarker required for diagnosis in this indication", "<span><b>FDA and/or professional guideline-recognized</b> biomarker required for diagnosis in this indication</span>", ""),
+    LEVEL_Dx2("Dx2", "FDA and/or professional guideline-recognized biomarker that supports diagnosis in this indication", "<span><b>FDA and/or professional guideline-recognized</b> biomarker that supports diagnosis in this indication</span>", ""),
+    LEVEL_Dx3("Dx3", "Biomarker that may assist disease diagnosis in this indication based on clinical evidence", "<span>Biomarker that <b>may assist disease diagnosis</b> in this indication based on <b>clinical evidence</b></span>", ""),
 
     NO("NO", "No level", "No Level", ""),
     ;
