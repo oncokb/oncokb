@@ -171,7 +171,7 @@ public class SummaryUtils {
             tumorTypeSummary.put("summary", tmpSummary);
         }
 
-        tumorTypeSummary.put("summary", replaceSpecialCharacterInTumorTypeSummary((String) tumorTypeSummary.get("summary"), gene, query.getReferenceGenome(), query));
+        tumorTypeSummary.put("summary", replaceSpecialCharacterInTumorTypeSummary((String) tumorTypeSummary.get("summary"), gene, query.getReferenceGenome(), query, matchedTumorType));
 
         return tumorTypeSummary;
     }
@@ -805,12 +805,14 @@ public class SummaryUtils {
         return sb.toString();
     }
 
-    private static String replaceSpecialCharacterInTumorTypeSummary(String summary, Gene gene, ReferenceGenome referenceGenome, Query query) {
+    private static String replaceSpecialCharacterInTumorTypeSummary(String summary, Gene gene, ReferenceGenome referenceGenome, Query query, TumorType matchedTumorType) {
         String altName = getGeneMutationNameInTumorTypeSummary(gene, referenceGenome, query.getHugoSymbol(), query.getAlteration());
         String alterationName = getGeneMutationNameInVariantSummary(gene, referenceGenome, query.getHugoSymbol(), query.getAlteration());
-        String variantStr = altName + " " + query.getTumorType();
+        String tumorTypeName = (matchedTumorType == null ? query.getTumorType() : (StringUtils.isEmpty(matchedTumorType.getSubtype()) ? matchedTumorType.getMainType() : matchedTumorType.getSubtype())).toLowerCase();
+
+        String variantStr = altName + " " + tumorTypeName;
         if (query.getAlteration().contains("deletion")) {
-            variantStr = query.getTumorType() + " harboring a " + altName;
+            variantStr = tumorTypeName + " harboring a " + altName;
         }
         summary = summary.replace("[[variant]]", variantStr);
         summary = summary.replace("[[gene]] [[mutation]] [[[mutation]]]", alterationName);
@@ -840,8 +842,8 @@ public class SummaryUtils {
         // In case of miss typed
         summary = summary.replace("[[mutation]] [[mutation]]", query.getAlteration());
         summary = summary.replace("[[mutation]]", query.getAlteration());
-        summary = summary.replace("[[tumorType]]", query.getTumorType());
-        summary = summary.replace("[[tumor type]]", query.getTumorType());
+        summary = summary.replace("[[tumorType]]", tumorTypeName);
+        summary = summary.replace("[[tumor type]]", tumorTypeName);
         summary = summary.replace("[[fusion name]]", altName);
         summary = summary.replace("[[fusion name]]", altName);
         return summary;
