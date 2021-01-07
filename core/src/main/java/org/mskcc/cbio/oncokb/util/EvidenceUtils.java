@@ -244,7 +244,7 @@ public class EvidenceUtils {
 
             // Get diagnostic implication evidences
             if (evidenceTypes.contains(EvidenceType.DIAGNOSTIC_IMPLICATION)) {
-                evidences.addAll(getEvidence(uniqueAlterationsWithoutAlternativeAlleles, Collections.singleton(EvidenceType.DIAGNOSTIC_IMPLICATION), matchedTumorType, downwardTumorTypes, levelOfEvidences));
+                evidences.addAll(getEvidence(uniqueAlterationsWithoutAlternativeAlleles, Collections.singleton(EvidenceType.DIAGNOSTIC_IMPLICATION), matchedTumorType, StringUtils.isEmpty(query.getQuery().getTumorType()) ? null : downwardTumorTypes, levelOfEvidences));
             }
 
             // Get other tumor type related evidences
@@ -253,8 +253,7 @@ public class EvidenceUtils {
             restTTevidenceTypes.remove(EvidenceType.DIAGNOSTIC_IMPLICATION);
             common = Sets.intersection(restTTevidenceTypes, evidenceTypes);
             if (common.size() > 0) {
-
-                evidences.addAll(getEvidence(uniqueAlterationsWithoutAlternativeAlleles, common, matchedTumorType, upwardTumorTypes, levelOfEvidences));
+                evidences.addAll(getEvidence(uniqueAlterationsWithoutAlternativeAlleles, common, matchedTumorType, StringUtils.isEmpty(query.getQuery().getTumorType()) ? null : upwardTumorTypes, levelOfEvidences));
             }
         }
 
@@ -908,7 +907,7 @@ public class EvidenceUtils {
                 final List<TumorType> upwardTumorTypes = query.getOncoTreeTypes();
                 TumorForm tumorForm = TumorTypeUtils.checkTumorForm(new HashSet<>(upwardTumorTypes));
                 query.getEvidences().stream().forEach(evidence -> {
-                    if (evidence.getLevelOfEvidence() != null && tumorForm != null && Collections.disjoint(upwardTumorTypes, evidence.getRelevantCancerTypes().isEmpty() ? evidence.getCancerTypes() : evidence.getRelevantCancerTypes())) {
+                    if (evidence.getLevelOfEvidence() != null && EvidenceTypeUtils.getTreatmentEvidenceTypes().contains(evidence.getEvidenceType()) && tumorForm != null && Collections.disjoint(upwardTumorTypes, evidence.getRelevantCancerTypes().isEmpty() ? evidence.getCancerTypes() : evidence.getRelevantCancerTypes())) {
                         Evidence propagatedLevel = getPropagateEvidence(allowedLevels, evidence, tumorForm);
                         if (propagatedLevel != null) {
                             updatedEvidences.add(propagatedLevel);
