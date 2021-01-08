@@ -32,8 +32,8 @@ public class IndicatorQueryResp implements java.io.Serializable {
     private String tumorTypeSummary = "";
     private String prognosticSummary = "";
     private String diagnosticSummary = "";
-    private List<Implication> diagnosticImplications;
-    private List<Implication> prognosticImplications;
+    private List<Implication> diagnosticImplications = new ArrayList<>();
+    private List<Implication> prognosticImplications = new ArrayList<>();
     private List<IndicatorQueryTreatment> treatments = new ArrayList<>();
     private String dataVersion;
     private String lastUpdate;
