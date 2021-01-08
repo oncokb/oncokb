@@ -808,7 +808,7 @@ public class SummaryUtils {
     private static String replaceSpecialCharacterInTumorTypeSummary(String summary, Gene gene, ReferenceGenome referenceGenome, Query query, TumorType matchedTumorType) {
         String altName = getGeneMutationNameInTumorTypeSummary(gene, referenceGenome, query.getHugoSymbol(), query.getAlteration());
         String alterationName = getGeneMutationNameInVariantSummary(gene, referenceGenome, query.getHugoSymbol(), query.getAlteration());
-        String tumorTypeName = (matchedTumorType == null ? query.getTumorType() : (StringUtils.isEmpty(matchedTumorType.getSubtype()) ? matchedTumorType.getMainType() : matchedTumorType.getSubtype())).toLowerCase();
+        String tumorTypeName = convertTumorTypeNameInSummary(matchedTumorType == null ? query.getTumorType() : (StringUtils.isEmpty(matchedTumorType.getSubtype()) ? matchedTumorType.getMainType() : matchedTumorType.getSubtype()));
 
         String variantStr = altName + " " + tumorTypeName;
         if (query.getAlteration().contains("deletion")) {
@@ -865,7 +865,7 @@ public class SummaryUtils {
             }
 
             // Find all uppercased string
-            Pattern p = Pattern.compile("(\\b[A-Z]+\\b)");
+            Pattern p = Pattern.compile("(\\b[A-Z0-9]+\\b)");
             Matcher m = p.matcher(summary);
 
             while (m.find()) {
