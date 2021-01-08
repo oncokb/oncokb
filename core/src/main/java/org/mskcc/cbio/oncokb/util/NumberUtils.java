@@ -51,8 +51,12 @@ public class NumberUtils {
 
             LevelOfEvidence highestSensitiveLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(pair.getValue(), new HashSet<LevelOfEvidence>(CollectionUtils.intersection(levels, LevelUtils.getSensitiveLevels())));
             LevelOfEvidence highestResistanceLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(pair.getValue(), new HashSet<LevelOfEvidence>(CollectionUtils.intersection(levels, LevelUtils.getResistanceLevels())));
+            LevelOfEvidence highestDiagnosticLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(pair.getValue(), new HashSet<LevelOfEvidence>(CollectionUtils.intersection(levels, LevelUtils.getDiagnosticLevels())));
+            LevelOfEvidence highestPrognosticLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(pair.getValue(), new HashSet<LevelOfEvidence>(CollectionUtils.intersection(levels, LevelUtils.getPrognosticLevels())));
             geneNumber.setHighestSensitiveLevel(highestSensitiveLevel != null ? highestSensitiveLevel.name() : null);
             geneNumber.setHighestResistanceLevel(highestResistanceLevel != null ? highestResistanceLevel.name() : null);
+            geneNumber.setHighestDiagnosticImplicationLevel(highestDiagnosticLevel != null ? highestDiagnosticLevel.name() : null);
+            geneNumber.setHighestPrognosticImplicationLevel(highestPrognosticLevel != null ? highestPrognosticLevel.name() : null);
 
             Set<Alteration> alterations = AlterationUtils.getAllAlterations(null, pair.getKey());
             List<Alteration> excludeVUS = AlterationUtils.excludeVUS(pair.getKey(), new ArrayList<>(alterations));

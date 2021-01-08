@@ -478,7 +478,7 @@ public class DriveAnnotationParser {
         }
     }
 
-    private static void saveTumorLevelSummaries(JSONObject cancerObj, String summaryKey, Gene gene, Set<Alteration> alterations, List<TumorType> tumorTypes, EvidenceType evidenceType, Integer nestLevel) {
+    private static void saveTumorLevelSummaries(JSONObject cancerObj, String summaryKey, Gene gene, Set<Alteration> alterations, List<TumorType> tumorTypes, List<TumorType> relevantCancerTypes, EvidenceType evidenceType, Integer nestLevel) {
         if (cancerObj.has(summaryKey) && !cancerObj.getString(summaryKey).isEmpty()) {
             EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
             System.out.println(spaceStrByNestLevel(nestLevel + 1) + " " + summaryKey);
@@ -491,6 +491,9 @@ public class DriveAnnotationParser {
             evidence.setUuid(getUUID(cancerObj, summaryKey));
             evidence.setAlterations(alterations);
             evidence.setLastEdit(lastEdit);
+            if (relevantCancerTypes != null && !relevantCancerTypes.isEmpty()) {
+                evidence.setRelevantCancerTypes(new HashSet<>(relevantCancerTypes));
+            }
 //            evidence.setLastReview(lastReview);
             if (lastEdit != null) {
                 System.out.println(spaceStrByNestLevel(nestLevel + 2) +
@@ -514,11 +517,21 @@ public class DriveAnnotationParser {
         System.out.println(spaceStrByNestLevel(nestLevel) + "Tumor types: " + tumorTypes.stream().map(TumorTypeUtils::getTumorTypeName).collect(Collectors.joining(", ")));
 
         // cancer type summary
-        saveTumorLevelSummaries(cancerObj, "summary", gene, alterations, tumorTypes, EvidenceType.TUMOR_TYPE_SUMMARY, nestLevel);
+        saveTumorLevelSummaries(cancerObj, "summary", gene, alterations, tumorTypes, null, EvidenceType.TUMOR_TYPE_SUMMARY, nestLevel);
+
         // diagnostic summary
-        saveTumorLevelSummaries(cancerObj, "diagnosticSummary", gene, alterations, tumorTypes, EvidenceType.DIAGNOSTIC_SUMMARY, nestLevel);
+        saveTumorLevelSummaries(
+            cancerObj,
+            "diagnosticSummary",
+            gene,
+            alterations,
+            tumorTypes,
+            cancerObj.has("diagnostic") && cancerObj.getJSONObject("diagnostic").has("relevantCancerTypes") ? getTumorTypes(cancerObj.getJSONObject("diagnostic").getJSONArray("relevantCancerTypes")) : null,
+            EvidenceType.DIAGNOSTIC_SUMMARY,
+            nestLevel);
+
         // prognostic summary
-        saveTumorLevelSummaries(cancerObj, "prognosticSummary", gene, alterations, tumorTypes, EvidenceType.PROGNOSTIC_SUMMARY, nestLevel);
+        saveTumorLevelSummaries(cancerObj, "prognosticSummary", gene, alterations, tumorTypes, null, EvidenceType.PROGNOSTIC_SUMMARY, nestLevel);
 
         // Prognostic implications
         parseImplication(gene, alterations, tumorTypes,
