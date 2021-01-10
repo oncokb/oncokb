@@ -170,6 +170,11 @@ public class EvidenceUtils {
         Set<TumorType> upwardTumorTypes = new HashSet<>();
         Set<TumorType> downwardTumorTypes = new HashSet<>();
 
+        if (query.getOncoTreeTypes() != null) {
+            upwardTumorTypes.addAll(query.getOncoTreeTypes());
+        }
+        downwardTumorTypes.addAll(TumorTypeUtils.findTumorTypes(query.getQuery().getTumorType(), DOWNWARD));
+
         if (query.getGene() != null) {
             genes.add(query.getGene());
             if (query.getAlterations().isEmpty() && query.getAlleles().isEmpty()) {
@@ -183,14 +188,32 @@ public class EvidenceUtils {
                 }
             }
         } else {
-            genes.addAll(CacheUtils.getAllGenes());
-            alterations.addAll(AlterationUtils.getAllAlterations());
+            // this is really a performance blow if we compute based on all genes and all alterations, there is a collection disjoint in the base layer
+            // in this case, let's directly return all evidences with query, evidenceTypes and level of evidences filtered
+            Set<Evidence> evidenceToReturn = CacheUtils.getAllEvidences();
+            if (evidenceTypes != null && evidenceTypes.size() > 0) {
+                evidenceToReturn = evidenceToReturn.stream().filter(evidence -> evidenceTypes.contains(evidence.getEvidenceType())).collect(toSet());
+            }
+            if (levelOfEvidences != null && levelOfEvidences.size() > 0) {
+                evidenceToReturn = evidenceToReturn.stream().filter(evidence -> levelOfEvidences.contains(evidence.getLevelOfEvidence())).collect(toSet());
+            }
+            if (StringUtils.isNotEmpty(query.getQuery().getTumorType())) {
+                evidenceToReturn = evidenceToReturn.stream().filter(evidence -> {
+                    if (evidence.getEvidenceType() != null) {
+                        if (evidence.getEvidenceType().equals(EvidenceType.DIAGNOSTIC_IMPLICATION) && evidence.getLevelOfEvidence() != null && evidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_Dx1)) {
+                            return downwardTumorTypes.contains(evidence.getOncoTreeType());
+                        } else if (EvidenceTypeUtils.getTumorTypeEvidenceTypes().contains(evidence.getEvidenceType())) {
+                            return upwardTumorTypes.contains(evidence.getOncoTreeType());
+                        } else {
+                            return true;
+                        }
+                    } else {
+                        return true;
+                    }
+                }).collect(toSet());
+            }
+            return evidenceToReturn;
         }
-
-        if (query.getOncoTreeTypes() != null) {
-            upwardTumorTypes.addAll(query.getOncoTreeTypes());
-        }
-        downwardTumorTypes.addAll(TumorTypeUtils.findTumorTypes(query.getQuery().getTumorType(), DOWNWARD));
 
         // Get all gene related evidences
         Map<Gene, Set<Evidence>> mappedEvidences =
@@ -299,13 +322,11 @@ public class EvidenceUtils {
             Boolean flag = true;
             if (Collections.disjoint(Collections.singleton(tmpEvidence.getOncoTreeType()), tumorTypes)) {
                 if (tmpEvidence.getLevelOfEvidence() != null) {
-                    if (tumorForm != null) {
-                        LevelOfEvidence propagationLevel = getPropagationLevel(tmpEvidence, tumorForm);
-                        if (propagationLevel != null) {
-                            tmpEvidence.setLevelOfEvidence(propagationLevel);
-                        } else {
-                            flag = false;
-                        }
+                    LevelOfEvidence propagationLevel = getPropagationLevel(tmpEvidence, tumorForm);
+                    if (propagationLevel != null) {
+                        tmpEvidence.setLevelOfEvidence(propagationLevel);
+                    } else {
+                        flag = false;
                     }
 
                     // Don't include any resistance evidence if tumor type is not matched.
@@ -384,9 +405,22 @@ public class EvidenceUtils {
         return filtered;
     }
 
-    public static LevelOfEvidence getPropagationLevel(Evidence evidence, TumorForm queriedTumorForm) {
-        if (evidence == null || queriedTumorForm == null) {
+    private static LevelOfEvidence resolveUnknownTumorFormLevel(LevelOfEvidence solidPropagationLevel, LevelOfEvidence liquidPropagationLevel) {
+        if (solidPropagationLevel == null || liquidPropagationLevel == null) {
             return null;
+        } else if (solidPropagationLevel.equals(liquidPropagationLevel)) {
+            return liquidPropagationLevel;
+        } else {
+            return null;
+        }
+    }
+
+    public static LevelOfEvidence getPropagationLevel(Evidence evidence, TumorForm queriedTumorForm) {
+        if (evidence == null) {
+            return null;
+        }
+        if (queriedTumorForm == null) {
+            return resolveUnknownTumorFormLevel(evidence.getSolidPropagationLevel(), evidence.getLiquidPropagationLevel());
         }
         return queriedTumorForm.equals(TumorForm.SOLID) ? evidence.getSolidPropagationLevel() : evidence.getLiquidPropagationLevel();
     }
@@ -790,7 +824,11 @@ public class EvidenceUtils {
         List<EvidenceQueryRes> evidenceQueries = new ArrayList<>();
 
         if (evidenceTypes == null) {
-            evidenceTypes = new HashSet<>(EvidenceTypeUtils.getAllEvidenceTypes());
+            if (levelOfEvidences == null) {
+                evidenceTypes = new HashSet<>(EvidenceTypeUtils.getAllEvidenceTypes());
+            } else {
+                evidenceTypes = new HashSet<>(EvidenceTypeUtils.getTreatmentEvidenceTypes());
+            }
         }
 
         levelOfEvidences = levelOfEvidences == null ? levelOfEvidences :

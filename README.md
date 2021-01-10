@@ -9,7 +9,7 @@ The core of OncoKB Annotation service.
 
 ## Info
 
-[![Gitter](https://img.shields.io/gitter/room/oncokb/public-chat)](https://gitter.im/oncokb/public-chat) <a href="https://ascopubs.org/doi/full/10.1200/PO.17.00011"><img src="https://img.shields.io/badge/DOI-10.1200%2FPO.17.00011-1c75cd" /></a>
+<a href="https://ascopubs.org/doi/full/10.1200/PO.17.00011"><img src="https://img.shields.io/badge/DOI-10.1200%2FPO.17.00011-1c75cd" /></a>
 
 ## Running Environment
 Please confirm your running environment is:
@@ -31,7 +31,7 @@ cp -r core/src/main/resources/properties-EXAMPLE core/src/main/resources/propert
     * google.p_twelve : Your P12 private key path (You can generate this file from google developer console, more detials in Wiki)
     * google.service_account_email : Your service account email from google developer console.
     * cancerhotspots.single : [Cancer hotspots service](http://cancerhotspots.org). Default: http://cancerhotspots.org/api/hotspots/single
-    * oncotree.api: [OncoTree service](http://oncotree.mskcc.org/oncotree/). Default: http://oncotree.mskcc.org/oncotree/api/
+    * oncotree.api: [OncoTree service](http://oncotree.info/). Default: http://oncotree.info/api/
     * google.username & google.password(Optional) : Google account info. It is used to send email
     * data.version & data.version_date(Optional) : These two properties will be attached to API call.
     

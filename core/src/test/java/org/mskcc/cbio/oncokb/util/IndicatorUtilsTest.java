@@ -12,8 +12,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mskcc.cbio.oncokb.Constants.*;
 import static org.mskcc.cbio.oncokb.util.SummaryUtils.ONCOGENIC_MUTATIONS_DEFAULT_SUMMARY;
 
@@ -131,6 +130,12 @@ public class IndicatorUtilsTest {
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null);
         assertEquals("The oncogenicity should be 'Predicted Oncogenic'", Oncogenicity.PREDICTED.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The isHotspot is not true, but it should be.", Boolean.TRUE, indicatorQueryResp.getHotspot());
+
+        // Test for 3d hotspot which should not be predicted oncogenic
+        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "KEAP1", "Y525S", null, null, "Pancreatic Adenocarcinoma", null, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null);
+        assertEquals("The oncogenicity should not be 'Predicted Oncogenic', it should be empty.", "", indicatorQueryResp.getOncogenic());
+        assertEquals("The isHotspot is true, but it should not be.", Boolean.FALSE, indicatorQueryResp.getHotspot());
 
         // ALK R401Q should not be hotspot. It later was removed from the hotspot list.
         // The position has high truncating rate
@@ -393,6 +398,13 @@ public class IndicatorUtilsTest {
         assertTrue("There should not be any treatments", indicatorQueryResp.getTreatments().isEmpty());
 
         // Give a default mutation effect when it is not available: Unknown
+        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "CHEK2", "R346C", null, null, "Myelodysplastic Workup", null, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
+        assertEquals("The Oncogenicity is not empty, but it should be.", Oncogenicity.PREDICTED.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("There should not be any sensitive therapeutic associated.", null, indicatorQueryResp.getHighestSensitiveLevel());
+        assertEquals("There should not be any resistance therapeutic associated.", null, indicatorQueryResp.getHighestResistanceLevel());
+
+        // For hotspot mutation, if the tumor type is unknown from oncotree, we should not propagate the treatment from oncogenic mutations
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "PIK3R1", "W583del", null, null, null, null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
         assertTrue("The mutation effect is null, but it should not be.", indicatorQueryResp.getMutationEffect() != null);
@@ -667,6 +679,24 @@ public class IndicatorUtilsTest {
         resp2 = IndicatorUtils.processQuery(query2, null, true, null);
         pairComparison(resp1, resp2, true);
         assertEquals("The summary should not be the same, but it is.", resp1.getGeneSummary(), resp2.getGeneSummary());
+
+        // The annotation service should return all treatments without changing the level when tumor type is specified
+        query1 = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "KRAS", "G12C", null, null, null, null, null, null, null);
+        query2 = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "KRAS", "G12C", null, null, "NSCLC", MISSENSE_VARIANT, null, null, null);
+        resp1 = IndicatorUtils.processQuery(query1, null, true, null);
+        resp2 = IndicatorUtils.processQuery(query2, null, true, null);
+
+        assertTrue("The gene exist should be the same.", resp1.getGeneExist().equals(resp2.getGeneExist()));
+        assertTrue("The variant exist should be the same.", resp1.getVariantExist().equals(resp2.getVariantExist()));
+        assertTrue("The oncogenicity should be the same.", resp1.getOncogenic().equals(resp2.getOncogenic()));
+        assertTrue("The VUS info should be the same", resp1.getVUS().equals(resp2.getVUS()));
+        assertTrue("The gene summary should be the same.", resp1.getGeneSummary().equals(resp2.getGeneSummary()));
+        assertTrue("The variant summary should be the same.", resp1.getVariantSummary().equals(resp2.getVariantSummary()));
+
+        assertSame("The highest sensitive level should be the same.", resp1.getHighestSensitiveLevel(), resp2.getHighestSensitiveLevel());
+        assertNotSame("The highest resistance level should not be the same. R1 belongs to colorectal", resp1.getHighestResistanceLevel(), resp2.getHighestResistanceLevel());
+
+        assertNotSame("The annotation without tumor type should have more treatments", resp1.getTreatments().size(), resp2.getTreatments().size());
 
     }
 

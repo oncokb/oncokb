@@ -337,13 +337,6 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             alterations.addAll(findMutationsByConsequenceAndPosition(alteration.getGene(), referenceGenome, truncatingVariantConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations));
         }
 
-        if (addVUSMutation(alteration, matchedAlt != null)){
-            Alteration VUSMutation = findAlteration(referenceGenome, InferredMutation.VUS.getVariant(), fullAlterations);
-            if (VUSMutation != null){
-                alterations.add(VUSMutation);
-            }
-        }
-
         if (addOncogenicMutations(alteration, alterations)) {
             Alteration oncogenicMutations = findAlteration(referenceGenome, "oncogenic mutations", fullAlterations);
             if (oncogenicMutations != null) {
@@ -384,7 +377,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             }
         }
 
-        if (addVUSMutation(alteration, matchedAlt != null)) {
+        if (!addOncogenicMutations(alteration, alterations) && addVUSMutation(alteration, matchedAlt != null)) {
             Alteration VUSMutation = findAlteration(referenceGenome, InferredMutation.VUS.getVariant(), fullAlterations);
             if (VUSMutation != null) {
                 alterations.add(VUSMutation);
