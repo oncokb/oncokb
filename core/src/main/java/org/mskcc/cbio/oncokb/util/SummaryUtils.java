@@ -844,7 +844,7 @@ public class SummaryUtils {
 
     public static String convertTumorTypeNameInSummary(String tumorType) {
         if (tumorType != null) {
-            String[] specialWords = {"Wilms", "IgA", "IgG", "IgM", "Sezary", "Down", "Hodgkin", "Ewing"};
+            String[] specialWords = {"Wilms", "IgA", "IgG", "IgM", "Sezary", "Down", "Hodgkin", "Ewing", "Merkel"};
             List<String> specialWordsList = Arrays.asList(specialWords);
             String lowerCaseStr = tumorType.toLowerCase();
 
