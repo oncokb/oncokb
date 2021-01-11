@@ -157,7 +157,7 @@ public class MainUtils {
         for (Evidence evidence : evidences) {
             MutationEffect mutationEffect = MutationEffect.getByName(evidence.getKnownEffect());
             int _index = PRIORITIZED_MUTATION_EFFECTS.indexOf(mutationEffect);
-            if (_index < index) {
+            if (_index >= 0 && _index < index) {
                 indicatorQueryMutationEffect.setMutationEffect(mutationEffect);
                 indicatorQueryMutationEffect.setMutationEffectEvidence(evidence);
                 index = _index;
