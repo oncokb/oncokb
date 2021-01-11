@@ -726,7 +726,7 @@ public class IndicatorUtils {
                     Map<Treatment, Set<String>> pmidsMap = new HashMap<>();
                     Map<Treatment, Set<ArticleAbstract>> abstractsMap = new HashMap<>();
                     Map<Treatment, List<String>> alterationsMap = new HashMap<>();
-                    Map<Treatment, Set<TumorType>> tumorTypeMap = new HashMap<>();
+                    Map<Treatment, Set<org.mskcc.cbio.oncokb.apiModels.TumorType>> tumorTypeMap = new HashMap<>();
                     Map<Treatment, String> descriptionMap = new HashMap<>();
 
                     for (Evidence evidence : evidenceSetMap.get(level)) {
@@ -745,7 +745,7 @@ public class IndicatorUtils {
                             pmidsMap.put(treatment, citations.getPmids());
                             abstractsMap.put(treatment, citations.getAbstracts());
                             alterationsMap.put(treatment, evidence.getAlterations().stream().map(alteration -> alteration.getName()).collect(Collectors.toList()));
-                            tumorTypeMap.put(treatment, evidence.getCancerTypes());
+                            tumorTypeMap.put(treatment, evidence.getCancerTypes().stream().map(tumorType -> new org.mskcc.cbio.oncokb.apiModels.TumorType(tumorType)).collect(Collectors.toSet()));
                             descriptionMap.put(treatment, evidence.getDescription());
                         }
                         sameLevelTreatments.addAll(evidence.getTreatments());
