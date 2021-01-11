@@ -1,6 +1,9 @@
 # Gene	Alteration	Tumor Type	Summary	The Highest Level	Number of prognostic implications
 
-ABL1	BCR-ABL1 Fusion				0
+ABL1	BCR-ABL1 Fusion			Px1	3
 ABL1	BCR-ABL1 Fusion	AML			0
-ABL1	BCR-ABL1 Fusion	BLLBCRABL1L		Px1	1
-ABL1	BCR-ABL1 Fusion	MPALBCRABL1		Px1	1
+ABL1	BCR-ABL1 Fusion	BLLBCRABL1L	The NCCN guidelines list the BCR-ABL1 fusion as a prognostic biomarker in B-lymphoblastic leukemia/lymphoma. Well-powered studies find that patients with the BCR-ABl1 fusion have a less favorable prognosis.	Px1	2
+
+# Check the Px propagation rule to the child is working. Px1 is assigned on ALAL
+ABL1	BCR-ABL1 Fusion	ALAL	The WHO classification of hematologic tumors lists the BCR-ABL1 fusion as a prognostic biomarker in acute leukemias of ambiguous lineage. Well-powered studies find that patients with the BCR-ABL1 fusion have a less favorable prognosis.	Px1	1
+ABL1	BCR-ABL1 Fusion	AUL	The WHO classification of hematologic tumors lists the BCR-ABL1 fusion as a prognostic biomarker in acute undifferentiated leukemia. Well-powered studies find that patients with the BCR-ABL1 fusion have a less favorable prognosis.	Px1	1

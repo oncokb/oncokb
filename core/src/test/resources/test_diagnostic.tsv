@@ -1,10 +1,12 @@
 # Gene	Alteration	Tumor Type	Summary	The highest Level	Number of diagnostic implications
 
 ABL1	BCR-ABL1 Fusion			Dx1	5
-ABL1	BCR-ABL1 Fusion	CML	The presence of a BCR-ABL1 fusion is required for a diagnosis of chronic myelogenous leukemia, BCR-ABL1-positive.	Dx1	1
-ABL1	BCR-ABL1 Fusion	CMLBCRABL1	The presence of a BCR-ABL1 fusion is required for a diagnosis of chronic myelogenous leukemia, BCR-ABL1-positive.	Dx1	1
-ABL1	BCR-ABL1 Fusion	Myloid		Dx1	5
-ABL1	BCR-ABL1 Fusion	AML		Dx1	1
-ABL1	BCR-ABL1 Fusion	BLL		Dx1	2
-ABL1	BCR-ABL1 Fusion	AMLBCRABL1		Dx1	1
-ABL1	BCR-ABL1 Fusion	MPALBCRABL1		Dx1	1
+ABL1	BCR-ABL1 Fusion	AML	The presence of a BCR-ABL1 fusion is required for a diagnosis of acute myeloid leukemia with BCR-ABL1. The BCR-ABL1 fusion may also suggest a diagnosis of blast crisis chronic myeloid leukemia.	Dx1	1
+ABL1	BCR-ABL1 Fusion	BLL	The presence of a BCR-ABL1 fusion is required for a diagnosis of B-Lymphoblastic Leukemia/Lymphoma with t(9;22)(q34.1;q11.2);BCR-ABL1. The presence of the BCR-ABL1 fusion may also suggest a diagnosis of blast crisis chronic myeloid leukemia.	Dx1	2
+ABL1	BCR-ABL1 Fusion	AMLBCRABL1	The presence of a BCR-ABL1 fusion is required for a diagnosis of acute myeloid leukemia with BCR-ABL1. The BCR-ABL1 fusion may also suggest a diagnosis of blast crisis chronic myeloid leukemia.	Dx1	1
+ABL1	BCR-ABL1 Fusion	MPALBCRABL1	The presence of a BCR-ABL1 fusion is required for a diagnosis of mixed phenotype acute leukemia with t(9;22)(q34.1;q11.2); BCR-ABL1.	Dx1	1
+
+# ABL1 MPALBCRABL1 Dx1 only applies top to CML
+ABL1	BCR-ABL1 Fusion	CMLBCRABL1	The presence of a BCR-ABL1 fusion is required for a diagnosis of chronic myeloid leukemia, BCR-ABL1+.	Dx1	1
+ABL1	BCR-ABL1 Fusion	CML	The presence of a BCR-ABL1 fusion is required for a diagnosis of chronic myeloid leukemia, BCR-ABL1+.	Dx1	1
+ABL1	BCR-ABL1 Fusion	MPN			0
