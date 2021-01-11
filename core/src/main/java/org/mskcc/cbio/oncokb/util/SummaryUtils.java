@@ -26,13 +26,6 @@ public class SummaryUtils {
         String key = query.getQueryId();
         queryTumorType = convertTumorTypeNameInSummary(queryTumorType);
 
-        if (queryTumorType != null) {
-            queryTumorType = queryTumorType.trim();
-            if (queryTumorType.endsWith(" tumor")) {
-                queryTumorType = queryTumorType.substring(0, queryTumorType.lastIndexOf(" tumor")) + " tumors";
-            }
-        }
-
         if (gene == null || alterations == null || relevantTumorTypes == null || queryTumorType == null) {
             Map<String, Object> map = newTumorTypeSummary();
             return map;
@@ -849,16 +842,16 @@ public class SummaryUtils {
         return summary;
     }
 
-    private static String convertTumorTypeNameInSummary(String summary) {
-        if (summary != null) {
-            String[] specialWords = {"Wilms"};
+    public static String convertTumorTypeNameInSummary(String tumorType) {
+        if (tumorType != null) {
+            String[] specialWords = {"Wilms", "IgA", "IgG", "IgM", "Sezary", "Down", "Hodgkin", "Ewing"};
             List<String> specialWordsList = Arrays.asList(specialWords);
-            String lowerCaseStr = summary.toLowerCase();
+            String lowerCaseStr = tumorType.toLowerCase();
 
             StringBuilder sb = new StringBuilder(lowerCaseStr);
 
             for (String item : specialWordsList) {
-                Integer startIndex = summary.indexOf(item);
+                Integer startIndex = tumorType.indexOf(item);
                 if (startIndex != -1) {
                     sb.replace(startIndex, startIndex + item.length(), item);
                 }
@@ -866,15 +859,22 @@ public class SummaryUtils {
 
             // Find all uppercased string
             Pattern p = Pattern.compile("(\\b[A-Z0-9]+\\b)");
-            Matcher m = p.matcher(summary);
+            Matcher m = p.matcher(tumorType);
 
             while (m.find()) {
                 sb.replace(m.start(), m.end(), m.group(1));
             }
 
-            summary = sb.toString();
+            tumorType = sb.toString();
         }
-        return summary;
+
+        if (tumorType != null) {
+            tumorType = tumorType.trim();
+            if (tumorType.endsWith(" tumor")) {
+                tumorType = tumorType.substring(0, tumorType.lastIndexOf(" tumor")) + " tumors";
+            }
+        }
+        return tumorType;
     }
 
     private static Map<String, Object> newTumorTypeSummary() {
