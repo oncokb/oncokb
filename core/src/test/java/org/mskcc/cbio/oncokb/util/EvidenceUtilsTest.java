@@ -304,6 +304,7 @@ public class EvidenceUtilsTest extends TestCase {
 
         // Test with variant only
         query = new Query();
+        query.setHugoSymbol("BRAF");
         query.setAlteration("V600E");
         responses = EvidenceUtils.processRequest(Collections.singletonList(query), null, null, true);
         processRequestSuite(responses);
