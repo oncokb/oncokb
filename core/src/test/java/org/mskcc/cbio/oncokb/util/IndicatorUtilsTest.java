@@ -2,8 +2,9 @@ package org.mskcc.cbio.oncokb.util;
 
 import org.junit.Test;
 import org.mskcc.cbio.oncokb.apiModels.Implication;
+import org.mskcc.cbio.oncokb.apiModels.MainType;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.TumorType;
+import org.mskcc.cbio.oncokb.apiModels.TumorType;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -159,7 +160,7 @@ public class IndicatorUtilsTest {
         // Check special variant Oncogenic Mutations
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "BRAF", InferredMutation.ONCOGENIC_MUTATIONS.getVariant(), null, null, "Colorectal Cancer", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null);
-        assertEquals("The oncogenicity should be 'Unknown'", Oncogenicity.UNKNOWN.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The oncogenicity should be 'Yes'", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The mutation effect is not unknown, but it should be.", MutationEffect.UNKNOWN.getMutationEffect(), indicatorQueryResp.getMutationEffect().getKnownEffect());
 
         assertEquals("The variant summary does not match",
@@ -702,14 +703,18 @@ public class IndicatorUtilsTest {
     @Test
     public void testFilterImplication() {
         TumorType melanoma = new TumorType();
-        melanoma.setSubtype("Melanoma");
+        melanoma.setName("Melanoma");
         melanoma.setCode("MEL");
-        melanoma.setMainType("Melanoma");
+        MainType mainType = new MainType();
+        mainType.setName("Melanoma");
+        melanoma.setMainType(mainType);
 
         TumorType nsclc = new TumorType();
-        nsclc.setSubtype("Non-Small Cell Lung Cancer");
+        nsclc.setName("Non-Small Cell Lung Cancer");
         nsclc.setCode("NSCLC");
-        nsclc.setMainType("Non-Small Cell Lung Cancer");
+        mainType = new MainType();
+        mainType.setName("Non-Small Cell Lung Cancer");
+        nsclc.setMainType(mainType);
 
         Implication implication1 = new Implication();
         implication1.setDescription("implication1");
