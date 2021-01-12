@@ -814,6 +814,7 @@ public class SummaryUtils {
         summary = summary.replace("[[gene]] [[mutation]] [[mutation]]", alterationName);
         summary = summary.replace("[[gene]] [[mutation]] [[mutant]]", altName);
         summary = summary.replace("[[gene]] [[mutation]] [[[mutant]]]", altName);
+        summary = summary.replace("[[gene]] [[mutation]]", alterationName);
         summary = summary.replace("[[gene]]", query.getHugoSymbol());
 
         // Improve false tolerance. Curators often use hugoSymbol directly instead of [[gene]]
