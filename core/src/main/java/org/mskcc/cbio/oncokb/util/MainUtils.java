@@ -148,7 +148,7 @@ public class MainUtils {
                 index = PRIORITIZED_MUTATION_EFFECTS.indexOf(effect);
             }
         }
-        return index == 100 ? null : PRIORITIZED_MUTATION_EFFECTS.get(index);
+        return (index == 100 || index < 0) ? null : PRIORITIZED_MUTATION_EFFECTS.get(index);
     }
 
     public static IndicatorQueryMutationEffect findHighestMutationEffectByEvidence(Set<Evidence> evidences) {

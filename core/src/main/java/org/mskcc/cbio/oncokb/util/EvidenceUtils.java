@@ -457,7 +457,7 @@ public class EvidenceUtils {
         Set<MutationEffect> result = new HashSet<>();
 
         for (Evidence evidence : evidences) {
-            if (evidence.getKnownEffect() != null) {
+            if (StringUtils.isNotEmpty(evidence.getKnownEffect())) {
                 result.add(MutationEffect.getByName(evidence.getKnownEffect()));
             }
         }
