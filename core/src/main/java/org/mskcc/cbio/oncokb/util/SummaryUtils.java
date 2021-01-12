@@ -1,5 +1,6 @@
 package org.mskcc.cbio.oncokb.util;
 
+import jdk.nashorn.internal.runtime.regexp.joni.Regex;
 import org.apache.commons.collections.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.model.*;
@@ -814,7 +815,12 @@ public class SummaryUtils {
         summary = summary.replace("[[gene]] [[mutation]] [[mutation]]", alterationName);
         summary = summary.replace("[[gene]] [[mutation]] [[mutant]]", altName);
         summary = summary.replace("[[gene]] [[mutation]] [[[mutant]]]", altName);
-        summary = summary.replace("[[gene]] [[mutation]]", alterationName);
+
+        // If the mutation already includes the gene name, we should skip the gene
+        if (summary.contains("[[gene]] [[mutation]]") && query.getAlteration().toLowerCase().contains(query.getHugoSymbol().toLowerCase())) {
+            summary = summary.replace("[[gene]]", "");
+        }
+
         summary = summary.replace("[[gene]]", query.getHugoSymbol());
 
         // Improve false tolerance. Curators often use hugoSymbol directly instead of [[gene]]
@@ -840,7 +846,7 @@ public class SummaryUtils {
         summary = summary.replace("[[tumor type]]", tumorTypeName);
         summary = summary.replace("[[fusion name]]", altName);
         summary = summary.replace("[[fusion name]]", altName);
-        return summary;
+        return summary.trim().replaceAll("\\s+", " ");
     }
 
     public static String convertTumorTypeNameInSummary(String tumorType) {
