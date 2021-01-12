@@ -178,7 +178,7 @@ public class EvidenceUtils {
 
         if (query.getGene() != null) {
             genes.add(query.getGene());
-            if (query.getAlterations().isEmpty() && query.getAlleles().isEmpty()) {
+            if (query.getExactMatchedAlteration() == null && query.getAlterations().isEmpty() && query.getAlleles().isEmpty()) {
                 alterations.addAll(AlterationUtils.getAllAlterations(referenceGenome, query.getGene()));
             } else {
                 if (query.getAlterations() != null) {
