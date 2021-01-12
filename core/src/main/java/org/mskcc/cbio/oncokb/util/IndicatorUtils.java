@@ -275,7 +275,7 @@ public class IndicatorUtils {
                         allQueryRelatedEvidences.add(indicatorQueryMutationEffect.getMutationEffectEvidence());
                     }
 
-                    // Only set oncogenicity if no previous data assigned.
+                    // Only set mutation effect if no previous data assigned.
                     if (indicatorQuery.getMutationEffect() == null && indicatorQueryMutationEffect.getMutationEffect() != null) {
                         MutationEffectResp mutationEffectResp = new MutationEffectResp();
                         mutationEffectResp.setKnownEffect(indicatorQueryMutationEffect.getMutationEffect().getMutationEffect());
@@ -463,6 +463,10 @@ public class IndicatorUtils {
             indicatorQuery.setGeneExist(false);
         }
 
+        if(StringUtils.isEmpty(indicatorQuery.getOncogenic()) && StringUtils.isNotEmpty(query.getAlteration()) && query.getAlteration().trim().toLowerCase().equals(InferredMutation.ONCOGENIC_MUTATIONS.getVariant().toLowerCase())) {
+            indicatorQuery.setOncogenic(Oncogenicity.YES.getOncogenic());
+        }
+
         if (indicatorQuery.getMutationEffect() == null) {
             indicatorQuery.setMutationEffect(getDefaultMutationEffectResponse());
         }
@@ -588,7 +592,6 @@ public class IndicatorUtils {
         Oncogenicity oncogenicity = null;
         Evidence oncogenicityEvidence = null;
 
-
         // Find alteration specific oncogenicity
         List<Evidence> selfAltOncogenicEvis = EvidenceUtils.getEvidence(Collections.singletonList(alteration),
             Collections.singleton(EvidenceType.ONCOGENIC), null);
@@ -597,6 +600,10 @@ public class IndicatorUtils {
             if (oncogenicityEvidence != null) {
                 oncogenicity = Oncogenicity.getByEffect(oncogenicityEvidence.getKnownEffect());
             }
+        }
+
+        if(StringUtils.isNotEmpty(alteration.getAlteration()) && alteration.getAlteration().trim().toLowerCase().equals(InferredMutation.ONCOGENIC_MUTATIONS.getVariant().toLowerCase())) {
+            oncogenicity = Oncogenicity.YES;
         }
 
         if (oncogenicity == null || oncogenicity.equals(Oncogenicity.UNKNOWN)) {
