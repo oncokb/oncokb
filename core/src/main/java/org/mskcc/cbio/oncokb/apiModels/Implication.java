@@ -1,7 +1,7 @@
 package org.mskcc.cbio.oncokb.apiModels;
 
 import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
-import org.mskcc.cbio.oncokb.model.TumorType;
+import org.mskcc.cbio.oncokb.apiModels.TumorType;
 
 import java.util.HashSet;
 import java.util.Set;
