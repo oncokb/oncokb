@@ -138,6 +138,9 @@ public class TumorType {
             mainType.setTumorForm(mainTumorType.getTumorForm());
             this.setMainType(mainType);
         }
+        if (tumorType.getParent() != null) {
+            this.setParent(tumorType.getParent().getCode());
+        }
         this.setLevel(tumorType.getLevel());
         this.setTissue(tumorType.getTissue());
         this.setTumorForm(tumorType.getTumorForm());

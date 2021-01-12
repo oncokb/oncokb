@@ -518,7 +518,7 @@ public class IndicatorUtils {
             Implication implication = new Implication();
             implication.setLevelOfEvidence(evidence.getLevelOfEvidence());
             implication.setAlterations(evidence.getAlterations().stream().map(alteration -> alteration.getName() == null ? alteration.getAlteration() : alteration.getAlteration()).collect(Collectors.toSet()));
-            implication.setTumorType(tumorType);
+            implication.setTumorType(new org.mskcc.cbio.oncokb.apiModels.TumorType(tumorType));
             String hugoSymbol = StringUtils.isEmpty(queryHugoSymbol) ? evidence.getGene().getHugoSymbol() : queryHugoSymbol;
             implication.setDescription(SummaryUtils.enrichDescription(evidence.getDescription(), hugoSymbol));
             return implication;
