@@ -1,11 +1,10 @@
 package org.mskcc.cbio.oncokb.util;
 
-import org.apache.commons.collections.CollectionUtils;
+import jdk.nashorn.internal.runtime.regexp.joni.Regex;
 import org.apache.commons.collections.ListUtils;
-import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
+import org.mskcc.cbio.oncokb.model.TumorType;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -22,18 +21,11 @@ public class SummaryUtils {
     public static final String TERT_PROMOTER_NO_THERAPY_TUMOR_TYPE_SUMMARY = "There are no FDA-approved or NCCN-compendium listed treatments specifically for patients with TERT promoter mutations in [[tumor type]].";
     public static final String ONCOGENIC_MUTATIONS_DEFAULT_SUMMARY = "Oncogenic Mutations includes all variants annotated as oncogenic and likely oncogenic.";
 
-    public static Map<String, Object> tumorTypeSummary(EvidenceType evidenceType, Gene gene, Query query, Alteration exactMatchedAlt, List<Alteration> alterations, List<TumorType> relevantTumorTypes) {
+    public static Map<String, Object> tumorTypeSummary(EvidenceType evidenceType, Gene gene, Query query, Alteration exactMatchedAlt, List<Alteration> alterations, TumorType matchedTumorType, List<TumorType> relevantTumorTypes) {
         Map<String, Object> tumorTypeSummary = newTumorTypeSummary();
         String queryTumorType = query.getTumorType();
         String key = query.getQueryId();
         queryTumorType = convertTumorTypeNameInSummary(queryTumorType);
-
-        if (queryTumorType != null) {
-            queryTumorType = queryTumorType.trim();
-            if (queryTumorType.endsWith(" tumor")) {
-                queryTumorType = queryTumorType.substring(0, queryTumorType.lastIndexOf(" tumor")) + " tumors";
-            }
-        }
 
         if (gene == null || alterations == null || relevantTumorTypes == null || queryTumorType == null) {
             Map<String, Object> map = newTumorTypeSummary();
@@ -41,12 +33,12 @@ public class SummaryUtils {
         }
 
         query.setTumorType(queryTumorType);
-        tumorTypeSummary = getTumorTypeSummarySubFunc(evidenceType, gene, query, exactMatchedAlt, alterations, relevantTumorTypes);
+        tumorTypeSummary = getTumorTypeSummarySubFunc(evidenceType, gene, query, exactMatchedAlt, alterations, matchedTumorType, relevantTumorTypes);
 
         return tumorTypeSummary;
     }
 
-    private static Map<String, Object> getTumorTypeSummarySubFunc(EvidenceType evidenceType, Gene gene, Query query, Alteration exactMatchedAlt, List<Alteration> relevantAlterations, List<TumorType> relevantTumorTypes) {
+    private static Map<String, Object> getTumorTypeSummarySubFunc(EvidenceType evidenceType, Gene gene, Query query, Alteration exactMatchedAlt, List<Alteration> relevantAlterations, TumorType matchedTumorType, List<TumorType> relevantTumorTypes) {
         Map<String, Object> tumorTypeSummary = newTumorTypeSummary();
         Alteration alteration = null;
 
@@ -79,7 +71,7 @@ public class SummaryUtils {
         if (tumorTypeSummary == null) {
             for (TumorType tumorType : relevantTumorTypes) {
                 for (Alteration allele : alternativeAlleles) {
-                    tumorTypeSummary = getRelevantTumorTypeSummaryByAlt(evidenceType, allele, Collections.singleton(tumorType));
+                    tumorTypeSummary = getRelevantTumorTypeSummaryByAlt(evidenceType, allele, tumorType, Collections.singleton(tumorType));
                     if (tumorTypeSummary != null) {
                         break;
                     }
@@ -133,13 +125,24 @@ public class SummaryUtils {
 
             // Base on the priority of relevant alterations
             for (Alteration alt : relevantAlterations) {
-                tumorTypeSummary = getRelevantTumorTypeSummaryByAlt(evidenceType, alt, new HashSet<>(relevantTumorTypes));
+                for (TumorType tumorType : relevantTumorTypes) {
+                    tumorTypeSummary = getRelevantTumorTypeSummaryByAlt(evidenceType, alt, tumorType, Collections.singleton(tumorType));
+                    if (tumorTypeSummary != null) {
+                        break;
+                    }
+                }
                 if (tumorTypeSummary != null) {
                     break;
                 }
 
                 // Get Other Tumor Types summary
-                tumorTypeSummary = getOtherTumorTypeSummaryByAlt(evidenceType, alt, new HashSet<>(relevantTumorTypes));
+
+                for (TumorType tumorType : relevantTumorTypes) {
+                    tumorTypeSummary = getOtherTumorTypeSummaryByAlt(evidenceType, alt, Collections.singleton(tumorType));
+                    if (tumorTypeSummary != null) {
+                        break;
+                    }
+                }
                 if (tumorTypeSummary != null) {
                     break;
                 }
@@ -162,13 +165,13 @@ public class SummaryUtils {
             tumorTypeSummary.put("summary", tmpSummary);
         }
 
-        tumorTypeSummary.put("summary", replaceSpecialCharacterInTumorTypeSummary((String) tumorTypeSummary.get("summary"), gene, query.getReferenceGenome(), query));
+        tumorTypeSummary.put("summary", replaceSpecialCharacterInTumorTypeSummary((String) tumorTypeSummary.get("summary"), gene, query.getReferenceGenome(), query, matchedTumorType));
 
         return tumorTypeSummary;
     }
 
-    private static Map<String, Object> getRelevantTumorTypeSummaryByAlt(EvidenceType evidenceType, Alteration alteration, Set<TumorType> relevantTumorTypes) {
-        return getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(Collections.singletonList(alteration), Collections.singleton(evidenceType), relevantTumorTypes, null));
+    private static Map<String, Object> getRelevantTumorTypeSummaryByAlt(EvidenceType evidenceType, Alteration alteration, TumorType matchedTumorType, Set<TumorType> relevantTumorTypes) {
+        return getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(Collections.singletonList(alteration), Collections.singleton(evidenceType), matchedTumorType, relevantTumorTypes, null));
     }
 
     private static Map<String, Object> getOtherTumorTypeSummaryByAlt(EvidenceType evidenceType, Alteration alteration, Set<TumorType> relevantTumorTypes) {
@@ -187,7 +190,8 @@ public class SummaryUtils {
             List<Evidence> evidences = EvidenceUtils.getEvidence(
                 Collections.singletonList(alteration),
                 Collections.singleton(evidenceType),
-                Collections.singleton(TumorTypeUtils.getMappedSpecialTumor(specialTumorType)), null);
+                TumorTypeUtils.getBySpecialTumor(specialTumorType),
+                Collections.singleton(TumorTypeUtils.getBySpecialTumor(specialTumorType)), null);
             if (evidences.size() > 0) {
                 return getTumorTypeSummaryFromEvidences(evidences);
             }
@@ -795,12 +799,14 @@ public class SummaryUtils {
         return sb.toString();
     }
 
-    private static String replaceSpecialCharacterInTumorTypeSummary(String summary, Gene gene, ReferenceGenome referenceGenome, Query query) {
+    private static String replaceSpecialCharacterInTumorTypeSummary(String summary, Gene gene, ReferenceGenome referenceGenome, Query query, TumorType matchedTumorType) {
         String altName = getGeneMutationNameInTumorTypeSummary(gene, referenceGenome, query.getHugoSymbol(), query.getAlteration());
         String alterationName = getGeneMutationNameInVariantSummary(gene, referenceGenome, query.getHugoSymbol(), query.getAlteration());
-        String variantStr = altName + " " + query.getTumorType();
+        String tumorTypeName = convertTumorTypeNameInSummary(matchedTumorType == null ? query.getTumorType() : (StringUtils.isEmpty(matchedTumorType.getSubtype()) ? matchedTumorType.getMainType() : matchedTumorType.getSubtype()));
+
+        String variantStr = altName + " " + tumorTypeName;
         if (query.getAlteration().contains("deletion")) {
-            variantStr = query.getTumorType() + " harboring a " + altName;
+            variantStr = tumorTypeName + " harboring a " + altName;
         }
         summary = summary.replace("[[variant]]", variantStr);
         summary = summary.replace("[[gene]] [[mutation]] [[[mutation]]]", alterationName);
@@ -809,6 +815,12 @@ public class SummaryUtils {
         summary = summary.replace("[[gene]] [[mutation]] [[mutation]]", alterationName);
         summary = summary.replace("[[gene]] [[mutation]] [[mutant]]", altName);
         summary = summary.replace("[[gene]] [[mutation]] [[[mutant]]]", altName);
+
+        // If the mutation already includes the gene name, we should skip the gene
+        if (summary.contains("[[gene]] [[mutation]]") && query.getAlteration().toLowerCase().contains(query.getHugoSymbol().toLowerCase())) {
+            summary = summary.replace("[[gene]]", "");
+        }
+
         summary = summary.replace("[[gene]]", query.getHugoSymbol());
 
         // Improve false tolerance. Curators often use hugoSymbol directly instead of [[gene]]
@@ -830,39 +842,46 @@ public class SummaryUtils {
         // In case of miss typed
         summary = summary.replace("[[mutation]] [[mutation]]", query.getAlteration());
         summary = summary.replace("[[mutation]]", query.getAlteration());
-        summary = summary.replace("[[tumorType]]", query.getTumorType());
-        summary = summary.replace("[[tumor type]]", query.getTumorType());
+        summary = summary.replace("[[tumorType]]", tumorTypeName);
+        summary = summary.replace("[[tumor type]]", tumorTypeName);
         summary = summary.replace("[[fusion name]]", altName);
         summary = summary.replace("[[fusion name]]", altName);
-        return summary;
+        return summary.trim().replaceAll("\\s+", " ");
     }
 
-    private static String convertTumorTypeNameInSummary(String summary) {
-        if (summary != null) {
-            String[] specialWords = {"Wilms"};
+    public static String convertTumorTypeNameInSummary(String tumorType) {
+        if (tumorType != null) {
+            String[] specialWords = {"Wilms", "IgA", "IgG", "IgM", "Sezary", "Down", "Hodgkin", "Ewing", "Merkel"};
             List<String> specialWordsList = Arrays.asList(specialWords);
-            String lowerCaseStr = summary.toLowerCase();
+            String lowerCaseStr = tumorType.toLowerCase();
 
             StringBuilder sb = new StringBuilder(lowerCaseStr);
 
             for (String item : specialWordsList) {
-                Integer startIndex = summary.indexOf(item);
+                Integer startIndex = tumorType.indexOf(item);
                 if (startIndex != -1) {
                     sb.replace(startIndex, startIndex + item.length(), item);
                 }
             }
 
             // Find all uppercased string
-            Pattern p = Pattern.compile("(\\b[A-Z]+\\b)");
-            Matcher m = p.matcher(summary);
+            Pattern p = Pattern.compile("(\\b[A-Z0-9]+\\b)");
+            Matcher m = p.matcher(tumorType);
 
             while (m.find()) {
                 sb.replace(m.start(), m.end(), m.group(1));
             }
 
-            summary = sb.toString();
+            tumorType = sb.toString();
         }
-        return summary;
+
+        if (tumorType != null) {
+            tumorType = tumorType.trim();
+            if (tumorType.endsWith(" tumor")) {
+                tumorType = tumorType.substring(0, tumorType.lastIndexOf(" tumor")) + " tumors";
+            }
+        }
+        return tumorType;
     }
 
     private static Map<String, Object> newTumorTypeSummary() {

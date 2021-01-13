@@ -10,11 +10,12 @@ public final class GeneralImporter {
 
     public static void main(String[] args) throws Exception {
         VariantConsequenceImporter.main(args);
+        TumorTypeImporter.main(args);
 
         // Save special genes
-        Gene gene = new Gene();
-        gene.setHugoSymbol("Other Biomarkers");
-        gene.setEntrezGeneId(-2);
-        ApplicationContextSingleton.getGeneBo().save(gene);
+//        Gene gene = new Gene();
+//        gene.setHugoSymbol("Other Biomarkers");
+//        gene.setEntrezGeneId(-2);
+//        ApplicationContextSingleton.getGeneBo().save(gene);
     }
 }

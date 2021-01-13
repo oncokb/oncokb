@@ -2,9 +2,9 @@ package org.mskcc.cbio.oncokb.util;
 
 import org.junit.Test;
 import org.mskcc.cbio.oncokb.apiModels.Implication;
+import org.mskcc.cbio.oncokb.apiModels.MainType;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.tumor_type.MainType;
-import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
+import org.mskcc.cbio.oncokb.apiModels.TumorType;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -88,7 +88,7 @@ public class IndicatorUtilsTest {
         // Both genes have relevant alterations, should return highest level then highest oncogenicity
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "BRAF-TMPRSS2", null, "fusion", null, "Prostate Adenocarcinoma", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
-        assertEquals("The highest sensitive level of CUL1-BRAF fusion should be Level 3A", LevelOfEvidence.LEVEL_3B, indicatorQueryResp.getHighestSensitiveLevel());
+        assertEquals("The highest sensitive level of BRAF-TMPRSS2 fusion should be Level 3A", LevelOfEvidence.LEVEL_3B, indicatorQueryResp.getHighestSensitiveLevel());
         assertEquals("The oncogenicity of BRAF-TMPRSS2 fusion should be Likely Oncogenic", "Likely Oncogenic", indicatorQueryResp.getOncogenic());
 
         // Test Intragenic Mutation
@@ -160,7 +160,7 @@ public class IndicatorUtilsTest {
         // Check special variant Oncogenic Mutations
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "BRAF", InferredMutation.ONCOGENIC_MUTATIONS.getVariant(), null, null, "Colorectal Cancer", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null);
-        assertEquals("The oncogenicity should be 'Unknown'", Oncogenicity.UNKNOWN.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The oncogenicity should be 'Yes'", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The mutation effect is not unknown, but it should be.", MutationEffect.UNKNOWN.getMutationEffect(), indicatorQueryResp.getMutationEffect().getKnownEffect());
 
         assertEquals("The variant summary does not match",
@@ -712,8 +712,8 @@ public class IndicatorUtilsTest {
         TumorType nsclc = new TumorType();
         nsclc.setName("Non-Small Cell Lung Cancer");
         nsclc.setCode("NSCLC");
-        MainType nsclcMainType = new MainType();
-        nsclcMainType.setName("Non-Small Cell Lung Cancer");
+        mainType = new MainType();
+        mainType.setName("Non-Small Cell Lung Cancer");
         nsclc.setMainType(mainType);
 
         Implication implication1 = new Implication();
