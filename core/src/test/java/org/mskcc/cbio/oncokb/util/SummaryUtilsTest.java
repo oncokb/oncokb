@@ -2,6 +2,8 @@ package org.mskcc.cbio.oncokb.util;
 
 import org.junit.Test;
 import org.mskcc.cbio.oncokb.model.Gene;
+import org.mskcc.cbio.oncokb.model.TumorType;
+import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.Tumor;
 
 import static org.junit.Assert.assertEquals;
 import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
@@ -35,45 +37,5 @@ public class SummaryUtilsTest {
         assertEquals(SummaryUtils.getGeneMutationNameInTumorTypeSummary(gene, DEFAULT_REFERENCE_GENOME, gene.getHugoSymbol(), "Deletion"), SummaryUtils.getGeneMutationNameInTumorTypeSummary(gene, DEFAULT_REFERENCE_GENOME, gene.getHugoSymbol(), "loss"));
         assertEquals(SummaryUtils.getGeneMutationNameInTumorTypeSummary(gene, DEFAULT_REFERENCE_GENOME, gene.getHugoSymbol(), "Deletion"), SummaryUtils.getGeneMutationNameInTumorTypeSummary(gene, DEFAULT_REFERENCE_GENOME, gene.getHugoSymbol(), " loss"));
         assertEquals(SummaryUtils.getGeneMutationNameInTumorTypeSummary(gene, DEFAULT_REFERENCE_GENOME, gene.getHugoSymbol(), "Deletion"), SummaryUtils.getGeneMutationNameInTumorTypeSummary(gene, DEFAULT_REFERENCE_GENOME, gene.getHugoSymbol(), "deLetion"));
-    }
-
-    public void testVariantTumorTypeSummary() throws Exception {
-
-    }
-
-    public void testVariantCustomizedSummary() throws Exception {
-
-    }
-
-    public void testTumorTypeSummary() throws Exception {
-
-    }
-
-    public void testUnknownOncogenicSummary() throws Exception {
-
-    }
-
-    public void testSynonymousSummary() throws Exception {
-
-    }
-
-    public void testOncogenicSummary() throws Exception {
-
-    }
-
-    public void testGeneSummary() throws Exception {
-
-    }
-
-    public void testFullSummary() throws Exception {
-
-    }
-
-    public void testAlleleSummary() throws Exception {
-
-    }
-
-    public void testHotspotSummary() throws Exception {
-
     }
 }

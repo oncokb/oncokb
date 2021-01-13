@@ -5,7 +5,7 @@ import org.mskcc.cbio.oncokb.apiModels.AnnotatedVariant;
 import org.mskcc.cbio.oncokb.apiModels.Citations;
 import org.mskcc.cbio.oncokb.apiModels.CuratedGene;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
+import org.mskcc.cbio.oncokb.model.TumorType;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -148,7 +148,7 @@ public class MainUtils {
                 index = PRIORITIZED_MUTATION_EFFECTS.indexOf(effect);
             }
         }
-        return index == 100 ? null : PRIORITIZED_MUTATION_EFFECTS.get(index);
+        return (index == 100 || index < 0) ? null : PRIORITIZED_MUTATION_EFFECTS.get(index);
     }
 
     public static IndicatorQueryMutationEffect findHighestMutationEffectByEvidence(Set<Evidence> evidences) {
@@ -157,7 +157,7 @@ public class MainUtils {
         for (Evidence evidence : evidences) {
             MutationEffect mutationEffect = MutationEffect.getByName(evidence.getKnownEffect());
             int _index = PRIORITIZED_MUTATION_EFFECTS.indexOf(mutationEffect);
-            if (_index < index) {
+            if (_index >= 0 && _index < index) {
                 indicatorQueryMutationEffect.setMutationEffect(mutationEffect);
                 indicatorQueryMutationEffect.setMutationEffectEvidence(evidence);
                 index = _index;
@@ -475,7 +475,7 @@ public class MainUtils {
         if (gene != null) {
             List<Alteration> alterations;
             alterations = AlterationUtils.excludeVUS(gene, new ArrayList<>(AlterationUtils.getAllAlterations(null, gene)));
-            Set<EvidenceType> evidenceTypes = EvidenceTypeUtils.getTreatmentEvidenceTypes();
+            Set<EvidenceType> evidenceTypes = EvidenceTypeUtils.getImplicationEvidenceTypes();
             Map<Alteration, Map<TumorType, Map<LevelOfEvidence, Set<Evidence>>>> evidences = new HashMap<>();
             Set<LevelOfEvidence> publicLevels = LevelUtils.getPublicLevels();
 
@@ -487,21 +487,21 @@ public class MainUtils {
                 EvidenceUtils.getEvidenceByGenesAndEvidenceTypes(Collections.singleton(gene), evidenceTypes);
 
             for (Evidence evidence : geneEvidences.get(gene)) {
-                TumorType oncoTreeType = evidence.getOncoTreeType();
-
-                if (oncoTreeType != null) {
+                if (!evidence.getCancerTypes().isEmpty()) {
                     for (Alteration alteration : evidence.getAlterations()) {
                         if (evidences.containsKey(alteration)) {
-                            if (!evidences.get(alteration).containsKey(oncoTreeType)) {
-                                evidences.get(alteration).put(oncoTreeType, new HashMap<LevelOfEvidence, Set<Evidence>>());
-                            }
-                            if (publicLevels.contains(evidence.getLevelOfEvidence())) {
-                                LevelOfEvidence levelOfEvidence = evidence.getLevelOfEvidence();
-                                if (!evidences.get(alteration).get(oncoTreeType).containsKey(levelOfEvidence)) {
-                                    evidences.get(alteration).get(oncoTreeType).put(levelOfEvidence, new HashSet<Evidence>());
+                            evidence.getCancerTypes().forEach(tumorType -> {
+                                if (!evidences.get(alteration).containsKey(tumorType)) {
+                                    evidences.get(alteration).put(tumorType, new HashMap<>());
                                 }
-                                evidences.get(alteration).get(oncoTreeType).get(levelOfEvidence).add(evidence);
-                            }
+                                if (publicLevels.contains(evidence.getLevelOfEvidence())) {
+                                    LevelOfEvidence levelOfEvidence = evidence.getLevelOfEvidence();
+                                    if (!evidences.get(alteration).get(tumorType).containsKey(levelOfEvidence)) {
+                                        evidences.get(alteration).get(tumorType).put(levelOfEvidence, new HashSet<Evidence>());
+                                    }
+                                    evidences.get(alteration).get(tumorType).get(levelOfEvidence).add(evidence);
+                                }
+                            });
                         }
                     }
                 }

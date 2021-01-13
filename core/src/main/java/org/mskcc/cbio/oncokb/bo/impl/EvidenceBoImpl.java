@@ -1,19 +1,17 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.mskcc.cbio.oncokb.bo.impl;
 
 import com.google.common.collect.Sets;
-import com.mysql.jdbc.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.dao.EvidenceDao;
 import org.mskcc.cbio.oncokb.model.*;
+import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.Tumor;
 import org.mskcc.cbio.oncokb.util.CacheUtils;
-import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
+import org.mskcc.cbio.oncokb.model.TumorType;
 import org.mskcc.cbio.oncokb.util.EvidenceUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author jgao
@@ -62,125 +60,46 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
     }
 
     @Override
-    public List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, Collection<TumorType> tumorTypes) {
-        if (tumorTypes == null) {
+    public List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, TumorType matchedTumorType,  Collection<TumorType> relevantTumorTypes) {
+        if (relevantTumorTypes == null) {
             if (evidenceTypes == null) {
                 return findEvidencesByAlteration(alterations);
             }
             return findEvidencesByAlteration(alterations, evidenceTypes);
         }
-        Set<Evidence> set = new LinkedHashSet<Evidence>();
-        List<Alteration> alts = new ArrayList<>();
-        List<String> cancerTypes = new ArrayList<>();
-        List<String> subTypes = new ArrayList<>();
-        List<String> cancerTypesOfSubtypes = new ArrayList<>();
-        List<EvidenceType> ets = new ArrayList<>();
-        alts.addAll(alterations);
-        ets.addAll(evidenceTypes);
 
-        for (TumorType oncoTreeType : tumorTypes) {
-            if (oncoTreeType.getCode() == null) {
-                if (oncoTreeType.getMainType() != null) {
-                    cancerTypes.add(oncoTreeType.getMainType().getName());
+        return findEvidencesByAlteration(alterations).stream()
+            .filter(evidence -> {
+                if (!evidenceTypes.contains(evidence.getEvidenceType())) {
+                    return false;
                 }
-            } else {
-                subTypes.add(oncoTreeType.getCode());
-                if (oncoTreeType.getMainType() != null) {
-                    cancerTypesOfSubtypes.add(oncoTreeType.getMainType().getName());
+                boolean hasJointOnSubtype = false;
+                if (evidence.getRelevantCancerTypes().isEmpty()) {
+                    hasJointOnSubtype = !Collections.disjoint(evidence.getCancerTypes(), relevantTumorTypes);
+                } else {
+                    hasJointOnSubtype = matchedTumorType != null && evidence.getRelevantCancerTypes().contains(matchedTumorType);
                 }
-            }
-        }
-
-        if (subTypes.size() > 0) {
-            List<String> tts = subTypes;
-            List<Evidence> evidences = findEvidencesByAlteration(alterations);
-            for (Evidence evidence : evidences) {
-                if ((ets.contains(evidence.getEvidenceType())) && tts.contains(evidence.getSubtype())) {
-                    set.add(evidence);
+                if (hasJointOnSubtype) {
+                    return true;
+                } else if (evidence.getRelevantCancerTypes().isEmpty()) {
+                    // we also like to check whether the evidence is assigned to a main type. Only check if the evidence relevant cancer type is empty.
+                    // If the evidence has the relevant cancer type curated, disjoin in the previous step should capture it
+                    Set<TumorType> evidenceMainTypes = evidence.getCancerTypes().stream().filter(cancerType -> StringUtils.isEmpty(cancerType.getCode()) && !StringUtils.isEmpty(cancerType.getMainType())).collect(Collectors.toSet());
+                    if (!evidenceMainTypes.isEmpty()) {
+                        return !Collections.disjoint(evidenceMainTypes.stream().map(tumorType -> tumorType.getMainType()).collect(Collectors.toSet()), relevantTumorTypes.stream().map(tumorType -> tumorType.getMainType()).collect(Collectors.toSet()));
+                    } else {
+                        return false;
+                    }
+                } else {
+                    return false;
                 }
-            }
-        }
-
-        if (cancerTypesOfSubtypes.size() > 0) {
-            List<String> tts = cancerTypesOfSubtypes;
-
-
-            List<Evidence> evidences = findEvidencesByAlteration(alterations);
-            for (Evidence evidence : evidences) {
-                if ((ets.contains(evidence.getEvidenceType())) && tts.contains(evidence.getCancerType())
-                    && evidence.getSubtype() == null) {
-                    set.add(evidence);
-                }
-            }
-        }
-
-        if (cancerTypes.size() > 0) {
-            List<String> tts = cancerTypes;
-
-            List<Evidence> evidences = findEvidencesByAlteration(alterations);
-            for (Evidence evidence : evidences) {
-                if ((ets.contains(evidence.getEvidenceType())) && tts.contains(evidence.getCancerType()) && StringUtils.isNullOrEmpty(evidence.getSubtype())) {
-                    set.add(evidence);
-                }
-            }
-        }
-        return new ArrayList<>(set);
+            })
+            .collect(Collectors.toList());
     }
 
     @Override
-    public List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, Collection<TumorType> tumorTypes, Collection<LevelOfEvidence> levelOfEvidences) {
-        if (tumorTypes == null) {
-            if (evidenceTypes == null) {
-                return findEvidencesByAlteration(alterations);
-            }
-            return findEvidencesByAlteration(alterations, evidenceTypes);
-        }
-        Set<Evidence> set = new LinkedHashSet<Evidence>();
-        List<Alteration> alts = new ArrayList<>();
-        List<String> cancerTypes = new ArrayList<>();
-        List<String> subTypes = new ArrayList<>();
-        List<String> cancerTypesOfSubtypes = new ArrayList<>();
-        List<EvidenceType> ets = new ArrayList<>();
-        List<LevelOfEvidence> les = new ArrayList<>();
-        alts.addAll(alterations);
-        ets.addAll(evidenceTypes);
-        les.addAll(levelOfEvidences);
-
-        for (TumorType oncoTreeType : tumorTypes) {
-            if (StringUtils.isNullOrEmpty(oncoTreeType.getCode())) {
-                if (oncoTreeType.getMainType() != null) {
-                    cancerTypes.add(oncoTreeType.getMainType().getName());
-                }
-            } else {
-                subTypes.add(oncoTreeType.getCode());
-            }
-        }
-
-        if (subTypes.size() > 0) {
-            List<String> tts = subTypes;
-
-            List<Evidence> evidences = findEvidencesByAlteration(alterations);
-            for (Evidence evidence : evidences) {
-                if ((ets.contains(evidence.getEvidenceType())) && tts.contains(evidence.getSubtype())
-                    && les.contains(evidence.getLevelOfEvidence())) {
-                    set.add(evidence);
-                }
-            }
-        }
-
-        if (cancerTypes.size() > 0) {
-            List<String> tts = cancerTypes;
-
-            List<Evidence> evidences = findEvidencesByAlteration(alterations);
-            for (Evidence evidence : evidences) {
-                if ((ets.contains(evidence.getEvidenceType())) && tts.contains(evidence.getCancerType())
-                    && les.contains(evidence.getLevelOfEvidence()) && StringUtils.isNullOrEmpty(evidence.getSubtype())) {
-                    set.add(evidence);
-                }
-            }
-        }
-
-        return new ArrayList<Evidence>(set);
+    public List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, TumorType matchedTumorType, Collection<TumorType> tumorTypes, Collection<LevelOfEvidence> levelOfEvidences) {
+        return findEvidencesByAlteration(alterations, evidenceTypes, matchedTumorType, tumorTypes).stream().filter(evidence -> levelOfEvidences.contains(evidence.getLevelOfEvidence())).collect(Collectors.toList());
     }
 
     @Override
@@ -218,24 +137,7 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
     public List<Evidence> findEvidencesByGene(Collection<Gene> genes, Collection<EvidenceType> evidenceTypes, Collection<TumorType> tumorTypes) {
         Set<Evidence> set = new LinkedHashSet<Evidence>();
         for (Gene gene : genes) {
-            for (Evidence evidence : CacheUtils.getEvidences(gene)) {
-                if (evidenceTypes.contains(evidence.getEvidenceType())) {
-                    for (TumorType oncoTreeType : tumorTypes) {
-                        if (oncoTreeType.getCode() != null) {
-                            if (oncoTreeType.getCode().equals(evidence.getSubtype())) {
-                                set.add(evidence);
-                            }
-                            if (oncoTreeType.getMainType() != null && oncoTreeType.getMainType().getName().equals(evidence.getCancerType()) && evidence.getSubtype() == null) {
-                                set.add(evidence);
-                            }
-                        } else if (oncoTreeType.getMainType() != null) {
-                            if (oncoTreeType.getMainType().getName().equals(evidence.getCancerType()) && evidence.getSubtype() == null) {
-                                set.add(evidence);
-                            }
-                        }
-                    }
-                }
-            }
+            set.addAll(CacheUtils.getEvidences(gene).stream().filter(evidence -> evidenceTypes.contains(evidence.getEvidenceType()) && !Collections.disjoint(evidence.getRelevantCancerTypes().isEmpty() ? evidence.getCancerTypes() : evidence.getRelevantCancerTypes(), tumorTypes)).collect(Collectors.toList()));
         }
         return new ArrayList<>(set);
     }
@@ -286,16 +188,6 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
     @Override
     public List<Object> findSubtypesWithEvidencesForAlterations(List<Alteration> alterations) {
         return getDao().findSubtypesWithEvidencesForAlterations(alterations);
-    }
-
-    @Override
-    public List<String> findAllCancerTypes() {
-        return getDao().findAllCancerTypes();
-    }
-
-    @Override
-    public List<String> findAllSubtypes() {
-        return getDao().findAllSubtypes();
     }
 
     @Override

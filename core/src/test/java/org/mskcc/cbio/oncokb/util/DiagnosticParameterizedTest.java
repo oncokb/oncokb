@@ -42,7 +42,6 @@ public class DiagnosticParameterizedTest {
     }
 // Temporary disable the test due to lack of the data
     @Test
-    @Ignore
     public void testSummary() throws Exception {
         Query query = new Query();
         query.setAlteration(variant);
@@ -56,8 +55,8 @@ public class DiagnosticParameterizedTest {
         List<Implication> _diagnosticImplications = resp.getDiagnosticImplications();
 
         assertEquals("Diagnostic summary, Query: " + _query, diagnosticSummary, _diagnosticSummary);
-        assertEquals("Prognostic implication level, Query: " + _query, diagnosticImplicationLevel, theHighestDiagnosticImplicationLevel == null ? "" : theHighestDiagnosticImplicationLevel.getLevel());
-        assertEquals("Number of prognostic implications, Query: " + _query, numOfDiagnosticImplications, Integer.toString(_diagnosticImplications.size()));
+        assertEquals("Diagnostic implication level, Query: " + _query, diagnosticImplicationLevel, theHighestDiagnosticImplicationLevel == null ? "" : theHighestDiagnosticImplicationLevel.getLevel());
+        assertEquals("Number of diagnostic implications, Query: " + _query, numOfDiagnosticImplications, Integer.toString(_diagnosticImplications.size()));
     }
 
     @Parameterized.Parameters

@@ -43,7 +43,6 @@ public class PrognosticParameterizedTest {
 
     // Temporary disable the test due to lack of the data
     @Test
-    @Ignore
     public void testSummary() throws Exception {
         Query query = new Query();
         query.setAlteration(variant);
