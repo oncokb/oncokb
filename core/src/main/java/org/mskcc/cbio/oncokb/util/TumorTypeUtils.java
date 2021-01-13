@@ -47,7 +47,7 @@ public class TumorTypeUtils {
     }
 
     public static Set<TumorType> getAllSpecialTumorOncoTreeTypes() {
-        return Arrays.stream(SpecialTumorType.values()).map(specialTumorType -> getBySpecialTumor(specialTumorType)).filter(persistenceTT -> persistenceTT != null).collect(Collectors.toSet());
+        return ApplicationContextSingleton.getTumorTypeBo().findAllSpecialCancerTypesCached();
     }
 
     public static TumorType getByName(String name) {
@@ -80,7 +80,7 @@ public class TumorTypeUtils {
 
     public static TumorType getBySpecialTumor(SpecialTumorType specialTumorType) {
         if (specialTumorType == null) return null;
-        return getAllMainTypes().stream().filter(mainType -> StringUtils.isNotEmpty(mainType.getMainType()) && mainType.getMainType().toLowerCase().equals(specialTumorType.getTumorType().toLowerCase())).findAny().orElse(null);
+        return getAllSpecialTumorOncoTreeTypes().stream().filter(cancerType -> cancerType.getMainType().equals(specialTumorType.getTumorType())).findAny().orElse(null);
     }
 
     public static Boolean isSolidTumor(TumorType tumorType) {
