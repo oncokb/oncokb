@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.mskcc.cbio.oncokb.util.TumorTypeUtils.getBySpecialTumor;
+
 
 /**
  * Created by Hongxin on 4/1/16.
@@ -44,6 +46,7 @@ public class CacheUtils {
     private static Map<Integer, Set<Alteration>> VUS = new HashMap<>(); //Gene based VUSs
 
     private static List<TumorType> cancerTypes = new ArrayList<>();
+    private static Set<TumorType> specialCancerTypes = new HashSet<>();
 
     // Other services which will be defined in the property cache.update separated by comma
     // Every time the observer is triggered, all other services will be triggered as well
@@ -193,6 +196,9 @@ public class CacheUtils {
             cancerTypes = ApplicationContextSingleton.getTumorTypeBo().findAll();
             System.out.println("Cached all tumor types: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
             current = MainUtils.getCurrentTimestamp();
+
+            System.out.println("Cached all special tumor types: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
+            specialCancerTypes = Arrays.stream(SpecialTumorType.values()).map(specialTumorType -> cancerTypes.stream().filter(cancerType -> !StringUtils.isNullOrEmpty(cancerType.getMainType()) && cancerType.getMainType().equals(specialTumorType.getTumorType())).findAny().orElse(null)).filter(cancerType -> cancerType != null).collect(Collectors.toSet());
 
             NamingUtils.cacheAllAbbreviations();
             System.out.println("Cached abbreviation ontology: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
@@ -513,6 +519,10 @@ public class CacheUtils {
 
     public static List<TumorType> getAllCancerTypes() {
         return cancerTypes.stream().collect(Collectors.toList());
+    }
+
+    public static Set<TumorType> getAllSpecialCancerTypes() {
+        return specialCancerTypes;
     }
 
     public static void forceUpdateGeneAlterations(Integer entrezGeneId) {

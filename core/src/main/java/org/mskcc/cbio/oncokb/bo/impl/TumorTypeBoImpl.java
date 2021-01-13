@@ -6,6 +6,7 @@ import org.mskcc.cbio.oncokb.model.TumorType;
 import org.mskcc.cbio.oncokb.util.CacheUtils;
 
 import java.util.List;
+import java.util.Set;
 
 
 public class TumorTypeBoImpl extends GenericBoImpl<TumorType, TumorTypeDao> implements TumorTypeBo {
@@ -16,5 +17,9 @@ public class TumorTypeBoImpl extends GenericBoImpl<TumorType, TumorTypeDao> impl
 
     public List<TumorType> findAllCached() {
         return CacheUtils.getAllCancerTypes();
+    }
+
+    public Set<TumorType> findAllSpecialCancerTypesCached() {
+        return CacheUtils.getAllSpecialCancerTypes();
     }
 }
