@@ -1,10 +1,13 @@
-package org.mskcc.cbio.oncokb.model.tumor_type;
+package org.mskcc.cbio.oncokb.apiModels;
 
 import io.swagger.annotations.ApiModel;
 import org.mskcc.cbio.oncokb.model.TumorForm;
+import org.mskcc.cbio.oncokb.util.MainUtils;
 import org.mskcc.cbio.oncokb.util.TumorTypeUtils;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 
 @ApiModel(description = "OncoTree Detailed Cancer Type")
@@ -120,6 +123,27 @@ public class TumorType {
         }
         this.setChildren(children);
         this.setTissue(oncoTreeTumorType.getTissue());
+    }
+
+    // do not include parent and child
+    public TumorType(org.mskcc.cbio.oncokb.model.TumorType tumorType) {
+        this.setName(tumorType.getSubtype());
+        this.setTissue(tumorType.getTissue());
+        this.setCode(tumorType.getCode());
+        this.setColor(tumorType.getColor());
+        if (tumorType.getMainType() != null) {
+            MainType mainType = new MainType();
+            mainType.setName(tumorType.getMainType());
+            org.mskcc.cbio.oncokb.model.TumorType mainTumorType = TumorTypeUtils.getByMainType(tumorType.getMainType());
+            mainType.setTumorForm(mainTumorType.getTumorForm());
+            this.setMainType(mainType);
+        }
+        if (tumorType.getParent() != null) {
+            this.setParent(tumorType.getParent().getCode());
+        }
+        this.setLevel(tumorType.getLevel());
+        this.setTissue(tumorType.getTissue());
+        this.setTumorForm(tumorType.getTumorForm());
     }
 
     @Override

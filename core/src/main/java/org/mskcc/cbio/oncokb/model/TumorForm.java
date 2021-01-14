@@ -5,5 +5,6 @@ package org.mskcc.cbio.oncokb.model;
  */
 public enum  TumorForm {
     SOLID,
-    LIQUID
+    LIQUID,
+    MIXED
 }

@@ -4,10 +4,13 @@ import com.mysql.jdbc.StringUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.mskcc.cbio.oncokb.apiModels.download.DownloadAvailability;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
+import org.mskcc.cbio.oncokb.model.TumorType;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.mskcc.cbio.oncokb.util.TumorTypeUtils.getBySpecialTumor;
 
 
 /**
@@ -30,9 +33,6 @@ public class CacheUtils {
     private static Map<String, Integer> hugoSymbolToEntrez = new HashMap<>();
 
     private static List<CancerGene> cancerGeneList = null;
-
-    private static Map<String, List<TumorType>> mappedTumorTypes = new HashMap<>();
-    private static Map<String, List<TumorType>> allOncoTreeTypes = new HashMap<>(); //Tag by different categories. main or subtype
     private static Map<String, Object> numbers = new HashMap<>();
 
     private static List<DownloadAvailability> downloadAvailabilities = new ArrayList<>();
@@ -44,6 +44,9 @@ public class CacheUtils {
     private static Map<Integer, Set<Evidence>> evidences = new HashMap<>(); //Gene based evidences
     private static Map<Integer, Set<Alteration>> alterations = new HashMap<>(); //Gene based alterations
     private static Map<Integer, Set<Alteration>> VUS = new HashMap<>(); //Gene based VUSs
+
+    private static List<TumorType> cancerTypes = new ArrayList<>();
+    private static Set<TumorType> specialCancerTypes = new HashSet<>();
 
     // Other services which will be defined in the property cache.update separated by comma
     // Every time the observer is triggered, all other services will be triggered as well
@@ -117,14 +120,6 @@ public class CacheUtils {
         }
     };
 
-    private static Observer allCancerTypesObserver = new Observer() {
-        @Override
-        public void update(Observable o, Object arg) {
-            allOncoTreeTypes.put("main", TumorTypeUtils.getOncoTreeCancerTypes(ApplicationContextSingleton.getEvidenceBo().findAllCancerTypes()));
-            allOncoTreeTypes.put("subtype", TumorTypeUtils.getOncoTreeSubtypesByCode(ApplicationContextSingleton.getEvidenceBo().findAllSubtypes()));
-        }
-    };
-
     private static void notifyOtherServices(String cmd, Set<Integer> entrezGeneIds) {
         if (cmd == null) {
             cmd = "";
@@ -158,7 +153,6 @@ public class CacheUtils {
         try {
             Long current = MainUtils.getCurrentTimestamp();
             GeneObservable.getInstance().addObserver(alterationsObserver);
-            GeneObservable.getInstance().addObserver(allCancerTypesObserver);
             GeneObservable.getInstance().addObserver(genesObserver);
             GeneObservable.getInstance().addObserver(evidencesObserver);
             GeneObservable.getInstance().addObserver(VUSObserver);
@@ -199,11 +193,12 @@ public class CacheUtils {
             System.out.println("Cached all VUSs: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
             current = MainUtils.getCurrentTimestamp();
 
-            allOncoTreeTypes.put("main", TumorTypeUtils.getOncoTreeCancerTypes(ApplicationContextSingleton.getEvidenceBo().findAllCancerTypes()));
-            allOncoTreeTypes.put("subtype", TumorTypeUtils.getOncoTreeSubtypesByCode(ApplicationContextSingleton.getEvidenceBo().findAllSubtypes()));
-
+            cancerTypes = ApplicationContextSingleton.getTumorTypeBo().findAll();
             System.out.println("Cached all tumor types: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
             current = MainUtils.getCurrentTimestamp();
+
+            System.out.println("Cached all special tumor types: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
+            specialCancerTypes = Arrays.stream(SpecialTumorType.values()).map(specialTumorType -> cancerTypes.stream().filter(cancerType -> !StringUtils.isNullOrEmpty(cancerType.getMainType()) && cancerType.getMainType().equals(specialTumorType.getTumorType())).findAny().orElse(null)).filter(cancerType -> cancerType != null).collect(Collectors.toSet());
 
             NamingUtils.cacheAllAbbreviations();
             System.out.println("Cached abbreviation ontology: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
@@ -357,26 +352,6 @@ public class CacheUtils {
         if (gene != null && genes.contains(gene)) {
             alterations.put(gene.getEntrezGeneId(), new HashSet<>(ApplicationContextSingleton.getAlterationBo().findAlterationsByGene(Collections.singleton(gene))));
         }
-    }
-
-    public static List<TumorType> getMappedTumorTypes(String queryTumorType) {
-        return mappedTumorTypes.get(queryTumorType);
-    }
-
-    public static Boolean containMappedTumorTypes(String queryTumorType) {
-        return mappedTumorTypes.containsKey(queryTumorType) ? true : false;
-    }
-
-    public static void setMappedTumorTypes(String queryTumorType, List<TumorType> tumorTypes) {
-        mappedTumorTypes.put(queryTumorType, tumorTypes);
-    }
-
-    public static List<TumorType> getAllCancerTypes() {
-        return allOncoTreeTypes.get("main");
-    }
-
-    public static List<TumorType> getAllSubtypes() {
-        return allOncoTreeTypes.get("subtype");
     }
 
     public static Set<Gene> getAllGenes() {
@@ -536,6 +511,18 @@ public class CacheUtils {
                 }
             }
         }
+    }
+
+    public static TumorType findTumorTypeByCode(String code) {
+        return cancerTypes.stream().filter(cancerType -> !StringUtils.isNullOrEmpty(cancerType.getCode()) && cancerType.getCode().equals(code)).findFirst().orElse(null);
+    }
+
+    public static List<TumorType> getAllCancerTypes() {
+        return cancerTypes.stream().collect(Collectors.toList());
+    }
+
+    public static Set<TumorType> getAllSpecialCancerTypes() {
+        return specialCancerTypes;
     }
 
     public static void forceUpdateGeneAlterations(Integer entrezGeneId) {
