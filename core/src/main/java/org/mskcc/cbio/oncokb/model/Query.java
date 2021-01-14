@@ -91,7 +91,9 @@ public class Query implements java.io.Serializable {
         if (com.mysql.jdbc.StringUtils.isNullOrEmpty(geneHugoSymbol)) {
             if (queryGene.getEntrezGeneId() != null) {
                 gene = findGene(Integer.toString(queryGene.getEntrezGeneId()));
-                geneHugoSymbol = gene.getHugoSymbol();
+                if (gene != null) {
+                    geneHugoSymbol = gene.getHugoSymbol();
+                }
             }
             if (com.mysql.jdbc.StringUtils.isNullOrEmpty(geneHugoSymbol)) {
                 geneHugoSymbol = "";

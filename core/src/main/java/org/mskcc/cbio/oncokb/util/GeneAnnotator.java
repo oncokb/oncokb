@@ -26,6 +26,9 @@ public final class GeneAnnotator {
 
 
     public static Gene findGene(String symbol) {
+        if (StringUtils.isNumeric(symbol) && Integer.parseInt(symbol) <= 0) {
+            return null;
+        }
         Gene gene = findGeneFromCBioPortal(symbol);
         if (gene == null) {
             System.out.println("The gene does not exist in cBioPortal, looking in MyGeneInfo");
@@ -47,6 +50,9 @@ public final class GeneAnnotator {
     }
 
     private static Gene findGeneFromCBioPortal(String symbol) {
+        if (StringUtils.isNumeric(symbol) && Integer.parseInt(symbol) <= 0) {
+            return null;
+        }
         try {
             String response = HttpUtils.getRequest(CBIOPORTAL_GENES_ENDPOINT + symbol);
             JSONObject jsonObj = new JSONObject(response);
@@ -175,6 +181,9 @@ public final class GeneAnnotator {
     }
 
     private static void includeGeneAlias(Gene gene) throws IOException {
+        if (gene.getEntrezGeneId() == null || gene.getEntrezGeneId() <= 0) {
+            return;
+        }
         String url = URL_MY_GENE_INFO_3 + "gene/" + gene.getEntrezGeneId()
             + "?fields=alias";
         String json = FileUtils.readRemote(url);
