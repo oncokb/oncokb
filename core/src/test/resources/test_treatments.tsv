@@ -120,6 +120,9 @@ PDGFRA	D842H	Gastrointestinal Stromal Tumor	2: Imatinib; 2: Sunitinib; 2: Regora
 PDGFRA	D842H	Melanoma	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Ripretinib;
 BTK	C481S	Chronic Lymphocytic Leukemia/Small Lymphocytic Lymphoma	R1: Ibrutinib;
 
+# this is R2 in production but the R2 data is not ready for public release yet
+BTK	R28S	Chronic Lymphocytic Leukemia/Small Lymphocytic Lymphoma
+
 # Test Heme
 FLT3	Internal Tandem Duplication	AML	1: Gilteritinib; 1: Midostaurin+High Dose Chemotherapy; 3A: Sorafenib; 3A: Crenolanib; 3A: Quizartinib;
 FLT3	Internal Tandem Duplication	APLPMLRARA	1: Gilteritinib; 1: Midostaurin+High Dose Chemotherapy; 3A: Sorafenib; 3A: Crenolanib; 3A: Quizartinib;
