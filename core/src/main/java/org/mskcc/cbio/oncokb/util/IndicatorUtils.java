@@ -518,12 +518,15 @@ public class IndicatorUtils {
         if (evidence == null) {
             return null;
         }
+        Citations citations = MainUtils.getCitationsByEvidence(evidence);
         return evidence.getCancerTypes().stream().map(tumorType -> {
             Implication implication = new Implication();
             implication.setLevelOfEvidence(evidence.getLevelOfEvidence());
             implication.setAlterations(evidence.getAlterations().stream().map(alteration -> alteration.getName() == null ? alteration.getAlteration() : alteration.getAlteration()).collect(Collectors.toSet()));
             implication.setTumorType(new org.mskcc.cbio.oncokb.apiModels.TumorType(tumorType));
             String hugoSymbol = StringUtils.isEmpty(queryHugoSymbol) ? evidence.getGene().getHugoSymbol() : queryHugoSymbol;
+            implication.setPmids(citations.getPmids());
+            implication.setAbstracts(citations.getAbstracts());
             implication.setDescription(SummaryUtils.enrichDescription(evidence.getDescription(), hugoSymbol));
             return implication;
         }).collect(Collectors.toSet());
