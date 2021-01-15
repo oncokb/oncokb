@@ -26,6 +26,9 @@ public final class GeneAnnotator {
 
 
     public static Gene findGene(String symbol) {
+        if (StringUtils.isNumeric(symbol) && Integer.parseInt(symbol) <= 0) {
+            return null;
+        }
         Gene gene = findGeneFromCBioPortal(symbol);
         if (gene == null) {
             System.out.println("The gene does not exist in cBioPortal, looking in MyGeneInfo");
@@ -47,6 +50,9 @@ public final class GeneAnnotator {
     }
 
     private static Gene findGeneFromCBioPortal(String symbol) {
+        if (StringUtils.isNumeric(symbol) && Integer.parseInt(symbol) <= 0) {
+            return null;
+        }
         try {
             String response = HttpUtils.getRequest(CBIOPORTAL_GENES_ENDPOINT + symbol);
             JSONObject jsonObj = new JSONObject(response);
@@ -66,6 +72,30 @@ public final class GeneAnnotator {
             System.out.println("Something goes wrong while fetching cBioPortal service");
             e.printStackTrace();
             return null;
+        }
+    }
+
+    public static List<Gene> findGenesFromCBioPortal(List<Integer> entrezGeneIds) {
+        List<Gene> genes = new ArrayList<>();
+        JSONArray jsonArray = new JSONArray();
+        entrezGeneIds.forEach(entrezGeneId -> {
+            if (entrezGeneId > 0) {
+                jsonArray.put(entrezGeneId);
+            }
+        });
+        if (jsonArray.length() == 0) {
+            return genes;
+        }
+        try {
+            String response = HttpUtils.postRequest(CBIOPORTAL_GENES_ENDPOINT + "fetch?geneIdType=ENTREZ_GENE_ID&projection=SUMMARY", jsonArray.toString());
+            JSONArray jsonArrayResponse = new JSONArray(response);
+            for (int i = 0; i < jsonArrayResponse.length(); i++) {
+                genes.add(parseGeneFromCbioPortal(jsonArrayResponse.getJSONObject(i)));
+            }
+            return genes;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return genes;
         }
     }
 
@@ -128,6 +158,17 @@ public final class GeneAnnotator {
         return gene;
     }
 
+    private static Gene parseGeneFromCbioPortal(JSONObject object) {
+        Gene gene = new Gene();
+        if (object.has("hugoGeneSymbol")) {
+            gene.setHugoSymbol(object.getString("hugoGeneSymbol"));
+        }
+        if (object.has("entrezgene")) {
+            gene.setEntrezGeneId(object.getInt("entrezgene"));
+        }
+        return gene;
+    }
+
     private static Gene readByHugoSymbol(String symbol) throws IOException {
         String url = URL_MY_GENE_INFO_3 + "query?species=human&q=" + symbol;
         String json = FileUtils.readRemote(url);
@@ -175,6 +216,9 @@ public final class GeneAnnotator {
     }
 
     private static void includeGeneAlias(Gene gene) throws IOException {
+        if (gene.getEntrezGeneId() == null || gene.getEntrezGeneId() <= 0) {
+            return;
+        }
         String url = URL_MY_GENE_INFO_3 + "gene/" + gene.getEntrezGeneId()
             + "?fields=alias";
         String json = FileUtils.readRemote(url);
