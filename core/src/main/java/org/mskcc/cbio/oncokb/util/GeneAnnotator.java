@@ -75,6 +75,30 @@ public final class GeneAnnotator {
         }
     }
 
+    public static List<Gene> findGenesFromCBioPortal(List<Integer> entrezGeneIds) {
+        List<Gene> genes = new ArrayList<>();
+        JSONArray jsonArray = new JSONArray();
+        entrezGeneIds.forEach(entrezGeneId -> {
+            if (entrezGeneId > 0) {
+                jsonArray.put(entrezGeneId);
+            }
+        });
+        if (jsonArray.length() == 0) {
+            return genes;
+        }
+        try {
+            String response = HttpUtils.postRequest(CBIOPORTAL_GENES_ENDPOINT + "fetch?geneIdType=ENTREZ_GENE_ID&projection=SUMMARY", jsonArray.toString());
+            JSONArray jsonArrayResponse = new JSONArray(response);
+            for (int i = 0; i < jsonArrayResponse.length(); i++) {
+                genes.add(parseGeneFromCbioPortal(jsonArrayResponse.getJSONObject(i)));
+            }
+            return genes;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return genes;
+        }
+    }
+
     public static List<Gene> findGenesFromMyGeneInfo(List<Integer> entrezGeneIds) {
         // There is a limit of using mygene.info. The post can only allow no more than 1000 genes
         int pageSize = 500;
@@ -130,6 +154,17 @@ public final class GeneAnnotator {
                     gene.getGeneAliases().add(aliases.getString(i));
                 }
             }
+        }
+        return gene;
+    }
+
+    private static Gene parseGeneFromCbioPortal(JSONObject object) {
+        Gene gene = new Gene();
+        if (object.has("hugoGeneSymbol")) {
+            gene.setHugoSymbol(object.getString("hugoGeneSymbol"));
+        }
+        if (object.has("entrezgene")) {
+            gene.setEntrezGeneId(object.getInt("entrezgene"));
         }
         return gene;
     }
