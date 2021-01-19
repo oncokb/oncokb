@@ -476,11 +476,11 @@ public class MainUtils {
             List<Alteration> alterations;
             alterations = AlterationUtils.excludeVUS(gene, new ArrayList<>(AlterationUtils.getAllAlterations(null, gene)));
             Set<EvidenceType> evidenceTypes = EvidenceTypeUtils.getImplicationEvidenceTypes();
-            Map<Alteration, Map<TumorType, Map<LevelOfEvidence, Set<Evidence>>>> evidences = new HashMap<>();
+            Map<Alteration, Map<LevelOfEvidence, Set<Evidence>>> evidences = new HashMap<>();
             Set<LevelOfEvidence> publicLevels = LevelUtils.getPublicLevels();
 
             for (Alteration alteration : alterations) {
-                evidences.put(alteration, new HashMap<TumorType, Map<LevelOfEvidence, Set<Evidence>>>());
+                evidences.put(alteration, new HashMap<>());
             }
 
             Map<Gene, Set<Evidence>> geneEvidences =
@@ -490,44 +490,36 @@ public class MainUtils {
                 if (!evidence.getCancerTypes().isEmpty()) {
                     for (Alteration alteration : evidence.getAlterations()) {
                         if (evidences.containsKey(alteration)) {
-                            evidence.getCancerTypes().forEach(tumorType -> {
-                                if (!evidences.get(alteration).containsKey(tumorType)) {
-                                    evidences.get(alteration).put(tumorType, new HashMap<>());
+                            if (publicLevels.contains(evidence.getLevelOfEvidence())) {
+                                LevelOfEvidence levelOfEvidence = evidence.getLevelOfEvidence();
+                                if (!evidences.get(alteration).containsKey(levelOfEvidence)) {
+                                    evidences.get(alteration).put(levelOfEvidence, new HashSet<Evidence>());
                                 }
-                                if (publicLevels.contains(evidence.getLevelOfEvidence())) {
-                                    LevelOfEvidence levelOfEvidence = evidence.getLevelOfEvidence();
-                                    if (!evidences.get(alteration).get(tumorType).containsKey(levelOfEvidence)) {
-                                        evidences.get(alteration).get(tumorType).put(levelOfEvidence, new HashSet<Evidence>());
-                                    }
-                                    evidences.get(alteration).get(tumorType).get(levelOfEvidence).add(evidence);
-                                }
-                            });
+                                evidences.get(alteration).get(levelOfEvidence).add(evidence);
+                            }
                         }
                     }
                 }
             }
 
-            for (Map.Entry<Alteration, Map<TumorType, Map<LevelOfEvidence, Set<Evidence>>>> entry : evidences.entrySet()) {
+            for (Map.Entry<Alteration, Map<LevelOfEvidence, Set<Evidence>>> entry : evidences.entrySet()) {
                 Alteration alteration = entry.getKey();
                 IndicatorQueryOncogenicity oncogenicity = IndicatorUtils.getOncogenicity(alteration, AlterationUtils.getAlleleAlterations(null, alteration), AlterationUtils.getRelevantAlterations(null, alteration));
                 String oncogenicityString = null;
                 if (oncogenicity.getOncogenicity() != null) {
                     oncogenicityString = oncogenicity.getOncogenicity().getOncogenic();
                 }
-                Map<TumorType, Map<LevelOfEvidence, Set<Evidence>>> map = entry.getValue();
 
-                for (Map.Entry<TumorType, Map<LevelOfEvidence, Set<Evidence>>> _entry : map.entrySet()) {
-                    TumorType oncoTreeType = _entry.getKey();
-
-                    for (Map.Entry<LevelOfEvidence, Set<Evidence>> __entry : _entry.getValue().entrySet()) {
+                for (Map.Entry<LevelOfEvidence, Set<Evidence>> __entry : entry.getValue().entrySet()) {
+                    for (Evidence evidence : __entry.getValue()) {
                         ClinicalVariant variant = new ClinicalVariant();
-                        variant.setOncoTreeType(oncoTreeType);
+                        variant.setCancerTypes(evidence.getCancerTypes());
                         variant.setVariant(alteration);
                         variant.setOncogenic(oncogenicityString);
-                        variant.setLevel(__entry.getKey().getLevel());
-                        variant.setDrug(EvidenceUtils.getDrugs(__entry.getValue()));
-                        variant.setDrugPmids(EvidenceUtils.getPmids(__entry.getValue()));
-                        variant.setDrugAbstracts(EvidenceUtils.getAbstracts(__entry.getValue()));
+                        variant.setLevel(evidence.getLevelOfEvidence().getLevel());
+                        variant.setDrug(EvidenceUtils.getDrugs(Collections.singleton(evidence)));
+                        variant.setDrugPmids(EvidenceUtils.getPmids(Collections.singleton(evidence)));
+                        variant.setDrugAbstracts(EvidenceUtils.getAbstracts(Collections.singleton(evidence)));
                         variants.add(variant);
                     }
                 }
