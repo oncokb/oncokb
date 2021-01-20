@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
+
 /**
  * Created by Hongxin on 10/28/16.
  */
@@ -367,9 +369,12 @@ public class PrivateSearchApiController implements PrivateSearchApi {
         typeaheadSearchResp.setVariants(Collections.singleton(alteration));
         typeaheadSearchResp.setVariantExist(true);
 
+        ReferenceGenome referenceGenome = alteration.getReferenceGenomes().stream().findAny().orElse(DEFAULT_REFERENCE_GENOME);
+
         Query query = new Query();
         query.setEntrezGeneId(alteration.getGene().getEntrezGeneId());
         query.setAlteration(alteration.getAlteration());
+        query.setReferenceGenome(alteration.getReferenceGenomes().iterator().next());
 
         IndicatorQueryResp resp = IndicatorUtils.processQuery(query, null, false, null);
         typeaheadSearchResp.setOncogenicity(resp.getOncogenic());
@@ -389,8 +394,11 @@ public class PrivateSearchApiController implements PrivateSearchApi {
 
         typeaheadSearchResp.setQueryType(TypeaheadQueryType.VARIANT);
 
-        // TODO: switch to variant page once it's ready.
-        typeaheadSearchResp.setLink("/gene/" + alteration.getGene().getHugoSymbol() + "/" + alteration.getAlteration());
+        String link = "/gene/" + alteration.getGene().getHugoSymbol() + "/" + alteration.getAlteration();
+        if (referenceGenome != DEFAULT_REFERENCE_GENOME) {
+            link += "?refGenome=" + referenceGenome;
+        }
+        typeaheadSearchResp.setLink(link);
         return typeaheadSearchResp;
     }
 
