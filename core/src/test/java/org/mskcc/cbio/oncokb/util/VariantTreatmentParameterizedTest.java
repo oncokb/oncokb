@@ -56,7 +56,7 @@ public class VariantTreatmentParameterizedTest {
         }
         String tl = stringBuilder.toString().trim();
 
-        System.out.println("New: " + gene + "&&" + variant + "&&" + tl);
+//        System.out.println("New: " + gene + "&&" + variant + "&&" + tl);
 
         assertEquals("Gene summary, Query: " + gene + " " + variant, treatment, tl);
 
