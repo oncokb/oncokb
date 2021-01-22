@@ -207,7 +207,7 @@ BRAF	V600K	NSCLC	3B: Dabrafenib+Trametinib; 3B: Trametinib; 3B: Vemurafenib+Cobi
 BRAF	V600G	NSCLC	3B: Encorafenib+Binimetinib; 3B: Dabrafenib+Trametinib; 3B: Vemurafenib+Cobimetinib; 3B: Vemurafenib+Atezolizumab+Cobimetinib;
 BRAF	V600K	NSCLC	3B: Dabrafenib+Trametinib; 3B: Trametinib; 3B: Vemurafenib+Cobimetinib; 3B: Encorafenib+Binimetinib; 3B: Vemurafenib+Atezolizumab+Cobimetinib;
 BRAF	V600E	Colorectal Cancer	1: Encorafenib+Cetuximab; 2: Encorafenib+Panitumumab; 3B: Dabrafenib; 3B: Dabrafenib+Trametinib; 3B: Trametinib; 3B: Vemurafenib; 3B: Vemurafenib+Cobimetinib; 3B: Encorafenib+Binimetinib; 3B: Vemurafenib+Atezolizumab+Cobimetinib;
-BRAF	V600K	Colorectal Cancer	3B: Dabrafenib+Trametinib; 3B: Trametinib; 3B: Vemurafenib+Cobimetinib; 3B: Encorafenib+Binimetinib; 3B: Vemurafenib+Atezolizumab+Cobimetinib;
+BRAF	V600K	Colorectal Cancer	3B: Dabrafenib+Trametinib; 3B: Trametinib; 3B: Vemurafenib+Cobimetinib; 3B: Encorawfenib+Binimetinib; 3B: Vemurafenib+Atezolizumab+Cobimetinib;
 BRAF	V600E	HCL	2: Vemurafenib;
 BRAF	V600K	Pilocytic Astrocytoma   3B: Dabrafenib+Trametinib; 3B: Trametinib; 3B: Vemurafenib+Cobimetinib; 3B: Encorafenib+Binimetinib;
 BRAF	V600E	Pilocytic Astrocytoma	2: Dabrafenib+Trametinib; 2: Vemurafenib+Cobimetinib; 3B: Dabrafenib; 3B: Encorafenib+Cetuximab; 3B: Encorafenib+Panitumumab; 3B: Trametinib; 3B: Vemurafenib; 3B: Encorafenib+Binimetinib; 3B: Vemurafenib+Atezolizumab+Cobimetinib;
