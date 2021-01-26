@@ -30,5 +30,6 @@
     <mapping class="org.mskcc.cbio.oncokb.model.TreatmentDrug"/>
     <mapping class="org.mskcc.cbio.oncokb.model.Geneset"/>
     <mapping class="org.mskcc.cbio.oncokb.model.TumorType"/>
+    <mapping class="org.mskcc.cbio.oncokb.model.Info"/>
   </session-factory>
 </hibernate-configuration>
