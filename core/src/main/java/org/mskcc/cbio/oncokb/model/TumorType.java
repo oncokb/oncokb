@@ -172,6 +172,32 @@ public class TumorType implements Serializable {
         this.setChildren(children);
     }
 
+    public TumorType(org.mskcc.cbio.oncokb.apiModels.TumorType tumorType) {
+        if (!StringUtils.isNullOrEmpty(tumorType.getName())) {
+            this.setSubtype(tumorType.getName());
+        }
+        if (!StringUtils.isNullOrEmpty(tumorType.getTissue())) {
+            this.setTissue(tumorType.getTissue());
+        }
+        if (!StringUtils.isNullOrEmpty(tumorType.getCode())) {
+            this.setCode(tumorType.getCode());
+        }
+        if (!StringUtils.isNullOrEmpty(tumorType.getColor())) {
+            this.setColor(tumorType.getColor());
+        }
+        if (tumorType.getMainType() != null && !StringUtils.isNullOrEmpty(tumorType.getMainType().getName())) {
+            this.setMainType(tumorType.getMainType().getName());
+        }
+        if (tumorType.getLevel() != null) {
+            this.setLevel(tumorType.getLevel());
+        }
+        Set<TumorType> children = new HashSet<>();
+        for (Map.Entry<String, org.mskcc.cbio.oncokb.apiModels.TumorType> entry : tumorType.getChildren().entrySet()) {
+            children.add(new TumorType(entry.getValue()));
+        }
+        this.setChildren(children);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

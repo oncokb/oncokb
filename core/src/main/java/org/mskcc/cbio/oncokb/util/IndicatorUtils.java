@@ -518,12 +518,15 @@ public class IndicatorUtils {
         if (evidence == null) {
             return null;
         }
+        Citations citations = MainUtils.getCitationsByEvidence(evidence);
         return evidence.getCancerTypes().stream().map(tumorType -> {
             Implication implication = new Implication();
             implication.setLevelOfEvidence(evidence.getLevelOfEvidence());
             implication.setAlterations(evidence.getAlterations().stream().map(alteration -> alteration.getName() == null ? alteration.getAlteration() : alteration.getAlteration()).collect(Collectors.toSet()));
             implication.setTumorType(new org.mskcc.cbio.oncokb.apiModels.TumorType(tumorType));
             String hugoSymbol = StringUtils.isEmpty(queryHugoSymbol) ? evidence.getGene().getHugoSymbol() : queryHugoSymbol;
+            implication.setPmids(citations.getPmids());
+            implication.setAbstracts(citations.getAbstracts());
             implication.setDescription(SummaryUtils.enrichDescription(evidence.getDescription(), hugoSymbol));
             return implication;
         }).collect(Collectors.toSet());
@@ -762,16 +765,24 @@ public class IndicatorUtils {
                     for (Treatment treatment : list) {
                         String hugoSymbol = StringUtils.isEmpty(queryHugoSymbol) ? hugoSymbolMap.get(treatment) : queryHugoSymbol;
                         if (!filterSameTreatment || !treatmentExist(treatments, level, treatment.getDrugs())) {
-                            IndicatorQueryTreatment indicatorQueryTreatment = new IndicatorQueryTreatment();
-                            indicatorQueryTreatment.setDrugs(treatment.getDrugs());
-                            indicatorQueryTreatment.setApprovedIndications(treatment.getApprovedIndications().stream().map(indication -> SummaryUtils.enrichDescription(indication, hugoSymbol)).collect(Collectors.toSet()));
-                            indicatorQueryTreatment.setLevel(level);
-                            indicatorQueryTreatment.setPmids(pmidsMap.get(treatment));
-                            indicatorQueryTreatment.setAbstracts(abstractsMap.get(treatment));
-                            indicatorQueryTreatment.setAlterations(alterationsMap.get(treatment));
-                            indicatorQueryTreatment.setLevelAssociatedCancerType((tumorTypeMap.get(treatment) == null || tumorTypeMap.get(treatment).isEmpty()) ? null : tumorTypeMap.get(treatment).iterator().next());
-                            indicatorQueryTreatment.setDescription(SummaryUtils.enrichDescription(descriptionMap.get(treatment), queryHugoSymbol));
-                            treatments.add(indicatorQueryTreatment);
+                            List<org.mskcc.cbio.oncokb.apiModels.TumorType> pickedCancerTypes = new ArrayList<>();
+                            if (filterSameTreatment) {
+                                pickedCancerTypes.add(tumorTypeMap.get(treatment).iterator().next());
+                            } else {
+                                pickedCancerTypes.addAll(tumorTypeMap.get(treatment));
+                            }
+                            for (org.mskcc.cbio.oncokb.apiModels.TumorType tumorType :  pickedCancerTypes) {
+                                IndicatorQueryTreatment indicatorQueryTreatment = new IndicatorQueryTreatment();
+                                indicatorQueryTreatment.setDrugs(treatment.getDrugs());
+                                indicatorQueryTreatment.setApprovedIndications(treatment.getApprovedIndications().stream().map(indication -> SummaryUtils.enrichDescription(indication, hugoSymbol)).collect(Collectors.toSet()));
+                                indicatorQueryTreatment.setLevel(level);
+                                indicatorQueryTreatment.setPmids(pmidsMap.get(treatment));
+                                indicatorQueryTreatment.setAbstracts(abstractsMap.get(treatment));
+                                indicatorQueryTreatment.setAlterations(alterationsMap.get(treatment));
+                                indicatorQueryTreatment.setLevelAssociatedCancerType(tumorType);
+                                indicatorQueryTreatment.setDescription(SummaryUtils.enrichDescription(descriptionMap.get(treatment), queryHugoSymbol));
+                                treatments.add(indicatorQueryTreatment);
+                            }
                         }
                     }
                 }

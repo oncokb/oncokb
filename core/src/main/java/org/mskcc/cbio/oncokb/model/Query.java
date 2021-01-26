@@ -69,51 +69,6 @@ public class Query implements java.io.Serializable {
         }
     }
 
-    public Query(AnnotateStructuralVariantQuery svQuery) {
-        this.id = svQuery.getId();
-        this.type = AnnotationQueryType.REGULAR.getName();
-        this.setTumorType(svQuery.getTumorType());
-
-        this.referenceGenome = svQuery.getReferenceGenome();
-        if (this.referenceGenome == null) {
-            this.referenceGenome = DEFAULT_REFERENCE_GENOME;
-        }
-        this.hugoSymbol = resolveHugoSymbol(svQuery.getGeneA()) + "-" + resolveHugoSymbol(svQuery.getGeneB());
-
-        this.alterationType = AlterationType.STRUCTURAL_VARIANT.name();
-        this.svType = svQuery.getStructuralVariantType();
-        this.consequence = svQuery.getFunctionalFusion() ? "fusion" : "";
-    }
-
-    private static String resolveHugoSymbol(QueryGene queryGene) {
-        Gene gene = GeneUtils.getGene(queryGene.getEntrezGeneId(), queryGene.getHugoSymbol());
-        String geneHugoSymbol = gene == null ? queryGene.getHugoSymbol() : gene.getHugoSymbol();
-        if (com.mysql.jdbc.StringUtils.isNullOrEmpty(geneHugoSymbol)) {
-            if (queryGene.getEntrezGeneId() != null) {
-                gene = findGene(Integer.toString(queryGene.getEntrezGeneId()));
-                geneHugoSymbol = gene.getHugoSymbol();
-            }
-            if (com.mysql.jdbc.StringUtils.isNullOrEmpty(geneHugoSymbol)) {
-                geneHugoSymbol = "";
-            }
-        }
-        return geneHugoSymbol;
-    }
-
-    public Query(AnnotateCopyNumberAlterationQuery cnaQuery) {
-        this.id = cnaQuery.getId();
-        this.type = AnnotationQueryType.REGULAR.getName();
-        this.setTumorType(cnaQuery.getTumorType());
-
-        this.hugoSymbol = resolveHugoSymbol(cnaQuery.getGene());
-        this.referenceGenome = cnaQuery.getReferenceGenome();
-        if (this.referenceGenome == null) {
-            this.referenceGenome = DEFAULT_REFERENCE_GENOME;
-        }
-
-        setAlteration(StringUtils.capitalize(cnaQuery.getCopyNameAlterationType().name().toLowerCase()));
-    }
-
     public Query(Alteration alt, ReferenceGenome referenceGenome) {
         if (alt != null) {
             if (alt.getGene() != null) {
