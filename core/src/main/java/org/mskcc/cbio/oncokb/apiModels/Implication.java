@@ -1,7 +1,8 @@
 package org.mskcc.cbio.oncokb.apiModels;
 
+import org.mskcc.cbio.oncokb.model.ArticleAbstract;
 import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
-import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
+import org.mskcc.cbio.oncokb.apiModels.TumorType;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -13,6 +14,8 @@ public class Implication {
     LevelOfEvidence levelOfEvidence;
     Set<String> alterations = new HashSet<>();
     TumorType tumorType;
+    private Set<String> pmids = new HashSet<String>(0);
+    private Set<ArticleAbstract> abstracts = new HashSet<ArticleAbstract>(0);
     String description = "";
 
     public LevelOfEvidence getLevelOfEvidence() {
@@ -37,6 +40,22 @@ public class Implication {
 
     public void setTumorType(TumorType tumorType) {
         this.tumorType = tumorType;
+    }
+
+    public Set<String> getPmids() {
+        return pmids;
+    }
+
+    public void setPmids(Set<String> pmids) {
+        this.pmids = pmids;
+    }
+
+    public Set<ArticleAbstract> getAbstracts() {
+        return abstracts;
+    }
+
+    public void setAbstracts(Set<ArticleAbstract> abstracts) {
+        this.abstracts = abstracts;
     }
 
     public String getDescription() {

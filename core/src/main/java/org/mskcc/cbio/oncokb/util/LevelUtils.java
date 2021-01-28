@@ -5,9 +5,8 @@ import org.mskcc.cbio.oncokb.apiModels.InfoLevel;
 import org.mskcc.cbio.oncokb.model.Evidence;
 import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
 import org.mskcc.cbio.oncokb.model.TumorForm;
-import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
+import org.mskcc.cbio.oncokb.model.TumorType;
 
-import javax.sound.sampled.Line;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -275,8 +274,7 @@ public class LevelUtils {
     }
 
     public static LevelOfEvidence getDefaultPropagationLevelByTumorForm(Evidence evidence, TumorForm tumorForm) {
-        TumorType tumorType = evidence.getOncoTreeType();
-        TumorForm evidenceTumorForm = tumorType.getCode() == null ? tumorType.getMainType().getTumorForm() : tumorType.getTumorForm();
+        TumorForm evidenceTumorForm = resolveEvidenceTumorForm(evidence);
         if (evidenceTumorForm == null || tumorForm == null) {
             return null;
         } else if (evidenceTumorForm.equals(tumorForm) && tumorForm.equals(TumorForm.SOLID)) {
@@ -290,6 +288,15 @@ public class LevelUtils {
             }
         }
         return LevelOfEvidence.NO;
+    }
+
+    public static TumorForm resolveEvidenceTumorForm(Evidence evidence) {
+        Set<TumorForm> tumorForms = evidence.getCancerTypes().stream().map(tumorType -> tumorType.getTumorForm()).distinct().collect(Collectors.toSet());
+        if (tumorForms.size() == 1) {
+            return tumorForms.iterator().next();
+        } else {
+            return null;
+        }
     }
 
     public static ListIterator getTherapeuticLevelsWithPriorityLIstIterator() {
@@ -310,6 +317,8 @@ public class LevelUtils {
         List<LevelOfEvidence> levels = new ArrayList<>();
         levels.addAll(CollectionUtils.intersection(PUBLIC_LEVELS, THERAPEUTIC_RESISTANCE_LEVELS));
         levels.addAll(CollectionUtils.intersection(PUBLIC_LEVELS, THERAPEUTIC_SENSITIVE_LEVELS));
+        levels.addAll(CollectionUtils.intersection(PUBLIC_LEVELS, DIAGNOSTIC_LEVELS));
+        levels.addAll(CollectionUtils.intersection(PUBLIC_LEVELS, PROGNOSTIC_LEVELS));
         levels.sort(Comparator.comparing(LevelOfEvidence::getLevel));
 
         return levels.stream().map(levelOfEvidence -> new InfoLevel(levelOfEvidence)).collect(Collectors.toList());

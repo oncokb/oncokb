@@ -7,7 +7,6 @@ import org.mskcc.cbio.oncokb.apiModels.CuratedGene;
 import org.mskcc.cbio.oncokb.apiModels.download.FileName;
 import org.mskcc.cbio.oncokb.apiModels.download.FileExtension;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
 import org.mskcc.cbio.oncokb.util.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.*;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import static org.mskcc.cbio.oncokb.util.HttpUtils.getDataDownloadResponseEntity;
@@ -203,32 +201,28 @@ public class UtilsApiController implements UtilsApi {
                     abstracts.add(articleAbstract.getAbstractContent() + " " + articleAbstract.getLink());
                 }
 
-                actionableGenes.add(new ActionableGene(
-                    gene.getGrch37Isoform(), gene.getGrch37RefSeq(),
-                    gene.getGrch38Isoform(), gene.getGrch38RefSeq(),
-                    gene.getEntrezGeneId(),
-                    gene.getHugoSymbol(),
-                    clinicalVariant.getVariant().getReferenceGenomes().stream().map(referenceGenome -> referenceGenome.name()).collect(Collectors.joining(", ")),
-                    clinicalVariant.getVariant().getName(),
-                    clinicalVariant.getVariant().getAlteration(),
-                    getCancerType(clinicalVariant.getOncoTreeType()),
-                    clinicalVariant.getLevel(),
-                    MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrug()), ", ", true),
-                    MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrugPmids()), ", ", true),
-                    MainUtils.listToString(abstracts, "; ", true)));
+                for (TumorType tumorType : clinicalVariant.getCancerTypes()) {
+                    actionableGenes.add(new ActionableGene(
+                        gene.getGrch37Isoform(), gene.getGrch37RefSeq(),
+                        gene.getGrch38Isoform(), gene.getGrch38RefSeq(),
+                        gene.getEntrezGeneId(),
+                        gene.getHugoSymbol(),
+                        clinicalVariant.getVariant().getReferenceGenomes().stream().map(referenceGenome -> referenceGenome.name()).collect(Collectors.joining(", ")),
+                        clinicalVariant.getVariant().getName(),
+                        clinicalVariant.getVariant().getAlteration(),
+                        TumorTypeUtils.getTumorTypeName(tumorType),
+                        clinicalVariant.getLevel(),
+                        MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrug()), ", ", true),
+                        MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrugPmids()), ", ", true),
+                        MainUtils.listToString(abstracts, "; ", true)));
+
+                }
             }
         }
 
         actionableGeneList.addAll(actionableGenes);
         MainUtils.sortActionableVariants(actionableGeneList);
         return actionableGeneList;
-    }
-
-    private String getCancerType(TumorType oncoTreeType) {
-        return oncoTreeType == null ? null : (
-            oncoTreeType.getName() == null ?
-                (oncoTreeType.getMainType() == null ? null : oncoTreeType.getMainType().getName()) :
-                oncoTreeType.getName());
     }
 
     @Override

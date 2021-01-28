@@ -58,4 +58,8 @@ public final class ApplicationContextSingleton {
     public static GenesetBo getGenesetBo() {
         return GenesetBo.class.cast(getApplicationContext().getBean("genesetBo"));
     }
+
+    public static TumorTypeBo getTumorTypeBo() {
+        return TumorTypeBo.class.cast(getApplicationContext().getBean("tumorTypeBo"));
+    }
 }

@@ -22,15 +22,15 @@ import static org.junit.Assert.assertEquals;
  * Created by Hongxin on 12/5/16.
  */
 @RunWith(Parameterized.class)
-public class TreatmentParameterizedTest {
-    private static String TREATMENT_EXAMPLES_PATH = "src/test/resources/test_treatments.tsv";
+public class CancerTypeTreatmentParameterizedTest {
+    private static String TREATMENT_EXAMPLES_PATH = "src/test/resources/test_cancer_type_treatments.tsv";
 
     private String gene;
     private String variant;
     private String tumorType;
     private String treatmentLevel;
 
-    public TreatmentParameterizedTest(String gene, String variant, String tumorType, String treatmentLevel) {
+    public CancerTypeTreatmentParameterizedTest(String gene, String variant, String tumorType, String treatmentLevel) {
         this.gene = gene;
         this.variant = variant;
         this.tumorType = tumorType;
@@ -106,7 +106,7 @@ public class TreatmentParameterizedTest {
             }
             line = buf.readLine();
         }
-        System.err.println("Contains " + count + " tumor type summary queries.");
+        System.err.println("Contains " + count + " queries.");
         System.err.println("Done.");
 
         return queries;

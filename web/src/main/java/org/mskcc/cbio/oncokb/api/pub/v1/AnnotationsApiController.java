@@ -16,12 +16,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
+import static org.mskcc.cbio.oncokb.util.GeneAnnotator.findGene;
 
 /**
  * Created by Hongxin Zhang on 2019-03-25.
@@ -279,8 +278,18 @@ public class AnnotationsApiController {
         if (body == null) {
             status = HttpStatus.BAD_REQUEST;
         } else {
+            Set<Integer> genesToQuery = new HashSet<>();
+            body.forEach(annotateStructuralVariantQuery -> {
+                if(annotateStructuralVariantQuery.getGene().getEntrezGeneId() != null) {
+                    genesToQuery.add(annotateStructuralVariantQuery.getGene().getEntrezGeneId());
+                }
+            });
+            Map<Integer, Gene> genePool = GeneUtils.findGenes(genesToQuery);
             for (AnnotateCopyNumberAlterationQuery query : body) {
-                result.add(IndicatorUtils.processQuery(new Query(query), null, false, query.getEvidenceTypes()));
+                String hugoSymbol = resolveHugoSymbol(query.getGene(), genePool);
+                result.add(IndicatorUtils.processQuery(
+                    new Query(query.getId(), query.getReferenceGenome(), AnnotationQueryType.REGULAR.getName(), null, hugoSymbol, StringUtils.capitalize(query.getCopyNameAlterationType().name().toLowerCase()), null, null, query.getTumorType(), null, null, null, null),
+                    null, false, query.getEvidenceTypes()));
             }
         }
         return new ResponseEntity<>(result, status);
@@ -313,15 +322,8 @@ public class AnnotationsApiController {
         if ((entrezGeneIdA != null && hugoSymbolA != null && !GeneUtils.isSameGene(entrezGeneIdA, hugoSymbolA)) || (entrezGeneIdB != null && hugoSymbolB != null && !GeneUtils.isSameGene(entrezGeneIdB, hugoSymbolB))) {
             status = HttpStatus.BAD_REQUEST;
         } else {
-            Gene geneA = GeneUtils.getGene(entrezGeneIdA, hugoSymbolA);
-            Gene geneB = GeneUtils.getGene(entrezGeneIdB, hugoSymbolB);
-
-            if (geneA == null && entrezGeneIdA != null) {
-                geneA = GeneAnnotator.findGene(entrezGeneIdA.toString());
-            }
-            if (geneB == null && entrezGeneIdB != null) {
-                geneB = GeneAnnotator.findGene(entrezGeneIdB.toString());
-            }
+            Gene geneA = GeneUtils.findGene(new QueryGene(entrezGeneIdA, hugoSymbolA));
+            Gene geneB = GeneUtils.findGene(new QueryGene(entrezGeneIdB, hugoSymbolB));
 
             if (geneA != null) {
                 hugoSymbolA = geneA.getHugoSymbol();
@@ -365,10 +367,40 @@ public class AnnotationsApiController {
         if (body == null) {
             status = HttpStatus.BAD_REQUEST;
         } else {
+            Set<Integer> genesToQuery = new HashSet<>();
+            body.forEach(annotateStructuralVariantQuery -> {
+                if(annotateStructuralVariantQuery.getGeneA().getEntrezGeneId() != null) {
+                    genesToQuery.add(annotateStructuralVariantQuery.getGeneA().getEntrezGeneId());
+                }
+                if(annotateStructuralVariantQuery.getGeneB().getEntrezGeneId() != null) {
+                    genesToQuery.add(annotateStructuralVariantQuery.getGeneB().getEntrezGeneId());
+                }
+            });
+            Map<Integer, Gene> genePool = GeneUtils.findGenes(genesToQuery);
             for (AnnotateStructuralVariantQuery query : body) {
-                result.add(IndicatorUtils.processQuery(new Query(query), null, false, query.getEvidenceTypes()));
+                String hugsoSymbolA = resolveHugoSymbol(query.getGeneA(), genePool);
+                String hugsoSymbolB = resolveHugoSymbol(query.getGeneB(), genePool);
+                String hugoSymbol = hugsoSymbolA + "-" + hugsoSymbolB;
+                result.add(IndicatorUtils.processQuery(
+                    new Query(query.getId(), query.getReferenceGenome(), AnnotationQueryType.REGULAR.getName(), null, hugoSymbol, null, AlterationType.STRUCTURAL_VARIANT.name(), query.getStructuralVariantType(), query.getTumorType(), query.getFunctionalFusion() ? "fusion" : "", null, null, null),
+                    null, false, query.getEvidenceTypes()));
             }
         }
         return new ResponseEntity<>(result, status);
+    }
+
+    private static String resolveHugoSymbol(QueryGene queryGene, Map<Integer, Gene> genePool) {
+        String hugoSymbol = "";
+        if (queryGene != null) {
+            if (StringUtils.isNotEmpty(queryGene.getHugoSymbol())) {
+                hugoSymbol = queryGene.getHugoSymbol();
+            } else if (queryGene.getEntrezGeneId() != null) {
+                Gene matchedGene = genePool.get(queryGene.getEntrezGeneId());
+                if (matchedGene != null && StringUtils.isNotEmpty(matchedGene.getHugoSymbol())) {
+                    hugoSymbol = matchedGene.getHugoSymbol();
+                }
+            }
+        }
+        return hugoSymbol;
     }
 }

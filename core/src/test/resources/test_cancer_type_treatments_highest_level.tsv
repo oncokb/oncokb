@@ -1,0 +1,8 @@
+KIT	N505I	Gastrointestinal Stromal Tumor	1: Imatinib; 1: Sunitinib; 1: Regorafenib; 1: Ripretinib;
+BRAF	V600E	Anaplastic Thyroid Cancer	1: Dabrafenib+Trametinib;
+AKT1	E17K	Breast Cancer	3A: AZD5363;
+AKT1	E17K	NSCLC	3B: AZD5363;
+AKT1	E17G	Breast Cancer
+FGFR3	Y373C	Bladder Cancer	1: Erdafitinib;
+RET	KIF5B-RET Fusion	NSCLC	1: Selpercatinib; 1: Pralsetinib;
+RET	KIF5B-RET Fusion	Bladder Cancer	3B: Cabozantinib; 3B: Vandetanib; 3B: Selpercatinib; 3B: Pralsetinib;

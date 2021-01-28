@@ -136,7 +136,7 @@ public class CancerGeneUtils {
             }
         }
 
-        return new ArrayList<>(cancerGenes);
+        return cancerGenes.stream().sorted((Comparator.comparing(CancerGene::getOccurrenceCount).reversed().thenComparing(CancerGene::getHugoSymbol))).collect(Collectors.toList());
     }
 
     private static Set<Gene> getGenes(String file) {

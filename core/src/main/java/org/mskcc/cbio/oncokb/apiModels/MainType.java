@@ -1,8 +1,6 @@
-package org.mskcc.cbio.oncokb.model.tumor_type;
+package org.mskcc.cbio.oncokb.apiModels;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import org.mskcc.cbio.oncokb.model.TumorForm;
 
 import java.util.Objects;

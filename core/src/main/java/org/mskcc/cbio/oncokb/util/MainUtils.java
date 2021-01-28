@@ -5,7 +5,7 @@ import org.mskcc.cbio.oncokb.apiModels.AnnotatedVariant;
 import org.mskcc.cbio.oncokb.apiModels.Citations;
 import org.mskcc.cbio.oncokb.apiModels.CuratedGene;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
+import org.mskcc.cbio.oncokb.model.TumorType;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -148,7 +148,7 @@ public class MainUtils {
                 index = PRIORITIZED_MUTATION_EFFECTS.indexOf(effect);
             }
         }
-        return index == 100 ? null : PRIORITIZED_MUTATION_EFFECTS.get(index);
+        return (index == 100 || index < 0) ? null : PRIORITIZED_MUTATION_EFFECTS.get(index);
     }
 
     public static IndicatorQueryMutationEffect findHighestMutationEffectByEvidence(Set<Evidence> evidences) {
@@ -157,7 +157,7 @@ public class MainUtils {
         for (Evidence evidence : evidences) {
             MutationEffect mutationEffect = MutationEffect.getByName(evidence.getKnownEffect());
             int _index = PRIORITIZED_MUTATION_EFFECTS.indexOf(mutationEffect);
-            if (_index < index) {
+            if (_index >= 0 && _index < index) {
                 indicatorQueryMutationEffect.setMutationEffect(mutationEffect);
                 indicatorQueryMutationEffect.setMutationEffectEvidence(evidence);
                 index = _index;
@@ -476,58 +476,50 @@ public class MainUtils {
             List<Alteration> alterations;
             alterations = AlterationUtils.excludeVUS(gene, new ArrayList<>(AlterationUtils.getAllAlterations(null, gene)));
             Set<EvidenceType> evidenceTypes = EvidenceTypeUtils.getImplicationEvidenceTypes();
-            Map<Alteration, Map<TumorType, Map<LevelOfEvidence, Set<Evidence>>>> evidences = new HashMap<>();
+            Map<Alteration, Map<LevelOfEvidence, Set<Evidence>>> evidences = new HashMap<>();
             Set<LevelOfEvidence> publicLevels = LevelUtils.getPublicLevels();
 
             for (Alteration alteration : alterations) {
-                evidences.put(alteration, new HashMap<TumorType, Map<LevelOfEvidence, Set<Evidence>>>());
+                evidences.put(alteration, new HashMap<>());
             }
 
             Map<Gene, Set<Evidence>> geneEvidences =
                 EvidenceUtils.getEvidenceByGenesAndEvidenceTypes(Collections.singleton(gene), evidenceTypes);
 
             for (Evidence evidence : geneEvidences.get(gene)) {
-                TumorType oncoTreeType = evidence.getOncoTreeType();
-
-                if (oncoTreeType != null) {
+                if (!evidence.getCancerTypes().isEmpty()) {
                     for (Alteration alteration : evidence.getAlterations()) {
                         if (evidences.containsKey(alteration)) {
-                            if (!evidences.get(alteration).containsKey(oncoTreeType)) {
-                                evidences.get(alteration).put(oncoTreeType, new HashMap<LevelOfEvidence, Set<Evidence>>());
-                            }
                             if (publicLevels.contains(evidence.getLevelOfEvidence())) {
                                 LevelOfEvidence levelOfEvidence = evidence.getLevelOfEvidence();
-                                if (!evidences.get(alteration).get(oncoTreeType).containsKey(levelOfEvidence)) {
-                                    evidences.get(alteration).get(oncoTreeType).put(levelOfEvidence, new HashSet<Evidence>());
+                                if (!evidences.get(alteration).containsKey(levelOfEvidence)) {
+                                    evidences.get(alteration).put(levelOfEvidence, new HashSet<Evidence>());
                                 }
-                                evidences.get(alteration).get(oncoTreeType).get(levelOfEvidence).add(evidence);
+                                evidences.get(alteration).get(levelOfEvidence).add(evidence);
                             }
                         }
                     }
                 }
             }
 
-            for (Map.Entry<Alteration, Map<TumorType, Map<LevelOfEvidence, Set<Evidence>>>> entry : evidences.entrySet()) {
+            for (Map.Entry<Alteration, Map<LevelOfEvidence, Set<Evidence>>> entry : evidences.entrySet()) {
                 Alteration alteration = entry.getKey();
                 IndicatorQueryOncogenicity oncogenicity = IndicatorUtils.getOncogenicity(alteration, AlterationUtils.getAlleleAlterations(null, alteration), AlterationUtils.getRelevantAlterations(null, alteration));
                 String oncogenicityString = null;
                 if (oncogenicity.getOncogenicity() != null) {
                     oncogenicityString = oncogenicity.getOncogenicity().getOncogenic();
                 }
-                Map<TumorType, Map<LevelOfEvidence, Set<Evidence>>> map = entry.getValue();
 
-                for (Map.Entry<TumorType, Map<LevelOfEvidence, Set<Evidence>>> _entry : map.entrySet()) {
-                    TumorType oncoTreeType = _entry.getKey();
-
-                    for (Map.Entry<LevelOfEvidence, Set<Evidence>> __entry : _entry.getValue().entrySet()) {
+                for (Map.Entry<LevelOfEvidence, Set<Evidence>> __entry : entry.getValue().entrySet()) {
+                    for (Evidence evidence : __entry.getValue()) {
                         ClinicalVariant variant = new ClinicalVariant();
-                        variant.setOncoTreeType(oncoTreeType);
+                        variant.setCancerTypes(evidence.getCancerTypes());
                         variant.setVariant(alteration);
                         variant.setOncogenic(oncogenicityString);
-                        variant.setLevel(__entry.getKey().getLevel());
-                        variant.setDrug(EvidenceUtils.getDrugs(__entry.getValue()));
-                        variant.setDrugPmids(EvidenceUtils.getPmids(__entry.getValue()));
-                        variant.setDrugAbstracts(EvidenceUtils.getAbstracts(__entry.getValue()));
+                        variant.setLevel(evidence.getLevelOfEvidence().getLevel());
+                        variant.setDrug(EvidenceUtils.getDrugs(Collections.singleton(evidence)));
+                        variant.setDrugPmids(EvidenceUtils.getPmids(Collections.singleton(evidence)));
+                        variant.setDrugAbstracts(EvidenceUtils.getAbstracts(Collections.singleton(evidence)));
                         variants.add(variant);
                     }
                 }

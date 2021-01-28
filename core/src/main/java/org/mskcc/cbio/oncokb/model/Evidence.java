@@ -1,12 +1,8 @@
 package org.mskcc.cbio.oncokb.model;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.mskcc.cbio.oncokb.model.tumor_type.TumorType;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
-import org.mskcc.cbio.oncokb.util.TumorTypeUtils;
 
 import javax.persistence.*;
 import java.util.*;
@@ -24,51 +20,15 @@ import java.util.*;
     ),
     @NamedQuery(
         name = "findEvidencesByAlterationAndTumorType",
-        query = "select e from Evidence e join e.alterations a where a.id=:alt and (e.cancerType=:tt or e.subtype=:tt)"
-    ),
-    @NamedQuery(
-        name = "findEvidencesByAlterationAndCancerType",
-        query = "select e from Evidence e join e.alterations a where a.id=? and e.cancerType=?"
-    ),
-    @NamedQuery(
-        name = "findEvidencesByAlterationAndCancerTypeNoSubtype",
-        query = "select e from Evidence e join e.alterations a where a.id=? and e.cancerType=? and e.subtype is null"
-    ),
-    @NamedQuery(
-        name = "findEvidencesByAlterationAndSubtype",
-        query = "select e from Evidence e join e.alterations a where a.id=? and e.subtype=?"
+        query = "select e from Evidence e join e.alterations a join e.cancerTypes tt where a.id=? and tt.id=?"
     ),
     @NamedQuery(
         name = "findEvidencesByAlterationsAndTumorTypesAndEvidenceTypes",
-        query = "select e from Evidence e join e.alterations a where a.id in (:alts) and (e.cancerType in (:tts) or e.subtype in (:tt)) and  e.evidenceType in (:ets)"
-    ),
-    @NamedQuery(
-        name = "findEvidencesByAlterationsAndCancerTypesAndEvidenceTypes",
-        query = "select e from Evidence e join e.alterations a where a.id in (:alts) and e.cancerType in (:tts) and  e.evidenceType in (:ets)"
-    ),
-    @NamedQuery(
-        name = "findEvidencesByAlterationsAndCancerTypesAndEvidenceTypesNoSubtype",
-        query = "select e from Evidence e join e.alterations a where a.id in (:alts) and e.cancerType in (:tts) and  e.evidenceType in (:ets) and e.subtype is null"
-    ),
-    @NamedQuery(
-        name = "findEvidencesByAlterationsAndSubtypesAndEvidenceTypes",
-        query = "select e from Evidence e join e.alterations a where a.id in (:alts) and e.subtype in (:tts) and  e.evidenceType in (:ets)"
+        query = "select e from Evidence e join e.alterations a join e.cancerTypes tt where a.id in (:alts) and tt.id in (:tts) and  e.evidenceType in (:ets)"
     ),
     @NamedQuery(
         name = "findEvidencesByAlterationsAndTumorTypesAndEvidenceTypesAndLevelOfEvidence",
-        query = "select e from Evidence e join e.alterations a where a.id in (:alts) and (e.cancerType in (:tts) or e.subtype in (:tts)) and  e.evidenceType in (:ets) and e.levelOfEvidence in (:les)"
-    ),
-    @NamedQuery(
-        name = "findEvidencesByAlterationsAndCancerTypesAndEvidenceTypesAndLevelOfEvidence",
-        query = "select e from Evidence e join e.alterations a where a.id in (:alts) and e.cancerType in (:tts) and  e.evidenceType in (:ets) and e.levelOfEvidence in (:les)"
-    ),
-    @NamedQuery(
-        name = "findEvidencesByAlterationsAndCancerTypesAndEvidenceTypesAndLevelOfEvidenceNoSubtype",
-        query = "select e from Evidence e join e.alterations a where a.id in (:alts) and e.cancerType in (:tts) and  e.evidenceType in (:ets) and e.levelOfEvidence in (:les) and e.subtype is null"
-    ),
-    @NamedQuery(
-        name = "findEvidencesByAlterationsAndSubtypesAndEvidenceTypesAndLevelOfEvidence",
-        query = "select e from Evidence e join e.alterations a where a.id in (:alts) and e.subtype in (:tts) and  e.evidenceType in (:ets) and e.levelOfEvidence in (:les)"
+        query = "select e from Evidence e join e.alterations a join e.cancerTypes tt where a.id in (:alts) and tt.id in (:tts) and  e.evidenceType in (:ets) and e.levelOfEvidence in (:les)"
     ),
     @NamedQuery(
         name = "findEvidencesByAlterationAndEvidenceType",
@@ -80,19 +40,7 @@ import java.util.*;
     ),
     @NamedQuery(
         name = "findEvidencesByAlterationAndEvidenceTypeAndTumorType",
-        query = "select e from Evidence e join e.alterations a where a.id=:alt and e.evidenceType=:et and (e.cancerType=:tt or e.subtype=:tt)"
-    ),
-    @NamedQuery(
-        name = "findEvidencesByAlterationAndEvidenceTypeAndCancerType",
-        query = "select e from Evidence e join e.alterations a where a.id=? and e.evidenceType=? and e.cancerType=?"
-    ),
-    @NamedQuery(
-        name = "findEvidencesByAlterationAndEvidenceTypeAndCancerTypeNoSubtype",
-        query = "select e from Evidence e join e.alterations a where a.id=? and e.evidenceType=? and e.cancerType=? and e.subtype is null"
-    ),
-    @NamedQuery(
-        name = "findEvidencesByAlterationAndEvidenceTypeAndSubtype",
-        query = "select e from Evidence e join e.alterations a where a.id=? and e.evidenceType=? and e.subtype=?"
+        query = "select e from Evidence e join e.alterations a join e.cancerTypes tt where a.id=:alt and e.evidenceType=:et and tt.id=:tt"
     ),
     @NamedQuery(
         name = "findEvidencesByGene",
@@ -104,47 +52,15 @@ import java.util.*;
     ),
     @NamedQuery(
         name = "findEvidencesByGeneAndEvidenceTypeAndTumorType",
-        query = "select e from Evidence e where e.gene=:g and e.evidenceType=:et and (e.cancerType=:tt or e.subtype=:tt)"
-    ),
-    @NamedQuery(
-        name = "findEvidencesByGeneAndEvidenceTypeAndCancerType",
-        query = "select e from Evidence e where e.gene=? and e.evidenceType=? and e.cancerType=?"
-    ),
-    @NamedQuery(
-        name = "findEvidencesByGeneAndEvidenceTypeAndCancerTypeNoSubtype",
-        query = "select e from Evidence e where e.gene=? and e.evidenceType=? and e.cancerType=? and e.subtype is null"
-    ),
-    @NamedQuery(
-        name = "findEvidencesByGeneAndEvidenceTypeAndSubtype",
-        query = "select e from Evidence e where e.gene=? and e.evidenceType=? and e.subtype=?"
+        query = "select e from Evidence e join e.cancerTypes tt where e.gene=:g and e.evidenceType=:et and tt.id=:tt"
     ),
     @NamedQuery(
         name = "findEvidencesByTumorType",
-        query = "select e from Evidence e where (e.cancerType=:tt or e.subtype=:tt)"
-    ),
-    @NamedQuery(
-        name = "findEvidencesByCancerType",
-        query = "select e from Evidence e where e.cancerType=?"
-    ),
-    @NamedQuery(
-        name = "findEvidencesByCancerTypeNoSubtype",
-        query = "select e from Evidence e where e.cancerType=? and e.subtype is null"
-    ),
-    @NamedQuery(
-        name = "findEvidencesBySubtype",
-        query = "select e from Evidence e where e.subtype=?"
+        query = "select e from Evidence e join e.cancerTypes tt where tt.id=:tt"
     ),
     @NamedQuery(
         name = "findEvidencesByGeneAndTumorType",
-        query = "select e from Evidence e join e.alterations a where e.gene=:g and (e.cancerType=:tt or e.subtype=:tt)"
-    ),
-    @NamedQuery(
-        name = "findEvidencesByGeneAndCancerType",
-        query = "select e from Evidence e join e.alterations a where e.gene=? and e.cancerType=?"
-    ),
-    @NamedQuery(
-        name = "findEvidencesByGeneAndSubtype",
-        query = "select e from Evidence e join e.alterations a where e.gene=? and e.subtype=?"
+        query = "select e from Evidence e join e.alterations a join e.cancerTypes tt where e.gene=:g and tt.id=:tt"
     ),
     @NamedQuery(
         name = "findEvidencesByIds",
@@ -156,23 +72,7 @@ import java.util.*;
     ),
     @NamedQuery(
         name = "findTumorTypesWithEvidencesForAlterations",
-        query = "select distinct e.cancerType, e.subtype from Evidence e join e.alterations a where a.id in (:alts)"
-    ),
-    @NamedQuery(
-        name = "findCancerTypesWithEvidencesForAlterations",
-        query = "select distinct e.cancerType from Evidence e join e.alterations a where a.id in (:alts)"
-    ),
-    @NamedQuery(
-        name = "findSubtypesWithEvidencesForAlterations",
-        query = "select distinct e.subtype from Evidence e join e.alterations a where a.id in (:alts)"
-    ),
-    @NamedQuery(
-        name = "findAllCancerTypes",
-        query = "select distinct e.cancerType from Evidence e where e.cancerType is not null"
-    ),
-    @NamedQuery(
-        name = "findAllSubtypes",
-        query = "select distinct e.subtype from Evidence e where e.subtype is not null"
+        query = "select distinct e.cancerTypes from Evidence e join e.alterations a where a.id in (:alts)"
     ),
     @NamedQuery(
         name = "findEvidenceByUUIDs",
@@ -182,7 +82,6 @@ import java.util.*;
 
 @Entity
 @Table(name = "evidence")
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Evidence implements java.io.Serializable {
 
     @Id
@@ -196,18 +95,22 @@ public class Evidence implements java.io.Serializable {
     @Enumerated(EnumType.STRING)
     private EvidenceType evidenceType;
 
-    @Column(name = "cancer_type", length = 100)
-    private String cancerType;
-
-    @Column(length = 50)
-    private String subtype;
-
     @JsonIgnore
     @Column(name = "for_germline")
     private Boolean forGermline = false;
 
-    @Transient
-    private TumorType oncoTreeType;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "evidence_cancer_type",
+        joinColumns = @JoinColumn(name = "evidence_id", referencedColumnName = "id"),
+        inverseJoinColumns = @JoinColumn(name = "cancer_type_id", referencedColumnName = "id"))
+    private Set<TumorType> cancerTypes = new HashSet<>();
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "evidence_relevant_cancer_type",
+        joinColumns = @JoinColumn(name = "evidence_id", referencedColumnName = "id"),
+        inverseJoinColumns = @JoinColumn(name = "cancer_type_id", referencedColumnName = "id"))
+    private Set<TumorType> relevantCancerTypes = new HashSet<>();
+
 
     @ManyToOne(fetch = FetchType.EAGER)
     @Fetch(FetchMode.JOIN)
@@ -287,20 +190,20 @@ public class Evidence implements java.io.Serializable {
         this.evidenceType = evidenceType;
     }
 
-    public String getCancerType() {
-        return cancerType;
+    public Set<TumorType> getCancerTypes() {
+        return cancerTypes;
     }
 
-    public void setCancerType(String cancerType) {
-        this.cancerType = cancerType;
+    public void setCancerTypes(Set<TumorType> cancerTypes) {
+        this.cancerTypes = cancerTypes;
     }
 
-    public String getSubtype() {
-        return subtype;
+    public Set<TumorType> getRelevantCancerTypes() {
+        return relevantCancerTypes;
     }
 
-    public void setSubtype(String subtype) {
-        this.subtype = subtype;
+    public void setRelevantCancerTypes(Set<TumorType> relevantCancerTypes) {
+        this.relevantCancerTypes = relevantCancerTypes;
     }
 
     public Boolean getForGermline() {
@@ -309,25 +212,6 @@ public class Evidence implements java.io.Serializable {
 
     public void setForGermline(Boolean forGermline) {
         this.forGermline = forGermline;
-    }
-
-    public void setOncoTreeType(TumorType oncoTreeType) {
-        this.oncoTreeType = oncoTreeType;
-    }
-
-    public TumorType getOncoTreeType() {
-        if (this.oncoTreeType != null)
-            return this.oncoTreeType;
-
-        TumorType oncoTreeType = null;
-
-        if (this.subtype != null) {
-            oncoTreeType = TumorTypeUtils.getOncoTreeSubtypeByCode(this.subtype);
-        } else if (this.cancerType != null) {
-            oncoTreeType = TumorTypeUtils.getOncoTreeCancerType(this.cancerType);
-        }
-
-        return oncoTreeType;
     }
 
     public Gene getGene() {
@@ -504,9 +388,8 @@ public class Evidence implements java.io.Serializable {
         }
         this.uuid = e.uuid;
         this.evidenceType = e.evidenceType;
-        this.cancerType = e.cancerType;
-        this.subtype = e.subtype;
-        this.oncoTreeType = e.oncoTreeType;
+        this.cancerTypes = e.cancerTypes;
+        this.relevantCancerTypes = e.relevantCancerTypes;
         this.gene = e.gene;
         this.description = e.description;
         this.additionalInfo = e.additionalInfo;
@@ -522,15 +405,15 @@ public class Evidence implements java.io.Serializable {
         this.articles = new HashSet<>(e.articles);
     }
 
-    public Evidence(String uuid, EvidenceType evidenceType, String cancerType, String subtype, TumorType oncoTreeType, Gene gene, Set<Alteration> alterations, String description, String additionalInfo, List<Treatment> treatments,
+    public Evidence(String uuid, EvidenceType evidenceType, Set<TumorType> cancerTypes, Set<TumorType> relevantCancerTypes, Gene gene, Set<Alteration> alterations, String description, String additionalInfo, List<Treatment> treatments,
                     String knownEffect, Date lastEdit, Date lastReview,
                     LevelOfEvidence levelOfEvidence,
                     LevelOfEvidence solidPropagationLevel, LevelOfEvidence liquidPropagationLevel,
                     Set<Article> articles) {
         this.uuid = uuid;
         this.evidenceType = evidenceType;
-        this.cancerType = cancerType;
-        this.subtype = subtype;
+        this.cancerTypes = cancerTypes;
+        this.relevantCancerTypes = relevantCancerTypes;
         this.gene = gene;
         this.alterations = alterations;
         this.description = description;

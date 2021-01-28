@@ -1,15 +1,15 @@
 package org.mskcc.cbio.oncokb.util;
 
 import org.apache.commons.lang3.StringUtils;
+import org.mskcc.cbio.oncokb.apiModels.annotation.QueryGene;
 import org.mskcc.cbio.oncokb.bo.GeneBo;
 import org.mskcc.cbio.oncokb.model.Drug;
 import org.mskcc.cbio.oncokb.model.Evidence;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.Treatment;
 
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by hongxinzhang on 4/5/16.
@@ -30,6 +30,47 @@ public class GeneUtils {
         } else {
             return getGeneByHugoSymbol(hugoSymbol);
         }
+    }
+
+    public static Gene findGene(QueryGene queryGene) {
+        Gene gene = GeneUtils.getGene(queryGene.getEntrezGeneId(), queryGene.getHugoSymbol());
+        if (gene == null) {
+            if (queryGene.getEntrezGeneId() != null) {
+                gene = GeneAnnotator.findGene(Integer.toString(queryGene.getEntrezGeneId()));
+            } else if (queryGene.getHugoSymbol() != null) {
+                gene = GeneAnnotator.findGene(queryGene.getHugoSymbol());
+            }
+        }
+        return gene;
+    }
+
+    public static Map<Integer, Gene> findGenes(Set<Integer> genes) {
+        Set<Integer> genesToQuery = new HashSet<>(genes);
+        Map<Integer, Gene> genePool = new HashMap<>();
+
+        // check for our gene table
+        genesToQuery.forEach(geneQuery -> {
+            Gene gene = GeneUtils.getGeneByEntrezId(geneQuery);
+            if(gene != null) {
+                genePool.put(geneQuery, gene);
+            }
+        });
+
+        // check for our cbioportal
+        GeneAnnotator.findGenesFromCBioPortal(genesToQuery.stream().filter(geneQuery -> !genePool.containsKey(geneQuery)).collect(Collectors.toList())).forEach(gene -> {
+            if(gene != null && gene.getEntrezGeneId() != null) {
+                genePool.put(gene.getEntrezGeneId(), gene);
+            }
+        });
+
+        // check for mygene.info
+        GeneAnnotator.findGenesFromMyGeneInfo(genesToQuery.stream().filter(geneQuery -> !genePool.containsKey(geneQuery)).collect(Collectors.toList())).forEach(gene -> {
+            if(gene != null && gene.getEntrezGeneId() != null) {
+                genePool.put(gene.getEntrezGeneId(), gene);
+            }
+        });
+
+        return genePool;
     }
 
     public static Gene getGeneByHugoSymbol(String hugoSymbol) {
