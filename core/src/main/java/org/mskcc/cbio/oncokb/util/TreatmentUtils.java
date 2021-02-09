@@ -116,6 +116,10 @@ public final class TreatmentUtils {
 
         return treatments;
     }
+
+    public static Integer compareTreatmentEvidenceByTumorTypesName(Evidence t1, Evidence t2) {
+        return TumorTypeUtils.getTumorTypesName(t1.getCancerTypes()).compareTo(TumorTypeUtils.getTumorTypesName(t2.getCancerTypes()));
+    }
 }
 
 
@@ -124,7 +128,12 @@ class TreatmentComparatorByPriority implements Comparator<Treatment> {
     public int compare(Treatment t1, Treatment t2) {
         if (t1.getPriority() == null) {
             if (t2.getPriority() == null) {
-                return TreatmentUtils.getTreatmentName(Collections.singleton(t1)).compareTo(TreatmentUtils.getTreatmentName(Collections.singleton(t2)));
+                int nameComparison = TreatmentUtils.getTreatmentName(Collections.singleton(t1)).compareTo(TreatmentUtils.getTreatmentName(Collections.singleton(t2)));
+                if (nameComparison == 0) {
+                    return TreatmentUtils.compareTreatmentEvidenceByTumorTypesName(t1.getEvidence(), t2.getEvidence());
+                } else {
+                    return nameComparison;
+                }
             } else {
                 return 1;
             }
@@ -134,7 +143,12 @@ class TreatmentComparatorByPriority implements Comparator<Treatment> {
         }
 
         if (t1.getPriority().equals(t2.getPriority())) {
-            return TreatmentUtils.getTreatmentName(Collections.singleton(t1)).compareTo(TreatmentUtils.getTreatmentName(Collections.singleton(t2)));
+            int nameComparison = TreatmentUtils.getTreatmentName(Collections.singleton(t1)).compareTo(TreatmentUtils.getTreatmentName(Collections.singleton(t2)));
+            if (nameComparison == 0) {
+                return TreatmentUtils.compareTreatmentEvidenceByTumorTypesName(t1.getEvidence(), t2.getEvidence());
+            } else {
+                return nameComparison;
+            }
         }
         return t1.getPriority() - t2.getPriority();
     }
