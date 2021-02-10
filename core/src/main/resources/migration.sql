@@ -1,5 +1,5 @@
-# Update to v1.13
-# Applicable to v1.13~v1.19
+-- Update to v1.13
+-- Applicable to v1.13~v1.19
 
 drop table `evidence_clinical_trial`;
 drop table `clinical_trial_country`;
@@ -62,8 +62,8 @@ alter table treatment_drug
 
 
 
-# Update to v1.20
-# Applicable to v1.20~v1.23
+-- Update to v1.20
+-- Applicable to v1.20~v1.23
 drop table drug_atccode;
 
 create table drug_family
@@ -94,8 +94,8 @@ alter table drug_synonym
 
 
 
-# Update to v1.24
-# Applicable to v1.24~v2.7
+-- Update to v1.24
+-- Applicable to v1.24
 create table geneset
 (
     id   int auto_increment
@@ -139,7 +139,16 @@ alter table gene
     change TSG tsg bit null;
 
 
-# Update to v2.8
+-- Update to v2.0, this is update to the v2 Levels of Evidence https://www.oncokb.org/news#12202019
+-- Applicable to v2.0~v2.7
+update evidence set level_of_evidence='LEVEL_2' where level_of_evidence='LEVEL_2A';
+update evidence set level_of_evidence='LEVEL_3B' where level_of_evidence='LEVEL_2B';
+update evidence set solid_propagation_level='LEVEL_2' where solid_propagation_level='LEVEL_2A';
+update evidence set solid_propagation_level='LEVEL_3B' where solid_propagation_level='LEVEL_2B';
+update evidence set liquid_propagation_level='LEVEL_2' where liquid_propagation_level='LEVEL_2A';
+update evidence set liquid_propagation_level='LEVEL_3B' where liquid_propagation_level='LEVEL_2B';
+
+-- Update to v2.8
 create table alteration_reference_genome
 (
     alteration_id    int         not null,
