@@ -54,6 +54,8 @@ public class CacheUtils {
 
     private static Map<String, Long> recordTime = new HashedMap();
 
+    private static Info oncokbInfo;
+
     private static Observer numbersObserver = new Observer() {
         @Override
         public void update(Observable o, Object arg) {
@@ -207,6 +209,9 @@ public class CacheUtils {
             cacheDownloadAvailability();
             System.out.println("Cached downloadable files availability on github: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
 
+            oncokbInfo = ApplicationContextSingleton.getInfoBo().get();
+            System.out.println("Cached oncokb info " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
+
             registerOtherServices();
             System.out.println("Register other services: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
             current = MainUtils.getCurrentTimestamp();
@@ -229,6 +234,10 @@ public class CacheUtils {
         } else {
             return null;
         }
+    }
+
+    public static Info getInfo() {
+        return oncokbInfo;
     }
 
     public static Boolean containGeneByEntrezId(Integer entrezId) {
