@@ -1081,6 +1081,7 @@ public final class AlterationUtils {
 
     public static Boolean hasImportantCuratedOncogenicity(Set<Oncogenicity> oncogenicities) {
         Set<Oncogenicity> curatedOncogenicities = new HashSet<>();
+        curatedOncogenicities.add(Oncogenicity.RESISTANCE);
         curatedOncogenicities.add(Oncogenicity.YES);
         curatedOncogenicities.add(Oncogenicity.LIKELY);
         curatedOncogenicities.add(Oncogenicity.LIKELY_NEUTRAL);

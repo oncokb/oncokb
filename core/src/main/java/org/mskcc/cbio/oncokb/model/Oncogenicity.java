@@ -17,6 +17,7 @@ public enum Oncogenicity {
     LIKELY_NEUTRAL("Likely Neutral"),
     PREDICTED("Predicted Oncogenic"),
     INCONCLUSIVE("Inconclusive"),
+    RESISTANCE("Resistance"),
     UNKNOWN("Unknown");
 
     private Oncogenicity(String oncogenic) {

@@ -438,6 +438,9 @@ public class DriveAnnotationParser {
                 case "likely neutral":
                     oncogenic = Oncogenicity.LIKELY_NEUTRAL;
                     break;
+                case "resistance":
+                    oncogenic = Oncogenicity.RESISTANCE;
+                    break;
                 case "inconclusive":
                     oncogenic = Oncogenicity.INCONCLUSIVE;
                     break;

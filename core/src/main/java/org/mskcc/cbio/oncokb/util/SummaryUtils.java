@@ -391,6 +391,10 @@ public class SummaryUtils {
             if (oncogenicity.equals(Oncogenicity.INCONCLUSIVE)) {
                 return inconclusiveSummary(alteration.getGene(), query.getReferenceGenome(), query);
             }
+
+            if (oncogenicity.equals(Oncogenicity.RESISTANCE)) {
+                return resistanceOncogenicitySummary(alteration.getGene(), query.getReferenceGenome(), query);
+            }
             if (appendThe) {
                 sb.append("The ");
             }
@@ -487,6 +491,16 @@ public class SummaryUtils {
             sb.append(", and therefore " + alteration.getGene().getHugoSymbol() + " " + alteration.getAlteration() + " is considered likely oncogenic.");
         }
 
+        return sb.toString();
+    }
+
+    public static String resistanceOncogenicitySummary(Gene gene, ReferenceGenome referenceGenome, Query query) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("The ");
+        sb.append(gene.getHugoSymbol());
+        sb.append(" ");
+        sb.append(query.getAlteration());
+        sb.append("is a known resistance mutation.");
         return sb.toString();
     }
 
