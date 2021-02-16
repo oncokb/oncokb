@@ -80,8 +80,8 @@
         <profile>
             <id>curate</id>
             <properties>
-                <frontend.version>0.6.2</frontend.version>
-                <frontend.groupId>com.github.oncokb</frontend.groupId>
+                <frontend.version>53d36dcfd6</frontend.version>
+                <frontend.groupId>com.github.zhx828</frontend.groupId>
                 <frontend.artifactId>curation-platform</frontend.artifactId>
             </properties>
             <build>

@@ -500,7 +500,7 @@ public class SummaryUtils {
         sb.append(gene.getHugoSymbol());
         sb.append(" ");
         sb.append(query.getAlteration());
-        sb.append("is a known resistance mutation.");
+        sb.append(" is a known resistance mutation.");
         return sb.toString();
     }
 
