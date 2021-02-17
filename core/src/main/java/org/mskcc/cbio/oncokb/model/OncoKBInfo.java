@@ -31,7 +31,7 @@ public class OncoKBInfo {
         Version dataVersion = new Version();
         dataVersion.setVersion(info.getDataVersion());
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/YYYY");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
         dataVersion.setDate(dateFormat.format(info.getDataVersionDate()));
 
         this.dataVersion = dataVersion;

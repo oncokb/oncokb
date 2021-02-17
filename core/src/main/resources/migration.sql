@@ -176,5 +176,17 @@ alter table gene
 alter table gene
     add grch38_ref_seq varchar(100) null;
 
+-- Update to v3.0
+-- This is not possible without complex cancer type mapping. We need to compute the cancer type of the evidence using the cancer_type table
 
+-- Update to v3.2
+create table `info` (
+  `id` int(11) not null AUTO_INCREMENT,
+  `data_version` varchar(255) default null,
+  `data_version_date` datetime default null,
+  `ncit_version` varchar(255) default null,
+  `oncotree_version` varchar(255) default null,
+  primary key (`id`)
+);
 
+insert into `info` values (1,'v3.2','2021-02-24','19.03d','oncotree_2019_12_01');

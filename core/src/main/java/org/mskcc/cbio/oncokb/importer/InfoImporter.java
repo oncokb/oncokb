@@ -14,6 +14,9 @@ public final class InfoImporter {
     private static final String ONCO_TREE_VERSION = "oncotree_2019_12_01";
     private static final String NCIT_VERSION = "19.03d";
 
+    // This is subject to change based on how the database dump is generated
+    // This is only useful if the database is generated from the scratch
+    // If the database dump is generated directly from the production database, the data version and date will be updated at the time of data release
     private static final String DATA_VERSION = "v3.0";
     private static final String DATA_VERSION_DATE = "01/14/2021";
 
