@@ -14,6 +14,7 @@ public class InfoDaoImpl
     @Override
     public Info get() {
         List<Info> infoList = findAll();
+        // the info table have and should only have one row
         return infoList.size() > 0 ? infoList.iterator().next() : null;
     }
 }

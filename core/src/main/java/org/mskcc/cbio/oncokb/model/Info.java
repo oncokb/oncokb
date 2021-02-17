@@ -16,7 +16,7 @@ public class Info implements Serializable {
     String oncoTreeVersion;
 
     @Column(name = "ncit_version")
-    String ncitVersion = "19.03d";
+    String ncitVersion;
 
     @Column(name = "data_version")
     String dataVersion;
