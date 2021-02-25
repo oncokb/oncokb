@@ -278,6 +278,11 @@
             <version>2.3</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>com.github.oncokb</groupId>
+            <artifactId>oncokb-java-api-client</artifactId>
+            <version>0305912bf3</version>
+        </dependency>
     </dependencies>
 
     <repositories>
