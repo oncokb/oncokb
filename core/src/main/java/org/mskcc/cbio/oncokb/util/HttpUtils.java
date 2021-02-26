@@ -1,6 +1,5 @@
 package org.mskcc.cbio.oncokb.util;
 
-import com.sun.net.httpserver.Headers;
 import org.mskcc.cbio.oncokb.apiModels.download.FileExtension;
 import org.mskcc.cbio.oncokb.apiModels.download.FileName;
 import org.springframework.http.HttpHeaders;
@@ -8,12 +7,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Created by Hongxin on 11/03/16.
@@ -43,6 +42,41 @@ public class HttpUtils {
 
             int responseCode = con.getResponseCode();
             System.out.println("\nSending 'POST' request to URL : " + url);
+            System.out.println("Response Code : " + responseCode);
+
+            return FileUtils.readStream(con.getInputStream());
+        } else {
+            return null;
+        }
+    }
+
+    public static String postRequestUrlParams(String url, String urlParams) throws IOException {
+        if (url != null) {
+            url = url.replaceAll(" ", "%20");
+            URL obj = new URL(url);
+
+            String urlParameters = urlParams;
+            byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
+
+            HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+
+            //add request header
+            con.setRequestMethod("POST");
+            con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+
+            // Send post request
+            con.setDoOutput(true);
+
+            // Set timeout to 10 seconds
+            con.setConnectTimeout(10000);
+
+            DataOutputStream wr = new DataOutputStream(con.getOutputStream());
+            wr.write(postData);
+            wr.flush();
+            wr.close();
+
+            int responseCode = con.getResponseCode();
+            System.out.println("\nSending '" + con.getRequestMethod() + "' request to URL : " + url);
             System.out.println("Response Code : " + responseCode);
 
             return FileUtils.readStream(con.getInputStream());

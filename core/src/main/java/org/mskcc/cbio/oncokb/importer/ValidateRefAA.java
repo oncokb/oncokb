@@ -2,10 +2,12 @@ package org.mskcc.cbio.oncokb.importer;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.mskcc.cbio.oncokb.bo.OncokbTranscriptService;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.ReferenceGenome;
 import org.mskcc.cbio.oncokb.util.*;
+import org.oncokb.oncokb_transcript.ApiException;
 
 import java.io.IOException;
 import java.util.*;
@@ -14,7 +16,7 @@ import java.util.stream.Collectors;
 
 public class ValidateRefAA {
 
-    public static void main(String[] args) throws IOException {
+    public void main(String[] args) throws ApiException {
         for (Alteration alteration : AlterationUtils.excludeVUS(new ArrayList<>(AlterationUtils.getAllAlterations()))) {
             checkAlteration(alteration, false);
         }
@@ -26,7 +28,7 @@ public class ValidateRefAA {
         }
     }
 
-    private static String getNote(JSONObject jsonObj, ReferenceGenome referenceGenome) {
+    private String getNote(JSONObject jsonObj, ReferenceGenome referenceGenome) {
         List<String> note = new ArrayList<>();
         String rgStr = referenceGenome.equals(ReferenceGenome.GRCh37) ? "37" : "38";
         JSONArray jsonArray = jsonObj.getJSONArray("grch" + rgStr);
@@ -42,13 +44,14 @@ public class ValidateRefAA {
         return note.stream().collect(Collectors.joining(" "));
     }
 
-    private static void checkAlteration(Alteration alteration, Boolean isVus) {
+    private void checkAlteration(Alteration alteration, Boolean isVus) throws ApiException {
         if (alteration.getProteinStart() >= 0 && alteration.getReferenceGenomes() != null) {
             if (alteration.getReferenceGenomes() == null || alteration.getReferenceGenomes().size() == 0) {
                 System.out.println("Alteration " + alteration.getGene().getHugoSymbol() + " " + alteration.getName() + " does not have reference genome");
             } else {
                 if (alteration.getRefResidues() != null) {
-                    String referenceAA = SequenceUtils.getAminoAcid(alteration.getReferenceGenomes().iterator().next(), alteration.getGene().getEntrezGeneId(), alteration.getProteinStart(), alteration.getRefResidues().length());
+                    OncokbTranscriptService oncokbTranscriptService = new OncokbTranscriptService();
+                    String referenceAA = oncokbTranscriptService.getAminoAcid(alteration.getReferenceGenomes().iterator().next(), alteration.getGene(), alteration.getProteinStart(), alteration.getRefResidues().length());
                     if (!referenceAA.equals(alteration.getRefResidues())) {
                         List<String> content = getBasicRecord(alteration);
                         content.add(String.valueOf(isVus));
