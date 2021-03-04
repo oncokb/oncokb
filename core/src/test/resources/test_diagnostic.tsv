@@ -2,7 +2,7 @@
 
 ABL1	BCR-ABL1 Fusion			Dx1	5
 ABL1	BCR-ABL1 Fusion	AML	The presence of a BCR-ABL1 fusion is required for a diagnosis of acute myeloid leukemia with BCR-ABL1. The BCR-ABL1 fusion may also suggest a diagnosis of blast crisis chronic myeloid leukemia.	Dx1	1
-ABL1	BCR-ABL1 Fusion	BLL	The presence of a BCR-ABL1 fusion is required for a diagnosis of B-Lymphoblastic Leukemia/Lymphoma with t(9;22)(q34.1;q11.2);BCR-ABL1. The presence of the BCR-ABL1 fusion may also suggest a diagnosis of blast crisis chronic myeloid leukemia.	Dx1	2
+ABL1	BCR-ABL1 Fusion	BLL	The presence of a BCR-ABL1 fusion is required for a diagnosis of B-lymphoblastic leukemia/lymphoma with t(9;22)(q34.1;q11.2);BCR-ABL1. The presence of the BCR-ABL1 fusion may also suggest a diagnosis of blast crisis chronic myeloid leukemia.	Dx1	2
 ABL1	BCR-ABL1 Fusion	AMLBCRABL1	The presence of a BCR-ABL1 fusion is required for a diagnosis of acute myeloid leukemia with BCR-ABL1. The BCR-ABL1 fusion may also suggest a diagnosis of blast crisis chronic myeloid leukemia.	Dx1	1
 ABL1	BCR-ABL1 Fusion	MPALBCRABL1	The presence of a BCR-ABL1 fusion is required for a diagnosis of mixed phenotype acute leukemia with t(9;22)(q34.1;q11.2); BCR-ABL1.	Dx1	1
 

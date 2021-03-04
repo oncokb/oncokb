@@ -123,7 +123,7 @@ public class VEPDetailedEnrichmentService {
                 hgvsp = aaParts[0] + transcriptConsequence.getProteinStart();
                 if (transcriptConsequence.getConsequenceTerms() != null && transcriptConsequence.getConsequenceTerms().get(0).equals("frameshift_variant")) {
                     hgvsp += "fs";
-                } else {
+                } else if (aaParts.length > 1) {
                     hgvsp += aaParts[1];
                 }
             }

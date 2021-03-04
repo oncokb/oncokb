@@ -3,27 +3,27 @@
 #
 # Gene\tVariant\tTumorType\tTreatments\tLevel
 #
-KIT	N505I	1 (Gastrointestinal Stromal Tumor): Imatinib; 1 (Gastrointestinal Stromal Tumor): Sunitinib; 1 (Gastrointestinal Stromal Tumor): Regorafenib; 1 (Gastrointestinal Stromal Tumor): Ripretinib; 2 (Melanoma): Imatinib; 2 (Thymic Tumor): Sunitinib;
-KIT	N505L	2 (Melanoma): Imatinib; 2 (Thymic Tumor): Sunitinib;
+KIT	N505I	1 (Gastrointestinal Stromal Tumor): Imatinib; 1 (Gastrointestinal Stromal Tumor): Sunitinib; 1 (Gastrointestinal Stromal Tumor): Regorafenib; 1 (Gastrointestinal Stromal Tumor): Ripretinib; 2 (Melanoma): Imatinib;
+KIT	N505L	2 (Melanoma): Imatinib;
 KIT	M541L	
 KIT	M541C	
 KIT	Y553N	
 KIT	Y553C	
 KIT	R643W	
 KIT	D737N	
-KIT	C809G	1 (Gastrointestinal Stromal Tumor): Imatinib; 1 (Gastrointestinal Stromal Tumor): Sunitinib; 1 (Gastrointestinal Stromal Tumor): Regorafenib; 1 (Gastrointestinal Stromal Tumor): Ripretinib; 2 (Melanoma): Imatinib; 2 (Thymic Tumor): Sunitinib; 2 (Gastrointestinal Stromal Tumor): Sorafenib; R2 (Gastrointestinal Stromal Tumor): Imatinib; R2 (Gastrointestinal Stromal Tumor): Sunitinib;
-KIT	K642E	1 (Gastrointestinal Stromal Tumor): Imatinib; 1 (Gastrointestinal Stromal Tumor): Sunitinib; 1 (Gastrointestinal Stromal Tumor): Regorafenib; 1 (Gastrointestinal Stromal Tumor): Ripretinib; 2 (Melanoma): Imatinib; 2 (Thymic Tumor): Sunitinib;
-KIT	K642G	2 (Melanoma): Imatinib; 2 (Thymic Tumor): Sunitinib;
-KIT	V654A	1 (Gastrointestinal Stromal Tumor): Imatinib; 1 (Gastrointestinal Stromal Tumor): Sunitinib; 1 (Gastrointestinal Stromal Tumor): Regorafenib; 1 (Gastrointestinal Stromal Tumor): Ripretinib; 2 (Melanoma): Imatinib; 2 (Thymic Tumor): Sunitinib; R2 (Gastrointestinal Stromal Tumor): Imatinib;
-KIT	V654G	2 (Melanoma): Imatinib; 2 (Thymic Tumor): Sunitinib;
-KIT	T670I	1 (Gastrointestinal Stromal Tumor): Imatinib; 1 (Gastrointestinal Stromal Tumor): Sunitinib; 1 (Gastrointestinal Stromal Tumor): Regorafenib; 1 (Gastrointestinal Stromal Tumor): Ripretinib; 2 (Melanoma): Imatinib; 2 (Thymic Tumor): Sunitinib; R2 (Gastrointestinal Stromal Tumor): Imatinib;
-KIT	T670C	2 (Melanoma): Imatinib; 2 (Thymic Tumor): Sunitinib;
-KIT	D816A	1 (Gastrointestinal Stromal Tumor): Imatinib; 1 (Gastrointestinal Stromal Tumor): Sunitinib; 1 (Gastrointestinal Stromal Tumor): Regorafenib; 1 (Gastrointestinal Stromal Tumor): Ripretinib; 2 (Melanoma): Imatinib; 2 (Thymic Tumor): Sunitinib; 2 (Gastrointestinal Stromal Tumor): Sorafenib; 3A (Mastocytosis): Avapritinib; R2 (Gastrointestinal Stromal Tumor): Imatinib; R2 (Gastrointestinal Stromal Tumor): Sunitinib;
-KIT	Y823D	1 (Gastrointestinal Stromal Tumor): Imatinib; 1 (Gastrointestinal Stromal Tumor): Sunitinib; 1 (Gastrointestinal Stromal Tumor): Regorafenib; 1 (Gastrointestinal Stromal Tumor): Ripretinib; 2 (Melanoma): Imatinib; 2 (Thymic Tumor): Sunitinib; 2 (Gastrointestinal Stromal Tumor): Sorafenib; R2 (Gastrointestinal Stromal Tumor): Imatinib; R2 (Gastrointestinal Stromal Tumor): Sunitinib;
-KIT	Y823G	2 (Melanoma): Imatinib; 2 (Thymic Tumor): Sunitinib;
-KIT	A829P	1 (Gastrointestinal Stromal Tumor): Imatinib; 1 (Gastrointestinal Stromal Tumor): Sunitinib; 1 (Gastrointestinal Stromal Tumor): Regorafenib; 1 (Gastrointestinal Stromal Tumor): Ripretinib; 2 (Melanoma): Imatinib; 2 (Thymic Tumor): Sunitinib; 2 (Gastrointestinal Stromal Tumor): Sorafenib; R2 (Gastrointestinal Stromal Tumor): Imatinib; R2 (Gastrointestinal Stromal Tumor): Sunitinib;
-KIT	D820G	1 (Gastrointestinal Stromal Tumor): Imatinib; 1 (Gastrointestinal Stromal Tumor): Sunitinib; 1 (Gastrointestinal Stromal Tumor): Regorafenib; 1 (Gastrointestinal Stromal Tumor): Ripretinib; 2 (Melanoma): Imatinib; 2 (Thymic Tumor): Sunitinib; 2 (Gastrointestinal Stromal Tumor): Sorafenib; R2 (Gastrointestinal Stromal Tumor): Imatinib; R2 (Gastrointestinal Stromal Tumor): Sunitinib;
-KIT	N822E	1 (Gastrointestinal Stromal Tumor): Imatinib; 1 (Gastrointestinal Stromal Tumor): Sunitinib; 1 (Gastrointestinal Stromal Tumor): Regorafenib; 1 (Gastrointestinal Stromal Tumor): Ripretinib; 2 (Melanoma): Imatinib; 2 (Thymic Tumor): Sunitinib; 2 (Gastrointestinal Stromal Tumor): Sorafenib; R2 (Gastrointestinal Stromal Tumor): Imatinib; R2 (Gastrointestinal Stromal Tumor): Sunitinib;
+KIT	C809G	1 (Gastrointestinal Stromal Tumor): Imatinib; 1 (Gastrointestinal Stromal Tumor): Sunitinib; 1 (Gastrointestinal Stromal Tumor): Regorafenib; 1 (Gastrointestinal Stromal Tumor): Ripretinib; 2 (Melanoma): Imatinib; R2 (Gastrointestinal Stromal Tumor): Imatinib; R2 (Gastrointestinal Stromal Tumor): Sunitinib;
+KIT	K642E	1 (Gastrointestinal Stromal Tumor): Imatinib; 1 (Gastrointestinal Stromal Tumor): Sunitinib; 1 (Gastrointestinal Stromal Tumor): Regorafenib; 1 (Gastrointestinal Stromal Tumor): Ripretinib; 2 (Melanoma): Imatinib;
+KIT	K642G	2 (Melanoma): Imatinib;
+KIT	V654A	1 (Gastrointestinal Stromal Tumor): Imatinib; 1 (Gastrointestinal Stromal Tumor): Sunitinib; 1 (Gastrointestinal Stromal Tumor): Regorafenib; 1 (Gastrointestinal Stromal Tumor): Ripretinib; 2 (Melanoma): Imatinib; R2 (Gastrointestinal Stromal Tumor): Imatinib;
+KIT	V654G	2 (Melanoma): Imatinib;
+KIT	T670I	1 (Gastrointestinal Stromal Tumor): Imatinib; 1 (Gastrointestinal Stromal Tumor): Sunitinib; 1 (Gastrointestinal Stromal Tumor): Regorafenib; 1 (Gastrointestinal Stromal Tumor): Ripretinib; 2 (Melanoma): Imatinib; R2 (Gastrointestinal Stromal Tumor): Imatinib;
+KIT	T670C	2 (Melanoma): Imatinib;
+KIT	D816A	1 (Gastrointestinal Stromal Tumor): Imatinib; 1 (Gastrointestinal Stromal Tumor): Sunitinib; 1 (Gastrointestinal Stromal Tumor): Regorafenib; 1 (Gastrointestinal Stromal Tumor): Ripretinib; 2 (Melanoma): Imatinib; 3A (Mastocytosis): Avapritinib; R2 (Gastrointestinal Stromal Tumor): Imatinib; R2 (Gastrointestinal Stromal Tumor): Sunitinib;
+KIT	Y823D	1 (Gastrointestinal Stromal Tumor): Imatinib; 1 (Gastrointestinal Stromal Tumor): Sunitinib; 1 (Gastrointestinal Stromal Tumor): Regorafenib; 1 (Gastrointestinal Stromal Tumor): Ripretinib; 2 (Melanoma): Imatinib; R2 (Gastrointestinal Stromal Tumor): Imatinib; R2 (Gastrointestinal Stromal Tumor): Sunitinib;
+KIT	Y823G	2 (Melanoma): Imatinib;
+KIT	A829P	1 (Gastrointestinal Stromal Tumor): Imatinib; 1 (Gastrointestinal Stromal Tumor): Sunitinib; 1 (Gastrointestinal Stromal Tumor): Regorafenib; 1 (Gastrointestinal Stromal Tumor): Ripretinib; 2 (Melanoma): Imatinib; R2 (Gastrointestinal Stromal Tumor): Imatinib; R2 (Gastrointestinal Stromal Tumor): Sunitinib;
+KIT	D820G	1 (Gastrointestinal Stromal Tumor): Imatinib; 1 (Gastrointestinal Stromal Tumor): Sunitinib; 1 (Gastrointestinal Stromal Tumor): Regorafenib; 1 (Gastrointestinal Stromal Tumor): Ripretinib; 2 (Melanoma): Imatinib; R2 (Gastrointestinal Stromal Tumor): Imatinib; R2 (Gastrointestinal Stromal Tumor): Sunitinib;
+KIT	N822E	1 (Gastrointestinal Stromal Tumor): Imatinib; 1 (Gastrointestinal Stromal Tumor): Sunitinib; 1 (Gastrointestinal Stromal Tumor): Regorafenib; 1 (Gastrointestinal Stromal Tumor): Ripretinib; 2 (Melanoma): Imatinib; R2 (Gastrointestinal Stromal Tumor): Imatinib; R2 (Gastrointestinal Stromal Tumor): Sunitinib;
 MTOR	L2427Q	3A (Renal Cell Carcinoma): Temsirolimus; 4 (All Solid Tumors): Everolimus; 4 (All Solid Tumors): Temsirolimus;
 PDGFRA	D842I	2 (Gastrointestinal Stromal Tumor): Imatinib; 2 (Gastrointestinal Stromal Tumor): Sunitinib; 2 (Gastrointestinal Stromal Tumor): Regorafenib; 2 (Gastrointestinal Stromal Tumor): Ripretinib;
 PDGFRA	D842V	R1 (Gastrointestinal Stromal Tumor): Imatinib; 1 (Gastrointestinal Stromal Tumor): Avapritinib; 2 (Gastrointestinal Stromal Tumor): Dasatinib; 2 (Gastrointestinal Stromal Tumor): Imatinib; 2 (Gastrointestinal Stromal Tumor): Sunitinib; 2 (Gastrointestinal Stromal Tumor): Regorafenib; 2 (Gastrointestinal Stromal Tumor): Ripretinib;
@@ -36,4 +36,4 @@ EGFR	Y764_D770dup	R1 (Non-Small Cell Lung Cancer): Erlotinib; R1 (Non-Small Cell
 EGFR	N771delinsSTH	R1 (Non-Small Cell Lung Cancer): Erlotinib; R1 (Non-Small Cell Lung Cancer): Gefitinib; R1 (Non-Small Cell Lung Cancer): Afatinib; 3A (Non-Small Cell Lung Cancer): Poziotinib;
 
 # BRACA Oncogenic Mutations has evdience includes multiple cancer types
-BRCA1	Oncogenic Mutations	1 (Peritoneal Serous Carcinoma): Olaparib; 1 (Ovarian Cancer): Olaparib; 1 (Ovary/Fallopian Tube): Olaparib; 1 (Prostate Cancer, NOS): Olaparib; 1 (Prostate Cancer): Olaparib; 1 (Peritoneal Serous Carcinoma): Rucaparib; 1 (Ovarian Cancer): Rucaparib; 1 (Ovary/Fallopian Tube): Rucaparib; 1 (Prostate Cancer, NOS): Rucaparib; 1 (Prostate Cancer): Rucaparib; 1 (Peritoneal Serous Carcinoma): Niraparib; 1 (Ovarian Cancer): Niraparib; 1 (Ovary/Fallopian Tube): Niraparib; 2 (Breast Cancer): Talazoparib; 2 (Breast Cancer): Olaparib; 3A (Pancreatic Adenocarcinoma): Olaparib;
+BRCA1	Oncogenic Mutations	1 (Peritoneal Serous Carcinoma): Olaparib; 1 (Ovarian Cancer): Olaparib; 1 (Ovary/Fallopian Tube): Olaparib; 1 (Prostate Cancer, NOS): Olaparib; 1 (Prostate Cancer): Olaparib; 1 (Peritoneal Serous Carcinoma): Rucaparib; 1 (Ovarian Cancer): Rucaparib; 1 (Ovary/Fallopian Tube): Rucaparib; 1 (Prostate Cancer, NOS): Rucaparib; 1 (Prostate Cancer): Rucaparib; 1 (Peritoneal Serous Carcinoma): Niraparib; 1 (Ovarian Cancer): Niraparib; 1 (Ovary/Fallopian Tube): Niraparib; 2 (Breast Cancer): Talazoparib; 2 (Breast Cancer): Olaparib; 3A (Acinar Cell Carcinoma of the Pancreas): Olaparib; 3A (Pancreatic Adenocarcinoma): Olaparib;

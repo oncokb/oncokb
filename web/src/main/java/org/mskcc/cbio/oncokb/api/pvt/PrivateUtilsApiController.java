@@ -10,7 +10,9 @@ import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.PortalAlterationBo;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.TumorType;
+import org.mskcc.cbio.oncokb.bo.OncokbTranscriptService;
 import org.mskcc.cbio.oncokb.util.*;
+import org.oncokb.oncokb_transcript.ApiException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -374,6 +376,39 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         Gene gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
         portalAlterations.addAll(portalAlterationBo.findMutationMapperData(gene));
         return new ResponseEntity<>(portalAlterations, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<Void> utilUpdateTranscriptGet(
+        @ApiParam(value = "hugoSymbol") @RequestParam(required = false) String hugoSymbol
+        , @ApiParam(value = "entrezGeneId") @RequestParam(required = false) Integer entrezGeneId
+        , @ApiParam(value = "grch37Isoform") @RequestParam String grch37Isoform
+        , @ApiParam(value = "grch37RefSeq") @RequestParam String grch37RefSeq
+        , @ApiParam(value = "grch38Isoform") @RequestParam String grch38Isoform
+        , @ApiParam(value = "grch38RefSeq") @RequestParam String grch38RefSeq
+    ) throws ApiException {
+        // this is an util to upgrade oncokb transcript which operates on the grch37
+        Gene gene = GeneUtils.getGene(entrezGeneId, hugoSymbol);
+
+        if (gene == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        OncokbTranscriptService oncokbTranscriptService = new OncokbTranscriptService();
+        oncokbTranscriptService.updateTranscriptUsage(
+            gene,
+            grch37Isoform,
+            grch38Isoform
+        );
+
+        gene.setGrch37Isoform(grch37Isoform);
+        gene.setGrch37RefSeq(grch37RefSeq);
+        gene.setGrch38Isoform(grch38Isoform);
+        gene.setGrch38RefSeq(grch38RefSeq);
+
+        ApplicationContextSingleton.getGeneBo().update(gene);
+        CacheUtils.updateGene(Collections.singleton(gene.getEntrezGeneId()), true);
+
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Override
