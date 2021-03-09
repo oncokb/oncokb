@@ -7,21 +7,13 @@ import java.util.List;
  */
 
 
-public class Trial {
+public class ClinicalTrial {
     private String briefTitle;
     private String currentTrialStatus;
     private String nctId;
     private List<Arms> arms;
-    private Boolean isUSTrial = null;
-    private String principalInvestigator = null;
-
-    public Boolean getIsUSTrial() {
-        return isUSTrial;
-    }
-
-    public void setIsUSTrial(Boolean isUSTrial) {
-        this.isUSTrial = isUSTrial;
-    }
+    private String principalInvestigator;
+    private List<Site> sites;
 
     public String getBriefTitle() {
         return briefTitle;
@@ -61,6 +53,14 @@ public class Trial {
 
     public void setArms(List<Arms> arms) {
         this.arms = arms;
+    }
+
+    public List<Site> getSites() {
+        return sites;
+    }
+
+    public void setSites(List<Site> sites) {
+        this.sites = sites;
     }
 
 }

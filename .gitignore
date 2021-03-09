@@ -11,6 +11,7 @@ web/yo/app/data
 target
 dist
 *.iml
+core/src/main/resources/data/oncotree/clinical-trials-mapping-result.json
 core/src/main/resources/properties
 core/src/main/resources/certificate
 core/src/main/resources/log4j.properties
@@ -331,3 +332,5 @@ OpenCover/
 .DS_Store
 
 web/yo/node
+
+.vscode
