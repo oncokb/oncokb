@@ -1,6 +1,7 @@
 package org.mskcc.cbio.oncokb.bo;
 
 import org.apache.commons.lang3.StringUtils;
+import org.mskcc.cbio.oncokb.apiModels.TranscriptUpdateValidationVM;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.ReferenceGenome;
 import org.mskcc.cbio.oncokb.util.PropertiesUtils;
@@ -8,9 +9,7 @@ import org.oncokb.oncokb_transcript.ApiClient;
 import org.oncokb.oncokb_transcript.ApiException;
 import org.oncokb.oncokb_transcript.Configuration;
 import org.oncokb.oncokb_transcript.auth.OAuth;
-import org.oncokb.oncokb_transcript.client.Sequence;
-import org.oncokb.oncokb_transcript.client.SequenceResourceApi;
-import org.oncokb.oncokb_transcript.client.TranscriptControllerApi;
+import org.oncokb.oncokb_transcript.client.*;
 
 import java.util.List;
 
@@ -22,6 +21,7 @@ public class OncokbTranscriptService {
 
     public OncokbTranscriptService() {
         this.client = Configuration.getDefaultApiClient();
+        this.client.setBasePath("http://localhost:9090");
 
         // Configure API key authorization: authorization
         OAuth authorization = (OAuth) this.client.getAuthentication("Authorization");
@@ -49,6 +49,52 @@ public class OncokbTranscriptService {
                 ReferenceGenome.GRCh38.toString(),
                 grch38EnsemblTranscriptId
             );
+        }
+    }
+
+    public TranscriptUpdateValidationVM validateTranscriptUpdate(Gene gene, String grch37EnsemblTranscriptId, String grch38EnsemblTranscriptId) throws ApiException {
+        TranscriptUpdateValidationVM transcriptUpdateValidationVM = new TranscriptUpdateValidationVM();
+        if (StringUtils.isNotEmpty(grch37EnsemblTranscriptId)) {
+            transcriptUpdateValidationVM.setGrch37(this.compareTranscript(TranscriptPairVM.ReferenceGenomeEnum.GRCH37, gene, grch37EnsemblTranscriptId));
+        }
+        if (StringUtils.isNotEmpty(grch38EnsemblTranscriptId)) {
+            transcriptUpdateValidationVM.setGrch38(this.compareTranscript(TranscriptPairVM.ReferenceGenomeEnum.GRCH38, gene, grch38EnsemblTranscriptId));
+        }
+        return transcriptUpdateValidationVM;
+    }
+
+    private TranscriptComparisonResultVM compareTranscript(TranscriptPairVM.ReferenceGenomeEnum referenceGenome, Gene gene, String ensemblTranscriptId)  throws ApiException{
+        SequenceResourceApi sequenceResourceApi = new SequenceResourceApi();
+        TranscriptControllerApi controllerApi = new TranscriptControllerApi();
+
+        List<Sequence> sequences = null;
+        try {
+            sequences = sequenceResourceApi.getAllSequencesUsingGET1(referenceGenome.toString(), "ONCOKB", gene.getHugoSymbol());
+        } catch (ApiException e) {
+            throw e;
+        }
+        Sequence pickedSequence = sequences.iterator().next();
+        if (pickedSequence == null) {
+            return null;
+        } else {
+
+            TranscriptComparisonVM vm = new TranscriptComparisonVM();
+            vm.setAlign(true);
+
+            // Pair A is the old transcript
+            TranscriptPairVM pairA = new TranscriptPairVM();
+            pairA.setReferenceGenome(referenceGenome);
+            pairA.setTranscript(pickedSequence.getTranscript().getEnsemblTranscriptId());
+
+            // Pair B is the new transcript
+            TranscriptPairVM pairB = new TranscriptPairVM();
+            pairB.setReferenceGenome(referenceGenome);
+            pairB.setTranscript(ensemblTranscriptId);
+
+            vm.setTranscriptA(pairA);
+            vm.setTranscriptB(pairB);
+
+            return controllerApi.compareTranscriptUsingPOST(gene.getHugoSymbol(), vm);
         }
     }
 
