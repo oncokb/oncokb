@@ -21,7 +21,6 @@ public class OncokbTranscriptService {
 
     public OncokbTranscriptService() {
         this.client = Configuration.getDefaultApiClient();
-        this.client.setBasePath("http://localhost:9090");
 
         // Configure API key authorization: authorization
         OAuth authorization = (OAuth) this.client.getAuthentication("Authorization");
