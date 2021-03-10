@@ -429,16 +429,24 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
 
         StringBuilder sb = new StringBuilder();
         TranscriptUpdateValidationVM vm = oncokbTranscriptService.validateTranscriptUpdate(gene, grch37Isoform, grch38Isoform);
-        if (vm.getGrch37() != null && !vm.getGrch37().isMatch()) {
-            sb.append("GRCh37 sequences do not match.\n");
-            sb.append("GRCh37 old: " + vm.getGrch37().getSequenceA() + "\n");
-            sb.append("GRCh37 new: " + vm.getGrch37().getSequenceB() + "\n");
+        if (vm.getGrch37() != null) {
+            if (vm.getGrch37().isMatch()) {
+                sb.append("GRCh37 sequences are the same.\n");
+            } else {
+                sb.append("GRCh37 sequences do not match.\n");
+                sb.append("GRCh37 old: " + vm.getGrch37().getSequenceA() + "\n");
+                sb.append("GRCh37 new: " + vm.getGrch37().getSequenceB() + "\n");
+            }
         }
-        if (vm.getGrch38() != null && !vm.getGrch38().isMatch()) {
+        if (vm.getGrch38() != null) {
             sb.append("\n");
-            sb.append("GRCh38 sequences do not match.\n");
-            sb.append("GRCh38 old: " + vm.getGrch38().getSequenceA() + "\n");
-            sb.append("GRCh38 new: " + vm.getGrch38().getSequenceB() + "\n");
+            if (vm.getGrch38().isMatch()) {
+                sb.append("GRCh38 sequences are the same.\n");
+            } else {
+                sb.append("GRCh38 sequences do not match.\n");
+                sb.append("GRCh38 old: " + vm.getGrch38().getSequenceA() + "\n");
+                sb.append("GRCh38 new: " + vm.getGrch38().getSequenceB() + "\n");
+            }
         }
         return new ResponseEntity<>(sb.toString(), HttpStatus.OK);
     }
