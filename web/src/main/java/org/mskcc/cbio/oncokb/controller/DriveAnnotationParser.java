@@ -12,6 +12,7 @@ import org.mskcc.cbio.oncokb.apiModels.NCITDrug;
 import org.mskcc.cbio.oncokb.bo.*;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.TumorType;
+import org.mskcc.cbio.oncokb.bo.OncokbTranscriptService;
 import org.mskcc.cbio.oncokb.util.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -48,7 +49,16 @@ public class DriveAnnotationParser {
             if (vus != null) {
                 jsonArray = new JSONArray(vus);
             }
-            parseGene(jsonObj, releaseGene, jsonArray);
+            Gene persistenceGene = parseGene(jsonObj, releaseGene, jsonArray);
+
+            if (releaseGene && persistenceGene != null) {
+                OncokbTranscriptService oncokbTranscriptService = new OncokbTranscriptService();
+                oncokbTranscriptService.updateTranscriptUsage(
+                    persistenceGene,
+                    persistenceGene.getGrch37Isoform(),
+                    persistenceGene.getGrch38Isoform()
+                );
+            }
         }
     }
 
@@ -159,7 +169,7 @@ public class DriveAnnotationParser {
         }
     }
 
-    private static void parseGene(JSONObject geneInfo, Boolean releaseGene, JSONArray vus) throws Exception {
+    private static Gene parseGene(JSONObject geneInfo, Boolean releaseGene, JSONArray vus) throws Exception {
         GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
         Integer nestLevel = 1;
         if (geneInfo.has("name") && !geneInfo.getString("name").trim().isEmpty()) {
@@ -180,7 +190,7 @@ public class DriveAnnotationParser {
                             geneBo.save(gene);
                         }
                     } else {
-                        return;
+                        return null;
                     }
                 }
 
@@ -220,10 +230,12 @@ public class DriveAnnotationParser {
                 } else {
                     System.out.print(spaceStrByNestLevel(nestLevel) + "No info about " + hugo);
                 }
+                return gene;
             } else {
                 System.out.println(spaceStrByNestLevel(nestLevel) + "No hugoSymbol available");
             }
         }
+        return null;
     }
 
     private static Date getUpdateTime(Object obj) throws JSONException {

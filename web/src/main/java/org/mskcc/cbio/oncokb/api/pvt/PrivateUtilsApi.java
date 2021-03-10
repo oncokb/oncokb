@@ -5,6 +5,7 @@ import org.mskcc.cbio.oncokb.apiModels.*;
 import org.mskcc.cbio.oncokb.apiModels.download.DownloadAvailability;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.TumorType;
+import org.oncokb.oncokb_transcript.ApiException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.xml.sax.SAXException;
@@ -176,6 +177,32 @@ public interface PrivateUtilsApi {
     ResponseEntity<List<PortalAlteration>> utilMutationMapperDataGet(
         @ApiParam(value = "hugoSymbol") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
     );
+
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK")})
+    @RequestMapping(value = "/utils/updateTranscript",
+        produces = {"application/json"},
+        method = RequestMethod.GET)
+    ResponseEntity<Void> utilUpdateTranscriptGet(
+        @ApiParam(value = "hugoSymbol") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
+        , @ApiParam(value = "entrezGeneId") @RequestParam(required = false) Integer entrezGeneId
+        , @ApiParam(value = "grch37Isoform") @RequestParam(required = false) String grch37Isoform
+        , @ApiParam(value = "grch37RefSeq") @RequestParam(required = false) String grch37RefSeq
+        , @ApiParam(value = "grch38Isoform") @RequestParam(required = false) String grch38Isoform
+        , @ApiParam(value = "grch38RefSeq") @RequestParam(required = false) String grch38RefSeq
+    ) throws ApiException;
+
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK")})
+    @RequestMapping(value = "/utils/validateTranscriptUpdate",
+        produces = {"text/plain"},
+        method = RequestMethod.GET)
+    ResponseEntity<String> utilValidateTranscriptUpdateGet(
+        @ApiParam(value = "hugoSymbol") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
+        , @ApiParam(value = "entrezGeneId") @RequestParam(required = false) Integer entrezGeneId
+        , @ApiParam(value = "grch37Isoform") @RequestParam(required = false) String grch37Isoform
+        , @ApiParam(value = "grch38Isoform") @RequestParam(required = false) String grch38Isoform
+    ) throws ApiException;
 
     @ApiOperation(value = "", notes = "Get information about what files are available by data version", response = DownloadAvailability.class, responseContainer = "List")
     @ApiResponses(value = {

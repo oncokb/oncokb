@@ -2,6 +2,8 @@ package org.mskcc.cbio.oncokb.api.pvt;
 
 import com.mysql.jdbc.StringUtils;
 import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.mskcc.cbio.oncokb.apiModels.*;
 import org.mskcc.cbio.oncokb.apiModels.download.DownloadAvailability;
 import org.mskcc.cbio.oncokb.apiModels.download.FileExtension;
@@ -10,13 +12,14 @@ import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.PortalAlterationBo;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.TumorType;
+import org.mskcc.cbio.oncokb.bo.OncokbTranscriptService;
 import org.mskcc.cbio.oncokb.util.*;
+import org.oncokb.oncokb_transcript.ApiException;
+import org.oncokb.oncokb_transcript.client.TranscriptComparisonVM;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -374,6 +377,78 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         Gene gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
         portalAlterations.addAll(portalAlterationBo.findMutationMapperData(gene));
         return new ResponseEntity<>(portalAlterations, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<Void> utilUpdateTranscriptGet(
+        @ApiParam(value = "hugoSymbol") @RequestParam(required = false) String hugoSymbol
+        , @ApiParam(value = "entrezGeneId") @RequestParam(required = false) Integer entrezGeneId
+        , @ApiParam(value = "grch37Isoform") @RequestParam(required = false) String grch37Isoform
+        , @ApiParam(value = "grch37RefSeq") @RequestParam(required = false) String grch37RefSeq
+        , @ApiParam(value = "grch38Isoform") @RequestParam(required = false) String grch38Isoform
+        , @ApiParam(value = "grch38RefSeq") @RequestParam(required = false) String grch38RefSeq
+    ) throws ApiException {
+        // this is an util to upgrade oncokb transcript which operates on the grch37
+        Gene gene = GeneUtils.getGene(entrezGeneId, hugoSymbol);
+
+        if (gene == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        OncokbTranscriptService oncokbTranscriptService = new OncokbTranscriptService();
+        oncokbTranscriptService.updateTranscriptUsage(
+            gene,
+            grch37Isoform,
+            grch38Isoform
+        );
+
+        gene.setGrch37Isoform(grch37Isoform);
+        gene.setGrch37RefSeq(grch37RefSeq);
+        gene.setGrch38Isoform(grch38Isoform);
+        gene.setGrch38RefSeq(grch38RefSeq);
+
+        ApplicationContextSingleton.getGeneBo().update(gene);
+        CacheUtils.updateGene(Collections.singleton(gene.getEntrezGeneId()), true);
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<String> utilValidateTranscriptUpdateGet(
+        @ApiParam(value = "hugoSymbol") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
+        , @ApiParam(value = "entrezGeneId") @RequestParam(required = false) Integer entrezGeneId
+        , @ApiParam(value = "grch37Isoform") @RequestParam(required = false) String grch37Isoform
+        , @ApiParam(value = "grch38Isoform") @RequestParam(required = false) String grch38Isoform
+    ) throws ApiException {
+        // this is an util to upgrade oncokb transcript which operates on the grch37
+        Gene gene = GeneUtils.getGene(entrezGeneId, hugoSymbol);
+
+        if (gene == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        OncokbTranscriptService oncokbTranscriptService = new OncokbTranscriptService();
+
+        StringBuilder sb = new StringBuilder();
+        TranscriptUpdateValidationVM vm = oncokbTranscriptService.validateTranscriptUpdate(gene, grch37Isoform, grch38Isoform);
+        if (vm.getGrch37() != null) {
+            if (vm.getGrch37().isMatch()) {
+                sb.append("GRCh37 sequences are the same.\n");
+            } else {
+                sb.append("GRCh37 sequences do not match.\n");
+                sb.append("GRCh37 old: " + vm.getGrch37().getSequenceA() + "\n");
+                sb.append("GRCh37 new: " + vm.getGrch37().getSequenceB() + "\n");
+            }
+        }
+        if (vm.getGrch38() != null) {
+            sb.append("\n");
+            if (vm.getGrch38().isMatch()) {
+                sb.append("GRCh38 sequences are the same.\n");
+            } else {
+                sb.append("GRCh38 sequences do not match.\n");
+                sb.append("GRCh38 old: " + vm.getGrch38().getSequenceA() + "\n");
+                sb.append("GRCh38 new: " + vm.getGrch38().getSequenceB() + "\n");
+            }
+        }
+        return new ResponseEntity<>(sb.toString(), HttpStatus.OK);
     }
 
     @Override
