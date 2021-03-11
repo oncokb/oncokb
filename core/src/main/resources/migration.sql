@@ -189,4 +189,4 @@ create table `info` (
   primary key (`id`)
 );
 
-insert into `info` values (1,'v3.2','2021-02-24','19.03d','oncotree_2019_12_01');
+insert into `info` values (1,'v3.2','2021-03-12','19.03d','oncotree_2019_12_01');
