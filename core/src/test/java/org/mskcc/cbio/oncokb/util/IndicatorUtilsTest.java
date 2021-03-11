@@ -187,14 +187,6 @@ public class IndicatorUtilsTest {
         assertEquals("The highest resistance level should be R1",
             LevelOfEvidence.LEVEL_R2, indicatorQueryResp.getHighestResistanceLevel());
 
-        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "EGFR", "C797S", null, null, "Lung Adenocarcinoma", null, null, null, null);
-        indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null);
-        assertEquals("The oncogenicity should be 'Oncogenic'", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
-        assertEquals("The highest sensitive level should be 4",
-            null, indicatorQueryResp.getHighestSensitiveLevel());
-        assertEquals("The highest resistance level should be R1",
-            LevelOfEvidence.LEVEL_R2, indicatorQueryResp.getHighestResistanceLevel());
-
         // Test cases generated through MSK-IMPACT reports which ran into issue before
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "EGFR", "S768_V769delinsIL", null, null, "Non-Small Cell Lung Cancer", MISSENSE_VARIANT, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
@@ -410,6 +402,22 @@ public class IndicatorUtilsTest {
         assertTrue("The mutation effect is null, but it should not be.", indicatorQueryResp.getMutationEffect() != null);
         assertEquals("The mutation effect is not unknown, but it should be.", "Unknown", indicatorQueryResp.getMutationEffect().getKnownEffect());
 
+
+        // Test resistance mutation
+        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "EGFR", "C797S", null, null, "Lung Adenocarcinoma", null, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null);
+        assertEquals("The oncogenicity should be 'Resistance'", Oncogenicity.RESISTANCE.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The highest sensitive level should be 4",
+            null, indicatorQueryResp.getHighestSensitiveLevel());
+        assertEquals("The highest resistance level should be R1",
+            LevelOfEvidence.LEVEL_R2, indicatorQueryResp.getHighestResistanceLevel());
+
+        // The oncogenic mutations should not be mapped to Resistance mutation. So the summary from OM should no apply here.
+        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "KIT", "D820E", null, null, "AMLRUNX1RUNX1T1", null, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null);
+        assertEquals("The oncogenicity should be 'Resistance'", Oncogenicity.RESISTANCE.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The tumor type summary is not expected.",
+            "There are no FDA-approved or NCCN-compendium listed treatments specifically for patients with KIT D820E mutant AML with t(8;21)(q22;q22.1);RUNX1-RUNX1T1.", indicatorQueryResp.getTumorTypeSummary());
 
         /**
          * Comparing between two queries

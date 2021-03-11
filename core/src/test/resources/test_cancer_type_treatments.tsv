@@ -7,13 +7,13 @@
 # Test KIT
 KIT	N505I	Gastrointestinal Stromal Tumor	1: Imatinib; 1: Sunitinib; 1: Regorafenib; 1: Ripretinib;
 KIT	N505I	Gastrointestinal Stromal Tumor	1: Imatinib; 1: Sunitinib; 1: Regorafenib; 1: Ripretinib;
-KIT	N505I	Melanoma	2: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Ripretinib;
+KIT	N505I	Melanoma	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Ripretinib;
 KIT	N505I	Colorectal Cancer	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Ripretinib;
 KIT	N505I	Thymic Tumor	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Ripretinib;
-KIT	N505L	Gastrointestinal Stromal Tumor	3B: Imatinib;
-KIT	N505L	Melanoma	2: Imatinib;
-KIT	N505L	Colorectal Cancer	3B: Imatinib;
-KIT	N505L	Thymic Tumor	3B: Imatinib;
+KIT	N505L	Gastrointestinal Stromal Tumor
+KIT	N505L	Melanoma
+KIT	N505L	Colorectal Cancer
+KIT	N505L	Thymic Tumor
 KIT	M541L	Gastrointestinal Stromal Tumor
 KIT	M541L	Melanoma
 KIT	M541L	Colorectal Cancer
@@ -38,60 +38,69 @@ KIT	D737N	Gastrointestinal Stromal Tumor
 KIT	D737N	Melanoma
 KIT	D737N	Colorectal Cancer
 KIT	D737N	Thymic Tumor
-KIT	C809G	Gastrointestinal Stromal Tumor	1: Imatinib; 1: Sunitinib; 1: Regorafenib; 1: Ripretinib; R2: Imatinib; R2: Sunitinib;
-KIT	C809G	Melanoma	2: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Ripretinib;
-KIT	C809G	Colorectal Cancer	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Ripretinib;
-KIT	C809G	Thymic Tumor	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Ripretinib;
+KIT	C809G	Gastrointestinal Stromal Tumor	1: Imatinib; 1: Sunitinib; 1: Regorafenib; 1: Ripretinib; 2: Sorafenib; 4: Nilotinib; 4: Pazopanib; R2: Imatinib; R2: Sunitinib;
+KIT	C809G	Melanoma	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Sorafenib; 3B: Ripretinib;
+KIT	C809G	Colorectal Cancer	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Sorafenib; 3B: Ripretinib;
+KIT	C809G	Thymic Tumor	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Sorafenib; 3B: Ripretinib;
 KIT	K642E	Gastrointestinal Stromal Tumor	1: Imatinib; 1: Sunitinib; 1: Regorafenib; 1: Ripretinib;
 KIT	K642E	Melanoma	2: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Ripretinib;
 KIT	K642E	Colorectal Cancer	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Ripretinib;
 KIT	K642E	Thymic Tumor	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Ripretinib;
-KIT	K642G	Gastrointestinal Stromal Tumor	3B: Imatinib;
-KIT	K642G	Melanoma	2: Imatinib;
-KIT	K642G	Colorectal Cancer	3B: Imatinib;
-KIT	K642G	Thymic Tumor	3B: Imatinib;
+KIT	K642G	Gastrointestinal Stromal Tumor
+KIT	K642G	Melanoma
+KIT	K642G	Colorectal Cancer
+KIT	K642G	Thymic Tumor
 KIT	V654A	Gastrointestinal Stromal Tumor	1: Imatinib; 1: Sunitinib; 1: Regorafenib; 1: Ripretinib; R2: Imatinib;
 KIT	V654A	Melanoma	2: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Ripretinib;
 KIT	V654A	Colorectal Cancer	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Ripretinib;
 KIT	V654A	Thymic Tumor	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Ripretinib;
-KIT	V654G	Gastrointestinal Stromal Tumor	3B: Imatinib;
-KIT	V654G	Melanoma	2: Imatinib;
-KIT	V654G	Colorectal Cancer	3B: Imatinib;
-KIT	V654G	Thymic Tumor	3B: Imatinib;
+KIT	V654G	Gastrointestinal Stromal Tumor
+KIT	V654G	Melanoma
+KIT	V654G	Colorectal Cancer
+KIT	V654G	Thymic Tumor
 KIT	T670I	Gastrointestinal Stromal Tumor	1: Imatinib; 1: Sunitinib; 1: Regorafenib; 1: Ripretinib; R2: Imatinib;
-KIT	T670I	Melanoma	2: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Ripretinib;
+KIT	T670I	Melanoma	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Ripretinib;
 KIT	T670I	Colorectal Cancer	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Ripretinib;
 KIT	T670I	Thymic Tumor	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Ripretinib;
-KIT	T670C	Gastrointestinal Stromal Tumor	3B: Imatinib;
-KIT	T670C	Melanoma	2: Imatinib;
-KIT	T670C	Colorectal Cancer	3B: Imatinib;
-KIT	T670C	Thymic Tumor	3B: Imatinib;
-KIT	D816A	Gastrointestinal Stromal Tumor	1: Imatinib; 1: Sunitinib; 1: Regorafenib; 1: Ripretinib; 3B: Avapritinib; R2: Imatinib; R2: Sunitinib;
-KIT	D816A	Melanoma	2: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Avapritinib; 3B: Ripretinib;
+KIT	T670C	Gastrointestinal Stromal Tumor
+KIT	T670C	Melanoma
+KIT	T670C	Colorectal Cancer
+KIT	T670C	Thymic Tumor
+KIT	D816A	Gastrointestinal Stromal Tumor	1: Imatinib; 1: Sunitinib; 1: Regorafenib; 1: Ripretinib; 2: Sorafenib; 3B: Avapritinib; 4: Nilotinib; 4: Pazopanib; R2: Imatinib; R2: Sunitinib;
+KIT	D816A	Melanoma	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Sorafenib; 3B: Avapritinib; 3B: Ripretinib;
 KIT	D816A	Colorectal Cancer 3B: Regorafenib; 3B: Sorafenib;
 KIT	D816A	Mastocytosis	3A: Avapritinib;
-KIT	D816A	Thymic Tumor	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Avapritinib; 3B: Ripretinib;
-KIT	Y823D	Gastrointestinal Stromal Tumor	1: Imatinib; 1: Sunitinib; 1: Regorafenib; 1: Ripretinib; R2: Imatinib; R2: Sunitinib;
-KIT	Y823D	Melanoma	2: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Ripretinib;
-KIT	Y823D	Thymic Tumor	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Ripretinib;
-KIT	Y823D	Colorectal Cancer	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Ripretinib;
-KIT	Y823G	Gastrointestinal Stromal Tumor	3B: Imatinib;
-KIT	Y823G	Melanoma	2: Imatinib;
-KIT	Y823G	Thymic Tumor	3B: Imatinib;
-KIT	Y823G	Colorectal Cancer	3B: Imatinib;
-KIT	A829P	Gastrointestinal Stromal Tumor	1: Imatinib; 1: Sunitinib; 1: Regorafenib; 1: Ripretinib; R2: Imatinib; R2: Sunitinib;
-KIT	A829P	Melanoma	2: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Ripretinib;
-KIT	A829P	Thymic Tumor	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Ripretinib;
-KIT	A829P	Colorectal Cancer	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Ripretinib;
-KIT	D820G	Gastrointestinal Stromal Tumor	1: Imatinib; 1: Sunitinib; 1: Regorafenib; 1: Ripretinib; R2: Imatinib; R2: Sunitinib;
-KIT	D820G	Melanoma	2: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Ripretinib;
-KIT	D820G	Thymic Tumor	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Ripretinib;
-KIT	D820G	Colorectal Cancer	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Ripretinib;
+KIT	D816A	Thymic Tumor	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Sorafenib; 3B: Avapritinib; 3B: Ripretinib;
+KIT	Y823D	Gastrointestinal Stromal Tumor	1: Imatinib; 1: Sunitinib; 1: Regorafenib; 1: Ripretinib; 2: Sorafenib; 4: Nilotinib; 4: Pazopanib; R2: Imatinib; R2: Sunitinib;
+KIT	Y823D	Melanoma	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Sorafenib; 3B: Ripretinib;
+KIT	Y823D	Thymic Tumor	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Sorafenib; 3B: Ripretinib;
+KIT	Y823D	Colorectal Cancer	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Sorafenib; 3B: Ripretinib;
+KIT	Y823G	Gastrointestinal Stromal Tumor
+KIT	Y823G	Melanoma
+KIT	Y823G	Thymic Tumor
+KIT	Y823G	Colorectal Cancer
+KIT	A829P	Gastrointestinal Stromal Tumor	1: Imatinib; 1: Sunitinib; 1: Regorafenib; 1: Ripretinib; 2: Sorafenib; 4: Nilotinib; 4: Pazopanib; R2: Imatinib; R2: Sunitinib;
+KIT	A829P	Melanoma	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Sorafenib; 3B: Ripretinib;
+KIT	A829P	Thymic Tumor	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Sorafenib; 3B: Ripretinib;
+KIT	A829P	Colorectal Cancer	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Sorafenib; 3B: Ripretinib;
+KIT	D820G	Gastrointestinal Stromal Tumor	1: Imatinib; 1: Sunitinib; 1: Regorafenib; 1: Ripretinib; 2: Sorafenib; 4: Nilotinib; 4: Pazopanib; R2: Imatinib; R2: Sunitinib;
+KIT	D820G	Melanoma	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Sorafenib; 3B: Ripretinib;
+KIT	D820G	Thymic Tumor	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Sorafenib; 3B: Ripretinib;
+KIT	D820G	Colorectal Cancer	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Sorafenib; 3B: Ripretinib;
 KIT	D820G	Mastocytosis
-KIT	N822E	Gastrointestinal Stromal Tumor	1: Imatinib; 1: Sunitinib; 1: Regorafenib; 1: Ripretinib; R2: Imatinib; R2: Sunitinib;
-KIT	N822E	Melanoma	2: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Ripretinib;
-KIT	N822E	Thymic Tumor	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Ripretinib;
-KIT	N822E	Colorectal Cancer	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Ripretinib;
+KIT	N822E	Gastrointestinal Stromal Tumor	1: Imatinib; 1: Sunitinib; 1: Regorafenib; 1: Ripretinib; 2: Sorafenib; 4: Nilotinib; 4: Pazopanib; R2: Imatinib; R2: Sunitinib;
+KIT	N822E	Melanoma	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Sorafenib; 3B: Ripretinib;
+KIT	N822E	Thymic Tumor	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Sorafenib; 3B: Ripretinib;
+KIT	N822E	Colorectal Cancer	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Sorafenib; 3B: Ripretinib;
+
+# L2 should be included for few exon 11/13 mutations
+KIT	L576P	Melanoma	2: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Ripretinib;
+KIT	L576P	Colorectal Cancer	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Ripretinib;
+KIT	L576P	AML
+KIT	V654A	Melanoma	2: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Ripretinib;
+KIT	V654A	Colorectal Cancer	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Ripretinib;
+KIT	V654A	AML
+
 MTOR	L2427Q	Renal Clear Cell Carcinoma	3A: Temsirolimus; 4: Everolimus;
 PDGFRA	D842I	GIST	2: Imatinib; 2: Sunitinib; 2: Regorafenib; 2: Ripretinib;
 PDGFRA	D842I	Thymic Tumor	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Ripretinib;
@@ -121,7 +130,7 @@ PDGFRA	D842H	Melanoma	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Ripretin
 BTK	C481S	Chronic Lymphocytic Leukemia/Small Lymphocytic Lymphoma	R1: Ibrutinib;
 
 # this is R2 in production but the R2 data is not ready for public release yet
-BTK	R28S	Chronic Lymphocytic Leukemia/Small Lymphocytic Lymphoma
+BTK	T316A	Chronic Lymphocytic Leukemia/Small Lymphocytic Lymphoma
 
 # Test Heme
 FLT3	Internal Tandem Duplication	AML	1: Gilteritinib; 1: Midostaurin+High Dose Chemotherapy; 3A: Sorafenib; 3A: Crenolanib; 3A: Quizartinib;
