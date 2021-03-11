@@ -4,14 +4,19 @@ import com.google.common.collect.Sets;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
+import org.json.simple.parser.ParseException;
 import org.mskcc.cbio.oncokb.apiModels.Citations;
 import org.mskcc.cbio.oncokb.apiModels.Implication;
 import org.mskcc.cbio.oncokb.apiModels.MutationEffectResp;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.TumorType;
+import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.ClinicalTrial;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import static org.mskcc.cbio.oncokb.util.LevelUtils.getTherapeuticLevelsWithPriorityLIstIterator;
@@ -22,7 +27,7 @@ import static org.mskcc.cbio.oncokb.util.LevelUtils.getTherapeuticLevelsWithPrio
 public class IndicatorUtils {
     public static IndicatorQueryResp processQuery(Query query,
                                                   Set<LevelOfEvidence> levels, Boolean highestLevelOnly,
-                                                  Set<EvidenceType> evidenceTypes) {
+                                                  Set<EvidenceType> evidenceTypes) throws UnsupportedEncodingException, IOException, ParseException {
         highestLevelOnly = highestLevelOnly == null ? false : highestLevelOnly;
 
         levels = levels == null ? LevelUtils.getPublicLevels() :
@@ -722,7 +727,7 @@ public class IndicatorUtils {
         return otherSignificantLevels;
     }
 
-    private static List<IndicatorQueryTreatment> getIndicatorQueryTreatments(Set<Evidence> evidences, String queryHugoSymbol, Boolean filterSameTreatment) {
+    private static List<IndicatorQueryTreatment> getIndicatorQueryTreatments(Set<Evidence> evidences, String queryHugoSymbol, Boolean filterSameTreatment) throws UnsupportedEncodingException, IOException, ParseException {
         List<IndicatorQueryTreatment> treatments = new ArrayList<>();
         if (evidences != null) {
             Map<LevelOfEvidence, Set<Evidence>> evidenceSetMap = EvidenceUtils.separateEvidencesByLevel(evidences);
@@ -781,6 +786,7 @@ public class IndicatorUtils {
                                 indicatorQueryTreatment.setAlterations(alterationsMap.get(treatment));
                                 indicatorQueryTreatment.setLevelAssociatedCancerType(tumorType);
                                 indicatorQueryTreatment.setDescription(SummaryUtils.enrichDescription(descriptionMap.get(treatment), queryHugoSymbol));
+                                indicatorQueryTreatment.setClinicalTrials(ClinicalTrialsUtils.getInstance().filterTrialsForIndicatorQueryTreatment(tumorType.getName(), treatment.getDrugs().stream().map(drug -> drug.getDrugName()).collect(Collectors.toSet())));
                                 treatments.add(indicatorQueryTreatment);
                             }
                         }

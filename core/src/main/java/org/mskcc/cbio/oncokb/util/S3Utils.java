@@ -1,4 +1,4 @@
-package org.mskcc.cbio.oncokb.service;
+package org.mskcc.cbio.oncokb.util;
 
 import java.io.File;
 import java.util.Optional;
@@ -10,13 +10,11 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.S3Object;
 
-import org.mskcc.cbio.oncokb.util.PropertiesUtils;
-
-public class S3Service {
+public class S3Utils {
     private AWSCredentials credentials;
     private AmazonS3 s3client;
 
-    public S3Service(){
+    public S3Utils(){
         String s3AccessKey = PropertiesUtils.getProperties("aws.s3.accessKey");
         String s3SecretKey = PropertiesUtils.getProperties("aws.s3.secretKey");
         String s3Region = PropertiesUtils.getProperties("aws.s3.region");

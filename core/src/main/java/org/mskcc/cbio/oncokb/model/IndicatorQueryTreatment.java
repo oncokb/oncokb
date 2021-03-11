@@ -2,6 +2,8 @@ package org.mskcc.cbio.oncokb.model;
 
 
 import org.mskcc.cbio.oncokb.apiModels.TumorType;
+import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.ClinicalTrial;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -20,6 +22,7 @@ public class IndicatorQueryTreatment implements java.io.Serializable {
     private Set<String> pmids = new HashSet<String>(0);
     private Set<ArticleAbstract> abstracts = new HashSet<ArticleAbstract>(0);
     private String description = "";
+    private List<ClinicalTrial> clinicalTrials = new ArrayList<>();
 
     public IndicatorQueryTreatment() {
     }
@@ -88,6 +91,7 @@ public class IndicatorQueryTreatment implements java.io.Serializable {
         this.abstracts = abstracts;
     }
 
+    
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -112,6 +116,14 @@ public class IndicatorQueryTreatment implements java.io.Serializable {
         result = 31 * result + (getPmids() != null ? getPmids().hashCode() : 0);
         result = 31 * result + (getAbstracts() != null ? getAbstracts().hashCode() : 0);
         return result;
+    }
+
+    public List<ClinicalTrial> getClinicalTrials() {
+        return clinicalTrials;
+    }
+
+    public void setClinicalTrials(List<ClinicalTrial> clinicalTrials) {
+        this.clinicalTrials = clinicalTrials;
     }
 }
 

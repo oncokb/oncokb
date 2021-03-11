@@ -11,6 +11,10 @@ import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
 import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.Coordinates;
 
+/**
+ * Created by Yifu Yao on 3/4/2021
+ */
+
 public class OpenStreetMapUtils {
     public final static Logger log = Logger.getLogger("OpenStreeMapUtils");
 

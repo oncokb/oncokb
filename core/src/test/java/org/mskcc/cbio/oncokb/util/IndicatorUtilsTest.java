@@ -6,11 +6,15 @@ import org.mskcc.cbio.oncokb.apiModels.MainType;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.apiModels.TumorType;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import com.google.gson.Gson;
 
 import static org.junit.Assert.*;
 import static org.mskcc.cbio.oncokb.Constants.*;
@@ -20,6 +24,27 @@ import static org.mskcc.cbio.oncokb.util.SummaryUtils.ONCOGENIC_MUTATIONS_DEFAUL
  * Created by Hongxin on 12/23/16.
  */
 public class IndicatorUtilsTest {
+    /**
+     * Removed after all features implemented
+     */
+    @Test
+    public void testWithClinicalTrials() throws Exception{
+     // hugoSymbol=BRAF&alteration=V600E&referenceGenome=GRCh37&tumorType=Melanoma
+        Query query = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "BRAF", "V600E", null, null, "Melanoma", null, null, null, null);
+        IndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
+        Gson gson = new Gson();
+      
+        try {
+            FileWriter file = new FileWriter("C:\\Users\\Yifu\\Desktop\\test.json");
+            file.write(gson.toJson(indicatorQueryResp));
+            file.flush();
+            file.close();
+            System.out.println("FInished");
+        } catch (IOException e) {
+        }
+    }
+
+
     @Test
     public void testProcessQuery() throws Exception {
         // We do not check gene/variant/tumor type summaries here. The test will be done in SummaryUtilsTest.
