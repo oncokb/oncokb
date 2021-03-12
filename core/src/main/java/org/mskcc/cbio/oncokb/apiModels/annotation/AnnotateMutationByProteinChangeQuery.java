@@ -9,6 +9,8 @@ public class AnnotateMutationByProteinChangeQuery extends AnnotationQuery implem
     private String consequence;
     private Integer proteinStart;
     private Integer proteinEnd;
+    private String address;
+    private Double distance;
 
     public QueryGene getGene() {
         return gene;
@@ -48,5 +50,21 @@ public class AnnotateMutationByProteinChangeQuery extends AnnotationQuery implem
 
     public void setProteinEnd(Integer proteinEnd) {
         this.proteinEnd = proteinEnd;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public Double getDistance() {
+        return distance;
+    }
+
+    public void setDistance(Double distance) {
+        this.distance = distance;
     }
 }

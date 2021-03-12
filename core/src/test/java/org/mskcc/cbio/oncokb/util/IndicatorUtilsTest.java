@@ -31,8 +31,10 @@ public class IndicatorUtilsTest {
     public void testWithClinicalTrials() throws Exception{
      // hugoSymbol=BRAF&alteration=V600E&referenceGenome=GRCh37&tumorType=Melanoma
         Query query = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "BRAF", "V600E", null, null, "Melanoma", null, null, null, null);
-        IndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
         Gson gson = new Gson();
+
+        IndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
+        indicatorQueryResp = IndicatorUtils.filterClinicalTrialsByLocation(indicatorQueryResp, "Columbia, MO", "United States", null);
       
         try {
             FileWriter file = new FileWriter("C:\\Users\\Yifu\\Desktop\\test.json");

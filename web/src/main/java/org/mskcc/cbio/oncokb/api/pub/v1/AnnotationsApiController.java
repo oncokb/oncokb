@@ -12,6 +12,7 @@ import org.mskcc.cbio.oncokb.util.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -53,6 +54,9 @@ public class AnnotationsApiController {
         , @ApiParam(value = "Protein End. Example: 600") @RequestParam(value = "proteinEnd", required = false) Integer proteinEnd
         , @ApiParam(value = "OncoTree(http://oncotree.info) tumor type name. The field supports OncoTree Code, OncoTree Name and OncoTree Main type. Example: Melanoma") @RequestParam(value = "tumorType", required = false) String tumorType
         , @ApiParam(value = EVIDENCE_TYPES_DESCRIPTION) @RequestParam(value = "evidenceType", required = false) String evidenceTypes
+        , @ApiParam(value = "The address of your location. Support zip code. Must be spcified with country. Example: New York City, NY") @RequestParam(value = "address", required = false) String address
+        , @ApiParam(value = "The country of your location. Must be specified with address. Example: United States") @RequestParam(value = "country", required = false) String country
+        , @ApiParam(value = "The radius from your location. Must be specified with address and country. Example: 100, which means all trails have any site locates within 100 km from your location. If not specify, the default distance is 100km.") @RequestParam(value = "distance", required = false) Double distance
     ) throws UnsupportedEncodingException, IOException, ParseException {
         HttpStatus status = HttpStatus.OK;
         IndicatorQueryResp indicatorQueryResp = null;
@@ -69,6 +73,7 @@ public class AnnotationsApiController {
             }
             Query query = new Query(null, matchedRG, AnnotationQueryType.REGULAR.getName(), entrezGeneId, hugoSymbol, proteinChange, null, null, tumorType, consequence, proteinStart, proteinEnd, null);
             indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
+            indicatorQueryResp = IndicatorUtils.filterClinicalTrialsByLocation(indicatorQueryResp, address, country, distance);
         }
         return new ResponseEntity<>(indicatorQueryResp, status);
     }
@@ -79,11 +84,12 @@ public class AnnotationsApiController {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = IndicatorQueryResp.class, responseContainer = "List"),
         @ApiResponse(code = 400, message = "Error, error message will be given.", response = String.class)})
-    @RequestMapping(value = "/annotate/mutations/byProteinChange",
+    @RequestMapping(value = "/annotate/mutations/byProteinChange/{country}",
         consumes = {"application/json"},
         produces = {"application/json"},
         method = RequestMethod.POST)
     public ResponseEntity<List<IndicatorQueryResp>> annotateMutationsByProteinChangePost(
+        @PathVariable String country,
         @ApiParam(value = "List of queries. Please see swagger.json for request body format.", required = true) @RequestBody() List<AnnotateMutationByProteinChangeQuery> body
     ) throws UnsupportedEncodingException, IOException, ParseException {
         HttpStatus status = HttpStatus.OK;
@@ -93,7 +99,9 @@ public class AnnotationsApiController {
             status = HttpStatus.BAD_REQUEST;
         } else {
             for (AnnotateMutationByProteinChangeQuery query : body) {
-                result.add(IndicatorUtils.processQuery(new Query(query), null, false, query.getEvidenceTypes()));
+                IndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuery(new Query(query), null, false, query.getEvidenceTypes());
+                indicatorQueryResp = IndicatorUtils.filterClinicalTrialsByLocation(indicatorQueryResp, query.getAddress(), country, query.getDistance());
+                result.add(indicatorQueryResp);
             }
         }
         return new ResponseEntity<>(result, status);

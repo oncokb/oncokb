@@ -79,29 +79,34 @@ public class ClinicalTrialsUtils {
     }
 
     public List<ClinicalTrial> filterTrialsByTreatment(List<ClinicalTrial> trials, String treatment) {
-        List<ClinicalTrial> res = new ArrayList<>();
-        Set<String> drugs = Arrays.stream(treatment.split("\\+")).map(item -> item.trim().toLowerCase())
-                .collect(Collectors.toSet());
-
-        res = filterTrialsByDrugNameOrCode(trials, drugs);
-        return res;
+        if (treatment != null && !treatment.isEmpty()) {
+            List<ClinicalTrial> res = new ArrayList<>();
+            Set<String> drugs = Arrays.stream(treatment.split("\\+")).map(item -> item.trim().toLowerCase())
+            .collect(Collectors.toSet());
+            res = filterTrialsByDrugNameOrCode(trials, drugs);
+            return res;
+        }
+        return trials;
     }
 
     public List<ClinicalTrial> filterTrialsByDrugNameOrCode(List<ClinicalTrial> trials, Set<String> drugs) {
-        List<ClinicalTrial> res = new ArrayList<>();
-        drugs = drugs.stream().map(drug -> drug.toLowerCase()).collect(Collectors.toSet());
-        for (ClinicalTrial trial : trials) {
-            for (Arms arm : trial.getArms()) {
-                if (Stream
-                        .concat(arm.getDrugs().stream().map(drug -> drug.getNcitCode().toLowerCase()),
-                                arm.getDrugs().stream().map(drug -> drug.getDrugName().toLowerCase()))
-                        .collect(Collectors.toSet()).containsAll(drugs)) {
-                    res.add(trial);
-                    break;
+        if (!drugs.isEmpty()){
+            List<ClinicalTrial> res = new ArrayList<>();
+            drugs = drugs.stream().map(drug -> drug.toLowerCase()).collect(Collectors.toSet());
+            for (ClinicalTrial trial : trials) {
+                for (Arms arm : trial.getArms()) {
+                    if (Stream
+                            .concat(arm.getDrugs().stream().map(drug -> drug.getNcitCode().toLowerCase()),
+                                    arm.getDrugs().stream().map(drug -> drug.getDrugName().toLowerCase()))
+                            .collect(Collectors.toSet()).containsAll(drugs)) {
+                        res.add(trial);
+                        break;
+                    }
                 }
             }
+            return res;
         }
-        return res;
+        return trials;
     }
 
     public List<ClinicalTrial> filterTrialsBySpecialCancerType(JSONObject tumors, SpecialTumorType specialTumorType) {
@@ -171,43 +176,41 @@ public class ClinicalTrialsUtils {
     }
 
     public List<ClinicalTrial> filterTrialsByLocation(List<ClinicalTrial> trials, String location, Double distance) {
-        List<ClinicalTrial> res = new ArrayList<>();
-        Coordinates ori = OpenStreetMapUtils.getInstance().getCoordinates(location);
-        for (ClinicalTrial trial : trials) {
-            for (Site site : trial.getSites()) {
-                Coordinates des = site.getOrg().getCoordinates();
-                if (des == null) {
-                    if (site.getOrg().getCity() != null && site.getOrg().getState() != null
-                            && site.getOrg().getCountry() != null) {
-                        String address = String.format("%s, %s, %s", site.getOrg().getCity(), site.getOrg().getState(),
-                                site.getOrg().getCountry());
-                        des = OpenStreetMapUtils.getInstance().getCoordinates(address);
-                    } else
-                        continue;
-                }
-                if (OpenStreetMapUtils.getInstance().calculateDistance(ori, des) <= distance) {
-                    res.add(trial);
-                    break;
+        if (location != null){
+            if (distance == null) distance = 100.0;
+            List<ClinicalTrial> res = new ArrayList<>();
+            Coordinates ori = OpenStreetMapUtils.getInstance().getCoordinates(location);
+            for (ClinicalTrial trial : trials) {
+                for (Site site : trial.getSites()) {
+                    Coordinates des = site.getOrg().getCoordinates();
+                    if (des == null) {
+                        if (site.getOrg().getCity() != null && site.getOrg().getState() != null
+                                && site.getOrg().getCountry() != null) {
+                            String address = String.format("%s, %s, %s", site.getOrg().getCity(), site.getOrg().getState(),
+                                    site.getOrg().getCountry());
+                            des = OpenStreetMapUtils.getInstance().getCoordinates(address);
+                        } else
+                            continue;
+                    }
+                    if (OpenStreetMapUtils.getInstance().calculateDistance(ori, des) <= distance) {
+                        res.add(trial);
+                        break;
+                    }
                 }
             }
-        }
-        return res;
-    }
-
-    public List<ClinicalTrial> filterTrialsBytreatmentAndLocation(List<ClinicalTrial> trials, String treatment, String location,
-            Double distance) {
-        if (treatment != null && !treatment.isEmpty()) {
-            trials = filterTrialsByTreatment(trials, treatment);
-        }
-        if (location != null) {
-            if (distance == null)
-                distance = 100.0;
-            trials = filterTrialsByLocation(trials, location, distance);
+            return res;
         }
         return trials;
     }
 
-    public List<ClinicalTrial> filterTrialsForIndicatorQueryTreatment(String cancerType, Set<String> drugs) throws UnsupportedEncodingException, IOException, ParseException{
+    public List<ClinicalTrial> filterTrialsBytreatmentAndLocation(List<ClinicalTrial> trials, String treatment, String location,
+            Double distance) {
+        trials = filterTrialsByTreatment(trials, treatment);
+        trials = filterTrialsByLocation(trials, location, distance);
+        return trials;
+    }
+
+    public List<ClinicalTrial> filterTrialsByTreatmentForIndicatorQueryTreatment(String cancerType, Set<String> drugs) throws UnsupportedEncodingException, IOException, ParseException{
         JSONObject object = getMappingObject();
         List<ClinicalTrial> trials = filterTrialsByCancerType(object, cancerType);
         List<ClinicalTrial> res = filterTrialsByDrugNameOrCode(trials, drugs);

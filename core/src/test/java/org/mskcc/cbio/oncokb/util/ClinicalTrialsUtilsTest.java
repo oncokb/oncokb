@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -104,6 +105,7 @@ public class ClinicalTrialsUtilsTest{
             JSONObject jsonObject = ClinicalTrialsUtils.getInstance().getMappingObject();
             long start = System.currentTimeMillis();
             List<ClinicalTrial> trials = ClinicalTrialsUtils.getInstance().filterTrialsByCancerType(jsonObject, "Melanoma");
+            System.out.println(trials.size());
             List<ClinicalTrial> res = ClinicalTrialsUtils.getInstance().filterTrialsByLocation(trials, "Columbia, MO, United States", 100.0);
             long end = System.currentTimeMillis();
             System.out.println(end - start + " s : " + res.size());         
@@ -134,7 +136,7 @@ public class ClinicalTrialsUtilsTest{
                 file.write(gson.toJson(trials));
                 file.flush();
                 file.close();
-                System.out.println("FInished");
+                System.out.println("Finished");
             } catch (IOException e) {
             }
         } catch (IOException | ParseException e) {
