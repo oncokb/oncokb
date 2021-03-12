@@ -1,5 +1,7 @@
 package org.mskcc.cbio.oncokb.apiModels.annotation;
 
+import java.util.Objects;
+
 /**
  * Created by Hongxin Zhang on 2019-03-25.
  */
@@ -29,5 +31,10 @@ public class QueryGene implements java.io.Serializable {
 
     public void setHugoSymbol(String hugoSymbol) {
         this.hugoSymbol = hugoSymbol;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getEntrezGeneId(), getHugoSymbol());
     }
 }

@@ -1,5 +1,7 @@
 package org.mskcc.cbio.oncokb.apiModels.annotation;
 
+import java.util.Objects;
+
 /**
  * Created by Hongxin Zhang on 2019-03-25.
  */
@@ -48,5 +50,10 @@ public class AnnotateMutationByProteinChangeQuery extends AnnotationQuery implem
 
     public void setProteinEnd(Integer proteinEnd) {
         this.proteinEnd = proteinEnd;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), getGene(), getAlteration(), getConsequence(), getProteinStart(), getProteinEnd());
     }
 }
