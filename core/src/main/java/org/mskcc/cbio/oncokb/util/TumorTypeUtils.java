@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 
 
 public class TumorTypeUtils {
-    private static final String ONCO_TREE_ONCOKB_VERSION = "oncotree_2019_12_01";
     private static String ONCO_TREE_API_URL = null;
     private static final ImmutableList<String> LiquidTumorTissues = ImmutableList.of(
         "Lymph", "Blood", "Lymphoid", "Myeloid"
@@ -242,12 +241,8 @@ public class TumorTypeUtils {
         return tumorTypes.stream().map(tumorType -> getTumorTypeName(tumorType)).collect(Collectors.joining(", "));
     }
 
-    public static String getOncoTreeVersion() {
-        return ONCO_TREE_ONCOKB_VERSION;
-    }
-
     public static Map<String, org.mskcc.oncotree.model.TumorType> getAllNestedOncoTreeSubtypesFromSource() {
-        String url = getOncoTreeApiUrl() + "tumorTypes?version=" + ONCO_TREE_ONCOKB_VERSION + "&flat=false";
+        String url = getOncoTreeApiUrl() + "tumorTypes?version=" + CacheUtils.getInfo().getOncoTreeVersion() + "&flat=false";
         Map<String, org.mskcc.oncotree.model.TumorType> result = new HashMap<>();
         try {
             String json = IOUtils.toString(new InputStreamReader(TumorTypeUtils.class.getResourceAsStream("/data/oncotree/tumortypes.json")));
@@ -256,7 +251,7 @@ public class TumorTypeUtils {
             org.mskcc.oncotree.model.TumorType oncoTreeTumorType = new ObjectMapper().convertValue(data.get("TISSUE"), org.mskcc.oncotree.model.TumorType.class);
             result.put("TISSUE", oncoTreeTumorType);
         } catch (Exception e) {
-            System.out.println("You need to include oncotree nested file. Endpoint: tumorTypes?version=" + ONCO_TREE_ONCOKB_VERSION + "&flat=false");
+            System.out.println("You need to include oncotree nested file. Endpoint: tumorTypes?version=" + CacheUtils.getInfo().getOncoTreeVersion() + "&flat=false");
             e.printStackTrace();
         }
         return result;
@@ -277,7 +272,7 @@ public class TumorTypeUtils {
                 tumorTypes.add(tumorType);
             }
         } catch (Exception e) {
-            System.out.println("You need to include oncotree flat file. Endpoint: tumorTypes?version=" + ONCO_TREE_ONCOKB_VERSION + "&flat=true");
+            System.out.println("You need to include oncotree flat file. Endpoint: tumorTypes?version=" + CacheUtils.getInfo().getOncoTreeVersion() + "&flat=true");
             e.printStackTrace();
         }
         return tumorTypes;

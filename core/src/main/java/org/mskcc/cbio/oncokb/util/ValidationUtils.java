@@ -45,38 +45,6 @@ public class ValidationUtils {
         return data;
     }
 
-    public static JSONArray getMismatchRefAAData() {
-        JSONArray data = new JSONArray();
-        for (Alteration alteration : AlterationUtils.getAllAlterations()) {
-            if (alteration.getGene().getEntrezGeneId() > 0 && alteration.getProteinStart() >= 0 && alteration.getReferenceGenomes() != null && alteration.getRefResidues() != null) {
-                String sequence = "";
-                ReferenceGenome referenceGenome = null;
-                for (ReferenceGenome ref : alteration.getReferenceGenomes()) {
-                    sequence = SequenceUtils.getSequence(ref, alteration.getGene().getEntrezGeneId());
-                    if (!StringUtils.isNullOrEmpty(sequence)) {
-                        referenceGenome = ref;
-                        break;
-                    }
-                }
-                if (StringUtils.isNullOrEmpty(sequence)) {
-                    data.put(getErrorMessage(getTarget(alteration.getGene().getHugoSymbol(), alteration.getName()), "No sequence available for " + alteration.getGene().getHugoSymbol()));
-                } else if (referenceGenome != null) {
-                    if (sequence.length() < alteration.getProteinStart()) {
-                        data.put(getErrorMessage(getTarget(alteration.getGene().getHugoSymbol(), alteration.getName()), "The gene only has " + sequence.length() + " AAs. But the variant protein start is " + alteration.getProteinStart()));
-                    } else if (sequence.length() < alteration.getProteinEnd()) {
-                        data.put(getErrorMessage(getTarget(alteration.getGene().getHugoSymbol(), alteration.getName()), "The gene only has " + sequence.length() + " AAs. But the variant protein end is " + alteration.getProteinEnd()));
-                    } else {
-                        String referenceAA = SequenceUtils.getAminoAcid(referenceGenome, alteration.getGene().getEntrezGeneId(), alteration.getProteinStart(), alteration.getRefResidues().length());
-                        if (!referenceAA.equals(alteration.getRefResidues())) {
-                            data.put(getErrorMessage(getTarget(alteration.getGene().getHugoSymbol(), alteration.getName()), "The reference amino acid does not match with the curated variant. The expected AA is " + referenceAA));
-                        }
-                    }
-                }
-            }
-        }
-        return data;
-    }
-
     public static JSONArray getEmptyBiologicalVariants() {
         final String NO_ONCOGENECITY = "No oncogenicity is specified";
         final String NO_MUTATION_EFFECT = "No mutation effect is specified";
@@ -284,6 +252,7 @@ public class ValidationUtils {
         names.addAll(NamingUtils.getAllAbbreviations());
         names.addAll(NamingUtils.getAllAbbreviationFullNames());
         names.add("MSI-H");
+        names.add("TMB-H");
         names.add("M1?");
         return names;
     }
@@ -329,30 +298,30 @@ public class ValidationUtils {
         }
     }
 
-    private static JSONObject getErrorMessage(String target, String reason) {
+    public static JSONObject getErrorMessage(String target, String reason) {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("target", target);
         jsonObject.put("reason", reason);
         return jsonObject;
     }
 
-    private static String getTarget(String hugoSymbol) {
+    public static String getTarget(String hugoSymbol) {
         return getTarget(hugoSymbol, null);
     }
 
-    private static String getTarget(String hugoSymbol, String alteration) {
+    public static String getTarget(String hugoSymbol, String alteration) {
         return getTarget(hugoSymbol, alteration, null);
     }
 
-    private static String getTarget(String hugoSymbol, String alteration, String tumorType) {
+    public static String getTarget(String hugoSymbol, String alteration, String tumorType) {
         return getTarget(hugoSymbol, alteration, tumorType, null);
     }
 
-    private static String getTarget(String hugoSymbol, String alteration, String tumorType, String treatment) {
+    public static String getTarget(String hugoSymbol, String alteration, String tumorType, String treatment) {
         return getTarget(hugoSymbol, null, alteration, tumorType, treatment);
     }
 
-    private static String getTarget(String hugoSymbol, EvidenceType evidenceType, String alteration, String tumorType, String treatment) {
+    public static String getTarget(String hugoSymbol, EvidenceType evidenceType, String alteration, String tumorType, String treatment) {
         List<String> items = new ArrayList<>();
         if (!StringUtils.isNullOrEmpty(hugoSymbol)) {
             items.add(hugoSymbol);

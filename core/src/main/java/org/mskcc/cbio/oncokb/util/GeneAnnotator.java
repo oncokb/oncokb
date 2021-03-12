@@ -21,7 +21,7 @@ public final class GeneAnnotator {
         throw new AssertionError();
     }
 
-    private static final String URL_MY_GENE_INFO_3 = "http://mygene.info/v3/";
+    private static final String URL_MY_GENE_INFO_3 = "https://mygene.info/v3/";
     private static final String CBIOPORTAL_GENES_ENDPOINT = "https://www.cbioportal.org/api/genes/";
 
 
@@ -121,10 +121,8 @@ public final class GeneAnnotator {
 
     private static List<Gene> getGenesFromMyGeneInfo(List<Integer> entrezGeneIds) {
         List<Gene> genes = new ArrayList<>();
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("ids", entrezGeneIds.stream().map(id -> id.toString()).collect(Collectors.joining(",")));
         try {
-            String response = HttpUtils.postRequest(URL_MY_GENE_INFO_3 + "gene?fields=entrezgene,symbol,alias", jsonObject.toString());
+            String response = HttpUtils.postRequestUrlParams(URL_MY_GENE_INFO_3 + "gene?fields=entrezgene,symbol,alias", "ids=" + entrezGeneIds.stream().map(id -> id.toString()).collect(Collectors.joining(",")));
             JSONArray jsonArray = new JSONArray(response);
             for (int i = 0; i < jsonArray.length(); i++) {
                 genes.add(parseGeneFromMyGeneInfo(jsonArray.getJSONObject(i)));

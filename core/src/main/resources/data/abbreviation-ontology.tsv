@@ -3,5 +3,7 @@ CTD	C-terminal domain
 KDD	kinase domain duplication
 ITD	internal tandem duplication
 TMB	Tumor Mutational Burden
+TMB-H	Tumor Mutational Burden-High
+MSI	Microsatellite Instability
 MSI-H	Microsatellite Instability-High
 VUS	Variants of Unknown Significance

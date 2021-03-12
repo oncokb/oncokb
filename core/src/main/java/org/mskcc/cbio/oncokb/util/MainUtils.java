@@ -29,7 +29,9 @@ public class MainUtils {
             Oncogenicity.LIKELY_NEUTRAL,
             Oncogenicity.PREDICTED,
             Oncogenicity.LIKELY,
-            Oncogenicity.YES)
+            Oncogenicity.YES,
+            Oncogenicity.RESISTANCE
+            )
     );
     private static final List<MutationEffect> PRIORITIZED_MUTATION_EFFECTS = Collections.unmodifiableList(
         Arrays.asList(MutationEffect.GAIN_OF_FUNCTION,
@@ -401,6 +403,7 @@ public class MainUtils {
         if (oncogenicity == null)
             return false;
         Set<Oncogenicity> oncogenicities = new HashSet<>();
+        oncogenicities.add(Oncogenicity.RESISTANCE);
         oncogenicities.add(Oncogenicity.YES);
         oncogenicities.add(Oncogenicity.LIKELY);
         oncogenicities.add(Oncogenicity.PREDICTED);
