@@ -14,6 +14,6 @@ import org.springframework.stereotype.Controller;
 public class InfoApiController implements InfoApi {
     @Override
     public ResponseEntity<OncoKBInfo> infoGet() {
-        return new ResponseEntity<>(new OncoKBInfo(CacheUtils.getInfo()), HttpStatus.OK);
+        return new ResponseEntity<>(new OncoKBInfo(), HttpStatus.OK);
     }
 }

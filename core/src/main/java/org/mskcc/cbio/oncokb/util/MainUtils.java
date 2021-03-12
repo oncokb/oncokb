@@ -20,8 +20,6 @@ import java.util.*;
  * Created by Hongxin Zhang on 4/5/16.
  */
 public class MainUtils {
-    static String DataVersion = null;
-    static String DataVersionDate = null;
     private static final List<Oncogenicity> PRIORITIZED_ONCOGENICITY = Collections.unmodifiableList(
         Arrays.asList(
             Oncogenicity.UNKNOWN,
@@ -284,31 +282,13 @@ public class MainUtils {
     }
 
     public static String getDataVersion() {
-        if (DataVersion == null) {
-            DataVersion = getProperty("data.version");
-        }
-        return DataVersion;
+        return CacheUtils.getInfo().getDataVersion();
     }
 
     public static String getDataVersionDate() {
-        if (DataVersionDate == null) {
-            DataVersionDate = getProperty("data.version_date");
-        }
-        return DataVersionDate;
-    }
-
-    private static String getProperty(String propertyName) {
-        String version = "";
-        if (propertyName != null) {
-            try {
-                String tmpData = PropertiesUtils.getProperties(propertyName);
-                if (tmpData != null) {
-                    version = tmpData;
-                }
-            } catch (Exception e) {
-            }
-        }
-        return version;
+        Date dataVersionDate = CacheUtils.getInfo().getDataVersionDate();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
+        return dateFormat.format(dataVersionDate);
     }
 
     public static String listToString(List<String> list, String separator) {
