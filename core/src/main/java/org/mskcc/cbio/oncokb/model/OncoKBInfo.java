@@ -1,7 +1,9 @@
 package org.mskcc.cbio.oncokb.model;
 
 import org.mskcc.cbio.oncokb.apiModels.InfoLevel;
+import org.mskcc.cbio.oncokb.util.CacheUtils;
 import org.mskcc.cbio.oncokb.util.LevelUtils;
+import org.mskcc.cbio.oncokb.util.MainUtils;
 import org.mskcc.cbio.oncokb.util.PropertiesUtils;
 
 import javax.sound.sampled.Line;
@@ -23,16 +25,16 @@ public class OncoKBInfo {
     String apiVersion;
     Boolean publicInstance;
 
-    public OncoKBInfo(Info info) {
+    public OncoKBInfo() {
+        Info info = CacheUtils.getInfo();
+
         this.oncoTreeVersion = info.getOncoTreeVersion();
         this.ncitVersion = info.getNcitVersion();
         this.levels = LevelUtils.getInfoLevels();
 
         Version dataVersion = new Version();
-        dataVersion.setVersion(info.getDataVersion());
-
-        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
-        dataVersion.setDate(dateFormat.format(info.getDataVersionDate()));
+        dataVersion.setVersion(MainUtils.getDataVersion());
+        dataVersion.setDate(MainUtils.getDataVersionDate());
 
         this.dataVersion = dataVersion;
         this.apiVersion = PUBLIC_API_VERSION;
