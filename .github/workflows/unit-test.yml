@@ -9,11 +9,21 @@ on:
 jobs:
   main:
     runs-on: ubuntu-latest
+    env:
+      MYSQL_USER: 'developer'
+      MYSQL_PASS: 'developer'
     steps:
       - uses: actions/checkout@v2
+        
+      - name: Shutdown Default MySQL (SUDO)
+        run: sudo service mysql stop # Shutdown the Default MySQL, "sudo" is necessary, please not remove it
 
-      - name: Start Default MySQL (SUDO)
-        run: sudo systemctl start mysql
+      - name: Set up MySQL
+        uses: mirromutth/mysql-action@v1.1
+        with:
+          mysql version: '5.7' # Optional, default value is "latest". The version of the MySQL
+          mysql user: ${{MYSQL_USER}}
+          mysql password: ${{MYSQL_PASS}}
 
       - name: Import Data
         env:
@@ -23,7 +33,7 @@ jobs:
           curl -s https://"${ONCOKB_OAUTH_TOKEN}"@raw.githubusercontent.com/knowledgesystems/oncokb-data/master/RELEASE/latest/"${MYSQL_FILE_NAME}" -O
 
           mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test"
-          zcat "${MYSQL_FILE_NAME}" | mysql -uroot -proot test
+          zcat "${MYSQL_FILE_NAME}" | mysql -u${MYSQL_USER} -p${MYSQL_PASS} test
 
       - uses: actions/setup-java@v1
         with:
