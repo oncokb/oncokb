@@ -26,6 +26,8 @@ jobs:
       - name: Import Data
         env:
           ONCOKB_OAUTH_TOKEN: ${{ secrets.ONCOKB_OAUTH_TOKEN }}
+          MYSQL_USER: ${{ env.MYSQL_USER }}
+          MYSQL_PASS: ${{ env.MYSQL_PASS }}
         run: |
           MYSQL_FILE_NAME=mysql.sql.gz
           curl -s https://"${ONCOKB_OAUTH_TOKEN}"@raw.githubusercontent.com/knowledgesystems/oncokb-data/master/RELEASE/latest/"${MYSQL_FILE_NAME}" -O
