@@ -23,6 +23,16 @@ jobs:
           mysql user: ${{ env.MYSQL_USER }}
           mysql password: ${{ env.MYSQL_PASS }}
 
+      - name: Wait for MySQL
+        env:
+          ONCOKB_OAUTH_TOKEN: ${{ secrets.ONCOKB_OAUTH_TOKEN }}
+          MYSQL_USER: ${{ env.MYSQL_USER }}
+          MYSQL_PASS: ${{ env.MYSQL_PASS }}
+        run: |
+          while ! mysqladmin ping --host=127.0.0.1 --user=$MYSQL_USER --password=$MYSQL_PASS --silent; do
+            sleep 1
+          done
+
       - name: Import Data
         env:
           ONCOKB_OAUTH_TOKEN: ${{ secrets.ONCOKB_OAUTH_TOKEN }}
