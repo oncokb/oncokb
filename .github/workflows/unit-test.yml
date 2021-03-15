@@ -2,13 +2,11 @@
 
 name: Unit Tests
 
-on: push 
+on: push
 
 jobs:
   main:
     runs-on: ubuntu-latest
-    env:
-      MYSQL_ROOT_PASS: 'developer'
     steps:
       - uses: actions/checkout@v2
 
@@ -20,28 +18,27 @@ jobs:
         with:
           mysql version: '5.7'
           mysql database: 'test'
-          mysql root password: ${{ env.MYSQL_ROOT_PASS }}
+          mysql root password: ${{ secrets.MYSQL_ROOT_PASSWORD }}
 
       - name: Wait for MySQL
         env:
           ONCOKB_OAUTH_TOKEN: ${{ secrets.ONCOKB_OAUTH_TOKEN }}
-          MYSQL_PASS: ${{ env.MYSQL_PASS }}
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
         run: |
-          while ! mysqladmin ping --host=127.0.0.1 --user=root --password=$MYSQL_ROOT_PASS --silent; do
+          while ! mysqladmin ping --host=127.0.0.1 --user=root --password=$MYSQL_ROOT_PASSWORD --silent; do
             sleep 1
           done
 
       - name: Import Data
         env:
           ONCOKB_OAUTH_TOKEN: ${{ secrets.ONCOKB_OAUTH_TOKEN }}
-          MYSQL_ROOT_PASS: ${{ env.MYSQL_ROOT_PASS }}
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
         run: |
           MYSQL_FILE_NAME=mysql.sql.gz
           curl -s https://"${ONCOKB_OAUTH_TOKEN}"@raw.githubusercontent.com/knowledgesystems/oncokb-data/master/RELEASE/latest/"${MYSQL_FILE_NAME}" -O
-          echo ${MYSQL_USER}
 
-          mysql --host=127.0.0.1 --user=root --password="${MYSQL_ROOT_PASS}" -e "CREATE DATABASE IF NOT EXISTS test"
-          zcat "${MYSQL_FILE_NAME}" | mysql --host=127.0.0.1 --user=root --password="${MYSQL_ROOT_PASS}" test
+          mysql --host=127.0.0.1 --user=root --password=${MYSQL_ROOT_PASSWORD} -e "CREATE DATABASE IF NOT EXISTS test"
+          zcat "${MYSQL_FILE_NAME}" | mysql --host=127.0.0.1 --user=root --password=${MYSQL_ROOT_PASSWORD} test
 
       - uses: actions/setup-java@v1
         with:
@@ -49,11 +46,11 @@ jobs:
 
       - name: Run unit tests
         env:
-          MYSQL_ROOT_PASS: ${{ env.MYSQL_ROOT_PASS }}
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASS }}
         run: |
           mvn -ntp test \
           -Djdbc.driverClassName=com.mysql.jdbc.Driver \
           -Djdbc.url=jdbc:mysql://127.0.0.1:3306/test \
           -Djdbc.username=root \
-          -Djdbc.password=${MYSQL_ROOT_PASS}
+          -Djdbc.password=${MYSQL_ROOT_PASSWORD}
 
