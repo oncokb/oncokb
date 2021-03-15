@@ -32,7 +32,7 @@ jobs:
           MYSQL_FILE_NAME=mysql.sql.gz
           curl -s https://"${ONCOKB_OAUTH_TOKEN}"@raw.githubusercontent.com/knowledgesystems/oncokb-data/master/RELEASE/latest/"${MYSQL_FILE_NAME}" -O
 
-          mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test"
+          mysql -u${MYSQL_USER} -p${MYSQL_PASS} -e "CREATE DATABASE IF NOT EXISTS test"
           zcat "${MYSQL_FILE_NAME}" | mysql -u${MYSQL_USER} -p${MYSQL_PASS} test
 
       - uses: actions/setup-java@v1
