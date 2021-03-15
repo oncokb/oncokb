@@ -24,6 +24,8 @@ jobs:
         env:
           ONCOKB_OAUTH_TOKEN: ${{ secrets.ONCOKB_OAUTH_TOKEN }}
           MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+
+        # specify host is necessary here to avoid mysql connection issue
         run: |
           while ! mysqladmin ping --host=127.0.0.1 --user=root --password=$MYSQL_ROOT_PASSWORD --silent; do
             sleep 1
@@ -46,7 +48,7 @@ jobs:
 
       - name: Run unit tests
         env:
-          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASS }}
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
         run: |
           mvn -ntp test \
           -Djdbc.driverClassName=com.mysql.jdbc.Driver \
