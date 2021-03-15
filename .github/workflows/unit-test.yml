@@ -9,41 +9,52 @@ on:
 jobs:
   main:
     runs-on: ubuntu-latest
-    env:
-      MYSQL_USER: 'developer'
-      MYSQL_PASS: 'developer'
     steps:
       - uses: actions/checkout@v2
-        
+
       - name: Shutdown Default MySQL (SUDO)
         run: sudo service mysql stop # Shutdown the Default MySQL, "sudo" is necessary, please not remove it
 
       - name: Set up MySQL
         uses: mirromutth/mysql-action@v1.1
         with:
-          mysql version: '5.7' # Optional, default value is "latest". The version of the MySQL
-          mysql user: ${{ env.MYSQL_USER }}
-          mysql password: ${{ env.MYSQL_PASS }}
+          mysql version: '5.7'
+          mysql database: 'test'
+          mysql root password: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+
+      - name: Wait for MySQL
+        env:
+          ONCOKB_OAUTH_TOKEN: ${{ secrets.ONCOKB_OAUTH_TOKEN }}
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+
+        # specify host is necessary here to avoid mysql connection issue
+        run: |
+          while ! mysqladmin ping --host=127.0.0.1 --user=root --password=$MYSQL_ROOT_PASSWORD --silent; do
+            sleep 1
+          done
 
       - name: Import Data
         env:
           ONCOKB_OAUTH_TOKEN: ${{ secrets.ONCOKB_OAUTH_TOKEN }}
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
         run: |
           MYSQL_FILE_NAME=mysql.sql.gz
           curl -s https://"${ONCOKB_OAUTH_TOKEN}"@raw.githubusercontent.com/knowledgesystems/oncokb-data/master/RELEASE/latest/"${MYSQL_FILE_NAME}" -O
 
-          mysql -u${MYSQL_USER} -p${MYSQL_PASS} -e "CREATE DATABASE IF NOT EXISTS test"
-          zcat "${MYSQL_FILE_NAME}" | mysql -u${MYSQL_USER} -p${MYSQL_PASS} test
+          mysql --host=127.0.0.1 --user=root --password=${MYSQL_ROOT_PASSWORD} -e "CREATE DATABASE IF NOT EXISTS test"
+          zcat "${MYSQL_FILE_NAME}" | mysql --host=127.0.0.1 --user=root --password=${MYSQL_ROOT_PASSWORD} test
 
       - uses: actions/setup-java@v1
         with:
           java-version: '11.x'
 
       - name: Run unit tests
+        env:
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
         run: |
           mvn -ntp test \
           -Djdbc.driverClassName=com.mysql.jdbc.Driver \
-          -Djdbc.url=jdbc:mysql://localhost:3306/test \
+          -Djdbc.url=jdbc:mysql://127.0.0.1:3306/test \
           -Djdbc.username=root \
-          -Djdbc.password=root
+          -Djdbc.password=${MYSQL_ROOT_PASSWORD}
 
