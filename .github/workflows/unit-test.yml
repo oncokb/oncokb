@@ -43,8 +43,8 @@ jobs:
           curl -s https://"${ONCOKB_OAUTH_TOKEN}"@raw.githubusercontent.com/knowledgesystems/oncokb-data/master/RELEASE/latest/"${MYSQL_FILE_NAME}" -O
           echo ${MYSQL_USER}
 
-          mysql --user="${MYSQL_USER}" --password="${MYSQL_PASS}" -e "CREATE DATABASE IF NOT EXISTS test"
-          zcat "${MYSQL_FILE_NAME}" | mysql --user="${MYSQL_USER}" --password="${MYSQL_PASS}" test
+          mysql --host=127.0.0.1 --user="${MYSQL_USER}" --password="${MYSQL_PASS}" -e "CREATE DATABASE IF NOT EXISTS test"
+          zcat "${MYSQL_FILE_NAME}" | mysql --host=127.0.0.1 --user="${MYSQL_USER}" --password="${MYSQL_PASS}" test
 
       - uses: actions/setup-java@v1
         with:
