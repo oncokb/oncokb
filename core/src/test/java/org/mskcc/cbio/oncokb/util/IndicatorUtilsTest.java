@@ -24,28 +24,6 @@ import static org.mskcc.cbio.oncokb.util.SummaryUtils.ONCOGENIC_MUTATIONS_DEFAUL
  * Created by Hongxin on 12/23/16.
  */
 public class IndicatorUtilsTest {
-    /**
-     * Removed after all features implemented
-     */
-    @Test
-    public void testWithClinicalTrials() throws Exception{
-     // hugoSymbol=BRAF&alteration=V600E&referenceGenome=GRCh37&tumorType=Melanoma
-        Query query = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "BRAF", "V600E", null, null, "Melanoma", null, null, null, null);
-        Gson gson = new Gson();
-
-        IndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
-        indicatorQueryResp = IndicatorUtils.filterClinicalTrialsByLocation(indicatorQueryResp, "Columbia, MO", "United States", null);
-      
-        try {
-            FileWriter file = new FileWriter("C:\\Users\\Yifu\\Desktop\\test.json");
-            file.write(gson.toJson(indicatorQueryResp));
-            file.flush();
-            file.close();
-            System.out.println("FInished");
-        } catch (IOException e) {
-        }
-    }
-
 
     @Test
     public void testProcessQuery() throws Exception {

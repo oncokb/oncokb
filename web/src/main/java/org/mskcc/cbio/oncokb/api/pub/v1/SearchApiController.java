@@ -1,9 +1,7 @@
 package org.mskcc.cbio.oncokb.api.pub.v1;
 
 import io.swagger.annotations.ApiParam;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.json.simple.parser.ParseException;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.service.JsonResultFactory;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
@@ -16,7 +14,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -65,11 +62,7 @@ public class SearchApiController implements SearchApi {
             Query query = new Query(id,matchedRG, queryType, entrezGeneId, hugoSymbol, variant, variantType, svType, tumorType, consequence, proteinStart, proteinEnd, hgvs);
 
             Set<LevelOfEvidence> levelOfEvidences = levels == null ? null : LevelUtils.parseStringLevelOfEvidences(levels);
-            try {
-                indicatorQueryResp = IndicatorUtils.processQuery(query, levelOfEvidences, highestLevelOnly, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceType, ",")));
-            } catch (IOException | ParseException e) {
-                e.printStackTrace();
-            }
+            indicatorQueryResp = IndicatorUtils.processQuery(query, levelOfEvidences, highestLevelOnly, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceType, ",")));
         }
         return ResponseEntity.status(status.value()).body(JsonResultFactory.getIndicatorQueryResp(indicatorQueryResp, fields));
     }
@@ -86,13 +79,9 @@ public class SearchApiController implements SearchApi {
             status = HttpStatus.BAD_REQUEST;
         } else {
             for (Query query : body.getQueries()) {
-                try {
-                    result.add(IndicatorUtils.processQuery(query,
-                        body.getLevels() == null ? null : body.getLevels(),
-                        body.getHighestLevelOnly(), new HashSet<>(stringToEvidenceTypes(body.getEvidenceTypes(), ","))));
-                } catch (IOException | ParseException e) {
-                    e.printStackTrace();
-                }
+                result.add(IndicatorUtils.processQuery(query,
+                    body.getLevels() == null ? null : body.getLevels(),
+                    body.getHighestLevelOnly(), new HashSet<>(stringToEvidenceTypes(body.getEvidenceTypes(), ","))));
             }
         }
         return ResponseEntity.status(status.value()).body(JsonResultFactory.getIndicatorQueryResp(result, fields));

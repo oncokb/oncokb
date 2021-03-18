@@ -2,7 +2,6 @@ package org.mskcc.cbio.oncokb.api.pub.v1;
 
 import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
-import org.json.simple.parser.ParseException;
 import org.mskcc.cbio.oncokb.apiModels.annotation.*;
 import org.mskcc.cbio.oncokb.config.annotation.PremiumPublicApi;
 import org.mskcc.cbio.oncokb.config.annotation.PublicApi;
@@ -18,8 +17,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -57,7 +54,7 @@ public class AnnotationsApiController {
         , @ApiParam(value = "The address of your location. Support zip code. Must be spcified with country. Example: New York City, NY") @RequestParam(value = "address", required = false) String address
         , @ApiParam(value = "The country of your location. Must be specified with address. Example: United States") @RequestParam(value = "country", required = false) String country
         , @ApiParam(value = "The radius from your location. Must be specified with address and country. Example: 100, which means all trails have any site locates within 100 km from your location. If not specify, the default distance is 100km.") @RequestParam(value = "distance", required = false) Double distance
-    ) throws UnsupportedEncodingException, IOException, ParseException {
+    ) {
         HttpStatus status = HttpStatus.OK;
         IndicatorQueryResp indicatorQueryResp = null;
 
@@ -91,7 +88,7 @@ public class AnnotationsApiController {
     public ResponseEntity<List<IndicatorQueryResp>> annotateMutationsByProteinChangePost(
         @PathVariable String country,
         @ApiParam(value = "List of queries. Please see swagger.json for request body format.", required = true) @RequestBody() List<AnnotateMutationByProteinChangeQuery> body
-    ) throws UnsupportedEncodingException, IOException, ParseException {
+    ) {
         HttpStatus status = HttpStatus.OK;
         List<IndicatorQueryResp> result = new ArrayList<>();
 
@@ -122,7 +119,7 @@ public class AnnotationsApiController {
         , @ApiParam(value = "Reference genome, either GRCh37 or GRCh38. The default is GRCh37", required = false, defaultValue = "GRCh37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") String referenceGenome
         , @ApiParam(value = "OncoTree(http://oncotree.info) tumor type name. The field supports OncoTree Code, OncoTree Name and OncoTree Main type. Example: Melanoma") @RequestParam(value = "tumorType", required = false) String tumorType
         , @ApiParam(value = EVIDENCE_TYPES_DESCRIPTION) @RequestParam(value = "evidenceType", required = false) String evidenceTypes
-    ) throws UnsupportedEncodingException, IOException, ParseException {
+    ) {
         HttpStatus status = HttpStatus.OK;
         IndicatorQueryResp indicatorQueryResp = null;
 
@@ -149,7 +146,7 @@ public class AnnotationsApiController {
         method = RequestMethod.POST)
     public ResponseEntity<List<IndicatorQueryResp>> annotateMutationsByGenomicChangePost(
         @ApiParam(value = "List of queries. Please see swagger.json for request body format.", required = true) @RequestBody() List<AnnotateMutationByGenomicChangeQuery> body
-    ) throws UnsupportedEncodingException, IOException, ParseException {
+    ) {
         HttpStatus status = HttpStatus.OK;
         List<IndicatorQueryResp> result = new ArrayList<>();
 
@@ -163,7 +160,7 @@ public class AnnotationsApiController {
         return new ResponseEntity<>(result, status);
     }
 
-    private IndicatorQueryResp getIndicatorQueryFromGenomicLocation(ReferenceGenome referenceGenome, String genomicLocation, String tumorType, Set<EvidenceType> evidenceTypes) throws UnsupportedEncodingException, IOException, ParseException {
+    private IndicatorQueryResp getIndicatorQueryFromGenomicLocation(ReferenceGenome referenceGenome, String genomicLocation, String tumorType, Set<EvidenceType> evidenceTypes) {
         Alteration alteration = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, genomicLocation, referenceGenome);
         Query query = new Query();
         if (alteration != null) {
@@ -187,7 +184,7 @@ public class AnnotationsApiController {
         , @ApiParam(value = "Reference genome, either GRCh37 or GRCh38. The default is GRCh37", required = false, defaultValue = "GRCh37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") String referenceGenome
         , @ApiParam(value = "OncoTree(http://oncotree.info) tumor type name. The field supports OncoTree Code, OncoTree Name and OncoTree Main type. Example: Melanoma") @RequestParam(value = "tumorType", required = false) String tumorType
         , @ApiParam(value = EVIDENCE_TYPES_DESCRIPTION) @RequestParam(value = "evidenceType", required = false) String evidenceTypes
-    ) throws UnsupportedEncodingException, IOException, ParseException {
+    ) {
         HttpStatus status = HttpStatus.OK;
         IndicatorQueryResp indicatorQueryResp = null;
 
@@ -219,7 +216,7 @@ public class AnnotationsApiController {
         method = RequestMethod.POST)
     public ResponseEntity<List<IndicatorQueryResp>> annotateMutationsByHGVSgPost(
         @ApiParam(value = "List of queries. Please see swagger.json for request body format.", required = true) @RequestBody() List<AnnotateMutationByHGVSgQuery> body
-    ) throws UnsupportedEncodingException, IOException, ParseException {
+    ) {
         HttpStatus status = HttpStatus.OK;
         List<IndicatorQueryResp> result = new ArrayList<>();
 
@@ -250,7 +247,7 @@ public class AnnotationsApiController {
         , @ApiParam(value = "Reference genome, either GRCh37 or GRCh38. The default is GRCh37", required = false, defaultValue = "GRCh37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") String referenceGenome
         , @ApiParam(value = "OncoTree(http://oncotree.info) tumor type name. The field supports OncoTree Code, OncoTree Name and OncoTree Main type. Example: Melanoma") @RequestParam(value = "tumorType", required = false) String tumorType
         , @ApiParam(value = EVIDENCE_TYPES_DESCRIPTION) @RequestParam(value = "evidenceType", required = false) String evidenceTypes
-    ) throws UnsupportedEncodingException, IOException, ParseException {
+    ) {
         HttpStatus status = HttpStatus.OK;
         IndicatorQueryResp indicatorQueryResp = null;
 
@@ -282,7 +279,7 @@ public class AnnotationsApiController {
         method = RequestMethod.POST)
     public ResponseEntity<List<IndicatorQueryResp>> annotateCopyNumberAlterationsPost(
         @ApiParam(value = "List of queries. Please see swagger.json for request body format.", required = true) @RequestBody() List<AnnotateCopyNumberAlterationQuery> body
-    ) throws UnsupportedEncodingException, IOException, ParseException {
+    ) {
         HttpStatus status = HttpStatus.OK;
         List<IndicatorQueryResp> result = new ArrayList<>();
 
@@ -326,7 +323,7 @@ public class AnnotationsApiController {
         , @ApiParam(value = "Reference genome, either GRCh37 or GRCh38. The default is GRCh37", required = false, defaultValue = "GRCh37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") String referenceGenome
         , @ApiParam(value = "OncoTree(http://oncotree.info) tumor type name. The field supports OncoTree Code, OncoTree Name and OncoTree Main type. Example: Melanoma") @RequestParam(value = "tumorType", required = false) String tumorType
         , @ApiParam(value = EVIDENCE_TYPES_DESCRIPTION) @RequestParam(value = "evidenceType", required = false) String evidenceTypes
-    ) throws UnsupportedEncodingException, IOException, ParseException {
+    ) {
         HttpStatus status = HttpStatus.OK;
         IndicatorQueryResp indicatorQueryResp = null;
 
@@ -371,7 +368,7 @@ public class AnnotationsApiController {
         method = RequestMethod.POST)
     public ResponseEntity<List<IndicatorQueryResp>> annotateStructuralVariantsPost(
         @ApiParam(value = "List of queries. Please see swagger.json for request body format.", required = true) @RequestBody(required = true) List<AnnotateStructuralVariantQuery> body
-    ) throws UnsupportedEncodingException, IOException, ParseException {
+    ) {
         HttpStatus status = HttpStatus.OK;
         List<IndicatorQueryResp> result = new ArrayList<>();
 

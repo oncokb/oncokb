@@ -5,7 +5,6 @@
 package org.mskcc.cbio.oncokb.controller;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.json.simple.parser.ParseException;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.service.JsonResultFactory;
 import org.mskcc.cbio.oncokb.util.IndicatorUtils;
@@ -14,8 +13,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -50,7 +47,7 @@ public class IndicatorController {
         @RequestParam(value = "highestLevelOnly", required = false) Boolean highestLevelOnly,
         @RequestParam(value = "fields", required = false) String fields,
         @RequestParam(value = "hgvs", required = false) String hgvs
-    ) throws UnsupportedEncodingException, IOException, ParseException {
+    ) {
         Query query = new Query(id, referenceGenome, queryType, entrezGeneId, hugoSymbol, alteration, alterationType, svType, tumorType, consequence, proteinStart, proteinEnd, hgvs);
         Set<LevelOfEvidence> levelOfEvidences = levels == null ? null : LevelUtils.parseStringLevelOfEvidences(levels);
         IndicatorQueryResp resp = IndicatorUtils.processQuery(query, levelOfEvidences, highestLevelOnly, null);
@@ -64,7 +61,7 @@ public class IndicatorController {
     List<IndicatorQueryResp> getResult(
         @RequestBody EvidenceQueries body,
         @RequestParam(value = "fields", required = false) String fields
-    ) throws UnsupportedEncodingException, IOException, ParseException {
+    ) {
 
         List<IndicatorQueryResp> result = new ArrayList<>();
 

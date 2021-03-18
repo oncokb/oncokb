@@ -1,147 +1,152 @@
 package org.mskcc.cbio.oncokb.util;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-import java.io.FileReader;
+import com.google.gson.Gson;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-
-import com.amazonaws.services.s3.model.S3ObjectInputStream;
-import com.google.gson.Gson;
-
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.junit.Test;
 import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.ClinicalTrial;
+import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.Site;
+import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.Tumor;
 
-public class ClinicalTrialsUtilsTest{
+public class ClinicalTrialsUtilsTest {
+
     @Test
-    public void testGetMappingObject(){
-        JSONParser jsonParser = new JSONParser();
-        JSONObject jsonObject1 = new JSONObject();
-        // System.out.println(System.getProperty("user.dir"));
+    public void testLoadingMappingResult() {
+        Map<String, Tumor> result = new HashMap<>();
         try {
-            if (PropertiesUtils.getProperties("aws.s3.accessKey") != null
-            && !PropertiesUtils.getProperties("aws.s3.accessKey").isEmpty()){
-                System.out.println("Reading from S3");
-                S3Utils s3Utils = new S3Utils();
-                S3ObjectInputStream inputStream = s3Utils.getObject("oncokb", "drug-matching/result.json").get()
-                        .getObjectContent();
-                jsonObject1 = (JSONObject) jsonParser.parse(new InputStreamReader(inputStream, "UTF-8"));
-            }
-            else {
-                System.out.println("Reading locally");
-                jsonObject1 = (JSONObject)jsonParser.parse(new FileReader("./src/main/resources/data/oncotree/clinical-trials-mapping-result.json"));
-            }
+            result = ClinicalTrialsUtils.getInstance().loadMappingResult();
         } catch (IOException | ParseException e) {
             e.printStackTrace();
         }
-
-        JSONObject jsonObject2 = new JSONObject();
-        try {
-            jsonObject2 = ClinicalTrialsUtils.getInstance().getMappingObject();
-        } catch (IOException | ParseException e) {
-            e.printStackTrace();
-        }
-        assertEquals(jsonObject1, jsonObject2);
+        assertTrue("Loading mapping result failed", !result.isEmpty());
     }
 
     @Test
-    public void testFilterTrialsByTreatment(){
-        Gson gson = new Gson();
+    public void testLoadingSites() {
+        Map<String, Site> sites = new HashMap<>();
         try {
-            JSONObject jsonObject = ClinicalTrialsUtils.getInstance().getMappingObject();
-            List<ClinicalTrial> trials = ClinicalTrialsUtils.getInstance().filterTrialsByCancerType(jsonObject, "Melanoma");
-            List<ClinicalTrial> res = ClinicalTrialsUtils.getInstance().filterTrialsByTreatment(trials, "Dabrafenib");
-            System.out.println(res.size());         
-            try {
-                FileWriter file = new FileWriter("C:\\Users\\Yifu\\Desktop\\test.json");
-                file.write(gson.toJson(res));
-                file.flush();
-                file.close();
-                System.out.println("FInished");
-            } catch (IOException e) {
-            }
+            sites = ClinicalTrialsUtils.getInstance().loadSitesMap();
         } catch (IOException | ParseException e) {
-            System.out.println("error");
             e.printStackTrace();
         }
+        assertTrue("Loading sites failed", !sites.isEmpty());
     }
 
     @Test
-    public void testFilterTrialsByDrugNameOrCode(){
+    public void testLoadingTrials() {
+        Map<String, ClinicalTrial> trials = new HashMap<>();
+        try {
+            trials = ClinicalTrialsUtils.getInstance().loadTrialsMap();
+        } catch (IOException | ParseException e) {
+            e.printStackTrace();
+        }
+        assertTrue("Loading sites failed", !trials.isEmpty());
+    }
+
+    @Test
+    public void testGetAllMappingResult() {
+        Map<String, Tumor> res = ClinicalTrialsUtils
+            .getInstance()
+            .getAllMappingResult();
+        assertTrue("Getting mapping result failed", res.size() != 0);
+    }
+
+    @Test
+    public void testGetAllSites() {
+        Map<String, Site> sites = ClinicalTrialsUtils
+            .getInstance()
+            .getAllSites();
+        assertTrue("Getting sites failed", sites.size() != 0);
+    }
+
+    @Test
+    public void testGetAllTrials() {
+        Map<String, ClinicalTrial> trials = ClinicalTrialsUtils
+            .getInstance()
+            .getAllTrials();
+        assertTrue("Getting trials failed", trials.size() != 0);
+    }
+
+    @Test
+    public void testFilterByCancerType() {
+        List<ClinicalTrial> trials = ClinicalTrialsUtils
+            .getInstance()
+            .filterTrialsByCancerType("Melanoma");
+        assertTrue("Filter by cancer type failed", trials.size() != 0);
+    }
+
+    @Test
+    public void testFilterTrialsByTreatment() {
+        List<ClinicalTrial> trials = ClinicalTrialsUtils
+            .getInstance()
+            .filterTrialsByCancerType("Melanoma");
+        List<ClinicalTrial> res = ClinicalTrialsUtils
+            .getInstance()
+            .filterTrialsByTreatment(trials, "Dabrafenib");
+        System.out.println(res.size());
+        assertTrue("Filter by treatment failed", res.size() != 0);
+    }
+
+    @Test
+    public void testFilterTrialsByDrugNameOrCode() {
         Set<String> drugs = new HashSet<>();
         drugs.add("Dabrafenib");
-        Gson gson = new Gson();
-        try {
-            JSONObject jsonObject = ClinicalTrialsUtils.getInstance().getMappingObject();
-            List<ClinicalTrial> trials = ClinicalTrialsUtils.getInstance().filterTrialsByCancerType(jsonObject, "Melanoma");
-            List<ClinicalTrial> res = ClinicalTrialsUtils.getInstance().filterTrialsByDrugNameOrCode(trials, drugs);
-            System.out.println(res.size());         
-            try {
-                FileWriter file = new FileWriter("C:\\Users\\Yifu\\Desktop\\test.json");
-                file.write(gson.toJson(res));
-                file.flush();
-                file.close();
-                System.out.println("Finished");
-            } catch (IOException e) {
-            }
-        } catch (IOException | ParseException e) {
-            System.out.println("error");
-            e.printStackTrace();
-        }
+        List<ClinicalTrial> trials = ClinicalTrialsUtils
+            .getInstance()
+            .filterTrialsByCancerType("Melanoma");
+        List<ClinicalTrial> res = ClinicalTrialsUtils
+            .getInstance()
+            .filterTrialsByDrugNameOrCode(trials, drugs);
+        assertTrue("Filter by drug name Or code failed", res.size() != 0);
     }
 
     @Test
-    public void testFilterTrialsByLocation(){
-        Gson gson = new Gson();
-        try {
-            JSONObject jsonObject = ClinicalTrialsUtils.getInstance().getMappingObject();
-            long start = System.currentTimeMillis();
-            List<ClinicalTrial> trials = ClinicalTrialsUtils.getInstance().filterTrialsByCancerType(jsonObject, "Melanoma");
-            System.out.println(trials.size());
-            List<ClinicalTrial> res = ClinicalTrialsUtils.getInstance().filterTrialsByLocation(trials, "Columbia, MO, United States", 100.0);
-            long end = System.currentTimeMillis();
-            System.out.println(end - start + " s : " + res.size());         
-            try {
-                FileWriter file = new FileWriter("C:\\Users\\Yifu\\Desktop\\test1.json");
-                file.write(gson.toJson(res));
-                file.flush();
-                file.close();
-                System.out.println("FInished");
-            } catch (IOException e) {
-            }
-        } catch (IOException | ParseException e) {
-            System.out.println("error");
-            e.printStackTrace();
-        }
+    public void testFilterTrialsByLocation() {
+        List<ClinicalTrial> trials = ClinicalTrialsUtils
+            .getInstance()
+            .filterTrialsByCancerType("Melanoma");
+        List<ClinicalTrial> res = ClinicalTrialsUtils
+            .getInstance()
+            .filterTrialsByLocation(
+                trials,
+                "Columbia, MO, United States",
+                100.0
+            );
+        assertTrue("Filter by location failed", res.size() != 0);
     }
 
     @Test
-    public void testFilterTrialsByTreatmentAndLocation(){
+    public void testFilterTrialsByTreatmentAndLocation() {
         Gson gson = new Gson();
+        List<ClinicalTrial> trials = ClinicalTrialsUtils
+            .getInstance()
+            .filterTrialsByCancerType("Melanoma");
+        trials =
+            ClinicalTrialsUtils
+                .getInstance()
+                .filterTrialsBytreatmentAndLocation(
+                    trials,
+                    "Dabrafenib",
+                    "St. Louis, MO, United States",
+                    100.0
+                );
+        System.out.println(trials.size());
         try {
-            JSONObject jsonObject = ClinicalTrialsUtils.getInstance().getMappingObject();
-            List<ClinicalTrial> trials = ClinicalTrialsUtils.getInstance().filterTrialsByCancerType(jsonObject, "Melanoma");
-            trials = ClinicalTrialsUtils.getInstance().filterTrialsBytreatmentAndLocation(trials, "Dabrafenib", "Columbia, MO, United States", 100.0);
-            System.out.println(trials.size());        
-            try {
-                FileWriter file = new FileWriter("C:\\Users\\Yifu\\Desktop\\test2.json");
-                file.write(gson.toJson(trials));
-                file.flush();
-                file.close();
-                System.out.println("Finished");
-            } catch (IOException e) {
-            }
-        } catch (IOException | ParseException e) {
-            System.out.println("error");
-            e.printStackTrace();
-        }
+            FileWriter file = new FileWriter(
+                "C:\\Users\\Yifu\\Desktop\\test.json"
+            );
+            file.write(gson.toJson(trials));
+            file.flush();
+            file.close();
+            System.out.println("Finished");
+        } catch (IOException e) {}
     }
 }

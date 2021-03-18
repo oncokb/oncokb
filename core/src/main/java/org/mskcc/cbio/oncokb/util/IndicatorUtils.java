@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 import org.mskcc.cbio.oncokb.apiModels.Citations;
 import org.mskcc.cbio.oncokb.apiModels.Implication;
@@ -25,7 +26,7 @@ import static org.mskcc.cbio.oncokb.util.LevelUtils.getTherapeuticLevelsWithPrio
 public class IndicatorUtils {
     public static IndicatorQueryResp processQuery(Query query,
                                                   Set<LevelOfEvidence> levels, Boolean highestLevelOnly,
-                                                  Set<EvidenceType> evidenceTypes) throws UnsupportedEncodingException, IOException, ParseException {
+                                                  Set<EvidenceType> evidenceTypes) {
         highestLevelOnly = highestLevelOnly == null ? false : highestLevelOnly;
 
         levels = levels == null ? LevelUtils.getPublicLevels() :
@@ -725,7 +726,7 @@ public class IndicatorUtils {
         return otherSignificantLevels;
     }
 
-    private static List<IndicatorQueryTreatment> getIndicatorQueryTreatments(Set<Evidence> evidences, String queryHugoSymbol, Boolean filterSameTreatment) throws UnsupportedEncodingException, IOException, ParseException {
+    private static List<IndicatorQueryTreatment> getIndicatorQueryTreatments(Set<Evidence> evidences, String queryHugoSymbol, Boolean filterSameTreatment){
         List<IndicatorQueryTreatment> treatments = new ArrayList<>();
         if (evidences != null) {
             Map<LevelOfEvidence, Set<Evidence>> evidenceSetMap = EvidenceUtils.separateEvidencesByLevel(evidences);
@@ -962,7 +963,7 @@ public class IndicatorUtils {
         return map;
     }
 
-    public static IndicatorQueryResp filterClinicalTrialsByLocation(IndicatorQueryResp indicatorQueryResp, String address, String country, Double distance){
+    public static IndicatorQueryResp filterClinicalTrialsByLocation(IndicatorQueryResp indicatorQueryResp, String address, String country, Double distance) {
         String location = null;
         if (address != null && !address.isEmpty() && country != null && !country.isEmpty()){
             location = String.format("%s, %s", address, country);

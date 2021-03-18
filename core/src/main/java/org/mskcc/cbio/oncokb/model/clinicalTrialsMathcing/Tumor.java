@@ -8,7 +8,7 @@ import java.util.List;
 public class Tumor {
     private String nciCode;
     private String nciMainType;
-    private List<ClinicalTrial> trials;
+    private List<String> trials;
     private String tumorName;
 
     public String getNciCode() {
@@ -27,11 +27,11 @@ public class Tumor {
         this.nciMainType = nciMainType;
     }
 
-    public List<ClinicalTrial> getTrials() {
+    public List<String> getTrials() {
         return trials;
     }
 
-    public void setTrials(List<ClinicalTrial> trials) {
+    public void setTrials(List<String> trials) {
         this.trials = trials;
     }
 

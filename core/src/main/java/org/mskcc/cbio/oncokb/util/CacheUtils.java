@@ -2,9 +2,13 @@ package org.mskcc.cbio.oncokb.util;
 
 import com.mysql.jdbc.StringUtils;
 import org.apache.commons.collections.map.HashedMap;
+import org.json.simple.parser.ParseException;
 import org.mskcc.cbio.oncokb.apiModels.download.DownloadAvailability;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.TumorType;
+import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.ClinicalTrial;
+import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.Site;
+import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.Tumor;
 
 import java.io.IOException;
 import java.util.*;
@@ -47,6 +51,11 @@ public class CacheUtils {
 
     private static List<TumorType> cancerTypes = new ArrayList<>();
     private static Set<TumorType> specialCancerTypes = new HashSet<>();
+
+    // Cache data for clinical trials
+    private static Map<String, Tumor> clinicalTrialsMappingResult = new HashMap<>();
+    private static Map<String, Site> clinicalTrialsSites = new HashMap<>();
+    private static Map<String, ClinicalTrial> clinicalTrials = new HashMap<>();
 
     // Other services which will be defined in the property cache.update separated by comma
     // Every time the observer is triggered, all other services will be triggered as well
@@ -120,6 +129,39 @@ public class CacheUtils {
         }
     };
 
+    private static Observer clinicalTrialsMappingResultObserver = new Observer(){
+        @Override
+        public void update(Observable o, Object arg) {
+            try {
+                clinicalTrialsMappingResult = ClinicalTrialsUtils.getInstance().loadMappingResult();
+            } catch (IOException | ParseException e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
+    private static Observer clinicalTrialsSitesObserver = new Observer(){
+        @Override
+        public void update(Observable o, Object arg){
+            try {
+                clinicalTrialsSites = ClinicalTrialsUtils.getInstance().loadSitesMap();
+            } catch (IOException | ParseException e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
+    private static Observer clinicalTrialsObserver = new Observer(){
+        @Override
+        public void update(Observable o, Object arg){
+            try {
+                clinicalTrials = ClinicalTrialsUtils.getInstance().loadTrialsMap();
+            } catch (IOException | ParseException e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
     private static void notifyOtherServices(String cmd, Set<Integer> entrezGeneIds) {
         if (cmd == null) {
             cmd = "";
@@ -158,6 +200,10 @@ public class CacheUtils {
             GeneObservable.getInstance().addObserver(VUSObserver);
             GeneObservable.getInstance().addObserver(numbersObserver);
             GeneObservable.getInstance().addObserver(drugsObserver);
+
+            ClinicalTrialsObservable.getInstance().addObserver(clinicalTrialsMappingResultObserver);
+            ClinicalTrialsObservable.getInstance().addObserver(clinicalTrialsSitesObserver);
+            ClinicalTrialsObservable.getInstance().addObserver(clinicalTrialsObserver);
 
             System.out.println("Observer: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
 
@@ -202,6 +248,18 @@ public class CacheUtils {
 
             NamingUtils.cacheAllAbbreviations();
             System.out.println("Cached abbreviation ontology: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
+            current = MainUtils.getCurrentTimestamp();
+
+            clinicalTrialsMappingResult = ClinicalTrialsUtils.getInstance().loadMappingResult();
+            System.out.println("Cached all clinical trials mapping result: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
+            current = MainUtils.getCurrentTimestamp();
+
+            clinicalTrialsSites = ClinicalTrialsUtils.getInstance().loadSitesMap();
+            System.out.println("Cached all clinical trials sites: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
+            current = MainUtils.getCurrentTimestamp();
+
+            clinicalTrials = ClinicalTrialsUtils.getInstance().loadTrialsMap();;
+            System.out.println("Cached all matched clinical trials: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
             current = MainUtils.getCurrentTimestamp();
 
             cacheDownloadAvailability();
@@ -541,6 +599,44 @@ public class CacheUtils {
         if (propagate) {
             notifyOtherServices("update", entrezGeneIds);
         }
+    }
+
+    public static Map<String, Tumor> getAllClinicalTrialsMappingResult() {
+        if (clinicalTrialsMappingResult.size() == 0) {
+            try {
+                clinicalTrialsMappingResult = ClinicalTrialsUtils.getInstance().loadMappingResult();
+            } catch (IOException | ParseException e) {
+                e.printStackTrace();
+            }
+        }
+        return clinicalTrialsMappingResult;
+    }
+
+    public static Map<String, Site> getAllClinicalTrialsSites() {
+        if (clinicalTrialsSites.size() == 0) {
+            try {
+                clinicalTrialsSites = ClinicalTrialsUtils.getInstance().loadSitesMap();
+            } catch (IOException | ParseException e) {
+                e.printStackTrace();
+            }
+        }
+        return clinicalTrialsSites;
+    }
+
+    public static Map<String, ClinicalTrial> getAllClinicalTrials() {
+        if (clinicalTrials.size() == 0) {
+            try {
+                clinicalTrials = ClinicalTrialsUtils.getInstance().loadTrialsMap();
+            } catch (IOException | ParseException e) {
+                e.printStackTrace();
+            }
+        }
+        return clinicalTrials;
+    }
+
+    public static void updateClinicalTrials(){
+        System.out.println("Update clinical trials on instance " + PropertiesUtils.getProperties("app.name") + " at " + MainUtils.getCurrentTime());
+        ClinicalTrialsObservable.getInstance().update("update", null);
     }
 
     public static void resetAll() {

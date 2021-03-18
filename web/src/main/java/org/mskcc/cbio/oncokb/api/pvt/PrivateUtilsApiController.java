@@ -3,8 +3,6 @@ package org.mskcc.cbio.oncokb.api.pvt;
 import com.mysql.jdbc.StringUtils;
 import io.swagger.annotations.ApiParam;
 
-import org.hibernate.jdbc.Expectations;
-import org.json.simple.parser.ParseException;
 import org.mskcc.cbio.oncokb.apiModels.*;
 import org.mskcc.cbio.oncokb.apiModels.download.DownloadAvailability;
 import org.mskcc.cbio.oncokb.apiModels.download.FileExtension;
@@ -26,7 +24,6 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -334,12 +331,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         query.setTumorType(tumorType);
 
         List<EvidenceQueryRes> responses = EvidenceUtils.processRequest(Collections.singletonList(query), new HashSet<>(EvidenceTypeUtils.getAllEvidenceTypes()),LevelUtils.getPublicLevels(), false);
-        IndicatorQueryResp indicatorQueryResp = new IndicatorQueryResp();
-        try {
-            indicatorQueryResp = IndicatorUtils.processQuery(query,null, false, null);
-        } catch (IOException | ParseException e1) {
-            e1.printStackTrace();
-        }
+        IndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuery(query,null, false, null);
         EvidenceQueryRes response = responses.iterator().next();
 
         VariantAnnotation annotation = new VariantAnnotation(indicatorQueryResp);

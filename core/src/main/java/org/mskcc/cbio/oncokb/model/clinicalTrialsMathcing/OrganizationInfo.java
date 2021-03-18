@@ -8,6 +8,7 @@ public class OrganizationInfo {
     private String email;
     private String phone;
     private Coordinates coordinates;
+    private String address;
 
     public String getName() {
         return name;
@@ -63,5 +64,13 @@ public class OrganizationInfo {
 
     public void setCoordinates(Coordinates coordinates) {
         this.coordinates = coordinates;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 }

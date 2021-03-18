@@ -4,7 +4,6 @@ import io.swagger.annotations.ApiParam;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
-import org.json.simple.parser.ParseException;
 import org.mskcc.cbio.oncokb.apiModels.DrugMatch;
 import org.mskcc.cbio.oncokb.apiModels.NCITDrug;
 import org.mskcc.cbio.oncokb.model.*;
@@ -15,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -378,12 +376,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
         query.setAlteration(alteration.getAlteration());
         query.setReferenceGenome(alteration.getReferenceGenomes().iterator().next());
 
-        IndicatorQueryResp resp = new IndicatorQueryResp();
-        try {
-            resp = IndicatorUtils.processQuery(query, null, false, null);
-        } catch (IOException | ParseException e) {
-            e.printStackTrace();
-        }
+        IndicatorQueryResp resp = IndicatorUtils.processQuery(query, null, false, null);
         typeaheadSearchResp.setOncogenicity(resp.getOncogenic());
         typeaheadSearchResp.setVUS(resp.getVUS());
         typeaheadSearchResp.setAnnotation(resp.getVariantSummary());
