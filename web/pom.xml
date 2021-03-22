@@ -67,7 +67,7 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <repository>cbioportal/oncokb</repository>
+                            <repository>oncokb/oncokb</repository>
                             <tag>${project.version}</tag>
                             <buildArgs>
                                 <JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
