@@ -28,14 +28,6 @@ public class MvcConfigurationPublic extends MvcConfiguration {
             .addResourceLocations("classpath:/META-INF/resources/webjars/");
     }
 
-    @Override
-    public void addViewControllers(ViewControllerRegistry registry) {
-        registry.addViewController("/api").setViewName("redirect:/api/v1/swagger-ui.html");
-        registry.addViewController("/api/").setViewName("redirect:/api/v1/swagger-ui.html");
-        registry.addViewController("/api/v1/").setViewName("redirect:/api/v1/swagger-ui.html");
-        registry.addViewController("/api/v1").setViewName("redirect:/api/v1/swagger-ui.html");
-    }
-
     @Bean
     public Docket api() {
         return new Docket(DocumentationType.SWAGGER_2)

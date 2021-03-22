@@ -17,6 +17,9 @@ import java.util.*;
  */
 @Controller
 public class UtilsApiController implements UtilsApi {
+    final String legacyDisclaimer =
+        "## This file is generated based on data v1.23 (released on 08/28/2019). Please use with cautious.\n" +
+        "## We do not suggest using this file for data analysis which usually leads to inaccurate result. Please consider using our APIs or Variant Annotator instead (https://api.oncokb.org/).\n\n";
 
     @Override
     public ResponseEntity<List<AnnotatedVariant>> utilsAllAnnotatedVariantsGet() {
@@ -30,6 +33,8 @@ public class UtilsApiController implements UtilsApi {
         String newLine = "\n";
 
         StringBuilder sb = new StringBuilder();
+        sb.append(legacyDisclaimer);
+
         List<String> header = new ArrayList<>();
         header.add("Isoform");
         header.add("RefSeq");
@@ -106,6 +111,8 @@ public class UtilsApiController implements UtilsApi {
         String separator = "\t";
         String newLine = "\n";
         StringBuilder sb = new StringBuilder();
+        sb.append(legacyDisclaimer);
+
         List<String> header = new ArrayList<>();
         header.add("Isoform");
         header.add("RefSeq");
@@ -195,6 +202,8 @@ public class UtilsApiController implements UtilsApi {
         String separator = "\t";
         String newLine = "\n";
         StringBuilder sb = new StringBuilder();
+        sb.append(legacyDisclaimer);
+
         List<String> header = new ArrayList<>();
         header.add("Hugo Symbol");
         header.add("Entrez Gene ID");
@@ -242,6 +251,8 @@ public class UtilsApiController implements UtilsApi {
         String separator = "\t";
         String newLine = "\n";
         StringBuilder sb = new StringBuilder();
+        sb.append(legacyDisclaimer);
+
         List<String> header = new ArrayList<>();
         header.add("Isoform");
         header.add("RefSeq");
