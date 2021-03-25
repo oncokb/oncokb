@@ -73,11 +73,13 @@ public class EvidenceUtils {
             }
 
             Set<Evidence> relevantEvidences;
+            EvidenceQueryRes evidenceQueryRes = new EvidenceQueryRes();
+
             List<TumorType> relevantTumorTypes = new ArrayList<>();
             if (query.getTumorType() != null) {
                 relevantTumorTypes = TumorTypeUtils.findRelevantTumorTypes(query.getTumorType());
+                evidenceQueryRes.setExactMatchedTumorType(TumorTypeUtils.getByName(query.getTumorType()));
             }
-            EvidenceQueryRes evidenceQueryRes = new EvidenceQueryRes();
             evidenceQueryRes.setGene(gene);
             evidenceQueryRes.setQuery(query);
             evidenceQueryRes.setAlterations(relevantAlterations);
@@ -380,7 +382,14 @@ public class EvidenceUtils {
                                 Set<TumorType> tumorTypes = evidence.getRelevantCancerTypes().isEmpty() ? evidence.getCancerTypes() : evidence.getRelevantCancerTypes();
 
                                 TumorForm tumorForm = TumorTypeUtils.checkTumorForm(new HashSet<>(evidenceQuery.getOncoTreeTypes()));
-                                hasjointed = !Collections.disjoint(evidenceQuery.getOncoTreeTypes(), tumorTypes);
+
+                                // for evidence has relevant cancer types, we should only look at the exact matched cancer type of the evidence query
+                                if (evidence.getRelevantCancerTypes().isEmpty()) {
+                                    hasjointed = !Collections.disjoint(evidenceQuery.getOncoTreeTypes(), tumorTypes);
+                                } else {
+                                    hasjointed = evidence.getRelevantCancerTypes().contains(evidenceQuery.getExactMatchedTumorType());
+                                }
+
                                 if (hasjointed || com.mysql.jdbc.StringUtils.isNullOrEmpty(evidenceQuery.getQuery().getTumorType())) {
                                     filtered.add(evidence);
                                 } else if (tumorForm != null) {
@@ -860,6 +869,7 @@ public class EvidenceUtils {
                 query.setGene(GeneUtils.getGene(requestQuery.getEntrezGeneId(), requestQuery.getHugoSymbol()));
 
                 if (requestQuery.getTumorType() != null && !requestQuery.getTumorType().isEmpty()) {
+                    query.setExactMatchedTumorType(TumorTypeUtils.getByName(requestQuery.getTumorType()));
                     query.setOncoTreeTypes(
                         TumorTypeUtils.findRelevantTumorTypes(requestQuery.getTumorType()));
                 }

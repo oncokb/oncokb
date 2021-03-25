@@ -56,7 +56,17 @@ public class TumorTypeUtils {
             return tumorType;
         }
         tumorType = getBySubtype(name);
-        return tumorType == null ? getByMainType(name) : tumorType;
+        tumorType = tumorType == null ? getByMainType(name) : tumorType;
+        tumorType = tumorType == null ? getBySpecialTumor(getSpecialTumorTypeByName(name)) : tumorType;
+        return tumorType;
+    }
+
+    public static SpecialTumorType getSpecialTumorTypeByName(String name) {
+        try {
+            return SpecialTumorType.valueOf(name);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public static TumorType getBySubtype(String subtype) {
