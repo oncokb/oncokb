@@ -53,14 +53,38 @@ public class TumorTypeUtilsTest extends TestCase {
     }
 
     public void testFindTumorTypesWithDirection() throws Exception {
-        List<TumorType> tumorTypes = TumorTypeUtils.findRelevantTumorTypes("CML", RelevantTumorTypeDirection.DOWNWARD);
+        List<TumorType> tumorTypes = TumorTypeUtils.findRelevantTumorTypes("CML", false, RelevantTumorTypeDirection.DOWNWARD);
         String expectedResult = "Chronic Myelogenous Leukemia, M:Myeloproliferative Neoplasms, Chronic Myeloid Leukemia, BCR-ABL1+, M:All Liquid Tumors, M:All Tumors";
         assertEquals(expectedResult, tumorTypesToString(tumorTypes));
 
-        tumorTypes = TumorTypeUtils.findRelevantTumorTypes("CML", RelevantTumorTypeDirection.UPWARD);
+        tumorTypes = TumorTypeUtils.findRelevantTumorTypes("CML", false, RelevantTumorTypeDirection.UPWARD);
         expectedResult = "Chronic Myelogenous Leukemia, M:Myeloproliferative Neoplasms, Myeloproliferative Neoplasms, M:All Liquid Tumors, M:All Tumors";
         assertEquals(expectedResult, tumorTypesToString(tumorTypes));
 
+        tumorTypes = TumorTypeUtils.findRelevantTumorTypes("MEL", false, RelevantTumorTypeDirection.UPWARD);
+        expectedResult = "Melanoma, M:Melanoma, M:All Solid Tumors, M:All Tumors";
+        assertEquals(expectedResult, tumorTypesToString(tumorTypes));
+
+        tumorTypes = TumorTypeUtils.findRelevantTumorTypes("MEL", false, RelevantTumorTypeDirection.DOWNWARD);
+        expectedResult = "Melanoma, M:Melanoma, Congenital Nevus, Melanoma of Unknown Primary, Lentigo Maligna Melanoma, Desmoplastic Melanoma, Acral Melanoma, Cutaneous Melanoma, Spitzoid Melanoma, M:All Solid Tumors, M:All Tumors";
+        assertEquals(expectedResult, tumorTypesToString(tumorTypes));
+
+        tumorTypes = TumorTypeUtils.findRelevantTumorTypes("Melanoma", true, RelevantTumorTypeDirection.UPWARD);
+        expectedResult = "M:Melanoma, M:All Solid Tumors, M:All Tumors";
+        assertEquals(expectedResult, tumorTypesToString(tumorTypes));
+
+        tumorTypes = TumorTypeUtils.findRelevantTumorTypes("Melanoma", true, RelevantTumorTypeDirection.DOWNWARD);
+        expectedResult = "M:Melanoma, M:All Solid Tumors, M:All Tumors";
+        assertEquals(expectedResult, tumorTypesToString(tumorTypes));
+
+        // Soft Tissue Sarcoma is a mixed main type
+        tumorTypes = TumorTypeUtils.findRelevantTumorTypes("Soft Tissue Sarcoma", true, RelevantTumorTypeDirection.UPWARD);
+        expectedResult = "M:Soft Tissue Sarcoma, M:All Tumors";
+        assertEquals(expectedResult, tumorTypesToString(tumorTypes));
+
+        tumorTypes = TumorTypeUtils.findRelevantTumorTypes("Soft Tissue Sarcoma", true, RelevantTumorTypeDirection.DOWNWARD);
+        expectedResult = "M:Soft Tissue Sarcoma, M:All Tumors";
+        assertEquals(expectedResult, tumorTypesToString(tumorTypes));
         // 863 subtypes, 1 tissue root  117 main types, 7 special tumor types
         assertEquals(988, ApplicationContextSingleton.getTumorTypeBo().findAllCached().size());
     }

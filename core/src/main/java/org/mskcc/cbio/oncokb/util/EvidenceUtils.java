@@ -176,7 +176,7 @@ public class EvidenceUtils {
         if (query.getOncoTreeTypes() != null) {
             upwardTumorTypes.addAll(query.getOncoTreeTypes());
         }
-        downwardTumorTypes.addAll(TumorTypeUtils.findRelevantTumorTypes(query.getQuery().getTumorType(), DOWNWARD));
+        downwardTumorTypes.addAll(TumorTypeUtils.findRelevantTumorTypes(query.getQuery().getTumorType(),null, DOWNWARD));
 
         if (query.getGene() != null) {
             genes.add(query.getGene());

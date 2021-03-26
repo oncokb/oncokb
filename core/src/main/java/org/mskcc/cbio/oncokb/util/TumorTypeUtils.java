@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.model.RelevantTumorTypeDirection;
@@ -145,7 +144,7 @@ public class TumorTypeUtils {
     }
 
     public static List<TumorType> findRelevantTumorTypes(String tumorType) {
-        return findRelevantTumorTypes(tumorType, RelevantTumorTypeDirection.UPWARD);
+        return findRelevantTumorTypes(tumorType, null, RelevantTumorTypeDirection.UPWARD);
     }
 
     public static LinkedHashSet<TumorType> getParentTumorTypes(TumorType tumorType, boolean onlySameMaintype) {
@@ -173,42 +172,37 @@ public class TumorTypeUtils {
         return childTumorTypes;
     }
 
-    public static List<TumorType> findRelevantTumorTypes(String tumorType, RelevantTumorTypeDirection direction) {
+    public static List<TumorType> findRelevantTumorTypes(String tumorType, Boolean isMainType, RelevantTumorTypeDirection direction) {
         LinkedHashSet<TumorType> mappedTumorTypes = new LinkedHashSet<>();
-        TumorType matchedTumorType = getByCode(tumorType);
-        if (matchedTumorType == null) {
-            matchedTumorType = getBySubtype(tumorType);
+        TumorType matchedTumorType = null;
+
+        if (isMainType != Boolean.TRUE) {
+            matchedTumorType = getByCode(tumorType);
+            if (matchedTumorType == null) {
+                matchedTumorType = getBySubtype(tumorType);
+            }
+        }
+
+        String mainTypeName = tumorType;
+        if (matchedTumorType != null) {
+            // Add matched tumor type
+            mappedTumorTypes.add(matchedTumorType);
+            mainTypeName = matchedTumorType.getMainType();
+        }
+
+        // Add main type
+        TumorType matchedMainType = getByMainType(mainTypeName);
+        if (matchedMainType != null) {
+            mappedTumorTypes.add(matchedMainType);
         }
 
         if (direction.equals(RelevantTumorTypeDirection.UPWARD)) {
             if (matchedTumorType != null) {
-                // Add matched tumor type
-                mappedTumorTypes.add(matchedTumorType);
-
-                // Add main type
-                TumorType matchedMainType = getByMainType(matchedTumorType.getMainType());
-                if (matchedMainType != null) {
-                    mappedTumorTypes.add(matchedMainType);
-                }
                 // Add matched parent tumor types
                 mappedTumorTypes.addAll(getParentTumorTypes(matchedTumorType, true));
-            } else {
-                matchedTumorType = getByMainType(tumorType);
-                if (matchedTumorType != null) {
-                    mappedTumorTypes.add(matchedTumorType);
-                }
             }
         } else {
             if (matchedTumorType != null) {
-                // Add matched tumor type
-                mappedTumorTypes.add(matchedTumorType);
-
-                // Add main type
-                TumorType matchedMainType = getByMainType(matchedTumorType.getMainType());
-                if (matchedMainType != null) {
-                    mappedTumorTypes.add(matchedMainType);
-                }
-
                 // Add matched parent tumor types
                 mappedTumorTypes.addAll(getChildTumorTypes(matchedTumorType, true));
             }
