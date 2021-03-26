@@ -13,6 +13,7 @@ import org.mskcc.cbio.oncokb.bo.PortalAlterationBo;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.TumorType;
 import org.mskcc.cbio.oncokb.bo.OncokbTranscriptService;
+import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.Tumor;
 import org.mskcc.cbio.oncokb.util.*;
 import org.oncokb.oncokb_transcript.ApiException;
 import org.oncokb.oncokb_transcript.client.TranscriptComparisonVM;
@@ -277,18 +278,36 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     @Override
     public ResponseEntity<List<TumorType>> utilRelevantCancerTypesPost(
         @ApiParam(value = "Level of Evidence") @RequestParam(value = "levelOfEvidence", required = false) LevelOfEvidence levelOfEvidence,
-        @ApiParam(value = "Return only Detailed Cancer Type.") @RequestParam(value = "onlyDetailedCancerType", required = false) Boolean onlyDetailedCancerType,
         @ApiParam(value = "List of queries.", required = true) @RequestBody List<RelevantCancerTypeQuery> body
     ) {
+        boolean isLevelBased = levelOfEvidence != null;
         RelevantTumorTypeDirection direction = levelOfEvidence != null && levelOfEvidence.equals(LevelOfEvidence.LEVEL_Dx1) ? RelevantTumorTypeDirection.UPWARD : RelevantTumorTypeDirection.DOWNWARD;
         Set<TumorType> tumorTypes = body.stream()
-            .map(relevantCancerTypeQuery -> StringUtils.isNullOrEmpty(relevantCancerTypeQuery.getCode()) ? TumorTypeUtils.findRelevantTumorTypes(relevantCancerTypeQuery.getMainType(), direction) : TumorTypeUtils.findRelevantTumorTypes(relevantCancerTypeQuery.getCode(), direction))
+            .map(relevantCancerTypeQuery -> {
+                if (StringUtils.isNullOrEmpty(relevantCancerTypeQuery.getCode())) {
+                    if (isLevelBased) {
+                        List<TumorType> queries = TumorTypeUtils.getAllTumorTypes();
+                        if (direction.equals(RelevantTumorTypeDirection.UPWARD)) {
+                            queries = TumorTypeUtils.findRelevantTumorTypes(relevantCancerTypeQuery.getMainType(), true, direction);
+                        } else {
+                            queries = queries.stream().filter(tumorType -> !StringUtils.isNullOrEmpty(tumorType.getMainType()) && tumorType.getMainType().equals(relevantCancerTypeQuery.getMainType())).collect(Collectors.toList());
+                        }
+                        return queries.stream().filter(tumorType -> tumorType.getLevel() >= 0).collect(Collectors.toSet());
+                    } else {
+                        return TumorTypeUtils.findRelevantTumorTypes(relevantCancerTypeQuery.getMainType(), true, direction);
+                    }
+                } else {
+                    Set<TumorType> relevantTumorTypes = TumorTypeUtils.findRelevantTumorTypes(relevantCancerTypeQuery.getCode(), false, direction).stream().filter(tumorType -> tumorType.getLevel() > 0).collect(Collectors.toSet());
+                    if (isLevelBased) {
+                        return relevantTumorTypes.stream().filter(tumorType -> tumorType.getLevel() > 0).collect(Collectors.toSet());
+                    } else {
+                        return relevantTumorTypes;
+                    }
+                }
+            })
             .flatMap(Collection::stream)
             .collect(Collectors.toSet());
 
-        if (onlyDetailedCancerType) {
-            tumorTypes = tumorTypes.stream().filter(tumorType -> tumorType.getLevel() > 0).collect(Collectors.toSet());
-        }
         return new ResponseEntity<>(
             new ArrayList<>(tumorTypes)
             , HttpStatus.OK
