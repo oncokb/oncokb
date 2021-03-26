@@ -139,7 +139,6 @@ public interface PrivateUtilsApi {
         method = RequestMethod.POST)
     ResponseEntity<List<TumorType>> utilRelevantCancerTypesPost(
         @ApiParam(value = "Level of Evidence") @RequestParam(value = "levelOfEvidence", required = false) LevelOfEvidence levelOfEvidence,
-        @ApiParam(value = "Return only Detailed Cancer Type.") @RequestParam(value = "onlyDetailedCancerType", required = false) Boolean onlyDetailedCancerType,
         @ApiParam(value = "List of queries.", required = true) @RequestBody List<RelevantCancerTypeQuery> body
     );
 

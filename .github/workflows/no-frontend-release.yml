@@ -1,0 +1,57 @@
+name: Build/Push no-frontend docker image
+on:
+  release:
+    types: [ published ]
+jobs:
+  main:
+    if: github.repository == 'oncokb/oncokb'
+    name: Build and Push
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: master
+
+      - name: Merge master to no-frontend
+        uses: devmasx/merge-branch@v1.3.1
+        with:
+          type: now
+          target_branch: 'no-frontend'
+          github_token: ${{ github.token }}
+
+      - uses: actions/checkout@v2
+        with:
+          ref: no-frontend
+
+      - uses: actions/setup-java@v1
+        with:
+          java-version: '8.x'
+
+      - name: Update Pom
+        env:
+          TAG_NAME: ${{ github.event.release.tag_name }}
+        run: |
+          mvn --batch-mode versions:set -DnewVersion=${TAG_NAME:1}-no-frontend -DgenerateBackupPoms=false
+
+          CHANGED=$(git diff --name-only HEAD --)
+          if [ -n "$CHANGED" ]
+          then
+            git config user.name oncokb-bot
+            git config user.email dev.oncokb@gmail.com
+            git add .
+            git commit -m 'Update pom version'
+            git push
+          fi
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build the docker image and push
+        env:
+          TAG_NAME: ${{ github.event.release.tag_name }}
+        run: |
+          mvn -ntp package -DskipTests -P production
+          docker push oncokb/oncokb:${TAG_NAME:1}-no-frontend

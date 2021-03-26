@@ -235,7 +235,7 @@ public class IndicatorUtils {
                 relevantUpwardTumorTypes = TumorTypeUtils.findRelevantTumorTypes(query.getTumorType());
             }
 
-            relevantDownwardTumorTypes = TumorTypeUtils.findRelevantTumorTypes(query.getTumorType(), RelevantTumorTypeDirection.DOWNWARD);
+            relevantDownwardTumorTypes = TumorTypeUtils.findRelevantTumorTypes(query.getTumorType(), null, RelevantTumorTypeDirection.DOWNWARD);
 
             indicatorQuery.setVUS(isVUS(matchedAlt));
 

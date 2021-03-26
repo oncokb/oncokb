@@ -33,7 +33,6 @@ cp -r core/src/main/resources/properties-EXAMPLE core/src/main/resources/propert
     * cancerhotspots.single : [Cancer hotspots service](http://cancerhotspots.org). Default: http://cancerhotspots.org/api/hotspots/single
     * oncotree.api: [OncoTree service](http://oncotree.info/). Default: http://oncotree.info/api/
     * google.username & google.password(Optional) : Google account info. It is used to send email
-    * data.version & data.version_date(Optional) : These two properties will be attached to API call.
     
     
 ## Build the WAR file

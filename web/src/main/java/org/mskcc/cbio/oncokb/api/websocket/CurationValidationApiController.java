@@ -9,10 +9,12 @@ import org.mskcc.cbio.oncokb.model.ReferenceGenome;
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.ValidationUtils;
 import org.oncokb.oncokb_transcript.ApiException;
+import org.oncokb.oncokb_transcript.client.Sequence;
 
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
+import java.util.List;
 
 import static org.mskcc.cbio.oncokb.api.websocket.ValidationCategory.*;
 
@@ -197,12 +199,20 @@ public class CurationValidationApiController {
     public JSONArray getMismatchRefAAData() throws ApiException {
         JSONArray data = new JSONArray();
         OncokbTranscriptService oncokbTranscriptService = new OncokbTranscriptService();
+
+        List<org.oncokb.oncokb_transcript.client.Sequence> allGrch37Sequences = oncokbTranscriptService.getAllProteinSequences(ReferenceGenome.GRCh37);
+        List<org.oncokb.oncokb_transcript.client.Sequence> allGrch38Sequences = oncokbTranscriptService.getAllProteinSequences(ReferenceGenome.GRCh38);
+
         for (Alteration alteration : AlterationUtils.getAllAlterations()) {
             if (alteration.getGene().getEntrezGeneId() > 0 && alteration.getProteinStart() >= 0 && alteration.getReferenceGenomes() != null && alteration.getRefResidues() != null) {
                 String sequence = "";
                 ReferenceGenome referenceGenome = null;
                 for (ReferenceGenome ref : alteration.getReferenceGenomes()) {
-                    sequence = oncokbTranscriptService.getProteinSequence(ref, alteration.getGene());
+                    if (ref.equals(ReferenceGenome.GRCh37)) {
+                        sequence = getGeneSequenceFromPool(allGrch37Sequences, alteration.getGene().getHugoSymbol());
+                    } else if (ref.equals(ReferenceGenome.GRCh38)) {
+                        sequence = getGeneSequenceFromPool(allGrch38Sequences, alteration.getGene().getHugoSymbol());
+                    }
                     if (!StringUtils.isNullOrEmpty(sequence)) {
                         referenceGenome = ref;
                         break;
@@ -216,7 +226,8 @@ public class CurationValidationApiController {
                     } else if (sequence.length() < alteration.getProteinEnd()) {
                         data.put(ValidationUtils.getErrorMessage(ValidationUtils.getTarget(alteration.getGene().getHugoSymbol(), alteration.getName()), "The gene only has " + sequence.length() + " AAs. But the variant protein end is " + alteration.getProteinEnd()));
                     } else {
-                        String referenceAA = oncokbTranscriptService.getAminoAcid(referenceGenome, alteration.getGene(), alteration.getProteinStart(), alteration.getRefResidues().length());
+                        String referenceAA = sequence.substring(alteration.getProteinStart() - 1, alteration.getProteinStart() + alteration.getRefResidues().length() - 1);
+                        ;
                         if (!referenceAA.equals(alteration.getRefResidues())) {
                             data.put(ValidationUtils.getErrorMessage(ValidationUtils.getTarget(alteration.getGene().getHugoSymbol(), alteration.getName()), "The reference amino acid does not match with the curated variant. The expected AA is " + referenceAA));
                         }
@@ -225,5 +236,10 @@ public class CurationValidationApiController {
             }
         }
         return data;
+    }
+
+    private String getGeneSequenceFromPool(List<Sequence> allSequences, String hugoSymbol) {
+        Sequence matchedSeq = allSequences.stream().filter(sequence -> sequence.getTranscript().getHugoSymbol().equals(hugoSymbol)).findAny().orElse(null);
+        return matchedSeq == null ? null : matchedSeq.getSequence();
     }
 }

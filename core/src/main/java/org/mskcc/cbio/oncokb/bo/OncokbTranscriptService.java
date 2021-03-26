@@ -107,6 +107,11 @@ public class OncokbTranscriptService {
         }
     }
 
+    public List<Sequence> getAllProteinSequences(ReferenceGenome referenceGenome) throws ApiException {
+        SequenceResourceApi sequenceResourceApi = new SequenceResourceApi();
+        return sequenceResourceApi.getAllSequencesUsingGET1(referenceGenome.name(), "ONCOKB", null);
+    }
+
     public String getAminoAcid(ReferenceGenome referenceGenome, Gene gene, int positionStart, int length) throws ApiException {
         String sequence = getProteinSequence(referenceGenome, gene);
 
