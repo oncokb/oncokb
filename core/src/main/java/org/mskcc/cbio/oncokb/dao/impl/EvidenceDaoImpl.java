@@ -6,7 +6,6 @@ package org.mskcc.cbio.oncokb.dao.impl;
 
 import org.mskcc.cbio.oncokb.dao.EvidenceDao;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.Tumor;
 
 import java.util.ArrayList;
 import java.util.List;

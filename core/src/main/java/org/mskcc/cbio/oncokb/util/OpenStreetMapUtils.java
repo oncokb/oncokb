@@ -1,9 +1,5 @@
 package org.mskcc.cbio.oncokb.util;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import org.apache.log4j.Logger;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -20,39 +16,12 @@ public class OpenStreetMapUtils {
     public static final Logger log = Logger.getLogger("OpenStreeMapUtils");
 
     private static OpenStreetMapUtils instance = null;
-    private JSONParser jsonParser;
-
-    public OpenStreetMapUtils() {
-        jsonParser = new JSONParser();
-    }
 
     public static OpenStreetMapUtils getInstance() {
         if (instance == null) {
             instance = new OpenStreetMapUtils();
         }
         return instance;
-    }
-
-    private String getRequest(String url) throws Exception {
-        final URL obj = new URL(url);
-        final HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-
-        con.setRequestMethod("GET");
-        if (con.getResponseCode() != 200) {
-            return null;
-        }
-
-        BufferedReader in = new BufferedReader(
-            new InputStreamReader(con.getInputStream())
-        );
-        String inputLine;
-        StringBuffer response = new StringBuffer();
-
-        while ((inputLine = in.readLine()) != null) {
-            response.append(inputLine);
-        }
-        in.close();
-        return response.toString();
     }
 
     public Coordinates getCoordinates(String address) {
@@ -76,12 +45,10 @@ public class OpenStreetMapUtils {
         }
         query.append("&format=json&addressdetails=1");
 
-        // System.out.println("Query:" + query);
-
         try {
-            queryResult = getRequest(query.toString());
+            queryResult = HttpUtils.getRequest(query.toString());
         } catch (Exception e) {
-            // System.out.println("Error when trying to get data with the following query " + query);
+            e.printStackTrace();
         }
 
         if (queryResult == null) {
@@ -106,6 +73,7 @@ public class OpenStreetMapUtils {
         return res;
     }
 
+    // Accroding to: https://stackoverflow.com/questions/837872/calculate-distance-in-meters-when-you-know-longitude-and-latitude-in-java
     public double calculateDistance(Coordinates ori, Coordinates des) {
         double lat1 = ori.getLat();
         double lat2 = des.getLat();

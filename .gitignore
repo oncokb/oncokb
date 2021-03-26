@@ -17,6 +17,9 @@ core/src/main/resources/certificate
 core/src/main/resources/log4j.properties
 web/src/main/resources/certificate
 web/src/main/resources/sentry.properties
+core/src/main/resources/data/clinicalTrials/sites.json.gz
+core/src/main/resources/data/clinicalTrials/result.json.gz
+core/src/main/resources/data/clinicalTrials/trials.json.gz
 
 # These files are coming from VS CODE while setting up
 .project

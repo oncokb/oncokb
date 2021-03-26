@@ -6,9 +6,9 @@ import org.json.simple.parser.ParseException;
 import org.mskcc.cbio.oncokb.apiModels.download.DownloadAvailability;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.TumorType;
-import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.ClinicalTrial;
+import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.ClinicalTrialMap;
 import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.Site;
-import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.Tumor;
+import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.TumorMap;
 
 import java.io.IOException;
 import java.util.*;
@@ -53,9 +53,9 @@ public class CacheUtils {
     private static Set<TumorType> specialCancerTypes = new HashSet<>();
 
     // Cache data for clinical trials
-    private static Map<String, Tumor> clinicalTrialsMappingResult = new HashMap<>();
+    private static Map<String, TumorMap> clinicalTrialsMappingResult = new HashMap<>();
     private static Map<String, Site> clinicalTrialsSites = new HashMap<>();
-    private static Map<String, ClinicalTrial> clinicalTrials = new HashMap<>();
+    private static Map<String, ClinicalTrialMap> clinicalTrials = new HashMap<>();
 
     // Other services which will be defined in the property cache.update separated by comma
     // Every time the observer is triggered, all other services will be triggered as well
@@ -129,39 +129,6 @@ public class CacheUtils {
         }
     };
 
-    private static Observer clinicalTrialsMappingResultObserver = new Observer(){
-        @Override
-        public void update(Observable o, Object arg) {
-            try {
-                clinicalTrialsMappingResult = ClinicalTrialsUtils.getInstance().loadMappingResult();
-            } catch (IOException | ParseException e) {
-                e.printStackTrace();
-            }
-        }
-    };
-
-    private static Observer clinicalTrialsSitesObserver = new Observer(){
-        @Override
-        public void update(Observable o, Object arg){
-            try {
-                clinicalTrialsSites = ClinicalTrialsUtils.getInstance().loadSitesMap();
-            } catch (IOException | ParseException e) {
-                e.printStackTrace();
-            }
-        }
-    };
-
-    private static Observer clinicalTrialsObserver = new Observer(){
-        @Override
-        public void update(Observable o, Object arg){
-            try {
-                clinicalTrials = ClinicalTrialsUtils.getInstance().loadTrialsMap();
-            } catch (IOException | ParseException e) {
-                e.printStackTrace();
-            }
-        }
-    };
-
     private static void notifyOtherServices(String cmd, Set<Integer> entrezGeneIds) {
         if (cmd == null) {
             cmd = "";
@@ -200,10 +167,6 @@ public class CacheUtils {
             GeneObservable.getInstance().addObserver(VUSObserver);
             GeneObservable.getInstance().addObserver(numbersObserver);
             GeneObservable.getInstance().addObserver(drugsObserver);
-
-            ClinicalTrialsObservable.getInstance().addObserver(clinicalTrialsMappingResultObserver);
-            ClinicalTrialsObservable.getInstance().addObserver(clinicalTrialsSitesObserver);
-            ClinicalTrialsObservable.getInstance().addObserver(clinicalTrialsObserver);
 
             System.out.println("Observer: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
 
@@ -601,42 +564,27 @@ public class CacheUtils {
         }
     }
 
-    public static Map<String, Tumor> getAllClinicalTrialsMappingResult() {
-        if (clinicalTrialsMappingResult.size() == 0) {
-            try {
-                clinicalTrialsMappingResult = ClinicalTrialsUtils.getInstance().loadMappingResult();
-            } catch (IOException | ParseException e) {
-                e.printStackTrace();
-            }
-        }
+    public static Map<String, TumorMap> getAllClinicalTrialsMappingResult() {
         return clinicalTrialsMappingResult;
     }
 
     public static Map<String, Site> getAllClinicalTrialsSites() {
-        if (clinicalTrialsSites.size() == 0) {
-            try {
-                clinicalTrialsSites = ClinicalTrialsUtils.getInstance().loadSitesMap();
-            } catch (IOException | ParseException e) {
-                e.printStackTrace();
-            }
-        }
         return clinicalTrialsSites;
     }
 
-    public static Map<String, ClinicalTrial> getAllClinicalTrials() {
-        if (clinicalTrials.size() == 0) {
-            try {
-                clinicalTrials = ClinicalTrialsUtils.getInstance().loadTrialsMap();
-            } catch (IOException | ParseException e) {
-                e.printStackTrace();
-            }
-        }
+    public static Map<String, ClinicalTrialMap> getAllClinicalTrials() {
         return clinicalTrials;
     }
 
     public static void updateClinicalTrials(){
         System.out.println("Update clinical trials on instance " + PropertiesUtils.getProperties("app.name") + " at " + MainUtils.getCurrentTime());
-        ClinicalTrialsObservable.getInstance().update("update", null);
+        try {
+            clinicalTrialsMappingResult = ClinicalTrialsUtils.getInstance().loadMappingResult();
+            clinicalTrialsSites = ClinicalTrialsUtils.getInstance().loadSitesMap();
+            clinicalTrials = ClinicalTrialsUtils.getInstance().loadTrialsMap();    
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static void resetAll() {

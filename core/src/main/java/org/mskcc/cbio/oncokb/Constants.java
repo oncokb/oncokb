@@ -23,6 +23,10 @@ public final class Constants {
 
     public static final ReferenceGenome DEFAULT_REFERENCE_GENOME = ReferenceGenome.GRCh37;
 
+    public static final String CLINICAL_TRIAL_COUNTRY_DESCRIPTION = "The country of your location. Must be specified with the address request parameter. Example: United States";
+    public static final String CLINICAL_TRIAL_DISTANCE_DESCRIPTION = "The radius from your location. Must be specified with address and country request parameters. Example: 100, which means all trails have any site locates within 100 km from your location. If not specify, the default distance is 100km.";
+    public static final String CLINICAL_TRIAL_ADDRESS_DESCRIPTION = "The address of your location. Support zip code. Must be specified with country request parameter. Example: New York City, NY";
+
     private Constants() {
     }
 }

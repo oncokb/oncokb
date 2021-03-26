@@ -1,8 +1,10 @@
 package org.mskcc.cbio.oncokb.util;
 
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
-import com.google.common.reflect.TypeToken;
+import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -17,14 +19,18 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.formula.functions.T;
 import org.json.simple.parser.ParseException;
 import org.mskcc.cbio.oncokb.model.SpecialTumorType;
 import org.mskcc.cbio.oncokb.model.TumorType;
 import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.Arms;
 import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.ClinicalTrial;
+import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.ClinicalTrialMap;
 import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.Coordinates;
+import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.GenericMapClass;
 import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.Site;
-import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.Tumor;
+import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.TumorMap;
+import org.springframework.util.ResourceUtils;
 
 /**
  * Created by Yifu Yao on 3/9/2021
@@ -41,98 +47,53 @@ public class ClinicalTrialsUtils {
         }
         return instance;
     }
-
-    private static final String S3_DIR = "drug-matching/";
-    private static final String S3_BUCKET = "oncokb";
+    
     private static final String LOCAL_DIR = "/data/clinicalTrials/";
     private static final String MAPPING_RESULT_FILE = "result.json.gz";
     private static final String SITES_FILE = "sites.json.gz";
     private static final String TRIALS_FILE = "trials.json.gz";
+    private static final String CLASSPATH = "classpath:";
 
-    public Map<String, Tumor> loadMappingResult()
-        throws UnsupportedEncodingException, IOException, ParseException {
-        Map<String, Tumor> result = new HashMap<>();
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        if (S3Utils.getInstance().isPropertiesConfigured()) {
-            S3ObjectInputStream inputStream = S3Utils
-                .getInstance()
-                .getObject(S3_BUCKET, S3_DIR + MAPPING_RESULT_FILE)
-                .get()
-                .getObjectContent();
-            GzipUtils.deCompress(inputStream, os);
-        } else {
-            GzipUtils.deCompress(
-                ClinicalTrialsUtils.class.getResourceAsStream(
-                        LOCAL_DIR + MAPPING_RESULT_FILE
-                    ),
-                os
-            );
-        }
+    public boolean isFilesConfigured() {
+        return (
+            S3Utils.getInstance().isPropertiesConfigured() ||
+            isLocalFilesExisted()
+        );
+    }
+
+    public boolean isLocalFilesExisted() {
+        return (
+            ResourceUtils.isUrl(CLASSPATH + LOCAL_DIR + MAPPING_RESULT_FILE) &&
+            ResourceUtils.isUrl(CLASSPATH + LOCAL_DIR + SITES_FILE) &&
+            ResourceUtils.isUrl(CLASSPATH + LOCAL_DIR + TRIALS_FILE)
+        );
+    }
+
+    public Map<String, TumorMap> loadMappingResult() throws Exception {
+        Map<String, TumorMap> result = new HashMap<>();
         result =
-            new Gson()
-            .fromJson(
-                    os.toString("UTF-8"),
-                    new TypeToken<Map<String, Tumor>>() {}.getType()
-                );
-        os.close();
+            new GenericMapClass<TumorMap>(
+                new TypeToken<Map<String, TumorMap>>() {}
+            )
+            .getMap(MAPPING_RESULT_FILE);
         return result;
     }
 
-    public Map<String, Site> loadSitesMap()
-        throws UnsupportedEncodingException, IOException, ParseException {
+    public Map<String, Site> loadSitesMap() throws Exception {
         Map<String, Site> sites = new HashMap<>();
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        if (S3Utils.getInstance().isPropertiesConfigured()) {
-            S3ObjectInputStream inputStream = S3Utils
-                .getInstance()
-                .getObject(S3_BUCKET, S3_DIR + SITES_FILE)
-                .get()
-                .getObjectContent();
-            GzipUtils.deCompress(inputStream, os);
-        } else {
-            GzipUtils.deCompress(
-                ClinicalTrialsUtils.class.getResourceAsStream(
-                        LOCAL_DIR + SITES_FILE
-                    ),
-                os
-            );
-        }
         sites =
-            new Gson()
-            .fromJson(
-                    os.toString("UTF-8"),
-                    new TypeToken<HashMap<String, Site>>() {}.getType()
-                );
-        os.close();
+            new GenericMapClass<Site>(new TypeToken<Map<String, Site>>() {})
+            .getMap(SITES_FILE);
         return sites;
     }
 
-    public Map<String, ClinicalTrial> loadTrialsMap()
-        throws UnsupportedEncodingException, IOException, ParseException {
-        Map<String, ClinicalTrial> trials = new HashMap<>();
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        if (S3Utils.getInstance().isPropertiesConfigured()) {
-            S3ObjectInputStream inputStream = S3Utils
-                .getInstance()
-                .getObject(S3_BUCKET, S3_DIR + TRIALS_FILE)
-                .get()
-                .getObjectContent();
-            GzipUtils.deCompress(inputStream, os);
-        } else {
-            GzipUtils.deCompress(
-                ClinicalTrialsUtils.class.getResourceAsStream(
-                        LOCAL_DIR + TRIALS_FILE
-                    ),
-                os
-            );
-        }
+    public Map<String, ClinicalTrialMap> loadTrialsMap() throws Exception {
+        Map<String, ClinicalTrialMap> trials = new HashMap<>();
         trials =
-            new Gson()
-            .fromJson(
-                    os.toString("UTF-8"),
-                    new TypeToken<Map<String, ClinicalTrial>>() {}.getType()
-                );
-        os.close();
+            new GenericMapClass<ClinicalTrialMap>(
+                new TypeToken<Map<String, ClinicalTrialMap>>() {}
+            )
+            .getMap(TRIALS_FILE);
         return trials
             .entrySet()
             .stream()
@@ -145,7 +106,7 @@ public class ClinicalTrialsUtils {
             );
     }
 
-    public Map<String, Tumor> getAllMappingResult() {
+    public Map<String, TumorMap> getAllMappingResult() {
         return CacheUtils.getAllClinicalTrialsMappingResult();
     }
 
@@ -153,17 +114,8 @@ public class ClinicalTrialsUtils {
         return CacheUtils.getAllClinicalTrialsSites();
     }
 
-    public Map<String, ClinicalTrial> getAllTrials() {
+    public Map<String, ClinicalTrialMap> getAllTrials() {
         return CacheUtils.getAllClinicalTrials();
-    }
-
-    public Tumor getTumor(String oncoTreeCode) {
-        Map<String, Tumor> tumors = getAllMappingResult();
-        Tumor tumor = new Tumor();
-        if (tumors.containsKey(oncoTreeCode)) {
-            tumor = tumors.get(oncoTreeCode);
-        }
-        return tumor;
     }
 
     public Site getSite(String siteKey) {
@@ -175,21 +127,12 @@ public class ClinicalTrialsUtils {
         return site;
     }
 
-    public ClinicalTrial getTrial(String nctID) {
-        Map<String, ClinicalTrial> trials = getAllTrials();
-        ClinicalTrial trial = new ClinicalTrial();
-        if (trials.containsKey(nctID)) {
-            trial = trials.get(nctID);
-        }
-        return trial;
-    }
-
-    public List<ClinicalTrial> filterTrialsByTreatment(
-        List<ClinicalTrial> trials,
+    public List<ClinicalTrialMap> filterTrialsByTreatment(
+        List<ClinicalTrialMap> trials,
         String treatment
     ) {
         if (treatment != null && !treatment.isEmpty()) {
-            List<ClinicalTrial> res = new ArrayList<>();
+            List<ClinicalTrialMap> res = new ArrayList<>();
             Set<String> drugs = Arrays
                 .stream(treatment.split("\\+"))
                 .map(item -> item.trim().toLowerCase())
@@ -200,18 +143,18 @@ public class ClinicalTrialsUtils {
         return trials;
     }
 
-    public List<ClinicalTrial> filterTrialsByDrugNameOrCode(
-        List<ClinicalTrial> trials,
+    public List<ClinicalTrialMap> filterTrialsByDrugNameOrCode(
+        List<ClinicalTrialMap> trials,
         Set<String> drugs
     ) {
         if (!drugs.isEmpty()) {
-            List<ClinicalTrial> res = new ArrayList<>();
+            List<ClinicalTrialMap> res = new ArrayList<>();
             drugs =
                 drugs
                     .stream()
                     .map(drug -> drug.toLowerCase())
                     .collect(Collectors.toSet());
-            for (ClinicalTrial trial : trials) {
+            for (ClinicalTrialMap trial : trials) {
                 for (Arms arm : trial.getArms()) {
                     if (
                         Stream
@@ -242,10 +185,10 @@ public class ClinicalTrialsUtils {
         return trials;
     }
 
-    public List<ClinicalTrial> filterTrialsBySpecialCancerType(
+    public List<ClinicalTrialMap> filterTrialsBySpecialCancerType(
         SpecialTumorType specialTumorType
     ) {
-        List<ClinicalTrial> trials = new ArrayList<>();
+        List<ClinicalTrialMap> trials = new ArrayList<>();
         if (specialTumorType == null) return trials;
 
         TumorType matchedSpecialTumorType = TumorTypeUtils.getBySpecialTumor(
@@ -286,9 +229,9 @@ public class ClinicalTrialsUtils {
         }
     }
 
-    public List<ClinicalTrial> filterTrialsByCancerType(String cancerType) {
-        Map<String, Tumor> tumors = getAllMappingResult();
-        List<ClinicalTrial> trials = new ArrayList<>();
+    public List<ClinicalTrialMap> filterTrialsByCancerType(String cancerType) {
+        Map<String, TumorMap> tumors = getAllMappingResult();
+        List<ClinicalTrialMap> trials = new ArrayList<>();
 
         Set<String> tumorCodesByMainType = new HashSet<>();
         List<TumorType> allOncoTreeSubtypes = TumorTypeUtils.getAllSubtypes();
@@ -335,25 +278,53 @@ public class ClinicalTrialsUtils {
         return trials;
     }
 
-    public List<ClinicalTrial> getTrialsByIDList(List<String> ids) {
+    public List<ClinicalTrialMap> getTrialsByIDList(List<String> ids) {
         return ids
             .stream()
             .map(id -> getAllTrials().get(id))
             .collect(Collectors.toList());
     }
 
-    public List<ClinicalTrial> filterTrialsByLocation(
-        List<ClinicalTrial> trials,
+    public List<ClinicalTrial> replaceKeysWithSites(
+        List<ClinicalTrialMap> input
+    ) {
+        List<ClinicalTrial> res = new ArrayList<>();
+        for (ClinicalTrialMap trial : input) {
+            ClinicalTrial add = new ClinicalTrial();
+            add.setArms(trial.getArms());
+            add.setBriefTitle(trial.getBriefTitle());
+            add.setCollaborators(trial.getCollaborators());
+            add.setCurrentTrialStatus(trial.getCurrentTrialStatus());
+            add.setCurrentTrialStatusDate(trial.getCurrentTrialStatusDate());
+            add.setEligibility(trial.getEligibility());
+            add.setNctId(trial.getNctId());
+            add.setPhase(trial.getPhase());
+            add.setPreviousTrialStatus(trial.getPreviousTrialStatus());
+            add.setPreviousTrialStatusDate(trial.getPreviousTrialStatusDate());
+            add.setPrincipalInvestigator(trial.getPrincipalInvestigator());
+            List<Site> sites = new ArrayList<>();
+            trial
+                .getSites()
+                .stream()
+                .forEach(key -> sites.add(getAllSites().get(key)));
+            add.setSites(sites);
+            res.add(add);
+        }
+        return res;
+    }
+
+    public List<ClinicalTrialMap> filterTrialsByLocation(
+        List<ClinicalTrialMap> trials,
         String location,
         Double distance
     ) {
         if (location != null) {
             if (distance == null) distance = 100.0;
-            List<ClinicalTrial> res = new ArrayList<>();
+            List<ClinicalTrialMap> res = new ArrayList<>();
             Coordinates ori = OpenStreetMapUtils
                 .getInstance()
                 .getCoordinates(location);
-            for (ClinicalTrial trial : trials) {
+            for (ClinicalTrialMap trial : trials) {
                 for (String siteKey : trial.getSites()) {
                     Site site = getSite(siteKey);
                     Coordinates des = site.getOrg().getCoordinates();
@@ -391,8 +362,56 @@ public class ClinicalTrialsUtils {
         return trials;
     }
 
-    public List<ClinicalTrial> filterTrialsBytreatmentAndLocation(
+    public List<ClinicalTrial> filterClinicalTrialsByLocation(
         List<ClinicalTrial> trials,
+        String location,
+        Double distance
+    ) {
+        if (location != null) {
+            if (distance == null) distance = 100.0;
+            List<ClinicalTrial> res = new ArrayList<>();
+            Coordinates ori = OpenStreetMapUtils
+                .getInstance()
+                .getCoordinates(location);
+            for (ClinicalTrial trial : trials) {
+                for (Site site : trial.getSites()) {
+                    Coordinates des = site.getOrg().getCoordinates();
+                    if (des == null) {
+                        if (
+                            site.getOrg().getCity() != null &&
+                            site.getOrg().getState() != null &&
+                            site.getOrg().getCountry() != null
+                        ) {
+                            String address = String.format(
+                                "%s, %s, %s",
+                                site.getOrg().getCity(),
+                                site.getOrg().getState(),
+                                site.getOrg().getCountry()
+                            );
+                            des =
+                                OpenStreetMapUtils
+                                    .getInstance()
+                                    .getCoordinates(address);
+                        } else continue;
+                    }
+                    if (
+                        OpenStreetMapUtils
+                            .getInstance()
+                            .calculateDistance(ori, des) <=
+                        distance
+                    ) {
+                        res.add(trial);
+                        break;
+                    }
+                }
+            }
+            return res;
+        }
+        return trials;
+    }
+
+    public List<ClinicalTrialMap> filterTrialsByTreatmentAndLocation(
+        List<ClinicalTrialMap> trials,
         String treatment,
         String location,
         Double distance
@@ -402,12 +421,15 @@ public class ClinicalTrialsUtils {
         return trials;
     }
 
-    public List<ClinicalTrial> filterTrialsByTreatmentForIndicatorQueryTreatment(
+    public List<ClinicalTrialMap> filterTrialsByTreatmentForIndicatorQueryTreatment(
         String cancerType,
         Set<String> drugs
     ) {
-        List<ClinicalTrial> trials = filterTrialsByCancerType(cancerType);
-        List<ClinicalTrial> res = filterTrialsByDrugNameOrCode(trials, drugs);
+        List<ClinicalTrialMap> trials = filterTrialsByCancerType(cancerType);
+        List<ClinicalTrialMap> res = filterTrialsByDrugNameOrCode(
+            trials,
+            drugs
+        );
         return res;
     }
 }

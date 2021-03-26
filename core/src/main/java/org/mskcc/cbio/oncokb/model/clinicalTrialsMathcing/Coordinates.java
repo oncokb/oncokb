@@ -41,9 +41,9 @@ public class Coordinates {
         if (getClass() != obj.getClass())
             return false;
         Coordinates other = (Coordinates) obj;
-        if (Double.doubleToLongBits(lat) != Double.doubleToLongBits(other.lat))
+        if (!String.format("%.6f",lat).equals(String.format("%.6f",other.lat)))
             return false;
-        if (Double.doubleToLongBits(lon) != Double.doubleToLongBits(other.lon))
+        if (!String.format("%.6f",lon).equals(String.format("%.6f",other.lon)))
             return false;
         return true;
     }

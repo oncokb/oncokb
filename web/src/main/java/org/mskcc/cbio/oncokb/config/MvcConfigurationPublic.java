@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
@@ -28,6 +29,7 @@ import static org.mskcc.cbio.oncokb.Constants.*;
 @ComponentScan(basePackages = "org.mskcc.cbio.oncokb.api.pub.v1")
 @EnableWebMvc
 @EnableSwagger2
+@EnableScheduling
 public class MvcConfigurationPublic extends WebMvcConfigurerAdapter{
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {

@@ -4,21 +4,21 @@ package org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing;
  * Created by Yifu Yao on 3/16/2021
  */
 public class StructuredEligibility {
-    private boolean accepts_healthy_volunteers;
+    private boolean acceptsHealthyVolunteers;
     private String gender;
-    private String max_age;
-    private double max_age_in_years;
-    private double max_age_number;
-    private String max_age_unit;
-    private String min_age;
-    private double min_age_in_years;
-    private double min_age_number;
-    private String min_age_unit;
-    public boolean isAccepts_healthy_volunteers() {
-        return accepts_healthy_volunteers;
+    private String maxAge;
+    private double maxAgeInYears;
+    private double maxAgeNumber;
+    private String maxAgeUnit;
+    private String minAge;
+    private double minAgeInYears;
+    private double minAgeNumber;
+    private String minAgeUnit;
+    public boolean isAcceptsHealthyVolunteers() {
+        return acceptsHealthyVolunteers;
     }
-    public void setAccepts_healthy_volunteers(boolean accepts_healthy_volunteers) {
-        this.accepts_healthy_volunteers = accepts_healthy_volunteers;
+    public void setAcceptsHealthyVolunteers(boolean acceptsHealthyVolunteers) {
+        this.acceptsHealthyVolunteers = acceptsHealthyVolunteers;
     }
     public String getGender() {
         return gender;
@@ -26,53 +26,52 @@ public class StructuredEligibility {
     public void setGender(String gender) {
         this.gender = gender;
     }
-    public String getMax_age() {
-        return max_age;
+    public String getMaxAge() {
+        return maxAge;
     }
-    public void setMax_age(String max_age) {
-        this.max_age = max_age;
+    public void setMaxAge(String maxAge) {
+        this.maxAge = maxAge;
     }
-    public double getMax_age_in_years() {
-        return max_age_in_years;
+    public double getMaxAgeInYears() {
+        return maxAgeInYears;
     }
-    public void setMax_age_in_years(double max_age_in_years) {
-        this.max_age_in_years = max_age_in_years;
+    public void setMaxAgeInYears(double maxAgeInYears) {
+        this.maxAgeInYears = maxAgeInYears;
     }
-    public double getMax_age_number() {
-        return max_age_number;
+    public double getMaxAgeNumber() {
+        return maxAgeNumber;
     }
-    public void setMax_age_number(double max_age_number) {
-        this.max_age_number = max_age_number;
+    public void setMaxAgeNumber(double maxAgeNumber) {
+        this.maxAgeNumber = maxAgeNumber;
     }
-    public String getMax_age_unit() {
-        return max_age_unit;
+    public String getMaxAgeUnit() {
+        return maxAgeUnit;
     }
-    public void setMax_age_unit(String max_age_unit) {
-        this.max_age_unit = max_age_unit;
+    public void setMaxAgeUnit(String maxAgeUnit) {
+        this.maxAgeUnit = maxAgeUnit;
     }
-    public String getMin_age() {
-        return min_age;
+    public String getMinAge() {
+        return minAge;
     }
-    public void setMin_age(String min_age) {
-        this.min_age = min_age;
+    public void setMinAge(String minAge) {
+        this.minAge = minAge;
     }
-    public double getMin_age_in_years() {
-        return min_age_in_years;
+    public double getMinAgeInYears() {
+        return minAgeInYears;
     }
-    public void setMin_age_in_years(double min_age_in_years) {
-        this.min_age_in_years = min_age_in_years;
+    public void setMinAgeInYears(double minAgeInYears) {
+        this.minAgeInYears = minAgeInYears;
     }
-    public double getMin_age_number() {
-        return min_age_number;
+    public double getMinAgeNumber() {
+        return minAgeNumber;
     }
-    public void setMin_age_number(double min_age_number) {
-        this.min_age_number = min_age_number;
+    public void setMinAgeNumber(double minAgeNumber) {
+        this.minAgeNumber = minAgeNumber;
     }
-    public String getMin_age_unit() {
-        return min_age_unit;
+    public String getMinAgeUnit() {
+        return minAgeUnit;
     }
-    public void setMin_age_unit(String min_age_unit) {
-        this.min_age_unit = min_age_unit;
+    public void setMinAgeUnit(String minAgeUnit) {
+        this.minAgeUnit = minAgeUnit;
     }
-    
 }

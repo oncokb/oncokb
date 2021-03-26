@@ -40,6 +40,7 @@ public class GzipUtilsTest {
         );
     }
 
+
     @Test
     public void stringTest() throws IOException {
         String orginal = testDir + "/test_gzip_file.json";

@@ -2,6 +2,7 @@ package org.mskcc.cbio.oncokb.api.pub.v1;
 
 import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
+import org.mskcc.cbio.oncokb.Constants;
 import org.mskcc.cbio.oncokb.apiModels.annotation.*;
 import org.mskcc.cbio.oncokb.config.annotation.PremiumPublicApi;
 import org.mskcc.cbio.oncokb.config.annotation.PublicApi;
@@ -51,15 +52,17 @@ public class AnnotationsApiController {
         , @ApiParam(value = "Protein End. Example: 600") @RequestParam(value = "proteinEnd", required = false) Integer proteinEnd
         , @ApiParam(value = "OncoTree(http://oncotree.info) tumor type name. The field supports OncoTree Code, OncoTree Name and OncoTree Main type. Example: Melanoma") @RequestParam(value = "tumorType", required = false) String tumorType
         , @ApiParam(value = EVIDENCE_TYPES_DESCRIPTION) @RequestParam(value = "evidenceType", required = false) String evidenceTypes
-        , @ApiParam(value = "The address of your location. Support zip code. Must be spcified with country. Example: New York City, NY") @RequestParam(value = "address", required = false) String address
-        , @ApiParam(value = "The country of your location. Must be specified with address. Example: United States") @RequestParam(value = "country", required = false) String country
-        , @ApiParam(value = "The radius from your location. Must be specified with address and country. Example: 100, which means all trails have any site locates within 100 km from your location. If not specify, the default distance is 100km.") @RequestParam(value = "distance", required = false) Double distance
+        , @ApiParam(value = Constants.CLINICAL_TRIAL_ADDRESS_DESCRIPTION) @RequestParam(value = "address", required = false) String address
+        , @ApiParam(value = Constants.CLINICAL_TRIAL_COUNTRY_DESCRIPTION) @RequestParam(value = "country", required = false) String country
+        , @ApiParam(value = Constants.CLINICAL_TRIAL_DISTANCE_DESCRIPTION) @RequestParam(value = "distance", required = false) Double distance
     ) {
         HttpStatus status = HttpStatus.OK;
         IndicatorQueryResp indicatorQueryResp = null;
 
         if (entrezGeneId != null && hugoSymbol != null && !GeneUtils.isSameGene(entrezGeneId, hugoSymbol)) {
             status = HttpStatus.BAD_REQUEST;
+        } else if(!ClinicalTrialsUtils.getInstance().isFilesConfigured()){
+            status = HttpStatus.NOT_FOUND; 
         } else {
             ReferenceGenome matchedRG = null;
             if (!StringUtils.isEmpty(referenceGenome)) {
@@ -81,12 +84,11 @@ public class AnnotationsApiController {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = IndicatorQueryResp.class, responseContainer = "List"),
         @ApiResponse(code = 400, message = "Error, error message will be given.", response = String.class)})
-    @RequestMapping(value = "/annotate/mutations/byProteinChange/{country}",
+    @RequestMapping(value = "/annotate/mutations/byProteinChange",
         consumes = {"application/json"},
         produces = {"application/json"},
         method = RequestMethod.POST)
     public ResponseEntity<List<IndicatorQueryResp>> annotateMutationsByProteinChangePost(
-        @PathVariable String country,
         @ApiParam(value = "List of queries. Please see swagger.json for request body format.", required = true) @RequestBody() List<AnnotateMutationByProteinChangeQuery> body
     ) {
         HttpStatus status = HttpStatus.OK;
@@ -94,10 +96,13 @@ public class AnnotationsApiController {
 
         if (body == null) {
             status = HttpStatus.BAD_REQUEST;
-        } else {
+        } else if(!ClinicalTrialsUtils.getInstance().isFilesConfigured()){
+            status = HttpStatus.NOT_FOUND; 
+        } 
+        else {
             for (AnnotateMutationByProteinChangeQuery query : body) {
                 IndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuery(new Query(query), null, false, query.getEvidenceTypes());
-                indicatorQueryResp = IndicatorUtils.filterClinicalTrialsByLocation(indicatorQueryResp, query.getAddress(), country, query.getDistance());
+                indicatorQueryResp = IndicatorUtils.filterClinicalTrialsByLocation(indicatorQueryResp, query.getAddress(), query.getCountry(), query.getDistance());
                 result.add(indicatorQueryResp);
             }
         }

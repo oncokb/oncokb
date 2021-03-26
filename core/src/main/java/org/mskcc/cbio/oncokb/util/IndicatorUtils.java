@@ -785,7 +785,12 @@ public class IndicatorUtils {
                                 indicatorQueryTreatment.setAlterations(alterationsMap.get(treatment));
                                 indicatorQueryTreatment.setLevelAssociatedCancerType(tumorType);
                                 indicatorQueryTreatment.setDescription(SummaryUtils.enrichDescription(descriptionMap.get(treatment), queryHugoSymbol));
-                                indicatorQueryTreatment.setClinicalTrials(ClinicalTrialsUtils.getInstance().filterTrialsByTreatmentForIndicatorQueryTreatment(tumorType.getName(), treatment.getDrugs().stream().map(drug -> drug.getDrugName()).collect(Collectors.toSet())));
+                                indicatorQueryTreatment
+                                    .setClinicalTrials(ClinicalTrialsUtils
+                                        .getInstance()
+                                        .replaceKeysWithSites(ClinicalTrialsUtils
+                                            .getInstance()
+                                            .filterTrialsByTreatmentForIndicatorQueryTreatment(tumorType.getName(), treatment.getDrugs().stream().map(drug -> drug.getDrugName()).collect(Collectors.toSet()))));
                                 treatments.add(indicatorQueryTreatment);
                             }
                         }
@@ -970,7 +975,7 @@ public class IndicatorUtils {
         }
         List<IndicatorQueryTreatment> treatments = new ArrayList<>();
         for (IndicatorQueryTreatment treatment: indicatorQueryResp.getTreatments()){
-            treatment.setClinicalTrials(ClinicalTrialsUtils.getInstance().filterTrialsByLocation(treatment.getClinicalTrials(), location, distance));
+            treatment.setClinicalTrials(ClinicalTrialsUtils.getInstance().filterClinicalTrialsByLocation(treatment.getClinicalTrials(), location, distance));
             treatments.add(treatment);
         }
         indicatorQueryResp.setTreatments(treatments);

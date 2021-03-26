@@ -30,8 +30,8 @@ public class OpenStreetMapUtilsTest extends TestCase {
             .calculateDistance(coord1, coord2);
         assertEquals(
             "Get distance between two coordinates has error",
-            exp3,
-            dis1
+            String.format("%.2f", exp3),
+            String.format("%.2f", dis1)
         );
     }
 }

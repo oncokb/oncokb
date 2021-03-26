@@ -5,24 +5,25 @@ package org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing;
  */
 public class UnstructuredEligibility {
     private String description;
-    private int display_order;
-    private boolean inclusion_indicator;
+    private int displayOrder;
+    private boolean inclusionIndicator;
     public String getDescription() {
         return description;
     }
     public void setDescription(String description) {
         this.description = description;
     }
-    public int getDisplay_order() {
-        return display_order;
+    public int getDisplayOrder() {
+        return displayOrder;
     }
-    public void setDisplay_order(int display_order) {
-        this.display_order = display_order;
+    public void setDisplayOrder(int displayOrder) {
+        this.displayOrder = displayOrder;
     }
-    public boolean isInclusion_indicator() {
-        return inclusion_indicator;
+    public boolean isInclusionIndicator() {
+        return inclusionIndicator;
     }
-    public void setInclusion_indicator(boolean inclusion_indicator) {
-        this.inclusion_indicator = inclusion_indicator;
+    public void setInclusionIndicator(boolean inclusionIndicator) {
+        this.inclusionIndicator = inclusionIndicator;
     }
+
 }

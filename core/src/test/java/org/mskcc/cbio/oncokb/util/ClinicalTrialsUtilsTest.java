@@ -3,6 +3,8 @@ package org.mskcc.cbio.oncokb.util;
 import static org.junit.Assert.assertTrue;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
@@ -13,17 +15,29 @@ import java.util.Set;
 import org.json.simple.parser.ParseException;
 import org.junit.Test;
 import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.ClinicalTrial;
+import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.ClinicalTrialMap;
+import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.GenericMapClass;
 import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.Site;
-import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.Tumor;
+import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.TumorMap;
 
 public class ClinicalTrialsUtilsTest {
 
     @Test
+    public void testIfFilesConfigured(){
+        assertTrue("No files configurations were found", ClinicalTrialsUtils.getInstance().isFilesConfigured());
+    }
+
+    @Test
+    public void testIsLocalFilesExisted(){
+        assertTrue("Local Files don't existed", ClinicalTrialsUtils.getInstance().isLocalFilesExisted());
+    }
+
+    @Test
     public void testLoadingMappingResult() {
-        Map<String, Tumor> result = new HashMap<>();
+        Map<String, TumorMap> result = new HashMap<>();
         try {
             result = ClinicalTrialsUtils.getInstance().loadMappingResult();
-        } catch (IOException | ParseException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         assertTrue("Loading mapping result failed", !result.isEmpty());
@@ -34,7 +48,7 @@ public class ClinicalTrialsUtilsTest {
         Map<String, Site> sites = new HashMap<>();
         try {
             sites = ClinicalTrialsUtils.getInstance().loadSitesMap();
-        } catch (IOException | ParseException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         assertTrue("Loading sites failed", !sites.isEmpty());
@@ -42,18 +56,18 @@ public class ClinicalTrialsUtilsTest {
 
     @Test
     public void testLoadingTrials() {
-        Map<String, ClinicalTrial> trials = new HashMap<>();
+        Map<String, ClinicalTrialMap> trials = new HashMap<>();
         try {
             trials = ClinicalTrialsUtils.getInstance().loadTrialsMap();
-        } catch (IOException | ParseException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        assertTrue("Loading sites failed", !trials.isEmpty());
+        assertTrue("Loading trials failed", !trials.isEmpty());
     }
 
     @Test
     public void testGetAllMappingResult() {
-        Map<String, Tumor> res = ClinicalTrialsUtils
+        Map<String, TumorMap> res = ClinicalTrialsUtils
             .getInstance()
             .getAllMappingResult();
         assertTrue("Getting mapping result failed", res.size() != 0);
@@ -69,7 +83,7 @@ public class ClinicalTrialsUtilsTest {
 
     @Test
     public void testGetAllTrials() {
-        Map<String, ClinicalTrial> trials = ClinicalTrialsUtils
+        Map<String, ClinicalTrialMap> trials = ClinicalTrialsUtils
             .getInstance()
             .getAllTrials();
         assertTrue("Getting trials failed", trials.size() != 0);
@@ -77,7 +91,7 @@ public class ClinicalTrialsUtilsTest {
 
     @Test
     public void testFilterByCancerType() {
-        List<ClinicalTrial> trials = ClinicalTrialsUtils
+        List<ClinicalTrialMap> trials = ClinicalTrialsUtils
             .getInstance()
             .filterTrialsByCancerType("Melanoma");
         assertTrue("Filter by cancer type failed", trials.size() != 0);
@@ -85,10 +99,10 @@ public class ClinicalTrialsUtilsTest {
 
     @Test
     public void testFilterTrialsByTreatment() {
-        List<ClinicalTrial> trials = ClinicalTrialsUtils
+        List<ClinicalTrialMap> trials = ClinicalTrialsUtils
             .getInstance()
             .filterTrialsByCancerType("Melanoma");
-        List<ClinicalTrial> res = ClinicalTrialsUtils
+        List<ClinicalTrialMap> res = ClinicalTrialsUtils
             .getInstance()
             .filterTrialsByTreatment(trials, "Dabrafenib");
         System.out.println(res.size());
@@ -99,10 +113,10 @@ public class ClinicalTrialsUtilsTest {
     public void testFilterTrialsByDrugNameOrCode() {
         Set<String> drugs = new HashSet<>();
         drugs.add("Dabrafenib");
-        List<ClinicalTrial> trials = ClinicalTrialsUtils
+        List<ClinicalTrialMap> trials = ClinicalTrialsUtils
             .getInstance()
             .filterTrialsByCancerType("Melanoma");
-        List<ClinicalTrial> res = ClinicalTrialsUtils
+        List<ClinicalTrialMap> res = ClinicalTrialsUtils
             .getInstance()
             .filterTrialsByDrugNameOrCode(trials, drugs);
         assertTrue("Filter by drug name Or code failed", res.size() != 0);
@@ -110,10 +124,10 @@ public class ClinicalTrialsUtilsTest {
 
     @Test
     public void testFilterTrialsByLocation() {
-        List<ClinicalTrial> trials = ClinicalTrialsUtils
+        List<ClinicalTrialMap> trials = ClinicalTrialsUtils
             .getInstance()
             .filterTrialsByCancerType("Melanoma");
-        List<ClinicalTrial> res = ClinicalTrialsUtils
+        List<ClinicalTrialMap> res = ClinicalTrialsUtils
             .getInstance()
             .filterTrialsByLocation(
                 trials,
@@ -124,21 +138,39 @@ public class ClinicalTrialsUtilsTest {
     }
 
     @Test
-    public void testFilterTrialsByTreatmentAndLocation() {
-        Gson gson = new Gson();
-        List<ClinicalTrial> trials = ClinicalTrialsUtils
+    public void testReplaceKeysWithSites(){
+        List<ClinicalTrialMap> trials = ClinicalTrialsUtils
             .getInstance()
             .filterTrialsByCancerType("Melanoma");
         trials =
             ClinicalTrialsUtils
                 .getInstance()
-                .filterTrialsBytreatmentAndLocation(
+                .filterTrialsByTreatmentAndLocation(
+                    trials,
+                    "Dabrafenib",
+                    "St. Louis, MO, United States",
+                    100.0
+                );
+        List<ClinicalTrial> res = ClinicalTrialsUtils.getInstance().replaceKeysWithSites(trials);
+        assertTrue("Sites replace failed", res.size() != 0);
+    }
+
+    @Test
+    public void testFilterTrialsByTreatmentAndLocation() {
+        List<ClinicalTrialMap> trials = ClinicalTrialsUtils
+            .getInstance()
+            .filterTrialsByCancerType("Melanoma");
+        trials =
+            ClinicalTrialsUtils
+                .getInstance()
+                .filterTrialsByTreatmentAndLocation(
                     trials,
                     "Dabrafenib",
                     "St. Louis, MO, United States",
                     100.0
                 );
         System.out.println(trials.size());
+        Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd").create();
         try {
             FileWriter file = new FileWriter(
                 "C:\\Users\\Yifu\\Desktop\\test.json"

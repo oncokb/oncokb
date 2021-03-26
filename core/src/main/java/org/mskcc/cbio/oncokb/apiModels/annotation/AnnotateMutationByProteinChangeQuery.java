@@ -9,6 +9,7 @@ public class AnnotateMutationByProteinChangeQuery extends AnnotationQuery implem
     private String consequence;
     private Integer proteinStart;
     private Integer proteinEnd;
+    private String country;
     private String address;
     private Double distance;
 
@@ -66,5 +67,13 @@ public class AnnotateMutationByProteinChangeQuery extends AnnotationQuery implem
 
     public void setDistance(Double distance) {
         this.distance = distance;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
     }
 }

@@ -1,31 +1,27 @@
 package org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing;
 
+import java.util.Date;
+
 public class Site {
     private String recruitmentStatus;
-    private String recruitmentStatusDate;
-    private OrganizationInfo org;
-
+    private Date recruitmentStatusDate;
+    private Organization org;
     public String getRecruitmentStatus() {
         return recruitmentStatus;
     }
-
     public void setRecruitmentStatus(String recruitmentStatus) {
         this.recruitmentStatus = recruitmentStatus;
     }
-
-    public String getRecruitmentStatusDate() {
+    public Date getRecruitmentStatusDate() {
         return recruitmentStatusDate;
     }
-
-    public void setRecruitmentStatusDate(String recruitmentStatusDate) {
+    public void setRecruitmentStatusDate(Date recruitmentStatusDate) {
         this.recruitmentStatusDate = recruitmentStatusDate;
     }
-
-    public OrganizationInfo getOrg() {
+    public Organization getOrg() {
         return org;
     }
-
-    public void setOrg(OrganizationInfo org) {
+    public void setOrg(Organization org) {
         this.org = org;
     }
 

@@ -3,7 +3,6 @@ package org.mskcc.cbio.oncokb.util;
 import org.junit.Test;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.TumorType;
-import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.Tumor;
 
 import static org.junit.Assert.assertEquals;
 import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
