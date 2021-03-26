@@ -128,7 +128,7 @@ public class TrialsApiController {
                 Set<String> nctIDSet = new HashSet<>();
                 List<Trial> addTrials = new ArrayList<>();
                 List<Trial> trials = new ArrayList<>();
-                SpecialTumorType specialTumorType = SpecialTumorType.valueOf(cancerType);
+                SpecialTumorType specialTumorType = TumorTypeUtils.getSpecialTumorTypeByName(cancerType);
                 if (specialTumorType != null) {
                     trials = getTrialsForSpecialCancerType(jsonObject, specialTumorType);
                 } else {

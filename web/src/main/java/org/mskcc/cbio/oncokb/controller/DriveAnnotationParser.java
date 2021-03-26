@@ -546,7 +546,14 @@ public class DriveAnnotationParser {
             nestLevel);
 
         // prognostic summary
-        saveTumorLevelSummaries(cancerObj, "prognosticSummary", gene, alterations, tumorTypes, null, EvidenceType.PROGNOSTIC_SUMMARY, nestLevel);
+        saveTumorLevelSummaries(cancerObj,
+            "prognosticSummary",
+            gene,
+            alterations,
+            tumorTypes,
+            cancerObj.has("prognostic") && cancerObj.getJSONObject("prognostic").has("relevantCancerTypes") ? getTumorTypes(cancerObj.getJSONObject("prognostic").getJSONArray("relevantCancerTypes")) : null,
+            EvidenceType.PROGNOSTIC_SUMMARY, nestLevel
+        );
 
         // Prognostic implications
         parseImplication(gene, alterations, tumorTypes,
@@ -589,7 +596,7 @@ public class DriveAnnotationParser {
     }
 
     private static void parseTherapeuticImplications(Gene gene, Set<Alteration> alterations, List<TumorType> tumorTypes, JSONObject implicationObj,
-                                                     EvidenceType evidenceType, String knownEffectOfEvidence, Integer nestLevel) throws JSONException {
+                                                     EvidenceType evidenceType, String knownEffectOfEvidence, Integer nestLevel) throws Exception {
         System.out.println(spaceStrByNestLevel(nestLevel) + evidenceType);
 
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
@@ -619,6 +626,11 @@ public class DriveAnnotationParser {
             String desc = implicationObj.getString("description");
             evidence.setDescription(desc);
             setDocuments(desc, evidence);
+
+            if (implicationObj.has("relevantCancerTypes")) {
+                evidence.setRelevantCancerTypes(new HashSet<>(getTumorTypes(implicationObj.getJSONArray("relevantCancerTypes"))));
+            }
+
             evidenceBo.save(evidence);
         }
 
@@ -810,6 +822,10 @@ public class DriveAnnotationParser {
 //                    "Last update on: " + MainUtils.getTimeByDate(lastReview));
 //            }
 //            evidence.setLastReview(lastReview);
+
+            if (drugObj.has("relevantCancerTypes")) {
+                evidence.setRelevantCancerTypes(new HashSet<>(getTumorTypes(drugObj.getJSONArray("relevantCancerTypes"))));
+            }
 
             evidenceBo.save(evidence);
         }

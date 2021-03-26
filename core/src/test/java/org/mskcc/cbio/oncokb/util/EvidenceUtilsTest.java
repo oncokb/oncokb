@@ -312,8 +312,8 @@ public class EvidenceUtilsTest extends TestCase {
         // Test with tumor type only
         query = new Query();
         query.setTumorType("MEL");
-        List<TumorType> upward = TumorTypeUtils.findRelevantTumorTypes("MEL", RelevantTumorTypeDirection.UPWARD);
-        List<TumorType> downward = TumorTypeUtils.findRelevantTumorTypes("MEL", RelevantTumorTypeDirection.DOWNWARD);
+        List<TumorType> upward = TumorTypeUtils.findRelevantTumorTypes("MEL", false, RelevantTumorTypeDirection.UPWARD);
+        List<TumorType> downward = TumorTypeUtils.findRelevantTumorTypes("MEL", false, RelevantTumorTypeDirection.DOWNWARD);
         responses = EvidenceUtils.processRequest(Collections.singletonList(query), null, null, true);
         assertTrue("The response should only tumor type relevant evidences", responses.get(0).getEvidences().stream().filter(evidence -> {
             if (evidence.getLevelOfEvidence() != null && evidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_Dx1)) {
