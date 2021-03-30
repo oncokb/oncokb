@@ -123,11 +123,13 @@ public class CacheUtils {
     };
 
     private static void notifyOtherServices(String cmd, Set<Integer> entrezGeneIds) {
+        System.out.println("Notify other services..." + " at " + MainUtils.getCurrentTime());
         if (cmd == null) {
             cmd = "";
         }
-        System.out.println("Notify other services..." + " at " + MainUtils.getCurrentTime());
+        System.out.println("\tcmd is " + cmd);
         if (cmd == "update" && entrezGeneIds != null && entrezGeneIds.size() > 0) {
+            System.out.println("\t# of other services" + otherServices.size());
             for (String service : otherServices) {
                 if (!StringUtils.isNullOrEmpty(service)) {
                     try {
@@ -148,6 +150,8 @@ public class CacheUtils {
                     }
                 }
             }
+        } else {
+            System.out.println("\tcmd=" + cmd + ", has gene:" + entrezGeneIds != null && entrezGeneIds.size() > 0);
         }
     }
 
@@ -544,11 +548,14 @@ public class CacheUtils {
             propagate = false;
         }
         if(entrezGeneIds == null || entrezGeneIds.size() == 0){
+            System.out.println("\tThere is no entrez gene ids specified.");
             return;
         }
         entrezGeneIds.forEach(entrezGeneId -> GeneObservable.getInstance().update("update", entrezGeneId.toString()));
         if (propagate) {
             notifyOtherServices("update", entrezGeneIds);
+        }else{
+            System.out.println("\tDo not propagate.");
         }
     }
 
