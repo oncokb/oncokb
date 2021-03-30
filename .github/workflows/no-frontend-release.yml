@@ -33,16 +33,6 @@ jobs:
         run: |
           mvn --batch-mode versions:set -DnewVersion=${TAG_NAME:1}-no-frontend -DgenerateBackupPoms=false
 
-          CHANGED=$(git diff --name-only HEAD --)
-          if [ -n "$CHANGED" ]
-          then
-            git config user.name oncokb-bot
-            git config user.email dev.oncokb@gmail.com
-            git add .
-            git commit -m 'Update pom version'
-            git push
-          fi
-
       - name: Login to DockerHub
         uses: docker/login-action@v1
         with:
