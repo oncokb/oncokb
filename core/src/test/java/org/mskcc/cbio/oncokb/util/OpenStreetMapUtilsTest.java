@@ -1,10 +1,13 @@
 package org.mskcc.cbio.oncokb.util;
 
 import junit.framework.TestCase;
+
+import org.junit.Test;
 import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.Coordinates;
 
 public class OpenStreetMapUtilsTest extends TestCase {
 
+    @Test
     public void testOpenStreetMapUtils() throws Exception {
         String address1 = "65202, USA";
         Coordinates coord1 = OpenStreetMapUtils

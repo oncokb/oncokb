@@ -329,22 +329,7 @@ public class ClinicalTrialsUtils {
                     Site site = getSite(siteKey);
                     Coordinates des = site.getOrg().getCoordinates();
                     if (des == null) {
-                        if (
-                            site.getOrg().getCity() != null &&
-                            site.getOrg().getState() != null &&
-                            site.getOrg().getCountry() != null
-                        ) {
-                            String address = String.format(
-                                "%s, %s, %s",
-                                site.getOrg().getCity(),
-                                site.getOrg().getState(),
-                                site.getOrg().getCountry()
-                            );
-                            des =
-                                OpenStreetMapUtils
-                                    .getInstance()
-                                    .getCoordinates(address);
-                        } else continue;
+                        continue;
                     }
                     if (
                         OpenStreetMapUtils
@@ -377,22 +362,7 @@ public class ClinicalTrialsUtils {
                 for (Site site : trial.getSites()) {
                     Coordinates des = site.getOrg().getCoordinates();
                     if (des == null) {
-                        if (
-                            site.getOrg().getCity() != null &&
-                            site.getOrg().getState() != null &&
-                            site.getOrg().getCountry() != null
-                        ) {
-                            String address = String.format(
-                                "%s, %s, %s",
-                                site.getOrg().getCity(),
-                                site.getOrg().getState(),
-                                site.getOrg().getCountry()
-                            );
-                            des =
-                                OpenStreetMapUtils
-                                    .getInstance()
-                                    .getCoordinates(address);
-                        } else continue;
+                        continue;
                     }
                     if (
                         OpenStreetMapUtils

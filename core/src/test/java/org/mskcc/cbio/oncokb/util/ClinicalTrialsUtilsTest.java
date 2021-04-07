@@ -93,7 +93,7 @@ public class ClinicalTrialsUtilsTest {
     public void testFilterByCancerType() {
         List<ClinicalTrialMap> trials = ClinicalTrialsUtils
             .getInstance()
-            .filterTrialsByCancerType("Melanoma");
+            .filterTrialsByCancerType("MEL");
         assertTrue("Filter by cancer type failed", trials.size() != 0);
     }
 
@@ -126,15 +126,25 @@ public class ClinicalTrialsUtilsTest {
     public void testFilterTrialsByLocation() {
         List<ClinicalTrialMap> trials = ClinicalTrialsUtils
             .getInstance()
-            .filterTrialsByCancerType("Melanoma");
+            .filterTrialsByCancerType("MEL");
         List<ClinicalTrialMap> res = ClinicalTrialsUtils
             .getInstance()
             .filterTrialsByLocation(
                 trials,
-                "Columbia, MO, United States",
+                "toronto, Canada",
                 100.0
             );
-        assertTrue("Filter by location failed", res.size() != 0);
+        assertTrue("Filter by location failed", res.size() != 0);       
+        Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd").create();
+        try {
+            FileWriter file = new FileWriter(
+                "C:\\Users\\Yifu\\Desktop\\test.json"
+            );
+            file.write(gson.toJson(ClinicalTrialsUtils.getInstance().replaceKeysWithSites(res)));
+            file.flush();
+            file.close();
+            System.out.println("Finished");
+        } catch (IOException e) {}
     }
 
     @Test
