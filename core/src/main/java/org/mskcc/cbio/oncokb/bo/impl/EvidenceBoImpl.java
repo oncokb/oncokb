@@ -60,7 +60,7 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
     }
 
     @Override
-    public List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, TumorType matchedTumorType,  Collection<TumorType> relevantTumorTypes) {
+    public List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, TumorType matchedTumorType,  List<TumorType> relevantTumorTypes) {
         if (relevantTumorTypes == null) {
             if (evidenceTypes == null) {
                 return findEvidencesByAlteration(alterations);
@@ -68,37 +68,42 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
             return findEvidencesByAlteration(alterations, evidenceTypes);
         }
 
-        return findEvidencesByAlteration(alterations).stream()
+        Set<Evidence> alterationEvidences = findEvidencesByAlteration(alterations).stream()
             .filter(evidence -> {
                 if (!evidenceTypes.contains(evidence.getEvidenceType())) {
                     return false;
                 }
+                return true;
+            })
+            .collect(Collectors.toSet());
+        Set<Evidence> evidences = new LinkedHashSet<>();
+        for (TumorType relevantTumorType : relevantTumorTypes) {
+            for (Evidence evidence : alterationEvidences) {
                 boolean hasJointOnSubtype = false;
                 if (evidence.getRelevantCancerTypes().isEmpty()) {
-                    hasJointOnSubtype = !Collections.disjoint(evidence.getCancerTypes(), relevantTumorTypes);
+                    hasJointOnSubtype = evidence.getCancerTypes().contains(relevantTumorType);
                 } else {
                     hasJointOnSubtype = matchedTumorType != null && evidence.getRelevantCancerTypes().contains(matchedTumorType);
                 }
                 if (hasJointOnSubtype) {
-                    return true;
+                    evidences.add(evidence);
                 } else if (evidence.getRelevantCancerTypes().isEmpty()) {
                     // we also like to check whether the evidence is assigned to a main type. Only check if the evidence relevant cancer type is empty.
                     // If the evidence has the relevant cancer type curated, disjoin in the previous step should capture it
                     Set<TumorType> evidenceMainTypes = evidence.getCancerTypes().stream().filter(cancerType -> StringUtils.isEmpty(cancerType.getCode()) && !StringUtils.isEmpty(cancerType.getMainType())).collect(Collectors.toSet());
                     if (!evidenceMainTypes.isEmpty()) {
-                        return !Collections.disjoint(evidenceMainTypes.stream().map(tumorType -> tumorType.getMainType()).collect(Collectors.toSet()), relevantTumorTypes.stream().map(tumorType -> tumorType.getMainType()).collect(Collectors.toSet()));
-                    } else {
-                        return false;
+                        if (evidenceMainTypes.stream().map(tumorType -> tumorType.getMainType()).collect(Collectors.toSet()).contains(relevantTumorType.getMainType())) {
+                            evidences.add(evidence);
+                        }
                     }
-                } else {
-                    return false;
                 }
-            })
-            .collect(Collectors.toList());
+            }
+        }
+        return new ArrayList<>(evidences);
     }
 
     @Override
-    public List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, TumorType matchedTumorType, Collection<TumorType> tumorTypes, Collection<LevelOfEvidence> levelOfEvidences) {
+    public List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, TumorType matchedTumorType, List<TumorType> tumorTypes, Collection<LevelOfEvidence> levelOfEvidences) {
         return findEvidencesByAlteration(alterations, evidenceTypes, matchedTumorType, tumorTypes).stream().filter(evidence -> levelOfEvidences.contains(evidence.getLevelOfEvidence())).collect(Collectors.toList());
     }
 
