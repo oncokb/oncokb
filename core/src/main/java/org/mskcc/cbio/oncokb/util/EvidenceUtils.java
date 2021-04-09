@@ -147,7 +147,7 @@ public class EvidenceUtils {
         return result;
     }
 
-    public static List<Evidence> getEvidence(List<Alteration> alterations, Set<EvidenceType> evidenceTypes, TumorType matchedTumorType, Set<TumorType> tumorTypes, Set<LevelOfEvidence> levelOfEvidences) {
+    public static List<Evidence> getEvidence(List<Alteration> alterations, Set<EvidenceType> evidenceTypes, TumorType matchedTumorType, List<TumorType> tumorTypes, Set<LevelOfEvidence> levelOfEvidences) {
         if (alterations == null || alterations.size() == 0) {
             return new ArrayList<>();
         }
@@ -170,8 +170,8 @@ public class EvidenceUtils {
         Set<Gene> genes = new HashSet<>(); //Get gene evidences
         TumorType matchedTumorType = TumorTypeUtils.getByName(query.getQuery().getTumorType());
         Set<Alteration> alterations = new HashSet<>();
-        Set<TumorType> upwardTumorTypes = new HashSet<>();
-        Set<TumorType> downwardTumorTypes = new HashSet<>();
+        List<TumorType> upwardTumorTypes = new ArrayList<>();
+        List<TumorType> downwardTumorTypes = new ArrayList<>();
 
         if (query.getOncoTreeTypes() != null) {
             upwardTumorTypes.addAll(query.getOncoTreeTypes());
