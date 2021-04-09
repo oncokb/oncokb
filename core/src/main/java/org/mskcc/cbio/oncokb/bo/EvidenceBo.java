@@ -47,7 +47,7 @@ public interface EvidenceBo extends GenericBo<Evidence> {
      * @param tumorTypes
      * @return
      */
-    List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, TumorType tumorType, Collection<TumorType> tumorTypes);
+    List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, TumorType tumorType, List<TumorType> tumorTypes);
 
 
     /**
@@ -58,7 +58,7 @@ public interface EvidenceBo extends GenericBo<Evidence> {
      * @param levelOfEvidences
      * @return
      */
-    List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, TumorType tumorType, Collection<TumorType> tumorTypes, Collection<LevelOfEvidence> levelOfEvidences);
+    List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, TumorType tumorType, List<TumorType> tumorTypes, Collection<LevelOfEvidence> levelOfEvidences);
 
     /**
      * Find Evidences by Entrez Gene ID
