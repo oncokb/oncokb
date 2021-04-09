@@ -2,9 +2,13 @@ package org.mskcc.cbio.oncokb.util;
 
 import com.mysql.jdbc.StringUtils;
 import org.apache.commons.collections.map.HashedMap;
+import org.json.simple.parser.ParseException;
 import org.mskcc.cbio.oncokb.apiModels.download.DownloadAvailability;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.TumorType;
+import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.ClinicalTrialMap;
+import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.Site;
+import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.TumorMap;
 
 import java.io.IOException;
 import java.util.*;
@@ -47,6 +51,11 @@ public class CacheUtils {
 
     private static List<TumorType> cancerTypes = new ArrayList<>();
     private static Set<TumorType> specialCancerTypes = new HashSet<>();
+
+    // Cache data for clinical trials
+    private static Map<String, TumorMap> clinicalTrialsMappingResult = new HashMap<>();
+    private static Map<String, Site> clinicalTrialsSites = new HashMap<>();
+    private static Map<String, ClinicalTrialMap> clinicalTrials = new HashMap<>();
 
     // Other services which will be defined in the property cache.update separated by comma
     // Every time the observer is triggered, all other services will be triggered as well
@@ -202,6 +211,18 @@ public class CacheUtils {
 
             NamingUtils.cacheAllAbbreviations();
             System.out.println("Cached abbreviation ontology: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
+            current = MainUtils.getCurrentTimestamp();
+
+            clinicalTrialsMappingResult = ClinicalTrialsUtils.getInstance().loadMappingResult();
+            System.out.println("Cached all clinical trials mapping result: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
+            current = MainUtils.getCurrentTimestamp();
+
+            clinicalTrialsSites = ClinicalTrialsUtils.getInstance().loadSitesMap();
+            System.out.println("Cached all clinical trials sites: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
+            current = MainUtils.getCurrentTimestamp();
+
+            clinicalTrials = ClinicalTrialsUtils.getInstance().loadTrialsMap();;
+            System.out.println("Cached all matched clinical trials: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
             current = MainUtils.getCurrentTimestamp();
 
             cacheDownloadAvailability();
@@ -540,6 +561,29 @@ public class CacheUtils {
         entrezGeneIds.forEach(entrezGeneId -> GeneObservable.getInstance().update("update", entrezGeneId.toString()));
         if (propagate) {
             notifyOtherServices("update", entrezGeneIds);
+        }
+    }
+
+    public static Map<String, TumorMap> getAllClinicalTrialsMappingResult() {
+        return clinicalTrialsMappingResult;
+    }
+
+    public static Map<String, Site> getAllClinicalTrialsSites() {
+        return clinicalTrialsSites;
+    }
+
+    public static Map<String, ClinicalTrialMap> getAllClinicalTrials() {
+        return clinicalTrials;
+    }
+
+    public static void updateClinicalTrials(){
+        System.out.println("Update clinical trials on instance " + PropertiesUtils.getProperties("app.name") + " at " + MainUtils.getCurrentTime());
+        try {
+            clinicalTrialsMappingResult = ClinicalTrialsUtils.getInstance().loadMappingResult();
+            clinicalTrialsSites = ClinicalTrialsUtils.getInstance().loadSitesMap();
+            clinicalTrials = ClinicalTrialsUtils.getInstance().loadTrialsMap();    
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

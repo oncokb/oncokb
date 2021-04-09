@@ -4,12 +4,16 @@ import com.google.common.collect.Sets;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.ParseException;
 import org.mskcc.cbio.oncokb.apiModels.Citations;
 import org.mskcc.cbio.oncokb.apiModels.Implication;
 import org.mskcc.cbio.oncokb.apiModels.MutationEffectResp;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.TumorType;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -722,7 +726,7 @@ public class IndicatorUtils {
         return otherSignificantLevels;
     }
 
-    private static List<IndicatorQueryTreatment> getIndicatorQueryTreatments(Set<Evidence> evidences, String queryHugoSymbol, Boolean filterSameTreatment) {
+    private static List<IndicatorQueryTreatment> getIndicatorQueryTreatments(Set<Evidence> evidences, String queryHugoSymbol, Boolean filterSameTreatment){
         List<IndicatorQueryTreatment> treatments = new ArrayList<>();
         if (evidences != null) {
             Map<LevelOfEvidence, Set<Evidence>> evidenceSetMap = EvidenceUtils.separateEvidencesByLevel(evidences);
@@ -781,6 +785,12 @@ public class IndicatorUtils {
                                 indicatorQueryTreatment.setAlterations(alterationsMap.get(treatment));
                                 indicatorQueryTreatment.setLevelAssociatedCancerType(tumorType);
                                 indicatorQueryTreatment.setDescription(SummaryUtils.enrichDescription(descriptionMap.get(treatment), queryHugoSymbol));
+                                indicatorQueryTreatment
+                                    .setClinicalTrials(ClinicalTrialsUtils
+                                        .getInstance()
+                                        .replaceKeysWithSites(ClinicalTrialsUtils
+                                            .getInstance()
+                                            .filterTrialsByTreatmentForIndicatorQueryTreatment(tumorType.getName(), treatment.getDrugs().stream().map(drug -> drug.getDrugName()).collect(Collectors.toSet()))));
                                 treatments.add(indicatorQueryTreatment);
                             }
                         }
@@ -956,6 +966,20 @@ public class IndicatorUtils {
         map.put("pickedGene", gene);
         map.put("relevantAlts", relevantAlterations);
         return map;
+    }
+
+    public static IndicatorQueryResp filterClinicalTrialsByLocation(IndicatorQueryResp indicatorQueryResp, String address, String country, Double distance) {
+        String location = null;
+        if (address != null && !address.isEmpty() && country != null && !country.isEmpty()){
+            location = String.format("%s, %s", address, country);
+        }
+        List<IndicatorQueryTreatment> treatments = new ArrayList<>();
+        for (IndicatorQueryTreatment treatment: indicatorQueryResp.getTreatments()){
+            treatment.setClinicalTrials(ClinicalTrialsUtils.getInstance().filterClinicalTrialsByLocation(treatment.getClinicalTrials(), location, distance));
+            treatments.add(treatment);
+        }
+        indicatorQueryResp.setTreatments(treatments);
+        return indicatorQueryResp;
     }
 }
 

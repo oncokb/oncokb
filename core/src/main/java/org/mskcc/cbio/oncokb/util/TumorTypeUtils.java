@@ -11,7 +11,6 @@ import org.mskcc.cbio.oncokb.model.RelevantTumorTypeDirection;
 import org.mskcc.cbio.oncokb.model.SpecialTumorType;
 import org.mskcc.cbio.oncokb.model.TumorForm;
 import org.mskcc.cbio.oncokb.model.TumorType;
-import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.Tumor;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;

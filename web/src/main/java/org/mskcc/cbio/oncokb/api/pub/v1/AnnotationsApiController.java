@@ -2,6 +2,7 @@ package org.mskcc.cbio.oncokb.api.pub.v1;
 
 import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
+import org.mskcc.cbio.oncokb.Constants;
 import org.mskcc.cbio.oncokb.apiModels.annotation.*;
 import org.mskcc.cbio.oncokb.config.annotation.PremiumPublicApi;
 import org.mskcc.cbio.oncokb.config.annotation.PublicApi;
@@ -11,6 +12,7 @@ import org.mskcc.cbio.oncokb.util.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -50,12 +52,17 @@ public class AnnotationsApiController {
         , @ApiParam(value = "Protein End. Example: 600") @RequestParam(value = "proteinEnd", required = false) Integer proteinEnd
         , @ApiParam(value = "OncoTree(http://oncotree.info) tumor type name. The field supports OncoTree Code, OncoTree Name and OncoTree Main type. Example: Melanoma") @RequestParam(value = "tumorType", required = false) String tumorType
         , @ApiParam(value = EVIDENCE_TYPES_DESCRIPTION) @RequestParam(value = "evidenceType", required = false) String evidenceTypes
+        , @ApiParam(value = Constants.CLINICAL_TRIAL_ADDRESS_DESCRIPTION) @RequestParam(value = "address", required = false) String address
+        , @ApiParam(value = Constants.CLINICAL_TRIAL_COUNTRY_DESCRIPTION) @RequestParam(value = "country", required = false) String country
+        , @ApiParam(value = Constants.CLINICAL_TRIAL_DISTANCE_DESCRIPTION) @RequestParam(value = "distance", required = false) Double distance
     ) {
         HttpStatus status = HttpStatus.OK;
         IndicatorQueryResp indicatorQueryResp = null;
 
         if (entrezGeneId != null && hugoSymbol != null && !GeneUtils.isSameGene(entrezGeneId, hugoSymbol)) {
             status = HttpStatus.BAD_REQUEST;
+        } else if(!ClinicalTrialsUtils.getInstance().isFilesConfigured()){
+            status = HttpStatus.NOT_FOUND; 
         } else {
             ReferenceGenome matchedRG = null;
             if (!StringUtils.isEmpty(referenceGenome)) {
@@ -66,6 +73,7 @@ public class AnnotationsApiController {
             }
             Query query = new Query(null, matchedRG, AnnotationQueryType.REGULAR.getName(), entrezGeneId, hugoSymbol, proteinChange, null, null, tumorType, consequence, proteinStart, proteinEnd, null);
             indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
+            indicatorQueryResp = IndicatorUtils.filterClinicalTrialsByLocation(indicatorQueryResp, address, country, distance);
         }
         return new ResponseEntity<>(indicatorQueryResp, status);
     }
@@ -88,9 +96,14 @@ public class AnnotationsApiController {
 
         if (body == null) {
             status = HttpStatus.BAD_REQUEST;
-        } else {
+        } else if(!ClinicalTrialsUtils.getInstance().isFilesConfigured()){
+            status = HttpStatus.NOT_FOUND; 
+        } 
+        else {
             for (AnnotateMutationByProteinChangeQuery query : body) {
-                result.add(IndicatorUtils.processQuery(new Query(query), null, false, query.getEvidenceTypes()));
+                IndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuery(new Query(query), null, false, query.getEvidenceTypes());
+                indicatorQueryResp = IndicatorUtils.filterClinicalTrialsByLocation(indicatorQueryResp, query.getAddress(), query.getCountry(), query.getDistance());
+                result.add(indicatorQueryResp);
             }
         }
         return new ResponseEntity<>(result, status);

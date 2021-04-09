@@ -2,6 +2,7 @@ package org.mskcc.cbio.oncokb.api.pvt;
 
 import com.mysql.jdbc.StringUtils;
 import io.swagger.annotations.ApiParam;
+
 import org.mskcc.cbio.oncokb.apiModels.*;
 import org.mskcc.cbio.oncokb.apiModels.download.DownloadAvailability;
 import org.mskcc.cbio.oncokb.apiModels.download.FileExtension;
@@ -331,7 +332,6 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
 
         List<EvidenceQueryRes> responses = EvidenceUtils.processRequest(Collections.singletonList(query), new HashSet<>(EvidenceTypeUtils.getAllEvidenceTypes()),LevelUtils.getPublicLevels(), false);
         IndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuery(query,null, false, null);
-
         EvidenceQueryRes response = responses.iterator().next();
 
         VariantAnnotation annotation = new VariantAnnotation(indicatorQueryResp);

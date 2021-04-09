@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.Tumor;
 
 /**
  *

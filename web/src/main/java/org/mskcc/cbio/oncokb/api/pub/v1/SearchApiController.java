@@ -1,7 +1,6 @@
 package org.mskcc.cbio.oncokb.api.pub.v1;
 
 import io.swagger.annotations.ApiParam;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.service.JsonResultFactory;
