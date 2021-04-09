@@ -916,18 +916,28 @@ public class EvidenceUtils {
                 final List<LevelOfEvidence> allowedLevels = query.getLevelOfEvidences();
                 final List<TumorType> upwardTumorTypes = query.getOncoTreeTypes();
                 TumorForm tumorForm = TumorTypeUtils.checkTumorForm(new HashSet<>(upwardTumorTypes));
-                query.getEvidences().stream().forEach(evidence -> {
-                    if (evidence.getLevelOfEvidence() != null && EvidenceTypeUtils.getTreatmentEvidenceTypes().contains(evidence.getEvidenceType()) && tumorForm != null && Collections.disjoint(upwardTumorTypes, evidence.getRelevantCancerTypes().isEmpty() ? evidence.getCancerTypes() : evidence.getRelevantCancerTypes())) {
-                        Evidence propagatedLevel = getPropagateEvidence(allowedLevels, evidence, tumorForm);
-                        if (propagatedLevel != null) {
-                            updatedEvidences.add(propagatedLevel);
+                for (Evidence evidence : query.getEvidences()) {
+                    if (evidence.getLevelOfEvidence() != null && EvidenceTypeUtils.getTreatmentEvidenceTypes().contains(evidence.getEvidenceType()) && tumorForm != null) {
+                        boolean disjoint = false;
+                        if (evidence.getRelevantCancerTypes().isEmpty()) {
+                            disjoint = Collections.disjoint(upwardTumorTypes, evidence.getCancerTypes());
+                        } else {
+                            disjoint = !evidence.getRelevantCancerTypes().contains(query.getExactMatchedTumorType());
+                        }
+                        if (disjoint) {
+                            Evidence propagatedLevel = getPropagateEvidence(allowedLevels, evidence, tumorForm);
+                            if (propagatedLevel != null) {
+                                updatedEvidences.add(propagatedLevel);
+                            }
+                        } else {
+                            updatedEvidences.add(new Evidence(evidence, evidence.getId()));
                         }
                     } else {
                         updatedEvidences.add(new Evidence(evidence, evidence.getId()));
                     }
-                });
+                }
 
-                if(!StringUtils.isEmpty(requestQuery.getHugoSymbol()) || query.getGene() != null) {
+                if (!StringUtils.isEmpty(requestQuery.getHugoSymbol()) || query.getGene() != null) {
                     String hugoSymbol = StringUtils.isEmpty(requestQuery.getHugoSymbol()) ? query.getGene().getHugoSymbol() : requestQuery.getHugoSymbol();
                     for (Evidence evidence : updatedEvidences) {
                         evidence.setDescription(SummaryUtils.enrichDescription(evidence.getDescription(), hugoSymbol));
