@@ -134,17 +134,7 @@ public class ClinicalTrialsUtilsTest {
                 "toronto, Canada",
                 100.0
             );
-        assertTrue("Filter by location failed", res.size() != 0);       
-        Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd").create();
-        try {
-            FileWriter file = new FileWriter(
-                "C:\\Users\\Yifu\\Desktop\\test.json"
-            );
-            file.write(gson.toJson(ClinicalTrialsUtils.getInstance().replaceKeysWithSites(res)));
-            file.flush();
-            file.close();
-            System.out.println("Finished");
-        } catch (IOException e) {}
+        assertTrue("Filter by location failed", res.size() != 0);
     }
 
     @Test
@@ -180,15 +170,5 @@ public class ClinicalTrialsUtilsTest {
                     100.0
                 );
         System.out.println(trials.size());
-        Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd").create();
-        try {
-            FileWriter file = new FileWriter(
-                "C:\\Users\\Yifu\\Desktop\\test.json"
-            );
-            file.write(gson.toJson(trials));
-            file.flush();
-            file.close();
-            System.out.println("Finished");
-        } catch (IOException e) {}
     }
 }
