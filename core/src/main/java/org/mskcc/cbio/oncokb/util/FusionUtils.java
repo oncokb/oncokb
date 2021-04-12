@@ -1,7 +1,9 @@
 package org.mskcc.cbio.oncokb.util;
 
 import com.mysql.jdbc.StringUtils;
+import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.Gene;
+import org.mskcc.cbio.oncokb.model.ReferenceGenome;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,5 +27,55 @@ public class FusionUtils {
             }
         }
         return genes;
+    }
+
+    public static String getFusionName(Gene geneA, Gene geneB) {
+        if (geneA == null || geneB == null) {
+            return "";
+        }
+        List<String> geneANames = new ArrayList<>();
+        List<String> geneBNames = new ArrayList<>();
+        geneANames.add(geneA.getHugoSymbol());
+        geneANames.addAll(geneA.getGeneAliases());
+        geneBNames.add(geneB.getHugoSymbol());
+        geneBNames.addAll(geneB.getGeneAliases());
+
+        Alteration matchedAlteration = null;
+        String fusionName = null;
+
+        for (String hugoA : geneANames) {
+            for (String hugoB : geneBNames) {
+                fusionName = getFusionName(hugoA, hugoB);
+                matchedAlteration = AlterationUtils.findAlteration(geneA, ReferenceGenome.GRCh37, fusionName);
+                if (matchedAlteration != null) {
+                    return fusionName;
+                }
+
+                fusionName = getFusionName(hugoA, hugoB);
+                matchedAlteration = AlterationUtils.findAlteration(geneB, ReferenceGenome.GRCh37, fusionName);
+                if (matchedAlteration != null) {
+                    return fusionName;
+                }
+
+                fusionName = getFusionName(hugoB, hugoA);
+                matchedAlteration = AlterationUtils.findAlteration(geneA, ReferenceGenome.GRCh37, fusionName);
+                if (matchedAlteration != null) {
+                    return fusionName;
+                }
+                fusionName = getFusionName(hugoB, hugoA);
+                matchedAlteration = AlterationUtils.findAlteration(geneB, ReferenceGenome.GRCh37, fusionName);
+                if (matchedAlteration != null) {
+                    return fusionName;
+                }
+            }
+        }
+        if (matchedAlteration == null) {
+            fusionName = getFusionName(geneA.getHugoSymbol(), geneB.getHugoSymbol());
+        }
+        return fusionName;
+    }
+
+    private static String getFusionName(String hugoA, String hugoB) {
+        return hugoA + "-" + hugoB + " Fusion";
     }
 }

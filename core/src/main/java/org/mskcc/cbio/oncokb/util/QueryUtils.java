@@ -27,7 +27,7 @@ public class QueryUtils {
                             Gene entrezGeneIdGene = GeneUtils.getGeneByEntrezId(query.getEntrezGeneId());
                             name = entrezGeneIdGene.getHugoSymbol();
                         } else {
-                            LinkedHashSet<String> genes = new LinkedHashSet<>(Arrays.asList(query.getHugoSymbol().split("-")));
+                            LinkedHashSet<String> genes = StringUtils.isNullOrEmpty(query.getHugoSymbol()) ? new LinkedHashSet<>() : new LinkedHashSet<>(Arrays.asList(query.getHugoSymbol().split("-")));
                             if (genes.size() > 1) {
                                 name = org.apache.commons.lang3.StringUtils.join(genes, "-") + " Fusion";
                             } else if (genes.size() == 1) {
