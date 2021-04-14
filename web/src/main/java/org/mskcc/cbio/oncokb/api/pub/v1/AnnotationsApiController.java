@@ -20,6 +20,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
+import static org.mskcc.cbio.oncokb.util.CacheUtils.getFromGenePool;
 import static org.mskcc.cbio.oncokb.util.GeneAnnotator.findGene;
 
 /**
@@ -288,9 +289,9 @@ public class AnnotationsApiController {
                     }
                 }
             });
-            Map<String, Gene> genePool = GeneUtils.findGenes(genesToQuery);
+            GeneUtils.findGenes(genesToQuery);
             for (AnnotateCopyNumberAlterationQuery query : body) {
-                String hugoSymbol = resolveHugoSymbol(query.getGene(), genePool);
+                String hugoSymbol = resolveHugoSymbol(query.getGene());
                 result.add(IndicatorUtils.processQuery(
                     new Query(query.getId(), query.getReferenceGenome(), AnnotationQueryType.REGULAR.getName(), null, hugoSymbol, StringUtils.capitalize(query.getCopyNameAlterationType().name().toLowerCase()), null, null, query.getTumorType(), null, null, null, null),
                     null, false, query.getEvidenceTypes()));
@@ -389,10 +390,12 @@ public class AnnotationsApiController {
                     }
                 }
             });
-            Map<String, Gene> genePool = GeneUtils.findGenes(genesToQuery);
+
+            GeneUtils.findGenes(genesToQuery);
+
             for (AnnotateStructuralVariantQuery query : body) {
                 String geneAKey = query.getGeneA().getEntrezGeneId() == null ? query.getGeneA().getHugoSymbol() : query.getGeneA().getEntrezGeneId().toString();
-                Gene geneA = StringUtils.isEmpty(geneAKey) ? null : genePool.get(geneAKey);
+                Gene geneA = StringUtils.isEmpty(geneAKey) ? null : getFromGenePool(geneAKey);
                 if (geneA == null) {
                     geneA = new Gene();
                     if (query.getGeneA() != null) {
@@ -402,7 +405,7 @@ public class AnnotationsApiController {
                 }
 
                 String geneBKey = query.getGeneB().getEntrezGeneId() == null ? query.getGeneB().getHugoSymbol() : query.getGeneB().getEntrezGeneId().toString();
-                Gene geneB = StringUtils.isEmpty(geneBKey) ? null : genePool.get(geneBKey);
+                Gene geneB = StringUtils.isEmpty(geneBKey) ? null : getFromGenePool(geneBKey);
                 if (geneB == null) {
                     geneB = new Gene();
                     if (query.getGeneA() != null) {
@@ -420,13 +423,13 @@ public class AnnotationsApiController {
         return new ResponseEntity<>(result, status);
     }
 
-    private static String resolveHugoSymbol(QueryGene queryGene, Map<String, Gene> genePool) {
+    private static String resolveHugoSymbol(QueryGene queryGene) {
         String hugoSymbol = "";
         if (queryGene != null) {
             if (StringUtils.isNotEmpty(queryGene.getHugoSymbol())) {
                 hugoSymbol = queryGene.getHugoSymbol();
             } else if (queryGene.getEntrezGeneId() != null) {
-                Gene matchedGene = genePool.get(queryGene.getEntrezGeneId() == null ? queryGene.getHugoSymbol() : queryGene.getEntrezGeneId().toString());
+                Gene matchedGene = getFromGenePool(queryGene.getEntrezGeneId() == null ? queryGene.getHugoSymbol() : queryGene.getEntrezGeneId().toString());
                 if (matchedGene != null && StringUtils.isNotEmpty(matchedGene.getHugoSymbol())) {
                     hugoSymbol = matchedGene.getHugoSymbol();
                 }
