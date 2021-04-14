@@ -66,4 +66,60 @@ public class FindRelevantAlterationsIndependentTest extends TestCase {
         assertEquals(1, relevantAlterations.size());
     }
 
+    public void testFindRelevantAlterationsWithConsequence() {
+        Gene gene = new Gene();
+        gene.setHugoSymbol("MET");
+        gene.setEntrezGeneId(4233);
+
+        Alteration alt1 = new Alteration();
+        alt1.setGene(gene);
+        alt1.setAlteration("X1010_splice");
+        alt1.setConsequence(VariantConsequenceUtils.findVariantConsequenceByTerm("splice_region_variant"));
+        alt1.setReferenceGenomes(Collections.singleton(ReferenceGenome.GRCh37));
+        AlterationUtils.annotateAlteration(alt1, alt1.getAlteration());
+
+
+        // alt should be matched when the consequence is the same
+        Alteration query = new Alteration();
+        query.setGene(gene);
+        query.setAlteration("X1010_splice");
+        query.setConsequence(VariantConsequenceUtils.findVariantConsequenceByTerm("splice_region_variant"));
+        AlterationUtils.annotateAlteration(query, query.getAlteration());
+
+        LinkedHashSet<Alteration> relevantAlterations =
+            ApplicationContextSingleton.getAlterationBo()
+                .findRelevantAlterations(ReferenceGenome.GRCh37, query, Collections.singleton(alt1), true);
+
+        assertEquals(1, relevantAlterations.size());
+
+
+        // alt should be matched when the consequence is relevant
+        query = new Alteration();
+        query.setGene(gene);
+        query.setAlteration("X1010_splice");
+        query.setConsequence(VariantConsequenceUtils.findVariantConsequenceByTerm("splice_donor_variant"));
+        AlterationUtils.annotateAlteration(query, query.getAlteration());
+
+        relevantAlterations =
+            ApplicationContextSingleton.getAlterationBo()
+                .findRelevantAlterations(ReferenceGenome.GRCh37, query, Collections.singleton(alt1), true);
+
+        assertEquals(1, relevantAlterations.size());
+
+
+        // alt should not be matched when the consequence is irrelevant
+        query = new Alteration();
+        query.setGene(gene);
+        query.setAlteration("X1010_splice");
+        query.setConsequence(VariantConsequenceUtils.findVariantConsequenceByTerm("missense_mutation"));
+        AlterationUtils.annotateAlteration(query, query.getAlteration());
+
+        relevantAlterations =
+            ApplicationContextSingleton.getAlterationBo()
+                .findRelevantAlterations(ReferenceGenome.GRCh37, query, Collections.singleton(alt1), true);
+
+        assertEquals(0, relevantAlterations.size());
+
+    }
+
 }
