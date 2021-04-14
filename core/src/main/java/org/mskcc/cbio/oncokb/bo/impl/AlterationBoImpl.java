@@ -144,7 +144,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         if (alterations != null && alterations.size() > 0) {
             for (Alteration alteration : alterations) {
                 if (alteration.getGene().equals(gene) && alteration.getConsequence() != null
-                    && alteration.getConsequence().equals(consequence)
+                    && AlterationUtils.consequenceRelated(alteration.getConsequence(), consequence)
                     && alteration.getProteinStart() != null
                     && alteration.getProteinEnd() != null
                     && (referenceGenome == null || alteration.getReferenceGenomes().contains(referenceGenome))

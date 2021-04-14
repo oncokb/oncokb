@@ -602,7 +602,7 @@ public class EvidenceUtils {
                 Iterator<Alteration> i = relevantAlterations.iterator();
                 while (i.hasNext()) {
                     Alteration relAlt = i.next();
-                    if (relAlt.getConsequence().equals(alteration.getConsequence())) {
+                    if (AlterationUtils.consequenceRelated(relAlt.getConsequence(), alteration.getConsequence())) {
                         if (relAlt.getProteinStart() > alteration.getProteinStart() || relAlt.getProteinEnd() < alteration.getProteinEnd()) {
                             i.remove();
                         }

@@ -345,7 +345,7 @@ public class CacheUtils {
     public static Set<Alteration> findMutationsByConsequenceAndPositionOnSamePosition(Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end) {
         Set<Alteration> alterations = new HashSet<>();
         for (Alteration alteration : getAlterations(gene.getEntrezGeneId())) {
-            if (alteration.getConsequence().equals(consequence)
+            if (AlterationUtils.consequenceRelated(alteration.getConsequence(), consequence)
                 && (referenceGenome == null || alteration.getReferenceGenomes().contains(referenceGenome))
                 && alteration.getProteinStart().equals(alteration.getProteinEnd())
                 && alteration.getProteinStart() >= start
