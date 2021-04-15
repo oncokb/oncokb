@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.mskcc.cbio.oncokb.api.pub.v1.Constants.INCLUDE_EVIDENCE;
+import static org.mskcc.cbio.oncokb.api.pub.v1.Constants.VERSION;
 import static org.mskcc.cbio.oncokb.util.HttpUtils.getDataDownloadResponseEntity;
 
 /**
@@ -25,7 +27,7 @@ import static org.mskcc.cbio.oncokb.util.HttpUtils.getDataDownloadResponseEntity
 public class UtilsApiController implements UtilsApi {
     @Override
     public ResponseEntity<List<AnnotatedVariant>> utilsAllAnnotatedVariantsGet(
-        @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
+        @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
     ) {
         if (version != null) {
             return getDataDownloadResponseEntity(version, FileName.ALL_ANNOTATED_VARIANTS, FileExtension.JSON);
@@ -35,7 +37,7 @@ public class UtilsApiController implements UtilsApi {
 
     @Override
     public ResponseEntity<String> utilsAllAnnotatedVariantsTxtGet(
-        @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
+        @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
     ) {
         if (version != null) {
             return getDataDownloadResponseEntity(version, FileName.ALL_ANNOTATED_VARIANTS, FileExtension.TEXT);
@@ -124,7 +126,7 @@ public class UtilsApiController implements UtilsApi {
 
     @Override
     public ResponseEntity<List<ActionableGene>> utilsAllActionableVariantsGet(
-        @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
+        @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
     ) {
         if (version != null) {
             return getDataDownloadResponseEntity(version, FileName.ALL_ACTIONABLE_VARIANTS, FileExtension.JSON);
@@ -134,7 +136,7 @@ public class UtilsApiController implements UtilsApi {
 
     @Override
     public ResponseEntity<String> utilsAllActionableVariantsTxtGet(
-        @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
+        @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
     ) {
         if (version != null) {
             return getDataDownloadResponseEntity(version, FileName.ALL_ACTIONABLE_VARIANTS, FileExtension.TEXT);
@@ -227,7 +229,7 @@ public class UtilsApiController implements UtilsApi {
 
     @Override
     public ResponseEntity<List<CancerGene>> utilsCancerGeneListGet(
-        @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
+        @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
     ) {
         if (version != null) {
             return getDataDownloadResponseEntity(version, FileName.CANCER_GENE_LIST, FileExtension.JSON);
@@ -238,7 +240,7 @@ public class UtilsApiController implements UtilsApi {
 
     @Override
     public ResponseEntity<String> utilsCancerGeneListTxtGet(
-        @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
+        @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
     ) {
         if (version != null) {
             return getDataDownloadResponseEntity(version, FileName.CANCER_GENE_LIST, FileExtension.TEXT);
@@ -293,17 +295,19 @@ public class UtilsApiController implements UtilsApi {
 
     @Override
     public ResponseEntity<List<CuratedGene>> utilsAllCuratedGenesGet(
-        @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
+        @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
+        , @ApiParam(value = INCLUDE_EVIDENCE, defaultValue = "TRUE") @RequestParam(value = "includeEvidence", required = false, defaultValue = "TRUE") Boolean includeEvidence
     ) {
         if (version != null) {
             return getDataDownloadResponseEntity(version, FileName.ALL_CURATED_GENES, FileExtension.JSON);
         }
-        return new ResponseEntity<>(getCuratedGenes(), HttpStatus.OK);
+        return new ResponseEntity<>(getCuratedGenes(includeEvidence == Boolean.TRUE), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<String> utilsAllCuratedGenesTxtGet(
-        @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
+        @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
+        , @ApiParam(value = INCLUDE_EVIDENCE, defaultValue = "TRUE") @RequestParam(value = "includeEvidence", required = false, defaultValue = "TRUE") Boolean includeEvidence
     ) {
         if (version != null) {
             return getDataDownloadResponseEntity(version, FileName.ALL_CURATED_GENES, FileExtension.TEXT);
@@ -322,11 +326,14 @@ public class UtilsApiController implements UtilsApi {
         header.add("Is Tumor Suppressor Gene");
         header.add("Highest Level of Evidence(sensitivity)");
         header.add("Highest Level of Evidence(resistance)");
-        header.add("Summary");
+        if (includeEvidence == Boolean.TRUE) {
+            header.add("Summary");
+            header.add("Background");
+        }
         sb.append(MainUtils.listToString(header, separator));
         sb.append(newLine);
 
-        List<CuratedGene> genes = getCuratedGenes();
+        List<CuratedGene> genes = getCuratedGenes(includeEvidence == Boolean.TRUE);
         for (CuratedGene gene : genes) {
             List<String> row = new ArrayList<>();
             row.add(gene.getGrch37Isoform());
@@ -339,6 +346,10 @@ public class UtilsApiController implements UtilsApi {
             row.add(getStringByBoolean(gene.getTSG()));
             row.add(gene.getHighestSensitiveLevel());
             row.add(gene.getHighestResistancLevel());
+            if (includeEvidence == Boolean.TRUE) {
+                row.add(gene.getSummary());
+                row.add(gene.getBackground());
+            }
             sb.append(MainUtils.listToString(row, separator));
             sb.append(newLine);
         }
@@ -346,18 +357,12 @@ public class UtilsApiController implements UtilsApi {
         return new ResponseEntity<>(sb.toString(), HttpStatus.OK);
     }
 
-    private static List<CuratedGene> getCuratedGenes() {
+    private static List<CuratedGene> getCuratedGenes(boolean includeEvidence) {
         List<CuratedGene> genes = new ArrayList<>();
         for (Gene gene : CacheUtils.getAllGenes()) {
             // Skip all genes without entrez gene id
             if (gene.getEntrezGeneId() == null) {
                 continue;
-            }
-            String summary = "";
-            Set<Evidence> summaryEvidences = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Collections.singleton(EvidenceType.GENE_SUMMARY));
-            // evidences should only have one item, but just in case
-            if (!summaryEvidences.isEmpty()) {
-                summary = summaryEvidences.iterator().next().getDescription();
             }
 
             String highestSensitiveLevel = "";
@@ -372,10 +377,17 @@ public class UtilsApiController implements UtilsApi {
                 highestResistanceLevel = highestResistanceLevelEvidences.iterator().next().getLevelOfEvidence().getLevel();
             }
 
-            genes.add(new CuratedGene(
-                gene.getGrch37Isoform(), gene.getGrch37RefSeq(),
-                gene.getGrch38Isoform(), gene.getGrch38RefSeq(),
-                gene.getEntrezGeneId(), gene.getHugoSymbol(), gene.getTSG(), gene.getOncogene(), highestSensitiveLevel, highestResistanceLevel, summary));
+            genes.add(
+                new CuratedGene(
+                    gene.getGrch37Isoform(), gene.getGrch37RefSeq(),
+                    gene.getGrch38Isoform(), gene.getGrch38RefSeq(),
+                    gene.getEntrezGeneId(), gene.getHugoSymbol(),
+                    gene.getTSG(), gene.getOncogene(),
+                    highestSensitiveLevel, highestResistanceLevel,
+                    includeEvidence ? SummaryUtils.geneSummary(gene, gene.getHugoSymbol()) : "",
+                    includeEvidence ? SummaryUtils.geneBackground(gene, gene.getHugoSymbol()) : ""
+                )
+            );
         }
         MainUtils.sortCuratedGenes(genes);
         return genes;

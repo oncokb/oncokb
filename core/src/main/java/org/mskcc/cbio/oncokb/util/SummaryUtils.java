@@ -440,10 +440,21 @@ public class SummaryUtils {
         if (gene != null && gene.getHugoSymbol().equals(SpecialStrings.OTHERBIOMARKERS)) {
             return "";
         }
-        Set<Evidence> geneSummaryEvs = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Collections.singleton(EvidenceType.GENE_SUMMARY));
+        return enrichGeneEvidenceDescription(EvidenceType.GENE_SUMMARY, gene, StringUtils.isEmpty(queryHugoSymbol) ? gene.getHugoSymbol() : queryHugoSymbol);
+    }
+
+    public static String geneBackground(Gene gene, String queryHugoSymbol) {
+        if (gene != null && gene.getHugoSymbol().equals(SpecialStrings.OTHERBIOMARKERS)) {
+            return "";
+        }
+        return enrichGeneEvidenceDescription(EvidenceType.GENE_BACKGROUND, gene, StringUtils.isEmpty(queryHugoSymbol) ? gene.getHugoSymbol() : queryHugoSymbol);
+    }
+
+    private static String enrichGeneEvidenceDescription(EvidenceType evidenceType, Gene gene, String hugoSymbol) {
+        Set<Evidence> geneBackgroundEvs = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Collections.singleton(evidenceType));
         String summary = "";
-        if (!geneSummaryEvs.isEmpty()) {
-            Evidence ev = geneSummaryEvs.iterator().next();
+        if (!geneBackgroundEvs.isEmpty()) {
+            Evidence ev = geneBackgroundEvs.iterator().next();
             if (ev != null) {
                 summary = ev.getDescription();
             }
@@ -454,7 +465,7 @@ public class SummaryUtils {
         }
         summary = summary.trim();
         summary = summary.endsWith(".") ? summary : summary + ".";
-        summary = enrichDescription(summary, StringUtils.isEmpty(queryHugoSymbol) ? gene.getHugoSymbol() : queryHugoSymbol);
+        summary = enrichDescription(summary, hugoSymbol);
         return summary;
     }
 
