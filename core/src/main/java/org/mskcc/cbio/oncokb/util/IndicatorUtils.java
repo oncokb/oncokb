@@ -873,7 +873,7 @@ public class IndicatorUtils {
                 geneStrsList.add(gene.getHugoSymbol());
             }
         } else {
-            geneStrsList.addAll(Arrays.asList(query.getHugoSymbol().split("-")));
+            geneStrsList.addAll(FusionUtils.getGenesStrs(query.getHugoSymbol()));
         }
         Set<String> geneStrsSet = new HashSet<>();
         Gene gene = null;

@@ -392,18 +392,24 @@ public final class AlterationUtils {
             alteration.getAlterationType(), referenceGenome, getRevertFusionName(alteration));
     }
 
-    private static String getRevertFusionName(Alteration alteration) {
+    public static String getRevertFusionName(Alteration alteration) {
         String revertFusionAltStr = null;
         if (alteration != null && alteration.getAlteration() != null
             && isFusion(alteration.getAlteration())) {
-            Pattern pattern = Pattern.compile(fusionRegex);
-            Matcher matcher = pattern.matcher(alteration.getAlteration());
-            if (matcher.matches() && matcher.groupCount() == 3) {
-                // Revert fusion
-                String geneA = matcher.group(2);
-                String geneB = matcher.group(3);
-                revertFusionAltStr = geneB + "-" + geneA + " fusion";
-            }
+            revertFusionAltStr = getRevertFusionName(alteration.getAlteration());
+        }
+        return revertFusionAltStr;
+    }
+
+    public static String getRevertFusionName(String fusionName) {
+        String revertFusionAltStr = "";
+        Pattern pattern = Pattern.compile(fusionRegex);
+        Matcher matcher = pattern.matcher(fusionName);
+        if (matcher.matches() && matcher.groupCount() == 3) {
+            // Revert fusion
+            String geneA = matcher.group(2);
+            String geneB = matcher.group(3);
+            revertFusionAltStr = geneB + "-" + geneA + " fusion";
         }
         return revertFusionAltStr;
     }
