@@ -75,22 +75,36 @@ public final class GeneAnnotator {
         }
     }
 
-    public static List<Gene> findGenesFromCBioPortal(List<Integer> entrezGeneIds) {
+    public static List<Gene> findGenesFromCBioPortal(List<String> geneIds) {
         List<Gene> genes = new ArrayList<>();
-        JSONArray jsonArray = new JSONArray();
-        entrezGeneIds.forEach(entrezGeneId -> {
-            if (entrezGeneId > 0) {
-                jsonArray.put(entrezGeneId);
+        JSONArray hugoArray = new JSONArray();
+        JSONArray entrezArray = new JSONArray();
+        geneIds.forEach(geneId -> {
+            if (StringUtils.isNumeric(geneId)) {
+                if (Integer.valueOf(geneId) > 0) {
+                    entrezArray.put(geneId);
+                }
+            } else {
+                hugoArray.put(geneId);
             }
         });
-        if (jsonArray.length() == 0) {
+        if (hugoArray.length() + entrezArray.length() == 0) {
             return genes;
         }
         try {
-            String response = HttpUtils.postRequest(CBIOPORTAL_GENES_ENDPOINT + "fetch?geneIdType=ENTREZ_GENE_ID&projection=SUMMARY", jsonArray.toString());
-            JSONArray jsonArrayResponse = new JSONArray(response);
-            for (int i = 0; i < jsonArrayResponse.length(); i++) {
-                genes.add(parseGeneFromCbioPortal(jsonArrayResponse.getJSONObject(i)));
+            if (hugoArray.length() > 0) {
+                String response = HttpUtils.postRequest(CBIOPORTAL_GENES_ENDPOINT + "fetch?geneIdType=HUGO_GENE_SYMBOL&projection=SUMMARY", hugoArray.toString());
+                JSONArray jsonArrayResponse = new JSONArray(response);
+                for (int i = 0; i < jsonArrayResponse.length(); i++) {
+                    genes.add(parseGeneFromCbioPortal(jsonArrayResponse.getJSONObject(i)));
+                }
+            }
+            if (entrezArray.length() > 0) {
+                String response = HttpUtils.postRequest(CBIOPORTAL_GENES_ENDPOINT + "fetch?geneIdType=ENTREZ_GENE_ID&projection=SUMMARY", entrezArray.toString());
+                JSONArray jsonArrayResponse = new JSONArray(response);
+                for (int i = 0; i < jsonArrayResponse.length(); i++) {
+                    genes.add(parseGeneFromCbioPortal(jsonArrayResponse.getJSONObject(i)));
+                }
             }
             return genes;
         } catch (IOException e) {
@@ -161,8 +175,8 @@ public final class GeneAnnotator {
         if (object.has("hugoGeneSymbol")) {
             gene.setHugoSymbol(object.getString("hugoGeneSymbol"));
         }
-        if (object.has("entrezgene")) {
-            gene.setEntrezGeneId(object.getInt("entrezgene"));
+        if (object.has("entrezGeneId")) {
+            gene.setEntrezGeneId(object.getInt("entrezGeneId"));
         }
         return gene;
     }
