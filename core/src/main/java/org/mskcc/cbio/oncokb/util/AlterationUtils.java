@@ -778,7 +778,7 @@ public final class AlterationUtils {
             && alteration.getProteinStart().intValue() != AlterationPositionBoundary.START.getValue() && alteration.getProteinStart().intValue() != AlterationPositionBoundary.END.getValue()) {
             VariantConsequence variantConsequence = new VariantConsequence();
             variantConsequence.setTerm("NA");
-            return ApplicationContextSingleton.getAlterationBo().findMutationsByConsequenceAndPositionOnSamePosition(alteration.getGene(), referenceGenome, variantConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations);
+            return ApplicationContextSingleton.getAlterationBo().findMutationsByConsequenceAndPositionOnSamePosition(alteration.getGene(), referenceGenome, variantConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), alteration.getRefResidues(), fullAlterations);
         }
         return new ArrayList<>();
     }
@@ -803,7 +803,12 @@ public final class AlterationUtils {
 
         List<Alteration> alleles = new ArrayList<>();
         for (Alteration alt : missenseVariants) {
-            if (alt.getProteinStart() != null && alt.getProteinEnd() != null && alt.getProteinStart().equals(alt.getProteinEnd()) && !alt.equals(alteration)) {
+            if (alt.getProteinStart() != null &&
+                alt.getProteinEnd() != null &&
+                alt.getProteinStart().equals(alt.getProteinEnd()) &&
+                !alt.equals(alteration) &&
+                (alteration.getRefResidues() == null || alt.getRefResidues() == null || alt.getRefResidues().equals(alteration.getRefResidues()))
+            ) {
                 alleles.add(alt);
             }
         }
@@ -964,26 +969,6 @@ public final class AlterationUtils {
         });
     }
 
-    public static List<Alteration> getAlleleAndRelevantAlterations(ReferenceGenome referenceGenome, Alteration alteration) {
-        List<Alteration> alleles = getAlleleAlterations(referenceGenome, alteration);
-        Alteration oncogenicAllele = AlterationUtils.findOncogenicAllele(alleles);
-
-        if (oncogenicAllele != null) {
-            alleles.addAll(AlterationUtils.getOncogenicMutations(referenceGenome, oncogenicAllele));
-        }
-        return alleles;
-    }
-
-    public static Alteration findOncogenicAllele(List<Alteration> alleles) {
-        for (Alteration allele : alleles) {
-            Boolean isOncogenicAlt = isOncogenicAlteration(allele);
-            if (isOncogenicAlt != null && isOncogenicAlt) {
-                return allele;
-            }
-        }
-        return null;
-    }
-
     public static List<Alteration> getRelevantAlterations(ReferenceGenome referenceGenome, Alteration alteration) {
         if (alteration == null || alteration.getGene() == null) {
             return new ArrayList<>();
@@ -1008,17 +993,6 @@ public final class AlterationUtils {
             }
         }
         return cleanedList;
-    }
-
-    public static Boolean hasAlleleAlterations(ReferenceGenome referenceGenome, Alteration alteration) {
-        List<Alteration> alleles = AlterationUtils.getAlleleAlterations(referenceGenome, alteration);
-
-        alleles = AlterationUtils.excludeVUS(alleles);
-        if (alleles.size() == 0) {
-            return false;
-        } else {
-            return true;
-        }
     }
 
     public static Alteration findAlteration(Gene gene, ReferenceGenome referenceGenome, String alteration) {
@@ -1121,15 +1095,6 @@ public final class AlterationUtils {
             curatedOncogenicities.add(Oncogenicity.getByEvidence(evidence));
         }
         return curatedOncogenicities;
-    }
-
-    public static Set<Alteration> getOncogenicMutations(ReferenceGenome referenceGenome, Alteration alteration) {
-        Set<Alteration> oncogenicMutations = new HashSet<>();
-        Alteration alt = findAlteration(alteration.getGene(), referenceGenome, "oncogenic mutations");
-        if (alt != null) {
-            oncogenicMutations.add(alt);
-        }
-        return oncogenicMutations;
     }
 
     public static Set<String> getGeneralVariants() {

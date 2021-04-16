@@ -124,8 +124,11 @@ public class FindRelevantAlterationsTest {
                 {"KIT", "T670A", null, "T670I, I669_T670delinsMI, Oncogenic Mutations"},
 
 
-                // Do not mapping Oncogenic Mutations to Amplification
+                // Do not map Oncogenic Mutations to Amplification
                 {"KIT", "Amplification", null, "Amplification"},
+
+                // Do not map missense alteration with different reference AA as relevant
+                {"BRAF", "A600E", null, ""},
 
 
 
