@@ -190,8 +190,8 @@ PIK3CA	E545K	Ovarian Cancer	3B: Fulvestrant+Alpelisib;
 #PIK3CA	E545K	Acute Myeloid Leukemia
 NRAS	G12C	Breast Cancer	3B: Binimetinib;
 #NRAS	G12C	Chronic Myelogenous Leukemia
-SF3B1	K625G	Chronic Myelomonocytic Leukemia	4: H3B-8800;
-SF3B1	K625G	Breast Cancer
+SF3B1	R625G	Chronic Myelomonocytic Leukemia	4: H3B-8800;
+SF3B1	R625G	Breast Cancer
 
 # Sotorasib should only work for KRAS G12C, not alternative allele
 # the following tests should be enabled when the liquid propagation is in production also the AGM-510 treatment is in place

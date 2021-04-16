@@ -82,6 +82,13 @@ public class HotspotUtilsTest extends TestCase {
         assertTrue(HotspotUtils.isHotspot(alteration));
         alteration.setReferenceGenomes(Collections.singleton(ReferenceGenome.GRCh38));
         assertFalse(HotspotUtils.isHotspot(alteration));
+
+        // For missense hotspot, the reference residues need to be matched
+        // For instance V600 is a valid hotspot, not A600
+        alteration = AlterationUtils.getAlteration("BRAF", "V600E", null, null, null, null, null);
+        assertTrue(HotspotUtils.isHotspot(alteration));
+        alteration = AlterationUtils.getAlteration("BRAF", "A600E", null, null, null, null, null);
+        assertFalse(HotspotUtils.isHotspot(alteration));
     }
 
 }
