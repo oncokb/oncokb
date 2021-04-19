@@ -790,7 +790,7 @@ public class IndicatorUtils {
                                         .getInstance()
                                         .replaceKeysWithSites(ClinicalTrialsUtils
                                             .getInstance()
-                                            .filterTrialsByTreatmentForIndicatorQueryTreatment(tumorType.getName(), treatment.getDrugs().stream().map(drug -> drug.getDrugName()).collect(Collectors.toSet()))));
+                                            .filterTrialsByTreatmentForIndicatorQueryTreatment(StringUtils.isNotEmpty(tumorType.getName()) ? tumorType.getName() : tumorType.getMainType().getName(), treatment.getDrugs().stream().map(drug -> drug.getDrugName()).collect(Collectors.toSet()))));
                                 treatments.add(indicatorQueryTreatment);
                             }
                         }
