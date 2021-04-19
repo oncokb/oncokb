@@ -139,7 +139,6 @@ public interface PrivateUtilsApi {
         method = RequestMethod.POST)
     ResponseEntity<List<TumorType>> utilRelevantCancerTypesPost(
         @ApiParam(value = "Level of Evidence") @RequestParam(value = "levelOfEvidence", required = false) LevelOfEvidence levelOfEvidence,
-        @ApiParam(value = "Return only Detailed Cancer Type.") @RequestParam(value = "onlyDetailedCancerType", required = false) Boolean onlyDetailedCancerType,
         @ApiParam(value = "List of queries.", required = true) @RequestBody List<RelevantCancerTypeQuery> body
     );
 
@@ -185,11 +184,23 @@ public interface PrivateUtilsApi {
         method = RequestMethod.GET)
     ResponseEntity<Void> utilUpdateTranscriptGet(
         @ApiParam(value = "hugoSymbol") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
-        , @ApiParam(value = "entrezGeneId") @RequestParam Integer entrezGeneId
-        , @ApiParam(value = "grch37EnsemblTranscriptId") @RequestParam String grch37EnsemblTranscriptId
-        , @ApiParam(value = "grch37RefSeq") @RequestParam String grch37RefSeq
-        , @ApiParam(value = "grch38EnsemblTranscriptId") @RequestParam String grch38EnsemblTranscriptId
-        , @ApiParam(value = "grch38RefSeq") @RequestParam String grch38RefSeq
+        , @ApiParam(value = "entrezGeneId") @RequestParam(required = false) Integer entrezGeneId
+        , @ApiParam(value = "grch37Isoform") @RequestParam(required = false) String grch37Isoform
+        , @ApiParam(value = "grch37RefSeq") @RequestParam(required = false) String grch37RefSeq
+        , @ApiParam(value = "grch38Isoform") @RequestParam(required = false) String grch38Isoform
+        , @ApiParam(value = "grch38RefSeq") @RequestParam(required = false) String grch38RefSeq
+    ) throws ApiException;
+
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK")})
+    @RequestMapping(value = "/utils/validateTranscriptUpdate",
+        produces = {"text/plain"},
+        method = RequestMethod.GET)
+    ResponseEntity<String> utilValidateTranscriptUpdateGet(
+        @ApiParam(value = "hugoSymbol") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
+        , @ApiParam(value = "entrezGeneId") @RequestParam(required = false) Integer entrezGeneId
+        , @ApiParam(value = "grch37Isoform") @RequestParam(required = false) String grch37Isoform
+        , @ApiParam(value = "grch38Isoform") @RequestParam(required = false) String grch38Isoform
     ) throws ApiException;
 
     @ApiOperation(value = "", notes = "Get information about what files are available by data version", response = DownloadAvailability.class, responseContainer = "List")

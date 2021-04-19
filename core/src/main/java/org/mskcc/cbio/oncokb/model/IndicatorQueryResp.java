@@ -41,6 +41,35 @@ public class IndicatorQueryResp implements java.io.Serializable {
     public IndicatorQueryResp() {
     }
 
+    public IndicatorQueryResp copy() {
+        IndicatorQueryResp newResp = new IndicatorQueryResp();
+        newResp.setQuery(this.query.copy());
+        newResp.setGeneExist(this.geneExist);
+        newResp.setVariantExist(this.variantExist);
+        newResp.setAlleleExist(this.alleleExist);
+        newResp.setOncogenic(this.oncogenic);
+        newResp.setMutationEffect(this.mutationEffect);
+        newResp.setHighestSensitiveLevel(this.highestSensitiveLevel);
+        newResp.setHighestResistanceLevel(this.highestResistanceLevel);
+        newResp.setHighestDiagnosticImplicationLevel(this.highestDiagnosticImplicationLevel);
+        newResp.setHighestPrognosticImplicationLevel(this.highestPrognosticImplicationLevel);
+        newResp.setOtherSignificantSensitiveLevels(new ArrayList<>(this.otherSignificantSensitiveLevels));
+        newResp.setOtherSignificantResistanceLevels(new ArrayList<>(this.otherSignificantSensitiveLevels));
+        newResp.setVUS(this.VUS);
+        newResp.setHotspot(this.hotspot);
+        newResp.setGeneSummary(this.geneSummary);
+        newResp.setVariantSummary(this.geneSummary);
+        newResp.setTumorTypeSummary(this.tumorTypeSummary);
+        newResp.setPrognosticSummary(this.prognosticSummary);
+        newResp.setDiagnosticSummary(this.diagnosticSummary);
+        newResp.setDiagnosticImplications(new ArrayList<>(diagnosticImplications));
+        newResp.setPrognosticImplications(new ArrayList<>(prognosticImplications));
+        newResp.setTreatments(new ArrayList<>(treatments));
+        newResp.setDataVersion(dataVersion);
+        newResp.setLastUpdate(lastUpdate);
+        return newResp;
+    }
+
     public Query getQuery() {
         return query;
     }

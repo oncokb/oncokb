@@ -18,9 +18,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
-import static org.mskcc.cbio.oncokb.Constants.MISSENSE_VARIANT;
-import static org.mskcc.cbio.oncokb.Constants.UPSTREAM_GENE;
+import static org.mskcc.cbio.oncokb.Constants.*;
 
 /**
  * @author jgao
@@ -38,10 +36,21 @@ public final class AlterationUtils {
         throw new AssertionError();
     }
 
+    public static boolean consequenceRelated(VariantConsequence consequence, VariantConsequence compareTo) {
+        if (consequence == null || compareTo == null) {
+            return consequence == compareTo;
+        }
+        if (SPLICE_SITE_VARIANTS.contains(consequence)) {
+            return SPLICE_SITE_VARIANTS.contains(compareTo);
+        } else {
+            return consequence.equals(compareTo);
+        }
+    }
+
     public static Set<Alteration> findOverlapAlteration(Set<Alteration> alterations, Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end) {
         Set<Alteration> overlaps = new HashSet<>();
         for (Alteration alteration : alterations) {
-            if (alteration.getGene().equals(gene) && alteration.getConsequence() != null && alteration.getConsequence().equals(consequence) && (referenceGenome == null || alteration.getReferenceGenomes().contains(referenceGenome))) {
+            if (alteration.getGene().equals(gene) && alteration.getConsequence() != null && consequenceRelated(consequence, alteration.getConsequence()) && (referenceGenome == null || alteration.getReferenceGenomes().contains(referenceGenome))) {
                 //For alteration without specific position, do not do intersection
                 if (start <= AlterationPositionBoundary.START.getValue() || end >= AlterationPositionBoundary.END.getValue()) {
                     if (start >= alteration.getProteinStart()
@@ -309,7 +318,7 @@ public final class AlterationUtils {
         if (alteration.getConsequence() == null && variantConsequence != null) {
             alteration.setConsequence(variantConsequence);
         } else if (alteration.getConsequence() != null && variantConsequence != null &&
-            !alteration.getConsequence().equals(variantConsequence)) {
+            !AlterationUtils.consequenceRelated(alteration.getConsequence(), variantConsequence)) {
             // For the query which already contains consequence but different with OncoKB algorithm,
             // we should keep query consequence unless it is `any`
             if (alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm("any"))) {
@@ -383,18 +392,24 @@ public final class AlterationUtils {
             alteration.getAlterationType(), referenceGenome, getRevertFusionName(alteration));
     }
 
-    private static String getRevertFusionName(Alteration alteration) {
+    public static String getRevertFusionName(Alteration alteration) {
         String revertFusionAltStr = null;
         if (alteration != null && alteration.getAlteration() != null
             && isFusion(alteration.getAlteration())) {
-            Pattern pattern = Pattern.compile(fusionRegex);
-            Matcher matcher = pattern.matcher(alteration.getAlteration());
-            if (matcher.matches() && matcher.groupCount() == 3) {
-                // Revert fusion
-                String geneA = matcher.group(2);
-                String geneB = matcher.group(3);
-                revertFusionAltStr = geneB + "-" + geneA + " fusion";
-            }
+            revertFusionAltStr = getRevertFusionName(alteration.getAlteration());
+        }
+        return revertFusionAltStr;
+    }
+
+    public static String getRevertFusionName(String fusionName) {
+        String revertFusionAltStr = "";
+        Pattern pattern = Pattern.compile(fusionRegex);
+        Matcher matcher = pattern.matcher(fusionName);
+        if (matcher.matches() && matcher.groupCount() == 3) {
+            // Revert fusion
+            String geneA = matcher.group(2);
+            String geneB = matcher.group(3);
+            revertFusionAltStr = geneB + "-" + geneA + " fusion";
         }
         return revertFusionAltStr;
     }
@@ -763,7 +778,7 @@ public final class AlterationUtils {
             && alteration.getProteinStart().intValue() != AlterationPositionBoundary.START.getValue() && alteration.getProteinStart().intValue() != AlterationPositionBoundary.END.getValue()) {
             VariantConsequence variantConsequence = new VariantConsequence();
             variantConsequence.setTerm("NA");
-            return ApplicationContextSingleton.getAlterationBo().findMutationsByConsequenceAndPositionOnSamePosition(alteration.getGene(), referenceGenome, variantConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations);
+            return ApplicationContextSingleton.getAlterationBo().findMutationsByConsequenceAndPositionOnSamePosition(alteration.getGene(), referenceGenome, variantConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), alteration.getRefResidues(), fullAlterations);
         }
         return new ArrayList<>();
     }
@@ -788,7 +803,12 @@ public final class AlterationUtils {
 
         List<Alteration> alleles = new ArrayList<>();
         for (Alteration alt : missenseVariants) {
-            if (alt.getProteinStart() != null && alt.getProteinEnd() != null && alt.getProteinStart().equals(alt.getProteinEnd()) && !alt.equals(alteration)) {
+            if (alt.getProteinStart() != null &&
+                alt.getProteinEnd() != null &&
+                alt.getProteinStart().equals(alt.getProteinEnd()) &&
+                !alt.equals(alteration) &&
+                (alteration.getRefResidues() == null || alt.getRefResidues() == null || alt.getRefResidues().equals(alteration.getRefResidues()))
+            ) {
                 alleles.add(alt);
             }
         }
@@ -949,26 +969,6 @@ public final class AlterationUtils {
         });
     }
 
-    public static List<Alteration> getAlleleAndRelevantAlterations(ReferenceGenome referenceGenome, Alteration alteration) {
-        List<Alteration> alleles = getAlleleAlterations(referenceGenome, alteration);
-        Alteration oncogenicAllele = AlterationUtils.findOncogenicAllele(alleles);
-
-        if (oncogenicAllele != null) {
-            alleles.addAll(AlterationUtils.getOncogenicMutations(referenceGenome, oncogenicAllele));
-        }
-        return alleles;
-    }
-
-    public static Alteration findOncogenicAllele(List<Alteration> alleles) {
-        for (Alteration allele : alleles) {
-            Boolean isOncogenicAlt = isOncogenicAlteration(allele);
-            if (isOncogenicAlt != null && isOncogenicAlt) {
-                return allele;
-            }
-        }
-        return null;
-    }
-
     public static List<Alteration> getRelevantAlterations(ReferenceGenome referenceGenome, Alteration alteration) {
         if (alteration == null || alteration.getGene() == null) {
             return new ArrayList<>();
@@ -993,17 +993,6 @@ public final class AlterationUtils {
             }
         }
         return cleanedList;
-    }
-
-    public static Boolean hasAlleleAlterations(ReferenceGenome referenceGenome, Alteration alteration) {
-        List<Alteration> alleles = AlterationUtils.getAlleleAlterations(referenceGenome, alteration);
-
-        alleles = AlterationUtils.excludeVUS(alleles);
-        if (alleles.size() == 0) {
-            return false;
-        } else {
-            return true;
-        }
     }
 
     public static Alteration findAlteration(Gene gene, ReferenceGenome referenceGenome, String alteration) {
@@ -1106,15 +1095,6 @@ public final class AlterationUtils {
             curatedOncogenicities.add(Oncogenicity.getByEvidence(evidence));
         }
         return curatedOncogenicities;
-    }
-
-    public static Set<Alteration> getOncogenicMutations(ReferenceGenome referenceGenome, Alteration alteration) {
-        Set<Alteration> oncogenicMutations = new HashSet<>();
-        Alteration alt = findAlteration(alteration.getGene(), referenceGenome, "oncogenic mutations");
-        if (alt != null) {
-            oncogenicMutations.add(alt);
-        }
-        return oncogenicMutations;
     }
 
     public static Set<String> getGeneralVariants() {

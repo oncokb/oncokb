@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.model.RelevantTumorTypeDirection;
@@ -19,7 +18,6 @@ import java.util.stream.Collectors;
 
 
 public class TumorTypeUtils {
-    private static final String ONCO_TREE_ONCOKB_VERSION = "oncotree_2019_12_01";
     private static String ONCO_TREE_API_URL = null;
     private static final ImmutableList<String> LiquidTumorTissues = ImmutableList.of(
         "Lymph", "Blood", "Lymphoid", "Myeloid"
@@ -56,7 +54,17 @@ public class TumorTypeUtils {
             return tumorType;
         }
         tumorType = getBySubtype(name);
-        return tumorType == null ? getByMainType(name) : tumorType;
+        tumorType = tumorType == null ? getByMainType(name) : tumorType;
+        tumorType = tumorType == null ? getBySpecialTumor(getSpecialTumorTypeByName(name)) : tumorType;
+        return tumorType;
+    }
+
+    public static SpecialTumorType getSpecialTumorTypeByName(String name) {
+        try {
+            return SpecialTumorType.valueOf(name);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public static TumorType getBySubtype(String subtype) {
@@ -135,7 +143,7 @@ public class TumorTypeUtils {
     }
 
     public static List<TumorType> findRelevantTumorTypes(String tumorType) {
-        return findRelevantTumorTypes(tumorType, RelevantTumorTypeDirection.UPWARD);
+        return findRelevantTumorTypes(tumorType, null, RelevantTumorTypeDirection.UPWARD);
     }
 
     public static LinkedHashSet<TumorType> getParentTumorTypes(TumorType tumorType, boolean onlySameMaintype) {
@@ -163,42 +171,37 @@ public class TumorTypeUtils {
         return childTumorTypes;
     }
 
-    public static List<TumorType> findRelevantTumorTypes(String tumorType, RelevantTumorTypeDirection direction) {
+    public static List<TumorType> findRelevantTumorTypes(String tumorType, Boolean isMainType, RelevantTumorTypeDirection direction) {
         LinkedHashSet<TumorType> mappedTumorTypes = new LinkedHashSet<>();
-        TumorType matchedTumorType = getByCode(tumorType);
-        if (matchedTumorType == null) {
-            matchedTumorType = getBySubtype(tumorType);
+        TumorType matchedTumorType = null;
+
+        if (isMainType != Boolean.TRUE) {
+            matchedTumorType = getByCode(tumorType);
+            if (matchedTumorType == null) {
+                matchedTumorType = getBySubtype(tumorType);
+            }
+        }
+
+        String mainTypeName = tumorType;
+        if (matchedTumorType != null) {
+            // Add matched tumor type
+            mappedTumorTypes.add(matchedTumorType);
+            mainTypeName = matchedTumorType.getMainType();
+        }
+
+        // Add main type
+        TumorType matchedMainType = getByMainType(mainTypeName);
+        if (matchedMainType != null) {
+            mappedTumorTypes.add(matchedMainType);
         }
 
         if (direction.equals(RelevantTumorTypeDirection.UPWARD)) {
             if (matchedTumorType != null) {
-                // Add matched tumor type
-                mappedTumorTypes.add(matchedTumorType);
-
-                // Add main type
-                TumorType matchedMainType = getByMainType(matchedTumorType.getMainType());
-                if (matchedMainType != null) {
-                    mappedTumorTypes.add(matchedMainType);
-                }
                 // Add matched parent tumor types
                 mappedTumorTypes.addAll(getParentTumorTypes(matchedTumorType, true));
-            } else {
-                matchedTumorType = getByMainType(tumorType);
-                if (matchedTumorType != null) {
-                    mappedTumorTypes.add(matchedTumorType);
-                }
             }
         } else {
             if (matchedTumorType != null) {
-                // Add matched tumor type
-                mappedTumorTypes.add(matchedTumorType);
-
-                // Add main type
-                TumorType matchedMainType = getByMainType(matchedTumorType.getMainType());
-                if (matchedMainType != null) {
-                    mappedTumorTypes.add(matchedMainType);
-                }
-
                 // Add matched parent tumor types
                 mappedTumorTypes.addAll(getChildTumorTypes(matchedTumorType, true));
             }
@@ -241,12 +244,8 @@ public class TumorTypeUtils {
         return tumorTypes.stream().map(tumorType -> getTumorTypeName(tumorType)).collect(Collectors.joining(", "));
     }
 
-    public static String getOncoTreeVersion() {
-        return ONCO_TREE_ONCOKB_VERSION;
-    }
-
     public static Map<String, org.mskcc.oncotree.model.TumorType> getAllNestedOncoTreeSubtypesFromSource() {
-        String url = getOncoTreeApiUrl() + "tumorTypes?version=" + ONCO_TREE_ONCOKB_VERSION + "&flat=false";
+        String url = getOncoTreeApiUrl() + "tumorTypes?version=" + CacheUtils.getInfo().getOncoTreeVersion() + "&flat=false";
         Map<String, org.mskcc.oncotree.model.TumorType> result = new HashMap<>();
         try {
             String json = IOUtils.toString(new InputStreamReader(TumorTypeUtils.class.getResourceAsStream("/data/oncotree/tumortypes.json")));
@@ -255,7 +254,7 @@ public class TumorTypeUtils {
             org.mskcc.oncotree.model.TumorType oncoTreeTumorType = new ObjectMapper().convertValue(data.get("TISSUE"), org.mskcc.oncotree.model.TumorType.class);
             result.put("TISSUE", oncoTreeTumorType);
         } catch (Exception e) {
-            System.out.println("You need to include oncotree nested file. Endpoint: tumorTypes?version=" + ONCO_TREE_ONCOKB_VERSION + "&flat=false");
+            System.out.println("You need to include oncotree nested file. Endpoint: tumorTypes?version=" + CacheUtils.getInfo().getOncoTreeVersion() + "&flat=false");
             e.printStackTrace();
         }
         return result;
@@ -276,7 +275,7 @@ public class TumorTypeUtils {
                 tumorTypes.add(tumorType);
             }
         } catch (Exception e) {
-            System.out.println("You need to include oncotree flat file. Endpoint: tumorTypes?version=" + ONCO_TREE_ONCOKB_VERSION + "&flat=true");
+            System.out.println("You need to include oncotree flat file. Endpoint: tumorTypes?version=" + CacheUtils.getInfo().getOncoTreeVersion() + "&flat=true");
             e.printStackTrace();
         }
         return tumorTypes;

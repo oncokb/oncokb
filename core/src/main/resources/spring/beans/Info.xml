@@ -1,0 +1,14 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+    <bean id="infoBo" class="org.mskcc.cbio.oncokb.bo.impl.InfoBoImpl">
+        <property name="dao" ref="infoDao"/>
+    </bean>
+
+    <bean id="infoDao" class="org.mskcc.cbio.oncokb.dao.impl.InfoDaoImpl">
+        <property name="sessionFactory" ref="sessionFactory"></property>
+    </bean>
+
+</beans>

@@ -69,13 +69,8 @@ public class SummaryUtils {
         // Get all tumor type summary evidences for the exact alteration + alternative alleles
         // Tumor type has high priority. Get relevant tumor type summary across all alternative alleles, then look for other tumor types summary
         if (tumorTypeSummary == null) {
-            for (TumorType tumorType : relevantTumorTypes) {
-                for (Alteration allele : alternativeAlleles) {
-                    tumorTypeSummary = getRelevantTumorTypeSummaryByAlt(evidenceType, allele, tumorType, Collections.singleton(tumorType));
-                    if (tumorTypeSummary != null) {
-                        break;
-                    }
-                }
+            for (Alteration allele : alternativeAlleles) {
+                tumorTypeSummary = getRelevantTumorTypeSummaryByAlt(evidenceType, allele, matchedTumorType, relevantTumorTypes);
                 if (tumorTypeSummary != null) {
                     break;
                 }
@@ -125,11 +120,9 @@ public class SummaryUtils {
 
             // Base on the priority of relevant alterations
             for (Alteration alt : relevantAlterations) {
-                for (TumorType tumorType : relevantTumorTypes) {
-                    tumorTypeSummary = getRelevantTumorTypeSummaryByAlt(evidenceType, alt, tumorType, Collections.singleton(tumorType));
-                    if (tumorTypeSummary != null) {
-                        break;
-                    }
+                tumorTypeSummary = getRelevantTumorTypeSummaryByAlt(evidenceType, alt, matchedTumorType, relevantTumorTypes);
+                if (tumorTypeSummary != null) {
+                    break;
                 }
                 if (tumorTypeSummary != null) {
                     break;
@@ -170,7 +163,7 @@ public class SummaryUtils {
         return tumorTypeSummary;
     }
 
-    private static Map<String, Object> getRelevantTumorTypeSummaryByAlt(EvidenceType evidenceType, Alteration alteration, TumorType matchedTumorType, Set<TumorType> relevantTumorTypes) {
+    private static Map<String, Object> getRelevantTumorTypeSummaryByAlt(EvidenceType evidenceType, Alteration alteration, TumorType matchedTumorType, List<TumorType> relevantTumorTypes) {
         return getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(Collections.singletonList(alteration), Collections.singleton(evidenceType), matchedTumorType, relevantTumorTypes, null));
     }
 
@@ -191,7 +184,7 @@ public class SummaryUtils {
                 Collections.singletonList(alteration),
                 Collections.singleton(evidenceType),
                 TumorTypeUtils.getBySpecialTumor(specialTumorType),
-                Collections.singleton(TumorTypeUtils.getBySpecialTumor(specialTumorType)), null);
+                Collections.singletonList(TumorTypeUtils.getBySpecialTumor(specialTumorType)), null);
             if (evidences.size() > 0) {
                 return getTumorTypeSummaryFromEvidences(evidences);
             }
@@ -447,10 +440,21 @@ public class SummaryUtils {
         if (gene != null && gene.getHugoSymbol().equals(SpecialStrings.OTHERBIOMARKERS)) {
             return "";
         }
-        Set<Evidence> geneSummaryEvs = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Collections.singleton(EvidenceType.GENE_SUMMARY));
+        return enrichGeneEvidenceDescription(EvidenceType.GENE_SUMMARY, gene, StringUtils.isEmpty(queryHugoSymbol) ? gene.getHugoSymbol() : queryHugoSymbol);
+    }
+
+    public static String geneBackground(Gene gene, String queryHugoSymbol) {
+        if (gene != null && gene.getHugoSymbol().equals(SpecialStrings.OTHERBIOMARKERS)) {
+            return "";
+        }
+        return enrichGeneEvidenceDescription(EvidenceType.GENE_BACKGROUND, gene, StringUtils.isEmpty(queryHugoSymbol) ? gene.getHugoSymbol() : queryHugoSymbol);
+    }
+
+    private static String enrichGeneEvidenceDescription(EvidenceType evidenceType, Gene gene, String hugoSymbol) {
+        Set<Evidence> geneBackgroundEvs = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Collections.singleton(evidenceType));
         String summary = "";
-        if (!geneSummaryEvs.isEmpty()) {
-            Evidence ev = geneSummaryEvs.iterator().next();
+        if (!geneBackgroundEvs.isEmpty()) {
+            Evidence ev = geneBackgroundEvs.iterator().next();
             if (ev != null) {
                 summary = ev.getDescription();
             }
@@ -461,7 +465,7 @@ public class SummaryUtils {
         }
         summary = summary.trim();
         summary = summary.endsWith(".") ? summary : summary + ".";
-        summary = enrichDescription(summary, StringUtils.isEmpty(queryHugoSymbol) ? gene.getHugoSymbol() : queryHugoSymbol);
+        summary = enrichDescription(summary, hugoSymbol);
         return summary;
     }
 

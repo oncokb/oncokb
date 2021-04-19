@@ -63,6 +63,10 @@ public class CacheUtils {
 
     private static Map<String, Long> recordTime = new HashedMap();
 
+    private static Map<String, Gene> externalGenePool = new HashMap<>();
+
+    private static Info oncokbInfo;
+
     private static Observer numbersObserver = new Observer() {
         @Override
         public void update(Observable o, Object arg) {
@@ -130,11 +134,13 @@ public class CacheUtils {
     };
 
     private static void notifyOtherServices(String cmd, Set<Integer> entrezGeneIds) {
+        System.out.println("Notify other services..." + " at " + MainUtils.getCurrentTime());
         if (cmd == null) {
             cmd = "";
         }
-        System.out.println("Notify other services..." + " at " + MainUtils.getCurrentTime());
+        System.out.println("\tcmd is " + cmd);
         if (cmd == "update" && entrezGeneIds != null && entrezGeneIds.size() > 0) {
+            System.out.println("\t# of other services" + otherServices.size());
             for (String service : otherServices) {
                 if (!StringUtils.isNullOrEmpty(service)) {
                     try {
@@ -155,6 +161,8 @@ public class CacheUtils {
                     }
                 }
             }
+        } else {
+            System.out.println("\tcmd=" + cmd + ", has gene:" + entrezGeneIds != null && entrezGeneIds.size() > 0);
         }
     }
 
@@ -228,6 +236,9 @@ public class CacheUtils {
             cacheDownloadAvailability();
             System.out.println("Cached downloadable files availability on github: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
 
+            oncokbInfo = ApplicationContextSingleton.getInfoBo().get();
+            System.out.println("Cached oncokb info " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
+
             registerOtherServices();
             System.out.println("Register other services: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
             current = MainUtils.getCurrentTimestamp();
@@ -250,6 +261,10 @@ public class CacheUtils {
         } else {
             return null;
         }
+    }
+
+    public static Info getInfo() {
+        return oncokbInfo;
     }
 
     public static Boolean containGeneByEntrezId(Integer entrezId) {
@@ -350,14 +365,16 @@ public class CacheUtils {
         return AlterationUtils.findOverlapAlteration(getAlterations(gene.getEntrezGeneId()), gene, referenceGenome, consequence, start, end);
     }
 
-    public static Set<Alteration> findMutationsByConsequenceAndPositionOnSamePosition(Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end) {
+    public static Set<Alteration> findMutationsByConsequenceAndPositionOnSamePosition(Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end, String referenceResidue) {
         Set<Alteration> alterations = new HashSet<>();
         for (Alteration alteration : getAlterations(gene.getEntrezGeneId())) {
-            if (alteration.getConsequence().equals(consequence)
+            if (AlterationUtils.consequenceRelated(alteration.getConsequence(), consequence)
                 && (referenceGenome == null || alteration.getReferenceGenomes().contains(referenceGenome))
                 && alteration.getProteinStart().equals(alteration.getProteinEnd())
                 && alteration.getProteinStart() >= start
-                && alteration.getProteinStart() <= end) {
+                && alteration.getProteinStart() <= end
+                && (alteration.getRefResidues() == null || referenceResidue == null || referenceResidue.equals(alteration.getRefResidues()))
+            ) {
                 alterations.add(alteration);
             }
         }
@@ -508,6 +525,36 @@ public class CacheUtils {
         return mappedEvis;
     }
 
+    public static void addToGenePool(Gene gene) {
+        if (gene == null) {
+            return;
+        }
+        if (gene.getEntrezGeneId() != null) {
+            externalGenePool.put(gene.getEntrezGeneId().toString(), gene);
+        }
+        if (gene.getHugoSymbol() != null) {
+            externalGenePool.put(gene.getHugoSymbol(), gene);
+        }
+        gene.getGeneAliases().forEach(alias -> {
+            // gene alias mapping should have lower priority when the same query exists
+            if (alias != null && !externalGenePool.containsKey(alias)) {
+                externalGenePool.put(alias, gene);
+            }
+        });
+    }
+
+    public static void addToGenePool(String query, Gene gene) {
+        externalGenePool.put(query, gene);
+    }
+
+    public static Gene getFromGenePool(String key) {
+        return externalGenePool.get(key);
+    }
+
+    public static boolean hasKeyInGenePool(String key) {
+        return externalGenePool.containsKey(key);
+    }
+
     private static void setEvidences(Gene gene) {
         evidences.put(gene.getEntrezGeneId(), new HashSet<>(ApplicationContextSingleton.getEvidenceBo().findEvidencesByGeneFromDB(Collections.singleton(gene))));
     }
@@ -556,11 +603,14 @@ public class CacheUtils {
             propagate = false;
         }
         if(entrezGeneIds == null || entrezGeneIds.size() == 0){
+            System.out.println("\tThere is no entrez gene ids specified.");
             return;
         }
         entrezGeneIds.forEach(entrezGeneId -> GeneObservable.getInstance().update("update", entrezGeneId.toString()));
         if (propagate) {
             notifyOtherServices("update", entrezGeneIds);
+        }else{
+            System.out.println("\tDo not propagate.");
         }
     }
 

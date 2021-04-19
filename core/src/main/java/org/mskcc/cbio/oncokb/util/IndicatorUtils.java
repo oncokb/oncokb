@@ -239,7 +239,7 @@ public class IndicatorUtils {
                 relevantUpwardTumorTypes = TumorTypeUtils.findRelevantTumorTypes(query.getTumorType());
             }
 
-            relevantDownwardTumorTypes = TumorTypeUtils.findRelevantTumorTypes(query.getTumorType(), RelevantTumorTypeDirection.DOWNWARD);
+            relevantDownwardTumorTypes = TumorTypeUtils.findRelevantTumorTypes(query.getTumorType(), null, RelevantTumorTypeDirection.DOWNWARD);
 
             indicatorQuery.setVUS(isVUS(matchedAlt));
 
@@ -305,13 +305,13 @@ public class IndicatorUtils {
 
                 if (hasDiagnosticImplicationEvidence) {
                     List<Implication> implications = new ArrayList<>();
-                    implications.addAll(getImplications(matchedAlt, alleles, relevantAlterationsWithoutAlternativeAlleles, EvidenceType.DIAGNOSTIC_IMPLICATION, matchedTumorType, StringUtils.isEmpty(query.getTumorType()) ? null : new HashSet<>(relevantDownwardTumorTypes), query.getHugoSymbol(), Collections.singleton(LevelOfEvidence.LEVEL_Dx1)));
+                    implications.addAll(getImplications(matchedAlt, alleles, relevantAlterationsWithoutAlternativeAlleles, EvidenceType.DIAGNOSTIC_IMPLICATION, matchedTumorType, StringUtils.isEmpty(query.getTumorType()) ? null : relevantDownwardTumorTypes, query.getHugoSymbol(), Collections.singleton(LevelOfEvidence.LEVEL_Dx1)));
 
                     // For Dx2 and Dx3, the logic is the same as Tx/Px
                     Set<LevelOfEvidence> levelOfEvidences = new HashSet<>();
                     levelOfEvidences.add(LevelOfEvidence.LEVEL_Dx2);
                     levelOfEvidences.add(LevelOfEvidence.LEVEL_Dx3);
-                    implications.addAll(getImplications(matchedAlt, alleles, relevantAlterationsWithoutAlternativeAlleles, EvidenceType.DIAGNOSTIC_IMPLICATION, matchedTumorType, StringUtils.isEmpty(query.getTumorType()) ? null : new HashSet<>(relevantUpwardTumorTypes), query.getHugoSymbol(), levelOfEvidences));
+                    implications.addAll(getImplications(matchedAlt, alleles, relevantAlterationsWithoutAlternativeAlleles, EvidenceType.DIAGNOSTIC_IMPLICATION, matchedTumorType, StringUtils.isEmpty(query.getTumorType()) ? null : relevantUpwardTumorTypes, query.getHugoSymbol(), levelOfEvidences));
                     indicatorQuery.setDiagnosticImplications(implications);
                     if (indicatorQuery.getDiagnosticImplications().size() > 0) {
                         indicatorQuery.setHighestDiagnosticImplicationLevel(LevelUtils.getHighestDiagnosticImplicationLevel(indicatorQuery.getDiagnosticImplications().stream().map(implication -> implication.getLevelOfEvidence()).collect(Collectors.toSet())));
@@ -319,7 +319,7 @@ public class IndicatorUtils {
                 }
 
                 if (hasPrognosticImplicationEvidence) {
-                    indicatorQuery.setPrognosticImplications(getImplications(matchedAlt, alleles, relevantAlterationsWithoutAlternativeAlleles, EvidenceType.PROGNOSTIC_IMPLICATION, matchedTumorType, StringUtils.isEmpty(query.getTumorType()) ? null : new HashSet<>(relevantUpwardTumorTypes), query.getHugoSymbol(), null));
+                    indicatorQuery.setPrognosticImplications(getImplications(matchedAlt, alleles, relevantAlterationsWithoutAlternativeAlleles, EvidenceType.PROGNOSTIC_IMPLICATION, matchedTumorType, StringUtils.isEmpty(query.getTumorType()) ? null : relevantUpwardTumorTypes, query.getHugoSymbol(), null));
                     if (indicatorQuery.getPrognosticImplications().size() > 0) {
                         indicatorQuery.setHighestPrognosticImplicationLevel(LevelUtils.getHighestPrognosticImplicationLevel(indicatorQuery.getPrognosticImplications().stream().map(implication -> implication.getLevelOfEvidence()).collect(Collectors.toSet())));
                     }
@@ -553,7 +553,7 @@ public class IndicatorUtils {
         return implications;
     }
 
-    private static List<Implication> getImplications(Alteration matchedAlt, List<Alteration> alternativeAlleles, List<Alteration> relevantAlterations, EvidenceType evidenceType, TumorType matchedTumorType, Set<TumorType> tumorTypes, String queryHugoSymbol, Set<LevelOfEvidence> levelOfEvidences) {
+    private static List<Implication> getImplications(Alteration matchedAlt, List<Alteration> alternativeAlleles, List<Alteration> relevantAlterations, EvidenceType evidenceType, TumorType matchedTumorType, List<TumorType> tumorTypes, String queryHugoSymbol, Set<LevelOfEvidence> levelOfEvidences) {
         List<Implication> implications = new ArrayList<>();
 
         // Find alteration specific evidence
@@ -883,7 +883,7 @@ public class IndicatorUtils {
                 geneStrsList.add(gene.getHugoSymbol());
             }
         } else {
-            geneStrsList.addAll(Arrays.asList(query.getHugoSymbol().split("-")));
+            geneStrsList.addAll(FusionUtils.getGenesStrs(query.getHugoSymbol()));
         }
         Set<String> geneStrsSet = new HashSet<>();
         Gene gene = null;

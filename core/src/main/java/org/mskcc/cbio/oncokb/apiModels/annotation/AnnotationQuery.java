@@ -4,6 +4,7 @@ import org.mskcc.cbio.oncokb.model.EvidenceType;
 import org.mskcc.cbio.oncokb.model.ReferenceGenome;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -45,5 +46,10 @@ public class AnnotationQuery implements java.io.Serializable{
 
     public void setEvidenceTypes(Set<EvidenceType> evidenceTypes) {
         this.evidenceTypes = evidenceTypes;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getReferenceGenome(), getTumorType(), getEvidenceTypes());
     }
 }

@@ -138,25 +138,26 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
     }
 
     @Override
-    public List<Alteration> findMutationsByConsequenceAndPositionOnSamePosition(Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end, Collection<Alteration> alterations) {
+    public List<Alteration> findMutationsByConsequenceAndPositionOnSamePosition(Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end, String referenceResidue, Collection<Alteration> alterations) {
         Set<Alteration> result = new HashSet<>();
 
         if (alterations != null && alterations.size() > 0) {
             for (Alteration alteration : alterations) {
                 if (alteration.getGene().equals(gene) && alteration.getConsequence() != null
-                    && alteration.getConsequence().equals(consequence)
+                    && AlterationUtils.consequenceRelated(alteration.getConsequence(), consequence)
                     && alteration.getProteinStart() != null
                     && alteration.getProteinEnd() != null
                     && (referenceGenome == null || alteration.getReferenceGenomes().contains(referenceGenome))
                     && alteration.getProteinStart().equals(alteration.getProteinEnd())
                     && alteration.getProteinStart() >= start
-                    && alteration.getProteinStart() <= end) {
+                    && alteration.getProteinStart() <= end
+                    && (alteration.getRefResidues() == null || referenceResidue == null || referenceResidue.equals(alteration.getRefResidues()))) {
                     result.add(alteration);
                 }
             }
         } else {
             Collection<Alteration> queryResult;
-            queryResult = CacheUtils.findMutationsByConsequenceAndPositionOnSamePosition(gene, referenceGenome, consequence, start, end);
+            queryResult = CacheUtils.findMutationsByConsequenceAndPositionOnSamePosition(gene, referenceGenome, consequence, start, end, referenceResidue);
             if (queryResult != null) {
                 result.addAll(queryResult);
             }
@@ -283,7 +284,17 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
                 List<Alteration> mutationsByConsequenceAndPosition = findMutationsByConsequenceAndPosition(alteration.getGene(), referenceGenome, alteration.getConsequence(), alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations);
                 for (Alteration alt : mutationsByConsequenceAndPosition) {
                     if (!alt.getProteinStart().equals(alt.getProteinEnd())) {
-                        includeRangeAlts.add(alt);
+                        if (alt.getRefResidues() != null && alteration.getRefResidues() != null && alt.getProteinStart() != null && alteration.getProteinStart() != null) {
+                            int distance = Math.abs(alt.getProteinStart() - alteration.getProteinStart());
+                            if (distance < alt.getRefResidues().length()) {
+                                char rangeAltMatchedResidue = alt.getRefResidues().charAt(distance);
+                                if (rangeAltMatchedResidue == alteration.getRefResidues().charAt(0)) {
+                                    includeRangeAlts.add(alt);
+                                }
+                            }
+                        } else {
+                            includeRangeAlts.add(alt);
+                        }
                     }
                 }
             }

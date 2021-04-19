@@ -3,6 +3,8 @@ package org.mskcc.cbio.oncokb.apiModels.annotation;
 import io.swagger.annotations.ApiModel;
 import org.mskcc.cbio.oncokb.model.StructuralVariantType;
 
+import java.util.Objects;
+
 /**
  * Created by Hongxin Zhang on 2019-03-25.
  */
@@ -42,5 +44,10 @@ public class AnnotateStructuralVariantQuery extends AnnotationQuery implements j
 
     public void setFunctionalFusion(Boolean functionalFusion) {
         isFunctionalFusion = functionalFusion;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), getGeneA(), getGeneB(), getStructuralVariantType(), isFunctionalFusion);
     }
 }

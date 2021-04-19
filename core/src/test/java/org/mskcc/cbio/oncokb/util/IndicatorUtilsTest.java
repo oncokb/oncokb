@@ -1,5 +1,6 @@
 package org.mskcc.cbio.oncokb.util;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.mskcc.cbio.oncokb.apiModels.Implication;
 import org.mskcc.cbio.oncokb.apiModels.MainType;
@@ -189,14 +190,6 @@ public class IndicatorUtilsTest {
         assertEquals("The oncogenicity should be 'Oncogenic'", Oncogenicity.LIKELY.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The highest sensitive level should be 4",
             LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
-        assertEquals("The highest resistance level should be R1",
-            LevelOfEvidence.LEVEL_R2, indicatorQueryResp.getHighestResistanceLevel());
-
-        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "EGFR", "C797S", null, null, "Lung Adenocarcinoma", null, null, null, null);
-        indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null);
-        assertEquals("The oncogenicity should be 'Oncogenic'", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
-        assertEquals("The highest sensitive level should be 4",
-            null, indicatorQueryResp.getHighestSensitiveLevel());
         assertEquals("The highest resistance level should be R1",
             LevelOfEvidence.LEVEL_R2, indicatorQueryResp.getHighestResistanceLevel());
 
@@ -415,6 +408,28 @@ public class IndicatorUtilsTest {
         assertTrue("The mutation effect is null, but it should not be.", indicatorQueryResp.getMutationEffect() != null);
         assertEquals("The mutation effect is not unknown, but it should be.", "Unknown", indicatorQueryResp.getMutationEffect().getKnownEffect());
 
+
+        // Test resistance mutation
+        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "EGFR", "C797S", null, null, "Lung Adenocarcinoma", null, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null);
+        assertEquals("The oncogenicity should be 'Resistance'", Oncogenicity.RESISTANCE.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The highest sensitive level should be 4",
+            null, indicatorQueryResp.getHighestSensitiveLevel());
+        assertEquals("The highest resistance level should be R1",
+            LevelOfEvidence.LEVEL_R2, indicatorQueryResp.getHighestResistanceLevel());
+
+        // The oncogenic mutations should not be mapped to Resistance mutation. So the summary from OM should no apply here.
+        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "KIT", "D820E", null, null, "AMLRUNX1RUNX1T1", null, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null);
+        assertEquals("The oncogenicity should be 'Resistance'", Oncogenicity.RESISTANCE.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The tumor type summary is not expected.",
+            "There are no FDA-approved or NCCN-compendium listed treatments specifically for patients with KIT D820E mutant AML with t(8;21)(q22;q22.1);RUNX1-RUNX1T1.", indicatorQueryResp.getTumorTypeSummary());
+
+        // The oncogenic mutations should not be mapped to Resistance mutation. So the summary from OM should no apply here.
+        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "BRAF", "V600E", null, null, "MEL", null, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null);
+        assertTrue("The data version should not be empty.", StringUtils.isNotEmpty(indicatorQueryResp.getDataVersion()));
+        assertEquals("The data version is not expected.", MainUtils.getDataVersion(), indicatorQueryResp.getDataVersion());
 
         /**
          * Comparing between two queries

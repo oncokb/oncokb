@@ -2,6 +2,8 @@ package org.mskcc.cbio.oncokb.apiModels.annotation;
 
 import org.mskcc.cbio.oncokb.model.CopyNumberAlterationType;
 
+import java.util.Objects;
+
 /**
  * Created by Hongxin Zhang on 2019-03-25.
  */
@@ -24,5 +26,10 @@ public class AnnotateCopyNumberAlterationQuery extends AnnotationQuery implement
 
     public void setCopyNameAlterationType(CopyNumberAlterationType copyNameAlterationType) {
         this.copyNameAlterationType = copyNameAlterationType;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), getGene(), getCopyNameAlterationType());
     }
 }

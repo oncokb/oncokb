@@ -13,6 +13,7 @@ public class EvidenceQueryRes implements java.io.Serializable {
     private Query query;
     private Gene gene;
     private Alteration exactMatchedAlteration;
+    private TumorType exactMatchedTumorType;
     private List<Alteration> alterations = new ArrayList<>();
     private List<Alteration> alleles = new ArrayList<>();
     private List<TumorType> tumorTypes = new ArrayList<>();
@@ -52,6 +53,14 @@ public class EvidenceQueryRes implements java.io.Serializable {
 
     public void setExactMatchedAlteration(Alteration exactMatchedAlteration) {
         this.exactMatchedAlteration = exactMatchedAlteration;
+    }
+
+    public TumorType getExactMatchedTumorType() {
+        return exactMatchedTumorType;
+    }
+
+    public void setExactMatchedTumorType(TumorType exactMatchedTumorType) {
+        this.exactMatchedTumorType = exactMatchedTumorType;
     }
 
     public List<Alteration> getAlterations() {

@@ -73,11 +73,13 @@ public class EvidenceUtils {
             }
 
             Set<Evidence> relevantEvidences;
+            EvidenceQueryRes evidenceQueryRes = new EvidenceQueryRes();
+
             List<TumorType> relevantTumorTypes = new ArrayList<>();
             if (query.getTumorType() != null) {
                 relevantTumorTypes = TumorTypeUtils.findRelevantTumorTypes(query.getTumorType());
+                evidenceQueryRes.setExactMatchedTumorType(TumorTypeUtils.getByName(query.getTumorType()));
             }
-            EvidenceQueryRes evidenceQueryRes = new EvidenceQueryRes();
             evidenceQueryRes.setGene(gene);
             evidenceQueryRes.setQuery(query);
             evidenceQueryRes.setAlterations(relevantAlterations);
@@ -145,7 +147,7 @@ public class EvidenceUtils {
         return result;
     }
 
-    public static List<Evidence> getEvidence(List<Alteration> alterations, Set<EvidenceType> evidenceTypes, TumorType matchedTumorType, Set<TumorType> tumorTypes, Set<LevelOfEvidence> levelOfEvidences) {
+    public static List<Evidence> getEvidence(List<Alteration> alterations, Set<EvidenceType> evidenceTypes, TumorType matchedTumorType, List<TumorType> tumorTypes, Set<LevelOfEvidence> levelOfEvidences) {
         if (alterations == null || alterations.size() == 0) {
             return new ArrayList<>();
         }
@@ -168,13 +170,13 @@ public class EvidenceUtils {
         Set<Gene> genes = new HashSet<>(); //Get gene evidences
         TumorType matchedTumorType = TumorTypeUtils.getByName(query.getQuery().getTumorType());
         Set<Alteration> alterations = new HashSet<>();
-        Set<TumorType> upwardTumorTypes = new HashSet<>();
-        Set<TumorType> downwardTumorTypes = new HashSet<>();
+        List<TumorType> upwardTumorTypes = new ArrayList<>();
+        List<TumorType> downwardTumorTypes = new ArrayList<>();
 
         if (query.getOncoTreeTypes() != null) {
             upwardTumorTypes.addAll(query.getOncoTreeTypes());
         }
-        downwardTumorTypes.addAll(TumorTypeUtils.findRelevantTumorTypes(query.getQuery().getTumorType(), DOWNWARD));
+        downwardTumorTypes.addAll(TumorTypeUtils.findRelevantTumorTypes(query.getQuery().getTumorType(),null, DOWNWARD));
 
         if (query.getGene() != null) {
             genes.add(query.getGene());
@@ -380,7 +382,14 @@ public class EvidenceUtils {
                                 Set<TumorType> tumorTypes = evidence.getRelevantCancerTypes().isEmpty() ? evidence.getCancerTypes() : evidence.getRelevantCancerTypes();
 
                                 TumorForm tumorForm = TumorTypeUtils.checkTumorForm(new HashSet<>(evidenceQuery.getOncoTreeTypes()));
-                                hasjointed = !Collections.disjoint(evidenceQuery.getOncoTreeTypes(), tumorTypes);
+
+                                // for evidence has relevant cancer types, we should only look at the exact matched cancer type of the evidence query
+                                if (evidence.getRelevantCancerTypes().isEmpty()) {
+                                    hasjointed = !Collections.disjoint(evidenceQuery.getOncoTreeTypes(), tumorTypes);
+                                } else {
+                                    hasjointed = evidence.getRelevantCancerTypes().contains(evidenceQuery.getExactMatchedTumorType());
+                                }
+
                                 if (hasjointed || com.mysql.jdbc.StringUtils.isNullOrEmpty(evidenceQuery.getQuery().getTumorType())) {
                                     filtered.add(evidence);
                                 } else if (tumorForm != null) {
@@ -593,7 +602,7 @@ public class EvidenceUtils {
                 Iterator<Alteration> i = relevantAlterations.iterator();
                 while (i.hasNext()) {
                     Alteration relAlt = i.next();
-                    if (relAlt.getConsequence().equals(alteration.getConsequence())) {
+                    if (AlterationUtils.consequenceRelated(relAlt.getConsequence(), alteration.getConsequence())) {
                         if (relAlt.getProteinStart() > alteration.getProteinStart() || relAlt.getProteinEnd() < alteration.getProteinEnd()) {
                             i.remove();
                         }
@@ -860,6 +869,7 @@ public class EvidenceUtils {
                 query.setGene(GeneUtils.getGene(requestQuery.getEntrezGeneId(), requestQuery.getHugoSymbol()));
 
                 if (requestQuery.getTumorType() != null && !requestQuery.getTumorType().isEmpty()) {
+                    query.setExactMatchedTumorType(TumorTypeUtils.getByName(requestQuery.getTumorType()));
                     query.setOncoTreeTypes(
                         TumorTypeUtils.findRelevantTumorTypes(requestQuery.getTumorType()));
                 }
@@ -906,18 +916,28 @@ public class EvidenceUtils {
                 final List<LevelOfEvidence> allowedLevels = query.getLevelOfEvidences();
                 final List<TumorType> upwardTumorTypes = query.getOncoTreeTypes();
                 TumorForm tumorForm = TumorTypeUtils.checkTumorForm(new HashSet<>(upwardTumorTypes));
-                query.getEvidences().stream().forEach(evidence -> {
-                    if (evidence.getLevelOfEvidence() != null && EvidenceTypeUtils.getTreatmentEvidenceTypes().contains(evidence.getEvidenceType()) && tumorForm != null && Collections.disjoint(upwardTumorTypes, evidence.getRelevantCancerTypes().isEmpty() ? evidence.getCancerTypes() : evidence.getRelevantCancerTypes())) {
-                        Evidence propagatedLevel = getPropagateEvidence(allowedLevels, evidence, tumorForm);
-                        if (propagatedLevel != null) {
-                            updatedEvidences.add(propagatedLevel);
+                for (Evidence evidence : query.getEvidences()) {
+                    if (evidence.getLevelOfEvidence() != null && EvidenceTypeUtils.getTreatmentEvidenceTypes().contains(evidence.getEvidenceType()) && tumorForm != null) {
+                        boolean disjoint = false;
+                        if (evidence.getRelevantCancerTypes().isEmpty()) {
+                            disjoint = Collections.disjoint(upwardTumorTypes, evidence.getCancerTypes());
+                        } else {
+                            disjoint = !evidence.getRelevantCancerTypes().contains(query.getExactMatchedTumorType());
+                        }
+                        if (disjoint) {
+                            Evidence propagatedLevel = getPropagateEvidence(allowedLevels, evidence, tumorForm);
+                            if (propagatedLevel != null) {
+                                updatedEvidences.add(propagatedLevel);
+                            }
+                        } else {
+                            updatedEvidences.add(new Evidence(evidence, evidence.getId()));
                         }
                     } else {
                         updatedEvidences.add(new Evidence(evidence, evidence.getId()));
                     }
-                });
+                }
 
-                if(!StringUtils.isEmpty(requestQuery.getHugoSymbol()) || query.getGene() != null) {
+                if (!StringUtils.isEmpty(requestQuery.getHugoSymbol()) || query.getGene() != null) {
                     String hugoSymbol = StringUtils.isEmpty(requestQuery.getHugoSymbol()) ? query.getGene().getHugoSymbol() : requestQuery.getHugoSymbol();
                     for (Evidence evidence : updatedEvidences) {
                         evidence.setDescription(SummaryUtils.enrichDescription(evidence.getDescription(), hugoSymbol));

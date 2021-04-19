@@ -9,6 +9,7 @@ import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 public final class GeneralImporter {
 
     public static void main(String[] args) throws Exception {
+        InfoImporter.main(args);
         VariantConsequenceImporter.main(args);
         TumorTypeImporter.main(args);
 

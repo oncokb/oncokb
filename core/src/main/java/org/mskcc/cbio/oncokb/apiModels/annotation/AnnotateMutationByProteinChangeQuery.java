@@ -1,5 +1,7 @@
 package org.mskcc.cbio.oncokb.apiModels.annotation;
 
+import java.util.Objects;
+
 /**
  * Created by Hongxin Zhang on 2019-03-25.
  */
@@ -75,5 +77,10 @@ public class AnnotateMutationByProteinChangeQuery extends AnnotationQuery implem
 
     public void setCountry(String country) {
         this.country = country;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), getGene(), getAlteration(), getConsequence(), getProteinStart(), getProteinEnd(), getAddress(), getDistance(), getCountry());
     }
 }
