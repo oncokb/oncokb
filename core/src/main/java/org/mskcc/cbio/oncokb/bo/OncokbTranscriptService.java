@@ -93,7 +93,7 @@ public class OncokbTranscriptService {
             vm.setTranscriptA(pairA);
             vm.setTranscriptB(pairB);
 
-            return controllerApi.compareTranscriptUsingPOST(gene.getHugoSymbol(), vm);
+            return controllerApi.compareTranscriptUsingPOST1(gene.getHugoSymbol(), vm);
         }
     }
 
@@ -119,5 +119,15 @@ public class OncokbTranscriptService {
             return sequence.substring(positionStart - 1, positionStart + length - 1);
         }
         return "";
+    }
+
+    public List<Drug> findDrugs(String query) throws ApiException {
+        DrugResourceApi drugResourceApi = new DrugResourceApi();
+        return drugResourceApi.findDrugsUsingGET(query);
+    }
+
+    public Drug findDrugByNcitCode(String code) throws ApiException {
+        DrugResourceApi drugResourceApi = new DrugResourceApi();
+        return drugResourceApi.findDrugByCodeUsingGET(code);
     }
 }

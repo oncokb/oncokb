@@ -148,7 +148,8 @@ public class EvidenceController {
                     new ArrayList<>(AlterationUtils.getAllAlterations(null, gene)),
                     Collections.singleton(EvidenceType.VUS), null);
                 deleteEvidencesAndAlts(evidences);
-                DriveAnnotationParser.parseVUS(gene, new JSONArray(vus), 1);
+                DriveAnnotationParser driveAnnotationParser = new DriveAnnotationParser();
+                driveAnnotationParser.parseVUS(gene, new JSONArray(vus), 1);
                 updateCacheBasedOnGenes(Collections.singleton(gene));
             }
         }
@@ -311,7 +312,8 @@ public class EvidenceController {
         // common cases for evidence update
         // Use controlled vocabulary to update oncogenic knowneffect
         if (evidenceType.equals(EvidenceType.ONCOGENIC)) {
-            Oncogenicity oncogenicity = DriveAnnotationParser.getOncogenicityByString(knownEffect);
+            DriveAnnotationParser driveAnnotationParser = new DriveAnnotationParser();
+            Oncogenicity oncogenicity = driveAnnotationParser.getOncogenicityByString(knownEffect);
             if (oncogenicity != null) {
                 knownEffect = oncogenicity.getOncogenic();
             }

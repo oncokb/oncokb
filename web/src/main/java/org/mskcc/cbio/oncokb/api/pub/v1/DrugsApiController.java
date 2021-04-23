@@ -7,7 +7,6 @@ import org.mskcc.cbio.oncokb.dao.DrugDao;
 import org.mskcc.cbio.oncokb.model.Drug;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 import org.mskcc.cbio.oncokb.util.DrugUtils;
-import org.mskcc.cbio.oncokb.util.NCITDrugUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
