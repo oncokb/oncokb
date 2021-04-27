@@ -344,14 +344,16 @@ public class CacheUtils {
         return AlterationUtils.findOverlapAlteration(getAlterations(gene.getEntrezGeneId()), gene, referenceGenome, consequence, start, end);
     }
 
-    public static Set<Alteration> findMutationsByConsequenceAndPositionOnSamePosition(Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end) {
+    public static Set<Alteration> findMutationsByConsequenceAndPositionOnSamePosition(Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end, String referenceResidue) {
         Set<Alteration> alterations = new HashSet<>();
         for (Alteration alteration : getAlterations(gene.getEntrezGeneId())) {
             if (AlterationUtils.consequenceRelated(alteration.getConsequence(), consequence)
                 && (referenceGenome == null || alteration.getReferenceGenomes().contains(referenceGenome))
                 && alteration.getProteinStart().equals(alteration.getProteinEnd())
                 && alteration.getProteinStart() >= start
-                && alteration.getProteinStart() <= end) {
+                && alteration.getProteinStart() <= end
+                && (alteration.getRefResidues() == null || referenceResidue == null || referenceResidue.equals(alteration.getRefResidues()))
+            ) {
                 alterations.add(alteration);
             }
         }

@@ -37,6 +37,24 @@ public class Query implements java.io.Serializable {
     public Query() {
     }
 
+    public Query copy() {
+        Query newQuery = new Query();
+        newQuery.setId(this.id);
+        newQuery.setReferenceGenome(this.referenceGenome);
+        newQuery.setType(this.type);
+        newQuery.setHugoSymbol(this.hugoSymbol);
+        newQuery.setEntrezGeneId(this.entrezGeneId);
+        newQuery.setAlteration(this.alteration);
+        newQuery.setAlterationType(this.alterationType);
+        newQuery.setSvType(this.svType);
+        newQuery.setTumorType(this.tumorType);
+        newQuery.setConsequence(this.consequence);
+        newQuery.setProteinStart(this.proteinStart);
+        newQuery.setProteinEnd(this.proteinEnd);
+        newQuery.setHgvs(this.hgvs, this.referenceGenome);
+        return newQuery;
+    }
+
     public Query(AnnotateMutationByProteinChangeQuery mutationQuery) {
         this.id = mutationQuery.getId();
         this.type = AnnotationQueryType.REGULAR.getName();

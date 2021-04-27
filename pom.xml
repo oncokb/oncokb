@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.mskcc.cbio.oncokb</groupId>
     <artifactId>master</artifactId>
-    <version>3.2.0</version>
+    <version>3.3.0</version>
     <packaging>pom</packaging>
     <modules>
         <module>web</module>
@@ -96,7 +96,7 @@
         <dependency>
             <groupId>com.github.oncokb</groupId>
             <artifactId>oncokb-java-api-client</artifactId>
-            <version>da4b4c4e62</version>
+            <version>c92ae3cd06</version>
         </dependency>
     </dependencies>
 </project>
