@@ -15,6 +15,7 @@ public class CuratedGene {
     String highestSensitiveLevel;
     String highestResistanceLevel;
     String summary;
+    String background;
 
     public String getGrch37Isoform() {
         return grch37Isoform;
@@ -112,7 +113,15 @@ public class CuratedGene {
         this.summary = summary;
     }
 
-    public CuratedGene(String grch37Isoform, String grch37RefSeq, String grch38Isoform, String grch38RefSeq, Integer entrezGeneId, String hugoSymbol, Boolean TSG, Boolean oncogene, String highestSensitiveLevel, String highestResistanceLevel, String summary) {
+    public String getBackground() {
+        return background;
+    }
+
+    public void setBackground(String background) {
+        this.background = background;
+    }
+
+    public CuratedGene(String grch37Isoform, String grch37RefSeq, String grch38Isoform, String grch38RefSeq, Integer entrezGeneId, String hugoSymbol, Boolean TSG, Boolean oncogene, String highestSensitiveLevel, String highestResistanceLevel, String summary, String background) {
         this.grch37Isoform = grch37Isoform;
         this.grch37RefSeq = grch37RefSeq;
         this.grch38Isoform = grch38Isoform;
@@ -124,6 +133,7 @@ public class CuratedGene {
         this.highestSensitiveLevel = highestSensitiveLevel;
         this.highestResistanceLevel = highestResistanceLevel;
         this.summary = summary;
+        this.background = background;
     }
 
     public CuratedGene() {

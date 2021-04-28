@@ -54,6 +54,8 @@ public class CacheUtils {
 
     private static Map<String, Long> recordTime = new HashedMap();
 
+    private static Map<String, Gene> externalGenePool = new HashMap<>();
+
     private static Info oncokbInfo;
 
     private static Observer numbersObserver = new Observer() {
@@ -342,14 +344,16 @@ public class CacheUtils {
         return AlterationUtils.findOverlapAlteration(getAlterations(gene.getEntrezGeneId()), gene, referenceGenome, consequence, start, end);
     }
 
-    public static Set<Alteration> findMutationsByConsequenceAndPositionOnSamePosition(Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end) {
+    public static Set<Alteration> findMutationsByConsequenceAndPositionOnSamePosition(Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end, String referenceResidue) {
         Set<Alteration> alterations = new HashSet<>();
         for (Alteration alteration : getAlterations(gene.getEntrezGeneId())) {
-            if (alteration.getConsequence().equals(consequence)
+            if (AlterationUtils.consequenceRelated(alteration.getConsequence(), consequence)
                 && (referenceGenome == null || alteration.getReferenceGenomes().contains(referenceGenome))
                 && alteration.getProteinStart().equals(alteration.getProteinEnd())
                 && alteration.getProteinStart() >= start
-                && alteration.getProteinStart() <= end) {
+                && alteration.getProteinStart() <= end
+                && (alteration.getRefResidues() == null || referenceResidue == null || referenceResidue.equals(alteration.getRefResidues()))
+            ) {
                 alterations.add(alteration);
             }
         }
@@ -498,6 +502,36 @@ public class CacheUtils {
             }
         }
         return mappedEvis;
+    }
+
+    public static void addToGenePool(Gene gene) {
+        if (gene == null) {
+            return;
+        }
+        if (gene.getEntrezGeneId() != null) {
+            externalGenePool.put(gene.getEntrezGeneId().toString(), gene);
+        }
+        if (gene.getHugoSymbol() != null) {
+            externalGenePool.put(gene.getHugoSymbol(), gene);
+        }
+        gene.getGeneAliases().forEach(alias -> {
+            // gene alias mapping should have lower priority when the same query exists
+            if (alias != null && !externalGenePool.containsKey(alias)) {
+                externalGenePool.put(alias, gene);
+            }
+        });
+    }
+
+    public static void addToGenePool(String query, Gene gene) {
+        externalGenePool.put(query, gene);
+    }
+
+    public static Gene getFromGenePool(String key) {
+        return externalGenePool.get(key);
+    }
+
+    public static boolean hasKeyInGenePool(String key) {
+        return externalGenePool.containsKey(key);
     }
 
     private static void setEvidences(Gene gene) {

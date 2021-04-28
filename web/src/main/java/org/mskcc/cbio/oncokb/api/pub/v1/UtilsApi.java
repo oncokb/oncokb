@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
+import static org.mskcc.cbio.oncokb.api.pub.v1.Constants.INCLUDE_EVIDENCE;
+import static org.mskcc.cbio.oncokb.api.pub.v1.Constants.VERSION;
+
 /**
  * Created by Hongxin on 10/28/16.
  */
@@ -31,7 +34,7 @@ public interface UtilsApi {
 //    @RequestMapping(value = "/utils/allAnnotatedVariants", produces = {"application/json"},
 //        method = RequestMethod.GET)
     ResponseEntity<List<AnnotatedVariant>> utilsAllAnnotatedVariantsGet(
-        @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
+        @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
     );
 
     @PremiumPublicApi
@@ -45,7 +48,7 @@ public interface UtilsApi {
 //        produces = {"text/plain"},
 //        method = RequestMethod.GET)
     ResponseEntity<String> utilsAllAnnotatedVariantsTxtGet(
-        @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
+        @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
     );
 
     @PremiumPublicApi
@@ -58,7 +61,7 @@ public interface UtilsApi {
 //    @RequestMapping(value = "/utils/allActionableVariants", produces = {"application/json"},
 //        method = RequestMethod.GET)
     ResponseEntity<List<ActionableGene>> utilsAllActionableVariantsGet(
-        @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
+        @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
     );
 
 
@@ -73,7 +76,7 @@ public interface UtilsApi {
 //        produces = {"text/plain"},
 //        method = RequestMethod.GET)
     ResponseEntity<String> utilsAllActionableVariantsTxtGet(
-        @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
+        @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
     );
 
     @PublicApi
@@ -88,7 +91,7 @@ public interface UtilsApi {
 //        produces = {"application/json"},
 //        method = RequestMethod.GET)
     ResponseEntity<List<CancerGene>> utilsCancerGeneListGet(
-        @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
+        @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
     );
 
     @PublicApi
@@ -103,7 +106,7 @@ public interface UtilsApi {
 //        produces = {"text/plain"},
 //        method = RequestMethod.GET)
     ResponseEntity<String> utilsCancerGeneListTxtGet(
-        @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
+        @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
     );
 
     @PublicApi
@@ -118,7 +121,8 @@ public interface UtilsApi {
 //        produces = {"application/json"},
 //        method = RequestMethod.GET)
     ResponseEntity<List<CuratedGene>> utilsAllCuratedGenesGet(
-        @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
+        @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
+        , @ApiParam(value = INCLUDE_EVIDENCE, defaultValue = "TRUE") @RequestParam(value = "includeEvidence", required = false, defaultValue = "TRUE") Boolean includeEvidence
     );
 
     @PublicApi
@@ -133,6 +137,7 @@ public interface UtilsApi {
 //        produces = {"text/plain"},
 //        method = RequestMethod.GET)
     ResponseEntity<String> utilsAllCuratedGenesTxtGet(
-        @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
+        @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
+        , @ApiParam(value = INCLUDE_EVIDENCE, defaultValue = "TRUE") @RequestParam(value = "includeEvidence", required = false, defaultValue = "TRUE") Boolean includeEvidence
     );
 }

@@ -133,11 +133,11 @@ public class HotspotUtils {
                 hotspots.add(hotspot);
             }
         }
-        return proteinLocationHotspotsFilter(hotspots, proteinLocation).size() > 0;
+        return proteinLocationHotspotsFilter(hotspots, proteinLocation, alteration.getRefResidues()).size() > 0;
     }
 
     // Logic from GN
-    private static List<Hotspot> proteinLocationHotspotsFilter(List<EnrichedHotspot> hotspots, ProteinLocation proteinLocation) {
+    private static List<Hotspot> proteinLocationHotspotsFilter(List<EnrichedHotspot> hotspots, ProteinLocation proteinLocation, String referenceResidues) {
         int start = proteinLocation.getStart();
         int end = proteinLocation.getEnd();
         String type = proteinLocation.getMutationType();
@@ -159,7 +159,14 @@ public class HotspotUtils {
 
             // Add hotspot
             if (validPosition && (validMissense || validInFrameInsertion || validInFrameDeletion || validSplice)) {
-                result.add(hotspot);
+                if(validMissense) {
+                    boolean validReferenceResidues = (referenceResidues + proteinLocation.getStart()).equals(hotspot.getResidue());
+                    if (validReferenceResidues) {
+                        result.add(hotspot);
+                    }
+                } else {
+                    result.add(hotspot);
+                }
             }
         }
 

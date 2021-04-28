@@ -83,7 +83,8 @@ public class TumorTypeUtils {
 
     public static TumorType getByCode(String code) {
         if (StringUtils.isEmpty(code)) return null;
-        return getAllSubtypes().stream().filter(subtype -> subtype.getCode().equals(code.toUpperCase())).findAny().orElse(null);
+        String finalCode = code.toUpperCase();
+        return getAllSubtypes().stream().filter(subtype -> subtype.getCode().equals(finalCode)).findAny().orElse(null);
     }
 
     public static TumorType getBySpecialTumor(SpecialTumorType specialTumorType) {

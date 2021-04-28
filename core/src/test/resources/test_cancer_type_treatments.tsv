@@ -108,9 +108,9 @@ PDGFRA	D842V	GIST	R1: Imatinib; 1: Avapritinib; 2: Dasatinib; 2: Sunitinib; 2: R
 PDGFRA	D842V	Thymic Tumor	3B: Avapritinib; 3B: Dasatinib; 3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Ripretinib;
 EGFR	A763_Y764insFQEA	NSCLC	2: Erlotinib; 4: Afatinib;
 # this one overlaps with A763_Y764insFQEA, but the rule only applies to exact match, so R1 will be used
-EGFR	Y764_D770dup	NSCLC	R1: Erlotinib; R1: Gefitinib; R1: Afatinib; 3A: Poziotinib;
+EGFR	Y764_D770dup	NSCLC	R1: Erlotinib; R1: Gefitinib; R1: Afatinib; 3A: Poziotinib; 3A: Mobocertinib; 3A: Amivantamab;
 # this one does not overlap with A763_Y764insFQEA, so R1 for sure
-EGFR	N771delinsSTH	Lung Adenocarcinoma	R1: Erlotinib; R1: Gefitinib; R1: Afatinib; 3A: Poziotinib;
+EGFR	N771delinsSTH	Lung Adenocarcinoma	R1: Erlotinib; R1: Gefitinib; R1: Afatinib; 3A: Poziotinib; 3A: Mobocertinib; 3A: Amivantamab;
 
 # test cases cover the resistance treatment should overwrite sensitive from alternative allele
 ABL1	T315I	Chronic Myelogenous Leukemia	R1: Imatinib; R1: Dasatinib; R1: Nilotinib; R1: Bosutinib; 1: Ponatinib;
@@ -190,14 +190,14 @@ PIK3CA	E545K	Ovarian Cancer	3B: Fulvestrant+Alpelisib;
 #PIK3CA	E545K	Acute Myeloid Leukemia
 NRAS	G12C	Breast Cancer	3B: Binimetinib;
 #NRAS	G12C	Chronic Myelogenous Leukemia
-SF3B1	K625G	Chronic Myelomonocytic Leukemia	4: H3B-8800;
-SF3B1	K625G	Breast Cancer
+SF3B1	R625G	Chronic Myelomonocytic Leukemia	4: H3B-8800;
+SF3B1	R625G	Breast Cancer
 
-# AMG-510 should only work for KRAS G12C, not alternative allele
+# Sotorasib should only work for KRAS G12C, not alternative allele
 # the following tests should be enabled when the liquid propagation is in production also the AGM-510 treatment is in place
-KRAS	G12C	Breast Cancer	3B: AMG-510; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
+KRAS	G12C	Breast Cancer	3B: Sotorasib; 3B: Adagrasib; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
 KRAS	G12D	Breast Cancer	4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
-KRAS	G12C	NSCLC	3A: AMG-510; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
+KRAS	G12C	NSCLC	3A: Sotorasib; 3A: Adagrasib; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
 KRAS	G12D	NSCLC	4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
 KRAS	G12C	AML
 KRAS	G12D	AML
@@ -239,8 +239,8 @@ BRAF	L597M	NSCLC	3B: Trametinib; 4: PLX8394;
 EGFR	L861Q	NSCLC	1: Afatinib;
 EGFR	L861R	NSCLC
 EGFR	L861M	NSCLC
-KRAS	G12C	NSCLC	3A: AMG-510; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
-KRAS	G12C	Melanoma	3B: AMG-510; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
+KRAS	G12C	NSCLC	3A: Sotorasib; 3A: Adagrasib; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
+KRAS	G12C	Melanoma	3B: Sotorasib; 3B: Adagrasib; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
 KRAS	G12A	NSCLC	4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
 KRAS	G12A	Melanoma	4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
 KRAS	G12C	Histiocytosis	3A: Cobimetinib;
@@ -248,6 +248,6 @@ KRAS	G12A	Histiocytosis	3A: Cobimetinib;
 IDH1	R132H	AML	1: Ivosidenib;
 IDH1	R132G	AML	1: Ivosidenib;
 FGFR2	FGFR2-BICC1 Fusion	Cholangiocarcinoma	1: Pemigatinib; 3B: Erdafitinib; 4: Debio1347; 4: BGJ398; 4: AZD4547;
-ERBB2	Amplification	Breast Cancer	1: Lapatinib+Capecitabine; 1: Margetuximab+Chemotherapy; 1: Neratinib; 1: Trastuzumab; 1: Trastuzumab+Pertuzumab+Chemotherapy; 1: Ado-Trastuzumab Emtansine; 1: Lapatinib+Letrozole; 1: Neratinib+Capecitabine; 1: Trastuzumab+Chemotherapy; 1: Capecitabine+Trastuzumab+Tucatinib; 1: Trastuzumab Deruxtecan; 3B: Carboplatin-Taxol Regimen+Trastuzumab; 3B: Trastuzumab+Pertuzumab; 3B: Lapatinib+Trastuzumab;
+ERBB2	Amplification	Breast Cancer	1: Trastuzumab; 1: Trastuzumab+Chemotherapy; 1: Ado-Trastuzumab Emtansine; 1: Lapatinib+Capecitabine; 1: Lapatinib+Letrozole; 1: Trastuzumab+Pertuzumab+Chemotherapy; 1: Neratinib; 1: Neratinib+Capecitabine; 1: Trastuzumab+Tucatinib+Capecitabine; 1: Trastuzumab Deruxtecan; 1: Margetuximab+Chemotherapy; 3B: Trastuzumab+Carboplatin-Taxol Regimen; 3B: Trastuzumab+Pertuzumab; 3B: Lapatinib+Trastuzumab;
 RET	KIF5B-RET Fusion	NSCLC	1: Selpercatinib; 1: Pralsetinib; 2: Cabozantinib; 3A: Vandetanib;
 RET	KIF5B-RET Fusion	Bladder Cancer	3B: Cabozantinib; 3B: Vandetanib; 3B: Selpercatinib; 3B: Pralsetinib;
