@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
-import static org.mskcc.cbio.oncokb.util.GeneAnnotator.findGene;
 
 
 /**

@@ -96,7 +96,7 @@
         <dependency>
             <groupId>com.github.oncokb</groupId>
             <artifactId>oncokb-java-api-client</artifactId>
-            <version>c92ae3cd06</version>
+            <version>29c881d2b9</version>
         </dependency>
     </dependencies>
 </project>
