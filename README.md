@@ -28,9 +28,6 @@ cp -r core/src/main/resources/properties-EXAMPLE core/src/main/resources/propert
     * jdbc.url: Database url
     * jdbc.username & jdbc.password: MySQL user name and password
 2. config.properties
-    * google.p_twelve : Your P12 private key path (You can generate this file from google developer console, more detials in Wiki)
-    * google.service_account_email : Your service account email from google developer console.
-    * cancerhotspots.single : [Cancer hotspots service](http://cancerhotspots.org). Default: http://cancerhotspots.org/api/hotspots/single
     * oncotree.api: [OncoTree service](http://oncotree.info/). Default: http://oncotree.info/api/
     * google.username & google.password(Optional) : Google account info. It is used to send email
     
