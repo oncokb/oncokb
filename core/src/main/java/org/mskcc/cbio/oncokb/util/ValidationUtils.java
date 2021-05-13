@@ -131,20 +131,11 @@ public class ValidationUtils {
         return data;
     }
 
-    public static JSONArray validateHugoSymbols() {
+    public static JSONArray validateHugoSymbols(Set<Gene> curatedGenesToCheck, Set<CancerGene> cancerGenesToCheck, List<Gene> searchedGenes) {
         JSONArray data = new JSONArray();
-
-        Set<Gene> curatedGenesToCheck = CacheUtils.getAllGenes().stream().filter(gene -> gene.getEntrezGeneId() > 0).collect(Collectors.toSet());
-        Set<CancerGene> cancerGenesToCheck = CacheUtils.getCancerGeneList().stream().filter(gene -> gene.getEntrezGeneId() > 0).collect(Collectors.toSet());
-        Set<Integer> genesToSearch = new HashSet<>();
-        genesToSearch.addAll(curatedGenesToCheck.stream().filter(gene -> gene.getEntrezGeneId() > 0).map(Gene::getEntrezGeneId).collect(Collectors.toSet()));
-        genesToSearch.addAll(cancerGenesToCheck.stream().map(CancerGene::getEntrezGeneId).collect(Collectors.toSet()));
-
-        List<Gene> myGenes = GeneAnnotator.findGenesFromMyGeneInfo(new ArrayList<>(genesToSearch));
-
         // Check the curated genes
         curatedGenesToCheck.stream().forEach(gene -> {
-            Optional<Gene> myGeneOptional = myGenes.stream().filter(geneDatum -> geneDatum.getEntrezGeneId().equals(gene.getEntrezGeneId())).findFirst();
+            Optional<Gene> myGeneOptional = searchedGenes.stream().filter(geneDatum -> geneDatum.getEntrezGeneId().equals(gene.getEntrezGeneId())).findFirst();
             if (myGeneOptional.isPresent()) {
                 if (!myGeneOptional.get().getHugoSymbol().equals(gene.getHugoSymbol())) {
                     data.put(getErrorMessage(getTarget(gene.getHugoSymbol()), "Gene symbol outdated, new: " + myGeneOptional.get().getHugoSymbol()));
@@ -156,7 +147,7 @@ public class ValidationUtils {
 
         // Check the cancer genes
         cancerGenesToCheck.forEach(cancerGene -> {
-            Optional<Gene> myGeneOptional = myGenes.stream().filter(geneDatum -> geneDatum.getEntrezGeneId().equals(cancerGene.getEntrezGeneId())).findFirst();
+            Optional<Gene> myGeneOptional = searchedGenes.stream().filter(geneDatum -> geneDatum.getEntrezGeneId().equals(cancerGene.getEntrezGeneId())).findFirst();
             if (myGeneOptional.isPresent()) {
                 if (!myGeneOptional.get().getHugoSymbol().equals(cancerGene.getHugoSymbol())) {
                     data.put(getErrorMessage(getTarget(cancerGene.getHugoSymbol()), "Cancer gene symbol outdated, new: " + myGeneOptional.get().getHugoSymbol()));

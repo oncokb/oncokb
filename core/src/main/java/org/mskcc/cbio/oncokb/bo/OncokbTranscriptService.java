@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.apiModels.TranscriptUpdateValidationVM;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.ReferenceGenome;
+import org.mskcc.cbio.oncokb.util.GeneUtils;
 import org.mskcc.cbio.oncokb.util.PropertiesUtils;
 import org.oncokb.oncokb_transcript.ApiClient;
 import org.oncokb.oncokb_transcript.ApiException;
@@ -11,7 +12,11 @@ import org.oncokb.oncokb_transcript.Configuration;
 import org.oncokb.oncokb_transcript.auth.OAuth;
 import org.oncokb.oncokb_transcript.client.*;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Created by Hongxin Zhang on 2/24/21.
@@ -93,7 +98,7 @@ public class OncokbTranscriptService {
             vm.setTranscriptA(pairA);
             vm.setTranscriptB(pairB);
 
-            return controllerApi.compareTranscriptUsingPOST1(gene.getHugoSymbol(), vm);
+            return controllerApi.compareTranscriptUsingPOST(gene.getHugoSymbol(), vm);
         }
     }
 
@@ -129,5 +134,42 @@ public class OncokbTranscriptService {
     public Drug findDrugByNcitCode(String code) throws ApiException {
         DrugResourceApi drugResourceApi = new DrugResourceApi();
         return drugResourceApi.findDrugByCodeUsingGET(code);
+    }
+
+    public Gene findGeneBySymbol(String symbol) throws ApiException {
+        Gene gene = GeneUtils.getGene(symbol);
+        if (gene != null) {
+            return gene;
+        }
+        GeneControllerApi geneControllerApi = new GeneControllerApi();
+        org.oncokb.oncokb_transcript.client.Gene transcriptGene = geneControllerApi.findGeneBySymbolUsingGET(symbol);
+        return transcriptGeneMap(transcriptGene);
+    }
+
+    public List<Gene> findGenesBySymbols(List<String> symbols) throws ApiException {
+        Set<String> unknownGenes = new HashSet<>();
+        List<Gene> genes = new ArrayList<>();
+        for (String symbol : symbols) {
+            Gene gene = GeneUtils.getGene(symbol);
+            if (gene == null) {
+                unknownGenes.add(symbol);
+            } else {
+                genes.add(gene);
+            }
+        }
+        if (unknownGenes.size() > 0) {
+            GeneControllerApi geneControllerApi = new GeneControllerApi();
+            List<org.oncokb.oncokb_transcript.client.Gene> transcriptGenes = geneControllerApi.findGenesBySymbolsUsingPOST(symbols);
+            transcriptGenes.stream().forEach(gene -> genes.add(transcriptGeneMap(gene)));
+        }
+        return genes;
+    }
+
+    private Gene transcriptGeneMap(org.oncokb.oncokb_transcript.client.Gene transcriptGene) {
+        Gene gene = new Gene();
+        gene.setHugoSymbol(transcriptGene.getHugoSymbol());
+        gene.setEntrezGeneId(transcriptGene.getEntrezGeneId());
+        gene.setGeneAliases(transcriptGene.getGeneAliases().stream().map(geneAlias -> geneAlias.getName()).collect(Collectors.toSet()));
+        return gene;
     }
 }

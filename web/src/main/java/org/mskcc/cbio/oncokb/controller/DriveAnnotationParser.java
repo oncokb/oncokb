@@ -182,7 +182,8 @@ public class DriveAnnotationParser {
                 if (gene == null) {
                     System.out.println(spaceStrByNestLevel(nestLevel) + "Gene " + hugo + " is not in the released list.");
                     if (releaseGene) {
-                        gene = GeneAnnotator.findGene(hugo);
+                        OncokbTranscriptService oncokbTranscriptService = new OncokbTranscriptService();
+                        gene = oncokbTranscriptService.findGeneBySymbol(hugo);
                         if (gene == null) {
                             System.out.println("!!!!!!!!!Could not find gene " + hugo + " either.");
                             throw new IOException("!!!!!!!!!Could not find gene " + hugo + ".");
