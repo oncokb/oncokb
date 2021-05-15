@@ -1,6 +1,5 @@
 package org.mskcc.cbio.oncokb.util;
 
-import jdk.nashorn.internal.runtime.regexp.joni.Regex;
 import org.apache.commons.collections.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.model.*;
@@ -513,15 +512,6 @@ public class SummaryUtils {
         sb.append("There is conflicting and/or weak data describing the biological significance of the ");
         sb.append(getGeneMutationNameInVariantSummary(gene, referenceGenome, query.getHugoSymbol(), query.getAlteration()));
         sb.append(".");
-        return sb.toString();
-    }
-
-    public static String inconclusiveHotSpotSummary(Alteration alteration, Query query) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(inconclusiveSummary(alteration.getGene(), query.getReferenceGenome(), query));
-        sb.append(" However, ");
-        String hotspotSummary = hotspotSummary(alteration, query, true, Oncogenicity.INCONCLUSIVE);
-        sb.append(StringUtils.uncapitalize(hotspotSummary));
         return sb.toString();
     }
 
