@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 
 @Configuration
-@ComponentScan(basePackages = "org.mskcc.cbio.oncokb")
+@ComponentScan(basePackages = "org.mskcc.cbio.oncokb.controller")
 @EnableWebMvc
 public class MvcConfiguration extends WebMvcConfigurerAdapter {
 

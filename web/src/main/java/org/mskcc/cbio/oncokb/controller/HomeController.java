@@ -13,6 +13,6 @@ public class HomeController {
 
 	@RequestMapping(value="/")
 	public ModelAndView test(HttpServletResponse response) throws IOException{
-		return new ModelAndView("index");
+		return new ModelAndView("redirect:/api/v1/swagger-ui.html");
 	}
 }
