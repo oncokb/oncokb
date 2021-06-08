@@ -8,9 +8,12 @@ import org.mskcc.cbio.oncokb.apiModels.download.FileName;
 import org.mskcc.cbio.oncokb.apiModels.download.FileExtension;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.*;
@@ -25,6 +28,9 @@ import static org.mskcc.cbio.oncokb.util.HttpUtils.getDataDownloadResponseEntity
  */
 @Controller
 public class UtilsApiController implements UtilsApi {
+    @Autowired
+    CacheFetcher cacheFetcher;
+
     @Override
     public ResponseEntity<List<AnnotatedVariant>> utilsAllAnnotatedVariantsGet(
         @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
