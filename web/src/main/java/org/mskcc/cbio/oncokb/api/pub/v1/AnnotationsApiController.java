@@ -364,6 +364,8 @@ public class AnnotationsApiController {
             try {
                 geneA = oncokbTranscriptService.findGeneBySymbol(entrezGeneIdA == null ? hugoSymbolA : entrezGeneIdA.toString());
             } catch (ApiException e) {
+            }
+            if (geneA == null) {
                 geneA = new Gene();
                 geneA.setEntrezGeneId(entrezGeneIdA);
                 geneA.setHugoSymbol(hugoSymbolA);
@@ -372,6 +374,8 @@ public class AnnotationsApiController {
             try {
                 geneB = oncokbTranscriptService.findGeneBySymbol(entrezGeneIdB == null ? hugoSymbolB : entrezGeneIdB.toString());
             } catch (ApiException e) {
+            }
+            if (geneB == null) {
                 geneB = new Gene();
                 geneB.setEntrezGeneId(entrezGeneIdB);
                 geneB.setHugoSymbol(hugoSymbolB);

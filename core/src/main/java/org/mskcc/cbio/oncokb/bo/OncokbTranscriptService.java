@@ -160,16 +160,19 @@ public class OncokbTranscriptService {
         if (unknownGenes.size() > 0) {
             GeneControllerApi geneControllerApi = new GeneControllerApi();
             List<org.oncokb.oncokb_transcript.client.Gene> transcriptGenes = geneControllerApi.findGenesBySymbolsUsingPOST(symbols);
-            transcriptGenes.stream().forEach(gene -> genes.add(transcriptGeneMap(gene)));
+            transcriptGenes.stream().filter(gene -> gene != null).forEach(gene -> genes.add(transcriptGeneMap(gene)));
         }
         return genes;
     }
 
     private Gene transcriptGeneMap(org.oncokb.oncokb_transcript.client.Gene transcriptGene) {
-        Gene gene = new Gene();
-        gene.setHugoSymbol(transcriptGene.getHugoSymbol());
-        gene.setEntrezGeneId(transcriptGene.getEntrezGeneId());
-        gene.setGeneAliases(transcriptGene.getGeneAliases().stream().map(geneAlias -> geneAlias.getName()).collect(Collectors.toSet()));
-        return gene;
+        if (transcriptGene != null) {
+            Gene gene = new Gene();
+            gene.setHugoSymbol(transcriptGene.getHugoSymbol());
+            gene.setEntrezGeneId(transcriptGene.getEntrezGeneId());
+            gene.setGeneAliases(transcriptGene.getGeneAliases().stream().map(geneAlias -> geneAlias.getName()).collect(Collectors.toSet()));
+            return gene;
+        }
+        return null;
     }
 }
