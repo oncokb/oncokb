@@ -7,7 +7,6 @@ import org.mskcc.cbio.oncokb.util.PropertiesUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.ImportResource;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
@@ -19,13 +18,11 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
 
 import static org.mskcc.cbio.oncokb.Constants.*;
 
 @Configuration
-@ComponentScan(basePackages = "org.mskcc.cbio.oncokb.api.pub.v1")
+@ComponentScan(basePackages = {"org.mskcc.cbio.oncokb.api.pub.v1", "org.mskcc.cbio.oncokb.cache", "org.mskcc.cbio.oncokb.bo"})
 @EnableWebMvc
 @EnableSwagger2
 public class MvcConfigurationPublic extends WebMvcConfigurerAdapter{

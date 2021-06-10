@@ -14,12 +14,10 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
-import java.util.ArrayList;
-
 import static org.mskcc.cbio.oncokb.Constants.PRIVATE_API_VERSION;
 
 @Configuration
-@ComponentScan(basePackages = "org.mskcc.cbio.oncokb.api.pvt")
+@ComponentScan(basePackages = {"org.mskcc.cbio.oncokb.api.pvt", "org.mskcc.cbio.oncokb.cache", "org.mskcc.cbio.oncokb.bo"})
 @EnableWebMvc
 @EnableSwagger2
 public class MvcConfigurationPrivate extends WebMvcConfigurerAdapter {
