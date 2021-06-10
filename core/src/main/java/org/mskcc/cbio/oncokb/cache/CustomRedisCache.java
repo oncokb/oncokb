@@ -1,4 +1,4 @@
-package org.mskcc.cbio.oncokb.config.cache;
+package org.mskcc.cbio.oncokb.cache;
 
 import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
@@ -12,17 +12,18 @@ import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import static org.mskcc.cbio.oncokb.cache.Constants.DELIMITER;
+
 /**
  * @author Luke Sikina, Hongxin Zhang
  **/
-public class CustomRedisCache extends AbstractValueAdaptingCache {
+public abstract class CustomRedisCache extends AbstractValueAdaptingCache {
     private static final Logger LOG = LoggerFactory.getLogger(CustomRedisCache.class);
-    public static final String DELIMITER = ":";
     public static final int INFINITE_TTL = -1;
 
-    private final String name;
-    private final long ttlMinutes;
-    private final RedissonClient store;
+    protected final String name;
+    protected final long ttlMinutes;
+    protected final RedissonClient store;
 
     /**
      * Create a new ConcurrentMapCache with the specified name.

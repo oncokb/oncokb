@@ -1,4 +1,4 @@
-package org.mskcc.cbio.oncokb.config.cache;
+package org.mskcc.cbio.oncokb.cache;
 
 import org.redisson.api.RedissonClient;
 import org.springframework.cache.Cache;
@@ -12,13 +12,12 @@ public class CustomRedisCacheManager implements CacheManager {
     private final ConcurrentMap<String, CustomRedisCache> caches = new ConcurrentHashMap<>();
     private final RedissonClient client;
     private final long ttlInMins;
+    private CacheNameResolver cacheNameResolver;
 
-    public CustomRedisCacheManager(RedissonClient client, long ttlInMins) {
+    public CustomRedisCacheManager(RedissonClient client, long ttlInMins, CacheNameResolver cacheNameResolver) {
         this.client = client;
         this.ttlInMins = ttlInMins;
-
-        CustomRedisCache cache = new CustomRedisCache("getVersion", client, ttlInMins);
-        caches.put("getVersion", cache);
+        this.cacheNameResolver = cacheNameResolver;
     }
 
     /**
@@ -42,7 +41,19 @@ public class CustomRedisCacheManager implements CacheManager {
 
     public Cache getCache(String name, boolean expires) {
         long clientTTLInMinutes = expires ? ttlInMins : CustomRedisCache.INFINITE_TTL;
-        return caches.computeIfAbsent(name, k -> new CustomRedisCache(name, client, clientTTLInMinutes));
+        String cacheName = this.cacheNameResolver.getCacheName(name);
+        return caches.computeIfAbsent(cacheName, k -> {
+            CacheKey nameKey = CacheKey.getByKey(name);
+            switch (nameKey) {
+                case ONCOKB_INFO:
+                case CANCER_GENE_LIST:
+                case CANCER_GENE_LIST_TXT:
+                case CURATED_GENE_LIST:
+                case CURATED_GENE_LIST_TXT:
+                default:
+                    return new CustomBucketRedisCache(cacheName, client, clientTTLInMinutes);
+            }
+        });
     }
 
     /**

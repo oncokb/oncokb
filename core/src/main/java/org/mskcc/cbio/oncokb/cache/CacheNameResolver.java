@@ -1,7 +1,9 @@
-package org.mskcc.cbio.oncokb.config.cache;
+package org.mskcc.cbio.oncokb.cache;
 
 import org.mskcc.cbio.oncokb.util.PropertiesUtils;
 import org.springframework.stereotype.Component;
+
+import static org.mskcc.cbio.oncokb.cache.Constants.DELIMITER;
 
 @Component
 public class CacheNameResolver {
@@ -11,6 +13,6 @@ public class CacheNameResolver {
     }
 
     public String getCacheName(String cacheKey) {
-        return this.appName + "-" + cacheKey;
+        return this.appName + DELIMITER + cacheKey;
     }
 }

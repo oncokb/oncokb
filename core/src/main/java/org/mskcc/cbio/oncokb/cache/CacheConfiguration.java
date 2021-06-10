@@ -1,4 +1,4 @@
-package org.mskcc.cbio.oncokb.config.cache;
+package org.mskcc.cbio.oncokb.cache;
 
 import org.mskcc.cbio.oncokb.util.PropertiesUtils;
 import org.mskcc.oncokb.meta.enumeration.RedisType;
@@ -8,7 +8,6 @@ import org.redisson.config.Config;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.interceptor.CacheResolver;
-import org.springframework.cache.interceptor.NamedCacheResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -49,16 +48,17 @@ public class CacheConfiguration {
 
     @Bean
     public org.springframework.cache.CacheManager cacheManager(
-        RedissonClient redissonClient) {
-        CacheManager cm = new CustomRedisCacheManager(redissonClient, 60);
+        RedissonClient redissonClient,
+        CacheNameResolver cacheNameResolver
+    ) {
+        CacheManager cm = new CustomRedisCacheManager(redissonClient, 60, cacheNameResolver);
         return cm;
     }
 
     @Bean
-    public CacheResolver geneCacheResolver(
-        CacheManager cm,
-        CacheNameResolver cacheNameResolver
+    public CacheResolver generalCacheResolver(
+        CacheManager cm
     ) {
-        return new GeneCacheResolver(cm, cacheNameResolver);
+        return new GeneralCacheResolver(cm);
     }
 }

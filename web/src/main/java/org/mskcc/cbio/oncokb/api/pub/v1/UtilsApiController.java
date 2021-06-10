@@ -6,10 +6,10 @@ import org.mskcc.cbio.oncokb.apiModels.AnnotatedVariant;
 import org.mskcc.cbio.oncokb.apiModels.CuratedGene;
 import org.mskcc.cbio.oncokb.apiModels.download.FileName;
 import org.mskcc.cbio.oncokb.apiModels.download.FileExtension;
+import org.mskcc.cbio.oncokb.cache.CacheFetcher;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -240,7 +240,7 @@ public class UtilsApiController implements UtilsApi {
         if (version != null) {
             return getDataDownloadResponseEntity(version, FileName.CANCER_GENE_LIST, FileExtension.JSON);
         }
-        List<CancerGene> result = CancerGeneUtils.getCancerGeneList();
+        List<CancerGene> result = this.cacheFetcher.getCancerGenes();
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
@@ -251,51 +251,7 @@ public class UtilsApiController implements UtilsApi {
         if (version != null) {
             return getDataDownloadResponseEntity(version, FileName.CANCER_GENE_LIST, FileExtension.TEXT);
         }
-        String separator = "\t";
-        String newLine = "\n";
-        StringBuilder sb = new StringBuilder();
-        List<String> header = new ArrayList<>();
-        header.add("Hugo Symbol");
-        header.add("Entrez Gene ID");
-        header.add("GRCh37 Isoform");
-        header.add("GRCh37 RefSeq");
-        header.add("GRCh38 Isoform");
-        header.add("GRCh38 RefSeq");
-        header.add("# of occurrence within resources (Column D-J)");
-        header.add("OncoKB Annotated");
-        header.add("Is Oncogene");
-        header.add("Is Tumor Suppressor Gene");
-        header.add("MSK-IMPACT");
-        header.add("MSK-HEME");
-        header.add("FOUNDATION ONE");
-        header.add("FOUNDATION ONE HEME");
-        header.add("Vogelstein");
-        header.add("SANGER CGC(05/30/2017)");
-        sb.append(MainUtils.listToString(header, separator));
-        sb.append(newLine);
-
-        for (CancerGene cancerGene : CancerGeneUtils.getCancerGeneList()) {
-            List<String> row = new ArrayList<>();
-            row.add(cancerGene.getHugoSymbol());
-            row.add(cancerGene.getEntrezGeneId().toString());
-            row.add(cancerGene.getGrch37Isoform());
-            row.add(cancerGene.getGrch37RefSeq());
-            row.add(cancerGene.getGrch38Isoform());
-            row.add(cancerGene.getGrch37RefSeq());
-            row.add(String.valueOf(cancerGene.getOccurrenceCount()));
-            row.add(getStringByBoolean(cancerGene.getOncokbAnnotated()));
-            row.add(getStringByBoolean(cancerGene.getOncogene()));
-            row.add(getStringByBoolean(cancerGene.getTSG()));
-            row.add(getStringByBoolean(cancerGene.getmSKImpact()));
-            row.add(getStringByBoolean(cancerGene.getmSKHeme()));
-            row.add(getStringByBoolean(cancerGene.getFoundation()));
-            row.add(getStringByBoolean(cancerGene.getFoundationHeme()));
-            row.add(getStringByBoolean(cancerGene.getVogelstein()));
-            row.add(getStringByBoolean(cancerGene.getSangerCGC()));
-            sb.append(MainUtils.listToString(row, separator));
-            sb.append(newLine);
-        }
-        return new ResponseEntity<>(sb.toString(), HttpStatus.OK);
+        return new ResponseEntity<>(this.cacheFetcher.getCancerGenesTxt(), HttpStatus.OK);
     }
 
 
@@ -307,7 +263,7 @@ public class UtilsApiController implements UtilsApi {
         if (version != null) {
             return getDataDownloadResponseEntity(version, FileName.ALL_CURATED_GENES, FileExtension.JSON);
         }
-        return new ResponseEntity<>(getCuratedGenes(includeEvidence == Boolean.TRUE), HttpStatus.OK);
+        return new ResponseEntity<>(this.cacheFetcher.getCuratedGenes(includeEvidence), HttpStatus.OK);
     }
 
     @Override
@@ -318,88 +274,7 @@ public class UtilsApiController implements UtilsApi {
         if (version != null) {
             return getDataDownloadResponseEntity(version, FileName.ALL_CURATED_GENES, FileExtension.TEXT);
         }
-        String separator = "\t";
-        String newLine = "\n";
-        StringBuilder sb = new StringBuilder();
-        List<String> header = new ArrayList<>();
-        header.add("GRCh37 Isoform");
-        header.add("GRCh37 RefSeq");
-        header.add("GRCh38 Isoform");
-        header.add("GRCh38 RefSeq");
-        header.add("Entrez Gene ID");
-        header.add("Hugo Symbol");
-        header.add("Is Oncogene");
-        header.add("Is Tumor Suppressor Gene");
-        header.add("Highest Level of Evidence(sensitivity)");
-        header.add("Highest Level of Evidence(resistance)");
-        if (includeEvidence == Boolean.TRUE) {
-            header.add("Summary");
-            header.add("Background");
-        }
-        sb.append(MainUtils.listToString(header, separator));
-        sb.append(newLine);
-
-        List<CuratedGene> genes = getCuratedGenes(includeEvidence == Boolean.TRUE);
-        for (CuratedGene gene : genes) {
-            List<String> row = new ArrayList<>();
-            row.add(gene.getGrch37Isoform());
-            row.add(gene.getGrch37RefSeq());
-            row.add(gene.getGrch38Isoform());
-            row.add(gene.getGrch38RefSeq());
-            row.add(String.valueOf(gene.getEntrezGeneId()));
-            row.add(gene.getHugoSymbol());
-            row.add(getStringByBoolean(gene.getOncogene()));
-            row.add(getStringByBoolean(gene.getTSG()));
-            row.add(gene.getHighestSensitiveLevel());
-            row.add(gene.getHighestResistancLevel());
-            if (includeEvidence == Boolean.TRUE) {
-                row.add(gene.getSummary());
-                row.add(gene.getBackground());
-            }
-            sb.append(MainUtils.listToString(row, separator));
-            sb.append(newLine);
-        }
-
-        return new ResponseEntity<>(sb.toString(), HttpStatus.OK);
+        return new ResponseEntity<>(this.cacheFetcher.getCuratedGenesTxt(includeEvidence), HttpStatus.OK);
     }
 
-    private static List<CuratedGene> getCuratedGenes(boolean includeEvidence) {
-        List<CuratedGene> genes = new ArrayList<>();
-        for (Gene gene : CacheUtils.getAllGenes()) {
-            // Skip all genes without entrez gene id
-            if (gene.getEntrezGeneId() == null) {
-                continue;
-            }
-
-            String highestSensitiveLevel = "";
-            String highestResistanceLevel = "";
-            Set<Evidence> therapeuticEvidences = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, EvidenceTypeUtils.getTreatmentEvidenceTypes());
-            Set<Evidence> highestSensitiveLevelEvidences = EvidenceUtils.getOnlyHighestLevelEvidences(EvidenceUtils.getSensitiveEvidences(therapeuticEvidences), null, null);
-            Set<Evidence> highestResistanceLevelEvidences = EvidenceUtils.getOnlyHighestLevelEvidences(EvidenceUtils.getResistanceEvidences(therapeuticEvidences), null, null);
-            if (!highestSensitiveLevelEvidences.isEmpty()) {
-                highestSensitiveLevel = highestSensitiveLevelEvidences.iterator().next().getLevelOfEvidence().getLevel();
-            }
-            if (!highestResistanceLevelEvidences.isEmpty()) {
-                highestResistanceLevel = highestResistanceLevelEvidences.iterator().next().getLevelOfEvidence().getLevel();
-            }
-
-            genes.add(
-                new CuratedGene(
-                    gene.getGrch37Isoform(), gene.getGrch37RefSeq(),
-                    gene.getGrch38Isoform(), gene.getGrch38RefSeq(),
-                    gene.getEntrezGeneId(), gene.getHugoSymbol(),
-                    gene.getTSG(), gene.getOncogene(),
-                    highestSensitiveLevel, highestResistanceLevel,
-                    includeEvidence ? SummaryUtils.geneSummary(gene, gene.getHugoSymbol()) : "",
-                    includeEvidence ? SummaryUtils.geneBackground(gene, gene.getHugoSymbol()) : ""
-                )
-            );
-        }
-        MainUtils.sortCuratedGenes(genes);
-        return genes;
-    }
-
-    private String getStringByBoolean(Boolean val) {
-        return val ? "Yes" : "No";
-    }
 }
