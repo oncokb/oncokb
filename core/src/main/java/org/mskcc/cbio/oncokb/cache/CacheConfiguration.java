@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @EnableCaching
 public class CacheConfiguration {
+    private final int DEFAULT_TTL = 60;
     @Bean
     public RedissonClient redissonClient()
         throws Exception {
@@ -51,7 +52,8 @@ public class CacheConfiguration {
         RedissonClient redissonClient,
         CacheNameResolver cacheNameResolver
     ) {
-        CacheManager cm = new CustomRedisCacheManager(redissonClient, 60, cacheNameResolver);
+        Integer redisExpiration = Integer.parseInt(PropertiesUtils.getProperties("redis.expiration"));
+        CacheManager cm = new CustomRedisCacheManager(redissonClient, redisExpiration == null ? DEFAULT_TTL : redisExpiration, cacheNameResolver);
         return cm;
     }
 
