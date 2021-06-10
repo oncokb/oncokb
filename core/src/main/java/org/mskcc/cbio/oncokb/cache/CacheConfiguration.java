@@ -8,11 +8,11 @@ import org.redisson.config.Config;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.interceptor.CacheResolver;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.*;
 
 @Configuration
 @EnableCaching
+@Conditional(EnableCacheCondition.class)
 public class CacheConfiguration {
     private final int DEFAULT_TTL = 60;
     @Bean
@@ -22,6 +22,7 @@ public class CacheConfiguration {
         String redisType = PropertiesUtils.getProperties("redis.type");
         String redisPassword = PropertiesUtils.getProperties("redis.password");
         String redisAddress = PropertiesUtils.getProperties("redis.address");
+        String redisMasterName = PropertiesUtils.getProperties("redis.masterName");
 
         if (redisType.equals(RedisType.SINGLE.getType())) {
             config
@@ -33,7 +34,7 @@ public class CacheConfiguration {
         } else if (redisType.equals(RedisType.SENTINEL.getType())) {
             config
                 .useSentinelServers()
-                .setMasterName("oncokb-master")
+                .setMasterName(redisMasterName)
                 .setCheckSentinelsList(false)
                 .addSentinelAddress(redisAddress)
                 .setPassword(redisPassword);
