@@ -22,7 +22,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 import static org.mskcc.cbio.oncokb.Constants.*;
 
 @Configuration
-@ComponentScan(basePackages = {"org.mskcc.cbio.oncokb.api.pub.v1", "org.mskcc.cbio.oncokb.config.cache"})
+@ComponentScan(basePackages = {"org.mskcc.cbio.oncokb.api.pub.v1", "org.mskcc.cbio.oncokb.cache", "org.mskcc.cbio.oncokb.bo"})
 @EnableWebMvc
 @EnableSwagger2
 public class MvcConfigurationPublic extends WebMvcConfigurerAdapter{

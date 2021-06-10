@@ -1,9 +1,11 @@
 package org.mskcc.cbio.oncokb.model;
 
+import java.io.Serializable;
+
 /**
  * Created by Hongxin Zhang on 7/13/18.
  */
-public class Version {
+public class Version implements Serializable {
     String version;
     String date;
 

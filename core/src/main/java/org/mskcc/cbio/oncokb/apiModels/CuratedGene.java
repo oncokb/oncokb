@@ -1,9 +1,11 @@
 package org.mskcc.cbio.oncokb.apiModels;
 
+import java.io.Serializable;
+
 /**
  * Created by Hongxin on 10/28/16.
  */
-public class CuratedGene {
+public class CuratedGene implements Serializable {
     String grch37Isoform;
     String grch37RefSeq;
     String grch38Isoform;
