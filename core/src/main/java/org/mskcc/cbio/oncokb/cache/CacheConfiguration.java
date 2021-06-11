@@ -54,7 +54,8 @@ public class CacheConfiguration {
         CacheNameResolver cacheNameResolver
     ) {
         Integer redisExpiration = Integer.parseInt(PropertiesUtils.getProperties("redis.expiration"));
-        CacheManager cm = new CustomRedisCacheManager(redissonClient, redisExpiration == null ? DEFAULT_TTL : redisExpiration, cacheNameResolver);
+        CustomRedisCacheManager cm = new CustomRedisCacheManager(redissonClient, redisExpiration == null ? DEFAULT_TTL : redisExpiration, cacheNameResolver);
+        cm.clearAll();
         return cm;
     }
 

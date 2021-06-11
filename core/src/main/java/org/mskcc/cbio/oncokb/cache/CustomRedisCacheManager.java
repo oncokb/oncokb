@@ -39,20 +39,29 @@ public class CustomRedisCacheManager implements CacheManager {
         return getCache(name, !name.toLowerCase().contains("static"));
     }
 
+    public void clearAll() {
+        for (CacheKey cacheKey : CacheKey.values()) {
+            this.getCache(cacheKey.getKey()).clear();
+        }
+    }
+
     public Cache getCache(String name, boolean expires) {
         long clientTTLInMinutes = expires ? ttlInMins : CustomRedisCache.INFINITE_TTL;
         String cacheName = this.cacheNameResolver.getCacheName(name);
         return caches.computeIfAbsent(cacheName, k -> {
             CacheKey nameKey = CacheKey.getByKey(name);
-            switch (nameKey) {
-                case ONCOKB_INFO:
-                case CANCER_GENE_LIST:
-                case CANCER_GENE_LIST_TXT:
-                case CURATED_GENE_LIST:
-                case CURATED_GENE_LIST_TXT:
-                default:
-                    return new CustomBucketRedisCache(cacheName, client, clientTTLInMinutes);
+            if (nameKey != null) {
+                switch (nameKey) {
+                    case ONCOKB_INFO:
+                    case CANCER_GENE_LIST:
+                    case CANCER_GENE_LIST_TXT:
+                    case CURATED_GENE_LIST:
+                    case CURATED_GENE_LIST_TXT:
+                    default:
+                        return new CustomBucketRedisCache(cacheName, client, clientTTLInMinutes);
+                }
             }
+            return new CustomBucketRedisCache(cacheName, client, clientTTLInMinutes);
         });
     }
 
