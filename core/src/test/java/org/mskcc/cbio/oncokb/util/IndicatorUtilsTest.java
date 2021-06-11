@@ -688,8 +688,8 @@ public class IndicatorUtilsTest {
         pairComparison(resp1, resp2);
 
         // Test using official hugo symbol and gene alias
-        query1 = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "BRAF", "V600E", null, null, "MEL", null, null, null, null);
-        query2 = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "B-RAF1", "V600E", null, null, "MEL", MISSENSE_VARIANT, null, null, null);
+        query1 = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "ABL1", "D276G", null, null, "MEL", null, null, null, null);
+        query2 = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "c-ABL", "D276G", null, null, "MEL", MISSENSE_VARIANT, null, null, null);
         resp1 = IndicatorUtils.processQuery(query1, null, true, null);
         resp2 = IndicatorUtils.processQuery(query2, null, true, null);
         pairComparison(resp1, resp2, true);
