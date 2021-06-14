@@ -4,12 +4,14 @@ import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.apiModels.annotation.*;
 import org.mskcc.cbio.oncokb.bo.OncokbTranscriptService;
+import org.mskcc.cbio.oncokb.cache.CacheFetcher;
 import org.mskcc.cbio.oncokb.config.annotation.PremiumPublicApi;
 import org.mskcc.cbio.oncokb.config.annotation.PublicApi;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.*;
 import org.oncokb.oncokb_transcript.ApiException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -29,6 +31,9 @@ public class AnnotationsApiController {
     final String EVIDENCE_TYPES_DESCRIPTION = "Evidence type to compute. This could help to improve the performance if you only look for sub-content. Example: ONCOGENIC. All available evidence type are GENE_SUMMARY, MUTATION_SUMMARY, TUMOR_TYPE_SUMMARY, PROGNOSTIC_SUMMARY, DIAGNOSTIC_SUMMARY, ONCOGENIC, MUTATION_EFFECT, PROGNOSTIC_IMPLICATION, DIAGNOSTIC_IMPLICATION, STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY, STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE, INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY, INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE. For multiple evidence types query, use ',' as separator.";
 
     OncokbTranscriptService oncokbTranscriptService = new OncokbTranscriptService();
+
+    @Autowired
+    CacheFetcher cacheFetcher;
 
     // Annotate mutations by protein change
     @PublicApi
@@ -65,7 +70,22 @@ public class AnnotationsApiController {
                 }
             }
             Query query = new Query(null, matchedRG, AnnotationQueryType.REGULAR.getName(), entrezGeneId, hugoSymbol, proteinChange, null, null, tumorType, consequence, proteinStart, proteinEnd, null);
-            indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
+            indicatorQueryResp = this.cacheFetcher.processQuery(
+                query.getReferenceGenome(),
+                query.getEntrezGeneId(),
+                query.getHugoSymbol(),
+                query.getAlteration(),
+                null,
+                query.getTumorType(),
+                query.getConsequence(),
+                query.getProteinStart(),
+                query.getProteinEnd(),
+                null,
+                null,
+                null,
+                false,
+                new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ","))
+            );
         }
         return new ResponseEntity<>(indicatorQueryResp, status);
     }
@@ -89,13 +109,23 @@ public class AnnotationsApiController {
         if (body == null) {
             status = HttpStatus.BAD_REQUEST;
         } else {
-            Map<Integer, IndicatorQueryResp> hashAnnotation = new HashMap<>();
             for (AnnotateMutationByProteinChangeQuery query : body) {
-                int hash = query.hashCode();
-                if (!hashAnnotation.containsKey(hash)) {
-                    hashAnnotation.put(hash, IndicatorUtils.processQuery(new Query(query), null, false, query.getEvidenceTypes()));
-                }
-                IndicatorQueryResp resp = hashAnnotation.get(hash).copy();
+                IndicatorQueryResp resp = this.cacheFetcher.processQuery(
+                    query.getReferenceGenome(),
+                    query.getGene().getEntrezGeneId(),
+                    query.getGene().getHugoSymbol(),
+                    query.getAlteration(),
+                    null,
+                    query.getTumorType(),
+                    query.getConsequence(),
+                    query.getProteinStart(),
+                    query.getProteinEnd(),
+                    null,
+                    null,
+                    null,
+                    false,
+                    query.getEvidenceTypes()
+                );
                 resp.getQuery().setId(query.getId());
                 result.add(resp);
             }
@@ -129,7 +159,7 @@ public class AnnotationsApiController {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
         }
-        indicatorQueryResp = getIndicatorQueryFromGenomicLocation(matchedRG, genomicLocation, tumorType, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
+        indicatorQueryResp = this.cacheFetcher.getIndicatorQueryFromGenomicLocation(matchedRG, genomicLocation, tumorType, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
         return new ResponseEntity<>(indicatorQueryResp, status);
     }
 
@@ -152,27 +182,13 @@ public class AnnotationsApiController {
         if (body == null) {
             status = HttpStatus.BAD_REQUEST;
         } else {
-            Map<Integer, IndicatorQueryResp> hashAnnotation = new HashMap<>();
             for (AnnotateMutationByGenomicChangeQuery query : body) {
-                int hash = query.hashCode();
-                if (!hashAnnotation.containsKey(hash)) {
-                    hashAnnotation.put(hash, getIndicatorQueryFromGenomicLocation(query.getReferenceGenome(), query.getGenomicLocation(), query.getTumorType(), query.getEvidenceTypes()));
-                }
-                IndicatorQueryResp resp = hashAnnotation.get(hash).copy();
+                IndicatorQueryResp resp = this.cacheFetcher.getIndicatorQueryFromGenomicLocation(query.getReferenceGenome(), query.getGenomicLocation(), query.getTumorType(), query.getEvidenceTypes());
                 resp.getQuery().setId(query.getId());
                 result.add(resp);
             }
         }
         return new ResponseEntity<>(result, status);
-    }
-
-    private IndicatorQueryResp getIndicatorQueryFromGenomicLocation(ReferenceGenome referenceGenome, String genomicLocation, String tumorType, Set<EvidenceType> evidenceTypes) {
-        Alteration alteration = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, genomicLocation, referenceGenome);
-        Query query = new Query();
-        if (alteration != null) {
-            query = new Query(null, referenceGenome, AnnotationQueryType.REGULAR.getName(), null, alteration.getGene().getHugoSymbol(), alteration.getAlteration(), null, null, tumorType, alteration.getConsequence() == null ? null : alteration.getConsequence().getTerm(), alteration.getProteinStart(), alteration.getProteinEnd(), null);
-        }
-        return IndicatorUtils.processQuery(query, null, false, evidenceTypes);
     }
 
     // Annotate mutations by HGVSg
@@ -204,8 +220,14 @@ public class AnnotationsApiController {
                     return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
                 }
             }
-            Query query = new Query(null, matchedRG, "regular", null, null, null, null, null, tumorType, null, null, null, hgvsg);
-            indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
+            indicatorQueryResp = this.cacheFetcher.processQuery(
+                matchedRG,
+                null,
+                null,
+                null,
+                null,
+                tumorType, null, null, null, null,
+                hgvsg, null, false, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
         }
         return new ResponseEntity<>(indicatorQueryResp, status);
     }
@@ -229,13 +251,19 @@ public class AnnotationsApiController {
         if (body == null) {
             status = HttpStatus.BAD_REQUEST;
         } else {
-            Map<Integer, IndicatorQueryResp> hashAnnotation = new HashMap<>();
             for (AnnotateMutationByHGVSgQuery query : body) {
-                int hash = query.hashCode();
-                if (!hashAnnotation.containsKey(hash)) {
-                    hashAnnotation.put(hash, IndicatorUtils.processQuery(new Query(query), null, false, query.getEvidenceTypes()));
-                }
-                IndicatorQueryResp resp = hashAnnotation.get(hash).copy();
+                IndicatorQueryResp resp = this.cacheFetcher.processQuery(
+                    query.getReferenceGenome(),
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    query.getHgvsg(), null, false, query.getEvidenceTypes());
                 resp.getQuery().setId(query.getId());
                 result.add(resp);
             }
@@ -274,8 +302,21 @@ public class AnnotationsApiController {
                     return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
                 }
             }
-            Query query = new Query(null, matchedRG, AnnotationQueryType.REGULAR.getName(), entrezGeneId, hugoSymbol, StringUtils.capitalize(copyNameAlterationType.name().toLowerCase()), null, null, tumorType, null, null, null, null);
-            indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
+            indicatorQueryResp = this.cacheFetcher.processQuery(
+                matchedRG,
+                entrezGeneId,
+                hugoSymbol,
+                StringUtils.capitalize(copyNameAlterationType.name().toLowerCase()),
+                null,
+                tumorType,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                false,
+                new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
         }
         return new ResponseEntity<>(indicatorQueryResp, status);
     }
@@ -316,16 +357,16 @@ public class AnnotationsApiController {
                 genePool = new HashMap<>();
             }
 
-            Map<Integer, IndicatorQueryResp> hashAnnotation = new HashMap<>();
             for (AnnotateCopyNumberAlterationQuery query : body) {
                 String hugoSymbol = resolveHugoSymbol(genePool, query.getGene());
-                int hash = query.hashCode();
-                if (!hashAnnotation.containsKey(hash)) {
-                    hashAnnotation.put(hash, IndicatorUtils.processQuery(
-                        new Query(query.getId(), query.getReferenceGenome(), AnnotationQueryType.REGULAR.getName(), null, hugoSymbol, StringUtils.capitalize(query.getCopyNameAlterationType().name().toLowerCase()), null, null, query.getTumorType(), null, null, null, null),
-                        null, false, query.getEvidenceTypes()));
-                }
-                IndicatorQueryResp resp = hashAnnotation.get(hash).copy();
+                IndicatorQueryResp resp = this.cacheFetcher.processQuery(
+                    query.getReferenceGenome(),
+                    null,
+                    hugoSymbol,
+                    StringUtils.capitalize(query.getCopyNameAlterationType().name().toLowerCase()),
+                    null,
+                    query.getTumorType(), null, null, null, null,
+                    null, null, false, query.getEvidenceTypes());
                 resp.getQuery().setId(query.getId());
                 result.add(resp);
             }
@@ -398,8 +439,9 @@ public class AnnotationsApiController {
                     }
                 }
                 String fusionName = FusionUtils.getFusionName(geneA, geneB);
-                Query query = new Query(null, matchedRG, AnnotationQueryType.REGULAR.getName(), null, fusionName.replace(" Fusion", ""), null, AlterationType.STRUCTURAL_VARIANT.name(), structuralVariantType, tumorType, isFunctionalFusion ? "fusion" : null, null, null, null);
-                indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
+                indicatorQueryResp = this.cacheFetcher.processQuery(
+                    matchedRG, null, fusionName.replace(" Fusion", ""), null, AlterationType.STRUCTURAL_VARIANT.name(), tumorType, isFunctionalFusion ? "fusion" : null, null, null, structuralVariantType, null,
+                    null, false, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
             }
         }
         return new ResponseEntity<>(indicatorQueryResp, status);
@@ -449,34 +491,30 @@ public class AnnotationsApiController {
                 genePool = new HashMap<>();
             }
 
-            Map<Integer, IndicatorQueryResp> hashAnnotation = new HashMap<>();
             for (AnnotateStructuralVariantQuery query : body) {
-                int hash = query.hashCode();
-                if (!hashAnnotation.containsKey(hash)) {
-                    Gene geneA = findGeneFromPool(genePool, new QueryGene(query.getGeneA().getEntrezGeneId(), query.getGeneA().getHugoSymbol()));
-                    if (geneA == null) {
-                        geneA = new Gene();
-                        if (query.getGeneA() != null) {
-                            geneA.setHugoSymbol(query.getGeneA().getHugoSymbol());
-                            geneA.setEntrezGeneId(query.getGeneA().getEntrezGeneId());
-                        }
+                Gene geneA = findGeneFromPool(genePool, new QueryGene(query.getGeneA().getEntrezGeneId(), query.getGeneA().getHugoSymbol()));
+                if (geneA == null) {
+                    geneA = new Gene();
+                    if (query.getGeneA() != null) {
+                        geneA.setHugoSymbol(query.getGeneA().getHugoSymbol());
+                        geneA.setEntrezGeneId(query.getGeneA().getEntrezGeneId());
                     }
-
-                    Gene geneB = findGeneFromPool(genePool, new QueryGene(query.getGeneB().getEntrezGeneId(), query.getGeneB().getHugoSymbol()));
-                    if (geneB == null) {
-                        geneB = new Gene();
-                        if (query.getGeneA() != null) {
-                            geneB.setHugoSymbol(query.getGeneB().getHugoSymbol());
-                            geneB.setEntrezGeneId(query.getGeneB().getEntrezGeneId());
-                        }
-                    }
-
-                    String fusionName = FusionUtils.getFusionName(geneA, geneB);
-                    hashAnnotation.put(hash, IndicatorUtils.processQuery(
-                        new Query(query.getId(), query.getReferenceGenome(), AnnotationQueryType.REGULAR.getName(), null, fusionName.replace(" Fusion", ""), null, AlterationType.STRUCTURAL_VARIANT.name(), query.getStructuralVariantType(), query.getTumorType(), query.getFunctionalFusion() ? "fusion" : "", null, null, null),
-                        null, false, query.getEvidenceTypes()));
                 }
-                IndicatorQueryResp resp = hashAnnotation.get(hash).copy();
+
+                Gene geneB = findGeneFromPool(genePool, new QueryGene(query.getGeneB().getEntrezGeneId(), query.getGeneB().getHugoSymbol()));
+                if (geneB == null) {
+                    geneB = new Gene();
+                    if (query.getGeneA() != null) {
+                        geneB.setHugoSymbol(query.getGeneB().getHugoSymbol());
+                        geneB.setEntrezGeneId(query.getGeneB().getEntrezGeneId());
+                    }
+                }
+
+                String fusionName = FusionUtils.getFusionName(geneA, geneB);
+
+                IndicatorQueryResp resp = this.cacheFetcher.processQuery(
+                    query.getReferenceGenome(),  null, fusionName.replace(" Fusion", ""), null, AlterationType.STRUCTURAL_VARIANT.name(), query.getTumorType(), query.getFunctionalFusion() ? "fusion" : "", null, null, query.getStructuralVariantType(), null,
+                    null, false, query.getEvidenceTypes());
                 resp.getQuery().setId(query.getId());
                 result.add(resp);
             }

@@ -1,17 +1,19 @@
 package org.mskcc.cbio.oncokb.cache;
 
 import org.mskcc.cbio.oncokb.apiModels.CuratedGene;
-import org.mskcc.cbio.oncokb.model.CancerGene;
-import org.mskcc.cbio.oncokb.model.Evidence;
-import org.mskcc.cbio.oncokb.model.Gene;
-import org.mskcc.cbio.oncokb.model.OncoKBInfo;
+import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotationQueryType;
+import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
+import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.*;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
 
 @Component
 public class CacheFetcher {
@@ -74,7 +76,6 @@ public class CacheFetcher {
         }
         return sb.toString();
     }
-
 
     @Cacheable(cacheResolver = "generalCacheResolver")
     public List<CuratedGene> getCuratedGenes(boolean includeEvidence) {
@@ -161,5 +162,40 @@ public class CacheFetcher {
 
     private String getStringByBoolean(Boolean val) {
         return val ? "Yes" : "No";
+    }
+
+    @Cacheable(cacheResolver = "generalCacheResolver")
+    public IndicatorQueryResp processQuery(ReferenceGenome referenceGenome,
+                                           Integer entrezGeneId,
+                                           String hugoSymbol,
+                                           String alteration,
+                                           String alterationType,
+                                           String tumorType,
+                                           String consequence,
+                                           Integer proteinStart,
+                                           Integer proteinEnd,
+                                           StructuralVariantType svType,
+                                           String hgvs,
+                                           Set<LevelOfEvidence> levels,
+                                           Boolean highestLevelOnly,
+                                           Set<EvidenceType> evidenceTypes) {
+        if(referenceGenome==null){
+            referenceGenome = DEFAULT_REFERENCE_GENOME;
+        }
+        Query query = new Query(null, referenceGenome, AnnotationQueryType.REGULAR.getName(), entrezGeneId, hugoSymbol, alteration, alterationType, svType, tumorType, consequence, proteinStart, proteinEnd, hgvs);
+        return IndicatorUtils.processQuery(
+            query, levels, highestLevelOnly,
+            new HashSet<>(evidenceTypes)
+        );
+    }
+
+    @Cacheable(cacheResolver = "generalCacheResolver")
+    public IndicatorQueryResp getIndicatorQueryFromGenomicLocation(ReferenceGenome referenceGenome, String genomicLocation, String tumorType, Set<EvidenceType> evidenceTypes) {
+        Alteration alteration = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, genomicLocation, referenceGenome);
+        Query query = new Query();
+        if (alteration != null) {
+            query = new Query(null, referenceGenome, AnnotationQueryType.REGULAR.getName(), null, alteration.getGene().getHugoSymbol(), alteration.getAlteration(), null, null, tumorType, alteration.getConsequence() == null ? null : alteration.getConsequence().getTerm(), alteration.getProteinStart(), alteration.getProteinEnd(), null);
+        }
+        return IndicatorUtils.processQuery(query, null, false, evidenceTypes);
     }
 }

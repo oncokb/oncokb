@@ -3,6 +3,7 @@ package org.mskcc.cbio.oncokb.apiModels;
 import io.swagger.annotations.ApiModel;
 import org.mskcc.cbio.oncokb.model.TumorForm;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 
@@ -10,7 +11,7 @@ import java.util.Objects;
  * General tumor type category.
  **/
 @ApiModel(description = "OncoTree Cancer Type")
-public class MainType {
+public class MainType implements Serializable {
 
   private Integer id = null;
   private String name = null;

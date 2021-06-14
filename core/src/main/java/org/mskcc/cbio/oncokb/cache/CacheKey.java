@@ -6,6 +6,8 @@ public enum CacheKey {
     CANCER_GENE_LIST_TXT("getCancerGenesTxt"),
     CURATED_GENE_LIST("getCuratedGenes"),
     CURATED_GENE_LIST_TXT("getCuratedGenesTxt"),
+    PROCESS_QUERY("processQuery"),
+    GENOMIC_LOCATION_QUERY("getIndicatorQueryFromGenomicLocation"),
     ONCOKB_INFO("getOncoKBInfo");
 
     String key;

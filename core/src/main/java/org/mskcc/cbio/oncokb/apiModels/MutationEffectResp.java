@@ -1,9 +1,11 @@
 package org.mskcc.cbio.oncokb.apiModels;
 
+import java.io.Serializable;
+
 /**
  * Created by Hongxin Zhang on 2/21/18.
  */
-public class MutationEffectResp {
+public class MutationEffectResp implements Serializable {
     String knownEffect = "";
     String description = "";
     Citations citations = new Citations();

@@ -30,12 +30,14 @@ public class CacheConfiguration {
                 .setAddress(redisAddress)
                 .setConnectionMinimumIdleSize(1)
                 .setConnectionPoolSize(2)
+                .setDnsMonitoringInterval(-1)
                 .setPassword(redisPassword);
         } else if (redisType.equals(RedisType.SENTINEL.getType())) {
             config
                 .useSentinelServers()
                 .setMasterName(redisMasterName)
                 .setCheckSentinelsList(false)
+                .setDnsMonitoringInterval(-1)
                 .addSentinelAddress(redisAddress)
                 .setPassword(redisPassword);
         } else {

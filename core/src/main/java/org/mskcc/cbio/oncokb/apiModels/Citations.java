@@ -2,13 +2,14 @@ package org.mskcc.cbio.oncokb.apiModels;
 
 import org.mskcc.cbio.oncokb.model.ArticleAbstract;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
 /**
  * Created by Hongxin Zhang on 2/21/18.
  */
-public class Citations {
+public class Citations implements Serializable {
     Set<String> pmids = new HashSet<String>(0);
     Set<ArticleAbstract> abstracts = new HashSet<ArticleAbstract>(0);
 
