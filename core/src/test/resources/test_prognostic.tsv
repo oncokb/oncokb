@@ -7,3 +7,7 @@ ABL1	BCR-ABL1 Fusion	BLLBCRABL1L	The NCCN guidelines list the BCR-ABL1 fusion as
 # Check the Px propagation rule to the child is working. Px1 is assigned on ALAL
 ABL1	BCR-ABL1 Fusion	ALAL	The WHO classification of hematologic tumors lists the BCR-ABL1 fusion as a prognostic biomarker in acute leukemias of ambiguous lineage. Well-powered studies find that patients with the BCR-ABL1 fusion have a less favorable prognosis.	Px1	1
 ABL1	BCR-ABL1 Fusion	AUL	The WHO classification of hematologic tumors lists the BCR-ABL1 fusion as a prognostic biomarker in acute undifferentiated leukemia. Well-powered studies find that patients with the BCR-ABL1 fusion have a less favorable prognosis.	Px1	1
+
+# Alternative allele should not get Dx from the curated alteration
+MPL	W515K	Primary Myelofibrosis	The NCCN guidelines list MPL W515 mutations as a prognostic biomarker in primary myelofibrosis. Clinical studies suggest that patients with a MPL W515L have an intermediate prognosis, however this is dependent on co-mutation patterns.	Px2	1
+MPL	W515A	Primary Myelofibrosis			0
