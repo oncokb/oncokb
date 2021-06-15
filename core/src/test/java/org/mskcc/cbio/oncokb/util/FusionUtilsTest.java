@@ -34,10 +34,6 @@ public class FusionUtilsTest extends TestCase {
         assertTrue(genes.stream().filter(gene -> gene.equals("H2BC5")).findAny().isPresent());
         assertTrue(genes.stream().filter(gene -> gene.equals("H1-4")).findAny().isPresent());
 
-        genes = getGenesStrs("H1-H2BC5-4");
-        assertEquals(2, genes.size());
-        assertTrue(genes.stream().filter(gene -> gene.equals("H2BC5-4")).findAny().isPresent());
-        assertTrue(genes.stream().filter(gene -> gene.equals("H1")).findAny().isPresent());
     }
 
     public void testGetGenes() {
@@ -59,10 +55,6 @@ public class FusionUtilsTest extends TestCase {
         assertEquals(2, genes.size());
         assertTrue(genes.stream().filter(gene -> gene.getHugoSymbol().equals("H2BC5")).findAny().isPresent());
         assertTrue(genes.stream().filter(gene -> gene.getHugoSymbol().equals("H1-4")).findAny().isPresent());
-
-        genes = getGenes("H1-H2BC5-4");
-        assertEquals(1, genes.size());
-        assertEquals("H1-5", genes.get(0).getHugoSymbol());
     }
 
     public void testGetFusionName() {
