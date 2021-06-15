@@ -164,7 +164,10 @@ public class CacheFetcher {
         return val ? "Yes" : "No";
     }
 
-    @Cacheable(cacheResolver = "generalCacheResolver")
+    @Cacheable(
+        cacheResolver = "generalCacheResolver",
+        keyGenerator = "concatKeyGenerator"
+    )
     public IndicatorQueryResp processQuery(ReferenceGenome referenceGenome,
                                            Integer entrezGeneId,
                                            String hugoSymbol,
@@ -179,7 +182,7 @@ public class CacheFetcher {
                                            Set<LevelOfEvidence> levels,
                                            Boolean highestLevelOnly,
                                            Set<EvidenceType> evidenceTypes) {
-        if(referenceGenome==null){
+        if (referenceGenome == null) {
             referenceGenome = DEFAULT_REFERENCE_GENOME;
         }
         Query query = new Query(null, referenceGenome, AnnotationQueryType.REGULAR.getName(), entrezGeneId, hugoSymbol, alteration, alterationType, svType, tumorType, consequence, proteinStart, proteinEnd, hgvs);
@@ -189,7 +192,8 @@ public class CacheFetcher {
         );
     }
 
-    @Cacheable(cacheResolver = "generalCacheResolver")
+    @Cacheable(cacheResolver = "generalCacheResolver",
+        keyGenerator = "concatKeyGenerator")
     public IndicatorQueryResp getIndicatorQueryFromGenomicLocation(ReferenceGenome referenceGenome, String genomicLocation, String tumorType, Set<EvidenceType> evidenceTypes) {
         Alteration alteration = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, genomicLocation, referenceGenome);
         Query query = new Query();
