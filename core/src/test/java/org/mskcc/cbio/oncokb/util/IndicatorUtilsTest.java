@@ -561,6 +561,12 @@ public class IndicatorUtilsTest {
         assertEquals("The variant summary is not expected.", "An association between high Tumor Mutational Burden (TMB), defined as the number of somatic mutations per megabase (mut/Mb) of genome sequenced, and response to immune checkpoint inhibitors has been reported in several solid tumor types.", indicatorQueryResp.getVariantSummary());
         assertEquals("The tumor type summary is not expected.", "The TMB for this sample is ≥10 mut/Mb. The anti-PD-1 antibody pembrolizumab is FDA-approved for the treatment of adult and pediatric patients with unresectable or metastatic solid tumors with a mutation burden of ≥10 mut/Mb.", indicatorQueryResp.getTumorTypeSummary());
 
+        // Alternative allele should not get the diagnostic from curated alterations
+        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "BRAF", "V600L", null, null, "hairy cell leukemia", null, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
+        assertEquals("The diagnostic implication list should be empty, but it's not", 0, indicatorQueryResp.getDiagnosticImplications().size());
+        assertTrue("The highest diagnostic level should be empty, but it's not", indicatorQueryResp.getHighestDiagnosticImplicationLevel() == null);
+
         // Test indicator endpoint supports HGVS
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, null, null, null, null, "Melanoma", null, null, null, "7:g.140453136A>T");
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
@@ -688,8 +694,8 @@ public class IndicatorUtilsTest {
         pairComparison(resp1, resp2);
 
         // Test using official hugo symbol and gene alias
-        query1 = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "BRAF", "V600E", null, null, "MEL", null, null, null, null);
-        query2 = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "B-RAF1", "V600E", null, null, "MEL", MISSENSE_VARIANT, null, null, null);
+        query1 = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "ABL1", "D276G", null, null, "MEL", null, null, null, null);
+        query2 = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "c-ABL", "D276G", null, null, "MEL", MISSENSE_VARIANT, null, null, null);
         resp1 = IndicatorUtils.processQuery(query1, null, true, null);
         resp2 = IndicatorUtils.processQuery(query2, null, true, null);
         pairComparison(resp1, resp2, true);

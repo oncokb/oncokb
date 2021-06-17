@@ -162,8 +162,8 @@ public class EvidenceUtilsTest extends TestCase {
         e4.setCancerTypes(Collections.singleton(tumorType));
         e5.setCancerTypes(Collections.singleton(tumorType));
 
-        Drug d1 = new Drug("Vemurafinib");
-        Drug d2 = new Drug("Dabrafinib");
+        Drug d1 = new Drug("Vemurafenib");
+        Drug d2 = new Drug("Dabrafenib");
 
         List<Drug> dc1 = new ArrayList<>();
         List<Drug> dc2 = new ArrayList<>();

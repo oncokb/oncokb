@@ -5,8 +5,11 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mskcc.cbio.oncokb.bo.OncokbTranscriptService;
 import org.mskcc.cbio.oncokb.model.Alteration;
+import org.mskcc.cbio.oncokb.model.CancerGene;
+import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.ReferenceGenome;
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
+import org.mskcc.cbio.oncokb.util.CacheUtils;
 import org.mskcc.cbio.oncokb.util.ValidationUtils;
 import org.oncokb.oncokb_transcript.ApiException;
 import org.oncokb.oncokb_transcript.client.Sequence;
@@ -14,7 +17,11 @@ import org.oncokb.oncokb_transcript.client.Sequence;
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.mskcc.cbio.oncokb.api.websocket.ValidationCategory.*;
 
@@ -151,17 +158,35 @@ public class CurationValidationApiController {
         } catch (ApiException e) {
             data = new JSONArray();
             data.put(ValidationUtils.getErrorMessage("API ERROR", e.getMessage()));
-            sendText(generateInfo(MISMATCH_REF_AA, ValidationStatus.IS_ERROR, null));
+            sendText(generateInfo(MISMATCH_REF_AA, ValidationStatus.IS_ERROR, data));
         }
     }
 
     private void validateHugoSymbols() {
         sendText(generateInfo(OUTDATED_HUGO_SYMBOLS, ValidationStatus.IS_PENDING, new JSONArray()));
 
-        JSONArray data = ValidationUtils.validateHugoSymbols();
-        if (data.length() == 0) {
-            sendText(generateInfo(OUTDATED_HUGO_SYMBOLS, ValidationStatus.IS_COMPLETE, new JSONArray()));
-        } else {
+        Set<Gene> curatedGenesToCheck = CacheUtils.getAllGenes().stream().filter(gene -> gene.getEntrezGeneId() > 0).collect(Collectors.toSet());
+        Set<CancerGene> cancerGenesToCheck = CacheUtils.getCancerGeneList().stream().filter(gene -> gene.getEntrezGeneId() > 0).collect(Collectors.toSet());
+        Set<Integer> genesToSearch = new HashSet<>();
+        genesToSearch.addAll(curatedGenesToCheck.stream().filter(gene -> gene.getEntrezGeneId() > 0).map(Gene::getEntrezGeneId).collect(Collectors.toSet()));
+        genesToSearch.addAll(cancerGenesToCheck.stream().map(CancerGene::getEntrezGeneId).collect(Collectors.toSet()));
+        OncokbTranscriptService oncokbTranscriptService = new OncokbTranscriptService();
+
+        JSONArray data = null;
+        try {
+            data = ValidationUtils.validateHugoSymbols(
+                curatedGenesToCheck,
+                cancerGenesToCheck,
+                oncokbTranscriptService.findGenesBySymbols(genesToSearch.stream().map(gene -> gene.toString()).collect(Collectors.toList()))
+            );
+            if (data.length() == 0) {
+                sendText(generateInfo(OUTDATED_HUGO_SYMBOLS, ValidationStatus.IS_COMPLETE, new JSONArray()));
+            } else {
+                sendText(generateInfo(OUTDATED_HUGO_SYMBOLS, ValidationStatus.IS_ERROR, data));
+            }
+        } catch (ApiException e) {
+            data = new JSONArray();
+            data.put(ValidationUtils.getErrorMessage("API ERROR", e.getMessage()));
             sendText(generateInfo(OUTDATED_HUGO_SYMBOLS, ValidationStatus.IS_ERROR, data));
         }
     }
