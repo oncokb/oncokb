@@ -1,6 +1,8 @@
 package org.mskcc.cbio.oncokb.cache;
 
+import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.apiModels.CuratedGene;
+import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotateMutationByHGVSgQuery;
 import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotationQueryType;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.model.*;
@@ -188,18 +190,13 @@ public class CacheFetcher {
         Query query = new Query(null, referenceGenome, AnnotationQueryType.REGULAR.getName(), entrezGeneId, hugoSymbol, alteration, alterationType, svType, tumorType, consequence, proteinStart, proteinEnd, hgvs);
         return IndicatorUtils.processQuery(
             query, levels, highestLevelOnly,
-            new HashSet<>(evidenceTypes)
+            evidenceTypes
         );
     }
 
     @Cacheable(cacheResolver = "generalCacheResolver",
         keyGenerator = "concatKeyGenerator")
-    public IndicatorQueryResp getIndicatorQueryFromGenomicLocation(ReferenceGenome referenceGenome, String genomicLocation, String tumorType, Set<EvidenceType> evidenceTypes) {
-        Alteration alteration = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, genomicLocation, referenceGenome);
-        Query query = new Query();
-        if (alteration != null) {
-            query = new Query(null, referenceGenome, AnnotationQueryType.REGULAR.getName(), null, alteration.getGene().getHugoSymbol(), alteration.getAlteration(), null, null, tumorType, alteration.getConsequence() == null ? null : alteration.getConsequence().getTerm(), alteration.getProteinStart(), alteration.getProteinEnd(), null);
-        }
-        return IndicatorUtils.processQuery(query, null, false, evidenceTypes);
+    public Alteration getAlterationFromGenomeNexus(GNVariantAnnotationType gnVariantAnnotationType, ReferenceGenome referenceGenome, String genomicLocation) {
+        return AlterationUtils.getAlterationFromGenomeNexus(gnVariantAnnotationType, genomicLocation, referenceGenome);
     }
 }

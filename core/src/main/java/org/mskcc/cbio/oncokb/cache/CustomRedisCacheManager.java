@@ -53,6 +53,7 @@ public class CustomRedisCacheManager implements CacheManager {
             if (nameKey != null) {
                 switch (nameKey) {
                     case PROCESS_QUERY:
+                    case GET_ALTERATION_FROM_GN:
                         return new CustomMapRedisCache(cacheName, client, clientTTLInMinutes);
                     default:
                         return new CustomBucketRedisCache(cacheName, client, clientTTLInMinutes);

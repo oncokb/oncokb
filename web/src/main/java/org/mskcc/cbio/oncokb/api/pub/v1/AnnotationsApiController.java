@@ -159,7 +159,7 @@ public class AnnotationsApiController {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
         }
-        indicatorQueryResp = this.cacheFetcher.getIndicatorQueryFromGenomicLocation(matchedRG, genomicLocation, tumorType, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
+        indicatorQueryResp = this.getIndicatorQueryFromGenomicLocation(matchedRG, genomicLocation, tumorType, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
         return new ResponseEntity<>(indicatorQueryResp, status);
     }
 
@@ -183,7 +183,7 @@ public class AnnotationsApiController {
             status = HttpStatus.BAD_REQUEST;
         } else {
             for (AnnotateMutationByGenomicChangeQuery query : body) {
-                IndicatorQueryResp resp = this.cacheFetcher.getIndicatorQueryFromGenomicLocation(query.getReferenceGenome(), query.getGenomicLocation(), query.getTumorType(), query.getEvidenceTypes());
+                IndicatorQueryResp resp = this.getIndicatorQueryFromGenomicLocation(query.getReferenceGenome(), query.getGenomicLocation(), query.getTumorType(), query.getEvidenceTypes());
                 resp.getQuery().setId(query.getId());
                 result.add(resp);
             }
@@ -220,14 +220,12 @@ public class AnnotationsApiController {
                     return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
                 }
             }
-            indicatorQueryResp = this.cacheFetcher.processQuery(
+            indicatorQueryResp = this.getIndicatorQueryFromHGVSg(
                 matchedRG,
-                null,
-                null,
-                null,
-                null,
-                tumorType, null, null, null, null,
-                hgvsg, null, false, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
+                hgvsg,
+                tumorType,
+                new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ","))
+            );
         }
         return new ResponseEntity<>(indicatorQueryResp, status);
     }
@@ -252,18 +250,12 @@ public class AnnotationsApiController {
             status = HttpStatus.BAD_REQUEST;
         } else {
             for (AnnotateMutationByHGVSgQuery query : body) {
-                IndicatorQueryResp resp = this.cacheFetcher.processQuery(
+                IndicatorQueryResp resp = this.getIndicatorQueryFromHGVSg(
                     query.getReferenceGenome(),
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    query.getHgvsg(), null, false, query.getEvidenceTypes());
+                    query.getHgvsg(),
+                    query.getTumorType(),
+                    query.getEvidenceTypes()
+                );
                 resp.getQuery().setId(query.getId());
                 result.add(resp);
             }
@@ -520,6 +512,52 @@ public class AnnotationsApiController {
             }
         }
         return new ResponseEntity<>(result, status);
+    }
+
+
+
+    private IndicatorQueryResp getIndicatorQueryFromGenomicLocation(ReferenceGenome referenceGenome, String genomicLocation, String tumorType, Set<EvidenceType> evidenceTypes) {
+        Alteration alteration = this.cacheFetcher.getAlterationFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, referenceGenome, genomicLocation);
+        Query query = new Query();
+        query = new Query(null, referenceGenome, AnnotationQueryType.REGULAR.getName(), null, alteration.getGene() == null ? null : alteration.getGene().getHugoSymbol(), alteration.getAlteration(), null, null, tumorType, alteration.getConsequence() == null ? null : alteration.getConsequence().getTerm(), alteration.getProteinStart(), alteration.getProteinEnd(), null);
+        return this.cacheFetcher.processQuery(
+            referenceGenome,
+            null,
+            query.getHugoSymbol(),
+            query.getAlteration(),
+            null,
+            query.getTumorType(),
+            query.getConsequence(),
+            query.getProteinStart(),
+            query.getProteinEnd(),
+            null,
+            null,
+            null,
+            false,
+            evidenceTypes
+        );
+    }
+
+    private IndicatorQueryResp getIndicatorQueryFromHGVSg(ReferenceGenome referenceGenome, String hgvsg, String tumorType, Set<EvidenceType> evidenceTypes) {
+        Alteration alteration = this.cacheFetcher.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, referenceGenome, hgvsg);
+        Query query = QueryUtils.getQueryForHgvsg(referenceGenome, hgvsg, tumorType, alteration);
+
+        return this.cacheFetcher.processQuery(
+            referenceGenome,
+            null,
+            query.getHugoSymbol(),
+            query.getAlteration(),
+            null,
+            query.getTumorType(),
+            query.getConsequence(),
+            query.getProteinStart(),
+            query.getProteinEnd(),
+            null,
+            query.getHgvs(),
+            null,
+            false,
+            evidenceTypes
+        );
     }
 
     private static Map<String, Gene> getGenePool(List<Gene> genes) {

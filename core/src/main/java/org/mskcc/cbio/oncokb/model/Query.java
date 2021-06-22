@@ -50,7 +50,7 @@ public class Query implements java.io.Serializable {
         newQuery.setConsequence(this.consequence);
         newQuery.setProteinStart(this.proteinStart);
         newQuery.setProteinEnd(this.proteinEnd);
-        newQuery.setHgvs(this.hgvs, this.referenceGenome);
+        newQuery.setHgvs(this.hgvs);
         return newQuery;
     }
 
@@ -68,18 +68,6 @@ public class Query implements java.io.Serializable {
         this.consequence = mutationQuery.getConsequence();
         this.proteinStart = mutationQuery.getProteinStart();
         this.proteinEnd = mutationQuery.getProteinEnd();
-        this.referenceGenome = mutationQuery.getReferenceGenome();
-        if (this.referenceGenome == null) {
-            this.referenceGenome = DEFAULT_REFERENCE_GENOME;
-        }
-    }
-
-    public Query(AnnotateMutationByHGVSgQuery mutationQuery) {
-        this.id = mutationQuery.getId();
-        this.type = AnnotationQueryType.REGULAR.getName();
-        this.setTumorType(mutationQuery.getTumorType());
-
-        this.setHgvs(mutationQuery.getHgvsg(), referenceGenome);
         this.referenceGenome = mutationQuery.getReferenceGenome();
         if (this.referenceGenome == null) {
             this.referenceGenome = DEFAULT_REFERENCE_GENOME;
@@ -127,7 +115,7 @@ public class Query implements java.io.Serializable {
         this.consequence = consequence;
         this.proteinStart = proteinStart;
         this.proteinEnd = proteinEnd;
-        this.setHgvs(hgvs, referenceGenome);
+        this.setHgvs(hgvs);
     }
 
     public String getId() {
@@ -236,23 +224,8 @@ public class Query implements java.io.Serializable {
         return hgvs;
     }
 
-    public void setHgvs(String hgvs, ReferenceGenome referenceGenome) {
+    public void setHgvs(String hgvs) {
         this.hgvs = hgvs;
-        if (hgvs != null && !hgvs.trim().isEmpty()) {
-            Alteration alteration = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, hgvs, referenceGenome);
-            if (alteration != null) {
-                if (alteration.getGene() != null) {
-                    this.hugoSymbol = alteration.getGene().getHugoSymbol();
-                    this.entrezGeneId = alteration.getGene().getEntrezGeneId();
-                }
-                this.alterationType = null;
-                this.setAlteration(alteration.getAlteration());
-                this.proteinStart = alteration.getProteinStart();
-                this.proteinEnd = alteration.getProteinEnd();
-                if (alteration.getConsequence() != null)
-                    this.consequence = alteration.getConsequence().getTerm();
-            }
-        }
     }
 
     public void enrich() {
