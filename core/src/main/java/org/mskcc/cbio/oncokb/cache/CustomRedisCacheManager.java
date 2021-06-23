@@ -54,6 +54,7 @@ public class CustomRedisCacheManager implements CacheManager {
                 switch (nameKey) {
                     case PROCESS_QUERY:
                     case GET_ALTERATION_FROM_GN:
+                    case FIND_GENE_BY_SYMBOL:
                         return new CustomMapRedisCache(cacheName, client, clientTTLInMinutes);
                     default:
                         return new CustomBucketRedisCache(cacheName, client, clientTTLInMinutes);

@@ -4,9 +4,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.apiModels.CuratedGene;
 import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotateMutationByHGVSgQuery;
 import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotationQueryType;
+import org.mskcc.cbio.oncokb.bo.OncokbTranscriptService;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.*;
+import org.oncokb.oncokb_transcript.ApiException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +22,8 @@ import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
 
 @Component
 public class CacheFetcher {
+    OncokbTranscriptService oncokbTranscriptService = new OncokbTranscriptService();
+
     @Cacheable(cacheResolver = "generalCacheResolver", key = "'all'")
     public OncoKBInfo getOncoKBInfo() {
         return new OncoKBInfo();
@@ -164,6 +169,11 @@ public class CacheFetcher {
 
     private String getStringByBoolean(Boolean val) {
         return val ? "Yes" : "No";
+    }
+
+    @Cacheable(cacheResolver = "generalCacheResolver")
+    public Gene findGeneBySymbol(String symbol) throws ApiException {
+        return this.oncokbTranscriptService.findGeneBySymbol(symbol);
     }
 
     @Cacheable(

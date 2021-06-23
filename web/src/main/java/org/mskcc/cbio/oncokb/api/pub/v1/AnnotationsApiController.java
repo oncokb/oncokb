@@ -3,7 +3,6 @@ package org.mskcc.cbio.oncokb.api.pub.v1;
 import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.apiModels.annotation.*;
-import org.mskcc.cbio.oncokb.bo.OncokbTranscriptService;
 import org.mskcc.cbio.oncokb.cache.CacheFetcher;
 import org.mskcc.cbio.oncokb.config.annotation.PremiumPublicApi;
 import org.mskcc.cbio.oncokb.config.annotation.PublicApi;
@@ -29,8 +28,6 @@ import java.util.*;
 @Controller
 public class AnnotationsApiController {
     final String EVIDENCE_TYPES_DESCRIPTION = "Evidence type to compute. This could help to improve the performance if you only look for sub-content. Example: ONCOGENIC. All available evidence type are GENE_SUMMARY, MUTATION_SUMMARY, TUMOR_TYPE_SUMMARY, PROGNOSTIC_SUMMARY, DIAGNOSTIC_SUMMARY, ONCOGENIC, MUTATION_EFFECT, PROGNOSTIC_IMPLICATION, DIAGNOSTIC_IMPLICATION, STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY, STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE, INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY, INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE. For multiple evidence types query, use ',' as separator.";
-
-    OncokbTranscriptService oncokbTranscriptService = new OncokbTranscriptService();
 
     @Autowired
     CacheFetcher cacheFetcher;
@@ -332,25 +329,18 @@ public class AnnotationsApiController {
         if (body == null) {
             status = HttpStatus.BAD_REQUEST;
         } else {
-            Set<String> genesToQuery = new HashSet<>();
-            body.forEach(annotateStructuralVariantQuery -> {
-                if (annotateStructuralVariantQuery.getGene() != null) {
-                    if (annotateStructuralVariantQuery.getGene().getEntrezGeneId() != null) {
-                        genesToQuery.add(annotateStructuralVariantQuery.getGene().getEntrezGeneId().toString());
-                    } else if (annotateStructuralVariantQuery.getGene().getHugoSymbol() != null) {
-                        genesToQuery.add(annotateStructuralVariantQuery.getGene().getHugoSymbol());
-                    }
-                }
-            });
-            Map<String, Gene> genePool;
-            try {
-                genePool = getGenePool(oncokbTranscriptService.findGenesBySymbols(new ArrayList<>(genesToQuery)));
-            } catch (ApiException e) {
-                genePool = new HashMap<>();
-            }
 
             for (AnnotateCopyNumberAlterationQuery query : body) {
-                String hugoSymbol = resolveHugoSymbol(genePool, query.getGene());
+                Gene gene = new Gene();
+                try {
+                    gene = this.cacheFetcher.findGeneBySymbol(
+                        query.getGene().getEntrezGeneId() != null ?
+                            query.getGene().getEntrezGeneId().toString() :
+                            query.getGene().getHugoSymbol()
+                    );
+                } catch (ApiException e) {
+                }
+                String hugoSymbol = gene.getHugoSymbol();
                 IndicatorQueryResp resp = this.cacheFetcher.processQuery(
                     query.getReferenceGenome(),
                     null,
@@ -393,23 +383,21 @@ public class AnnotationsApiController {
         if ((entrezGeneIdA != null && hugoSymbolA != null && !GeneUtils.isSameGene(entrezGeneIdA, hugoSymbolA)) || (entrezGeneIdB != null && hugoSymbolB != null && !GeneUtils.isSameGene(entrezGeneIdB, hugoSymbolB))) {
             status = HttpStatus.BAD_REQUEST;
         } else {
-            Gene geneA = null;
+            Gene geneA = new Gene();
             try {
-                geneA = oncokbTranscriptService.findGeneBySymbol(entrezGeneIdA == null ? hugoSymbolA : entrezGeneIdA.toString());
+                geneA = this.cacheFetcher.findGeneBySymbol(entrezGeneIdA == null ? hugoSymbolA : entrezGeneIdA.toString());
             } catch (ApiException e) {
             }
-            if (geneA == null) {
-                geneA = new Gene();
+            if (geneA.getEntrezGeneId() == null && StringUtils.isEmpty(geneA.getHugoSymbol())) {
                 geneA.setEntrezGeneId(entrezGeneIdA);
                 geneA.setHugoSymbol(hugoSymbolA);
             }
-            Gene geneB = null;
+            Gene geneB = new Gene();
             try {
-                geneB = oncokbTranscriptService.findGeneBySymbol(entrezGeneIdB == null ? hugoSymbolB : entrezGeneIdB.toString());
+                geneB = this.cacheFetcher.findGeneBySymbol(entrezGeneIdB == null ? hugoSymbolB : entrezGeneIdB.toString());
             } catch (ApiException e) {
             }
-            if (geneB == null) {
-                geneB = new Gene();
+            if (geneB.getEntrezGeneId() == null && StringUtils.isEmpty(geneB.getHugoSymbol())) {
                 geneB.setEntrezGeneId(entrezGeneIdB);
                 geneB.setHugoSymbol(hugoSymbolB);
             }
@@ -458,48 +446,33 @@ public class AnnotationsApiController {
         if (body == null) {
             status = HttpStatus.BAD_REQUEST;
         } else {
-            Set<String> genesToQuery = new HashSet<>();
-            body.forEach(annotateStructuralVariantQuery -> {
-                if (annotateStructuralVariantQuery.getGeneA() != null) {
-                    if (annotateStructuralVariantQuery.getGeneA().getEntrezGeneId() != null) {
-                        genesToQuery.add(annotateStructuralVariantQuery.getGeneA().getEntrezGeneId().toString());
-                    } else if (annotateStructuralVariantQuery.getGeneA().getHugoSymbol() != null) {
-                        genesToQuery.add(annotateStructuralVariantQuery.getGeneA().getHugoSymbol());
-                    }
-                }
-                if (annotateStructuralVariantQuery.getGeneB() != null) {
-                    if (annotateStructuralVariantQuery.getGeneB().getEntrezGeneId() != null) {
-                        genesToQuery.add(annotateStructuralVariantQuery.getGeneB().getEntrezGeneId().toString());
-                    } else if (annotateStructuralVariantQuery.getGeneB().getHugoSymbol() != null) {
-                        genesToQuery.add(annotateStructuralVariantQuery.getGeneB().getHugoSymbol());
-                    }
-                }
-            });
-
-            Map<String, Gene> genePool = null;
-            try {
-                genePool = getGenePool(oncokbTranscriptService.findGenesBySymbols(new ArrayList<>(genesToQuery)));
-            } catch (ApiException e) {
-                genePool = new HashMap<>();
-            }
-
             for (AnnotateStructuralVariantQuery query : body) {
-                Gene geneA = findGeneFromPool(genePool, new QueryGene(query.getGeneA().getEntrezGeneId(), query.getGeneA().getHugoSymbol()));
-                if (geneA == null) {
-                    geneA = new Gene();
-                    if (query.getGeneA() != null) {
-                        geneA.setHugoSymbol(query.getGeneA().getHugoSymbol());
-                        geneA.setEntrezGeneId(query.getGeneA().getEntrezGeneId());
-                    }
+                Gene geneA = new Gene();
+                try {
+                    geneA = this.cacheFetcher.findGeneBySymbol(
+                        query.getGeneA().getEntrezGeneId() != null ?
+                            query.getGeneA().getEntrezGeneId().toString() :
+                            query.getGeneA().getHugoSymbol()
+                    );
+                } catch (ApiException e) {
+                }
+                if (StringUtils.isEmpty(geneA.getHugoSymbol()) && geneA.getEntrezGeneId() == null && query.getGeneA() != null) {
+                    geneA.setHugoSymbol(query.getGeneA().getHugoSymbol());
+                    geneA.setEntrezGeneId(query.getGeneA().getEntrezGeneId());
                 }
 
-                Gene geneB = findGeneFromPool(genePool, new QueryGene(query.getGeneB().getEntrezGeneId(), query.getGeneB().getHugoSymbol()));
-                if (geneB == null) {
-                    geneB = new Gene();
-                    if (query.getGeneA() != null) {
-                        geneB.setHugoSymbol(query.getGeneB().getHugoSymbol());
-                        geneB.setEntrezGeneId(query.getGeneB().getEntrezGeneId());
-                    }
+                Gene geneB = new Gene();
+                try {
+                    geneB = this.cacheFetcher.findGeneBySymbol(
+                        query.getGeneB().getEntrezGeneId() != null ?
+                            query.getGeneB().getEntrezGeneId().toString() :
+                            query.getGeneB().getHugoSymbol()
+                    );
+                } catch (ApiException e) {
+                }
+                if (StringUtils.isEmpty(geneB.getHugoSymbol()) && geneB.getEntrezGeneId() == null && query.getGeneB() != null) {
+                    geneB.setHugoSymbol(query.getGeneB().getHugoSymbol());
+                    geneB.setEntrezGeneId(query.getGeneB().getEntrezGeneId());
                 }
 
                 String fusionName = FusionUtils.getFusionName(geneA, geneB);
@@ -570,21 +543,6 @@ public class AnnotationsApiController {
             }
         }
         return map;
-    }
-
-    private static String resolveHugoSymbol(Map<String, Gene> genePool, QueryGene queryGene) {
-        String hugoSymbol = "";
-        if (queryGene != null) {
-            if (StringUtils.isNotEmpty(queryGene.getHugoSymbol())) {
-                hugoSymbol = queryGene.getHugoSymbol();
-            } else if (queryGene.getEntrezGeneId() != null) {
-                Gene matchedGene = findGeneFromPool(genePool, queryGene);
-                if (matchedGene != null && StringUtils.isNotEmpty(matchedGene.getHugoSymbol())) {
-                    hugoSymbol = matchedGene.getHugoSymbol();
-                }
-            }
-        }
-        return hugoSymbol;
     }
 
     private static Gene findGeneFromPool(Map<String, Gene> genePool, QueryGene queryGene) {

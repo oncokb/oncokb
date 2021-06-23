@@ -6,6 +6,7 @@ public enum CacheKey {
     CANCER_GENE_LIST_TXT("getCancerGenesTxt"),
     CURATED_GENE_LIST("getCuratedGenes"),
     CURATED_GENE_LIST_TXT("getCuratedGenesTxt"),
+    FIND_GENE_BY_SYMBOL("findGeneBySymbol"),
     PROCESS_QUERY("processQuery"),
     GET_ALTERATION_FROM_GN("getAlterationFromGenomeNexus"),
     ONCOKB_INFO("getOncoKBInfo");
