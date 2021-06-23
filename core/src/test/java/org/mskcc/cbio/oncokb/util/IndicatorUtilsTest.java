@@ -4,8 +4,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.mskcc.cbio.oncokb.apiModels.Implication;
 import org.mskcc.cbio.oncokb.apiModels.MainType;
+import org.mskcc.cbio.oncokb.cache.CacheFetcher;
+import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.apiModels.TumorType;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -568,29 +571,27 @@ public class IndicatorUtilsTest {
         assertTrue("The highest diagnostic level should be empty, but it's not", indicatorQueryResp.getHighestDiagnosticImplicationLevel() == null);
 
         // Test indicator endpoint supports HGVS
-        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, null, null, null, null, "Melanoma", null, null, null, "7:g.140453136A>T");
+        String hgvsg = "7:g.140453136A>T";
+        Alteration alteration = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, hgvsg, DEFAULT_REFERENCE_GENOME);
+        query = QueryUtils.getQueryForHgvsg(DEFAULT_REFERENCE_GENOME, hgvsg, "Melanoma", alteration);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
         assertTrue("The geneExist is not true, but it should be.", indicatorQueryResp.getGeneExist() == true);
         assertEquals("The oncogenicity is not Oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The highest sensitive level is not 1, but it should be.", LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
 
-        query1 = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, null, null, null, null, "Melanoma", null, null, null, "7:g.140453136A>T");
+        hgvsg = "7:g.140453136A>T";
+        alteration = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, hgvsg, DEFAULT_REFERENCE_GENOME);
+        query1 = QueryUtils.getQueryForHgvsg(DEFAULT_REFERENCE_GENOME, hgvsg, "Melanoma", alteration);
         query2 = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "BRAF", "V600E", null, null, "Melanoma", null, null, null, null);
-        resp1 = IndicatorUtils.processQuery(query1, null, true, null);
-        resp2 = IndicatorUtils.processQuery(query2, null, true, null);
+
+        resp1 = IndicatorUtils.processQuery(query1, null, false, null);
+        resp2 = IndicatorUtils.processQuery(query2, null, false, null);
+
         assertTrue("Genes are not the same, but they should.", resp1.getGeneSummary().equals(resp2.getGeneSummary()));
         assertTrue("Oncogenicities are not the same, but they should.", resp1.getOncogenic().equals(resp2.getOncogenic()));
         assertTrue("Treatments are not the same, but they should.", resp1.getTreatments().equals(resp2.getTreatments()));
         assertTrue("Highest sensitive levels are not the same, but they should.", LevelUtils.areSameLevels(resp1.getHighestSensitiveLevel(), resp2.getHighestSensitiveLevel()));
         assertTrue("Highest resistance levels are not the same, but they should.", LevelUtils.areSameLevels(resp1.getHighestResistanceLevel(), resp2.getHighestResistanceLevel()));
-
-        // Test HGVS has higher priority than gene/variant pair
-        // 7:g.140453136A>T is BRAF V600E
-        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "ALK", "R401Q", null, null, "Melanoma", null, null, null, "7:g.140453136A>T");
-        indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
-        assertTrue("The geneExist is not true, but it should be.", indicatorQueryResp.getGeneExist() == true);
-        assertEquals("The oncogenicity is not Oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
-        assertEquals("The highest sensitive level is not 1, but it should be.", LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
 
         // Check structural variant fusion
         // a) BRAF is oncogenic gene. No Truncating Mutations is curated.

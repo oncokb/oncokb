@@ -5,13 +5,14 @@ import org.mskcc.cbio.oncokb.model.TumorForm;
 import org.mskcc.cbio.oncokb.util.MainUtils;
 import org.mskcc.cbio.oncokb.util.TumorTypeUtils;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
 
 @ApiModel(description = "OncoTree Detailed Cancer Type")
-public class TumorType {
+public class TumorType implements Serializable {
 
     private Integer id = null;
     private String code = null;

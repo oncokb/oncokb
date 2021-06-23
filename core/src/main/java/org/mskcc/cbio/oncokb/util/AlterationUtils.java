@@ -473,7 +473,7 @@ public final class AlterationUtils {
     }
 
     public static Alteration getAlterationFromGenomeNexus(GNVariantAnnotationType type, String query, ReferenceGenome referenceGenome) {
-        Alteration alteration = null;
+        Alteration alteration = new Alteration();
         if (query != null && !query.trim().isEmpty()) {
             TranscriptConsequence transcriptConsequence = GenomeNexusUtils.getTranscriptConsequence(type, query, referenceGenome);
             if (transcriptConsequence != null) {
