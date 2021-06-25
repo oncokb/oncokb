@@ -1,14 +1,9 @@
 package org.mskcc.cbio.oncokb.model;
 
 import org.mskcc.cbio.oncokb.apiModels.InfoLevel;
-import org.mskcc.cbio.oncokb.util.CacheUtils;
-import org.mskcc.cbio.oncokb.util.LevelUtils;
-import org.mskcc.cbio.oncokb.util.MainUtils;
-import org.mskcc.cbio.oncokb.util.PropertiesUtils;
+import org.mskcc.cbio.oncokb.util.*;
 
-import javax.sound.sampled.Line;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+import java.io.Serializable;
 import java.util.List;
 
 import static org.mskcc.cbio.oncokb.Constants.IS_PUBLIC_INSTANCE;
@@ -17,7 +12,7 @@ import static org.mskcc.cbio.oncokb.Constants.PUBLIC_API_VERSION;
 /**
  * Created by Hongxin Zhang on 7/13/18.
  */
-public class OncoKBInfo {
+public class OncoKBInfo implements Serializable {
     String oncoTreeVersion;
     String ncitVersion;
     List<InfoLevel> levels;

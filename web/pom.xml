@@ -6,10 +6,10 @@
     <parent>
         <groupId>org.mskcc.cbio.oncokb</groupId>
         <artifactId>master</artifactId>
-        <version>3.2.1</version>
+        <version>3.5.0</version>
     </parent>
     <artifactId>web</artifactId>
-    <version>3.2.1</version>
+    <version>3.5.0</version>
     <packaging>war</packaging>
 
     <name>OncoKB Web</name>
@@ -80,7 +80,7 @@
         <profile>
             <id>curate</id>
             <properties>
-                <frontend.version>0.6.8</frontend.version>
+                <frontend.version>0.6.10</frontend.version>
                 <frontend.groupId>com.github.oncokb</frontend.groupId>
                 <frontend.artifactId>curation-platform</frontend.artifactId>
             </properties>
@@ -270,7 +270,7 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>4.5.2</version>
+            <version>4.5.13</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>

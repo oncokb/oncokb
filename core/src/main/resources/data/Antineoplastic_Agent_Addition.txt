@@ -1,5 +1,0 @@
-Code	NCIt Preferred Name	Synonyms
-C63402	Carboplatin-Taxol Regimen	CaT Regimen|CaT regimen|Carbo-Tax Regimen|Carbo-Tax regimen|Carboplatin-Paclitaxel Regimen|Carboplatin-Taxol Regimen|Carboplatin/Paclitaxel|Carboplatin/Paclitaxel Regimen|PC Regimen|PC regimen|carboplatin-Taxol regimen
-C141432	Milademetan	"2,6-Anhydro-5-((((3&apos;R,4&apos;S,5&apos;R)-6&apos;&quot;-chloro-4&apos;-(2-chloro-3-fluoro-4-pyridinyl)-1&apos;&quot;,2&apos;&quot;-dihydro-4,4-dimethyl-2&apos;&apos;-oxodispiro(cyclohexane-1,2&apos;-pyrrolidine-3&apos;,3&apos;&apos;-(3H)indol)-5&apos;-yl)carbonyl)amino)-3,4,5-trideoxy-L-erythro-hexonamide|DS-3032|MILADEMETAN|Milademetan"
-C15807	High Dose Chemotherapy	High Dose Chemotherapy|high-dose chemotherapy
-C74052	Iodine I 131-6-Beta-Iodomethyl-19-Norcholesterol	I-131 NP-59|Iodine I 131-6-Beta-Iodomethyl-19-Norcholesterol|Radioiodine-Labeled Norcholesterol

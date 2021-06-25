@@ -8,7 +8,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.mskcc.cbio.oncokb.apiModels.NCITDrug;
 import org.mskcc.cbio.oncokb.bo.*;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.TumorType;
@@ -32,6 +31,8 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
  */
 @Controller
 public class DriveAnnotationParser {
+    OncokbTranscriptService oncokbTranscriptService = new OncokbTranscriptService();
+
     @RequestMapping(value = "/legacy-api/driveAnnotation", method = POST)
     public
     @ResponseBody
@@ -52,8 +53,7 @@ public class DriveAnnotationParser {
             Gene persistenceGene = parseGene(jsonObj, releaseGene, jsonArray);
 
             if (releaseGene && persistenceGene != null) {
-                OncokbTranscriptService oncokbTranscriptService = new OncokbTranscriptService();
-                oncokbTranscriptService.updateTranscriptUsage(
+                this.oncokbTranscriptService.updateTranscriptUsage(
                     persistenceGene,
                     persistenceGene.getGrch37Isoform(),
                     persistenceGene.getGrch38Isoform()
@@ -68,7 +68,7 @@ public class DriveAnnotationParser {
     private static final String SOLID_PROPAGATION_KEY = "propagation";
     private static final String LIQUID_PROPAGATION_KEY = "propagationLiquid";
 
-    public static void parseVUS(Gene gene, JSONArray vus, Integer nestLevel) throws JSONException {
+    public void parseVUS(Gene gene, JSONArray vus, Integer nestLevel) throws JSONException {
         System.out.println(spaceStrByNestLevel(nestLevel) + "Variants of unknown significance");
         if (vus != null) {
             AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
@@ -130,7 +130,7 @@ public class DriveAnnotationParser {
         }
     }
 
-    private static void updateGeneInfo(JSONObject geneInfo, Gene gene) {
+    private void updateGeneInfo(JSONObject geneInfo, Gene gene) {
         JSONObject geneType = geneInfo.has("type") ? geneInfo.getJSONObject("type") : null;
         String oncogene = geneType == null ? null : (geneType.has("ocg") ? geneType.getString("ocg").trim() : null);
         String tsg = geneType == null ? null : (geneType.has("tsg") ? geneType.getString("tsg").trim() : null);
@@ -169,7 +169,7 @@ public class DriveAnnotationParser {
         }
     }
 
-    private static Gene parseGene(JSONObject geneInfo, Boolean releaseGene, JSONArray vus) throws Exception {
+    private Gene parseGene(JSONObject geneInfo, Boolean releaseGene, JSONArray vus) throws Exception {
         GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
         Integer nestLevel = 1;
         if (geneInfo.has("name") && !geneInfo.getString("name").trim().isEmpty()) {
@@ -181,7 +181,8 @@ public class DriveAnnotationParser {
                 if (gene == null) {
                     System.out.println(spaceStrByNestLevel(nestLevel) + "Gene " + hugo + " is not in the released list.");
                     if (releaseGene) {
-                        gene = GeneAnnotator.findGene(hugo);
+                        OncokbTranscriptService oncokbTranscriptService = new OncokbTranscriptService();
+                        gene = oncokbTranscriptService.findGeneBySymbol(hugo);
                         if (gene == null) {
                             System.out.println("!!!!!!!!!Could not find gene " + hugo + " either.");
                             throw new IOException("!!!!!!!!!Could not find gene " + hugo + ".");
@@ -238,7 +239,7 @@ public class DriveAnnotationParser {
         return null;
     }
 
-    private static Date getUpdateTime(Object obj) throws JSONException {
+    private Date getUpdateTime(Object obj) throws JSONException {
         if (obj == null) return null;
         JSONObject reviewObj = new JSONObject(obj.toString());
         if (reviewObj.has("updateTime") && StringUtils.isNumeric(reviewObj.get("updateTime").toString())) {
@@ -247,7 +248,7 @@ public class DriveAnnotationParser {
         return null;
     }
 
-    private static void parseSummary(Gene gene, String geneSummary, String uuid, Date lastEdit, Integer nestLevel) {
+    private void parseSummary(Gene gene, String geneSummary, String uuid, Date lastEdit, Integer nestLevel) {
         System.out.println(spaceStrByNestLevel(nestLevel) + "Summary");
         // gene summary
         if (geneSummary != null && !geneSummary.isEmpty()) {
@@ -273,7 +274,7 @@ public class DriveAnnotationParser {
         }
     }
 
-    private static void parseGeneBackground(Gene gene, String bg, String uuid, Date lastEdit, Integer nestLevel) {
+    private void parseGeneBackground(Gene gene, String bg, String uuid, Date lastEdit, Integer nestLevel) {
         System.out.println(spaceStrByNestLevel(nestLevel) + "Background");
 
         if (bg != null && !bg.isEmpty()) {
@@ -295,7 +296,7 @@ public class DriveAnnotationParser {
         }
     }
 
-    private static void parseMutations(Gene gene, JSONArray mutations, Integer nestLevel) throws Exception {
+    private void parseMutations(Gene gene, JSONArray mutations, Integer nestLevel) throws Exception {
         if (mutations != null) {
             System.out.println(spaceStrByNestLevel(nestLevel) + mutations.length() + " mutations.");
             for (int i = 0; i < mutations.length(); i++) {
@@ -306,7 +307,7 @@ public class DriveAnnotationParser {
         }
     }
 
-    private static void parseMutation(Gene gene, JSONObject mutationObj, Integer nestLevel) throws Exception {
+    private void parseMutation(Gene gene, JSONObject mutationObj, Integer nestLevel) throws Exception {
         String mutationStr = mutationObj.has("name") ? mutationObj.getString("name").trim() : null;
 
         if (mutationStr != null && !mutationStr.isEmpty() && !mutationStr.contains("?")) {
@@ -414,7 +415,7 @@ public class DriveAnnotationParser {
         }
     }
 
-    private static List<TumorType> getTumorTypes(JSONArray tumorTypeJson) throws Exception {
+    private List<TumorType> getTumorTypes(JSONArray tumorTypeJson) throws Exception {
         List<TumorType> tumorTypes = new ArrayList<>();
         for (int j = 0; j < tumorTypeJson.length(); j++) {
             JSONObject subTT = tumorTypeJson.getJSONObject(j);
@@ -441,7 +442,7 @@ public class DriveAnnotationParser {
         return tumorTypes;
     }
 
-    protected static Oncogenicity getOncogenicityByString(String oncogenicStr) {
+    protected Oncogenicity getOncogenicityByString(String oncogenicStr) {
         Oncogenicity oncogenic = null;
         if (oncogenicStr != null) {
             oncogenicStr = oncogenicStr.toLowerCase();
@@ -468,7 +469,7 @@ public class DriveAnnotationParser {
         return oncogenic;
     }
 
-    private static Oncogenicity getOncogenicity(JSONObject mutationEffect) throws JSONException {
+    private Oncogenicity getOncogenicity(JSONObject mutationEffect) throws JSONException {
         Oncogenicity oncogenic = null;
         if (mutationEffect.has("oncogenic") && !mutationEffect.getString("oncogenic").isEmpty()) {
             oncogenic = getOncogenicityByString(mutationEffect.getString("oncogenic"));
@@ -476,7 +477,7 @@ public class DriveAnnotationParser {
         return oncogenic;
     }
 
-    private static void setOncogenic(Gene gene, Alteration alteration, Oncogenicity oncogenic, String uuid, Date lastEdit) {
+    private void setOncogenic(Gene gene, Alteration alteration, Oncogenicity oncogenic, String uuid, Date lastEdit) {
         if (alteration != null && gene != null && oncogenic != null) {
             EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
             List<Evidence> evidences = evidenceBo.findEvidencesByAlteration(Collections.singleton(alteration), Collections.singleton(EvidenceType.ONCOGENIC));
@@ -498,7 +499,7 @@ public class DriveAnnotationParser {
         }
     }
 
-    private static void saveTumorLevelSummaries(JSONObject cancerObj, String summaryKey, Gene gene, Set<Alteration> alterations, List<TumorType> tumorTypes, List<TumorType> relevantCancerTypes, EvidenceType evidenceType, Integer nestLevel) {
+    private void saveTumorLevelSummaries(JSONObject cancerObj, String summaryKey, Gene gene, Set<Alteration> alterations, List<TumorType> tumorTypes, List<TumorType> relevantCancerTypes, EvidenceType evidenceType, Integer nestLevel) {
         if (cancerObj.has(summaryKey) && !cancerObj.getString(summaryKey).isEmpty()) {
             EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
             System.out.println(spaceStrByNestLevel(nestLevel + 1) + " " + summaryKey);
@@ -529,7 +530,7 @@ public class DriveAnnotationParser {
         }
     }
 
-    private static void parseCancer(Gene gene, Set<Alteration> alterations, JSONObject cancerObj, List<TumorType> tumorTypes, List<TumorType> relevantCancerTypes, Integer nestLevel) throws Exception {
+    private void parseCancer(Gene gene, Set<Alteration> alterations, JSONObject cancerObj, List<TumorType> tumorTypes, List<TumorType> relevantCancerTypes, Integer nestLevel) throws Exception {
         if (tumorTypes.isEmpty()) {
             return;
         }
@@ -600,7 +601,7 @@ public class DriveAnnotationParser {
         }
     }
 
-    private static void parseTherapeuticImplications(Gene gene, Set<Alteration> alterations, List<TumorType> tumorTypes,  List<TumorType> relevantCancerTypes, JSONObject implicationObj,
+    private void parseTherapeuticImplications(Gene gene, Set<Alteration> alterations, List<TumorType> tumorTypes,  List<TumorType> relevantCancerTypes, JSONObject implicationObj,
                                                      EvidenceType evidenceType, String knownEffectOfEvidence, Integer nestLevel) throws Exception {
         System.out.println(spaceStrByNestLevel(nestLevel) + evidenceType);
 
@@ -702,15 +703,14 @@ public class DriveAnnotationParser {
                     }
                     if (drug == null) {
                         if (ncitCode != null) {
-                            NCITDrug ncitDrug = NCITDrugUtils.findDrugByNcitCode(ncitCode);
+                            org.oncokb.oncokb_transcript.client.Drug ncitDrug = oncokbTranscriptService.findDrugByNcitCode(ncitCode);
                             if (ncitDrug == null) {
                                 System.out.println("ERROR: the NCIT code cannot be found... Code:" + ncitCode);
                             } else {
                                 drug = new Drug();
-                                drug.setDrugName(ncitDrug.getDrugName());
-                                drug.setSynonyms(ncitDrug.getSynonyms());
-                                drug.setNcitCode(ncitDrug.getNcitCode());
-                                drug.setDrugName(ncitDrug.getDrugName());
+                                drug.setDrugName(ncitDrug.getName());
+                                drug.setSynonyms(ncitDrug.getSynonyms().stream().map(synonym -> synonym.getName()).collect(Collectors.toSet()));
+                                drug.setNcitCode(ncitDrug.getCode());
 
                                 if (drugName != null) {
                                     DrugUtils.updateDrugName(drug, drugName);
@@ -840,7 +840,7 @@ public class DriveAnnotationParser {
         }
     }
 
-    private static void parseImplication(Gene gene, Set<Alteration> alterations, List<TumorType> tumorTypes, List<TumorType> relevantCancerTypes, JSONObject implication, String uuid, EvidenceType evidenceType, Integer nestLevel) throws Exception {
+    private void parseImplication(Gene gene, Set<Alteration> alterations, List<TumorType> tumorTypes, List<TumorType> relevantCancerTypes, JSONObject implication, String uuid, EvidenceType evidenceType, Integer nestLevel) throws Exception {
         if (evidenceType != null && implication != null &&
             ((implication.has("description") && !implication.getString("description").trim().isEmpty())
                 || (implication.has("level") && !implication.getString("level").trim().isEmpty()))) {
@@ -894,13 +894,13 @@ public class DriveAnnotationParser {
         }
     }
 
-    private static String spaceStrByNestLevel(Integer nestLevel) {
+    private String spaceStrByNestLevel(Integer nestLevel) {
         if (nestLevel == null || nestLevel < 1)
             nestLevel = 1;
         return StringUtils.repeat("    ", nestLevel - 1);
     }
 
-    private static void setDocuments(String str, Evidence evidence) {
+    private void setDocuments(String str, Evidence evidence) {
         if (str == null) return;
         Set<Article> docs = new HashSet<>();
         ArticleBo articleBo = ApplicationContextSingleton.getArticleBo();
@@ -963,20 +963,15 @@ public class DriveAnnotationParser {
         evidence.addArticles(docs);
     }
 
-    // if the object does not have last review, it should fall back on last edit
-//    private static Date getLastReview(JSONObject object, String key) {
-//        return object.has(key + LAST_REVIEW_EXTENSION) ? getUpdateTime(object.get(key + LAST_REVIEW_EXTENSION)) : getLastEdit(object, key);
-//    }
-
-    private static Date getLastEdit(JSONObject object, String key) {
+    private Date getLastEdit(JSONObject object, String key) {
         return object.has(key + LAST_EDIT_EXTENSION) ? getUpdateTime(object.get(key + LAST_EDIT_EXTENSION)) : null;
     }
 
-    private static String getUUID(JSONObject object, String key) {
+    private String getUUID(JSONObject object, String key) {
         return object.has(key + UUID_EXTENSION) ? object.getString(key + UUID_EXTENSION) : "";
     }
 
-    private static void addDateToLastEditSetFromObject(Set<Date> set, JSONObject object, String key) throws JSONException {
+    private void addDateToLastEditSetFromObject(Set<Date> set, JSONObject object, String key) throws JSONException {
         if (object.has(key + LAST_EDIT_EXTENSION)) {
             Date tmpDate = getUpdateTime(object.get(key + LAST_EDIT_EXTENSION));
             if (tmpDate != null) {
@@ -985,14 +980,7 @@ public class DriveAnnotationParser {
         }
     }
 
-//    private static void addDateToLastReviewSetFromLong(Set<Date> set, JSONObject object, String key) throws JSONException {
-//        Date tmpDate = getLastReview(object, key);
-//        if (tmpDate != null) {
-//            set.add(tmpDate);
-//        }
-//    }
-
-    private static Date getMostRecentDate(Set<Date> dates) {
+    private Date getMostRecentDate(Set<Date> dates) {
         if (dates == null || dates.size() == 0)
             return null;
         return Collections.max(dates);

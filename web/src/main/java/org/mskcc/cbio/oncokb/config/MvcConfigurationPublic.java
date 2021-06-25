@@ -20,13 +20,11 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
 
 import static org.mskcc.cbio.oncokb.Constants.*;
 
 @Configuration
-@ComponentScan(basePackages = "org.mskcc.cbio.oncokb.api.pub.v1")
+@ComponentScan(basePackages = {"org.mskcc.cbio.oncokb.api.pub.v1", "org.mskcc.cbio.oncokb.cache", "org.mskcc.cbio.oncokb.bo"})
 @EnableWebMvc
 @EnableSwagger2
 @EnableScheduling

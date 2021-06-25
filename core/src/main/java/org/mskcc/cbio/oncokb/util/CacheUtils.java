@@ -63,8 +63,6 @@ public class CacheUtils {
 
     private static Map<String, Long> recordTime = new HashedMap();
 
-    private static Map<String, Gene> externalGenePool = new HashMap<>();
-
     private static Info oncokbInfo;
 
     private static Observer numbersObserver = new Observer() {
@@ -523,36 +521,6 @@ public class CacheUtils {
             }
         }
         return mappedEvis;
-    }
-
-    public static void addToGenePool(Gene gene) {
-        if (gene == null) {
-            return;
-        }
-        if (gene.getEntrezGeneId() != null) {
-            externalGenePool.put(gene.getEntrezGeneId().toString(), gene);
-        }
-        if (gene.getHugoSymbol() != null) {
-            externalGenePool.put(gene.getHugoSymbol(), gene);
-        }
-        gene.getGeneAliases().forEach(alias -> {
-            // gene alias mapping should have lower priority when the same query exists
-            if (alias != null && !externalGenePool.containsKey(alias)) {
-                externalGenePool.put(alias, gene);
-            }
-        });
-    }
-
-    public static void addToGenePool(String query, Gene gene) {
-        externalGenePool.put(query, gene);
-    }
-
-    public static Gene getFromGenePool(String key) {
-        return externalGenePool.get(key);
-    }
-
-    public static boolean hasKeyInGenePool(String key) {
-        return externalGenePool.containsKey(key);
     }
 
     private static void setEvidences(Gene gene) {

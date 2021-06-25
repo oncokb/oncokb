@@ -1,11 +1,12 @@
 package org.mskcc.cbio.oncokb.model;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
  * Created by jiaojiao on 6/8/17.
  */
-public class CancerGene {
+public class CancerGene implements Serializable {
     private String hugoSymbol;
     private Integer entrezGeneId;
     private String grch37Isoform = "";

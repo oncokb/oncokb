@@ -54,11 +54,11 @@ public class IndicatorQueryResp implements java.io.Serializable {
         newResp.setHighestDiagnosticImplicationLevel(this.highestDiagnosticImplicationLevel);
         newResp.setHighestPrognosticImplicationLevel(this.highestPrognosticImplicationLevel);
         newResp.setOtherSignificantSensitiveLevels(new ArrayList<>(this.otherSignificantSensitiveLevels));
-        newResp.setOtherSignificantResistanceLevels(new ArrayList<>(this.otherSignificantSensitiveLevels));
+        newResp.setOtherSignificantResistanceLevels(new ArrayList<>(this.otherSignificantResistanceLevels));
         newResp.setVUS(this.VUS);
         newResp.setHotspot(this.hotspot);
         newResp.setGeneSummary(this.geneSummary);
-        newResp.setVariantSummary(this.geneSummary);
+        newResp.setVariantSummary(this.variantSummary);
         newResp.setTumorTypeSummary(this.tumorTypeSummary);
         newResp.setPrognosticSummary(this.prognosticSummary);
         newResp.setDiagnosticSummary(this.diagnosticSummary);

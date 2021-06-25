@@ -2,10 +2,12 @@ package org.mskcc.cbio.oncokb.apiModels;
 
 import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
 
+import java.io.Serializable;
+
 /**
  * Created by Hongxin Zhang on 2019-04-24.
  */
-public class InfoLevel {
+public class InfoLevel implements Serializable {
     private LevelOfEvidence levelOfEvidence;
     private String description;
     private String htmlDescription;

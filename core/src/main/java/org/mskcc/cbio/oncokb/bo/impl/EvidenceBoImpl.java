@@ -67,14 +67,7 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
             return findEvidencesByAlteration(alterations, evidenceTypes);
         }
 
-        Set<Evidence> alterationEvidences = findEvidencesByAlteration(alterations).stream()
-            .filter(evidence -> {
-                if (!evidenceTypes.contains(evidence.getEvidenceType())) {
-                    return false;
-                }
-                return true;
-            })
-            .collect(Collectors.toSet());
+        Set<Evidence> alterationEvidences = new HashSet<>(findEvidencesByAlteration(alterations, evidenceTypes));
         Set<Evidence> evidences = new LinkedHashSet<>();
         for (TumorType relevantTumorType : relevantTumorTypes) {
             for (Evidence evidence : alterationEvidences) {

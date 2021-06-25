@@ -5,10 +5,11 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.apiModels.DrugMatch;
-import org.mskcc.cbio.oncokb.apiModels.NCITDrug;
+import org.mskcc.cbio.oncokb.bo.OncokbTranscriptService;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.TumorType;
 import org.mskcc.cbio.oncokb.util.*;
+import org.oncokb.oncokb_transcript.ApiException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -170,11 +171,15 @@ public class PrivateSearchApiController implements PrivateSearchApi {
     }
 
     @Override
-    public ResponseEntity<LinkedHashSet<NCITDrug>> searchDrugGet(String query, Integer limit) {
+    public ResponseEntity<LinkedHashSet<org.oncokb.oncokb_transcript.client.Drug>> searchDrugGet(
+        @ApiParam(value = "The search query, it could be drug name, NCIT code", required = true) @RequestParam(value = "query") String query,
+        @ApiParam(value = "The limit of returned result.") @RequestParam(value = "limit", defaultValue = "5", required = false) Integer limit
+    ) throws ApiException {
         if (limit == null) {
             limit = DEFAULT_RETURN_LIMIT;
         }
-        return new ResponseEntity<>(getLimit(NCITDrugUtils.findDrugs(query), limit), HttpStatus.OK);
+        OncokbTranscriptService oncokbTranscriptService = new OncokbTranscriptService();
+        return new ResponseEntity<>(getLimit(new LinkedHashSet<>(oncokbTranscriptService.findDrugs(query)), limit), HttpStatus.OK);
     }
 
     private LinkedHashSet<TypeaheadSearchResp> getMatch(Map<String, Set<Gene>> map, List<String> keywords, Boolean exactMatch) {
