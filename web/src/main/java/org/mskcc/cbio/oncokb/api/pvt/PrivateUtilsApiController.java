@@ -10,6 +10,8 @@ import org.mskcc.cbio.oncokb.apiModels.download.FileExtension;
 import org.mskcc.cbio.oncokb.apiModels.download.FileName;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.PortalAlterationBo;
+import org.mskcc.cbio.oncokb.cache.CacheFetcher;
+import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.TumorType;
 import org.mskcc.cbio.oncokb.bo.OncokbTranscriptService;
@@ -17,6 +19,7 @@ import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.Tumor;
 import org.mskcc.cbio.oncokb.util.*;
 import org.oncokb.oncokb_transcript.ApiException;
 import org.oncokb.oncokb_transcript.client.TranscriptComparisonVM;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -36,6 +39,8 @@ import static org.mskcc.cbio.oncokb.util.HttpUtils.getDataDownloadResponseEntity
  */
 @Controller
 public class PrivateUtilsApiController implements PrivateUtilsApi {
+    @Autowired
+    CacheFetcher cacheFetcher;
 
     @Override
     public ResponseEntity<List<String>> utilsSuggestedVariantsGet() {
@@ -344,7 +349,8 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             }
             query = new Query(alterationModel, matchedRG);
         } else {
-            query = new Query(null, matchedRG, "regular", null, null, null, null, null, tumorType, null, null, null, hgvsg);
+            Alteration alterationModel = this.cacheFetcher.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, matchedRG, hgvsg);
+            query = QueryUtils.getQueryForHgvsg(matchedRG, hgvsg, tumorType, alterationModel);
             gene = GeneUtils.getGeneByEntrezId(query.getEntrezGeneId());
         }
         query.setTumorType(tumorType);
