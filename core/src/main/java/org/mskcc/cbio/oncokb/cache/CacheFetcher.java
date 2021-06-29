@@ -1,20 +1,29 @@
 package org.mskcc.cbio.oncokb.cache;
 
+import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.apiModels.CuratedGene;
-import org.mskcc.cbio.oncokb.model.CancerGene;
-import org.mskcc.cbio.oncokb.model.Evidence;
-import org.mskcc.cbio.oncokb.model.Gene;
-import org.mskcc.cbio.oncokb.model.OncoKBInfo;
+import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotateMutationByHGVSgQuery;
+import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotationQueryType;
+import org.mskcc.cbio.oncokb.bo.OncokbTranscriptService;
+import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
+import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.*;
+import org.oncokb.oncokb_transcript.ApiException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
+
 @Component
 public class CacheFetcher {
+    OncokbTranscriptService oncokbTranscriptService = new OncokbTranscriptService();
+
     @Cacheable(cacheResolver = "generalCacheResolver", key = "'all'")
     public OncoKBInfo getOncoKBInfo() {
         return new OncoKBInfo();
@@ -74,7 +83,6 @@ public class CacheFetcher {
         }
         return sb.toString();
     }
-
 
     @Cacheable(cacheResolver = "generalCacheResolver")
     public List<CuratedGene> getCuratedGenes(boolean includeEvidence) {
@@ -161,5 +169,44 @@ public class CacheFetcher {
 
     private String getStringByBoolean(Boolean val) {
         return val ? "Yes" : "No";
+    }
+
+    @Cacheable(cacheResolver = "generalCacheResolver")
+    public Gene findGeneBySymbol(String symbol) throws ApiException {
+        return this.oncokbTranscriptService.findGeneBySymbol(symbol);
+    }
+
+    @Cacheable(
+        cacheResolver = "generalCacheResolver",
+        keyGenerator = "concatKeyGenerator"
+    )
+    public IndicatorQueryResp processQuery(ReferenceGenome referenceGenome,
+                                           Integer entrezGeneId,
+                                           String hugoSymbol,
+                                           String alteration,
+                                           String alterationType,
+                                           String tumorType,
+                                           String consequence,
+                                           Integer proteinStart,
+                                           Integer proteinEnd,
+                                           StructuralVariantType svType,
+                                           String hgvs,
+                                           Set<LevelOfEvidence> levels,
+                                           Boolean highestLevelOnly,
+                                           Set<EvidenceType> evidenceTypes) {
+        if (referenceGenome == null) {
+            referenceGenome = DEFAULT_REFERENCE_GENOME;
+        }
+        Query query = new Query(null, referenceGenome, AnnotationQueryType.REGULAR.getName(), entrezGeneId, hugoSymbol, alteration, alterationType, svType, tumorType, consequence, proteinStart, proteinEnd, hgvs);
+        return IndicatorUtils.processQuery(
+            query, levels, highestLevelOnly,
+            evidenceTypes
+        );
+    }
+
+    @Cacheable(cacheResolver = "generalCacheResolver",
+        keyGenerator = "concatKeyGenerator")
+    public Alteration getAlterationFromGenomeNexus(GNVariantAnnotationType gnVariantAnnotationType, ReferenceGenome referenceGenome, String genomicLocation) {
+        return AlterationUtils.getAlterationFromGenomeNexus(gnVariantAnnotationType, genomicLocation, referenceGenome);
     }
 }

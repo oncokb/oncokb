@@ -52,11 +52,10 @@ public class CustomRedisCacheManager implements CacheManager {
             CacheKey nameKey = CacheKey.getByKey(name);
             if (nameKey != null) {
                 switch (nameKey) {
-                    case ONCOKB_INFO:
-                    case CANCER_GENE_LIST:
-                    case CANCER_GENE_LIST_TXT:
-                    case CURATED_GENE_LIST:
-                    case CURATED_GENE_LIST_TXT:
+                    case PROCESS_QUERY:
+                    case GET_ALTERATION_FROM_GN:
+                    case FIND_GENE_BY_SYMBOL:
+                        return new CustomMapRedisCache(cacheName, client, clientTTLInMinutes);
                     default:
                         return new CustomBucketRedisCache(cacheName, client, clientTTLInMinutes);
                 }

@@ -173,6 +173,6 @@ public class OncokbTranscriptService {
             gene.setGeneAliases(transcriptGene.getGeneAliases().stream().map(geneAlias -> geneAlias.getName()).collect(Collectors.toSet()));
             return gene;
         }
-        return null;
+        return new Gene();
     }
 }

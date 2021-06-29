@@ -1,5 +1,6 @@
 package org.mskcc.cbio.oncokb.cache;
 
+import org.mskcc.cbio.oncokb.cache.keygenerator.ConcatGenerator;
 import org.mskcc.cbio.oncokb.util.PropertiesUtils;
 import org.mskcc.oncokb.meta.enumeration.RedisType;
 import org.redisson.Redisson;
@@ -8,6 +9,7 @@ import org.redisson.config.Config;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.interceptor.CacheResolver;
+import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.context.annotation.*;
 
 @Configuration
@@ -30,12 +32,14 @@ public class CacheConfiguration {
                 .setAddress(redisAddress)
                 .setConnectionMinimumIdleSize(1)
                 .setConnectionPoolSize(2)
+                .setDnsMonitoringInterval(-1)
                 .setPassword(redisPassword);
         } else if (redisType.equals(RedisType.SENTINEL.getType())) {
             config
                 .useSentinelServers()
                 .setMasterName(redisMasterName)
                 .setCheckSentinelsList(false)
+                .setDnsMonitoringInterval(-1)
                 .addSentinelAddress(redisAddress)
                 .setPassword(redisPassword);
         } else {
@@ -64,5 +68,10 @@ public class CacheConfiguration {
         CacheManager cm
     ) {
         return new GeneralCacheResolver(cm);
+    }
+
+    @Bean
+    public KeyGenerator concatKeyGenerator(){
+        return new ConcatGenerator();
     }
 }

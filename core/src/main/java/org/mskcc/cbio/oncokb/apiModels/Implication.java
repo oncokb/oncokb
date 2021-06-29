@@ -4,13 +4,14 @@ import org.mskcc.cbio.oncokb.model.ArticleAbstract;
 import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
 import org.mskcc.cbio.oncokb.apiModels.TumorType;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
 /**
  * Created by Hongxin Zhang on 2019-05-29.
  */
-public class Implication {
+public class Implication implements Serializable {
     LevelOfEvidence levelOfEvidence;
     Set<String> alterations = new HashSet<>();
     TumorType tumorType;
