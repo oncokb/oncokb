@@ -144,10 +144,12 @@ public class GenomeNexusUtils {
         VariantAnnotation variantAnnotation = null;
         if (query != null && type != null) {
             try {
+                List<String> gnFields = new ArrayList<>();
+                gnFields.add("annotation_summary");
                 if (type.equals(GNVariantAnnotationType.HGVS_G)) {
-                    variantAnnotation = getAnnotationControllerApi(referenceGenome).fetchVariantAnnotationGET(query, MSK_ISOFORM_OVERRIDE, null, null);
+                    variantAnnotation = getAnnotationControllerApi(referenceGenome).fetchVariantAnnotationGET(query, MSK_ISOFORM_OVERRIDE, null, gnFields);
                 } else {
-                    variantAnnotation = getAnnotationControllerApi(referenceGenome).fetchVariantAnnotationByGenomicLocationGET(query, MSK_ISOFORM_OVERRIDE, null, null);
+                    variantAnnotation = getAnnotationControllerApi(referenceGenome).fetchVariantAnnotationByGenomicLocationGET(query, MSK_ISOFORM_OVERRIDE, null, gnFields);
                 }
 
 
