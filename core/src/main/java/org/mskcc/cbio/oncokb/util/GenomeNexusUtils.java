@@ -196,8 +196,10 @@ public class GenomeNexusUtils {
         }
 
         // Only return one consequence term
-        String consequenceTerm = getTranscriptConsequenceSummaryTerm(summary.getConsequenceTerms(), variantAnnotation.getMostSevereConsequence());
-        summary.setConsequenceTerms(consequenceTerm);
+        if (summary != null) {
+            String consequenceTerm = getTranscriptConsequenceSummaryTerm(summary.getConsequenceTerms(), variantAnnotation.getMostSevereConsequence());
+            summary.setConsequenceTerms(consequenceTerm);
+        }
         return summary;
     }
 
