@@ -1,13 +1,12 @@
 package org.mskcc.cbio.oncokb.util;
 
 import junit.framework.TestCase;
-import org.genome_nexus.client.TranscriptConsequence;
 import org.genome_nexus.client.TranscriptConsequenceSummary;
+import org.junit.Assert;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.ReferenceGenome;
 
-import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertNotEquals;
 
@@ -98,7 +97,11 @@ public class GenomeNexusUtilsTest extends TestCase {
             gene.getGrch37RefSeq(), consequence.getRefSeq());
         assertEquals("Picked transcript isoform is not the same with MSKIMPACT BRAF isoform, but it should.",
             gene.getGrch37Isoform(), consequence.getTranscriptId());
-        assertTrue("There are multiple consequences", consequence.getConsequenceTerms().contains(","));
+        assertTrue("We no longer return multiple terms, only return the first term", !consequence.getConsequenceTerms().contains(","));
+
+        // No consequence can be found for the following
+        consequence = GenomeNexusUtils.getTranscriptConsequence(GNVariantAnnotationType.GENOMIC_LOCATION, "9,136519547,136519547,C,C", ReferenceGenome.GRCh38);
+        Assert.assertNull("No consequence should return for this genomic location", consequence);
     }
 
 }
