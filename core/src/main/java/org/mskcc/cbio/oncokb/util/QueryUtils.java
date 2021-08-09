@@ -1,7 +1,6 @@
 package org.mskcc.cbio.oncokb.util;
 
 import com.mysql.jdbc.StringUtils;
-import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.model.*;
 
 import java.util.Arrays;
