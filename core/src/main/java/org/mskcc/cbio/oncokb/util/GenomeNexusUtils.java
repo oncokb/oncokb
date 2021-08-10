@@ -11,7 +11,6 @@ import org.mskcc.cbio.oncokb.apiModels.TranscriptMatchResult;
 import org.mskcc.cbio.oncokb.apiModels.TranscriptPair;
 import org.mskcc.cbio.oncokb.apiModels.ensembl.Sequence;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
-import org.mskcc.cbio.oncokb.genomenexus.VEPDetailedEnrichmentService;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.ReferenceGenome;
 import org.springframework.http.*;
@@ -25,7 +24,7 @@ import java.util.stream.Collectors;
  */
 public class GenomeNexusUtils {
 
-    private static final String MSK_ISOFORM_OVERRIDE ="mskcc";
+    private static final String MSK_ISOFORM_OVERRIDE = "mskcc";
 
     private static final String ENSEMBL_37_API_URL = "https://grch37.rest.ensembl.org";
     private static final String ENSEMBL_38_API_URL = "https://rest.ensembl.org";
@@ -118,7 +117,7 @@ public class GenomeNexusUtils {
         }
     }
 
-    public static TranscriptConsequence getTranscriptConsequence(GNVariantAnnotationType type, String query, ReferenceGenome referenceGenome) {
+    public static TranscriptConsequenceSummary getTranscriptConsequence(GNVariantAnnotationType type, String query, ReferenceGenome referenceGenome) {
         if (StringUtils.isEmpty(query) || StringUtils.isEmpty(query.replace(",", ""))) {
             return null;
         }
@@ -144,16 +143,12 @@ public class GenomeNexusUtils {
         VariantAnnotation variantAnnotation = null;
         if (query != null && type != null) {
             try {
+                List<String> gnFields = new ArrayList<>();
+                gnFields.add("annotation_summary");
                 if (type.equals(GNVariantAnnotationType.HGVS_G)) {
-                    variantAnnotation = getAnnotationControllerApi(referenceGenome).fetchVariantAnnotationGET(query, MSK_ISOFORM_OVERRIDE, null, null);
+                    variantAnnotation = getAnnotationControllerApi(referenceGenome).fetchVariantAnnotationGET(query, MSK_ISOFORM_OVERRIDE, null, gnFields);
                 } else {
-                    variantAnnotation = getAnnotationControllerApi(referenceGenome).fetchVariantAnnotationByGenomicLocationGET(query, MSK_ISOFORM_OVERRIDE, null, null);
-                }
-
-
-                if (variantAnnotation != null) {
-                    VEPDetailedEnrichmentService service = new VEPDetailedEnrichmentService();
-                    variantAnnotation = service.enrich(variantAnnotation);
+                    variantAnnotation = getAnnotationControllerApi(referenceGenome).fetchVariantAnnotationByGenomicLocationGET(query, MSK_ISOFORM_OVERRIDE, null, gnFields);
                 }
             } catch (ApiException e) {
                 e.printStackTrace();
@@ -162,66 +157,64 @@ public class GenomeNexusUtils {
         return variantAnnotation;
     }
 
-    private static TranscriptConsequence getConsequence(VariantAnnotation variantAnnotation, ReferenceGenome referenceGenome) {
-        List<TranscriptConsequence> transcripts = new ArrayList<>();
+    private static String getTranscriptConsequenceSummaryTerm(String consequenceTerms, String mostSevereConsequence) {
+        if (StringUtils.isEmpty(consequenceTerms)) {
+            return "";
+        }
+        return Arrays.stream(consequenceTerms.split(",")).filter(term -> term.equals(mostSevereConsequence)).findFirst().orElse(consequenceTerms.split(",")[0]);
+    }
 
-        if (variantAnnotation == null) {
+    private static TranscriptConsequenceSummary getConsequence(VariantAnnotation variantAnnotation, ReferenceGenome referenceGenome) {
+        List<TranscriptConsequenceSummary> summaries = new ArrayList<>();
+
+        if (variantAnnotation == null || variantAnnotation.getAnnotationSummary() == null || variantAnnotation.getAnnotationSummary().getTranscriptConsequenceSummaries() == null) {
             return null;
         }
 
-        if (variantAnnotation.getTranscriptConsequences() != null) {
-            for (TranscriptConsequence transcript : variantAnnotation.getTranscriptConsequences()) {
-                if (transcript.getGeneSymbol() != null && transcript.getTranscriptId() != null) {
-                    Gene gene = GeneUtils.getGeneByHugoSymbol(transcript.getGeneSymbol());
+        if (variantAnnotation.getAnnotationSummary() != null && variantAnnotation.getAnnotationSummary().getTranscriptConsequenceSummaries() != null) {
+            for (TranscriptConsequenceSummary consequenceSummary : variantAnnotation.getAnnotationSummary().getTranscriptConsequenceSummaries()) {
+                if (consequenceSummary.getHugoGeneSymbol() != null && consequenceSummary.getTranscriptId() != null) {
+                    Gene gene = GeneUtils.getGeneByHugoSymbol(consequenceSummary.getHugoGeneSymbol());
                     String isoform = getIsoform(gene, referenceGenome);
-                    if (gene != null && (StringUtils.isEmpty(isoform) || isoform.equals(transcript.getTranscriptId()))) {
-                        transcripts.add(transcript);
+                    if (gene != null && (StringUtils.isEmpty(isoform) || isoform.equals(consequenceSummary.getTranscriptId()))) {
+                        summaries.add(consequenceSummary);
                     }
                 }
             }
         }
 
+        TranscriptConsequenceSummary summary;
         // only one transcript marked as canonical
-        if (transcripts.size() == 1) {
-            return transcripts.iterator().next();
-        } else if (transcripts.size() > 1) {
-            return pickTranscript(transcripts, variantAnnotation.getMostSevereConsequence());
+        if (summaries.size() == 1) {
+            summary = summaries.iterator().next();
+        } else if (summaries.size() > 1) {
+            summary = pickTranscriptConsequenceSummary(summaries, variantAnnotation.getAnnotationSummary().getCanonicalTranscriptId(), variantAnnotation.getMostSevereConsequence());
         }
         // no transcript marked as canonical (list.size() == 0), use most sever consequence to decide which one to pick among all available
         else {
-            return pickTranscript(variantAnnotation.getTranscriptConsequences(), variantAnnotation.getMostSevereConsequence());
+            summary = pickTranscriptConsequenceSummary(variantAnnotation.getAnnotationSummary().getTranscriptConsequenceSummaries(), variantAnnotation.getAnnotationSummary().getCanonicalTranscriptId(), variantAnnotation.getMostSevereConsequence());
         }
+
+        // Only return one consequence term
+        if (summary != null) {
+            String consequenceTerm = getTranscriptConsequenceSummaryTerm(summary.getConsequenceTerms(), variantAnnotation.getMostSevereConsequence());
+            summary.setConsequenceTerms(consequenceTerm);
+        }
+        return summary;
     }
 
-    private static TranscriptConsequence pickTranscript(List<TranscriptConsequence> transcripts, String mostSevereConsequence) {
-        List<TranscriptConsequence> canonicalTranscripts = new ArrayList<>();
-
-        if (transcripts == null) {
+    private static TranscriptConsequenceSummary pickTranscriptConsequenceSummary(List<TranscriptConsequenceSummary> summaries, String canonicalTranscript, String mostSevereConsequence) {
+        if (summaries == null) {
             return null;
         }
         // Find canonical isoforms first
-        for (TranscriptConsequence transcript : transcripts) {
-            if (transcript.getCanonical() != null && transcript.equals("1")) {
-                canonicalTranscripts.add(transcript);
-            }
+        List<TranscriptConsequenceSummary> canonicalTranscripts = summaries.stream().filter(summary -> StringUtils.isNotEmpty(summary.getTranscriptId()) && summary.getTranscriptId().equals(canonicalTranscript)).collect(Collectors.toList());
+
+        if (StringUtils.isNotEmpty(mostSevereConsequence)) {
+            canonicalTranscripts = canonicalTranscripts.stream().filter(summary -> StringUtils.isNotEmpty(summary.getConsequenceTerms()) && Arrays.asList(summary.getConsequenceTerms().split(",")).contains(mostSevereConsequence)).collect(Collectors.toList());
         }
 
-        // Find isoform with most severe consequence
-        for (TranscriptConsequence transcript : canonicalTranscripts) {
-            List<String> consequenceTerms = transcript.getConsequenceTerms();
-            for (String consequenceTerm : consequenceTerms) {
-                if (consequenceTerm.trim().equals(mostSevereConsequence)) {
-                    return transcript;
-                }
-            }
-        }
-
-        // no match, return the first one
-        if (transcripts.size() > 0) {
-            return transcripts.get(0);
-        }
-
-        return null;
+        return canonicalTranscripts.size() > 0 ? canonicalTranscripts.get(0) : null;
     }
 
     private static List<EnsemblTranscript> getEnsemblTranscriptList(String hugoSymbol, ReferenceGenome referenceGenome) throws ApiException {
