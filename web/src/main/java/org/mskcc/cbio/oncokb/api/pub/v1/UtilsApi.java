@@ -16,6 +16,7 @@ import java.util.List;
 
 import static org.mskcc.cbio.oncokb.api.pub.v1.Constants.INCLUDE_EVIDENCE;
 import static org.mskcc.cbio.oncokb.api.pub.v1.Constants.VERSION;
+import static org.springframework.util.MimeTypeUtils.TEXT_PLAIN_VALUE;
 
 /**
  * Created by Hongxin on 10/28/16.
@@ -45,7 +46,7 @@ public interface UtilsApi {
         @ApiResponse(code = 503, message = "Service Unavailable")
     })
     @RequestMapping(value = "/utils/allAnnotatedVariants.txt",
-        produces = {"text/plain"},
+        produces = TEXT_PLAIN_VALUE,
         method = RequestMethod.GET)
     ResponseEntity<String> utilsAllAnnotatedVariantsTxtGet(
         @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
@@ -73,7 +74,7 @@ public interface UtilsApi {
         @ApiResponse(code = 503, message = "Service Unavailable")
     })
     @RequestMapping(value = "/utils/allActionableVariants.txt",
-        produces = {"text/plain"},
+        produces = TEXT_PLAIN_VALUE,
         method = RequestMethod.GET)
     ResponseEntity<String> utilsAllActionableVariantsTxtGet(
         @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
@@ -103,7 +104,7 @@ public interface UtilsApi {
         @ApiResponse(code = 503, message = "Service Unavailable")
     })
     @RequestMapping(value = "/utils/cancerGeneList.txt",
-        produces = {"text/plain"},
+        produces = TEXT_PLAIN_VALUE,
         method = RequestMethod.GET)
     ResponseEntity<String> utilsCancerGeneListTxtGet(
         @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
@@ -134,7 +135,7 @@ public interface UtilsApi {
         @ApiResponse(code = 503, message = "Service Unavailable")
     })
     @RequestMapping(value = "/utils/allCuratedGenes.txt",
-        produces = {"text/plain"},
+        produces = TEXT_PLAIN_VALUE,
         method = RequestMethod.GET)
     ResponseEntity<String> utilsAllCuratedGenesTxtGet(
         @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
