@@ -1,8 +1,9 @@
 Prepare for data v*.* release
 
 - [ ] Update News
+- [ ] Update tests
 - [ ] Include v*.* data dump
-- [ ] Update demo site
 - [ ] Update public site
+- [ ] Update demo site
 - [ ] Update trimmed public site
 - [ ] Update release note
