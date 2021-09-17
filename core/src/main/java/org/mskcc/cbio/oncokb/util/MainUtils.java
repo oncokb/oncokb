@@ -393,6 +393,10 @@ public class MainUtils {
         return oncogenicities.contains(oncogenicity);
     }
 
+    public static boolean isOncogenic(Oncogenicity oncogenicity) {
+        return oncogenicity != null && (oncogenicity.equals(Oncogenicity.YES) || oncogenicity.equals(Oncogenicity.LIKELY) || oncogenicity.equals(Oncogenicity.PREDICTED));
+    }
+
     public static Set<BiologicalVariant> getBiologicalVariants(Gene gene) {
         Set<BiologicalVariant> variants = new HashSet<>();
         if (gene != null) {

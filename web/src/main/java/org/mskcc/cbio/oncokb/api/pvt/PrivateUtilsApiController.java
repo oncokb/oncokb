@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.mskcc.cbio.oncokb.model.InferredMutation.ONCOGENIC_MUTATIONS;
 import static org.mskcc.cbio.oncokb.util.GitHubUtils.getOncoKBSqlDumpFileName;
 import static org.mskcc.cbio.oncokb.util.HttpUtils.getDataDownloadResponseEntity;
 
@@ -39,6 +40,8 @@ import static org.mskcc.cbio.oncokb.util.HttpUtils.getDataDownloadResponseEntity
  */
 @Controller
 public class PrivateUtilsApiController implements PrivateUtilsApi {
+    final String FDA_L_2 = "FDAx2";
+    final String FDA_L_3 = "FDAx3";
     @Autowired
     CacheFetcher cacheFetcher;
 
@@ -152,6 +155,23 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     }
 
     @Override
+    public ResponseEntity<Map<String, Integer>> utilsNumbersFdaGet() {
+        List<FdaAlteration> fdaAlterations = utilsFdaAlterationsGet(null).getBody();
+        Map<String, Set<Gene>> map = new HashMap<>();
+        for (FdaAlteration fdaAlteration : fdaAlterations) {
+            if (!map.containsKey(fdaAlteration.getLevel())) {
+                map.put(fdaAlteration.getLevel(), new HashSet<>());
+            }
+            map.get(fdaAlteration.getLevel()).add(fdaAlteration.getAlteration().getGene());
+        }
+
+        Map<String, Integer> result = map.entrySet().stream().collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue().size()));
+        return new ResponseEntity<>(
+            result,
+            HttpStatus.OK);
+    }
+
+    @Override
     public ResponseEntity<Map<String, Boolean>> validateTrials(@ApiParam(value = "NCTID list") @RequestParam(value = "nctIds") List<String> nctIds) throws ParserConfigurationException, SAXException, IOException {
         return new ResponseEntity<>(MainUtils.validateTrials(nctIds), HttpStatus.OK);
     }
@@ -182,6 +202,105 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     @Override
     public ResponseEntity<List<TumorType>> utilsTumorTypesGet() {
         return new ResponseEntity<>(TumorTypeUtils.getAllTumorTypes(), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<List<FdaAlteration>> utilsFdaAlterationsGet(
+        @ApiParam(value = "Gene hugo symbol") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
+    ) {
+        Set<Gene> genes = new HashSet<>();
+        if (StringUtils.isNullOrEmpty(hugoSymbol)) {
+            genes = CacheUtils.getAllGenes();
+        } else {
+            genes.add(GeneUtils.getGeneByHugoSymbol(hugoSymbol));
+        }
+        Set<FdaAlteration> alterations = new HashSet<>();
+        Map<Alteration, Map<String, Set<FdaAlteration>>> resultMap = new HashMap<>();
+        for (Gene gene : genes) {
+            for (ClinicalVariant clinicalVariant : MainUtils.getClinicalVariants(gene)) {
+                LevelOfEvidence level = LevelOfEvidence.getByLevel(clinicalVariant.getLevel());
+                if (level == null || !LevelUtils.getTherapeuticLevels().contains(level)) {
+                    continue;
+                }
+                Set<Alteration> mappedAlterations = new HashSet<>();
+                if (clinicalVariant.getVariant().getAlteration().equals(ONCOGENIC_MUTATIONS.getVariant())) {
+                    for (BiologicalVariant annotatedAlt : MainUtils.getBiologicalVariants(gene)) {
+                        Oncogenicity oncogenicity = Oncogenicity.getByEffect(annotatedAlt.getOncogenic());
+                        if (MainUtils.isOncogenic(oncogenicity)) {
+                            mappedAlterations.add(annotatedAlt.getVariant());
+                        }
+                    }
+                } else {
+                    mappedAlterations.add(clinicalVariant.getVariant());
+                }
+                for (Alteration alteration : mappedAlterations) {
+                    if (!resultMap.containsKey(alteration)) {
+                        resultMap.put(alteration, new HashMap<>());
+                    }
+                    for (TumorType tumorType : clinicalVariant.getCancerTypes()) {
+                        FdaAlteration fdaAlteration = new FdaAlteration();
+                        String cancerTypeName = TumorTypeUtils.getTumorTypeName(tumorType);
+                        fdaAlteration.setAlteration(alteration);
+                        fdaAlteration.setLevel(convertToFdaLevel(LevelOfEvidence.getByLevel(clinicalVariant.getLevel()), clinicalVariant));
+                        fdaAlteration.setCancerType(cancerTypeName);
+                        if (!resultMap.get(alteration).containsKey(cancerTypeName)) {
+                            resultMap.get(alteration).put(cancerTypeName, new HashSet<>());
+                        }
+                        resultMap.get(alteration).get(cancerTypeName).add(fdaAlteration);
+                    }
+                }
+            }
+        }
+
+        for (Map.Entry<Alteration, Map<String, Set<FdaAlteration>>> alterationMap : resultMap.entrySet()) {
+            for (Map.Entry<String, Set<FdaAlteration>> cancerTypeMap : alterationMap.getValue().entrySet()) {
+                FdaAlteration pickedFdaAlt = cancerTypeMap.getValue().iterator().next();
+                if (cancerTypeMap.getValue().size() > 1) {
+                    Optional<FdaAlteration> level2 = cancerTypeMap.getValue().stream().filter(fdaAlteration -> fdaAlteration.getLevel().equals(FDA_L_2)).findAny();
+                    if (level2.isPresent()) {
+                        pickedFdaAlt = level2.get();
+                    }
+                }
+                alterations.add(pickedFdaAlt);
+            }
+        }
+        return new ResponseEntity<>(new ArrayList<>(alterations), HttpStatus.OK);
+    }
+
+    private boolean specialFdaL3(ClinicalVariant clinicalVariant) {
+        List<String> specialList = Arrays.asList(new String[]{"ERBB2&Oncogenic Mutations&Non-Small Cell Lung Cancer&Ado-Trastuzumab Emtansine", "EGFR&A763_Y764insFQEA&Non-Small Cell Lung Cancer&Erlotinib", "ALK&Fusions&Inflammatory Myofibroblastic Tumor&Crizotinib", "ALK&Fusions&Inflammatory Myofibroblastic Tumor&Ceritinib", "BRAF&V600E&Ganglioglioma, Pleomorphic Xanthoastrocytoma, Pilocytic Astrocytoma&Cobimetinib+Vemurafenib,", "BRAF&V600E&Ganglioglioma, Pleomorphic Xanthoastrocytoma, Pilocytic Astrocytoma&Trametinib+Dabrafenib"});
+
+        String separator = "&";
+        List<String> queryParts = new ArrayList<>();
+        queryParts.add(clinicalVariant.getVariant().getGene().getHugoSymbol());
+        queryParts.add(clinicalVariant.getVariant().getAlteration());
+        queryParts.add(TumorTypeUtils.getTumorTypesName(clinicalVariant.getCancerTypes()));
+        queryParts.add(String.join("+", clinicalVariant.getDrug().stream().sorted().collect(Collectors.toList())));
+        String query = String.join(separator, queryParts);
+        return specialList.contains(query);
+    }
+
+    private String convertToFdaLevel(LevelOfEvidence level, ClinicalVariant clinicalVariant) {
+        if (level == null) {
+            return "";
+        }
+        switch (level) {
+            case LEVEL_1:
+            case LEVEL_R1:
+                return FDA_L_2;
+            case LEVEL_2:
+                if (specialFdaL3(clinicalVariant)) {
+                    return FDA_L_3;
+                } else {
+                    return FDA_L_2;
+                }
+            case LEVEL_3A:
+            case LEVEL_4:
+            case LEVEL_R2:
+                return FDA_L_3;
+            default:
+                return "";
+        }
     }
 
     @Override
@@ -255,6 +374,10 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
 
     @Override
     public ResponseEntity<Map<LevelOfEvidence, Set<Evidence>>> utilsEvidencesByLevelsGet() {
+        return new ResponseEntity<>(getEvidencesByLevels(), HttpStatus.OK);
+    }
+
+    private Map<LevelOfEvidence, Set<Evidence>> getEvidencesByLevels() {
         Map<Gene, Set<Evidence>> evidences = EvidenceUtils.getAllGeneBasedEvidences();
 
         Map<LevelOfEvidence, Set<Evidence>> result = new HashMap<>();
@@ -270,7 +393,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
                 }
             }
         }
-        return new ResponseEntity<>(result, HttpStatus.OK);
+        return result;
     }
 
     @Override
