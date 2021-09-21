@@ -9,6 +9,7 @@ public enum CacheKey {
     FIND_GENE_BY_SYMBOL("findGeneBySymbol"),
     PROCESS_QUERY("processQuery"),
     GET_ALTERATION_FROM_GN("getAlterationFromGenomeNexus"),
+    GET_ALL_FDA_ALTERATIONS("getAllFdaAlterations"),
     ONCOKB_INFO("getOncoKBInfo");
 
     String key;
