@@ -40,8 +40,6 @@ import static org.mskcc.cbio.oncokb.util.HttpUtils.getDataDownloadResponseEntity
  */
 @Controller
 public class PrivateUtilsApiController implements PrivateUtilsApi {
-    final String FDA_L_2 = "FDAx2";
-    final String FDA_L_3 = "FDAx3";
     @Autowired
     CacheFetcher cacheFetcher;
 
@@ -208,98 +206,15 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     public ResponseEntity<List<FdaAlteration>> utilsFdaAlterationsGet(
         @ApiParam(value = "Gene hugo symbol") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
     ) {
-        Set<Gene> genes = new HashSet<>();
         if (StringUtils.isNullOrEmpty(hugoSymbol)) {
-            genes = CacheUtils.getAllGenes();
+            return new ResponseEntity<>(new ArrayList<>(this.cacheFetcher.getAllFdaAlterations()), HttpStatus.OK);
         } else {
-            genes.add(GeneUtils.getGeneByHugoSymbol(hugoSymbol));
-        }
-        Set<FdaAlteration> alterations = new HashSet<>();
-        Map<Alteration, Map<String, Set<FdaAlteration>>> resultMap = new HashMap<>();
-        for (Gene gene : genes) {
-            for (ClinicalVariant clinicalVariant : MainUtils.getClinicalVariants(gene)) {
-                LevelOfEvidence level = LevelOfEvidence.getByLevel(clinicalVariant.getLevel());
-                if (level == null || !LevelUtils.getTherapeuticLevels().contains(level)) {
-                    continue;
-                }
-                Set<Alteration> mappedAlterations = new HashSet<>();
-                if (clinicalVariant.getVariant().getAlteration().equals(ONCOGENIC_MUTATIONS.getVariant())) {
-                    for (BiologicalVariant annotatedAlt : MainUtils.getBiologicalVariants(gene)) {
-                        Oncogenicity oncogenicity = Oncogenicity.getByEffect(annotatedAlt.getOncogenic());
-                        if (MainUtils.isOncogenic(oncogenicity)) {
-                            mappedAlterations.add(annotatedAlt.getVariant());
-                        }
-                    }
-                } else {
-                    mappedAlterations.add(clinicalVariant.getVariant());
-                }
-                for (Alteration alteration : mappedAlterations) {
-                    if (!resultMap.containsKey(alteration)) {
-                        resultMap.put(alteration, new HashMap<>());
-                    }
-                    for (TumorType tumorType : clinicalVariant.getCancerTypes()) {
-                        FdaAlteration fdaAlteration = new FdaAlteration();
-                        String cancerTypeName = TumorTypeUtils.getTumorTypeName(tumorType);
-                        fdaAlteration.setAlteration(alteration);
-                        fdaAlteration.setLevel(convertToFdaLevel(LevelOfEvidence.getByLevel(clinicalVariant.getLevel()), clinicalVariant));
-                        fdaAlteration.setCancerType(cancerTypeName);
-                        if (!resultMap.get(alteration).containsKey(cancerTypeName)) {
-                            resultMap.get(alteration).put(cancerTypeName, new HashSet<>());
-                        }
-                        resultMap.get(alteration).get(cancerTypeName).add(fdaAlteration);
-                    }
-                }
+            Gene gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
+            if (gene == null) {
+                return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(this.cacheFetcher.getAllFdaAlterations().stream().filter(fdaAlt -> fdaAlt.getAlteration().getGene().equals(gene)).collect(Collectors.toList()), HttpStatus.OK);
             }
-        }
-
-        for (Map.Entry<Alteration, Map<String, Set<FdaAlteration>>> alterationMap : resultMap.entrySet()) {
-            for (Map.Entry<String, Set<FdaAlteration>> cancerTypeMap : alterationMap.getValue().entrySet()) {
-                FdaAlteration pickedFdaAlt = cancerTypeMap.getValue().iterator().next();
-                if (cancerTypeMap.getValue().size() > 1) {
-                    Optional<FdaAlteration> level2 = cancerTypeMap.getValue().stream().filter(fdaAlteration -> fdaAlteration.getLevel().equals(FDA_L_2)).findAny();
-                    if (level2.isPresent()) {
-                        pickedFdaAlt = level2.get();
-                    }
-                }
-                alterations.add(pickedFdaAlt);
-            }
-        }
-        return new ResponseEntity<>(new ArrayList<>(alterations), HttpStatus.OK);
-    }
-
-    private boolean specialFdaL3(ClinicalVariant clinicalVariant) {
-        List<String> specialList = Arrays.asList(new String[]{"ERBB2&Oncogenic Mutations&Non-Small Cell Lung Cancer&Ado-Trastuzumab Emtansine", "EGFR&A763_Y764insFQEA&Non-Small Cell Lung Cancer&Erlotinib", "ALK&Fusions&Inflammatory Myofibroblastic Tumor&Crizotinib", "ALK&Fusions&Inflammatory Myofibroblastic Tumor&Ceritinib", "BRAF&V600E&Ganglioglioma, Pleomorphic Xanthoastrocytoma, Pilocytic Astrocytoma&Cobimetinib+Vemurafenib,", "BRAF&V600E&Ganglioglioma, Pleomorphic Xanthoastrocytoma, Pilocytic Astrocytoma&Trametinib+Dabrafenib"});
-
-        String separator = "&";
-        List<String> queryParts = new ArrayList<>();
-        queryParts.add(clinicalVariant.getVariant().getGene().getHugoSymbol());
-        queryParts.add(clinicalVariant.getVariant().getAlteration());
-        queryParts.add(TumorTypeUtils.getTumorTypesName(clinicalVariant.getCancerTypes()));
-        queryParts.add(String.join("+", clinicalVariant.getDrug().stream().sorted().collect(Collectors.toList())));
-        String query = String.join(separator, queryParts);
-        return specialList.contains(query);
-    }
-
-    private String convertToFdaLevel(LevelOfEvidence level, ClinicalVariant clinicalVariant) {
-        if (level == null) {
-            return "";
-        }
-        switch (level) {
-            case LEVEL_1:
-            case LEVEL_R1:
-                return FDA_L_2;
-            case LEVEL_2:
-                if (specialFdaL3(clinicalVariant)) {
-                    return FDA_L_3;
-                } else {
-                    return FDA_L_2;
-                }
-            case LEVEL_3A:
-            case LEVEL_4:
-            case LEVEL_R2:
-                return FDA_L_3;
-            default:
-                return "";
         }
     }
 
@@ -452,7 +367,6 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         , @ApiParam(value = "OncoTree tumor type name/main type/code") @RequestParam(value = "tumorType", required = false) String tumorType) {
 
 
-
         List<TumorType> relevantTumorTypes = TumorTypeUtils.findRelevantTumorTypes(tumorType);
 
         Query query;
@@ -478,8 +392,8 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         }
         query.setTumorType(tumorType);
 
-        List<EvidenceQueryRes> responses = EvidenceUtils.processRequest(Collections.singletonList(query), new HashSet<>(EvidenceTypeUtils.getAllEvidenceTypes()),LevelUtils.getPublicLevels(), false);
-        IndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuery(query,null, false, null);
+        List<EvidenceQueryRes> responses = EvidenceUtils.processRequest(Collections.singletonList(query), new HashSet<>(EvidenceTypeUtils.getAllEvidenceTypes()), LevelUtils.getPublicLevels(), false);
+        IndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null);
 
         EvidenceQueryRes response = responses.iterator().next();
 
