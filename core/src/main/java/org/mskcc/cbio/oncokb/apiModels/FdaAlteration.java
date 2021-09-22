@@ -2,12 +2,13 @@ package org.mskcc.cbio.oncokb.apiModels;
 
 import org.mskcc.cbio.oncokb.model.Alteration;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
  * Created by Hongxin on 10/28/16.
  */
-public class FdaAlteration {
+public class FdaAlteration implements Serializable {
     String level;
     Alteration alteration;
     String cancerType;
