@@ -10,6 +10,7 @@ import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 /**
  * @author jiaojiao, Hongxin Zhang
@@ -32,7 +33,7 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "portal_alteration")
-public class PortalAlteration {
+public class PortalAlteration implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

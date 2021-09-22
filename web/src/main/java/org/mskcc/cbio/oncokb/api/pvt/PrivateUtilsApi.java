@@ -78,7 +78,7 @@ public interface PrivateUtilsApi {
     @ApiOperation(value = "", notes = "Get gene related numbers of all fda alterations. This is for main page word cloud.", response = Map.class, responseContainer = "Map")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK")})
-    @RequestMapping(value = "/utils/numbers/fda/",
+    @RequestMapping(value = "/utils/numbers/fda",
         produces = {"application/json"},
         method = RequestMethod.GET)
     ResponseEntity<Map<String, Integer>> utilsNumbersFdaGet();
