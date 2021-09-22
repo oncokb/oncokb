@@ -50,6 +50,7 @@ public class CustomRedisCacheManager implements CacheManager {
         String cacheName = this.cacheNameResolver.getCacheName(name);
         return caches.computeIfAbsent(cacheName, k -> {
             CacheKey nameKey = CacheKey.getByKey(name);
+            // We should name all the cache keys, so we can clear all in the method above.
             if (nameKey != null) {
                 switch (nameKey) {
                     case PROCESS_QUERY:

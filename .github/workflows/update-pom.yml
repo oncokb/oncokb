@@ -31,7 +31,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
       - name: 'Update Pom'
         env:
-          NEW_VERSION: ${{steps.semvers.outputs.minor}}
+          NEW_VERSION: ${{steps.semvers.outputs.patch}}
         run: |
           mvn --batch-mode versions:set -DnewVersion=${NEW_VERSION} -DgenerateBackupPoms=false
 
