@@ -1,9 +1,7 @@
 package org.mskcc.cbio.oncokb.util;
 
 import com.mysql.jdbc.StringUtils;
-import org.mskcc.cbio.oncokb.model.AlterationType;
-import org.mskcc.cbio.oncokb.model.Gene;
-import org.mskcc.cbio.oncokb.model.Query;
+import org.mskcc.cbio.oncokb.model.*;
 
 import java.util.Arrays;
 import java.util.LinkedHashSet;
@@ -43,5 +41,23 @@ public class QueryUtils {
             name = query.getAlteration().trim();
         }
         return name;
+    }
+
+    public static Query getQueryForHgvsg(ReferenceGenome referenceGenome, String hgvsg, String tumorType, Alteration alteration) {
+        Query query = new Query();
+        query.setReferenceGenome(referenceGenome);
+        query.setHgvs(hgvsg);
+        query.setTumorType(tumorType);
+        if (alteration.getGene() != null) {
+            query.setHugoSymbol(alteration.getGene().getHugoSymbol());
+            query.setEntrezGeneId(alteration.getGene().getEntrezGeneId());
+        }
+        query.setAlteration(alteration.getAlteration());
+        query.setProteinStart(alteration.getProteinStart());
+        query.setProteinEnd(alteration.getProteinEnd());
+        if (alteration.getConsequence() != null) {
+            query.setConsequence(alteration.getConsequence().getTerm());
+        }
+        return query;
     }
 }

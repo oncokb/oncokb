@@ -10,6 +10,8 @@ import org.mskcc.cbio.oncokb.apiModels.download.FileExtension;
 import org.mskcc.cbio.oncokb.apiModels.download.FileName;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.PortalAlterationBo;
+import org.mskcc.cbio.oncokb.cache.CacheFetcher;
+import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.TumorType;
 import org.mskcc.cbio.oncokb.bo.OncokbTranscriptService;
@@ -17,6 +19,7 @@ import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.Tumor;
 import org.mskcc.cbio.oncokb.util.*;
 import org.oncokb.oncokb_transcript.ApiException;
 import org.oncokb.oncokb_transcript.client.TranscriptComparisonVM;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -28,6 +31,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.mskcc.cbio.oncokb.model.InferredMutation.ONCOGENIC_MUTATIONS;
 import static org.mskcc.cbio.oncokb.util.GitHubUtils.getOncoKBSqlDumpFileName;
 import static org.mskcc.cbio.oncokb.util.HttpUtils.getDataDownloadResponseEntity;
 
@@ -36,6 +40,8 @@ import static org.mskcc.cbio.oncokb.util.HttpUtils.getDataDownloadResponseEntity
  */
 @Controller
 public class PrivateUtilsApiController implements PrivateUtilsApi {
+    @Autowired
+    CacheFetcher cacheFetcher;
 
     @Override
     public ResponseEntity<List<String>> utilsSuggestedVariantsGet() {
@@ -147,6 +153,23 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     }
 
     @Override
+    public ResponseEntity<Map<String, Integer>> utilsNumbersFdaGet() {
+        List<FdaAlteration> fdaAlterations = utilsFdaAlterationsGet(null).getBody();
+        Map<String, Set<Gene>> map = new HashMap<>();
+        for (FdaAlteration fdaAlteration : fdaAlterations) {
+            if (!map.containsKey(fdaAlteration.getLevel())) {
+                map.put(fdaAlteration.getLevel(), new HashSet<>());
+            }
+            map.get(fdaAlteration.getLevel()).add(fdaAlteration.getAlteration().getGene());
+        }
+
+        Map<String, Integer> result = map.entrySet().stream().collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue().size()));
+        return new ResponseEntity<>(
+            result,
+            HttpStatus.OK);
+    }
+
+    @Override
     public ResponseEntity<Map<String, Boolean>> validateTrials(@ApiParam(value = "NCTID list") @RequestParam(value = "nctIds") List<String> nctIds) throws ParserConfigurationException, SAXException, IOException {
         return new ResponseEntity<>(MainUtils.validateTrials(nctIds), HttpStatus.OK);
     }
@@ -177,6 +200,22 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     @Override
     public ResponseEntity<List<TumorType>> utilsTumorTypesGet() {
         return new ResponseEntity<>(TumorTypeUtils.getAllTumorTypes(), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<List<FdaAlteration>> utilsFdaAlterationsGet(
+        @ApiParam(value = "Gene hugo symbol") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
+    ) {
+        if (StringUtils.isNullOrEmpty(hugoSymbol)) {
+            return new ResponseEntity<>(new ArrayList<>(this.cacheFetcher.getAllFdaAlterations()), HttpStatus.OK);
+        } else {
+            Gene gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
+            if (gene == null) {
+                return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(this.cacheFetcher.getAllFdaAlterations().stream().filter(fdaAlt -> fdaAlt.getAlteration().getGene().equals(gene)).collect(Collectors.toList()), HttpStatus.OK);
+            }
+        }
     }
 
     @Override
@@ -250,6 +289,10 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
 
     @Override
     public ResponseEntity<Map<LevelOfEvidence, Set<Evidence>>> utilsEvidencesByLevelsGet() {
+        return new ResponseEntity<>(getEvidencesByLevels(), HttpStatus.OK);
+    }
+
+    private Map<LevelOfEvidence, Set<Evidence>> getEvidencesByLevels() {
         Map<Gene, Set<Evidence>> evidences = EvidenceUtils.getAllGeneBasedEvidences();
 
         Map<LevelOfEvidence, Set<Evidence>> result = new HashMap<>();
@@ -265,7 +308,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
                 }
             }
         }
-        return new ResponseEntity<>(result, HttpStatus.OK);
+        return result;
     }
 
     @Override
@@ -324,7 +367,6 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         , @ApiParam(value = "OncoTree tumor type name/main type/code") @RequestParam(value = "tumorType", required = false) String tumorType) {
 
 
-
         List<TumorType> relevantTumorTypes = TumorTypeUtils.findRelevantTumorTypes(tumorType);
 
         Query query;
@@ -344,13 +386,14 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             }
             query = new Query(alterationModel, matchedRG);
         } else {
-            query = new Query(null, matchedRG, "regular", null, null, null, null, null, tumorType, null, null, null, hgvsg);
+            Alteration alterationModel = this.cacheFetcher.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, matchedRG, hgvsg);
+            query = QueryUtils.getQueryForHgvsg(matchedRG, hgvsg, tumorType, alterationModel);
             gene = GeneUtils.getGeneByEntrezId(query.getEntrezGeneId());
         }
         query.setTumorType(tumorType);
 
-        List<EvidenceQueryRes> responses = EvidenceUtils.processRequest(Collections.singletonList(query), new HashSet<>(EvidenceTypeUtils.getAllEvidenceTypes()),LevelUtils.getPublicLevels(), false);
-        IndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuery(query,null, false, null);
+        List<EvidenceQueryRes> responses = EvidenceUtils.processRequest(Collections.singletonList(query), new HashSet<>(EvidenceTypeUtils.getAllEvidenceTypes()), LevelUtils.getPublicLevels(), false);
+        IndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null);
 
         EvidenceQueryRes response = responses.iterator().next();
 

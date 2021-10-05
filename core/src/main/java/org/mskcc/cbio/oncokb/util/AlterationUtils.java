@@ -7,7 +7,7 @@
 package org.mskcc.cbio.oncokb.util;
 
 import org.apache.commons.lang3.StringUtils;
-import org.genome_nexus.client.TranscriptConsequence;
+import org.genome_nexus.client.TranscriptConsequenceSummary;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
@@ -473,27 +473,29 @@ public final class AlterationUtils {
     }
 
     public static Alteration getAlterationFromGenomeNexus(GNVariantAnnotationType type, String query, ReferenceGenome referenceGenome) {
-        Alteration alteration = null;
+        Alteration alteration = new Alteration();
         if (query != null && !query.trim().isEmpty()) {
-            TranscriptConsequence transcriptConsequence = GenomeNexusUtils.getTranscriptConsequence(type, query, referenceGenome);
-            if (transcriptConsequence != null) {
-                String hugoSymbol = transcriptConsequence.getGeneSymbol();
+            TranscriptConsequenceSummary transcriptConsequenceSummary = GenomeNexusUtils.getTranscriptConsequence(type, query, referenceGenome);
+            if (transcriptConsequenceSummary != null) {
+                String hugoSymbol = transcriptConsequenceSummary.getHugoGeneSymbol();
                 Gene gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
                 if (gene != null) {
                     alteration = new Alteration();
                     alteration.setGene(gene);
                     alteration.setAlterationType(null);
-                    if (transcriptConsequence.getHgvsp() != null) {
-                        alteration.setAlteration(transcriptConsequence.getHgvsp());
+                    if (transcriptConsequenceSummary.getHgvspShort() != null) {
+                        alteration.setAlteration(transcriptConsequenceSummary.getHgvspShort());
                     }
-                    if (transcriptConsequence.getProteinStart() != null) {
-                        alteration.setProteinStart(transcriptConsequence.getProteinStart());
+                    if (transcriptConsequenceSummary.getProteinPosition() != null) {
+                        if (transcriptConsequenceSummary.getProteinPosition().getStart() != null) {
+                            alteration.setProteinStart(transcriptConsequenceSummary.getProteinPosition().getStart());
+                        }
+                        if (transcriptConsequenceSummary.getProteinPosition() != null) {
+                            alteration.setProteinEnd(transcriptConsequenceSummary.getProteinPosition().getEnd());
+                        }
                     }
-                    if (transcriptConsequence.getProteinEnd() != null) {
-                        alteration.setProteinEnd(transcriptConsequence.getProteinEnd());
-                    }
-                    if (!transcriptConsequence.getConsequenceTerms().isEmpty()) {
-                        alteration.setConsequence(VariantConsequenceUtils.findVariantConsequenceByTerm(transcriptConsequence.getConsequenceTerms().iterator().next()));
+                    if (StringUtils.isNotEmpty(transcriptConsequenceSummary.getConsequenceTerms())) {
+                        alteration.setConsequence(VariantConsequenceUtils.findVariantConsequenceByTerm(transcriptConsequenceSummary.getConsequenceTerms()));
                     }
                     return alteration;
                 }

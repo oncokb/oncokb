@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.springframework.util.MimeTypeUtils.TEXT_PLAIN_VALUE;
+
 /**
  * Created by Hongxin on 12/12/16.
  */
@@ -73,6 +75,14 @@ public interface PrivateUtilsApi {
         method = RequestMethod.GET)
     ResponseEntity<Set<LevelNumber>> utilsNumbersLevelsGet();
 
+    @ApiOperation(value = "", notes = "Get gene related numbers of all fda alterations. This is for main page word cloud.", response = Map.class, responseContainer = "Map")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK")})
+    @RequestMapping(value = "/utils/numbers/fda",
+        produces = {"application/json"},
+        method = RequestMethod.GET)
+    ResponseEntity<Map<String, Integer>> utilsNumbersFdaGet();
+
     @ApiOperation(value = "", notes = "Check if clinical trials are valid or not by nctId.", response = Map.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK")})
@@ -111,6 +121,16 @@ public interface PrivateUtilsApi {
         produces = {"application/json"},
         method = RequestMethod.GET)
     ResponseEntity<List<TumorType>> utilsTumorTypesGet();
+
+    @ApiOperation(value = "", notes = "Get the full list of FDA alterations.", response = FdaAlteration.class, responseContainer = "List")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK")})
+    @RequestMapping(value = "/utils/fdaAlterations",
+        produces = {"application/json"},
+        method = RequestMethod.GET)
+    ResponseEntity<List<FdaAlteration>> utilsFdaAlterationsGet(
+        @ApiParam(value = "Gene hugo symbol") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
+    );
 
     @ApiOperation(value = "", notes = "Get the list of evidences by levels.", response = Map.class)
     @ApiResponses(value = {
@@ -194,7 +214,7 @@ public interface PrivateUtilsApi {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK")})
     @RequestMapping(value = "/utils/validateTranscriptUpdate",
-        produces = {"text/plain"},
+        produces = TEXT_PLAIN_VALUE,
         method = RequestMethod.GET)
     ResponseEntity<String> utilValidateTranscriptUpdateGet(
         @ApiParam(value = "hugoSymbol") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
@@ -220,7 +240,7 @@ public interface PrivateUtilsApi {
         @ApiResponse(code = 503, message = "Service Unavailable")
     })
     @RequestMapping(value = "/utils/data/readme",
-        produces = {"text/plain"},
+        produces = TEXT_PLAIN_VALUE,
         method = RequestMethod.GET)
     ResponseEntity<String> utilDataReadmeGet(
         @ApiParam(value = "version", required = true) @RequestParam(value = "version") String version

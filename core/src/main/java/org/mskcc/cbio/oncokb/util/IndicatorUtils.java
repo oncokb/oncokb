@@ -558,20 +558,8 @@ public class IndicatorUtils {
             implications.addAll(getImplicationFromEvidence(selfAltEvis, queryHugoSymbol));
         }
 
-        // Find Oncogenicity from alternative alleles
-        if (alternativeAlleles.size() > 0) {
-            for (Alteration allele : alternativeAlleles) {
-                List<Evidence> allelesEvis = EvidenceUtils.getEvidence(Collections.singletonList(allele), Collections.singleton(evidenceType), matchedTumorType, tumorTypes, levelOfEvidences);
-                if (allelesEvis != null && allelesEvis.size() > 0) {
-                    implications.addAll(getImplicationFromEvidence(allelesEvis, queryHugoSymbol));
-                }
-            }
-        }
-
-        // If there is no oncogenic info available for this variant, find oncogenicity from relevant variants
         List<Alteration> listToBeRemoved = new ArrayList<>(alternativeAlleles);
         listToBeRemoved.add(matchedAlt);
-
 
         for (Alteration alt : AlterationUtils.removeAlterationsFromList(relevantAlterations, listToBeRemoved)) {
             List<Evidence> altEvis = EvidenceUtils.getEvidence(Collections.singletonList(alt), Collections.singleton(evidenceType), matchedTumorType, tumorTypes, levelOfEvidences);

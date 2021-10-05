@@ -13,7 +13,6 @@ import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.TumorType;
 import org.mskcc.cbio.oncokb.bo.OncokbTranscriptService;
 import org.mskcc.cbio.oncokb.util.*;
-import org.oncokb.oncokb_transcript.client.DrugResourceApi;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -182,7 +181,8 @@ public class DriveAnnotationParser {
                 if (gene == null) {
                     System.out.println(spaceStrByNestLevel(nestLevel) + "Gene " + hugo + " is not in the released list.");
                     if (releaseGene) {
-                        gene = GeneAnnotator.findGene(hugo);
+                        OncokbTranscriptService oncokbTranscriptService = new OncokbTranscriptService();
+                        gene = oncokbTranscriptService.findGeneBySymbol(hugo);
                         if (gene == null) {
                             System.out.println("!!!!!!!!!Could not find gene " + hugo + " either.");
                             throw new IOException("!!!!!!!!!Could not find gene " + hugo + ".");

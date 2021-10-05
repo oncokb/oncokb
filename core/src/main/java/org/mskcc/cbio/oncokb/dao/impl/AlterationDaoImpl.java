@@ -4,7 +4,6 @@
  */
 package org.mskcc.cbio.oncokb.dao.impl;
 
-import com.sun.org.apache.bcel.internal.generic.ALOAD;
 import org.mskcc.cbio.oncokb.dao.AlterationDao;
 import org.mskcc.cbio.oncokb.model.*;
 
