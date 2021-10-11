@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
+import static org.mskcc.cbio.oncokb.util.FusionUtils.FUSION_ALTERNATIVE_SEPARATOR;
+import static org.mskcc.cbio.oncokb.util.FusionUtils.FUSION_SEPARATOR;
 
 
 /**
@@ -243,7 +245,11 @@ public class Query implements java.io.Serializable {
                 Gene entrezGeneIdGene = GeneUtils.getGeneByEntrezId(this.getEntrezGeneId());
                 this.setHugoSymbol(entrezGeneIdGene.getHugoSymbol());
             }
-            if (this.getAlteration() != null && !this.getAlteration().toLowerCase().contains("fusion") && this.getAlteration().toLowerCase().contains("-") && (alterationType.equals(AlterationType.FUSION) || (this.consequence != null && this.consequence.toLowerCase().equals("fusion")))) {
+            if (this.getAlteration() != null &&
+                !this.getAlteration().toLowerCase().contains("fusion") &&
+                (!this.getAlteration().toLowerCase().contains(FUSION_SEPARATOR) && this.getAlteration().toLowerCase().contains(FUSION_ALTERNATIVE_SEPARATOR)) &&
+                (alterationType.equals(AlterationType.FUSION) || (this.consequence != null && this.consequence.toLowerCase().equals("fusion")))
+            ) {
                 this.setAlteration(this.getAlteration() + " Fusion");
             }
         }

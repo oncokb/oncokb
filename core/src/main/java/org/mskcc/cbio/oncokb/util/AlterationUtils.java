@@ -30,7 +30,6 @@ public final class AlterationUtils {
 
     private static AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
 
-    private final static String fusionRegex = "((\\w*)-(\\w*))\\s+(?i)fusion";
 
     private AlterationUtils() {
         throw new AssertionError();
@@ -365,14 +364,6 @@ public final class AlterationUtils {
         }
     }
 
-    public static Boolean isFusion(String variant) {
-        Boolean flag = false;
-        if (variant != null && Pattern.matches(fusionRegex, variant)) {
-            flag = true;
-        }
-        return flag;
-    }
-
     public static Alteration getRevertFusions(ReferenceGenome referenceGenome, Alteration alteration, Set<Alteration> fullAlterations) {
         if (fullAlterations == null) {
             return getRevertFusions(referenceGenome, alteration);
@@ -395,21 +386,8 @@ public final class AlterationUtils {
     public static String getRevertFusionName(Alteration alteration) {
         String revertFusionAltStr = null;
         if (alteration != null && alteration.getAlteration() != null
-            && isFusion(alteration.getAlteration())) {
-            revertFusionAltStr = getRevertFusionName(alteration.getAlteration());
-        }
-        return revertFusionAltStr;
-    }
-
-    public static String getRevertFusionName(String fusionName) {
-        String revertFusionAltStr = "";
-        Pattern pattern = Pattern.compile(fusionRegex);
-        Matcher matcher = pattern.matcher(fusionName);
-        if (matcher.matches() && matcher.groupCount() == 3) {
-            // Revert fusion
-            String geneA = matcher.group(2);
-            String geneB = matcher.group(3);
-            revertFusionAltStr = geneB + "-" + geneA + " fusion";
+            && FusionUtils.isFusion(alteration.getAlteration())) {
+            revertFusionAltStr = FusionUtils.getRevertFusionName(alteration.getAlteration());
         }
         return revertFusionAltStr;
     }
@@ -739,7 +717,7 @@ public final class AlterationUtils {
             }
         }
 
-        if (isFusion(alteration)) {
+        if (FusionUtils.isFusion(alteration)) {
             Alteration alt = new Alteration();
             alt.setAlteration(alteration);
             alt.setAlterationType(alterationType == null ? AlterationType.MUTATION : alterationType);
