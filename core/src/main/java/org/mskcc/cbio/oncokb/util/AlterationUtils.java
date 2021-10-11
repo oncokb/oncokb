@@ -281,6 +281,23 @@ public final class AlterationUtils {
                                         consequence = "inframe_deletion";
                                         break;
                                 }
+                            } else {
+                                /**
+                                 * support extension variant (https://varnomen.hgvs.org/recommendations/protein/variant/extension/)
+                                 * the following examples are supported
+                                 * *959Qext*14
+                                 * *110Gext*17
+                                 * *315TextALGT*
+                                 * *327Aext*?
+                                 */
+                                p = Pattern.compile("(\\*)([0-9]+)[A-Z]ext([A-Z]+)?\\*([0-9]+)?(\\?)?");
+                                m = p.matcher(proteinChange);
+                                if (m.matches()) {
+                                    ref = m.group(1);
+                                    start = Integer.valueOf(m.group(2));
+                                    end = start;
+                                    consequence = "stop_lost";
+                                }
                             }
                         }
                     }
