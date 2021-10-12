@@ -232,7 +232,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         // Find exact match
         Alteration matchedAlt = findExactlyMatchedAlteration(referenceGenome, alteration, fullAlterations);
 
-        if(matchedAlt == null && AlterationUtils.isFusion(alteration.getAlteration())) {
+        if(matchedAlt == null && FusionUtils.isFusion(alteration.getAlteration())) {
             matchedAlt = AlterationUtils.getRevertFusions(referenceGenome, alteration, fullAlterations);
         }
 

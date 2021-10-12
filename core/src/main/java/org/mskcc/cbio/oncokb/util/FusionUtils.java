@@ -6,23 +6,28 @@ import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.ReferenceGenome;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-/**
- * Created by Hongxin Zhang on 8/23/17.
- */
 public class FusionUtils {
+    public final static String FUSION_SEPARATOR = "::";
+    public final static String FUSION_ALTERNATIVE_SEPARATOR = "-";
+    private final static String FUSION_REGEX = "\\s*(\\w*)" + FUSION_SEPARATOR + "(\\w*)\\s*(?i)(fusion)?\\s*";
+    private final static String FUSION_ALT_REGEX = "\\s*((\\w*)" + FUSION_ALTERNATIVE_SEPARATOR + "(\\w*))\\s+(?i)fusion\\s*";
+
     public static List<String> getGenesStrs(String query) {
         Set<String> geneStrsList = new LinkedHashSet<>();
         if (!StringUtils.isNullOrEmpty(query)) {
-            List<String> geneFragments = Arrays.asList(query.split("-"));
+            String fusionSeparator = query.contains(FUSION_SEPARATOR) ? FUSION_SEPARATOR : FUSION_ALTERNATIVE_SEPARATOR;
+            List<String> geneFragments = Arrays.asList(query.split(fusionSeparator));
             if (geneFragments.size() > 2) {
-                String rightHandGene = org.apache.commons.lang3.StringUtils.join(geneFragments.subList(1, geneFragments.size()), "-");
+                String rightHandGene = org.apache.commons.lang3.StringUtils.join(geneFragments.subList(1, geneFragments.size()), fusionSeparator);
                 if (GeneUtils.getGeneByHugoSymbol(rightHandGene) != null) {
                     geneStrsList.add(rightHandGene);
                     geneStrsList.add(geneFragments.get(0));
                 }
-                String leftHandGene = org.apache.commons.lang3.StringUtils.join(geneFragments.subList(0, geneFragments.size() - 1), "-");
+                String leftHandGene = org.apache.commons.lang3.StringUtils.join(geneFragments.subList(0, geneFragments.size() - 1), fusionSeparator);
                 if (GeneUtils.getGeneByHugoSymbol(leftHandGene) != null) {
                     geneStrsList.add(leftHandGene);
                     geneStrsList.add(geneFragments.get(geneFragments.size() - 1));
@@ -51,17 +56,6 @@ public class FusionUtils {
         return new ArrayList<>(geneStrsList);
     }
 
-    public static List<Gene> getGenes(String query) {
-        List<Gene> genes = new ArrayList<>();
-        for (String geneStr : getGenesStrs(query)) {
-            Gene tmpGene = GeneUtils.getGeneByHugoSymbol(geneStr);
-            if (tmpGene != null && !genes.contains(tmpGene)) {
-                genes.add(tmpGene);
-            }
-        }
-        return genes;
-    }
-
     public static String getFusionName(Gene geneA, Gene geneB) {
         if (geneA == null || geneB == null) {
             return "";
@@ -78,25 +72,24 @@ public class FusionUtils {
 
         for (String hugoA : geneANames) {
             for (String hugoB : geneBNames) {
+                fusionName = getFusionAlterationName(hugoA, hugoB);
+                matchedAlteration = findAltByFusionName(fusionName, geneA, geneB);
+                if (matchedAlteration != null) {
+                    return fusionName;
+                }
                 fusionName = getFusionName(hugoA, hugoB);
-                matchedAlteration = AlterationUtils.findAlteration(geneA, ReferenceGenome.GRCh37, fusionName);
+                matchedAlteration = findAltByFusionName(fusionName, geneA, geneB);
                 if (matchedAlteration != null) {
                     return fusionName;
                 }
 
-                fusionName = getFusionName(hugoA, hugoB);
-                matchedAlteration = AlterationUtils.findAlteration(geneB, ReferenceGenome.GRCh37, fusionName);
-                if (matchedAlteration != null) {
-                    return fusionName;
-                }
-
-                fusionName = getFusionName(hugoB, hugoA);
-                matchedAlteration = AlterationUtils.findAlteration(geneA, ReferenceGenome.GRCh37, fusionName);
+                fusionName = getFusionAlterationName(hugoB, hugoA);
+                matchedAlteration = findAltByFusionName(fusionName, geneA, geneB);
                 if (matchedAlteration != null) {
                     return fusionName;
                 }
                 fusionName = getFusionName(hugoB, hugoA);
-                matchedAlteration = AlterationUtils.findAlteration(geneB, ReferenceGenome.GRCh37, fusionName);
+                matchedAlteration = findAltByFusionName(fusionName, geneA, geneB);
                 if (matchedAlteration != null) {
                     return fusionName;
                 }
@@ -108,7 +101,51 @@ public class FusionUtils {
         return fusionName;
     }
 
+    private static Alteration findAltByFusionName(String fusionName, Gene geneA, Gene geneB) {
+        Alteration matchedAlteration = null;
+        matchedAlteration = AlterationUtils.findAlteration(geneA, ReferenceGenome.GRCh37, fusionName);
+        if (matchedAlteration == null) {
+            matchedAlteration = AlterationUtils.findAlteration(geneB, ReferenceGenome.GRCh37, fusionName);
+        }
+        return matchedAlteration;
+    }
+
     private static String getFusionName(String hugoA, String hugoB) {
-        return hugoA + "-" + hugoB + " Fusion";
+        return hugoA + FUSION_SEPARATOR + hugoB;
+    }
+
+    // This is used to find fusion in the alteration table
+    private static String getFusionAlterationName(String hugoA, String hugoB) {
+        return hugoA + FUSION_ALTERNATIVE_SEPARATOR + hugoB + " Fusion";
+    }
+
+    public static Boolean isFusion(String variant) {
+        Boolean flag = false;
+        if (variant != null && (Pattern.matches(FUSION_REGEX, variant) || Pattern.matches(FUSION_ALT_REGEX, variant))) {
+            flag = true;
+        }
+        return flag;
+    }
+
+    public static String getRevertFusionName(String fusionName) {
+        String revertFusionAltStr = "";
+        Pattern pattern = Pattern.compile(FUSION_REGEX);
+        Matcher matcher = pattern.matcher(fusionName);
+        if (matcher.matches() && matcher.groupCount() == 3) {
+            // Revert fusion
+            String geneA = matcher.group(1);
+            String geneB = matcher.group(2);
+            revertFusionAltStr = getFusionName(geneB, geneA);
+        } else {
+            pattern = Pattern.compile(FUSION_ALT_REGEX);
+            matcher = pattern.matcher(fusionName);
+            if (matcher.matches() && matcher.groupCount() == 3) {
+                // Revert fusion
+                String geneA = matcher.group(2);
+                String geneB = matcher.group(3);
+                revertFusionAltStr = getFusionAlterationName(geneB, geneA);
+            }
+        }
+        return revertFusionAltStr;
     }
 }

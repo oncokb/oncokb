@@ -9,6 +9,7 @@ import org.mskcc.cbio.oncokb.model.AlterationPositionBoundary;
 import java.util.Arrays;
 import java.util.Collection;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mskcc.cbio.oncokb.Constants.MISSENSE_VARIANT;
 
@@ -91,6 +92,13 @@ public class AnnotateAlterationTest {
 
                 // Stop gained
                 {"R2109*", "2109", "2109", "2109", "2109", "R", "*", "stop_gained"},
+
+                // Stop lost, tests are from https://varnomen.hgvs.org/recommendations/protein/variant/extension/
+                {"*959Qext*14", "959", "959", "959", "959", "*", null, "stop_lost"},
+                {"*110Gext*17", "110", "110", "110", "110", "*", null, "stop_lost"},
+                {"*315TextALGT*", "315", "315", "315", "315", "*", null, "stop_lost"},
+                {"*327Aext*?", "327", "327", "327", "327", "*", null, "stop_lost"},
+                {"327Aext*?", "327", "327", "327", "327", null, null, "NA"},
 
                 // Synonymous Variant
                 {"G500G", "500", "500", "500", "500", "G", "G", "synonymous_variant"},
