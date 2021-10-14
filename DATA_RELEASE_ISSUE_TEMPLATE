@@ -1,9 +1,17 @@
 Prepare for data v*.* release
 
+- [ ] Generate database
+- [ ] Run mvn test to make sure all tests pass, update tests accordingly
+- [ ] Generate v*.* database dumps by running https://github.com/knowledgesystems/oncokb-deployment/blob/master/oncokb-data-release/release.sh
 - [ ] Update News
-- [ ] Update tests
-- [ ] Include v*.* data dump
 - [ ] Update public site
-- [ ] Update demo site
-- [ ] Update trimmed public site
+    - [ ] Update database 
+    - [ ] Update public website
+    - [ ] Update annotation service
+- [ ] Update demo sitesite
+    - [ ] Update database 
+    - [ ] Update annotation service
+- [ ] Update trimmed public sitesite
+    - [ ] Update database 
+    - [ ] Update annotation service
 - [ ] Update release note

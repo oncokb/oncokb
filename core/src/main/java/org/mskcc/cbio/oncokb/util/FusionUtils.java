@@ -69,26 +69,27 @@ public class FusionUtils {
 
         Alteration matchedAlteration = null;
         String fusionName = null;
+        String fusionAltName = null;
 
         for (String hugoA : geneANames) {
             for (String hugoB : geneBNames) {
-                fusionName = getFusionAlterationName(hugoA, hugoB);
-                matchedAlteration = findAltByFusionName(fusionName, geneA, geneB);
+                fusionName = getFusionName(hugoA, hugoB);
+                fusionAltName = getFusionAlterationName(hugoA, hugoB);
+                matchedAlteration = findAltByFusionName(fusionAltName, geneA, geneB);
                 if (matchedAlteration != null) {
                     return fusionName;
                 }
-                fusionName = getFusionName(hugoA, hugoB);
                 matchedAlteration = findAltByFusionName(fusionName, geneA, geneB);
                 if (matchedAlteration != null) {
                     return fusionName;
                 }
 
-                fusionName = getFusionAlterationName(hugoB, hugoA);
-                matchedAlteration = findAltByFusionName(fusionName, geneA, geneB);
+                fusionName = getFusionName(hugoB, hugoA);
+                fusionAltName = getFusionAlterationName(hugoB, hugoA);
+                matchedAlteration = findAltByFusionName(fusionAltName, geneA, geneB);
                 if (matchedAlteration != null) {
                     return fusionName;
                 }
-                fusionName = getFusionName(hugoB, hugoA);
                 matchedAlteration = findAltByFusionName(fusionName, geneA, geneB);
                 if (matchedAlteration != null) {
                     return fusionName;
