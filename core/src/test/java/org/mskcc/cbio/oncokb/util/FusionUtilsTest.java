@@ -68,9 +68,19 @@ public class FusionUtilsTest extends TestCase {
         geneB.setHugoSymbol("EGFR");
         geneB.setGeneAliases(new HashSet<>(Arrays.asList("ERBB1")));
 
-
         String fusionName = FusionUtils.getFusionName(geneA, geneB);
-        assertEquals("EGFR-SEPT14 Fusion", fusionName);
+        assertEquals("EGFR::SEPT14", fusionName);
+
+        geneA = new Gene();
+        geneA.setEntrezGeneId(23175);
+        geneA.setHugoSymbol("LPIN1");
+
+        geneB = new Gene();
+        geneB.setEntrezGeneId(238);
+        geneB.setHugoSymbol("ALK");
+
+        fusionName = FusionUtils.getFusionName(geneA, geneB);
+        assertEquals("LPIN1::ALK", fusionName);
 
         fusionName = FusionUtils.getFusionName(geneA, null);
         assertEquals("", fusionName);
