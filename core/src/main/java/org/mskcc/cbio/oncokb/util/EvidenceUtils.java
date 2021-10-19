@@ -890,9 +890,9 @@ public class EvidenceUtils {
                         // Look for Oncogenic Mutations if no relevantAlt found for alt and alt is hotspot
                         if (relevantAlts.isEmpty()
                             && HotspotUtils.isHotspot(alt)) {
-                            Alteration oncogenicMutations = AlterationUtils.findAlteration(alt.getGene(),requestQuery.getReferenceGenome(), "Oncogenic Mutations");
-                            if (oncogenicMutations != null) {
-                                relevantAlts.add(oncogenicMutations);
+                            List<Alteration> oncogenicMutations = AlterationUtils.findOncogenicMutations(AlterationUtils.getAllAlterations(requestQuery.getReferenceGenome(), alt.getGene()));
+                            if (!oncogenicMutations.isEmpty()) {
+                                relevantAlts.addAll(oncogenicMutations);
                             }
                         }
 
@@ -1004,7 +1004,7 @@ public class EvidenceUtils {
             AlterationType type = AlterationType.MUTATION;
             Set<Alteration> alterations = new HashSet<Alteration>();
             AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
-            evidence.getAlterations().stream().forEach(alteration -> parsedAlterations.addAll(AlterationUtils.parseMutationString(alteration.getAlteration())));
+            evidence.getAlterations().stream().forEach(alteration -> parsedAlterations.addAll(AlterationUtils.parseMutationString(alteration.getAlteration(), ",")));
             for (Alteration alt : parsedAlterations) {
                 String proteinChange = alt.getAlteration();
                 String displayName = alt.getName();
