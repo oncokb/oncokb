@@ -338,6 +338,19 @@ public final class AlterationUtils {
                                     start = Integer.valueOf(m.group(2));
                                     end = start;
                                     consequence = "stop_lost";
+                                } else {
+                                    p = Pattern.compile("([A-Z\\*])?([0-9]+)=");
+                                    m = p.matcher(proteinChange);
+                                    if (m.matches()) {
+                                        var = ref = m.group(1);
+                                        start = Integer.valueOf(m.group(2));
+                                        end = start;
+                                        if (ref.equals("*")) {
+                                            consequence = "stop_retained_variant";
+                                        } else {
+                                            consequence = "synonymous_variant";
+                                        }
+                                    }
                                 }
                             }
                         }

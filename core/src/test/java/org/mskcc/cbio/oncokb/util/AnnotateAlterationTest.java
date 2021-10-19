@@ -90,6 +90,12 @@ public class AnnotateAlterationTest {
                 {"405_500_splice", "405", "500", "405", "500", null, null, "splice_region_variant"},
                 {"405_500splice", "405", "500", "405", "500", null, null, "splice_region_variant"},
 
+                // stop retained variant
+                {"*1136=", "1136", "1136", "1136", "1136", "*", "*", "stop_retained_variant"},
+
+                // silent mutation
+                {"L838=", "838", "838", "838", "838", "L", "L", "synonymous_variant"},
+
                 // Stop gained
                 {"R2109*", "2109", "2109", "2109", "2109", "R", "*", "stop_gained"},
 
