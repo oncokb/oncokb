@@ -403,6 +403,11 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         // Remove all relevant alterations that potentially excluding the current alteration
         Set<Alteration> exclusionAlts = new HashSet<>();
         Set<Alteration> relevantAlterationsWithoutAlternativeAlleles = alterations.stream().collect(Collectors.toSet());
+
+        // when no matched alteration found in the database, we shuold include the `alteration` in the list to calculate the name
+        if (matchedAlt == null) {
+            relevantAlterationsWithoutAlternativeAlleles.add(alteration);
+        }
         relevantAlterationsWithoutAlternativeAlleles.removeAll(AlterationUtils.getAlleleAlterations(referenceGenome, alteration, fullAlterations));
         Set<String> alterationsName = relevantAlterationsWithoutAlternativeAlleles.stream().map(Alteration::getAlteration).collect(Collectors.toSet());
         alterations.stream().filter(alt -> AlterationUtils.hasExclusionCriteria(alt.getAlteration()))
