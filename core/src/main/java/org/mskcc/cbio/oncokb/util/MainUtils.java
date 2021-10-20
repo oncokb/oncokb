@@ -654,4 +654,9 @@ public class MainUtils {
             }
         });
     }
+
+    public static String replaceLast(String text, String regex, String replacement) {
+        // the code is from https://stackoverflow.com/a/2282998
+        return text.replaceFirst("(?s)"+regex+"(?!.*?"+regex+")", replacement);
+    }
 }

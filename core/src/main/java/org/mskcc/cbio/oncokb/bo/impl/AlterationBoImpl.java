@@ -12,8 +12,13 @@ import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.*;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static org.mskcc.cbio.oncokb.Constants.*;
+import static org.mskcc.cbio.oncokb.util.AlterationUtils.findFusions;
+import static org.mskcc.cbio.oncokb.util.AlterationUtils.findOncogenicMutations;
 
 /**
  * @author jgao
@@ -265,9 +270,9 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             // TODO: match fusion partner
 
             //the alteration 'fusions' should be injected into alteration list
-            Alteration alt = findAlteration(referenceGenome, "fusions", fullAlterations);
-            if (alt != null) {
-                alterations.add(alt);
+            List<Alteration> alts = findFusions(fullAlterations);
+            if (!alts.isEmpty()) {
+                alterations.addAll(alts);
             } else {
                 // If no fusions curated, check the Truncating Mutations.
                 addTruncatingMutations = true;
@@ -349,9 +354,9 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         }
 
         if (addOncogenicMutations(alteration, alterations)) {
-            Alteration oncogenicMutations = findAlteration(referenceGenome, "oncogenic mutations", fullAlterations);
-            if (oncogenicMutations != null) {
-                alterations.add(oncogenicMutations);
+            List<Alteration> oncogenicMutations = findOncogenicMutations(fullAlterations);
+            if (!oncogenicMutations.isEmpty()) {
+                alterations.addAll(oncogenicMutations);
             }
         }
 
@@ -395,6 +400,25 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             }
         }
 
+        // Remove all relevant alterations that potentially excluding the current alteration
+        Set<Alteration> exclusionAlts = new HashSet<>();
+        Set<Alteration> relevantAlterationsWithoutAlternativeAlleles = alterations.stream().collect(Collectors.toSet());
+
+        // when no matched alteration found in the database, we shuold include the `alteration` in the list to calculate the name
+        if (matchedAlt == null) {
+            relevantAlterationsWithoutAlternativeAlleles.add(alteration);
+        }
+        relevantAlterationsWithoutAlternativeAlleles.removeAll(AlterationUtils.getAlleleAlterations(referenceGenome, alteration, fullAlterations));
+        Set<String> alterationsName = relevantAlterationsWithoutAlternativeAlleles.stream().map(Alteration::getAlteration).collect(Collectors.toSet());
+        alterations.stream().filter(alt -> AlterationUtils.hasExclusionCriteria(alt.getAlteration()))
+            .forEach(alt -> {
+                Set<String> altsShouldBeExcluded = AlterationUtils.getExclusionAlterations(alt.getAlteration()).stream().map(alteration1->alteration1.getAlteration()).collect(Collectors.toSet());
+                boolean altShouldBeExcluded = !Collections.disjoint(alterationsName, altsShouldBeExcluded);
+                if (altShouldBeExcluded) {
+                    exclusionAlts.add(alt);
+                }
+            });
+        alterations.removeAll(exclusionAlts);
         return alterations;
     }
 

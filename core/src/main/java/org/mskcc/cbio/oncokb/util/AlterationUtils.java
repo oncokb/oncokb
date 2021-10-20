@@ -29,6 +29,7 @@ public final class AlterationUtils {
         Oncogenicity.LIKELY.getOncogenic(), Oncogenicity.YES.getOncogenic()});
 
     private static AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
+    private static final String PROTEIN_CHANGE_EXCLUSION_REGEX = "(.*),\\s*(exclude|excluding)(.*)";
 
 
     private AlterationUtils() {
@@ -66,12 +67,33 @@ public final class AlterationUtils {
         return overlaps;
     }
 
-    public static List<Alteration> parseMutationString(String mutationStr) {
+    private static Matcher getExclusionCriteriaMatcher(String proteinChange) {
+        Pattern exclusionPatter = Pattern.compile("(.*)\\{\\s*(exclude|excluding)(.*)\\}", Pattern.CASE_INSENSITIVE);
+        Matcher exclusionMatch = exclusionPatter.matcher(proteinChange);
+        return exclusionMatch;
+    }
+
+    public static Set<Alteration> getExclusionAlterations(String proteinChange) {
+        Set<Alteration> exclusionAlterations = new HashSet<>();
+        Matcher exclusionMatcher = getExclusionCriteriaMatcher(proteinChange);
+        if (exclusionMatcher.matches()) {
+            String excludedStr = exclusionMatcher.group(3).trim();
+            exclusionAlterations.addAll(parseMutationString(excludedStr, ";"));
+        }
+        return exclusionAlterations;
+    }
+
+    public static boolean hasExclusionCriteria(String proteinChange) {
+        Matcher exclusionMatch = getExclusionCriteriaMatcher(proteinChange);
+        return exclusionMatch.matches();
+    }
+
+    public static List<Alteration> parseMutationString(String mutationStr, String mutationSeparator) {
         List<Alteration> ret = new ArrayList<>();
 
         mutationStr = mutationStr.replaceAll("\\([^\\)]+\\)", ""); // remove comments first
 
-        String[] parts = mutationStr.split(", *");
+        String[] parts = mutationStr.split(mutationSeparator);
 
         Pattern p = Pattern.compile("([A-Z][0-9]+)([^0-9/]+/.+)", Pattern.CASE_INSENSITIVE);
         Pattern rgp = Pattern.compile("(((grch37)|(grch38)):\\s*).*", Pattern.CASE_INSENSITIVE);
@@ -101,6 +123,18 @@ public final class AlterationUtils {
             } else {
                 proteinChange = part;
                 displayName = part;
+                if (displayName.contains("{")) {
+                    int left = displayName.indexOf("{");
+                    int right = displayName.indexOf("}");
+                    if(left > 0 && right > 0) {
+                        String exclusion = displayName.substring(left + 1, right);
+                        String separatorRegex = "\\s*;\\s*";
+                        exclusion = MainUtils.replaceLast(exclusion, separatorRegex, " and ");
+                        exclusion.replaceAll(separatorRegex, ", ");
+
+                        displayName = displayName.substring(0, left) + "(" + exclusion + ")" + displayName.substring(right + 1);
+                    }
+                }
             }
 
             Matcher m = p.matcher(proteinChange);
@@ -145,6 +179,14 @@ public final class AlterationUtils {
 
         if (proteinChange.indexOf("[") != -1) {
             proteinChange = proteinChange.substring(0, proteinChange.indexOf("["));
+        }
+
+        // we need to deal with the exclusion format so the protein change can properly be interpreted.
+        String excludedStr = "";
+        Matcher exclusionMatch = getExclusionCriteriaMatcher(proteinChange);
+        if (exclusionMatch.matches()) {
+            proteinChange = exclusionMatch.group(1);
+            excludedStr = exclusionMatch.group(3).trim();
         }
 
         proteinChange = proteinChange.trim();
@@ -296,6 +338,19 @@ public final class AlterationUtils {
                                     start = Integer.valueOf(m.group(2));
                                     end = start;
                                     consequence = "stop_lost";
+                                } else {
+                                    p = Pattern.compile("([A-Z\\*])?([0-9]+)=");
+                                    m = p.matcher(proteinChange);
+                                    if (m.matches()) {
+                                        var = ref = m.group(1);
+                                        start = Integer.valueOf(m.group(2));
+                                        end = start;
+                                        if (ref.equals("*")) {
+                                            consequence = "stop_retained_variant";
+                                        } else {
+                                            consequence = "synonymous_variant";
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -370,7 +425,11 @@ public final class AlterationUtils {
         if (com.mysql.jdbc.StringUtils.isNullOrEmpty(alteration.getName()) && alteration.getAlteration() != null) {
             // Change the positional name
             if (isPositionedAlteration(alteration)) {
-                alteration.setName(alteration.getAlteration() + " Missense Mutations");
+                if (StringUtils.isEmpty(excludedStr)) {
+                    alteration.setName(alteration.getAlteration() + " Missense Mutations");
+                } else {
+                    alteration.setName(proteinChange + " Missense Mutations, excluding " + excludedStr);
+                }
             } else {
                 alteration.setName(alteration.getAlteration());
             }
@@ -967,6 +1026,11 @@ public final class AlterationUtils {
     }
 
     public static List<Alteration> getRelevantAlterations(ReferenceGenome referenceGenome, Alteration alteration) {
+        Gene gene = alteration.getGene();
+        return getRelevantAlterations(referenceGenome, alteration, getAllAlterations(referenceGenome, gene));
+    }
+
+    public static List<Alteration> getRelevantAlterations(ReferenceGenome referenceGenome, Alteration alteration, Set<Alteration> fullAlterations) {
         if (alteration == null || alteration.getGene() == null) {
             return new ArrayList<>();
         }
@@ -979,7 +1043,7 @@ public final class AlterationUtils {
         return getAlterations(
             gene, referenceGenome, alteration.getAlteration(), alteration.getAlterationType(), term,
             proteinStart, proteinEnd,
-            getAllAlterations(referenceGenome, gene));
+            fullAlterations);
     }
 
     public static List<Alteration> removeAlterationsFromList(List<Alteration> list, List<Alteration> alterationsToBeRemoved) {
@@ -1001,6 +1065,26 @@ public final class AlterationUtils {
         } else {
             return alterationBo.findAlteration(gene, AlterationType.MUTATION, referenceGenome, alteration);
         }
+    }
+
+    public static List<Alteration> findOncogenicMutations(Set<Alteration> fullAlterations) {
+        return findAlterationsByRegex(InferredMutation.ONCOGENIC_MUTATIONS.getVariant() + ".*", fullAlterations);
+    }
+
+    public static List<Alteration> findFusions(Set<Alteration> fullAlterations) {
+        return findAlterationsByRegex(StructuralAlteration.FUSIONS.getVariant() + ".*", fullAlterations);
+    }
+
+    private static List<Alteration> findAlterationsByRegex(String regex, Set<Alteration> fullAlterations) {
+        Comparator<Alteration> byAlt = Comparator.comparing(Alteration::getAlteration).reversed();
+        TreeSet<Alteration> matchedAlterations = new TreeSet<>(byAlt);
+        // Implement the data access logic
+        for (Alteration alt : fullAlterations) {
+            if (alt.getAlteration() != null && alt.getAlteration().matches(regex)) {
+                matchedAlterations.add(alt);
+            }
+        }
+        return matchedAlterations.stream().collect(Collectors.toList());
     }
 
     /**

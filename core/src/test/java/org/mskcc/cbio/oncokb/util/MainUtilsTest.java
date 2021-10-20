@@ -3,6 +3,8 @@ package org.mskcc.cbio.oncokb.util;
 import junit.framework.TestCase;
 import org.mskcc.cbio.oncokb.model.MutationEffect;
 
+import static org.mskcc.cbio.oncokb.util.MainUtils.replaceLast;
+
 /**
  * Created by Hongxin Zhang on 3/1/18.
  */
@@ -56,4 +58,10 @@ public class MainUtilsTest extends TestCase {
         assertFalse(MainUtils.isEGFRTruncatingVariants("EGFRvIVa"));
     }
 
+    public void testReplaceLast() {
+        assertEquals("A", replaceLast("A", "and", ","));
+        assertEquals("A,B", replaceLast("AandB", "and", ","));
+        assertEquals("A,B,", replaceLast("A,Band", "and", ","));
+        assertEquals("A,B,D", replaceLast("A,BandD", "and", ","));
+    }
 }

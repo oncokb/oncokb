@@ -86,7 +86,7 @@ public class DriveAnnotationParser {
                 }
 //                JSONArray nameComments = variant.has("nameComments") ? variant.getJSONArray("nameComments") : null;
                 if (mutationStr != null) {
-                    List<Alteration> mutations = AlterationUtils.parseMutationString(mutationStr);
+                    List<Alteration> mutations = AlterationUtils.parseMutationString(mutationStr, ",");
                     Set<Alteration> alterations = new HashSet<>();
                     for (Alteration mutation : mutations) {
                         Alteration alteration = alterationBo.findAlteration(gene, type, mutation.getAlteration());
@@ -333,7 +333,7 @@ public class DriveAnnotationParser {
 //            addDateToLastReviewSetFromLong(lastReviewDatesEffect, mutationEffect, "effect");
             String effect_uuid = getUUID(mutationEffect, "effect");
 
-            List<Alteration> mutations = AlterationUtils.parseMutationString(mutationStr);
+            List<Alteration> mutations = AlterationUtils.parseMutationString(mutationStr, ",");
             for (Alteration mutation : mutations) {
                 Alteration alteration = alterationBo.findAlteration(gene, type, mutation.getAlteration());
                 if (alteration == null) {
