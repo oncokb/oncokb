@@ -327,16 +327,16 @@ public class IndicatorUtils {
                 indicatorQuery.setOncogenic(Oncogenicity.PREDICTED.getOncogenic());
 
                 // Check whether the gene has Oncogenic Mutations annotated
-                Alteration oncogenicMutation = AlterationUtils.findAlteration(gene, query.getReferenceGenome(), "Oncogenic Mutations");
-                if (oncogenicMutation != null) {
-                    relevantAlterations.add(oncogenicMutation);
+                List<Alteration> oncogenicMutations = new ArrayList<>(AlterationUtils.findOncogenicMutations(AlterationUtils.getAllAlterations(query.getReferenceGenome(), gene)));
+                if (!oncogenicMutations.isEmpty()) {
+                    relevantAlterations.addAll(oncogenicMutations);
                     if (hasTreatmentEvidence) {
                         if (StringUtils.isEmpty(query.getTumorType())) {
-                            treatmentEvidences.addAll(EvidenceUtils.getEvidence(Collections.singletonList(oncogenicMutation), selectedTreatmentEvidence, levels));
+                            treatmentEvidences.addAll(EvidenceUtils.getEvidence(oncogenicMutations, selectedTreatmentEvidence, levels));
                         } else {
                             treatmentEvidences.addAll(EvidenceUtils.keepHighestLevelForSameTreatments(
                                 EvidenceUtils.convertEvidenceLevel(
-                                    EvidenceUtils.getEvidence(Collections.singletonList(oncogenicMutation),
+                                    EvidenceUtils.getEvidence(oncogenicMutations,
                                         selectedTreatmentEvidence, levels), new HashSet<>(relevantUpwardTumorTypes)), query.getReferenceGenome(), matchedAlt));
                         }
                     }

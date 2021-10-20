@@ -99,6 +99,70 @@ public class AlterationUtilsTest extends TestCase
         assertEquals("The relevant alterations do not match", "W583del", relevantAltsName);
     }
 
+    public void testGetRelevantAlterationsForExclusion() throws Exception {
+        // Test alteration with exclusion
+        Gene gene = GeneUtils.getGeneByHugoSymbol("BRAF");
+        Alteration v600e = generateAlteration(gene, "V600E");
+        Alteration v600k = generateAlteration(gene, "V600K");
+        Alteration v600 = generateAlteration(gene, "V600");
+        Alteration v600eExcluded = generateAlteration(gene, "V600 {excluding V600E}");
+        Alteration rangeMissense = generateAlteration(gene, "V600_V601delinsEB");
+        Alteration rangeMissenseExcluded = generateAlteration(gene, "V600_V601delinsEB {excluding V600E}");
+        Alteration rangeMissenseExcludesPosition = generateAlteration(gene, "V600_V601delinsEB {excluding V600}");
+
+        Set<Alteration> fullAlteration = new HashSet<>();
+        fullAlteration.add(v600e);
+        fullAlteration.add(v600k);
+        fullAlteration.add(v600);
+        fullAlteration.add(v600eExcluded);
+        fullAlteration.add(rangeMissense);
+        fullAlteration.add(rangeMissenseExcluded);
+        fullAlteration.add(rangeMissenseExcludesPosition);
+
+        List<Alteration> alterations = AlterationUtils.getRelevantAlterations(DEFAULT_REFERENCE_GENOME, v600e, fullAlteration);
+        String relevantAltsName = AlterationUtils.toString(alterations);
+        assertEquals("The relevant alterations do not match", "V600E, V600K, V600_V601delinsEB, V600", relevantAltsName);
+
+        alterations = AlterationUtils.getRelevantAlterations(DEFAULT_REFERENCE_GENOME, v600k, fullAlteration);
+        relevantAltsName = AlterationUtils.toString(alterations);
+        assertEquals("The relevant alterations do not match", "V600K, V600E, V600_V601delinsEB, V600_V601delinsEB {excluding V600E}, V600 {excluding V600E}, V600", relevantAltsName);
+
+        // Test alteration with exclusion
+        Alteration fusionA = generateAlteration(gene, "AKAP9-BRAF Fusion");
+        Alteration fusionB = generateAlteration(gene, "AGAP3-BRAF Fusion");
+        Alteration fusionC = generateAlteration(gene, "FAM131B-BRAF Fusion");
+        Alteration fusions = generateAlteration(gene, "Fusions");
+        Alteration oncogenicMutationsExcludesFusion = generateAlteration(gene, "Fusions {excluding AKAP9-BRAF Fusion; FAM131B-BRAF Fusion}");
+
+        fullAlteration = new HashSet<>();
+        fullAlteration.add(fusionA);
+        fullAlteration.add(fusionB);
+        fullAlteration.add(fusionC);
+        fullAlteration.add(fusions);
+        fullAlteration.add(oncogenicMutationsExcludesFusion);
+
+        alterations = AlterationUtils.getRelevantAlterations(DEFAULT_REFERENCE_GENOME, fusionA, fullAlteration);
+        relevantAltsName = AlterationUtils.toString(alterations);
+        assertEquals("The relevant alterations do not match", "AKAP9-BRAF Fusion, Fusions", relevantAltsName);
+
+        alterations = AlterationUtils.getRelevantAlterations(DEFAULT_REFERENCE_GENOME, fusionB, fullAlteration);
+        relevantAltsName = AlterationUtils.toString(alterations);
+        assertEquals("The relevant alterations do not match", "AGAP3-BRAF Fusion, Fusions {excluding AKAP9-BRAF Fusion; FAM131B-BRAF Fusion}, Fusions", relevantAltsName);
+
+        alterations = AlterationUtils.getRelevantAlterations(DEFAULT_REFERENCE_GENOME, fusionC, fullAlteration);
+        relevantAltsName = AlterationUtils.toString(alterations);
+        assertEquals("The relevant alterations do not match", "FAM131B-BRAF Fusion, Fusions", relevantAltsName);
+
+    }
+
+    private Alteration generateAlteration(Gene gene, String proteinChange) {
+        Alteration alteration = new Alteration();
+        alteration.setAlteration(proteinChange);
+        alteration.setGene(gene);
+        AlterationUtils.annotateAlteration(alteration, alteration.getAlteration());
+        return alteration;
+    }
+
     public void testSortAlterationsByTheRange() throws Exception {
         int start = 8;
         int end = 8;

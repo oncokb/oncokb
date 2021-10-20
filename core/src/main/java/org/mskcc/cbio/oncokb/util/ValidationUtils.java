@@ -16,6 +16,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static org.mskcc.cbio.oncokb.util.FusionUtils.FUSION_ALTERNATIVE_SEPARATOR;
+import static org.mskcc.cbio.oncokb.util.FusionUtils.FUSION_SEPARATOR;
+
 public class ValidationUtils {
 
     public static JSONArray getMissingTreatmentInfoData() {
@@ -185,7 +188,7 @@ public class ValidationUtils {
                     if (alteration.getName().toLowerCase().contains("exon") && (alteration.getProteinStart() == null || alteration.getProteinEnd() == null || alteration.getProteinStart().equals(alteration.getProteinEnd()) || alteration.getProteinStart().equals(-1))) {
                         data.put(getErrorMessage(getTarget(alteration.getGene().getHugoSymbol(), getAlterationName(alteration)), EXON_RANGE_NEEDED));
                     }
-                    if (alteration.getAlteration().contains("-") && !alteration.getAlteration().toLowerCase().contains("fusion") && !specialAlterationNames().contains(alteration.getName())) {
+                    if (alteration.getAlteration().contains(FUSION_ALTERNATIVE_SEPARATOR) && !alteration.getAlteration().toLowerCase().contains("fusion") && !specialAlterationNames().contains(alteration.getName())) {
                         data.put(getErrorMessage(getTarget(alteration.getGene().getHugoSymbol(), getAlterationName(alteration)), FUSION_NAME_IS_INCORRECT));
                     }
                     if (alteration.getConsequence() == null) {

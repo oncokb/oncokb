@@ -9,6 +9,7 @@ import org.mskcc.cbio.oncokb.model.AlterationPositionBoundary;
 import java.util.Arrays;
 import java.util.Collection;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mskcc.cbio.oncokb.Constants.MISSENSE_VARIANT;
 
@@ -89,8 +90,21 @@ public class AnnotateAlterationTest {
                 {"405_500_splice", "405", "500", "405", "500", null, null, "splice_region_variant"},
                 {"405_500splice", "405", "500", "405", "500", null, null, "splice_region_variant"},
 
+                // stop retained variant
+                {"*1136=", "1136", "1136", "1136", "1136", "*", "*", "stop_retained_variant"},
+
+                // silent mutation
+                {"L838=", "838", "838", "838", "838", "L", "L", "synonymous_variant"},
+
                 // Stop gained
                 {"R2109*", "2109", "2109", "2109", "2109", "R", "*", "stop_gained"},
+
+                // Stop lost, tests are from https://varnomen.hgvs.org/recommendations/protein/variant/extension/
+                {"*959Qext*14", "959", "959", "959", "959", "*", null, "stop_lost"},
+                {"*110Gext*17", "110", "110", "110", "110", "*", null, "stop_lost"},
+                {"*315TextALGT*", "315", "315", "315", "315", "*", null, "stop_lost"},
+                {"*327Aext*?", "327", "327", "327", "327", "*", null, "stop_lost"},
+                {"327Aext*?", "327", "327", "327", "327", null, null, "NA"},
 
                 // Synonymous Variant
                 {"G500G", "500", "500", "500", "500", "G", "G", "synonymous_variant"},
