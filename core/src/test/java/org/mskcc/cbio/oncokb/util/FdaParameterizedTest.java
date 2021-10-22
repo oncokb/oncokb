@@ -68,13 +68,13 @@ public class FdaParameterizedTest {
             if (!line.startsWith("#") && line.trim().length() > 0) {
                 try {
                     String parts[] = line.split("\t");
-                    if (parts.length < 4) {
+                    if (parts.length < 3) {
                         throw new IllegalArgumentException("Missing a tumor type summary query attribute, parts: " + parts.length);
                     }
                     String gene = parts[0];
                     String variant = parts[1];
                     String cancerType = parts[2];
-                    String fdaLevel = parts[3];
+                    String fdaLevel = parts.length > 3 ? parts[3] : "";
                     String[] query = {gene, variant, cancerType, fdaLevel};
                     queries.add(query);
                     count++;
