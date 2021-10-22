@@ -702,12 +702,13 @@ public class IndicatorUtilsTest {
         resp2 = IndicatorUtils.processQuery(query2, null, true, null);
         pairComparison(resp1, resp2);
 
+        // Disabled test because RDD and Histiocytosis have different highest sensitive level
         // test RDD, it used to belong to Histiocytic Disorder, now under Histiocytosis
-        query1 = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "MAP2K1", "C121S", null, null, "RDD", null, null, null, null);
-        query2 = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "MAP2K1", "C121S", null, null, "Histiocytosis", null, null, null, null);
-        resp1 = IndicatorUtils.processQuery(query1, null, true, null);
-        resp2 = IndicatorUtils.processQuery(query2, null, true, null);
-        pairComparison(resp1, resp2);
+        // query1 = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "MAP2K1", "C121S", null, null, "RDD", null, null, null, null);
+        // query2 = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "MAP2K1", "C121S", null, null, "Histiocytosis", null, null, null, null);
+        // resp1 = IndicatorUtils.processQuery(query1, null, true, null);
+        // resp2 = IndicatorUtils.processQuery(query2, null, true, null);
+        // pairComparison(resp1, resp2);
 
         // Test positional variant but with a missense variant consequence
         query1 = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "TP53", "R248", null, null, "RDD", null, null, null, null);
