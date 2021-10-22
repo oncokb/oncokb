@@ -655,7 +655,7 @@ public final class AlterationUtils {
             if (name != null) {
                 Boolean contain = false;
                 for (String inferredAlt : getInferredMutations()) {
-                    if (inferredAlt.equalsIgnoreCase(name)) {
+                    if (name.startsWith(inferredAlt)) {
                         contain = true;
                     }
                 }

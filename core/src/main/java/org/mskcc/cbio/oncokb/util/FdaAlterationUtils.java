@@ -26,7 +26,7 @@ public class FdaAlterationUtils {
                 if (clinicalVariant.getVariant().getAlteration().startsWith(ONCOGENIC_MUTATIONS.getVariant())) {
                     for (BiologicalVariant annotatedAlt : MainUtils.getBiologicalVariants(gene)) {
                         List<Alteration> relevantAlterations = AlterationUtils.getRelevantAlterations(ReferenceGenome.GRCh37, annotatedAlt.getVariant());
-                        if(relevantAlterations.contains(clinicalVariant.getVariant().getAlteration())) {
+                        if(relevantAlterations.contains(clinicalVariant.getVariant())) {
                             mappedAlterations.add(annotatedAlt.getVariant());
                         }
                     }
