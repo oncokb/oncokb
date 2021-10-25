@@ -463,7 +463,7 @@ public class IndicatorUtils {
             indicatorQuery.setGeneExist(false);
         }
 
-        if(StringUtils.isEmpty(indicatorQuery.getOncogenic()) && StringUtils.isNotEmpty(query.getAlteration()) && query.getAlteration().trim().toLowerCase().equals(InferredMutation.ONCOGENIC_MUTATIONS.getVariant().toLowerCase())) {
+        if(StringUtils.isEmpty(indicatorQuery.getOncogenic()) && StringUtils.isNotEmpty(query.getAlteration()) && query.getAlteration().trim().toLowerCase().startsWith(InferredMutation.ONCOGENIC_MUTATIONS.getVariant().toLowerCase())) {
             indicatorQuery.setOncogenic(Oncogenicity.YES.getOncogenic());
         }
 
@@ -593,7 +593,7 @@ public class IndicatorUtils {
             }
         }
 
-        if(StringUtils.isNotEmpty(alteration.getAlteration()) && alteration.getAlteration().trim().toLowerCase().equals(InferredMutation.ONCOGENIC_MUTATIONS.getVariant().toLowerCase())) {
+        if(StringUtils.isNotEmpty(alteration.getAlteration()) && alteration.getAlteration().trim().toLowerCase().startsWith(InferredMutation.ONCOGENIC_MUTATIONS.getVariant().toLowerCase())) {
             oncogenicity = Oncogenicity.YES;
         }
 
