@@ -208,7 +208,7 @@ public class SummaryUtils {
     }
 
     public static String variantSummary(Gene gene, Alteration exactMatchAlteration, List<Alteration> alterations, Query query) {
-        if (!StringUtils.isEmpty(query.getAlteration()) && query.getAlteration().equalsIgnoreCase(InferredMutation.ONCOGENIC_MUTATIONS.getVariant())) {
+        if (!StringUtils.isEmpty(query.getAlteration()) && query.getAlteration().toLowerCase().startsWith(InferredMutation.ONCOGENIC_MUTATIONS.getVariant().toLowerCase())) {
             return ONCOGENIC_MUTATIONS_DEFAULT_SUMMARY;
         }
         return getOncogenicSummarySubFunc(gene, exactMatchAlteration, alterations, query);
