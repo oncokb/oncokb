@@ -4,17 +4,12 @@
  */
 package org.mskcc.cbio.oncokb.util;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
@@ -40,6 +35,21 @@ public class FileUtils {
      */
     public static String readLocal(String pathToFile) throws IOException {
         return readStream(new FileInputStream(pathToFile));
+    }
+
+    public static void writeToLocal(String fileName, String content) throws IOException {
+        File file = new File(fileName);
+
+        // creates the file
+        file.createNewFile();
+
+        // creates a FileWriter Object
+        FileWriter writer = new FileWriter(file);
+
+        // Writes the content to the file
+        writer.write(content);
+        writer.flush();
+        writer.close();
     }
 
     /**

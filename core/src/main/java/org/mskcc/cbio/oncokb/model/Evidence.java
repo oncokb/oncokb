@@ -137,6 +137,28 @@ public class Evidence implements java.io.Serializable {
     @Column(name = "known_effect")
     private String knownEffect;
 
+    @Column(name = "cancer_type")
+    private String cancerType;
+
+    @Column(name = "subtype")
+    private String subtype;
+
+    public String getCancerType() {
+        return cancerType;
+    }
+
+    public void setCancerType(String cancerType) {
+        this.cancerType = cancerType;
+    }
+
+    public String getSubtype() {
+        return subtype;
+    }
+
+    public void setSubtype(String subtype) {
+        this.subtype = subtype;
+    }
+
     @Column(name = "last_edit")
     private Date lastEdit;
 
