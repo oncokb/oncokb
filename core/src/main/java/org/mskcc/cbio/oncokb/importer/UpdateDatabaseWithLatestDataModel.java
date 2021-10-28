@@ -21,6 +21,7 @@ import static org.mskcc.cbio.oncokb.Constants.MISSENSE_VARIANT;
 public class UpdateDatabaseWithLatestDataModel {
     public static void main(String[] args) throws IOException {
         updateAlteration();
+        updateLegacyCancerType();
         updateEvidence();
     }
 
@@ -31,16 +32,44 @@ public class UpdateDatabaseWithLatestDataModel {
         }
     }
 
+    private static void updateLegacyCancerType() {
+        for (Evidence evidence : ApplicationContextSingleton.getEvidenceBo().findAll()) {
+            if (StringUtils.isNotEmpty(evidence.getSubtype()) && evidence.getSubtype().equals("DLBCL")) {
+                evidence.setSubtype("DLBCLNOS");
+            }
+            if (StringUtils.isNotEmpty(evidence.getSubtype()) && evidence.getSubtype().equals("ALL")) {
+                evidence.setSubtype("BLL");
+            }
+            if (StringUtils.isNotEmpty(evidence.getCancerType()) && evidence.getCancerType().equals("Histiocytic Disorder")) {
+                evidence.setCancerType("Histiocytosis");
+            }
+            if (StringUtils.isNotEmpty(evidence.getCancerType()) && evidence.getCancerType().equals("Myelodysplasia")) {
+                evidence.setSubtype("MDS/MPN");
+                evidence.setCancerType("Myelodysplastic/Myeloproliferative Neoplasms");
+            }
+            if (StringUtils.isNotEmpty(evidence.getCancerType()) && evidence.getCancerType().equals("Myeloproliferative Neoplasm")) {
+                evidence.setSubtype("MDS/MPN");
+                evidence.setCancerType("Myelodysplastic/Myeloproliferative Neoplasms");
+            }
+            ApplicationContextSingleton.getEvidenceBo().update(evidence);
+        }
+    }
+
     private static void updateEvidence() {
         List<Evidence> evidences = ApplicationContextSingleton.getEvidenceBo().findAll();
 
         for (Evidence evidence : evidences) {
             TumorType matchedTumorType = null;
             if (StringUtils.isNotEmpty(evidence.getSubtype())) {
-                matchedTumorType = TumorTypeUtils.getBySubtype(evidence.getSubtype());
-            }
-            if (matchedTumorType == null && StringUtils.isNotEmpty(evidence.getCancerType())) {
+                matchedTumorType = TumorTypeUtils.getByCode(evidence.getSubtype());
+                if (matchedTumorType == null) {
+                    System.out.println("Cannot find the cancer type for subtype " + evidence.getSubtype());
+                }
+            } else if (StringUtils.isNotEmpty(evidence.getCancerType())) {
                 matchedTumorType = TumorTypeUtils.getByMainType(evidence.getCancerType());
+                if (matchedTumorType == null) {
+                    System.out.println("Cannot find the cancer type for main type " + evidence.getCancerType());
+                }
             }
             if (matchedTumorType != null) {
                 evidence.setCancerTypes(Collections.singleton(matchedTumorType));

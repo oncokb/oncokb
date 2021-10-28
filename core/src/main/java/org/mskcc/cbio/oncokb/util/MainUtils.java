@@ -227,7 +227,7 @@ public class MainUtils {
 
         if (oncogenicity != null) {
             for (Evidence evidence : evidences) {
-                if (evidence.getKnownEffect().equals(oncogenicity.getOncogenic())) {
+                if (evidence.getKnownEffect() != null && evidence.getKnownEffect().equals(oncogenicity.getOncogenic())) {
                     if (evidencePicked == null) {
                         evidencePicked = evidence;
                     } else if (evidencePicked.getLastEdit() == null) {
