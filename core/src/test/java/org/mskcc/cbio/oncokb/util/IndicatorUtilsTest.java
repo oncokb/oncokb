@@ -393,6 +393,19 @@ public class IndicatorUtilsTest {
         assertEquals("The Oncogenicity is not empty, but it should be.", "", indicatorQueryResp.getOncogenic());
         assertTrue("There should not be any treatments", indicatorQueryResp.getTreatments().isEmpty());
 
+
+        // Test enforced consequence, especially a silent mutation could be a splice mutation by specifying the consequence in the request
+        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "TP53", "X187=", null, null, "CLLSLL", null, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
+        assertEquals("The Oncogenicity is not unknown, but it should.", "", indicatorQueryResp.getOncogenic());
+        assertTrue("There highest prognostic level should be empty", indicatorQueryResp.getHighestPrognosticImplicationLevel() == null);
+
+        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "TP53", "X187=", null, null, "CLLSLL", "splice_region_variant", null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
+        assertEquals("The Oncogenicity is not likely oncogenic, but it should.", Oncogenicity.LIKELY.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertTrue("There highest prognostic level should not be empty", indicatorQueryResp.getHighestPrognosticImplicationLevel() != null);
+
+
         // Give a default mutation effect when it is not available: Unknown
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "CHEK2", "R346C", null, null, "Myelodysplastic Workup", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
