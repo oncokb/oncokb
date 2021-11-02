@@ -202,12 +202,12 @@ public final class AlterationUtils {
             Integer refL = ref.length();
             Integer varL = var.length();
 
-            if (ref.equals(var)) {
-                consequence = "synonymous_variant";
-            } else if (ref.equals("*")) {
+            if (ref.equals("*")) {
                 consequence = "stop_lost";
             } else if (var.equals("*")) {
                 consequence = "stop_gained";
+            } else if (ref.equals(var)) {
+                consequence = "synonymous_variant";
             } else if (start == 1) {
                 consequence = "start_lost";
             } else if (var.equals("?")) {
@@ -230,7 +230,7 @@ public final class AlterationUtils {
                 }
             }
         } else {
-            p = Pattern.compile("[A-Z]?([0-9]+)(_[A-Z]?([0-9]+))?(delins|ins)([A-Z]+)");
+            p = Pattern.compile("[A-Z]?([0-9]+)(_[A-Z]?([0-9]+))?(delins|ins)([A-Z0-9]+)");
             m = p.matcher(proteinChange);
             if (m.matches()) {
                 start = Integer.valueOf(m.group(1));
