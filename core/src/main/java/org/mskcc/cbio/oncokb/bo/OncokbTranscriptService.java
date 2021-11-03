@@ -23,9 +23,12 @@ import java.util.stream.Collectors;
  */
 public class OncokbTranscriptService {
     private ApiClient client;
+    private final int TIMEOUT = 30000;
 
     public OncokbTranscriptService() {
         this.client = Configuration.getDefaultApiClient();
+        this.client.setConnectTimeout(TIMEOUT);
+        this.client.setReadTimeout(TIMEOUT);
 
         // Configure API key authorization: authorization
         OAuth authorization = (OAuth) this.client.getAuthentication("Authorization");
