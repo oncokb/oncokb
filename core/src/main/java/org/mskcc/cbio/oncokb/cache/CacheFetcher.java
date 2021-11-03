@@ -27,7 +27,7 @@ public class CacheFetcher {
 
     @Cacheable(cacheResolver = "generalCacheResolver", key = "'all'")
     public List<CancerGene> getCancerGenes() {
-        return CancerGeneUtils.getCancerGeneList();
+        return getCancerGeneList();
     }
 
     @Cacheable(cacheResolver = "generalCacheResolver", key = "'all'")
@@ -53,10 +53,11 @@ public class CacheFetcher {
         header.add("FOUNDATION ONE HEME");
         header.add("Vogelstein");
         header.add("SANGER CGC(05/30/2017)");
+        header.add("Gene Aliases");
         sb.append(MainUtils.listToString(header, separator));
         sb.append(newLine);
 
-        for (CancerGene cancerGene : CancerGeneUtils.getCancerGeneList()) {
+        for (CancerGene cancerGene : getCancerGeneList()) {
             List<String> row = new ArrayList<>();
             row.add(cancerGene.getHugoSymbol());
             row.add(cancerGene.getEntrezGeneId().toString());
@@ -74,10 +75,36 @@ public class CacheFetcher {
             row.add(getStringByBoolean(cancerGene.getFoundationHeme()));
             row.add(getStringByBoolean(cancerGene.getVogelstein()));
             row.add(getStringByBoolean(cancerGene.getSangerCGC()));
+            row.add(cancerGene.getGeneAlias().stream().sorted().collect(Collectors.joining(", ")));
             sb.append(MainUtils.listToString(row, separator));
             sb.append(newLine);
         }
         return sb.toString();
+    }
+
+    private List<CancerGene> getCancerGeneList() {
+        List<CancerGene> cancerGenes = CancerGeneUtils.getCancerGeneList();
+        List<String> hugos = cancerGenes.stream().map(CancerGene::getHugoSymbol).collect(Collectors.toList());
+        List<Gene> genes = new ArrayList<>();
+        try {
+            genes = oncokbTranscriptService.findGenesBySymbols(hugos);
+        } catch (ApiException e) {
+            e.printStackTrace();
+        }
+        for (CancerGene cancerGene : cancerGenes) {
+            if (cancerGene.getGeneAlias().size() == 0) {
+                List<Gene> matched = genes.stream().filter(gene -> gene.getEntrezGeneId().equals(cancerGene.getEntrezGeneId())).collect(Collectors.toList());
+                if (matched.size() > 0) {
+                    Set<String> geneAlias = new HashSet<>();
+                    Gene gene = matched.iterator().next();
+                    geneAlias.addAll(gene.getGeneAliases());
+                    geneAlias.add(gene.getHugoSymbol());
+                    geneAlias.remove(cancerGene.getHugoSymbol());
+                    cancerGene.setGeneAlias(geneAlias);
+                }
+            }
+        }
+        return cancerGenes;
     }
 
     @Cacheable(cacheResolver = "generalCacheResolver")

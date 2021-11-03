@@ -1,7 +1,7 @@
 package org.mskcc.cbio.oncokb.model;
 
 import java.io.Serializable;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Created by jiaojiao on 6/8/17.
@@ -23,6 +23,7 @@ public class CancerGene implements Serializable {
     private Boolean sangerCGC = false;
     private Boolean isOncogene = false;
     private Boolean isTSG = false;
+    private Set<String> geneAlias = new HashSet<>();
 
     public String getHugoSymbol() {
         return hugoSymbol;
@@ -150,6 +151,14 @@ public class CancerGene implements Serializable {
 
     public void setTSG(Boolean TSG) {
         isTSG = TSG;
+    }
+
+    public Set<String> getGeneAlias() {
+        return geneAlias;
+    }
+
+    public void setGeneAlias(Set<String> geneAlias) {
+        this.geneAlias = geneAlias;
     }
 
     @Override
