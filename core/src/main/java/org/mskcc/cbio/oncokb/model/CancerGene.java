@@ -23,7 +23,7 @@ public class CancerGene implements Serializable {
     private Boolean sangerCGC = false;
     private Boolean isOncogene = false;
     private Boolean isTSG = false;
-    private Set<String> geneAlias = new HashSet<>();
+    private Set<String> geneAliases = new HashSet<>();
 
     public String getHugoSymbol() {
         return hugoSymbol;
@@ -153,12 +153,12 @@ public class CancerGene implements Serializable {
         isTSG = TSG;
     }
 
-    public Set<String> getGeneAlias() {
-        return geneAlias;
+    public Set<String> getGeneAliases() {
+        return geneAliases;
     }
 
-    public void setGeneAlias(Set<String> geneAlias) {
-        this.geneAlias = geneAlias;
+    public void setGeneAliases(Set<String> geneAliases) {
+        this.geneAliases = geneAliases;
     }
 
     @Override

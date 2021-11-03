@@ -43,7 +43,7 @@ public class CancerGeneUtils {
                 cancerGene.setOccurrenceCount(1);
                 cancerGene.setOncogene(gene.getOncogene());
                 cancerGene.setTSG(gene.getTSG());
-                cancerGene.setGeneAlias(gene.getGeneAliases());
+                cancerGene.setGeneAliases(gene.getGeneAliases());
                 cancerGenes.add(cancerGene);
             });
 

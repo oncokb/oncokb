@@ -75,7 +75,7 @@ public class CacheFetcher {
             row.add(getStringByBoolean(cancerGene.getFoundationHeme()));
             row.add(getStringByBoolean(cancerGene.getVogelstein()));
             row.add(getStringByBoolean(cancerGene.getSangerCGC()));
-            row.add(cancerGene.getGeneAlias().stream().sorted().collect(Collectors.joining(", ")));
+            row.add(cancerGene.getGeneAliases().stream().sorted().collect(Collectors.joining(", ")));
             sb.append(MainUtils.listToString(row, separator));
             sb.append(newLine);
         }
@@ -92,7 +92,7 @@ public class CacheFetcher {
             e.printStackTrace();
         }
         for (CancerGene cancerGene : cancerGenes) {
-            if (cancerGene.getGeneAlias().size() == 0) {
+            if (cancerGene.getGeneAliases().size() == 0) {
                 List<Gene> matched = genes.stream().filter(gene -> gene.getEntrezGeneId().equals(cancerGene.getEntrezGeneId())).collect(Collectors.toList());
                 if (matched.size() > 0) {
                     Set<String> geneAlias = new HashSet<>();
@@ -100,7 +100,7 @@ public class CacheFetcher {
                     geneAlias.addAll(gene.getGeneAliases());
                     geneAlias.add(gene.getHugoSymbol());
                     geneAlias.remove(cancerGene.getHugoSymbol());
-                    cancerGene.setGeneAlias(geneAlias);
+                    cancerGene.setGeneAliases(geneAlias);
                 }
             }
         }
