@@ -8,6 +8,8 @@ import org.springframework.cache.interceptor.CacheResolver;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import static org.mskcc.cbio.oncokb.cache.Constants.REDIS_KEY_SEPARATOR;
+
 public class GeneralCacheResolver implements CacheResolver {
     private final CacheManager cacheManager;
 
@@ -18,10 +20,7 @@ public class GeneralCacheResolver implements CacheResolver {
     @Override
     public Collection<? extends Cache> resolveCaches(CacheOperationInvocationContext<?> context) {
         Collection<Cache> caches = new ArrayList<>();
-        CacheKey nameKey = CacheKey.getByKey(context.getMethod().getName());
-        if (nameKey != null) {
-            caches.add(cacheManager.getCache(nameKey.getKey()));
-        }
+        caches.add(cacheManager.getCache(CacheCategory.GENERAL.getKey() + REDIS_KEY_SEPARATOR + context.getMethod().getName()));
         return caches;
     }
 }

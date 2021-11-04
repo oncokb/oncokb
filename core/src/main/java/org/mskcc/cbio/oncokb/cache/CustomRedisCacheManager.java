@@ -40,27 +40,14 @@ public class CustomRedisCacheManager implements CacheManager {
     }
 
     public void clearAll() {
-        for (CacheKey cacheKey : CacheKey.values()) {
-            this.getCache(cacheKey.getKey()).clear();
-        }
+        // remove all cache within the application
+        this.getCache("*").clear();
     }
 
     public Cache getCache(String name, boolean expires) {
         long clientTTLInMinutes = expires ? ttlInMins : CustomRedisCache.INFINITE_TTL;
         String cacheName = this.cacheNameResolver.getCacheName(name);
         return caches.computeIfAbsent(cacheName, k -> {
-            CacheKey nameKey = CacheKey.getByKey(name);
-            // We should name all the cache keys, so we can clear all in the method above.
-            if (nameKey != null) {
-                switch (nameKey) {
-                    case PROCESS_QUERY:
-                    case GET_ALTERATION_FROM_GN:
-                    case FIND_GENE_BY_SYMBOL:
-                        return new CustomMapRedisCache(cacheName, client, clientTTLInMinutes);
-                    default:
-                        return new CustomBucketRedisCache(cacheName, client, clientTTLInMinutes);
-                }
-            }
             return new CustomBucketRedisCache(cacheName, client, clientTTLInMinutes);
         });
     }
