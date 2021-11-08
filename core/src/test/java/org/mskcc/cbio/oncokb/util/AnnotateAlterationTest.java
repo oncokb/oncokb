@@ -59,17 +59,22 @@ public class AnnotateAlterationTest {
                 // frameshift event
                 {"N457Mfs*22", "457", "457", "457", "457", "N", null, "frameshift_variant"},
                 {"*1069Ffs*5", "1069", "1069", "1069", "1069", "*", null, "frameshift_variant"},
+                {"I327Rfs*", "327", "327", "327", "327", "I", null, "frameshift_variant"},
 
                 // inframe event
                 {"T417_D419delinsI", "417", "419", "417", "419", null, null, "inframe_deletion"},
-                {"E102_I103del", "102", "103", "102", "103", null, null, "inframe_deletion"},
                 {"V600delinsYM", "600", "600", "600", "600", null, null, "inframe_insertion"},
                 {"I744_K745delinsKIPVAI", "744", "745", "744", "745", null, null, "inframe_insertion"},
                 {"762_823ins", "762", "823", "762", "823", null, null, "inframe_insertion"},
                 {"V561_I562insER", "561", "562", "561", "562", null, null, "inframe_insertion"},
+                {"R78_G79ins23", "78", "79", "78", "79", null, null, "inframe_insertion"},
                 {"IK744KIPVAI", "744", "745", "744", "745", "IK", "KIPVAI", "inframe_insertion"},
-                {"IK744K", "744", "745", "744", "745", "IK", "K", "inframe_deletion"},
                 {"IKG744KIPVAI", "744", "746", "744", "746", "IKG", "KIPVAI", "inframe_insertion"},
+
+                {"E102_I103del", "102", "103", "102", "103", null, null, "inframe_deletion"},
+                {"IK744K", "744", "745", "744", "745", "IK", "K", "inframe_deletion"},
+                {"V559_E561del", "559", "561", "559", "561", null, null, "inframe_deletion"},
+
                 {"P68_C77dup", "68", "77", "68", "77", null, null, "inframe_insertion"},
 
                 // start_lost,
@@ -104,6 +109,7 @@ public class AnnotateAlterationTest {
                 {"*110Gext*17", "110", "110", "110", "110", "*", null, "stop_lost"},
                 {"*315TextALGT*", "315", "315", "315", "315", "*", null, "stop_lost"},
                 {"*327Aext*?", "327", "327", "327", "327", "*", null, "stop_lost"},
+                {"*151*", "151", "151", "151", "151", "*", "*", "stop_lost"},
                 {"327Aext*?", "327", "327", "327", "327", null, null, "NA"},
 
                 // Synonymous Variant

@@ -17,8 +17,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.mskcc.cbio.oncokb.Constants.*;
-import static org.mskcc.cbio.oncokb.util.AlterationUtils.findFusions;
-import static org.mskcc.cbio.oncokb.util.AlterationUtils.findOncogenicMutations;
+import static org.mskcc.cbio.oncokb.util.AlterationUtils.*;
 
 /**
  * @author jgao
@@ -45,7 +44,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
                 return matchedByAlteration;
             }
             // We also want to do a consequence check, if the consequence has been specified, then it should be respected
-            if (matchedByAlteration.getConsequence().equals(alteration.getConsequence())) {
+            if (consequenceRelated(alteration.getConsequence(), matchedByAlteration.getConsequence())) {
                 return matchedByAlteration;
             } else {
                 return null;
@@ -149,7 +148,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         if (alterations != null && alterations.size() > 0) {
             for (Alteration alteration : alterations) {
                 if (alteration.getGene().equals(gene) && alteration.getConsequence() != null
-                    && AlterationUtils.consequenceRelated(alteration.getConsequence(), consequence)
+                    && consequenceRelated(alteration.getConsequence(), consequence)
                     && alteration.getProteinStart() != null
                     && alteration.getProteinEnd() != null
                     && (referenceGenome == null || alteration.getReferenceGenomes().contains(referenceGenome))
