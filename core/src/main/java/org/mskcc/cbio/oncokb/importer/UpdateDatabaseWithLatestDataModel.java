@@ -51,6 +51,10 @@ public class UpdateDatabaseWithLatestDataModel {
                 evidence.setSubtype("MDS/MPN");
                 evidence.setCancerType("Myelodysplastic/Myeloproliferative Neoplasms");
             }
+            if (StringUtils.isNotEmpty(evidence.getCancerType()) && StringUtils.isEmpty(evidence.getSubtype()) && evidence.getCancerType().equalsIgnoreCase("melanoma")) {
+                evidence.setSubtype("MEL");
+                evidence.setCancerType("Melanoma");
+            }
             ApplicationContextSingleton.getEvidenceBo().update(evidence);
         }
     }
