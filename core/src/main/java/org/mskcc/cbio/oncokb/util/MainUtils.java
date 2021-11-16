@@ -659,4 +659,24 @@ public class MainUtils {
         // the code is from https://stackoverflow.com/a/2282998
         return text.replaceFirst("(?s)"+regex+"(?!.*?"+regex+")", replacement);
     }
+
+    public static boolean rangesIntersect(Integer start1, Integer end1, Integer start2, Integer end2) {
+        if (start1 == null) {
+            start1 = Integer.MIN_VALUE;
+        }
+        if (start2 == null) {
+            start2 = Integer.MIN_VALUE;
+        }
+        if (end1 == null) {
+            end1 = Integer.MAX_VALUE;
+        }
+        if (end2 == null) {
+            end2 = Integer.MAX_VALUE;
+        }
+        if (start1 > end2 || end1 < start2) {
+            return false;
+        } else {
+            return true;
+        }
+    }
 }
