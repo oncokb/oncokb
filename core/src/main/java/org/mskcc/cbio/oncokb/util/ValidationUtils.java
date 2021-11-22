@@ -173,7 +173,7 @@ public class ValidationUtils {
 
         JSONArray data = new JSONArray();
 
-        Pattern unsupportedAlterationNameRegex = Pattern.compile("[^\\w\\s\\*-]");
+        Pattern unsupportedAlterationNameRegex = Pattern.compile("[^\\w\\s\\*-\\{\\};]");
         for (Alteration alteration : AlterationUtils.getAllAlterations()) {
             if (StringUtils.isNullOrEmpty(alteration.getAlteration())) {
                 data.put(getErrorMessage(getTarget(alteration.getGene().getHugoSymbol()), ALTERATION_NAME_IS_EMPTY));

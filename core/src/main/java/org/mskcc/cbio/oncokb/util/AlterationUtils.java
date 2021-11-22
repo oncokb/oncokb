@@ -130,7 +130,7 @@ public final class AlterationUtils {
                         String exclusion = displayName.substring(left + 1, right);
                         String separatorRegex = "\\s*;\\s*";
                         exclusion = MainUtils.replaceLast(exclusion, separatorRegex, " and ");
-                        exclusion.replaceAll(separatorRegex, ", ");
+                        exclusion = exclusion.replaceAll(separatorRegex, ", ");
 
                         displayName = displayName.substring(0, left) + "(" + exclusion + ")" + displayName.substring(right + 1);
                     }
