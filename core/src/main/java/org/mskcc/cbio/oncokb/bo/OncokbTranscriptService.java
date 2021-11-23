@@ -23,9 +23,12 @@ import java.util.stream.Collectors;
  */
 public class OncokbTranscriptService {
     private ApiClient client;
+    private final int TIMEOUT = 30000;
 
     public OncokbTranscriptService() {
         this.client = Configuration.getDefaultApiClient();
+        this.client.setConnectTimeout(TIMEOUT);
+        this.client.setReadTimeout(TIMEOUT);
 
         // Configure API key authorization: authorization
         OAuth authorization = (OAuth) this.client.getAuthentication("Authorization");
@@ -68,12 +71,12 @@ public class OncokbTranscriptService {
     }
 
     private TranscriptComparisonResultVM compareTranscript(TranscriptPairVM.ReferenceGenomeEnum referenceGenome, Gene gene, String ensemblTranscriptId)  throws ApiException{
-        SequenceResourceApi sequenceResourceApi = new SequenceResourceApi();
+        SequenceControllerApi sequenceControllerApi = new SequenceControllerApi();
         TranscriptControllerApi controllerApi = new TranscriptControllerApi();
 
         List<Sequence> sequences = null;
         try {
-            sequences = sequenceResourceApi.getAllSequencesUsingGET1(referenceGenome.toString(), "ONCOKB", gene.getHugoSymbol());
+            sequences = sequenceControllerApi.findSequencesByUsageSourceUsingGET(referenceGenome.toString(), "ONCOKB", gene.getHugoSymbol());
         } catch (ApiException e) {
             throw e;
         }
@@ -103,8 +106,8 @@ public class OncokbTranscriptService {
     }
 
     public String getProteinSequence(ReferenceGenome referenceGenome, Gene gene) throws ApiException {
-        SequenceResourceApi sequenceResourceApi = new SequenceResourceApi();
-        List<Sequence> sequenceList = sequenceResourceApi.getAllSequencesUsingGET1(referenceGenome.name(), "ONCOKB", gene.getHugoSymbol());
+        SequenceControllerApi sequenceResourceApi = new SequenceControllerApi();
+        List<Sequence> sequenceList = sequenceResourceApi.findSequencesByUsageSourceUsingGET(referenceGenome.name(), "ONCOKB", gene.getHugoSymbol());
         if (sequenceList.isEmpty()) {
             return null;
         } else {
@@ -113,8 +116,8 @@ public class OncokbTranscriptService {
     }
 
     public List<Sequence> getAllProteinSequences(ReferenceGenome referenceGenome) throws ApiException {
-        SequenceResourceApi sequenceResourceApi = new SequenceResourceApi();
-        return sequenceResourceApi.getAllSequencesUsingGET1(referenceGenome.name(), "ONCOKB", null);
+        SequenceControllerApi sequenceResourceApi = new SequenceControllerApi();
+        return sequenceResourceApi.findSequencesByUsageSourceUsingGET(referenceGenome.name(), "ONCOKB", null);
     }
 
     public String getAminoAcid(ReferenceGenome referenceGenome, Gene gene, int positionStart, int length) throws ApiException {
@@ -127,13 +130,13 @@ public class OncokbTranscriptService {
     }
 
     public List<Drug> findDrugs(String query) throws ApiException {
-        DrugResourceApi drugResourceApi = new DrugResourceApi();
-        return drugResourceApi.findDrugsUsingGET(query);
+        DrugControllerApi drugControllerApi = new DrugControllerApi();
+        return drugControllerApi.findDrugsUsingGET(query);
     }
 
     public Drug findDrugByNcitCode(String code) throws ApiException {
-        DrugResourceApi drugResourceApi = new DrugResourceApi();
-        return drugResourceApi.findDrugByCodeUsingGET(code);
+        DrugControllerApi drugControllerApi = new DrugControllerApi();
+        return drugControllerApi.findDrugByCodeUsingGET(code);
     }
 
     public Gene findGeneBySymbol(String symbol) throws ApiException {

@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import static org.mskcc.cbio.oncokb.cache.Constants.DELIMITER;
+import static org.mskcc.cbio.oncokb.cache.Constants.REDIS_KEY_SEPARATOR;
 
 /**
  * @author Luke Sikina, Hongxin Zhang
@@ -48,7 +48,7 @@ public abstract class CustomRedisCache extends AbstractValueAdaptingCache {
 
     @Override
     protected Object lookup(Object key) {
-        Object value = this.store.getBucket(name + DELIMITER + key).get();
+        Object value = this.store.getBucket(name + REDIS_KEY_SEPARATOR + key).get();
         if (value != null){
             value = fromStoreValue(value);
             asyncRefresh(key);
@@ -58,16 +58,16 @@ public abstract class CustomRedisCache extends AbstractValueAdaptingCache {
 
     private void asyncRefresh(Object key) {
         if (ttlMinutes != INFINITE_TTL) {
-            this.store.getBucket(name + DELIMITER + key).expireAsync(ttlMinutes, TimeUnit.MINUTES);
+            this.store.getBucket(name + REDIS_KEY_SEPARATOR + key).expireAsync(ttlMinutes, TimeUnit.MINUTES);
         }
     }
 
     @Override
     public void put(Object key, Object value) {
         if (ttlMinutes == INFINITE_TTL) {
-            this.store.getBucket(name + DELIMITER + key).setAsync(toStoreValue(value));
+            this.store.getBucket(name + REDIS_KEY_SEPARATOR + key).setAsync(toStoreValue(value));
         } else {
-            this.store.getBucket(name + DELIMITER + key).setAsync(toStoreValue(value), ttlMinutes, TimeUnit.MINUTES);
+            this.store.getBucket(name + REDIS_KEY_SEPARATOR + key).setAsync(toStoreValue(value), ttlMinutes, TimeUnit.MINUTES);
         }
     }
 
@@ -89,7 +89,7 @@ public abstract class CustomRedisCache extends AbstractValueAdaptingCache {
 
     @Override
     public void clear() {
-        this.store.getKeys().deleteByPattern(name + DELIMITER + "*");
+        this.store.getKeys().deleteByPattern(name + REDIS_KEY_SEPARATOR + "*");
     }
 
     @Override

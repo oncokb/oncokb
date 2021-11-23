@@ -130,7 +130,7 @@ public final class AlterationUtils {
                         String exclusion = displayName.substring(left + 1, right);
                         String separatorRegex = "\\s*;\\s*";
                         exclusion = MainUtils.replaceLast(exclusion, separatorRegex, " and ");
-                        exclusion.replaceAll(separatorRegex, ", ");
+                        exclusion = exclusion.replaceAll(separatorRegex, ", ");
 
                         displayName = displayName.substring(0, left) + "(" + exclusion + ")" + displayName.substring(right + 1);
                     }
@@ -202,12 +202,12 @@ public final class AlterationUtils {
             Integer refL = ref.length();
             Integer varL = var.length();
 
-            if (ref.equals(var)) {
-                consequence = "synonymous_variant";
-            } else if (ref.equals("*")) {
+            if (ref.equals("*")) {
                 consequence = "stop_lost";
             } else if (var.equals("*")) {
                 consequence = "stop_gained";
+            } else if (ref.equals(var)) {
+                consequence = "synonymous_variant";
             } else if (start == 1) {
                 consequence = "start_lost";
             } else if (var.equals("?")) {
@@ -230,7 +230,7 @@ public final class AlterationUtils {
                 }
             }
         } else {
-            p = Pattern.compile("[A-Z]?([0-9]+)(_[A-Z]?([0-9]+))?(delins|ins)([A-Z]+)");
+            p = Pattern.compile("[A-Z]?([0-9]+)(_[A-Z]?([0-9]+))?(delins|ins)([A-Z0-9]+)");
             m = p.matcher(proteinChange);
             if (m.matches()) {
                 start = Integer.valueOf(m.group(1));
@@ -655,7 +655,7 @@ public final class AlterationUtils {
             if (name != null) {
                 Boolean contain = false;
                 for (String inferredAlt : getInferredMutations()) {
-                    if (inferredAlt.equalsIgnoreCase(name)) {
+                    if (name.startsWith(inferredAlt)) {
                         contain = true;
                     }
                 }
