@@ -41,7 +41,7 @@ public class FindRelevantAlterationsTest {
                 {"SMARCB1", "R374Q", null, "R374Q, R374W, Oncogenic Mutations"},
 
                 // Check Fusions
-                {"BRAF", "PAPSS1-BRAF Fusion", null, "PAPSS1-BRAF Fusion, Fusions, Oncogenic Mutations {excluding V600}, Oncogenic Mutations"},
+                {"BRAF", "PAPSS1-BRAF Fusion", null, "PAPSS1-BRAF Fusion, Fusions, Oncogenic Mutations {excluding V600}, Oncogenic Mutations {excluding V600E ; V600K}, Oncogenic Mutations"},
 
                 // The revert fusion should get picked
                 {"ABL1", "ABL1-BCR fusion", null, "BCR-ABL1 Fusion, Fusions"},
