@@ -11,8 +11,8 @@ import org.mskcc.cbio.oncokb.apiModels.TranscriptMatchResult;
 import org.mskcc.cbio.oncokb.apiModels.TranscriptPair;
 import org.mskcc.cbio.oncokb.apiModels.ensembl.Sequence;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
+import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.Gene;
-import org.mskcc.cbio.oncokb.model.ReferenceGenome;
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
 
@@ -215,6 +215,13 @@ public class GenomeNexusUtils {
         }
 
         return canonicalTranscripts.size() > 0 ? canonicalTranscripts.get(0) : null;
+    }
+
+    public static List<EnsemblTranscript> getEnsemblTranscriptList(List<String> ensembelTranscriptIds, ReferenceGenome referenceGenome) throws ApiException {
+        EnsemblControllerApi controllerApi = GenomeNexusUtils.getEnsemblControllerApi(referenceGenome);
+        EnsemblFilter ensemblFilter = new EnsemblFilter();
+        ensemblFilter.setTranscriptIds(ensembelTranscriptIds);
+        return controllerApi.fetchEnsemblTranscriptsByEnsemblFilterPOST(ensemblFilter);
     }
 
     private static List<EnsemblTranscript> getEnsemblTranscriptList(String hugoSymbol, ReferenceGenome referenceGenome) throws ApiException {

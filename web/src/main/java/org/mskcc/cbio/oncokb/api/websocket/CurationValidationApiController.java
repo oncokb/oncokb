@@ -264,7 +264,7 @@ public class CurationValidationApiController {
     }
 
     private String getGeneSequenceFromPool(List<Sequence> allSequences, String hugoSymbol) {
-        Sequence matchedSeq = allSequences.stream().filter(sequence -> sequence.getTranscript().getHugoSymbol().equals(hugoSymbol)).findAny().orElse(null);
+        Sequence matchedSeq = allSequences.stream().filter(sequence -> sequence.getTranscript().getEnsemblGene().getGene().getHugoSymbol().equals(hugoSymbol)).findAny().orElse(null);
         return matchedSeq == null ? null : matchedSeq.getSequence();
     }
 }
