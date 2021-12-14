@@ -2,12 +2,11 @@ package org.mskcc.cbio.oncokb.api.pvt;
 
 import com.mysql.jdbc.StringUtils;
 import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 import org.mskcc.cbio.oncokb.apiModels.*;
 import org.mskcc.cbio.oncokb.apiModels.download.DownloadAvailability;
 import org.mskcc.cbio.oncokb.apiModels.download.FileExtension;
 import org.mskcc.cbio.oncokb.apiModels.download.FileName;
+import org.mskcc.cbio.oncokb.apiModels.ensembl.EnsemblGene;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.PortalAlterationBo;
 import org.mskcc.cbio.oncokb.cache.CacheFetcher;
@@ -15,11 +14,8 @@ import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.TumorType;
 import org.mskcc.cbio.oncokb.bo.OncokbTranscriptService;
-import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.Tumor;
 import org.mskcc.cbio.oncokb.util.*;
 import org.oncokb.oncokb_transcript.ApiException;
-import org.oncokb.oncokb_transcript.client.EnsemblGene;
-import org.oncokb.oncokb_transcript.client.TranscriptComparisonVM;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,7 +28,6 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.mskcc.cbio.oncokb.model.InferredMutation.ONCOGENIC_MUTATIONS;
 import static org.mskcc.cbio.oncokb.util.GitHubUtils.getOncoKBSqlDumpFileName;
 import static org.mskcc.cbio.oncokb.util.HttpUtils.getDataDownloadResponseEntity;
 
@@ -456,7 +451,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             try {
                 Optional<org.oncokb.oncokb_transcript.client.Gene> geneOptional = cacheFetcher.getAllTranscriptGenes().stream().filter(gene -> gene.getEntrezGeneId().equals(entrezGeneId)).findFirst();
                 if (geneOptional.isPresent()) {
-                    genes = geneOptional.get().getEnsemblGenes();
+                    genes = geneOptional.get().getEnsemblGenes().stream().map(org.mskcc.cbio.oncokb.apiModels.ensembl.EnsemblGene::new).collect(Collectors.toList());
                 }
             } catch (ApiException e) {
                 e.printStackTrace();
