@@ -6,6 +6,7 @@ import org.junit.Assert;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.ReferenceGenome;
+import org.mskcc.cbio.oncokb.model.VariantConsequence;
 
 
 import static org.junit.Assert.assertNotEquals;
@@ -104,4 +105,56 @@ public class GenomeNexusUtilsTest extends TestCase {
         Assert.assertNull("No consequence should return for this genomic location", consequence);
     }
 
+    public void testGetTranscriptConsequenceSummaryTerm() {
+        // we do not have a mapping for splice_polypyrimidine_tract_variant. We should default to the one that we do. In this case, intron_variant
+        String consequenceTerms = "splice_polypyrimidine_tract_variant,intron_variant";
+        String mostSevereConsequence = "splice_polypyrimidine_tract_variant";
+        VariantConsequence variantConsequence = GenomeNexusUtils.getTranscriptConsequenceSummaryTerm(consequenceTerms, mostSevereConsequence);
+        assertEquals("intron_variant", variantConsequence.getTerm());
+
+        consequenceTerms = "splice_region_variant,intron_variant,splice_polypyrimidine_tract_variant";
+        mostSevereConsequence = "splice_polypyrimidine_tract_variant";
+        variantConsequence = GenomeNexusUtils.getTranscriptConsequenceSummaryTerm(consequenceTerms, mostSevereConsequence);
+        assertEquals("splice_region_variant", variantConsequence.getTerm());
+
+        consequenceTerms = "splice_region_variant,intron_variant";
+        mostSevereConsequence = "intron_variant";
+        variantConsequence = GenomeNexusUtils.getTranscriptConsequenceSummaryTerm(consequenceTerms, mostSevereConsequence);
+        assertEquals("intron_variant", variantConsequence.getTerm());
+
+        consequenceTerms = "splice_region_variant,intron_variant";
+        mostSevereConsequence = "splice_region_variant";
+        variantConsequence = GenomeNexusUtils.getTranscriptConsequenceSummaryTerm(consequenceTerms, mostSevereConsequence);
+        assertEquals("splice_region_variant", variantConsequence.getTerm());
+
+        consequenceTerms = "intron_variant";
+        mostSevereConsequence = "intron_variant";
+        variantConsequence = GenomeNexusUtils.getTranscriptConsequenceSummaryTerm(consequenceTerms, mostSevereConsequence);
+        assertEquals("intron_variant", variantConsequence.getTerm());
+
+        consequenceTerms = "intron_variant";
+        mostSevereConsequence = "";
+        variantConsequence = GenomeNexusUtils.getTranscriptConsequenceSummaryTerm(consequenceTerms, mostSevereConsequence);
+        assertEquals("intron_variant", variantConsequence.getTerm());
+
+        consequenceTerms = "intron_variant";
+        mostSevereConsequence = null;
+        variantConsequence = GenomeNexusUtils.getTranscriptConsequenceSummaryTerm(consequenceTerms, mostSevereConsequence);
+        assertEquals("intron_variant", variantConsequence.getTerm());
+
+        consequenceTerms = "intron_variant , intron_variant";
+        mostSevereConsequence = "intron_variant";
+        variantConsequence = GenomeNexusUtils.getTranscriptConsequenceSummaryTerm(consequenceTerms, mostSevereConsequence);
+        assertEquals("intron_variant", variantConsequence.getTerm());
+
+        consequenceTerms = "intron_variant , intron_variant";
+        mostSevereConsequence = " intron_variant ";
+        variantConsequence = GenomeNexusUtils.getTranscriptConsequenceSummaryTerm(consequenceTerms, mostSevereConsequence);
+        assertEquals("intron_variant", variantConsequence.getTerm());
+
+        consequenceTerms = null;
+        mostSevereConsequence = null;
+        variantConsequence = GenomeNexusUtils.getTranscriptConsequenceSummaryTerm(consequenceTerms, mostSevereConsequence);
+        assertNull(variantConsequence);
+    }
 }

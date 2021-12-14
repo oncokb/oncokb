@@ -47,7 +47,7 @@ public class AnnotationsApiController {
         , @ApiParam(value = "The entrez gene ID. (Higher priority than hugoSymbol). Example: 673") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
         , @ApiParam(value = "Protein Change. Example: V600E") @RequestParam(value = "alteration", required = false) String proteinChange
         , @ApiParam(value = "Reference genome, either GRCh37 or GRCh38. The default is GRCh37", required = false, defaultValue = "GRCh37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") String referenceGenome
-        , @ApiParam(value = "Consequence. Exacmple: missense_variant", allowableValues = "feature_truncation, frameshift_variant, inframe_deletion, inframe_insertion, start_lost, missense_variant, splice_region_variant, stop_gained, synonymous_variant") @RequestParam(value = "consequence", required = false) String consequence
+        , @ApiParam(value = "Consequence. Exacmple: missense_variant", allowableValues = "feature_truncation, frameshift_variant, inframe_deletion, inframe_insertion, start_lost, missense_variant, splice_region_variant, stop_gained, synonymous_variant, intron_variant") @RequestParam(value = "consequence", required = false) String consequence
         , @ApiParam(value = "Protein Start. Example: 600") @RequestParam(value = "proteinStart", required = false) Integer proteinStart
         , @ApiParam(value = "Protein End. Example: 600") @RequestParam(value = "proteinEnd", required = false) Integer proteinEnd
         , @ApiParam(value = "OncoTree(http://oncotree.info) tumor type name. The field supports OncoTree Code, OncoTree Name and OncoTree Main type. Example: Melanoma") @RequestParam(value = "tumorType", required = false) String tumorType
@@ -340,11 +340,10 @@ public class AnnotationsApiController {
                     );
                 } catch (ApiException e) {
                 }
-                String hugoSymbol = gene.getHugoSymbol();
                 IndicatorQueryResp resp = this.cacheFetcher.processQuery(
                     query.getReferenceGenome(),
-                    null,
-                    hugoSymbol,
+                    gene.getEntrezGeneId(),
+                    gene.getHugoSymbol(),
                     StringUtils.capitalize(query.getCopyNameAlterationType().name().toLowerCase()),
                     null,
                     query.getTumorType(), null, null, null, null,
@@ -495,7 +494,7 @@ public class AnnotationsApiController {
         query = new Query(null, referenceGenome, AnnotationQueryType.REGULAR.getName(), null, alteration.getGene() == null ? null : alteration.getGene().getHugoSymbol(), alteration.getAlteration(), null, null, tumorType, alteration.getConsequence() == null ? null : alteration.getConsequence().getTerm(), alteration.getProteinStart(), alteration.getProteinEnd(), null);
         return this.cacheFetcher.processQuery(
             referenceGenome,
-            null,
+            query.getEntrezGeneId(),
             query.getHugoSymbol(),
             query.getAlteration(),
             null,
@@ -517,7 +516,7 @@ public class AnnotationsApiController {
 
         return this.cacheFetcher.processQuery(
             referenceGenome,
-            null,
+            query.getEntrezGeneId(),
             query.getHugoSymbol(),
             query.getAlteration(),
             null,
