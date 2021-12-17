@@ -53,6 +53,12 @@ public class VariantConsequenceUtils {
         put("splice_site_del", "splice_region_variant");
         put("splice_site_snp", "splice_region_variant");
         put("splicing", "splice_region_variant");
+        put("intron_gain_variant", "splice_region_variant");
+        put("splice_polypyrimidine_tract_variant", "splice_region_variant");
+        put("extended_intronic_splice_region_variant", "splice_region_variant");
+        put("exon_loss_variant", "splice_region_variant");
+        put("splice_site_variant", "splice_region_variant");
+        put("cryptic_splice_site_variant", "splice_region_variant");
         put("stopgain_snv", "stop_gained");
         put("translation_start_site", "start_lost");
         put("upstream", "5_prime_UTR_variant");
