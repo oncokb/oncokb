@@ -2,7 +2,7 @@
 # Level 1, 2 should be mapped to FDA Level 2			
 # Level 3, 4 should be mapped to FDA Level 3			
 BRAF	V600E	Melanoma	FDAx2
-BRAF	Fusions	Melanoma	FDAx2
+BRAF	Fusions	Melanoma	FDAx3
 			
 # Some special fda level 3 are from level 2			
 EGFR	A763_Y764insFQEA	Non-Small Cell Lung Cancer	FDAx3
