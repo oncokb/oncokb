@@ -162,7 +162,7 @@ KMT2	KMT2-MLLT3 Fusion	APLPMLRARA
 KMT2	KMT2-MLLT3 Fusion	Colorectal Cacner
 PDGFRB	PDGFRB-CSF1R Fusion	CMML	1: Imatinib;
 PDGFRB	PDGFRB-CSF1R Fusion	Colorectal Cancer
-BRAF	K601E	Colorectal Cancer	3B: Encorafenib+Binimetinib; 3B: Trametinib; 3B: Dabrafenib+Trametinib; 3B: Vemurafenib+Cobimetinib; 4: PLX8394;
+BRAF	K601E	Colorectal Cancer	3B: Trametinib; 4: PLX8394;
 ARAF	S214A	HDCN	3A: Sorafenib; 3A: Cobimetinib; 3A: Trametinib;
 ARAF	S214A	ECD	2: Cobimetinib; 2: Trametinib; 3A: Sorafenib;
 #ARAF	S214A	RDD
@@ -231,8 +231,8 @@ MTOR	E2014K	NSCLC	3B: Everolimus; 4: Temsirolimus;
 ABL1	Y253H	CML	R1: Imatinib; R1: Nilotinib; 2: Bosutinib; 2: Dasatinib;
 ABL1	Y253H	TLL
 ABL1	Y253M	CML
-BRAF	L597R	Melanoma	2: Encorafenib+Binimetinib; 2: Dabrafenib+Trametinib; 2: Vemurafenib+Cobimetinib; 3A: Trametinib; 4: PLX8394;
-BRAF	L597M	NSCLC	3B: Encorafenib+Binimetinib; 3B: Trametinib; 3B: Dabrafenib+Trametinib; 3B: Vemurafenib+Cobimetinib; 4: PLX8394;
+BRAF	L597R	Melanoma	3A: Trametinib; 4: PLX8394;
+BRAF	L597M	NSCLC	3B: Trametinib; 4: PLX8394;
 EGFR	L861Q	NSCLC	1: Afatinib;
 EGFR	L861R	NSCLC
 EGFR	L861M	NSCLC
