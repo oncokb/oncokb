@@ -32,7 +32,7 @@ public class GenomeNexusUtils {
 
     private static final String GN_37_URL = "https://www.genomenexus.org";
     private static final String GN_38_URL = "https://grch38.genomenexus.org";
-    private static final int GN_READ_TIMEOUT_OVERRIDE = 5000;
+    private static final int GN_READ_TIMEOUT_OVERRIDE = 30000;
 
     public static String getEnsemblSequencePOSTUrl(ReferenceGenome referenceGenome) {
         return getEnsemblAPIUrl(referenceGenome) + "/sequence/id";
