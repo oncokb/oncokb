@@ -13,6 +13,7 @@ import org.mskcc.cbio.oncokb.apiModels.ensembl.Sequence;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.ReferenceGenome;
+import org.mskcc.cbio.oncokb.model.VariantConsequence;
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
 
@@ -31,7 +32,7 @@ public class GenomeNexusUtils {
 
     private static final String GN_37_URL = "https://www.genomenexus.org";
     private static final String GN_38_URL = "https://grch38.genomenexus.org";
-    private static final int GN_READ_TIMEOUT_OVERRIDE = 5000;
+    private static final int GN_READ_TIMEOUT_OVERRIDE = 30000;
 
     public static String getEnsemblSequencePOSTUrl(ReferenceGenome referenceGenome) {
         return getEnsemblAPIUrl(referenceGenome) + "/sequence/id";
@@ -157,11 +158,18 @@ public class GenomeNexusUtils {
         return variantAnnotation;
     }
 
-    private static String getTranscriptConsequenceSummaryTerm(String consequenceTerms, String mostSevereConsequence) {
+    public static VariantConsequence getTranscriptConsequenceSummaryTerm(String consequenceTerms, String mostSevereConsequence) {
         if (StringUtils.isEmpty(consequenceTerms)) {
-            return "";
+            return null;
         }
-        return Arrays.stream(consequenceTerms.split(",")).filter(term -> term.equals(mostSevereConsequence)).findFirst().orElse(consequenceTerms.split(",")[0]);
+        List<VariantConsequence> terms = Arrays.asList(consequenceTerms.split(",")).stream().map(consequence -> VariantConsequenceUtils.findVariantConsequenceByTerm(consequence.trim())).filter(Objects::nonNull).collect(Collectors.toList());
+        VariantConsequence mostSevereVariantConsequence = StringUtils.isNotEmpty(mostSevereConsequence) ? VariantConsequenceUtils.findVariantConsequenceByTerm(mostSevereConsequence.trim()) : null;
+        // if we cannot find the matched variant consequence using the mostSevereConsequence, we should skip it
+        if (mostSevereVariantConsequence == null && !terms.contains(mostSevereVariantConsequence)) {
+            return terms.iterator().next();
+        } else {
+            return mostSevereVariantConsequence;
+        }
     }
 
     private static TranscriptConsequenceSummary getConsequence(VariantAnnotation variantAnnotation, ReferenceGenome referenceGenome) {
@@ -197,8 +205,8 @@ public class GenomeNexusUtils {
 
         // Only return one consequence term
         if (summary != null) {
-            String consequenceTerm = getTranscriptConsequenceSummaryTerm(summary.getConsequenceTerms(), variantAnnotation.getMostSevereConsequence());
-            summary.setConsequenceTerms(consequenceTerm);
+            VariantConsequence consequence = getTranscriptConsequenceSummaryTerm(summary.getConsequenceTerms(), variantAnnotation.getMostSevereConsequence());
+            summary.setConsequenceTerms(consequence.getTerm());
         }
         return summary;
     }

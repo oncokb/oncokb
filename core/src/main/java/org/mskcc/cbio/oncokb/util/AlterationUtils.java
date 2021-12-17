@@ -1,9 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package org.mskcc.cbio.oncokb.util;
 
 import org.apache.commons.lang3.StringUtils;
@@ -21,7 +15,7 @@ import java.util.stream.Collectors;
 import static org.mskcc.cbio.oncokb.Constants.*;
 
 /**
- * @author jgao
+ * @author jgao, Hongxin Zhang
  */
 public final class AlterationUtils {
     private static List<String> oncogenicList = Arrays.asList(new String[]{
@@ -126,7 +120,7 @@ public final class AlterationUtils {
                 if (displayName.contains("{")) {
                     int left = displayName.indexOf("{");
                     int right = displayName.indexOf("}");
-                    if(left > 0 && right > 0) {
+                    if (left > 0 && right > 0) {
                         String exclusion = displayName.substring(left + 1, right);
                         String separatorRegex = "\\s*;\\s*";
                         exclusion = MainUtils.replaceLast(exclusion, separatorRegex, " and ");
@@ -435,7 +429,7 @@ public final class AlterationUtils {
             }
         }
 
-        if(alteration.getReferenceGenomes() == null || alteration.getReferenceGenomes().isEmpty()) {
+        if (alteration.getReferenceGenomes() == null || alteration.getReferenceGenomes().isEmpty()) {
             alteration.setReferenceGenomes(Collections.singleton(DEFAULT_REFERENCE_GENOME));
         }
     }
@@ -532,26 +526,31 @@ public final class AlterationUtils {
             TranscriptConsequenceSummary transcriptConsequenceSummary = GenomeNexusUtils.getTranscriptConsequence(type, query, referenceGenome);
             if (transcriptConsequenceSummary != null) {
                 String hugoSymbol = transcriptConsequenceSummary.getHugoGeneSymbol();
-                Gene gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
-                if (gene != null) {
-                    alteration = new Alteration();
+                Integer entrezGeneId = StringUtils.isNumeric(transcriptConsequenceSummary.getEntrezGeneId()) ? Integer.parseInt(transcriptConsequenceSummary.getEntrezGeneId()) : null;
+                if (StringUtils.isNotEmpty(transcriptConsequenceSummary.getHugoGeneSymbol())) {
+
+                    Gene gene = GeneUtils.getGene(hugoSymbol);
+                    if (gene == null) {
+                        gene = new Gene();
+                        gene.setHugoSymbol(transcriptConsequenceSummary.getHugoGeneSymbol());
+                        gene.setEntrezGeneId(entrezGeneId);
+                    }
                     alteration.setGene(gene);
-                    alteration.setAlterationType(null);
-                    if (transcriptConsequenceSummary.getHgvspShort() != null) {
-                        alteration.setAlteration(transcriptConsequenceSummary.getHgvspShort());
+                }
+
+                if (transcriptConsequenceSummary.getHgvspShort() != null) {
+                    alteration.setAlteration(transcriptConsequenceSummary.getHgvspShort());
+                }
+                if (transcriptConsequenceSummary.getProteinPosition() != null) {
+                    if (transcriptConsequenceSummary.getProteinPosition().getStart() != null) {
+                        alteration.setProteinStart(transcriptConsequenceSummary.getProteinPosition().getStart());
                     }
                     if (transcriptConsequenceSummary.getProteinPosition() != null) {
-                        if (transcriptConsequenceSummary.getProteinPosition().getStart() != null) {
-                            alteration.setProteinStart(transcriptConsequenceSummary.getProteinPosition().getStart());
-                        }
-                        if (transcriptConsequenceSummary.getProteinPosition() != null) {
-                            alteration.setProteinEnd(transcriptConsequenceSummary.getProteinPosition().getEnd());
-                        }
+                        alteration.setProteinEnd(transcriptConsequenceSummary.getProteinPosition().getEnd());
                     }
-                    if (StringUtils.isNotEmpty(transcriptConsequenceSummary.getConsequenceTerms())) {
-                        alteration.setConsequence(VariantConsequenceUtils.findVariantConsequenceByTerm(transcriptConsequenceSummary.getConsequenceTerms()));
-                    }
-                    return alteration;
+                }
+                if (StringUtils.isNotEmpty(transcriptConsequenceSummary.getConsequenceTerms())) {
+                    alteration.setConsequence(VariantConsequenceUtils.findVariantConsequenceByTerm(transcriptConsequenceSummary.getConsequenceTerms()));
                 }
             }
         }
@@ -885,7 +884,7 @@ public final class AlterationUtils {
         if (alteration != null && alteration.getConsequence() != null && alteration.getConsequence().getTerm().equals(MISSENSE_VARIANT)) {
             // check for positional variant when the consequence is forced to be missense variant
             boolean isMissensePositionalVariant = StringUtils.isEmpty(alteration.getVariantResidues()) && alteration.getProteinStart() != null && alteration.getProteinEnd() != null && alteration.getProteinStart().equals(alteration.getProteinEnd());
-            List<Alteration> alternativeAlleles = alterationBo.findMutationsByConsequenceAndPosition(alteration.getGene(),referenceGenome, alteration.getConsequence(), alteration.getProteinStart(), alteration.getProteinEnd(), new HashSet<>(relevantAlterations));
+            List<Alteration> alternativeAlleles = alterationBo.findMutationsByConsequenceAndPosition(alteration.getGene(), referenceGenome, alteration.getConsequence(), alteration.getProteinStart(), alteration.getProteinEnd(), new HashSet<>(relevantAlterations));
             for (Alteration allele : alternativeAlleles) {
                 // remove all alleles if the alteration variant residue is empty
                 if (isMissensePositionalVariant && !StringUtils.isEmpty(allele.getVariantResidues())) {
@@ -1111,7 +1110,7 @@ public final class AlterationUtils {
                 for (int i = 0; i < insertedAAs.length(); i++) {
                     char varAA = insertedAAs.charAt(i);
                     int proteinStart = alteration.getProteinStart() + i;
-                    List<Alteration> alterations = alterationBo.findMutationsByConsequenceAndPosition(alteration.getGene(),referenceGenome, alteration.getConsequence(), proteinStart, proteinStart, allAlterations);
+                    List<Alteration> alterations = alterationBo.findMutationsByConsequenceAndPosition(alteration.getGene(), referenceGenome, alteration.getConsequence(), proteinStart, proteinStart, allAlterations);
                     for (Alteration alt : alterations) {
                         if ((referenceGenome == null || alt.getReferenceGenomes().contains(referenceGenome)) && alt.getVariantResidues() != null && alt.getVariantResidues().charAt(0) == varAA) {
                             matches.add(alt);
