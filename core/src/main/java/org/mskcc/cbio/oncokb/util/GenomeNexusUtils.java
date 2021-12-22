@@ -164,8 +164,8 @@ public class GenomeNexusUtils {
         }
         List<VariantConsequence> terms = Arrays.asList(consequenceTerms.split(",")).stream().map(consequence -> VariantConsequenceUtils.findVariantConsequenceByTerm(consequence.trim())).filter(Objects::nonNull).collect(Collectors.toList());
         VariantConsequence mostSevereVariantConsequence = StringUtils.isNotEmpty(mostSevereConsequence) ? VariantConsequenceUtils.findVariantConsequenceByTerm(mostSevereConsequence.trim()) : null;
-        // if we cannot find the matched variant consequence using the mostSevereConsequence, we should skip it
-        if (mostSevereVariantConsequence == null && !terms.contains(mostSevereVariantConsequence)) {
+        // if we cannot find the matched variant consequence using the mostSevereConsequence, we should use the one from the consequence term list
+        if (mostSevereVariantConsequence == null && terms.size() > 0) {
             return terms.iterator().next();
         } else {
             return mostSevereVariantConsequence;
@@ -206,7 +206,7 @@ public class GenomeNexusUtils {
         // Only return one consequence term
         if (summary != null) {
             VariantConsequence consequence = getTranscriptConsequenceSummaryTerm(summary.getConsequenceTerms(), variantAnnotation.getMostSevereConsequence());
-            summary.setConsequenceTerms(consequence.getTerm());
+            summary.setConsequenceTerms(consequence == null ? "" : consequence.getTerm());
         }
         return summary;
     }

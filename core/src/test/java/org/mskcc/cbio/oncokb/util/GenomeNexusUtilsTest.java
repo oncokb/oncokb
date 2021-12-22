@@ -106,14 +106,14 @@ public class GenomeNexusUtilsTest extends TestCase {
     }
 
     public void testGetTranscriptConsequenceSummaryTerm() {
-        // we do not have a mapping for splice_polypyrimidine_tract_variant. We should default to the one that we do. In this case, intron_variant
-        String consequenceTerms = "splice_polypyrimidine_tract_variant,intron_variant";
-        String mostSevereConsequence = "splice_polypyrimidine_tract_variant";
+        // we do not have a mapping for test. We should default to the one that we do. In this case, intron_variant
+        String consequenceTerms = "test,intron_variant";
+        String mostSevereConsequence = "test";
         VariantConsequence variantConsequence = GenomeNexusUtils.getTranscriptConsequenceSummaryTerm(consequenceTerms, mostSevereConsequence);
         assertEquals("intron_variant", variantConsequence.getTerm());
 
-        consequenceTerms = "splice_region_variant,intron_variant,splice_polypyrimidine_tract_variant";
-        mostSevereConsequence = "splice_polypyrimidine_tract_variant";
+        consequenceTerms = "splice_region_variant,intron_variant,test";
+        mostSevereConsequence = "test";
         variantConsequence = GenomeNexusUtils.getTranscriptConsequenceSummaryTerm(consequenceTerms, mostSevereConsequence);
         assertEquals("splice_region_variant", variantConsequence.getTerm());
 
@@ -141,6 +141,11 @@ public class GenomeNexusUtilsTest extends TestCase {
         mostSevereConsequence = null;
         variantConsequence = GenomeNexusUtils.getTranscriptConsequenceSummaryTerm(consequenceTerms, mostSevereConsequence);
         assertEquals("intron_variant", variantConsequence.getTerm());
+
+        consequenceTerms = "test";
+        mostSevereConsequence = null;
+        variantConsequence = GenomeNexusUtils.getTranscriptConsequenceSummaryTerm(consequenceTerms, mostSevereConsequence);
+        assertNull(variantConsequence);
 
         consequenceTerms = "intron_variant , intron_variant";
         mostSevereConsequence = "intron_variant";
