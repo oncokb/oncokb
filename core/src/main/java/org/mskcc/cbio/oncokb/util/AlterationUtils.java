@@ -495,7 +495,7 @@ public final class AlterationUtils {
         alt.setAlterationType(type);
 
         VariantConsequence variantConsequence = null;
-        if (consequence != null) {
+        if (StringUtils.isNotEmpty(consequence)) {
             variantConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm(consequence);
 
             if (variantConsequence == null) {

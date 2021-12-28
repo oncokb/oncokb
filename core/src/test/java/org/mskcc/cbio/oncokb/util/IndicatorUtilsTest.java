@@ -505,6 +505,25 @@ public class IndicatorUtilsTest {
         assertTrue("Highest sensitive levels are not the same, but they should.", LevelUtils.areSameLevels(resp1.getHighestSensitiveLevel(), resp2.getHighestSensitiveLevel()));
         assertTrue("Highest resistance levels are not the same, but they should.", LevelUtils.areSameLevels(resp1.getHighestResistanceLevel(), resp2.getHighestResistanceLevel()));
 
+        // Compare the result when consequence is empty/null/missense_mutation
+        query1 = new Query(null, DEFAULT_REFERENCE_GENOME, null, 673, null, "V600E", null, null, "Melanoma", null, null, null, null);
+        query2 = new Query(null, DEFAULT_REFERENCE_GENOME, null, 673, null, "V600E", null, null, "Melanoma", "", null, null, null);
+        resp1 = IndicatorUtils.processQuery(query1, null, true, null);
+        resp2 = IndicatorUtils.processQuery(query2, null, true, null);
+        assertTrue("Genes are not the same, but they should.", resp1.getGeneSummary().equals(resp2.getGeneSummary()));
+        assertTrue("Oncogenicities are not the same, but they should.", resp1.getOncogenic().equals(resp2.getOncogenic()));
+        assertTrue("Treatments are not the same, but they should.", resp1.getTreatments().equals(resp2.getTreatments()));
+        assertTrue("Highest sensitive levels are not the same, but they should.", LevelUtils.areSameLevels(resp1.getHighestSensitiveLevel(), resp2.getHighestSensitiveLevel()));
+        assertTrue("Highest resistance levels are not the same, but they should.", LevelUtils.areSameLevels(resp1.getHighestResistanceLevel(), resp2.getHighestResistanceLevel()));
+        query2 = new Query(null, DEFAULT_REFERENCE_GENOME, null, 673, null, "V600E", null, null, "Melanoma", "missense_mutation", null, null, null);
+        resp1 = IndicatorUtils.processQuery(query1, null, true, null);
+        resp2 = IndicatorUtils.processQuery(query2, null, true, null);
+        assertTrue("Genes are not the same, but they should.", resp1.getGeneSummary().equals(resp2.getGeneSummary()));
+        assertTrue("Oncogenicities are not the same, but they should.", resp1.getOncogenic().equals(resp2.getOncogenic()));
+        assertTrue("Treatments are not the same, but they should.", resp1.getTreatments().equals(resp2.getTreatments()));
+        assertTrue("Highest sensitive levels are not the same, but they should.", LevelUtils.areSameLevels(resp1.getHighestSensitiveLevel(), resp2.getHighestSensitiveLevel()));
+        assertTrue("Highest resistance levels are not the same, but they should.", LevelUtils.areSameLevels(resp1.getHighestResistanceLevel(), resp2.getHighestResistanceLevel()));
+
 
         //EntrezGeneId has higher priority then hugoSymbol
         query1 = new Query(null, DEFAULT_REFERENCE_GENOME, null, 673, "EGFR", "V600E", null, null, "Melanoma", null, null, null, null);
