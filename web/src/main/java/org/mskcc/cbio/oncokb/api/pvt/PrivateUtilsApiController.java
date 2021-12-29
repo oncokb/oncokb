@@ -391,7 +391,6 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             gene = GeneUtils.getGeneByEntrezId(query.getEntrezGeneId());
         }
         query.setTumorType(tumorType);
-
         List<EvidenceQueryRes> responses = EvidenceUtils.processRequest(Collections.singletonList(query), new HashSet<>(EvidenceTypeUtils.getAllEvidenceTypes()), LevelUtils.getPublicLevels(), false);
         IndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null);
 
