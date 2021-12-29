@@ -205,6 +205,9 @@ public class GenomeNexusUtils {
         // Only return one consequence term
         if (summary != null) {
             VariantConsequence consequence = getTranscriptConsequenceSummaryTerm(summary.getConsequenceTerms());
+            if (consequence == null && StringUtils.isNotEmpty(summary.getVariantClassification())) {
+                consequence = VariantConsequenceUtils.findVariantConsequenceByTerm(summary.getVariantClassification());
+            }
             summary.setConsequenceTerms(consequence == null ? "" : consequence.getTerm());
         }
         return summary;
