@@ -158,17 +158,16 @@ public class GenomeNexusUtils {
         return variantAnnotation;
     }
 
-    public static VariantConsequence getTranscriptConsequenceSummaryTerm(String consequenceTerms, String mostSevereConsequence) {
+    public static VariantConsequence getTranscriptConsequenceSummaryTerm(String consequenceTerms) {
         if (StringUtils.isEmpty(consequenceTerms)) {
             return null;
         }
         List<VariantConsequence> terms = Arrays.asList(consequenceTerms.split(",")).stream().map(consequence -> VariantConsequenceUtils.findVariantConsequenceByTerm(consequence.trim())).filter(Objects::nonNull).collect(Collectors.toList());
-        VariantConsequence mostSevereVariantConsequence = StringUtils.isNotEmpty(mostSevereConsequence) ? VariantConsequenceUtils.findVariantConsequenceByTerm(mostSevereConsequence.trim()) : null;
         // if we cannot find the matched variant consequence using the mostSevereConsequence, we should use the one from the consequence term list
-        if (mostSevereVariantConsequence == null && terms.size() > 0) {
+        if (terms.size() > 0) {
             return terms.iterator().next();
         } else {
-            return mostSevereVariantConsequence;
+            return null;
         }
     }
 
@@ -181,8 +180,8 @@ public class GenomeNexusUtils {
 
         if (variantAnnotation.getAnnotationSummary() != null && variantAnnotation.getAnnotationSummary().getTranscriptConsequenceSummaries() != null) {
             for (TranscriptConsequenceSummary consequenceSummary : variantAnnotation.getAnnotationSummary().getTranscriptConsequenceSummaries()) {
-                if (consequenceSummary.getHugoGeneSymbol() != null && consequenceSummary.getTranscriptId() != null) {
-                    Gene gene = GeneUtils.getGeneByHugoSymbol(consequenceSummary.getHugoGeneSymbol());
+                if (StringUtils.isNotEmpty(consequenceSummary.getEntrezGeneId()) && StringUtils.isNotEmpty(consequenceSummary.getTranscriptId())) {
+                    Gene gene = GeneUtils.getGeneByEntrezId(Integer.parseInt(consequenceSummary.getEntrezGeneId()));
                     String isoform = getIsoform(gene, referenceGenome);
                     if (gene != null && (StringUtils.isEmpty(isoform) || isoform.equals(consequenceSummary.getTranscriptId()))) {
                         summaries.add(consequenceSummary);
@@ -205,7 +204,7 @@ public class GenomeNexusUtils {
 
         // Only return one consequence term
         if (summary != null) {
-            VariantConsequence consequence = getTranscriptConsequenceSummaryTerm(summary.getConsequenceTerms(), variantAnnotation.getMostSevereConsequence());
+            VariantConsequence consequence = getTranscriptConsequenceSummaryTerm(summary.getConsequenceTerms());
             summary.setConsequenceTerms(consequence == null ? "" : consequence.getTerm());
         }
         return summary;
