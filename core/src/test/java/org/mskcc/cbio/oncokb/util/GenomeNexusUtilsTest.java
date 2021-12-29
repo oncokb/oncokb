@@ -126,9 +126,11 @@ public class GenomeNexusUtilsTest extends TestCase {
         consequence = GenomeNexusUtils.getTranscriptConsequence(GNVariantAnnotationType.HGVS_G, "4:g.55593600_55593606delinsGTGG", mskReferenceGenome);
         assertEquals("Picked transcript gene symbol is not expected, but it should.", "3815", consequence.getEntrezGeneId());
         assertEquals("HGVSp short is not expected, but it should.", "p.Q556_K558delinsVE", consequence.getHgvspShort());
+        assertEquals("Consequence is not expected, but it should.", "inframe_deletion", consequence.getConsequenceTerms());
         consequence = GenomeNexusUtils.getTranscriptConsequence(GNVariantAnnotationType.HGVS_G, "5:g.67589635_67589639delinsTA", mskReferenceGenome);
         assertEquals("Picked transcript gene symbol is not expected, but it should.", "5295", consequence.getEntrezGeneId());
         assertEquals("HGVSp short is not expected, but it should.", "p.L466_E468delinsFK", consequence.getHgvspShort());
+        assertEquals("Consequence is not expected, but it should.", "inframe_deletion", consequence.getConsequenceTerms());
     }
 
     public void testGetTranscriptConsequenceSummaryTerm() {
