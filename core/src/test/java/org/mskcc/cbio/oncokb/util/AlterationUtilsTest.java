@@ -58,7 +58,7 @@ public class AlterationUtilsTest extends TestCase
         for (Alteration alt : positionedAlterations) {
             alterations.add(alt.getAlteration());
         }
-        assertEquals("V600, V600 {excluding V600E ; V600K}", MainUtils.listToString(alterations, ","));
+        assertEquals("V600,V600 {excluding V600E ; V600K}", MainUtils.listToString(alterations, ","));
 
         // non missense should not be annotated
         alteration = new Alteration();
