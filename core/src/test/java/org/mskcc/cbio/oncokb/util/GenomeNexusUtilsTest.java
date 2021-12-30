@@ -131,6 +131,10 @@ public class GenomeNexusUtilsTest extends TestCase {
         assertEquals("Picked transcript gene symbol is not expected, but it should.", "5295", consequence.getEntrezGeneId());
         assertEquals("HGVSp short is not expected, but it should.", "p.L466_E468delinsFK", consequence.getHgvspShort());
         assertEquals("Consequence is not expected, but it should.", "inframe_deletion", consequence.getConsequenceTerms());
+        //TERT promoter
+        consequence = GenomeNexusUtils.getTranscriptConsequence(GNVariantAnnotationType.GENOMIC_LOCATION, "5,1295167,1295168,TC,AATG", mskReferenceGenome);
+        assertEquals("Picked transcript gene symbol is not expected, but it should.", "TERT", consequence.getHugoGeneSymbol());
+        assertEquals("Consequence is not expected, but it should.", "upstream_gene_variant", consequence.getConsequenceTerms());
     }
 
     public void testGetTranscriptConsequenceSummaryTerm() {
