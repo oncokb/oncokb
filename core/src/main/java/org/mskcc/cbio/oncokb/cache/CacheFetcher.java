@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.cbioportal.genome_nexus.component.annotation.NotationConverter;
 import org.cbioportal.genome_nexus.model.GenomicLocation;
 import org.cbioportal.genome_nexus.util.exception.InvalidHgvsException;
+import org.cbioportal.genome_nexus.util.exception.TypeNotSupportedException;
 import org.mskcc.cbio.oncokb.apiModels.CuratedGene;
 import org.mskcc.cbio.oncokb.apiModels.FdaAlteration;
 import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotationQueryType;
@@ -273,7 +274,7 @@ public class CacheFetcher {
             if (gl == null) {
                 return false;
             }
-        } catch (InvalidHgvsException e) {
+        } catch (InvalidHgvsException | TypeNotSupportedException e) {
             // If GN throws InvalidHgvsException, we still need to check whether it's a duplication. The GN does not support dup in HGVSg format but it can still be annotated by VEP.
             if (genomicLocation.endsWith("dup")) {
                 return true;
