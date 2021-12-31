@@ -3,6 +3,7 @@ package org.mskcc.cbio.oncokb.cache;
 import org.apache.commons.lang3.StringUtils;
 import org.cbioportal.genome_nexus.component.annotation.NotationConverter;
 import org.cbioportal.genome_nexus.model.GenomicLocation;
+import org.cbioportal.genome_nexus.util.exception.InvalidHgvsException;
 import org.mskcc.cbio.oncokb.apiModels.CuratedGene;
 import org.mskcc.cbio.oncokb.apiModels.FdaAlteration;
 import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotationQueryType;
@@ -258,15 +259,27 @@ public class CacheFetcher {
     }
 
     public boolean genomicLocationShouldBeAnnotated(GNVariantAnnotationType gnVariantAnnotationType, String genomicLocation, ReferenceGenome referenceGenome, List<org.oncokb.oncokb_transcript.client.Gene> allTranscriptsGenes) throws ApiException {
-        GenomicLocation gl = null;
-        if (gnVariantAnnotationType.equals(GNVariantAnnotationType.GENOMIC_LOCATION)) {
-            gl = notationConverter.parseGenomicLocation(genomicLocation);
-        } else if (gnVariantAnnotationType.equals(GNVariantAnnotationType.HGVS_G)) {
-            genomicLocation = notationConverter.hgvsNormalizer(genomicLocation);
-            gl = notationConverter.hgvsgToGenomicLocation(genomicLocation);
-        }
-        if (gl == null) {
+        if (StringUtils.isEmpty(genomicLocation)) {
             return false;
+        }
+        GenomicLocation gl = null;
+        try {
+            if (gnVariantAnnotationType.equals(GNVariantAnnotationType.GENOMIC_LOCATION)) {
+                gl = notationConverter.parseGenomicLocation(genomicLocation);
+            } else if (gnVariantAnnotationType.equals(GNVariantAnnotationType.HGVS_G)) {
+                genomicLocation = notationConverter.hgvsNormalizer(genomicLocation);
+                gl = notationConverter.hgvsgToGenomicLocation(genomicLocation);
+            }
+            if (gl == null) {
+                return false;
+            }
+        } catch (InvalidHgvsException e) {
+            // If GN throws InvalidHgvsException, we still need to check whether it's a duplication. The GN does not support dup in HGVSg format but it can still be annotated by VEP.
+            if (genomicLocation.endsWith("dup")) {
+                return true;
+            } else {
+                return false;
+            }
         }
         GenomicLocation finalGl = gl;
         List<org.oncokb.oncokb_transcript.client.Gene> filtered = allTranscriptsGenes.stream().filter(gene -> {
