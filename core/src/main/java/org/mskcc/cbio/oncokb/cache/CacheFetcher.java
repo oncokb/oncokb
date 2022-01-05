@@ -1,5 +1,10 @@
 package org.mskcc.cbio.oncokb.cache;
 
+import org.apache.commons.lang3.StringUtils;
+import org.cbioportal.genome_nexus.component.annotation.NotationConverter;
+import org.cbioportal.genome_nexus.model.GenomicLocation;
+import org.cbioportal.genome_nexus.util.exception.InvalidHgvsException;
+import org.cbioportal.genome_nexus.util.exception.TypeNotSupportedException;
 import org.mskcc.cbio.oncokb.apiModels.CuratedGene;
 import org.mskcc.cbio.oncokb.apiModels.FdaAlteration;
 import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotationQueryType;
@@ -8,6 +13,8 @@ import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.*;
 import org.oncokb.oncokb_transcript.ApiException;
+import org.oncokb.oncokb_transcript.client.EnsemblGene;
+import org.oncokb.oncokb_transcript.client.TranscriptDTO;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
@@ -15,10 +22,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
+import static org.mskcc.cbio.oncokb.util.MainUtils.rangesIntersect;
 
 @Component
 public class CacheFetcher {
     OncokbTranscriptService oncokbTranscriptService = new OncokbTranscriptService();
+    NotationConverter notationConverter = new NotationConverter();
 
     @Cacheable(cacheResolver = "generalCacheResolver", key = "'all'")
     public OncoKBInfo getOncoKBInfo() {
@@ -80,6 +89,11 @@ public class CacheFetcher {
             sb.append(newLine);
         }
         return sb.toString();
+    }
+
+    @Cacheable(cacheResolver = "generalCacheResolver", key = "'all'")
+    public List<org.oncokb.oncokb_transcript.client.Gene> getAllTranscriptGenes() throws ApiException {
+        return oncokbTranscriptService.findTranscriptGenesBySymbols(CacheUtils.getAllGenes().stream().filter(gene -> gene.getEntrezGeneId() > 0).map(gene -> gene.getEntrezGeneId().toString()).collect(Collectors.toList()));
     }
 
     private List<CancerGene> getCancerGeneList() {
@@ -236,5 +250,47 @@ public class CacheFetcher {
         keyGenerator = "concatKeyGenerator")
     public Alteration getAlterationFromGenomeNexus(GNVariantAnnotationType gnVariantAnnotationType, ReferenceGenome referenceGenome, String genomicLocation) {
         return AlterationUtils.getAlterationFromGenomeNexus(gnVariantAnnotationType, genomicLocation, referenceGenome);
+    }
+
+    @Cacheable(cacheResolver = "generalCacheResolver",
+        keyGenerator = "concatKeyGenerator")
+    public List<TranscriptDTO> getAllGeneEnsemblTranscript(ReferenceGenome referenceGenome) throws ApiException {
+        List<String> ids = CacheUtils.getAllGenes().stream().map(gene -> Optional.ofNullable(referenceGenome.equals(ReferenceGenome.GRCh37.name()) ? gene.getGrch37Isoform() : gene.getGrch38Isoform()).orElse("")).filter(id -> StringUtils.isNotEmpty(id)).collect(Collectors.toList());
+        return oncokbTranscriptService.findEnsemblTranscriptsByIds(ids, referenceGenome);
+    }
+
+    public boolean genomicLocationShouldBeAnnotated(GNVariantAnnotationType gnVariantAnnotationType, String genomicLocation, ReferenceGenome referenceGenome, List<org.oncokb.oncokb_transcript.client.Gene> allTranscriptsGenes) throws ApiException {
+        if (StringUtils.isEmpty(genomicLocation)) {
+            return false;
+        }
+        GenomicLocation gl = null;
+        try {
+            if (gnVariantAnnotationType.equals(GNVariantAnnotationType.GENOMIC_LOCATION)) {
+                gl = notationConverter.parseGenomicLocation(genomicLocation);
+            } else if (gnVariantAnnotationType.equals(GNVariantAnnotationType.HGVS_G)) {
+                genomicLocation = notationConverter.hgvsNormalizer(genomicLocation);
+                gl = notationConverter.hgvsgToGenomicLocation(genomicLocation);
+            }
+            if (gl == null) {
+                return false;
+            }
+        } catch (InvalidHgvsException | TypeNotSupportedException e) {
+            // If GN throws InvalidHgvsException, we still need to check whether it's a duplication. The GN does not support dup in HGVSg format but it can still be annotated by VEP.
+            if (genomicLocation.endsWith("dup")) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        GenomicLocation finalGl = gl;
+        List<org.oncokb.oncokb_transcript.client.Gene> filtered = allTranscriptsGenes.stream().filter(gene -> {
+            Set<EnsemblGene> ensemblGenes = gene.getEnsemblGenes().stream().filter(ensemblGene -> ensemblGene.isCanonical() && ensemblGene.getReferenceGenome().equals(referenceGenome.name())).collect(Collectors.toSet());
+            if (ensemblGenes.size() > 0) {
+                return ensemblGenes.stream().filter(ensemblGene -> finalGl.getChromosome().equals(ensemblGene.getChromosome()) && rangesIntersect(ensemblGene.getStart(), ensemblGene.getEnd(), finalGl.getStart(), finalGl.getEnd())).count() > 0;
+            } else {
+                return false;
+            }
+        }).collect(Collectors.toList());
+        return filtered.size() > 0;
     }
 }

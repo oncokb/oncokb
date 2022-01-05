@@ -3,6 +3,7 @@ package org.mskcc.cbio.oncokb.api.pvt;
 import io.swagger.annotations.*;
 import org.mskcc.cbio.oncokb.apiModels.*;
 import org.mskcc.cbio.oncokb.apiModels.download.DownloadAvailability;
+import org.mskcc.cbio.oncokb.apiModels.ensembl.EnsemblGene;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.TumorType;
 import org.oncokb.oncokb_transcript.ApiException;
@@ -132,6 +133,16 @@ public interface PrivateUtilsApi {
         @ApiParam(value = "Gene hugo symbol") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
     );
 
+    @ApiOperation(value = "", notes = "Get the list of Ensembl genes.", response = EnsemblGene.class, responseContainer = "List")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK")})
+    @RequestMapping(value = "/utils/ensembleGenes",
+        produces = {"application/json"},
+        method = RequestMethod.GET)
+    ResponseEntity<List<EnsemblGene>> utilsEnsemblGenesGet(
+        @ApiParam(value = "Gene entrez id", required = true) @RequestParam(value = "entrezGeneId") Integer entrezGeneId
+    );
+
     @ApiOperation(value = "", notes = "Get the list of evidences by levels.", response = Map.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK")})
@@ -175,7 +186,7 @@ public interface PrivateUtilsApi {
         , @ApiParam(value = "Alteration") @RequestParam(value = "alteration", required = false) String alteration
         , @ApiParam(value = "HGVS genomic format. Example: 7:g.140453136A>T") @RequestParam(value = "hgvsg", required = false) String hgvsg
         , @ApiParam(value = "OncoTree tumor type name/main type/code") @RequestParam(value = "tumorType", required = false) String tumorType
-    );
+    ) throws ApiException;
 
     @ApiOperation(value = "", notes = "", response = CancerTypeCount.class, responseContainer = "List")
     @ApiResponses(value = {
