@@ -5,6 +5,13 @@ on:
     # branches to consider in the event; optional, defaults to all
     branches:
       - master
+  workflow_run:
+    workflows:
+      - "After master commit"
+    branches:
+      - master
+    types:
+      - completed
 
 jobs:
   update_draft_release:
