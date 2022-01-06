@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
       - name: 'Update Version Level'
         env:
           VERSION_LEVEL: ${{ contains(github.event.pull_request.labels.*.name, 'version-minor') && 'minor' || 'patch' }}
