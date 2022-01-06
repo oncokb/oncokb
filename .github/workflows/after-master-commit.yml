@@ -7,6 +7,7 @@ on:
 
 jobs:
   check-version-level-and-update:
+    if: github.repository == 'oncokb/oncokb'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -40,6 +41,7 @@ jobs:
 
 
   update-pom:
+    if: github.repository == 'oncokb/oncokb'
     needs: [check-version-level-and-update]
     runs-on: ubuntu-latest
     steps:
