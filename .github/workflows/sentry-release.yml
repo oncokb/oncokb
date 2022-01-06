@@ -6,6 +6,7 @@ on:
 
 jobs:
   createSentryRelease:
+    if: github.repository == 'oncokb/oncokb'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
