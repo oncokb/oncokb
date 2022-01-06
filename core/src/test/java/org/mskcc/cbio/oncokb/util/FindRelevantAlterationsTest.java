@@ -138,9 +138,9 @@ public class FindRelevantAlterationsTest {
 
                 // Check Variants of Unknown Significance is associated
                 {"BRCA2", "V159M", null, "V159M, V159L, Variants of Unknown Significance"}, // this is curated VUS
-                {"BRCA2", "R2659G", null, "R2659G, R2659K, R2659T"}, // this is curated inconclusive
+                {"BRCA2", "R2659G", null, "R2659G"}, // this is curated inconclusive
                 {"BRCA2", "E3002K", null, "E3002K, E3002D, Oncogenic Mutations"}, // this is curated likely oncogenic
-                {"BRCA2", "Y3035C", null, "Y3035C, Y3035S"}, // this is curated likely neutral
+                {"BRCA2", "Y3035C", null, "Y3035C"}, // this is curated likely neutral
                 {"BRCA2", "E790*", null, "Truncating Mutations, Oncogenic Mutations"}, // this is not curated truncating mutation
                 {"BRCA2", "E10000A", null, "Variants of Unknown Significance"}, // this is not curated
             });

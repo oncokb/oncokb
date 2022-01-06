@@ -45,6 +45,18 @@ public class MainUtils {
         )
     );
 
+    public static Oncogenicity getCuratedAlterationOncogenicity(Alteration alteration) {
+        List<Evidence> selfAltOncogenicEvis = EvidenceUtils.getEvidence(Collections.singletonList(alteration),
+            Collections.singleton(EvidenceType.ONCOGENIC), null);
+        if (selfAltOncogenicEvis != null) {
+            Evidence highestOncogenicEvidenceByEvidence = MainUtils.findHighestOncogenicEvidenceByEvidences(new HashSet<>(selfAltOncogenicEvis));
+            if (highestOncogenicEvidenceByEvidence != null) {
+                return Oncogenicity.getByEffect(highestOncogenicEvidenceByEvidence.getKnownEffect());
+            }
+        }
+        return null;
+    }
+
     public static boolean isEGFRTruncatingVariants(String alteration) {
         return alteration == null ? false : (alteration.trim().matches("^v(II|III|IV(a|b|c)|V)?$"));
     }
@@ -394,7 +406,7 @@ public class MainUtils {
     }
 
     public static boolean isOncogenic(Oncogenicity oncogenicity) {
-        return oncogenicity != null && (oncogenicity.equals(Oncogenicity.YES) || oncogenicity.equals(Oncogenicity.LIKELY) || oncogenicity.equals(Oncogenicity.PREDICTED));
+        return oncogenicity != null && (oncogenicity.equals(Oncogenicity.YES) || oncogenicity.equals(Oncogenicity.LIKELY) || oncogenicity.equals(Oncogenicity.PREDICTED) || oncogenicity.equals(Oncogenicity.RESISTANCE));
     }
 
     public static Set<BiologicalVariant> getBiologicalVariants(Gene gene) {
