@@ -14,6 +14,7 @@ jobs:
           fetch-depth: 0
       - name: 'Update Version Level'
         run: |
+          git pull
           VERSION_LEVEL=$(cat .version-level | tr "[:upper:]" "[:lower:]")
 
           RELEASE_DRAFTER_MINOR='NEXT_MINOR_VERSION'
@@ -72,6 +73,7 @@ jobs:
         env:
           NEW_VERSION: ${{ steps.version-level.outputs.VERSION_LEVEL == 'minor' && steps.semvers.outputs.minor || steps.semvers.outputs.patch}}
         run: |
+          git pull
           mvn --batch-mode versions:set -DnewVersion=${NEW_VERSION} -DgenerateBackupPoms=false
 
           CHANGED=$(git diff --name-only HEAD --)
