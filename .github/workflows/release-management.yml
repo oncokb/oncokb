@@ -5,12 +5,20 @@ on:
     # branches to consider in the event; optional, defaults to all
     branches:
       - master
+  workflow_run:
+    workflows:
+      - "After master commit"
+    branches:
+      - master
+    types:
+      - completed
 
 jobs:
   update_draft_release:
+    if: github.repository == 'oncokb/oncokb'
     runs-on: ubuntu-latest
     steps:
       # Drafts your next Release notes as Pull Requests are merged into "master"
-      - uses: toolmantim/release-drafter@v5.5.0
+      - uses: release-drafter/release-drafter@v5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

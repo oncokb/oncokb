@@ -45,6 +45,18 @@ public class MainUtils {
         )
     );
 
+    public static Oncogenicity getCuratedAlterationOncogenicity(Alteration alteration) {
+        List<Evidence> selfAltOncogenicEvis = EvidenceUtils.getEvidence(Collections.singletonList(alteration),
+            Collections.singleton(EvidenceType.ONCOGENIC), null);
+        if (selfAltOncogenicEvis != null) {
+            Evidence highestOncogenicEvidenceByEvidence = MainUtils.findHighestOncogenicEvidenceByEvidences(new HashSet<>(selfAltOncogenicEvis));
+            if (highestOncogenicEvidenceByEvidence != null) {
+                return Oncogenicity.getByEffect(highestOncogenicEvidenceByEvidence.getKnownEffect());
+            }
+        }
+        return null;
+    }
+
     public static boolean isEGFRTruncatingVariants(String alteration) {
         return alteration == null ? false : (alteration.trim().matches("^v(II|III|IV(a|b|c)|V)?$"));
     }
@@ -394,7 +406,7 @@ public class MainUtils {
     }
 
     public static boolean isOncogenic(Oncogenicity oncogenicity) {
-        return oncogenicity != null && (oncogenicity.equals(Oncogenicity.YES) || oncogenicity.equals(Oncogenicity.LIKELY) || oncogenicity.equals(Oncogenicity.PREDICTED));
+        return oncogenicity != null && (oncogenicity.equals(Oncogenicity.YES) || oncogenicity.equals(Oncogenicity.LIKELY) || oncogenicity.equals(Oncogenicity.PREDICTED) || oncogenicity.equals(Oncogenicity.RESISTANCE));
     }
 
     public static Set<BiologicalVariant> getBiologicalVariants(Gene gene) {
@@ -658,5 +670,25 @@ public class MainUtils {
     public static String replaceLast(String text, String regex, String replacement) {
         // the code is from https://stackoverflow.com/a/2282998
         return text.replaceFirst("(?s)"+regex+"(?!.*?"+regex+")", replacement);
+    }
+
+    public static boolean rangesIntersect(Integer start1, Integer end1, Integer start2, Integer end2) {
+        if (start1 == null) {
+            start1 = Integer.MIN_VALUE;
+        }
+        if (start2 == null) {
+            start2 = Integer.MIN_VALUE;
+        }
+        if (end1 == null) {
+            end1 = Integer.MAX_VALUE;
+        }
+        if (end2 == null) {
+            end2 = Integer.MAX_VALUE;
+        }
+        if (start1 > end2 || end1 < start2) {
+            return false;
+        } else {
+            return true;
+        }
     }
 }

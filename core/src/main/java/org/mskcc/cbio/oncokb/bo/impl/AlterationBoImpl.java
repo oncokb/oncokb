@@ -243,6 +243,12 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         if (matchedAlt != null) {
             alteration = matchedAlt;
             alterations.add(matchedAlt);
+
+            // check for oncogenicity, do not map any relevant alterations if the alteration has curated oncogenicity that not oncogenic
+            Oncogenicity oncogenicity = MainUtils.getCuratedAlterationOncogenicity(matchedAlt);
+            if (oncogenicity != null && !MainUtils.isOncogenic(oncogenicity)) {
+                return alterations;
+            }
         }
 
 
