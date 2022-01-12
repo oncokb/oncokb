@@ -510,7 +510,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         StringBuilder sb = new StringBuilder();
         TranscriptUpdateValidationVM vm = oncokbTranscriptService.validateTranscriptUpdate(gene, grch37Isoform, grch38Isoform);
         if (vm.getGrch37() != null) {
-            if (vm.getGrch37().isMatch()) {
+            if (vm.getGrch37().getMatch()) {
                 sb.append("GRCh37 sequences are the same.\n");
             } else {
                 sb.append("GRCh37 sequences do not match.\n");
@@ -520,7 +520,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         }
         if (vm.getGrch38() != null) {
             sb.append("\n");
-            if (vm.getGrch38().isMatch()) {
+            if (vm.getGrch38().getMatch()) {
                 sb.append("GRCh38 sequences are the same.\n");
             } else {
                 sb.append("GRCh38 sequences do not match.\n");
