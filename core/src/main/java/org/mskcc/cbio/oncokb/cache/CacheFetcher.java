@@ -92,7 +92,7 @@ public class CacheFetcher {
     }
 
     @Cacheable(cacheResolver = "generalCacheResolver", key = "'all'")
-    public List<org.oncokb.oncokb_transcript.client.Gene> getAllTranscriptGenes() throws ApiException {
+    public Set<org.oncokb.oncokb_transcript.client.Gene> getAllTranscriptGenes() throws ApiException {
         return oncokbTranscriptService.findTranscriptGenesBySymbols(CacheUtils.getAllGenes().stream().filter(gene -> gene.getEntrezGeneId() > 0).map(gene -> gene.getEntrezGeneId().toString()).collect(Collectors.toList()));
     }
 
@@ -259,7 +259,7 @@ public class CacheFetcher {
         return oncokbTranscriptService.findEnsemblTranscriptsByIds(ids, referenceGenome);
     }
 
-    public boolean genomicLocationShouldBeAnnotated(GNVariantAnnotationType gnVariantAnnotationType, String genomicLocation, ReferenceGenome referenceGenome, List<org.oncokb.oncokb_transcript.client.Gene> allTranscriptsGenes) throws ApiException {
+    public boolean genomicLocationShouldBeAnnotated(GNVariantAnnotationType gnVariantAnnotationType, String genomicLocation, ReferenceGenome referenceGenome, Set<org.oncokb.oncokb_transcript.client.Gene> allTranscriptsGenes) throws ApiException {
         if (StringUtils.isEmpty(genomicLocation)) {
             return false;
         }
@@ -284,7 +284,7 @@ public class CacheFetcher {
         }
         GenomicLocation finalGl = gl;
         List<org.oncokb.oncokb_transcript.client.Gene> filtered = allTranscriptsGenes.stream().filter(gene -> {
-            Set<EnsemblGene> ensemblGenes = gene.getEnsemblGenes().stream().filter(ensemblGene -> ensemblGene.isCanonical() && ensemblGene.getReferenceGenome().equals(referenceGenome.name())).collect(Collectors.toSet());
+            Set<EnsemblGene> ensemblGenes = gene.getEnsemblGenes().stream().filter(ensemblGene -> ensemblGene.getCanonical() && ensemblGene.getReferenceGenome().equals(referenceGenome.name())).collect(Collectors.toSet());
             if (ensemblGenes.size() > 0) {
                 return ensemblGenes.stream().filter(ensemblGene -> finalGl.getChromosome().equals(ensemblGene.getChromosome()) && rangesIntersect(ensemblGene.getStart(), ensemblGene.getEnd(), finalGl.getStart(), finalGl.getEnd())).count() > 0;
             } else {

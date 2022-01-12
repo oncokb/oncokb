@@ -21,7 +21,7 @@ public class EnsemblGene implements Serializable {
 
     public EnsemblGene(org.oncokb.oncokb_transcript.client.EnsemblGene ensemblGene) {
         this.ensemblGeneId=ensemblGene.getEnsemblGeneId();
-        this.canonical = ensemblGene.isCanonical();
+        this.canonical = ensemblGene.getCanonical();
         this.chromosome = ensemblGene.getChromosome();
         this.referenceGenome = ensemblGene.getReferenceGenome();
         this.strand = ensemblGene.getStrand();
