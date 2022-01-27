@@ -16,3 +16,4 @@ Prepare for data v*.* release
     - [ ] Update annotation service
 - [ ] Update release note
 - [ ] Update oncokb-annotator tests
+- [ ] Update oncokb_summary image and update the index.html in oncokb-public for the tags <meta name="twitter:image"> and <meta property="og:image">
