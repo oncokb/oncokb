@@ -118,5 +118,10 @@
             <artifactId>oncokb-java-api-client</artifactId>
             <version>8a9437488a</version>
         </dependency>
+        <dependency>
+            <groupId>com.vdurmont</groupId>
+            <artifactId>semver4j</artifactId>
+            <version>3.1.0</version>
+        </dependency>
     </dependencies>
 </project>
