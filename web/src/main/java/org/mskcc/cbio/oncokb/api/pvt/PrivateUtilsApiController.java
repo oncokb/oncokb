@@ -378,7 +378,16 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             gene = GeneUtils.getGene(entrezGeneId, hugoSymbol);
             Alteration alterationModel = AlterationUtils.findAlteration(gene, matchedRG, alteration);
             if (alterationModel == null) {
-                alterationModel = AlterationUtils.getAlteration(gene.getHugoSymbol(), alteration, null, null, null, null, matchedRG);
+                if (gene == null) {
+                    alterationModel = new Alteration();
+                    gene = new Gene();
+                    gene.setHugoSymbol(hugoSymbol);
+                    gene.setEntrezGeneId(entrezGeneId);
+                    alterationModel.setGene(gene);
+                    alterationModel.setAlteration(alteration);
+                } else {
+                    alterationModel = AlterationUtils.getAlteration(gene.getHugoSymbol(), alteration, null, null, null, null, matchedRG);
+                }
             }
             query = new Query(alterationModel, matchedRG);
         } else {
