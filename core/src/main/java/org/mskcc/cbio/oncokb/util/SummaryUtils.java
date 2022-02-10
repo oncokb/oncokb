@@ -276,7 +276,21 @@ public class SummaryUtils {
                 AlterationType.getByName(query.getAlterationType()), query.getConsequence(), query.getProteinStart(), query.getProteinEnd(), query.getReferenceGenome());
         }
 
+        if (oncogenic != null && !oncogenic.equals(Oncogenicity.UNKNOWN)) {
+            return getOncogenicSummaryFromOncogenicity(oncogenic, alteration, query);
+        }
+
         isHotspot = HotspotUtils.isHotspot(alteration);
+
+
+
+        if (isHotspot) {
+            if (alteration != null && MainUtils.isVUS(alteration)) {
+                return vusAndHotspotSummary(alteration, query, isHotspot);
+            } else {
+                return hotspotSummary(alteration, query, false, oncogenic);
+            }
+        } 
 
         if (oncogenic == null || oncogenic.equals(Oncogenicity.UNKNOWN)) {
             // Get oncogenic summary from alternative alleles
@@ -318,15 +332,11 @@ public class SummaryUtils {
         }
 
         if (oncogenic != null && !oncogenic.equals(Oncogenicity.UNKNOWN)) {
-            return getOncogenicSummaryFromOncogenicity(oncogenic, alteration, query, isHotspot);
+            return getOncogenicSummaryFromOncogenicity(oncogenic, alteration, query);
         }
 
         if (alteration != null && MainUtils.isVUS(alteration)) {
-            return vusAndHotspotSummary(alteration, query, isHotspot);
-        }
-
-        if (isHotspot) {
-            return hotspotSummary(alteration, query, false, oncogenic);
+            return getVUSOncogenicSummary(query.getReferenceGenome(), alteration, query);
         }
 
         String summary = unknownOncogenicSummary(gene, query.getReferenceGenome(), query);
@@ -362,16 +372,13 @@ public class SummaryUtils {
         return StringUtils.capitalize(sb.toString());
     }
 
-    private static String getOncogenicSummaryFromOncogenicity(Oncogenicity oncogenicity, Alteration alteration, Query query, Boolean isHotspot) {
+    private static String getOncogenicSummaryFromOncogenicity(Oncogenicity oncogenicity, Alteration alteration, Query query) {
         StringBuilder sb = new StringBuilder();
         String queryAlteration = query.getAlteration();
         String altName = getGeneMutationNameInVariantSummary(alteration.getGene(), query.getReferenceGenome(), query.getHugoSymbol(), queryAlteration);
         Boolean appendThe = appendThe(queryAlteration);
         Boolean isPlural = false;
 
-        if (isHotspot == null) {
-            isHotspot = false;
-        }
         if (queryAlteration.toLowerCase().contains("fusions") || queryAlteration.toLowerCase().endsWith("mutations")) {
             isPlural = true;
         }
