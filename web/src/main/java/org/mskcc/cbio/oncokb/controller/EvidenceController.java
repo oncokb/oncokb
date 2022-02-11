@@ -15,6 +15,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -29,7 +30,7 @@ public class EvidenceController {
     public
     @ResponseBody
     synchronized ResponseEntity updateEvidence(@ApiParam(value = "uuid", required = true) @PathVariable("uuid") String uuid,
-                                               @RequestBody Evidence queryEvidence) throws ParserConfigurationException {
+                                               @RequestBody Evidence queryEvidence) throws ParserConfigurationException, IOException {
 
         List<Evidence> updatedEvidences = updateEvidenceBasedOnUuid(uuid, queryEvidence);
 
@@ -43,7 +44,7 @@ public class EvidenceController {
     @RequestMapping(value = "/legacy-api/evidences/update", method = RequestMethod.POST)
     public
     @ResponseBody
-    synchronized ResponseEntity updateEvidence(@RequestBody Map<String, Evidence> queryEvidences) throws ParserConfigurationException {
+    synchronized ResponseEntity updateEvidence(@RequestBody Map<String, Evidence> queryEvidences) throws ParserConfigurationException, IOException {
         Set<Evidence> updatedEvidenceSet = new HashSet<>();
 
         for (Map.Entry<String, Evidence> entry : queryEvidences.entrySet()) {
@@ -62,7 +63,7 @@ public class EvidenceController {
     @RequestMapping(value = "/legacy-api/evidences/updateRelevantCancerTypes", method = RequestMethod.POST)
     public
     @ResponseBody
-    synchronized ResponseEntity updateEvidence(@RequestBody Set<Evidence> evidences) {
+    synchronized ResponseEntity updateEvidence(@RequestBody Set<Evidence> evidences) throws IOException {
         Set<Evidence> updatedEvidenceSet = new HashSet<>();
         evidences.forEach(evidence -> {
             Set<TumorType> cancerTypes = evidence.getRelevantCancerTypes().stream().map(tumorType -> StringUtils.isNullOrEmpty(tumorType.getCode()) ? TumorTypeUtils.getByMainType(tumorType.getMainType()) : TumorTypeUtils.getByCode(tumorType.getCode())).collect(Collectors.toSet());
@@ -82,7 +83,7 @@ public class EvidenceController {
     @ResponseBody
     synchronized ResponseEntity updateEvidencePriority(@ApiParam(value = "uuid", required = true) @PathVariable("uuid") String uuid,
                                                        @ApiParam(value = "newPriority", required = true) @PathVariable("newPriority") Map<String, Integer> newPriority
-    ) throws ParserConfigurationException {
+    ) throws ParserConfigurationException, IOException {
 
         Map<String, Map<String, Integer>> map = new HashMap<>();
         map.put(uuid, newPriority);
@@ -99,7 +100,7 @@ public class EvidenceController {
     public
     @ResponseBody
     synchronized ResponseEntity updateEvidencesPriority(@RequestBody Map<String, Map<String, Integer>> priorities
-    ) throws ParserConfigurationException {
+    ) throws ParserConfigurationException, IOException {
         Set<Evidence> updatedEvidences = updateEvidencePriorityBasedOnUuid(priorities);
 
         if (updatedEvidences != null) {
@@ -112,7 +113,7 @@ public class EvidenceController {
     @RequestMapping(value = "/legacy-api/evidences/delete", method = RequestMethod.POST)
     public
     @ResponseBody
-    synchronized String deleteEvidences(@RequestBody List<String> uuids) {
+    synchronized String deleteEvidences(@RequestBody List<String> uuids) throws IOException {
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
         if (uuids != null) {
             List<Evidence> evidences = evidenceBo.findEvidenceByUUIDs(uuids);
@@ -125,7 +126,7 @@ public class EvidenceController {
     @RequestMapping(value = "/legacy-api/evidences/delete/{uuid}", method = RequestMethod.DELETE)
     public
     @ResponseBody
-    synchronized String deleteEvidence(@ApiParam(value = "uuid", required = true) @PathVariable("uuid") String uuid) {
+    synchronized String deleteEvidence(@ApiParam(value = "uuid", required = true) @PathVariable("uuid") String uuid) throws IOException {
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
         List<Evidence> evidences = evidenceBo.findEvidenceByUUIDs(Collections.singletonList(uuid));
 
@@ -138,7 +139,7 @@ public class EvidenceController {
     public
     @ResponseBody
     synchronized ResponseEntity updateVUS(@ApiParam(value = "hugoSymbol", required = true) @PathVariable("hugoSymbol") String hugoSymbol,
-                                          @RequestBody String vus) throws JSONException {
+                                          @RequestBody String vus) throws JSONException, IOException {
 
         HttpStatus status = HttpStatus.OK;
         if (hugoSymbol != null && vus != null) {
@@ -404,7 +405,7 @@ public class EvidenceController {
         return evidences;
     }
 
-    private void updateCacheBasedOnEvidences(Set<Evidence> evidences) {
+    private void updateCacheBasedOnEvidences(Set<Evidence> evidences) throws IOException {
         // The sample solution for now is updating all gene related evidences.
         Set<Gene> genes = new HashSet<>();
         for (Evidence evidence : evidences) {
@@ -413,7 +414,7 @@ public class EvidenceController {
         updateCacheBasedOnGenes(genes);
     }
 
-    private void updateCacheBasedOnGenes(Set<Gene> genes) {
+    private void updateCacheBasedOnGenes(Set<Gene> genes) throws IOException {
         // The sample solution for now is updating all gene related evidences.
         for (Gene gene : genes) {
             ApplicationContextSingleton.getAlterationBo().deleteMutationsWithoutEvidenceAssociatedByGene(gene);

@@ -73,11 +73,7 @@ public class OncokbTranscriptService {
         TranscriptControllerApi controllerApi = new TranscriptControllerApi();
 
         Sequence pickedSequence = null;
-        try {
-            pickedSequence = sequenceControllerApi.findCanonicalSequenceUsingGET(referenceGenome.toString(), gene.getEntrezGeneId(), SEQUENCE_TYPE);
-        } catch (ApiException e) {
-            throw e;
-        }
+        pickedSequence = sequenceControllerApi.findCanonicalSequenceUsingGET(referenceGenome.toString(), gene.getEntrezGeneId(), SEQUENCE_TYPE);
         if (pickedSequence == null) {
             return null;
         } else {

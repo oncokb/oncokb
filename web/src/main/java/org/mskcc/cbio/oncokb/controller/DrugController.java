@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -27,7 +28,7 @@ public class DrugController {
     synchronized ResponseEntity updateEvidence(
         @ApiParam(value = "ncitCode", required = true) @PathVariable("ncitCode") String ncitCode
         , @ApiParam(value = "preferredName", required = true) @RequestParam(value = "preferredName", required = true) String preferredName
-    ) {
+    ) throws IOException {
         if (preferredName == null) {
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
         }
