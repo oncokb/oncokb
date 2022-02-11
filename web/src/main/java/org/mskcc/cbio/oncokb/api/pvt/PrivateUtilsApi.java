@@ -186,7 +186,7 @@ public interface PrivateUtilsApi {
         , @ApiParam(value = "Alteration") @RequestParam(value = "alteration", required = false) String alteration
         , @ApiParam(value = "HGVS genomic format. Example: 7:g.140453136A>T") @RequestParam(value = "hgvsg", required = false) String hgvsg
         , @ApiParam(value = "OncoTree tumor type name/main type/code") @RequestParam(value = "tumorType", required = false) String tumorType
-    ) throws ApiException;
+    ) throws ApiException, org.genome_nexus.ApiException;
 
     @ApiOperation(value = "", notes = "", response = CancerTypeCount.class, responseContainer = "List")
     @ApiResponses(value = {

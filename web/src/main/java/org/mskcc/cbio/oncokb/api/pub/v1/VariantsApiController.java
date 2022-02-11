@@ -2,6 +2,7 @@ package org.mskcc.cbio.oncokb.api.pub.v1;
 
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang3.StringUtils;
+import org.genome_nexus.ApiException;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.model.*;
@@ -43,7 +44,7 @@ public class VariantsApiController implements VariantsApi {
         , @ApiParam(value = "HGVS varaint. Its priority is higher than entrezGeneId/hugoSymbol + variant combination") @RequestParam(value = "hgvs", required = false) String hgvs
         , @ApiParam(value = "Reference genome, either GRCh37 or GRCh38. The default is GRCh37", required = false, defaultValue = "GRCh37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") String referenceGenome
         , @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
-    ) {
+    ) throws ApiException {
         ReferenceGenome matchedRG = null;
         if (!StringUtils.isEmpty(referenceGenome)) {
             matchedRG = MainUtils.searchEnum(ReferenceGenome.class, referenceGenome);
@@ -59,7 +60,7 @@ public class VariantsApiController implements VariantsApi {
     public ResponseEntity<List<List<Alteration>>> variantsLookupPost(
         @ApiParam(value = "List of queries.", required = true) @RequestBody(required = true) List<VariantSearchQuery> body
         , @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
-    ) {
+    ) throws ApiException {
         List<List<Alteration>> result = new ArrayList<>();
         if (body != null) {
             for (VariantSearchQuery query : body) {
@@ -69,7 +70,7 @@ public class VariantsApiController implements VariantsApi {
         return ResponseEntity.ok().body(JsonResultFactory.getAlteration2D(result, fields));
     }
 
-    private List<Alteration> getVariants(VariantSearchQuery query) {
+    private List<Alteration> getVariants(VariantSearchQuery query) throws ApiException {
         LinkedHashSet<Alteration> alterationSet = new LinkedHashSet<>();
         List<Alteration> alterationList = new ArrayList<>();
         if (query != null) {

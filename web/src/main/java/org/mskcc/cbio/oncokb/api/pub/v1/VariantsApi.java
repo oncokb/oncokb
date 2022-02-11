@@ -1,6 +1,7 @@
 package org.mskcc.cbio.oncokb.api.pub.v1;
 
 import io.swagger.annotations.*;
+import org.genome_nexus.ApiException;
 import org.mskcc.cbio.oncokb.config.annotation.PremiumPublicApi;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.ReferenceGenome;
@@ -48,7 +49,7 @@ public interface VariantsApi {
         , @ApiParam(value = "HGVS varaint. Its priority is higher than entrezGeneId/hugoSymbol + variant combination") @RequestParam(value = "hgvs", required = false) String hgvs
         , @ApiParam(value = "Reference genome, either GRCh37 or GRCh38. The default is GRCh37", required = false, defaultValue = "GRCh37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") String referenceGenome
         , @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
-    );
+    ) throws ApiException;
 
     @PremiumPublicApi
     @ApiOperation(value = "", notes = "Search for variants.", response = List.class, responseContainer = "List")
@@ -60,6 +61,6 @@ public interface VariantsApi {
     ResponseEntity<List<List<Alteration>>> variantsLookupPost(
         @ApiParam(value = "List of queries.", required = true) @RequestBody(required = true) List<VariantSearchQuery> body
         , @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
-    );
+    ) throws ApiException;
 
 }
