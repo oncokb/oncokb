@@ -220,7 +220,7 @@ public interface PrivateUtilsApi {
         , @ApiParam(value = "grch37RefSeq") @RequestParam(required = false) String grch37RefSeq
         , @ApiParam(value = "grch38Isoform") @RequestParam(required = false) String grch38Isoform
         , @ApiParam(value = "grch38RefSeq") @RequestParam(required = false) String grch38RefSeq
-    ) throws ApiException;
+    ) throws ApiException, IOException;
 
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK")})

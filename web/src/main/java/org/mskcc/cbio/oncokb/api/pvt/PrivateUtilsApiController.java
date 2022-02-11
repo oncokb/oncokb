@@ -476,7 +476,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         , @ApiParam(value = "grch37RefSeq") @RequestParam(required = false) String grch37RefSeq
         , @ApiParam(value = "grch38Isoform") @RequestParam(required = false) String grch38Isoform
         , @ApiParam(value = "grch38RefSeq") @RequestParam(required = false) String grch38RefSeq
-    ) throws ApiException {
+    ) throws ApiException, IOException {
         // this is an util to upgrade oncokb transcript which operates on the grch37
         Gene gene = GeneUtils.getGene(entrezGeneId, hugoSymbol);
 

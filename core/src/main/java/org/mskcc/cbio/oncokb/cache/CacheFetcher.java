@@ -18,6 +18,7 @@ import org.oncokb.oncokb_transcript.client.TranscriptDTO;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -35,12 +36,12 @@ public class CacheFetcher {
     }
 
     @Cacheable(cacheResolver = "generalCacheResolver", key = "'all'")
-    public List<CancerGene> getCancerGenes() {
+    public List<CancerGene> getCancerGenes() throws ApiException, IOException {
         return getCancerGeneList();
     }
 
     @Cacheable(cacheResolver = "generalCacheResolver", key = "'all'")
-    public String getCancerGenesTxt() {
+    public String getCancerGenesTxt() throws ApiException, IOException {
 
         String separator = "\t";
         String newLine = "\n";
@@ -96,15 +97,11 @@ public class CacheFetcher {
         return oncokbTranscriptService.findTranscriptGenesBySymbols(CacheUtils.getAllGenes().stream().filter(gene -> gene.getEntrezGeneId() > 0).map(gene -> gene.getEntrezGeneId().toString()).collect(Collectors.toList()));
     }
 
-    private List<CancerGene> getCancerGeneList() {
+    private List<CancerGene> getCancerGeneList() throws ApiException, IOException {
         List<CancerGene> cancerGenes = CancerGeneUtils.getCancerGeneList();
         List<String> hugos = cancerGenes.stream().map(CancerGene::getHugoSymbol).collect(Collectors.toList());
         List<Gene> genes = new ArrayList<>();
-        try {
-            genes = oncokbTranscriptService.findGenesBySymbols(hugos);
-        } catch (ApiException e) {
-            e.printStackTrace();
-        }
+        genes = oncokbTranscriptService.findGenesBySymbols(hugos);
         for (CancerGene cancerGene : cancerGenes) {
             if (cancerGene.getGeneAliases().size() == 0) {
                 List<Gene> matched = genes.stream().filter(gene -> gene.getEntrezGeneId().equals(cancerGene.getEntrezGeneId())).collect(Collectors.toList());
