@@ -68,6 +68,14 @@ public final class AlterationUtils {
         return exclusionMatch;
     }
 
+    public static String removeExclusionCriteria(String proteinChange) {
+        Matcher exclusionMatch = getExclusionCriteriaMatcher(proteinChange);
+        if (exclusionMatch.matches()) {
+            proteinChange = exclusionMatch.group(1).trim();
+        }
+        return proteinChange;
+    }
+
     public static Set<Alteration> getExclusionAlterations(String proteinChange) {
         Set<Alteration> exclusionAlterations = new HashSet<>();
         Matcher exclusionMatcher = getExclusionCriteriaMatcher(proteinChange);
@@ -150,7 +158,10 @@ public final class AlterationUtils {
                 ret.add(alteration);
             }
         }
-        return ret;
+        return ret.stream().map(alteration -> {
+            annotateAlteration(alteration, alteration.getAlteration());
+            return alteration;
+        }).collect(Collectors.toList());
     }
 
     public static void annotateAlteration(Alteration alteration, String proteinChange) {
@@ -819,6 +830,10 @@ public final class AlterationUtils {
         return getAlleleAlterationsSub(referenceGenome, alteration, fullAlterations);
     }
 
+    public static List<Alteration> getAllMissenseAlleles(ReferenceGenome referenceGenome, int position, Set<Alteration> fullAlterations) {
+        return fullAlterations.stream().filter(alt -> alt.getConsequence() != null && alt.getConsequence().getTerm().equals(MISSENSE_VARIANT) && alt.getProteinStart() != null && alt.getProteinStart() == position).collect(Collectors.toList());
+    }
+
     // Only for missense alteration
     public static List<Alteration> getPositionedAlterations(ReferenceGenome referenceGenome, Alteration alteration) {
         return getPositionedAlterations(referenceGenome, alteration, getAllAlterations(referenceGenome, alteration.getGene()));
@@ -1065,6 +1080,17 @@ public final class AlterationUtils {
         } else {
             return alterationBo.findAlteration(gene, AlterationType.MUTATION, referenceGenome, alteration);
         }
+    }
+
+    public static boolean isCategoricalAlteration(String alteration) {
+        if (StringUtils.isEmpty(alteration)) {
+            return false;
+        }
+        alteration = removeExclusionCriteria(alteration);
+        List<String> categoricalAlterations = new ArrayList<>();
+        categoricalAlterations.addAll(getInferredMutations().stream().map(mut -> mut.toLowerCase()).collect(Collectors.toList()));
+        categoricalAlterations.addAll(getStructuralAlterations().stream().map(mut -> mut.toLowerCase()).collect(Collectors.toList()));
+        return categoricalAlterations.contains(alteration.toLowerCase());
     }
 
     public static List<Alteration> findOncogenicMutations(Set<Alteration> fullAlterations) {

@@ -354,6 +354,33 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     }
 
     @Override
+    public ResponseEntity<List<Alteration>> utilRelevantAlterationsGet(
+        @ApiParam(value = "Reference genome, either GRCh37 or GRCh38. The default is GRCh37", defaultValue = "GRCh37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") String referenceGenome
+        , @ApiParam(value = "alteration") @RequestParam(value = "entrezGeneId") Integer entrezGeneId
+        , @ApiParam(value = "alteration") @RequestParam(value = "alteration") String alteration
+    ) {
+        ReferenceGenome matchedRG = null;
+        if (!org.apache.commons.lang3.StringUtils.isEmpty(referenceGenome)) {
+            matchedRG = MainUtils.searchEnum(ReferenceGenome.class, referenceGenome);
+            if (matchedRG == null) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+        }
+        Gene gene = GeneUtils.getGeneByEntrezId(entrezGeneId);
+        if (gene == null) {
+            return ResponseEntity.ok(new ArrayList<>());
+        }
+        Alteration alt = AlterationUtils.getAlteration(gene.getHugoSymbol(), alteration, null, null, null, null, matchedRG);
+        Set<Alteration> relevantAlts = new LinkedHashSet<>();
+        if (AlterationUtils.isCategoricalAlteration(alt.getAlteration())) {
+            relevantAlts = ApplicationContextSingleton.getAlterationBo().findRelevantAlterationsForCategoricalAlt(matchedRG, alt, AlterationUtils.getAllAlterations(matchedRG, alt.getGene()));
+        } else {
+            relevantAlts = ApplicationContextSingleton.getAlterationBo().findRelevantAlterations(matchedRG, alt, false);
+        }
+        return ResponseEntity.ok(new ArrayList<>(relevantAlts));
+    }
+
+    @Override
     public ResponseEntity<VariantAnnotation> utilVariantAnnotationGet(
         @ApiParam(value = "hugoSymbol") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
         , @ApiParam(value = "entrezGeneId") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
