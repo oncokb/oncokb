@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.mskcc.cbio.oncokb.bo.impl;
 
 import com.mysql.jdbc.StringUtils;
@@ -12,11 +8,12 @@ import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.*;
 
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.mskcc.cbio.oncokb.Constants.*;
+import static org.mskcc.cbio.oncokb.model.InferredMutation.*;
+import static org.mskcc.cbio.oncokb.model.StructuralAlteration.FUSIONS;
+import static org.mskcc.cbio.oncokb.model.StructuralAlteration.TRUNCATING_MUTATIONS;
 import static org.mskcc.cbio.oncokb.util.AlterationUtils.*;
 
 /**
@@ -212,6 +209,64 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         deleteAll(noMappingAlts);
     }
 
+    private Set<Alteration> getRelevantAlterationsForMutationEffectMutations(ReferenceGenome referenceGenome, Gene gene, InferredMutation alteration) {
+        String mutationEffect = alteration.getVariant().toLowerCase().replace("mutations", "").trim();
+        return EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Collections.singleton(EvidenceType.MUTATION_EFFECT)).stream().filter(evidence -> !StringUtils.isNullOrEmpty(evidence.getKnownEffect()) && mutationEffect.equals(evidence.getKnownEffect().toLowerCase().replace("likely", "").trim())).map(evidence -> evidence.getAlterations()).flatMap(Collection::stream).filter(alt -> alt.getReferenceGenomes().contains(referenceGenome)).collect(Collectors.toSet());
+    }
+
+    private Set<Alteration> getRelevantAlterationsForTruncatingMutations(ReferenceGenome referenceGenome, Set<Alteration> fullAlterations) {
+        return fullAlterations.stream().filter(alt -> {
+            VariantConsequence variantConsequence = alt.getConsequence();
+            return variantConsequence != null && variantConsequence.getIsGenerallyTruncating() && alt.getReferenceGenomes().contains(referenceGenome);
+        }).collect(Collectors.toSet());
+    }
+
+    private Set<Alteration> getRelevantAlterationsForFusions(ReferenceGenome referenceGenome, Set<Alteration> fullAlterations) {
+        return fullAlterations.stream().filter(alt -> alt.getAlteration().toLowerCase().contains("fusion") && alt.getReferenceGenomes().contains(referenceGenome)).collect(Collectors.toSet());
+    }
+
+    private Set<Alteration> getRelevantAlterationsForOncogenicMutations(ReferenceGenome referenceGenome, Gene gene) {
+        return EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Collections.singleton(EvidenceType.ONCOGENIC)).stream().filter(evidence -> {
+            Oncogenicity oncogenicity = Oncogenicity.getByEffect(evidence.getKnownEffect());
+            return MainUtils.isOncogenic(oncogenicity);
+        }).map(evidence -> evidence.getAlterations()).flatMap(Collection::stream).filter(alt -> alt.getReferenceGenomes().contains(referenceGenome)).collect(Collectors.toSet());
+    }
+
+    public LinkedHashSet<Alteration> findRelevantAlterationsForCategoricalAlt(ReferenceGenome referenceGenome, Alteration alteration, Set<Alteration> fullAlterations) {
+        String altName = removeExclusionCriteria(alteration.getAlteration()).toLowerCase();
+        LinkedHashSet<Alteration> relevant = new LinkedHashSet();
+
+        if (altName.equals(ONCOGENIC_MUTATIONS.getVariant().toLowerCase())) {
+            relevant = new LinkedHashSet<>(getRelevantAlterationsForOncogenicMutations(referenceGenome, alteration.getGene()));
+        } else {
+            List<InferredMutation> mutationEffectInferredAlterations = new ArrayList<>();
+            mutationEffectInferredAlterations.add(GAIN_OF_FUNCTION_MUTATIONS);
+            mutationEffectInferredAlterations.add(LOSS_OF_FUNCTION_MUTATIONS);
+            mutationEffectInferredAlterations.add(SWITCH_OF_FUNCTION_MUTATIONS);
+            Optional<InferredMutation> match = mutationEffectInferredAlterations.stream().filter(alt -> alt.getVariant().toLowerCase().equals(altName)).findFirst();
+            if (match.isPresent()) {
+                relevant = new LinkedHashSet<>(getRelevantAlterationsForMutationEffectMutations(referenceGenome, alteration.getGene(), match.get()));
+            } else if (altName.equals(TRUNCATING_MUTATIONS.getVariant().toLowerCase())) {
+                relevant = new LinkedHashSet<>(getRelevantAlterationsForTruncatingMutations(referenceGenome, fullAlterations));
+            } else if (altName.equals(FUSIONS.getVariant().toLowerCase())) {
+                relevant = new LinkedHashSet<>(getRelevantAlterationsForFusions(referenceGenome, fullAlterations));
+            }
+        }
+
+
+        if (AlterationUtils.hasExclusionCriteria(alteration.getAlteration())) {
+            Set<Alteration> altsShouldBeExcluded = AlterationUtils.getExclusionAlterations(alteration.getAlteration());
+            altsShouldBeExcluded.forEach(alt -> {
+                if (isPositionedAlteration(alt)) {
+                    altsShouldBeExcluded.addAll(AlterationUtils.getAllMissenseAlleles(referenceGenome, alt.getProteinStart(), fullAlterations));
+                }
+            });
+            Set<String> proteinChangesShouldBeExcluded = altsShouldBeExcluded.stream().map(alt -> alt.getAlteration().toLowerCase()).collect(Collectors.toSet());
+            relevant = new LinkedHashSet<>(relevant.stream().filter(alt -> !proteinChangesShouldBeExcluded.contains(alt.getAlteration().toLowerCase())).collect(Collectors.toSet()));
+        }
+
+        return relevant;
+    }
     /**
      * Find all relevant alterations. The order is important. The list should be generated based on priority.
      *
@@ -286,10 +341,10 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
 
         //Find Alternative Alleles for missense variant
         if (alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm(MISSENSE_VARIANT)) && !AlterationUtils.isPositionedAlteration(alteration)) {
-            alterations.addAll(AlterationUtils.getAlleleAlterations(referenceGenome, alteration, fullAlterations));
             List<Alteration> includeRangeAlts = new ArrayList<>();
 
             if (includeAlternativeAllele) {
+                alterations.addAll(AlterationUtils.getAlleleAlterations(referenceGenome, alteration, fullAlterations));
                 // Include the range mutation
                 List<Alteration> mutationsByConsequenceAndPosition = findMutationsByConsequenceAndPosition(alteration.getGene(), referenceGenome, alteration.getConsequence(), alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations);
                 for (Alteration alt : mutationsByConsequenceAndPosition) {

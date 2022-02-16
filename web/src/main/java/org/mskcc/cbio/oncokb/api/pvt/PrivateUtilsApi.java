@@ -173,6 +173,18 @@ public interface PrivateUtilsApi {
         @ApiParam(value = "List of queries.", required = true) @RequestBody List<RelevantCancerTypeQuery> body
     );
 
+    @ApiOperation(value = "", notes = "Get the list of relevant alterations", response = Alteration.class, responseContainer = "List")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK")})
+    @RequestMapping(value = "/utils/relevantAlterations",
+        produces = {"application/json"},
+        method = RequestMethod.GET)
+    ResponseEntity<List<Alteration>> utilRelevantAlterationsGet(
+        @ApiParam(value = "Reference genome, either GRCh37 or GRCh38. The default is GRCh37", defaultValue = "GRCh37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") String referenceGenome
+        , @ApiParam(value = "alteration") @RequestParam(value = "entrezGeneId") Integer entrezGeneId
+        , @ApiParam(value = "alteration") @RequestParam(value = "alteration") String alteration
+    );
+
     @ApiOperation(value = "", notes = "Get all the info for the query", response = VariantAnnotation.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = VariantAnnotation.class)})

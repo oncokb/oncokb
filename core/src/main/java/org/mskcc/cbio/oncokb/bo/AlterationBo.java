@@ -64,6 +64,11 @@ public interface AlterationBo extends GenericBo<Alteration> {
      * @return
      */
     LinkedHashSet<Alteration> findRelevantAlterations(ReferenceGenome referenceGenome, Alteration alteration, boolean includeAlternativeAllele);
+    /**
+     * @param alteration
+     * @return
+     */
+    LinkedHashSet<Alteration> findRelevantAlterationsForCategoricalAlt(ReferenceGenome referenceGenome, Alteration alteration, Set<Alteration> alterations);
 
     /**
      * @param alteration
