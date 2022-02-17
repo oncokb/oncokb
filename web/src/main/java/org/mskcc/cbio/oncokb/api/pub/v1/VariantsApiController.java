@@ -36,11 +36,6 @@ public class VariantsApiController implements VariantsApi {
         @ApiParam(value = "The entrez gene ID. entrezGeneId is prioritize than hugoSymbol if both parameters have been defined") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
         , @ApiParam(value = "The gene symbol used in Human Genome Organisation.") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
         , @ApiParam(value = "variant name.") @RequestParam(value = "variant", required = false) String variant
-        , @ApiParam(value = "") @RequestParam(value = "variantType", required = false) String variantType
-        , @ApiParam(value = "") @RequestParam(value = "consequence", required = false) String consequence
-        , @ApiParam(value = "") @RequestParam(value = "proteinStart", required = false) Integer proteinStart
-        , @ApiParam(value = "") @RequestParam(value = "proteinEnd", required = false) Integer proteinEnd
-        , @ApiParam(value = "HGVS varaint. Its priority is higher than entrezGeneId/hugoSymbol + variant combination") @RequestParam(value = "hgvs", required = false) String hgvs
         , @ApiParam(value = "Reference genome, either GRCh37 or GRCh38. The default is GRCh37", required = false, defaultValue = "GRCh37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") String referenceGenome
         , @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
     ) {
@@ -51,8 +46,19 @@ public class VariantsApiController implements VariantsApi {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
         }
-        VariantSearchQuery query = new VariantSearchQuery(entrezGeneId, hugoSymbol, variant, variantType, consequence, proteinStart, proteinEnd, hgvs, matchedRG);
-        return ResponseEntity.ok().body(JsonResultFactory.getAlteration(getVariants(query), fields));
+        List<Alteration> result = new ArrayList<>();
+        Gene gene = GeneUtils.getGene(entrezGeneId, hugoSymbol);
+        if (gene != null) {
+            if (StringUtils.isEmpty(variant)) {
+                result = new ArrayList<>(AlterationUtils.getAllAlterations(matchedRG, gene));
+            } else {
+                Alteration alteration = new Alteration();
+                alteration.setGene(gene);
+                alteration.setAlteration(variant);
+                result = new ArrayList<>(AlterationUtils.findMatchedAlterations(matchedRG, alteration));
+            }
+        }
+        return ResponseEntity.ok().body(JsonResultFactory.getAlteration(result, fields));
     }
 
     @Override
