@@ -66,7 +66,7 @@ public class AnnotationsApiController {
                     return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
                 }
             }
-            Query query = new Query(null, matchedRG, AnnotationQueryType.REGULAR.getName(), entrezGeneId, hugoSymbol, proteinChange, null, null, tumorType, consequence, proteinStart, proteinEnd, null);
+            Query query = new Query(null, matchedRG, entrezGeneId, hugoSymbol, proteinChange, null, null, tumorType, consequence, proteinStart, proteinEnd, null);
             indicatorQueryResp = this.cacheFetcher.processQuery(
                 query.getReferenceGenome(),
                 query.getEntrezGeneId(),
@@ -496,7 +496,7 @@ public class AnnotationsApiController {
             alteration = this.cacheFetcher.getAlterationFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, referenceGenome, genomicLocation);
         }
         Query query = new Query();
-        query = new Query(null, referenceGenome, AnnotationQueryType.REGULAR.getName(), null, alteration.getGene() == null ? null : alteration.getGene().getHugoSymbol(), alteration.getAlteration(), null, null, tumorType, alteration.getConsequence() == null ? null : alteration.getConsequence().getTerm(), alteration.getProteinStart(), alteration.getProteinEnd(), null);
+        query = new Query(null, referenceGenome, null, alteration.getGene() == null ? null : alteration.getGene().getHugoSymbol(), alteration.getAlteration(), null, null, tumorType, alteration.getConsequence() == null ? null : alteration.getConsequence().getTerm(), alteration.getProteinStart(), alteration.getProteinEnd(), null);
         return this.cacheFetcher.processQuery(
             referenceGenome,
             query.getEntrezGeneId(),

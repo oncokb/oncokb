@@ -7,7 +7,6 @@ import org.cbioportal.genome_nexus.util.exception.InvalidHgvsException;
 import org.cbioportal.genome_nexus.util.exception.TypeNotSupportedException;
 import org.mskcc.cbio.oncokb.apiModels.CuratedGene;
 import org.mskcc.cbio.oncokb.apiModels.FdaAlteration;
-import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotationQueryType;
 import org.mskcc.cbio.oncokb.bo.OncokbTranscriptService;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.model.*;
@@ -236,7 +235,7 @@ public class CacheFetcher {
         if (referenceGenome == null) {
             referenceGenome = DEFAULT_REFERENCE_GENOME;
         }
-        Query query = new Query(null, referenceGenome, AnnotationQueryType.REGULAR.getName(), entrezGeneId, hugoSymbol, alteration, alterationType, svType, tumorType, consequence, proteinStart, proteinEnd, hgvs);
+        Query query = new Query(null, referenceGenome, entrezGeneId, hugoSymbol, alteration, alterationType, svType, tumorType, consequence, proteinStart, proteinEnd, hgvs);
         return IndicatorUtils.processQuery(
             query, levels, highestLevelOnly,
             evidenceTypes

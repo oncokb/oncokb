@@ -529,29 +529,7 @@ public class SummaryUtils {
         if (oncogenicity == null || !MainUtils.isValidHotspotOncogenicity(oncogenicity)) {
             sb.append(" and is predicted to be oncogenic");
         }
-        sb.append(hotspotLink(query));
         sb.append(".");
-        return sb.toString();
-    }
-
-    private static String hotspotLink(Query query) {
-        StringBuilder sb = new StringBuilder();
-        if (query.getType() != null && query.getType().equals("web")) {
-            String cancerHotspotsLink = "";
-            try {
-                cancerHotspotsLink = PropertiesUtils.getProperties("cancerhotspots.website.link");
-                if (com.mysql.jdbc.StringUtils.isNullOrEmpty(cancerHotspotsLink))
-                    throw new Exception();
-            } catch (Exception e) {
-                cancerHotspotsLink = "http://cancerhotspots.org";
-            }
-            cancerHotspotsLink = cancerHotspotsLink.trim();
-            if (!cancerHotspotsLink.isEmpty()) {
-                sb.append(" (");
-                sb.append(cancerHotspotsLink);
-                sb.append(")");
-            }
-        }
         return sb.toString();
     }
 
@@ -560,9 +538,7 @@ public class SummaryUtils {
         sb.append(getVUSOncogenicSummary(query.getReferenceGenome(), alteration, query));
 
         if (isHotspot) {
-            sb.append(" However, it has been identified as a statistically significant hotspot and is predicted to be oncogenic");
-            sb.append(hotspotLink(query));
-            sb.append(".");
+            sb.append(" However, it has been identified as a statistically significant hotspot and is predicted to be oncogenic.");
         }
         return sb.toString();
     }
