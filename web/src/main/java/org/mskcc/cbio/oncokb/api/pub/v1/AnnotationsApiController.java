@@ -109,8 +109,8 @@ public class AnnotationsApiController {
             for (AnnotateMutationByProteinChangeQuery query : body) {
                 IndicatorQueryResp resp = this.cacheFetcher.processQuery(
                     query.getReferenceGenome(),
-                    query.getGene().getEntrezGeneId(),
-                    query.getGene().getHugoSymbol(),
+                    query.getGene() == null ? null : query.getGene().getEntrezGeneId(),
+                    query.getGene() == null ? null : query.getGene().getHugoSymbol(),
                     query.getAlteration(),
                     null,
                     query.getTumorType(),
@@ -332,13 +332,15 @@ public class AnnotationsApiController {
 
             for (AnnotateCopyNumberAlterationQuery query : body) {
                 Gene gene = new Gene();
-                try {
-                    gene = this.cacheFetcher.findGeneBySymbol(
-                        query.getGene().getEntrezGeneId() != null ?
-                            query.getGene().getEntrezGeneId().toString() :
-                            query.getGene().getHugoSymbol()
-                    );
-                } catch (ApiException e) {
+                if (query.getGene() != null) {
+                    try {
+                        gene = this.cacheFetcher.findGeneBySymbol(
+                            query.getGene().getEntrezGeneId() != null ?
+                                query.getGene().getEntrezGeneId().toString() :
+                                query.getGene().getHugoSymbol()
+                        );
+                    } catch (ApiException e) {
+                    }
                 }
                 IndicatorQueryResp resp = this.cacheFetcher.processQuery(
                     query.getReferenceGenome(),
@@ -447,13 +449,15 @@ public class AnnotationsApiController {
         } else {
             for (AnnotateStructuralVariantQuery query : body) {
                 Gene geneA = new Gene();
-                try {
-                    geneA = this.cacheFetcher.findGeneBySymbol(
-                        query.getGeneA().getEntrezGeneId() != null ?
-                            query.getGeneA().getEntrezGeneId().toString() :
-                            query.getGeneA().getHugoSymbol()
-                    );
-                } catch (ApiException e) {
+                if (query.getGeneA() != null) {
+                    try {
+                        geneA = this.cacheFetcher.findGeneBySymbol(
+                            query.getGeneA().getEntrezGeneId() != null ?
+                                query.getGeneA().getEntrezGeneId().toString() :
+                                query.getGeneA().getHugoSymbol()
+                        );
+                    } catch (ApiException e) {
+                    }
                 }
                 if (StringUtils.isEmpty(geneA.getHugoSymbol()) && geneA.getEntrezGeneId() == null && query.getGeneA() != null) {
                     geneA.setHugoSymbol(query.getGeneA().getHugoSymbol());
@@ -461,13 +465,15 @@ public class AnnotationsApiController {
                 }
 
                 Gene geneB = new Gene();
-                try {
-                    geneB = this.cacheFetcher.findGeneBySymbol(
-                        query.getGeneB().getEntrezGeneId() != null ?
-                            query.getGeneB().getEntrezGeneId().toString() :
-                            query.getGeneB().getHugoSymbol()
-                    );
-                } catch (ApiException e) {
+                if (query.getGeneB() != null) {
+                    try {
+                        geneB = this.cacheFetcher.findGeneBySymbol(
+                            query.getGeneB().getEntrezGeneId() != null ?
+                                query.getGeneB().getEntrezGeneId().toString() :
+                                query.getGeneB().getHugoSymbol()
+                        );
+                    } catch (ApiException e) {
+                    }
                 }
                 if (StringUtils.isEmpty(geneB.getHugoSymbol()) && geneB.getEntrezGeneId() == null && query.getGeneB() != null) {
                     geneB.setHugoSymbol(query.getGeneB().getHugoSymbol());
