@@ -164,7 +164,7 @@ public class IndicatorUtils {
             // If there are more than two genes have matches we need to compare the highest level, then oncogenicity
             TreeSet<IndicatorQueryResp> result = new TreeSet<>(new IndicatorQueryRespComp());
             for (Gene tmpGene : (List<Gene>) fusionGeneAltsMap.get("hasRelevantAltsGenes")) {
-                Query tmpQuery = new Query(query.getId(), query.getReferenceGenome(), query.getType(), tmpGene.getEntrezGeneId(),
+                Query tmpQuery = new Query(query.getId(), query.getReferenceGenome(), tmpGene.getEntrezGeneId(),
                     tmpGene.getHugoSymbol(), query.getAlteration(), null, query.getSvType(),
                     query.getTumorType(), query.getConsequence(), query.getProteinStart(),
                     query.getProteinEnd(), query.getHgvs());
@@ -492,7 +492,7 @@ public class IndicatorUtils {
         Map<Oncogenicity, List<Alteration>> groupedOncogenicities = new HashedMap();
         Map<LevelOfEvidence, List<Alteration>> groupedLevel = new HashedMap();
         for (Alteration alteration : alterations) {
-            Query tmpQuery = new Query(null, originalQuery.getReferenceGenome(), null, alteration.getGene().getEntrezGeneId(),
+            Query tmpQuery = new Query(null, originalQuery.getReferenceGenome(), alteration.getGene().getEntrezGeneId(),
                 alteration.getGene().getHugoSymbol(), alteration.getAlteration(), null, null,
                 originalQuery.getTumorType(), alteration.getConsequence().getTerm(), alteration.getProteinStart(),
                 alteration.getProteinEnd(), null);

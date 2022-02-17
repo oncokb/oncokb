@@ -4,8 +4,6 @@ package org.mskcc.cbio.oncokb.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.apiModels.annotation.*;
-import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
-import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
 import org.mskcc.cbio.oncokb.util.QueryUtils;
 
@@ -23,7 +21,6 @@ import static org.mskcc.cbio.oncokb.util.FusionUtils.FUSION_SEPARATOR;
 public class Query implements java.io.Serializable {
     private String id; //Optional, This id is passed from request. The identifier used to distinguish the query
     private ReferenceGenome referenceGenome = DEFAULT_REFERENCE_GENOME;
-    private String type; // Query type. Different type may return different result.
     private String hugoSymbol;
     private Integer entrezGeneId;
     private String alteration;
@@ -42,7 +39,6 @@ public class Query implements java.io.Serializable {
         Query newQuery = new Query();
         newQuery.setId(this.id);
         newQuery.setReferenceGenome(this.referenceGenome);
-        newQuery.setType(this.type);
         newQuery.setHugoSymbol(this.hugoSymbol);
         newQuery.setEntrezGeneId(this.entrezGeneId);
         newQuery.setAlteration(this.alteration);
@@ -58,7 +54,6 @@ public class Query implements java.io.Serializable {
 
     public Query(AnnotateMutationByProteinChangeQuery mutationQuery) {
         this.id = mutationQuery.getId();
-        this.type = AnnotationQueryType.REGULAR.getName();
         this.setTumorType(mutationQuery.getTumorType());
 
         if (mutationQuery.getGene() != null) {
@@ -100,12 +95,11 @@ public class Query implements java.io.Serializable {
         this.setTumorType(tumorType);
     }
 
-    public Query(String id, ReferenceGenome referenceGenome, String type, Integer entrezGeneId, String hugoSymbol,
+    public Query(String id, ReferenceGenome referenceGenome, Integer entrezGeneId, String hugoSymbol,
                  String alteration, String alterationType, StructuralVariantType svType,
                  String tumorType, String consequence, Integer proteinStart, Integer proteinEnd, String hgvs) {
         this.id = id;
         this.referenceGenome = referenceGenome == null ? DEFAULT_REFERENCE_GENOME : referenceGenome;
-        this.type = type;
         if (hugoSymbol != null && !hugoSymbol.isEmpty()) {
             this.hugoSymbol = hugoSymbol;
         }
@@ -134,14 +128,6 @@ public class Query implements java.io.Serializable {
 
     public void setReferenceGenome(ReferenceGenome referenceGenome) {
         this.referenceGenome = referenceGenome;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 
     public String getHugoSymbol() {
@@ -287,11 +273,6 @@ public class Query implements java.io.Serializable {
         }
         if (this.svType != null) {
             content.add(this.svType.name());
-        } else {
-            content.add("");
-        }
-        if (this.type != null) {
-            content.add(this.type);
         } else {
             content.add("");
         }

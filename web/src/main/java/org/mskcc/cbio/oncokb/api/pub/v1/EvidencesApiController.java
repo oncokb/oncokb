@@ -67,7 +67,7 @@ public class EvidencesApiController implements EvidencesApi {
         HttpStatus status = HttpStatus.OK;
         List<Evidence> evidences = new ArrayList<>();
 
-        Query tmpQuery = new Query(null, DEFAULT_REFERENCE_GENOME, null, entrezGeneId,
+        Query tmpQuery = new Query(null, DEFAULT_REFERENCE_GENOME, entrezGeneId,
             hugoSymbol, variant, null, null,
             tumorType, consequence, proteinStart == null ? null : Integer.parseInt(proteinStart),
             proteinEnd == null ? null : Integer.parseInt(proteinEnd), null);
