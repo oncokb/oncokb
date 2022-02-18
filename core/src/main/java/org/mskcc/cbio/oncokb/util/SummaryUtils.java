@@ -424,8 +424,6 @@ public class SummaryUtils {
                 sb.append("considered likely");
             } else if (oncogenicity.equals(Oncogenicity.YES)) {
                 sb.append("known to be");
-            } else if (oncogenicity.equals(Oncogenicity.PREDICTED)) {
-                sb.append("predicted to be");
             } else {
                 // For Unknown
                 return "";
@@ -527,7 +525,7 @@ public class SummaryUtils {
         }
         sb.append(" has been identified as a statistically significant hotspot");
         if (oncogenicity == null || !MainUtils.isValidHotspotOncogenicity(oncogenicity)) {
-            sb.append(" and is predicted to be oncogenic");
+            sb.append(" and is likely to be oncogenic");
         }
         sb.append(".");
         return sb.toString();
@@ -538,7 +536,7 @@ public class SummaryUtils {
         sb.append(getVUSOncogenicSummary(query.getReferenceGenome(), alteration, query));
 
         if (isHotspot) {
-            sb.append(" However, it has been identified as a statistically significant hotspot and is predicted to be oncogenic.");
+            sb.append(" However, it has been identified as a statistically significant hotspot and is likely to be oncogenic.");
         }
         return sb.toString();
     }

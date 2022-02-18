@@ -32,19 +32,19 @@ public class IndicatorUtilsTest {
         Query query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "TEST", "V123M", null, null, "Pancreatic Adenocarcinoma", null, null, null, null);
         IndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
         assertTrue("The geneExist in the response is not false, but it should be.", indicatorQueryResp.getGeneExist() == false);
-        assertEquals("The oncogenicity is not empty, but it should.", "", indicatorQueryResp.getOncogenic());
+        assertEquals("The oncogenicity is not unknown, but it should.", Oncogenicity.UNKNOWN.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertTrue("There is treatment(s) in the response, but it should no have any.", indicatorQueryResp.getTreatments().size() == 0);
 
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "CD74-CD74", null, "structural_variant", StructuralVariantType.DELETION, "Pancreatic Adenocarcinoma", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
         assertEquals("Gene should not exist, but it does.", false, indicatorQueryResp.getGeneExist());
-        assertEquals("The oncogenicity is not empty, but it should.", "", indicatorQueryResp.getOncogenic());
+        assertEquals("The oncogenicity is not unknown, but it should.", Oncogenicity.UNKNOWN.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertTrue("There is treatment(s) in the response, but it should no have any.", indicatorQueryResp.getTreatments().size() == 0);
 
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "CD74-CD74", null, "structural_variant", StructuralVariantType.DELETION, "Pancreatic Adenocarcinoma", "fusion", null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
         assertEquals("Gene should not exist, but it does.", false, indicatorQueryResp.getGeneExist());
-        assertEquals("The oncogenicity is not empty, but it should.", "", indicatorQueryResp.getOncogenic());
+        assertEquals("The oncogenicity is not unknown, but it should.", Oncogenicity.UNKNOWN.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertTrue("There is treatment(s) in the response, but it should no have any.", indicatorQueryResp.getTreatments().size() == 0);
 
         // The last update should be a date even if we don't have any annotation for the gene/varaint
@@ -60,7 +60,7 @@ public class IndicatorUtilsTest {
         // Alteration not available
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "MSH2", "", null, null, "CANCER", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
-        assertEquals("The oncogenicity is not empty, but it should.", "", indicatorQueryResp.getOncogenic());
+        assertEquals("The oncogenicity is not unknown, but it should.", Oncogenicity.UNKNOWN.getOncogenic(), indicatorQueryResp.getOncogenic());
 
         // Oncogenic should always match with oncogenic summary, similar to likely oncogenic
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "TP53", "R248Q", null, null, "Pancreatic Adenocarcinoma", null, null, null, null);
@@ -129,23 +129,23 @@ public class IndicatorUtilsTest {
 //        assertTrue(treatmentsContainLevel(indicatorQueryResp.getTreatments(), LevelOfEvidence.LEVEL_3A));
 //        assertEquals("The level 3A should be shown before 2A", LevelOfEvidence.LEVEL_3A, indicatorQueryResp.getTreatments().get(0).getLevel());
 
-        // Test for predicted oncogenic
+        // Test for likely oncogenic for hotspot mutation
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "PIK3R1", "K567E", null, null, "Pancreatic Adenocarcinoma", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null);
-        assertEquals("The oncogenicity should be 'Predicted Oncogenic'", Oncogenicity.PREDICTED.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The oncogenicity should be 'Likely Oncogenic'", Oncogenicity.LIKELY.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The isHotspot is not true, but it should be.", Boolean.TRUE, indicatorQueryResp.getHotspot());
 
         // Test for 3d hotspot which should not be predicted oncogenic
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "KEAP1", "Y525S", null, null, "Pancreatic Adenocarcinoma", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null);
-        assertEquals("The oncogenicity should not be 'Predicted Oncogenic', it should be empty.", "", indicatorQueryResp.getOncogenic());
+        assertEquals("The oncogenicity should not be 'Likely Oncogenic', it should be unknown.", Oncogenicity.UNKNOWN.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The isHotspot is true, but it should not be.", Boolean.FALSE, indicatorQueryResp.getHotspot());
 
         // ALK R401Q should not be hotspot. It later was removed from the hotspot list.
         // The position has high truncating rate
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "ALK", "R401Q", null, null, "Colon Adenocarcinoma", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null);
-        assertEquals("The oncogenicity should not be 'Predicted Oncogenic'", "", indicatorQueryResp.getOncogenic());
+        assertEquals("The oncogenicity should not be 'Likely Oncogenic'", Oncogenicity.UNKNOWN.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The variant summary is not expected.", "The biologic significance of the ALK R401Q mutation is unknown (last reviewed 02/01/2019).", indicatorQueryResp.getVariantSummary());
         assertEquals("The isHotspot is not false, but it should be.", Boolean.FALSE, indicatorQueryResp.getHotspot());
 
@@ -319,7 +319,7 @@ public class IndicatorUtilsTest {
 
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "ALK", "", "structural_variant", StructuralVariantType.DELETION, "Gastrointestinal Stromal Tumor", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
-        assertEquals("The Oncogenicity is not empty.", "", indicatorQueryResp.getOncogenic());
+        assertEquals("The Oncogenicity is not unknown.", Oncogenicity.UNKNOWN.getOncogenic(), indicatorQueryResp.getOncogenic());
 
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "ALK", "", "structural_variant", StructuralVariantType.DELETION, "Gastrointestinal Stromal Tumor", "fusion", null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
@@ -337,7 +337,7 @@ public class IndicatorUtilsTest {
         // No longer applicable
 //        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "MAP2K1", "N109_R113del", null, null, "Gastrointestinal Stromal Tumor", null, null, null, null);
 //        indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
-//        assertEquals("The Oncogenicity is not empty, but it should be.", "", indicatorQueryResp.getOncogenic());
+//        assertEquals("The Oncogenicity is not unknown, but it should be.", Oncogenicity.UNKNOWN.getOncogenic(), indicatorQueryResp.getOncogenic());
 //        assertEquals("The isHotspot is true, but it should not be.", Boolean.FALSE, indicatorQueryResp.getHotspot());
 //        assertEquals("The highest level of sensitive treatment is not null, but it should be.", null, indicatorQueryResp.getHighestSensitiveLevel());
 
@@ -383,14 +383,14 @@ public class IndicatorUtilsTest {
         // Check the case when alteration is empty but consequence is specified. This avoids positional variants
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "KIT", "", null, null, "Ovarian Cancer", MISSENSE_VARIANT, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
-        assertEquals("The Oncogenicity is not empty, but it should be.", "", indicatorQueryResp.getOncogenic());
+        assertEquals("The Oncogenicity is not unknown, but it should be.", Oncogenicity.UNKNOWN.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertTrue("There should not be any treatments", indicatorQueryResp.getTreatments().isEmpty());
 
 
         // Test enforced consequence, especially a silent mutation could be a splice mutation by specifying the consequence in the request
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "TP53", "X187=", null, null, "CLLSLL", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
-        assertEquals("The Oncogenicity is not unknown, but it should.", "", indicatorQueryResp.getOncogenic());
+        assertEquals("The Oncogenicity is not unknown, but it should.", Oncogenicity.UNKNOWN.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertTrue("There highest prognostic level should be empty", indicatorQueryResp.getHighestPrognosticImplicationLevel() == null);
 
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "TP53", "X187=", null, null, "CLLSLL", "splice_region_variant", null, null, null);
@@ -400,9 +400,10 @@ public class IndicatorUtilsTest {
 
 
         // Give a default mutation effect when it is not available: Unknown
-        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "CHEK2", "R346C", null, null, "Myelodysplastic Workup", null, null, null, null);
+        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "CHEK2", "R111111C", null, null, "Myelodysplastic Workup", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
-        assertEquals("The Oncogenicity is not empty, but it should be.", Oncogenicity.PREDICTED.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The Oncogenicity is not empty, but it should be.", Oncogenicity.UNKNOWN.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The Oncogenicity is not empty, but it should be.", MutationEffect.UNKNOWN.getMutationEffect(), indicatorQueryResp.getMutationEffect().getKnownEffect());
         assertEquals("There should not be any sensitive therapeutic associated.", null, indicatorQueryResp.getHighestSensitiveLevel());
         assertEquals("There should not be any resistance therapeutic associated.", null, indicatorQueryResp.getHighestResistanceLevel());
 
@@ -650,7 +651,7 @@ public class IndicatorUtilsTest {
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "BRAF-BRAF", null, "structural_variant", StructuralVariantType.INSERTION, "Ovarian Cancer", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
         assertEquals("The highest sensitive level of BRAF insertion should be null", null, indicatorQueryResp.getHighestSensitiveLevel());
-        assertEquals("The oncogenicity of BRAF insertion non-functional fusion should be empty", "", indicatorQueryResp.getOncogenic());
+        assertEquals("The oncogenicity of BRAF insertion non-functional fusion should be unknown", Oncogenicity.UNKNOWN.getOncogenic(), indicatorQueryResp.getOncogenic());
 
         // b)  KMT2A is tumor suppressor gene, it has both fusions and Truncating Mutations curated. Functional fusion should have fusions mapped, non-functional genes should have Truncating Mutations mapped. And both of them are likely oncogenic.
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "KMT2A-MLLT3", null, "structural_variant", StructuralVariantType.TRANSLOCATION, "Acute Myeloid Leukemia", "fusion", null, null, null);
@@ -688,7 +689,7 @@ public class IndicatorUtilsTest {
 
         query = new Query(null, ReferenceGenome.GRCh38, null, "MYD88", "M232T", null, null, "Acute Myeloid Leukemia", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
-        assertEquals("The oncogenicity is not empty, but it should be.", "", indicatorQueryResp.getOncogenic());
+        assertEquals("The oncogenicity is not unknown, but it should be.", Oncogenicity.UNKNOWN.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The mutation effect is not unknown, but it should be.", MutationEffect.UNKNOWN.getMutationEffect(), indicatorQueryResp.getMutationEffect().getKnownEffect());
         assertTrue("The mutation is not hotspot, but it should be.", !indicatorQueryResp.getHotspot());
 

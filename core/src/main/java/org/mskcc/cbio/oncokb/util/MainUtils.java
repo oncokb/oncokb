@@ -25,7 +25,6 @@ public class MainUtils {
             Oncogenicity.UNKNOWN,
             Oncogenicity.INCONCLUSIVE,
             Oncogenicity.LIKELY_NEUTRAL,
-            Oncogenicity.PREDICTED,
             Oncogenicity.LIKELY,
             Oncogenicity.YES,
             Oncogenicity.RESISTANCE
@@ -398,7 +397,6 @@ public class MainUtils {
         oncogenicities.add(Oncogenicity.RESISTANCE);
         oncogenicities.add(Oncogenicity.YES);
         oncogenicities.add(Oncogenicity.LIKELY);
-        oncogenicities.add(Oncogenicity.PREDICTED);
         oncogenicities.add(Oncogenicity.LIKELY_NEUTRAL);
         oncogenicities.add(Oncogenicity.INCONCLUSIVE);
 
@@ -406,7 +404,7 @@ public class MainUtils {
     }
 
     public static boolean isOncogenic(Oncogenicity oncogenicity) {
-        return oncogenicity != null && (oncogenicity.equals(Oncogenicity.YES) || oncogenicity.equals(Oncogenicity.LIKELY) || oncogenicity.equals(Oncogenicity.PREDICTED) || oncogenicity.equals(Oncogenicity.RESISTANCE));
+        return oncogenicity != null && (oncogenicity.equals(Oncogenicity.YES) || oncogenicity.equals(Oncogenicity.LIKELY) || oncogenicity.equals(Oncogenicity.RESISTANCE));
     }
 
     public static Set<BiologicalVariant> getBiologicalVariants(Gene gene) {

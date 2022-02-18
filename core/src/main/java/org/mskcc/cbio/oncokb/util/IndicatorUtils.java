@@ -322,9 +322,9 @@ public class IndicatorUtils {
                 }
             }
 
-            // Set hotspot oncogenicity to Predicted Oncogenic
+            // Set hotspot oncogenicity to Likely Oncogenic
             if (indicatorQuery.getHotspot() && !MainUtils.isValidHotspotOncogenicity(Oncogenicity.getByEffect(indicatorQuery.getOncogenic()))) {
-                indicatorQuery.setOncogenic(Oncogenicity.PREDICTED.getOncogenic());
+                indicatorQuery.setOncogenic(Oncogenicity.LIKELY.getOncogenic());
 
                 // Check whether the gene has Oncogenic Mutations annotated
                 List<Alteration> oncogenicMutations = new ArrayList<>(AlterationUtils.findOncogenicMutations(AlterationUtils.getAllAlterations(query.getReferenceGenome(), gene)));
@@ -479,7 +479,7 @@ public class IndicatorUtils {
 
         // Give default oncogenicity if no data has been assigned.
         if (indicatorQuery.getOncogenic() == null) {
-            indicatorQuery.setOncogenic("");
+            indicatorQuery.setOncogenic(Oncogenicity.UNKNOWN.getOncogenic());
         }
         return indicatorQuery;
     }
