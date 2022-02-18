@@ -466,13 +466,13 @@ class VariantComp implements Comparator<TypeaheadSearchResp> {
         Integer index1 = name1.indexOf(this.keyword);
         Integer index2 = name2.indexOf(this.keyword);
         if (index1.equals(index2)) {
-            //Compare Oncogenicity. Treat YES, LIKELY, PREDICTED as the same
+            //Compare Oncogenicity. Treat YES, LIKELY as the same
             Oncogenicity o1 = Oncogenicity.getByEffect(e1.getOncogenicity());
             Oncogenicity o2 = Oncogenicity.getByEffect(e2.getOncogenicity());
-            if (o1 != null && (o1.equals(Oncogenicity.LIKELY) || o1.equals(Oncogenicity.PREDICTED))) {
+            if (o1 != null && o1.equals(Oncogenicity.LIKELY)) {
                 o1 = Oncogenicity.YES;
             }
-            if (o2 != null && (o2.equals(Oncogenicity.LIKELY) || o2.equals(Oncogenicity.PREDICTED))) {
+            if (o2 != null && o2.equals(Oncogenicity.LIKELY)) {
                 o2 = Oncogenicity.YES;
             }
             Integer result = MainUtils.compareOncogenicity(o1, o2, true);
