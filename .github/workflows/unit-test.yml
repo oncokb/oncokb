@@ -4,7 +4,7 @@ name: Unit Tests
 
 on:
   push:
-    branches: [ master, refactor ]
+    branches: [ master, refactor , next-minor-release ]
 
 jobs:
   main:
