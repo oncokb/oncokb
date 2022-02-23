@@ -10,7 +10,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-;
+import static org.mskcc.cbio.oncokb.Constants.IN_FRAME_DELETION;
 
 /**
  * Created by Hongxin on 8/10/15.
@@ -699,7 +699,7 @@ public class SummaryUtils {
             sb.append(queryAlteration);
         } else if (AlterationUtils.isGeneralAlterations(queryAlteration, false)
             || (alteration.getConsequence() != null
-            && (alteration.getConsequence().getTerm().equals("inframe_deletion")
+            && (alteration.getConsequence().getTerm().equals(IN_FRAME_DELETION)
             || alteration.getConsequence().getTerm().equals("inframe_insertion")))
             || StringUtils.containsIgnoreCase(queryAlteration, "indel")
             || StringUtils.containsIgnoreCase(queryAlteration, "dup")
@@ -770,7 +770,7 @@ public class SummaryUtils {
                 sb.append(queryAlteration);
             } else if (AlterationUtils.isGeneralAlterations(queryAlteration, false)
                 || (alteration.getConsequence() != null
-                && (alteration.getConsequence().getTerm().equals("inframe_deletion")
+                && (alteration.getConsequence().getTerm().equals(IN_FRAME_DELETION)
                 || alteration.getConsequence().getTerm().equals("inframe_insertion")))
                 || StringUtils.containsIgnoreCase(queryAlteration, "indel")
                 || StringUtils.containsIgnoreCase(queryAlteration, "dup")

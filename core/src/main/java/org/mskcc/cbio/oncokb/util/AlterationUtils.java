@@ -223,7 +223,7 @@ public final class AlterationUtils {
                 if (refL > 1 || varL > 1) {
                     // Handle in-frame insertion/deletion event. Exp: IK744K
                     if (refL > varL) {
-                        consequence = "inframe_deletion";
+                        consequence = IN_FRAME_DELETION;
                     } else if (refL < varL) {
                         consequence = "inframe_insertion";
                     } else {
@@ -236,7 +236,7 @@ public final class AlterationUtils {
                 }
             }
         } else {
-            p = Pattern.compile("[A-Z]?([0-9]+)(_[A-Z]?([0-9]+))?(delins|ins)([A-Z0-9]+)");
+            p = Pattern.compile("[A-Z]?([0-9]+)(_[A-Z]?([0-9]+))?(delins|ins|del)([A-Z0-9]+)");
             m = p.matcher(proteinChange);
             if (m.matches()) {
                 start = Integer.valueOf(m.group(1));
@@ -248,6 +248,8 @@ public final class AlterationUtils {
                 String type = m.group(4);
                 if (type.equals("ins")) {
                     consequence = "inframe_insertion";
+                } else if (type.equals("del")) {
+                    consequence = IN_FRAME_DELETION;
                 } else {
                     Integer deletion = end - start + 1;
                     Integer insertion = m.group(5).length();
@@ -257,7 +259,7 @@ public final class AlterationUtils {
                     } else if (insertion - deletion == 0) {
                         consequence = MISSENSE_VARIANT;
                     } else {
-                        consequence = "inframe_deletion";
+                        consequence = IN_FRAME_DELETION;
                     }
                 }
             } else {
@@ -286,7 +288,7 @@ public final class AlterationUtils {
                                 consequence = "inframe_insertion";
                                 break;
                             case "del":
-                                consequence = "inframe_deletion";
+                                consequence = IN_FRAME_DELETION;
                                 break;
                             case "fs":
                                 consequence = "frameshift_variant";
@@ -325,7 +327,7 @@ public final class AlterationUtils {
                                         consequence = "inframe_insertion";
                                         break;
                                     case "del":
-                                        consequence = "inframe_deletion";
+                                        consequence = IN_FRAME_DELETION;
                                         break;
                                 }
                             } else {
