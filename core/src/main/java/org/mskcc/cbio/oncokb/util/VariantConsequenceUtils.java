@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.mskcc.cbio.oncokb.Constants.IN_FRAME_DELETION;
 import static org.mskcc.cbio.oncokb.Constants.MISSENSE_VARIANT;
 
 /**
@@ -23,7 +24,7 @@ public class VariantConsequenceUtils {
         put("5'utr", "5_prime_UTR_variant");
         put("damaging", "feature_truncation");
         put("essential_splice_site", "feature_truncation");
-        put("exon skipping", "inframe_deletion");
+        put("exon skipping", IN_FRAME_DELETION);
         put("frame_shift", "frameshift_variant");
         put("frame_shift_del", "frameshift_variant");
         put("frame_shift_dnp", "frameshift_variant");
@@ -36,7 +37,7 @@ public class VariantConsequenceUtils {
         put("frameshift_insertion", "frameshift_variant");
         put("fusion", "fusion");
         put("igr", "intergenic_variant");
-        put("in_frame_del", "inframe_deletion");
+        put("in_frame_del", IN_FRAME_DELETION);
         put("in_frame_ins", "inframe_insertion");
         put("indel", "inframe_indel");
         put("intron", "intron_variant");
@@ -61,7 +62,7 @@ public class VariantConsequenceUtils {
     private static final Map<String, String> GNMapping = new HashMap<String, String>() {{
         put(MISSENSE_VARIANT, "Missense_Mutation");
         put("inframe_insertion", "In_Frame_Ins");
-        put("inframe_deletion", "In_Frame_Del");
+        put(IN_FRAME_DELETION, "In_Frame_Del");
         put("splice_region_variant", "Splice_Region");
     }};
 

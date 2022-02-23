@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 public final class Constants {
 
     public static final String MISSENSE_VARIANT = "missense_variant";
+    public static final String IN_FRAME_DELETION = "inframe_deletion";
     public static final String FIVE_UTR = "5_prime_UTR_variant";
     public static final String UPSTREAM_GENE = "upstream_gene_variant";
 

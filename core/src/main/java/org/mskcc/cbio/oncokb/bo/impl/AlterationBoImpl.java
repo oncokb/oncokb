@@ -49,7 +49,17 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             } else {
                 return null;
             }
+        } else {
+            // For in-frame deletion, we should also look for variant with/out trailing amino acids
+            VariantConsequence inframeDeletionConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm(IN_FRAME_DELETION);
+            if (inframeDeletionConsequence.equals(alteration.getConsequence())) {
+                List<Alteration> matches = findMutationsByConsequenceAndPosition(alteration.getGene(), referenceGenome, inframeDeletionConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations);
+                if (matches.size() > 0) {
+                    return matches.iterator().next();
+                }
+            }
         }
+
         return null;
     }
 

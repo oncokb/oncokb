@@ -11,6 +11,7 @@ import java.util.Collection;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mskcc.cbio.oncokb.Constants.IN_FRAME_DELETION;
 import static org.mskcc.cbio.oncokb.Constants.MISSENSE_VARIANT;
 
 /**
@@ -62,7 +63,7 @@ public class AnnotateAlterationTest {
                 {"I327Rfs*", "327", "327", "327", "327", "I", null, "frameshift_variant"},
 
                 // inframe event
-                {"T417_D419delinsI", "417", "419", "417", "419", null, null, "inframe_deletion"},
+                {"T417_D419delinsI", "417", "419", "417", "419", null, null, IN_FRAME_DELETION},
                 {"V600delinsYM", "600", "600", "600", "600", null, null, "inframe_insertion"},
                 {"I744_K745delinsKIPVAI", "744", "745", "744", "745", null, null, "inframe_insertion"},
                 {"762_823ins", "762", "823", "762", "823", null, null, "inframe_insertion"},
@@ -71,9 +72,9 @@ public class AnnotateAlterationTest {
                 {"IK744KIPVAI", "744", "745", "744", "745", "IK", "KIPVAI", "inframe_insertion"},
                 {"IKG744KIPVAI", "744", "746", "744", "746", "IKG", "KIPVAI", "inframe_insertion"},
 
-                {"E102_I103del", "102", "103", "102", "103", null, null, "inframe_deletion"},
-                {"IK744K", "744", "745", "744", "745", "IK", "K", "inframe_deletion"},
-                {"V559_E561del", "559", "561", "559", "561", null, null, "inframe_deletion"},
+                {"E102_I103del", "102", "103", "102", "103", null, null, IN_FRAME_DELETION},
+                {"IK744K", "744", "745", "744", "745", "IK", "K", IN_FRAME_DELETION},
+                {"V559_E561del", "559", "561", "559", "561", null, null, IN_FRAME_DELETION},
 
                 {"P68_C77dup", "68", "77", "68", "77", null, null, "inframe_insertion"},
 
@@ -116,8 +117,8 @@ public class AnnotateAlterationTest {
                 {"G500G", "500", "500", "500", "500", "G", "G", "synonymous_variant"},
 
                 // Overwrite protein start, protein end
-                {"V105_E109delinsG", "109", "109", "105", "109", null, null, "inframe_deletion"},
-                {"P191del", "191", "192", "191", "191", "P", null, "inframe_deletion"},
+                {"V105_E109delinsG", "109", "109", "105", "109", null, null, IN_FRAME_DELETION},
+                {"P191del", "191", "192", "191", "191", "P", null, IN_FRAME_DELETION},
                 // Made up case
                 {"Oncogenic Mutations", "10", "50", "10", "50", null, null, "NA"},
             });
