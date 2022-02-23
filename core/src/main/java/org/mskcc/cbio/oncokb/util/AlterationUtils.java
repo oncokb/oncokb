@@ -236,23 +236,27 @@ public final class AlterationUtils {
                 }
             }
         } else {
-            p = Pattern.compile("[A-Z]?([0-9]+)(_[A-Z]?([0-9]+))?(delins|ins|del)([A-Z0-9]+)");
+            p = Pattern.compile("([A-Z]?)([0-9]+)(_[A-Z]?([0-9]+))?(delins|ins|del)([A-Z0-9]+)");
             m = p.matcher(proteinChange);
             if (m.matches()) {
-                start = Integer.valueOf(m.group(1));
-                if (m.group(3) != null) {
-                    end = Integer.valueOf(m.group(3));
+                if (m.group(1) != null && m.group(3) == null) {
+                    // we only want to specify reference when it's one position ins/del
+                    ref = m.group(1);
+                }
+                start = Integer.valueOf(m.group(2));
+                if (m.group(4) != null) {
+                    end = Integer.valueOf(m.group(4));
                 } else {
                     end = start;
                 }
-                String type = m.group(4);
+                String type = m.group(5);
                 if (type.equals("ins")) {
                     consequence = "inframe_insertion";
                 } else if (type.equals("del")) {
                     consequence = IN_FRAME_DELETION;
                 } else {
                     Integer deletion = end - start + 1;
-                    Integer insertion = m.group(5).length();
+                    Integer insertion = m.group(6).length();
 
                     if (insertion - deletion > 0) {
                         consequence = "inframe_insertion";
