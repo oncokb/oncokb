@@ -39,21 +39,21 @@ public class OncokbTranscriptService {
     public void updateTranscriptUsage(Gene gene, String grch37EnsemblTranscriptId, String grch38EnsemblTranscriptId) throws ApiException {
         TranscriptControllerApi controllerApi = new TranscriptControllerApi();
 
-        if(StringUtils.isNotEmpty(grch37EnsemblTranscriptId)) {
-            controllerApi.addTranscriptUsingPOST(
-                gene.getEntrezGeneId(),
-                ReferenceGenome.GRCh37.toString(),
-                grch37EnsemblTranscriptId,
-                true
-            );
+        if (StringUtils.isNotEmpty(grch37EnsemblTranscriptId)) {
+            AddTranscriptBody addTranscriptBody = new AddTranscriptBody();
+            addTranscriptBody.setEntrezGeneId(gene.getEntrezGeneId());
+            addTranscriptBody.setReferenceGenome(ReferenceGenome.GRCh37.toString());
+            addTranscriptBody.setEnsemblTranscriptId(grch37EnsemblTranscriptId);
+            addTranscriptBody.setCanonical(true);
+            controllerApi.addTranscriptUsingPOST(addTranscriptBody);
         }
         if (StringUtils.isNotEmpty(grch38EnsemblTranscriptId)) {
-            controllerApi.addTranscriptUsingPOST(
-                gene.getEntrezGeneId(),
-                ReferenceGenome.GRCh38.toString(),
-                grch38EnsemblTranscriptId,
-                true
-            );
+            AddTranscriptBody addTranscriptBody = new AddTranscriptBody();
+            addTranscriptBody.setEntrezGeneId(gene.getEntrezGeneId());
+            addTranscriptBody.setReferenceGenome(ReferenceGenome.GRCh38.toString());
+            addTranscriptBody.setEnsemblTranscriptId(grch38EnsemblTranscriptId);
+            addTranscriptBody.setCanonical(true);
+            controllerApi.addTranscriptUsingPOST(addTranscriptBody);
         }
     }
 
@@ -139,7 +139,11 @@ public class OncokbTranscriptService {
         }
         GeneControllerApi geneControllerApi = new GeneControllerApi();
         org.oncokb.oncokb_transcript.client.Gene transcriptGene = geneControllerApi.findGeneBySymbolUsingGET(symbol);
-        return transcriptGeneMap(transcriptGene);
+        if (transcriptGene != null) {
+            return transcriptGeneMap(transcriptGene);
+        } else {
+            return null;
+        }
     }
 
     public List<TranscriptDTO> findEnsemblTranscriptsByIds(List<String> ensemblTranscriptIds, ReferenceGenome referenceGenome) throws ApiException {
