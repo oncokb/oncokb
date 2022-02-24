@@ -584,14 +584,7 @@ public class IndicatorUtils {
         Evidence oncogenicityEvidence = null;
 
         // Find alteration specific oncogenicity
-        List<Evidence> selfAltOncogenicEvis = EvidenceUtils.getEvidence(Collections.singletonList(alteration),
-            Collections.singleton(EvidenceType.ONCOGENIC), null);
-        if (selfAltOncogenicEvis != null) {
-            oncogenicityEvidence = MainUtils.findHighestOncogenicEvidenceByEvidences(new HashSet<>(selfAltOncogenicEvis));
-            if (oncogenicityEvidence != null) {
-                oncogenicity = Oncogenicity.getByEffect(oncogenicityEvidence.getKnownEffect());
-            }
-        }
+        oncogenicity = MainUtils.getCuratedAlterationOncogenicity(alteration);
 
         if(StringUtils.isNotEmpty(alteration.getAlteration()) && alteration.getAlteration().trim().toLowerCase().startsWith(InferredMutation.ONCOGENIC_MUTATIONS.getVariant().toLowerCase())) {
             oncogenicity = Oncogenicity.YES;

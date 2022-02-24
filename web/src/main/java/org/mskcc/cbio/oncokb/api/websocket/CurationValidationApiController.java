@@ -234,9 +234,9 @@ public class CurationValidationApiController {
                 ReferenceGenome referenceGenome = null;
                 for (ReferenceGenome ref : alteration.getReferenceGenomes()) {
                     if (ref.equals(ReferenceGenome.GRCh37)) {
-                        sequence = getGeneSequenceFromPool(allGrch37Sequences, alteration.getGene().getHugoSymbol());
+                        sequence = getGeneSequenceFromPool(allGrch37Sequences, alteration.getGene().getGrch37Isoform());
                     } else if (ref.equals(ReferenceGenome.GRCh38)) {
-                        sequence = getGeneSequenceFromPool(allGrch38Sequences, alteration.getGene().getHugoSymbol());
+                        sequence = getGeneSequenceFromPool(allGrch38Sequences, alteration.getGene().getGrch38Isoform());
                     }
                     if (!StringUtils.isNullOrEmpty(sequence)) {
                         referenceGenome = ref;
@@ -263,8 +263,11 @@ public class CurationValidationApiController {
         return data;
     }
 
-    private String getGeneSequenceFromPool(List<Sequence> allSequences, String hugoSymbol) {
-        Sequence matchedSeq = allSequences.stream().filter(sequence -> sequence.getTranscript().getHugoSymbol().equals(hugoSymbol)).findAny().orElse(null);
+    private String getGeneSequenceFromPool(List<Sequence> allSequences, String geneIsoform) {
+        if (StringUtils.isNullOrEmpty(geneIsoform)) {
+            return null;
+        }
+        Sequence matchedSeq = allSequences.stream().filter(sequence -> sequence.getTranscript().getEnsemblTranscriptId().equals(geneIsoform)).findAny().orElse(null);
         return matchedSeq == null ? null : matchedSeq.getSequence();
     }
 }

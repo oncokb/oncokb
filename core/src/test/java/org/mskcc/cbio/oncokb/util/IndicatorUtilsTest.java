@@ -212,13 +212,6 @@ public class IndicatorUtilsTest {
         assertEquals("Gene should exist", true, indicatorQueryResp.getGeneExist());
         assertEquals("The Oncogenicity is not Likely Oncogenic, but it should be.", Oncogenicity.LIKELY.getOncogenic(), indicatorQueryResp.getOncogenic());
 
-
-        // The tumor type summary should come from the positional variant instead of alternative allele
-        // in this case, the V600K should get summary from V600
-        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "BRAF", "V600K", null, null, "anaplastic thyroid cancer", null, null, null, null);
-        indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
-        assertEquals("The tumor type summary does not match.", "The RAF-targeted inhibitor dabrafenib in combination with the MEK1/2-targeted inhibitor trametinib is FDA-approved for the treatment of patients with BRAF V600E mutant anaplastic thyroid cancer (ATC), and NCCN-compendium listed for the treatment of patients with BRAF V600-mutant ATC.", indicatorQueryResp.getTumorTypeSummary());
-
         // If alternative allele has resistance treatment, all sensitive treatments related to it should not be applied.
         // PDGFRA D842Y Gastrointestinal Stromal Tumor
         // Dasatinib should not be listed as D842V has resistance treatment
@@ -504,6 +497,25 @@ public class IndicatorUtilsTest {
         // Check hugoSymbol and entrezGene pair
         query1 = new Query(null, DEFAULT_REFERENCE_GENOME, null, 673, null, "V600E", null, null, "Melanoma", null, null, null, null);
         query2 = new Query(null, DEFAULT_REFERENCE_GENOME, null, null, "BRAF", "V600E", null, null, "Melanoma", null, null, null, null);
+        resp1 = IndicatorUtils.processQuery(query1, null, true, null);
+        resp2 = IndicatorUtils.processQuery(query2, null, true, null);
+        assertTrue("Genes are not the same, but they should.", resp1.getGeneSummary().equals(resp2.getGeneSummary()));
+        assertTrue("Oncogenicities are not the same, but they should.", resp1.getOncogenic().equals(resp2.getOncogenic()));
+        assertTrue("Treatments are not the same, but they should.", resp1.getTreatments().equals(resp2.getTreatments()));
+        assertTrue("Highest sensitive levels are not the same, but they should.", LevelUtils.areSameLevels(resp1.getHighestSensitiveLevel(), resp2.getHighestSensitiveLevel()));
+        assertTrue("Highest resistance levels are not the same, but they should.", LevelUtils.areSameLevels(resp1.getHighestResistanceLevel(), resp2.getHighestResistanceLevel()));
+
+        // Compare the result when consequence is empty/null/missense_mutation
+        query1 = new Query(null, DEFAULT_REFERENCE_GENOME, null, 673, null, "V600E", null, null, "Melanoma", null, null, null, null);
+        query2 = new Query(null, DEFAULT_REFERENCE_GENOME, null, 673, null, "V600E", null, null, "Melanoma", "", null, null, null);
+        resp1 = IndicatorUtils.processQuery(query1, null, true, null);
+        resp2 = IndicatorUtils.processQuery(query2, null, true, null);
+        assertTrue("Genes are not the same, but they should.", resp1.getGeneSummary().equals(resp2.getGeneSummary()));
+        assertTrue("Oncogenicities are not the same, but they should.", resp1.getOncogenic().equals(resp2.getOncogenic()));
+        assertTrue("Treatments are not the same, but they should.", resp1.getTreatments().equals(resp2.getTreatments()));
+        assertTrue("Highest sensitive levels are not the same, but they should.", LevelUtils.areSameLevels(resp1.getHighestSensitiveLevel(), resp2.getHighestSensitiveLevel()));
+        assertTrue("Highest resistance levels are not the same, but they should.", LevelUtils.areSameLevels(resp1.getHighestResistanceLevel(), resp2.getHighestResistanceLevel()));
+        query2 = new Query(null, DEFAULT_REFERENCE_GENOME, null, 673, null, "V600E", null, null, "Melanoma", "missense_mutation", null, null, null);
         resp1 = IndicatorUtils.processQuery(query1, null, true, null);
         resp2 = IndicatorUtils.processQuery(query2, null, true, null);
         assertTrue("Genes are not the same, but they should.", resp1.getGeneSummary().equals(resp2.getGeneSummary()));

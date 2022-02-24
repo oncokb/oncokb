@@ -11,8 +11,10 @@ import org.mskcc.cbio.oncokb.apiModels.TranscriptMatchResult;
 import org.mskcc.cbio.oncokb.apiModels.TranscriptPair;
 import org.mskcc.cbio.oncokb.apiModels.ensembl.Sequence;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
+import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.ReferenceGenome;
+import org.mskcc.cbio.oncokb.model.VariantConsequence;
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
 
@@ -31,7 +33,7 @@ public class GenomeNexusUtils {
 
     private static final String GN_37_URL = "https://www.genomenexus.org";
     private static final String GN_38_URL = "https://grch38.genomenexus.org";
-    private static final int GN_READ_TIMEOUT_OVERRIDE = 5000;
+    private static final int GN_READ_TIMEOUT_OVERRIDE = 30000;
 
     public static String getEnsemblSequencePOSTUrl(ReferenceGenome referenceGenome) {
         return getEnsemblAPIUrl(referenceGenome) + "/sequence/id";
@@ -157,11 +159,17 @@ public class GenomeNexusUtils {
         return variantAnnotation;
     }
 
-    private static String getTranscriptConsequenceSummaryTerm(String consequenceTerms, String mostSevereConsequence) {
+    public static VariantConsequence getTranscriptConsequenceSummaryTerm(String consequenceTerms) {
         if (StringUtils.isEmpty(consequenceTerms)) {
-            return "";
+            return null;
         }
-        return Arrays.stream(consequenceTerms.split(",")).filter(term -> term.equals(mostSevereConsequence)).findFirst().orElse(consequenceTerms.split(",")[0]);
+        List<VariantConsequence> terms = Arrays.asList(consequenceTerms.split(",")).stream().map(consequence -> VariantConsequenceUtils.findVariantConsequenceByTerm(consequence.trim())).filter(Objects::nonNull).collect(Collectors.toList());
+        // if we cannot find the matched variant consequence using the mostSevereConsequence, we should use the one from the consequence term list
+        if (terms.size() > 0) {
+            return terms.iterator().next();
+        } else {
+            return null;
+        }
     }
 
     private static TranscriptConsequenceSummary getConsequence(VariantAnnotation variantAnnotation, ReferenceGenome referenceGenome) {
@@ -173,8 +181,8 @@ public class GenomeNexusUtils {
 
         if (variantAnnotation.getAnnotationSummary() != null && variantAnnotation.getAnnotationSummary().getTranscriptConsequenceSummaries() != null) {
             for (TranscriptConsequenceSummary consequenceSummary : variantAnnotation.getAnnotationSummary().getTranscriptConsequenceSummaries()) {
-                if (consequenceSummary.getHugoGeneSymbol() != null && consequenceSummary.getTranscriptId() != null) {
-                    Gene gene = GeneUtils.getGeneByHugoSymbol(consequenceSummary.getHugoGeneSymbol());
+                if (StringUtils.isNotEmpty(consequenceSummary.getEntrezGeneId()) && StringUtils.isNotEmpty(consequenceSummary.getTranscriptId())) {
+                    Gene gene = GeneUtils.getGeneByEntrezId(Integer.parseInt(consequenceSummary.getEntrezGeneId()));
                     String isoform = getIsoform(gene, referenceGenome);
                     if (gene != null && (StringUtils.isEmpty(isoform) || isoform.equals(consequenceSummary.getTranscriptId()))) {
                         summaries.add(consequenceSummary);
@@ -197,8 +205,11 @@ public class GenomeNexusUtils {
 
         // Only return one consequence term
         if (summary != null) {
-            String consequenceTerm = getTranscriptConsequenceSummaryTerm(summary.getConsequenceTerms(), variantAnnotation.getMostSevereConsequence());
-            summary.setConsequenceTerms(consequenceTerm);
+            VariantConsequence consequence = getTranscriptConsequenceSummaryTerm(summary.getConsequenceTerms());
+            if (consequence == null && StringUtils.isNotEmpty(summary.getVariantClassification())) {
+                consequence = VariantConsequenceUtils.findVariantConsequenceByTerm(summary.getVariantClassification());
+            }
+            summary.setConsequenceTerms(consequence == null ? "" : consequence.getTerm());
         }
         return summary;
     }
@@ -215,6 +226,13 @@ public class GenomeNexusUtils {
         }
 
         return canonicalTranscripts.size() > 0 ? canonicalTranscripts.get(0) : null;
+    }
+
+    public static List<EnsemblTranscript> getEnsemblTranscriptList(List<String> ensembelTranscriptIds, ReferenceGenome referenceGenome) throws ApiException {
+        EnsemblControllerApi controllerApi = GenomeNexusUtils.getEnsemblControllerApi(referenceGenome);
+        EnsemblFilter ensemblFilter = new EnsemblFilter();
+        ensemblFilter.setTranscriptIds(ensembelTranscriptIds);
+        return controllerApi.fetchEnsemblTranscriptsByEnsemblFilterPOST(ensemblFilter);
     }
 
     private static List<EnsemblTranscript> getEnsemblTranscriptList(String hugoSymbol, ReferenceGenome referenceGenome) throws ApiException {

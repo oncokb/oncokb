@@ -4,16 +4,16 @@ import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.apiModels.TranscriptUpdateValidationVM;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.ReferenceGenome;
+import org.mskcc.cbio.oncokb.util.CacheUtils;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
 import org.mskcc.cbio.oncokb.util.PropertiesUtils;
 import org.oncokb.oncokb_transcript.ApiClient;
 import org.oncokb.oncokb_transcript.ApiException;
 import org.oncokb.oncokb_transcript.Configuration;
-import org.oncokb.oncokb_transcript.auth.OAuth;
+import org.oncokb.oncokb_transcript.auth.HttpBearerAuth;
 import org.oncokb.oncokb_transcript.client.*;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -24,37 +24,35 @@ import java.util.stream.Collectors;
 public class OncokbTranscriptService {
     private ApiClient client;
     private final int TIMEOUT = 30000;
+    private final String SEQUENCE_TYPE = "PROTEIN";
 
     public OncokbTranscriptService() {
         this.client = Configuration.getDefaultApiClient();
         this.client.setConnectTimeout(TIMEOUT);
         this.client.setReadTimeout(TIMEOUT);
 
-        // Configure API key authorization: authorization
-        OAuth authorization = (OAuth) this.client.getAuthentication("Authorization");
         String oncokbTranscriptToken = PropertiesUtils.getProperties("oncokb_transcript.token");
-        authorization.setAccessToken(oncokbTranscriptToken);
+        HttpBearerAuth Authorization = (HttpBearerAuth) this.client.getAuthentication("Authorization");
+        Authorization.setBearerToken(oncokbTranscriptToken);
     }
 
     public void updateTranscriptUsage(Gene gene, String grch37EnsemblTranscriptId, String grch38EnsemblTranscriptId) throws ApiException {
         TranscriptControllerApi controllerApi = new TranscriptControllerApi();
 
         if(StringUtils.isNotEmpty(grch37EnsemblTranscriptId)) {
-            controllerApi.updateTranscriptUsageUsingPOST(
-                "ONCOKB",
-                gene.getHugoSymbol(),
+            controllerApi.addTranscriptUsingPOST(
                 gene.getEntrezGeneId(),
                 ReferenceGenome.GRCh37.toString(),
-                grch37EnsemblTranscriptId
+                grch37EnsemblTranscriptId,
+                true
             );
         }
         if (StringUtils.isNotEmpty(grch38EnsemblTranscriptId)) {
-            controllerApi.updateTranscriptUsageUsingPOST(
-                "ONCOKB",
-                gene.getHugoSymbol(),
+            controllerApi.addTranscriptUsingPOST(
                 gene.getEntrezGeneId(),
                 ReferenceGenome.GRCh38.toString(),
-                grch38EnsemblTranscriptId
+                grch38EnsemblTranscriptId,
+                true
             );
         }
     }
@@ -74,13 +72,12 @@ public class OncokbTranscriptService {
         SequenceControllerApi sequenceControllerApi = new SequenceControllerApi();
         TranscriptControllerApi controllerApi = new TranscriptControllerApi();
 
-        List<Sequence> sequences = null;
+        Sequence pickedSequence = null;
         try {
-            sequences = sequenceControllerApi.findSequencesByUsageSourceUsingGET(referenceGenome.toString(), "ONCOKB", gene.getHugoSymbol());
+            pickedSequence = sequenceControllerApi.findCanonicalSequenceUsingGET(referenceGenome.toString(), gene.getEntrezGeneId(), SEQUENCE_TYPE);
         } catch (ApiException e) {
             throw e;
         }
-        Sequence pickedSequence = sequences.iterator().next();
         if (pickedSequence == null) {
             return null;
         } else {
@@ -107,17 +104,13 @@ public class OncokbTranscriptService {
 
     public String getProteinSequence(ReferenceGenome referenceGenome, Gene gene) throws ApiException {
         SequenceControllerApi sequenceResourceApi = new SequenceControllerApi();
-        List<Sequence> sequenceList = sequenceResourceApi.findSequencesByUsageSourceUsingGET(referenceGenome.name(), "ONCOKB", gene.getHugoSymbol());
-        if (sequenceList.isEmpty()) {
-            return null;
-        } else {
-            return sequenceList.iterator().next().getSequence();
-        }
+        Sequence sequence = sequenceResourceApi.findCanonicalSequenceUsingGET(referenceGenome.name(), gene.getEntrezGeneId(), SEQUENCE_TYPE);
+        return sequence == null ? null : sequence.getSequence();
     }
 
     public List<Sequence> getAllProteinSequences(ReferenceGenome referenceGenome) throws ApiException {
         SequenceControllerApi sequenceResourceApi = new SequenceControllerApi();
-        return sequenceResourceApi.findSequencesByUsageSourceUsingGET(referenceGenome.name(), "ONCOKB", null);
+        return sequenceResourceApi.findCanonicalSequencesUsingPOST(referenceGenome.name(), SEQUENCE_TYPE, CacheUtils.getAllGenes().stream().map(Gene::getEntrezGeneId).collect(Collectors.toList()));
     }
 
     public String getAminoAcid(ReferenceGenome referenceGenome, Gene gene, int positionStart, int length) throws ApiException {
@@ -149,8 +142,13 @@ public class OncokbTranscriptService {
         return transcriptGeneMap(transcriptGene);
     }
 
+    public List<TranscriptDTO> findEnsemblTranscriptsByIds(List<String> ensemblTranscriptIds, ReferenceGenome referenceGenome) throws ApiException {
+        TranscriptControllerApi transcriptControllerApi = new TranscriptControllerApi();
+        return transcriptControllerApi.findTranscriptsByEnsemblIdsUsingPOST(referenceGenome.name(), ensemblTranscriptIds);
+    }
+
     public List<Gene> findGenesBySymbols(List<String> symbols) throws ApiException {
-        Set<String> unknownGenes = new HashSet<>();
+        List<String> unknownGenes = new ArrayList<>();
         List<Gene> genes = new ArrayList<>();
         for (String symbol : symbols) {
             Gene gene = GeneUtils.getGene(symbol);
@@ -161,11 +159,14 @@ public class OncokbTranscriptService {
             }
         }
         if (unknownGenes.size() > 0) {
-            GeneControllerApi geneControllerApi = new GeneControllerApi();
-            List<org.oncokb.oncokb_transcript.client.Gene> transcriptGenes = geneControllerApi.findGenesBySymbolsUsingPOST(symbols);
-            transcriptGenes.stream().filter(gene -> gene != null).forEach(gene -> genes.add(transcriptGeneMap(gene)));
+            this.findTranscriptGenesBySymbols(unknownGenes).stream().filter(gene -> gene != null).forEach(gene -> genes.add(transcriptGeneMap(gene)));
         }
         return genes;
+    }
+
+    public Set<org.oncokb.oncokb_transcript.client.Gene> findTranscriptGenesBySymbols(List<String> symbols) throws ApiException {
+        GeneControllerApi geneControllerApi = new GeneControllerApi();
+        return geneControllerApi.findGenesBySymbolsUsingPOST(symbols);
     }
 
     private Gene transcriptGeneMap(org.oncokb.oncokb_transcript.client.Gene transcriptGene) {

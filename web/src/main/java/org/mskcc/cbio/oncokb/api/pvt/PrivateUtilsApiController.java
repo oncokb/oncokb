@@ -2,12 +2,11 @@ package org.mskcc.cbio.oncokb.api.pvt;
 
 import com.mysql.jdbc.StringUtils;
 import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 import org.mskcc.cbio.oncokb.apiModels.*;
 import org.mskcc.cbio.oncokb.apiModels.download.DownloadAvailability;
 import org.mskcc.cbio.oncokb.apiModels.download.FileExtension;
 import org.mskcc.cbio.oncokb.apiModels.download.FileName;
+import org.mskcc.cbio.oncokb.apiModels.ensembl.EnsemblGene;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.PortalAlterationBo;
 import org.mskcc.cbio.oncokb.cache.CacheFetcher;
@@ -15,10 +14,8 @@ import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.TumorType;
 import org.mskcc.cbio.oncokb.bo.OncokbTranscriptService;
-import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.Tumor;
 import org.mskcc.cbio.oncokb.util.*;
 import org.oncokb.oncokb_transcript.ApiException;
-import org.oncokb.oncokb_transcript.client.TranscriptComparisonVM;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +28,6 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.mskcc.cbio.oncokb.model.InferredMutation.ONCOGENIC_MUTATIONS;
 import static org.mskcc.cbio.oncokb.util.GitHubUtils.getOncoKBSqlDumpFileName;
 import static org.mskcc.cbio.oncokb.util.HttpUtils.getDataDownloadResponseEntity;
 
@@ -364,7 +360,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         , @ApiParam(value = "Reference genome, either GRCh37 or GRCh38. The default is GRCh37", defaultValue = "GRCh37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") String referenceGenome
         , @ApiParam(value = "Alteration") @RequestParam(value = "alteration", required = false) String alteration
         , @ApiParam(value = "HGVS genomic format. Example: 7:g.140453136A>T") @RequestParam(value = "hgvsg", required = false) String hgvsg
-        , @ApiParam(value = "OncoTree tumor type name/main type/code") @RequestParam(value = "tumorType", required = false) String tumorType) {
+        , @ApiParam(value = "OncoTree tumor type name/main type/code") @RequestParam(value = "tumorType", required = false) String tumorType) throws ApiException {
 
 
         List<TumorType> relevantTumorTypes = TumorTypeUtils.findRelevantTumorTypes(tumorType);
@@ -382,16 +378,29 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             gene = GeneUtils.getGene(entrezGeneId, hugoSymbol);
             Alteration alterationModel = AlterationUtils.findAlteration(gene, matchedRG, alteration);
             if (alterationModel == null) {
-                alterationModel = AlterationUtils.getAlteration(gene.getHugoSymbol(), alteration, null, null, null, null, matchedRG);
+                if (gene == null) {
+                    alterationModel = new Alteration();
+                    gene = new Gene();
+                    gene.setHugoSymbol(hugoSymbol);
+                    gene.setEntrezGeneId(entrezGeneId);
+                    alterationModel.setGene(gene);
+                    alterationModel.setAlteration(alteration);
+                } else {
+                    alterationModel = AlterationUtils.getAlteration(gene.getHugoSymbol(), alteration, null, null, null, null, matchedRG);
+                }
             }
             query = new Query(alterationModel, matchedRG);
         } else {
-            Alteration alterationModel = this.cacheFetcher.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, matchedRG, hgvsg);
+            Alteration alterationModel;
+            if (!this.cacheFetcher.genomicLocationShouldBeAnnotated(GNVariantAnnotationType.HGVS_G, hgvsg, matchedRG, this.cacheFetcher.getAllTranscriptGenes())) {
+                alterationModel = new Alteration();
+            } else {
+                alterationModel = this.cacheFetcher.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, matchedRG, hgvsg);
+            }
             query = QueryUtils.getQueryForHgvsg(matchedRG, hgvsg, tumorType, alterationModel);
             gene = GeneUtils.getGeneByEntrezId(query.getEntrezGeneId());
         }
         query.setTumorType(tumorType);
-
         List<EvidenceQueryRes> responses = EvidenceUtils.processRequest(Collections.singletonList(query), new HashSet<>(EvidenceTypeUtils.getAllEvidenceTypes()), LevelUtils.getPublicLevels(), false);
         IndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null);
 
@@ -439,6 +448,24 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         Gene gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
         portalAlterations.addAll(portalAlterationBo.findMutationMapperData(gene));
         return new ResponseEntity<>(portalAlterations, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<List<EnsemblGene>> utilsEnsemblGenesGet(
+        @ApiParam(value = "Gene entrez id", required = true) @RequestParam(value = "entrezGeneId") Integer entrezGeneId
+    ) {
+        List<EnsemblGene> genes = new ArrayList<>();
+        if (entrezGeneId != null && entrezGeneId > 0) {
+            try {
+                Optional<org.oncokb.oncokb_transcript.client.Gene> geneOptional = cacheFetcher.getAllTranscriptGenes().stream().filter(gene -> gene.getEntrezGeneId().equals(entrezGeneId)).findFirst();
+                if (geneOptional.isPresent()) {
+                    genes = geneOptional.get().getEnsemblGenes().stream().map(org.mskcc.cbio.oncokb.apiModels.ensembl.EnsemblGene::new).collect(Collectors.toList());
+                }
+            } catch (ApiException e) {
+                e.printStackTrace();
+            }
+        }
+        return new ResponseEntity<>(genes, HttpStatus.OK);
     }
 
     @Override
@@ -492,7 +519,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         StringBuilder sb = new StringBuilder();
         TranscriptUpdateValidationVM vm = oncokbTranscriptService.validateTranscriptUpdate(gene, grch37Isoform, grch38Isoform);
         if (vm.getGrch37() != null) {
-            if (vm.getGrch37().isMatch()) {
+            if (vm.getGrch37().getMatch()) {
                 sb.append("GRCh37 sequences are the same.\n");
             } else {
                 sb.append("GRCh37 sequences do not match.\n");
@@ -502,7 +529,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         }
         if (vm.getGrch38() != null) {
             sb.append("\n");
-            if (vm.getGrch38().isMatch()) {
+            if (vm.getGrch38().getMatch()) {
                 sb.append("GRCh38 sequences are the same.\n");
             } else {
                 sb.append("GRCh38 sequences do not match.\n");
