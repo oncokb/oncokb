@@ -82,10 +82,22 @@ public final class AlterationUtils {
         return exclusionMatch.matches();
     }
 
+    private static String trimComment(String mutationStr) {
+        if (StringUtils.isEmpty(mutationStr)) {
+            return "";
+        }
+        mutationStr = mutationStr.trim();
+        if (mutationStr.endsWith(")")) {
+            int commentStartIndex = mutationStr.lastIndexOf("(");
+            mutationStr = mutationStr.substring(0, commentStartIndex);
+        }
+        return mutationStr.trim();
+    }
+
     public static List<Alteration> parseMutationString(String mutationStr, String mutationSeparator) {
         List<Alteration> ret = new ArrayList<>();
 
-        mutationStr = mutationStr.replaceAll("\\([^\\)]+\\)", ""); // remove comments first
+        mutationStr = trimComment(mutationStr);
 
         String[] parts = mutationStr.split(mutationSeparator);
 
@@ -130,6 +142,7 @@ public final class AlterationUtils {
                     }
                 }
             }
+            proteinChange = trimComment(proteinChange);
 
             Matcher m = p.matcher(proteinChange);
             if (m.find()) {
