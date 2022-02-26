@@ -339,6 +339,9 @@ public class AnnotationsApiController {
                                 query.getGene().getEntrezGeneId().toString() :
                                 query.getGene().getHugoSymbol()
                         );
+                        if (gene == null) {
+                            gene = new Gene();
+                        }
                     } catch (ApiException e) {
                     }
                 }
@@ -387,6 +390,9 @@ public class AnnotationsApiController {
             Gene geneA = new Gene();
             try {
                 geneA = this.cacheFetcher.findGeneBySymbol(entrezGeneIdA == null ? hugoSymbolA : entrezGeneIdA.toString());
+                if (geneA == null) {
+                    geneA = new Gene();
+                }
             } catch (ApiException e) {
             }
             if (geneA.getEntrezGeneId() == null && StringUtils.isEmpty(geneA.getHugoSymbol())) {
@@ -396,6 +402,9 @@ public class AnnotationsApiController {
             Gene geneB = new Gene();
             try {
                 geneB = this.cacheFetcher.findGeneBySymbol(entrezGeneIdB == null ? hugoSymbolB : entrezGeneIdB.toString());
+                if (geneB == null) {
+                    geneB = new Gene();
+                }
             } catch (ApiException e) {
             }
             if (geneB.getEntrezGeneId() == null && StringUtils.isEmpty(geneB.getHugoSymbol())) {
@@ -456,6 +465,9 @@ public class AnnotationsApiController {
                                 query.getGeneA().getEntrezGeneId().toString() :
                                 query.getGeneA().getHugoSymbol()
                         );
+                        if (geneA == null) {
+                            geneA = new Gene();
+                        }
                     } catch (ApiException e) {
                     }
                 }
@@ -472,6 +484,9 @@ public class AnnotationsApiController {
                                 query.getGeneB().getEntrezGeneId().toString() :
                                 query.getGeneB().getHugoSymbol()
                         );
+                        if (geneB == null) {
+                            geneB = new Gene();
+                        }
                     } catch (ApiException e) {
                     }
                 }
