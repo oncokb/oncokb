@@ -7,6 +7,7 @@ import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.AlterationType;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
@@ -41,7 +42,14 @@ public class FindRelevantAlterationsTest {
                 {"SMARCB1", "R374Q", null, "R374Q, R374W, Oncogenic Mutations"},
 
                 // Check Fusions
-                {"BRAF", "PAPSS1-BRAF Fusion", null, "PAPSS1-BRAF Fusion, Fusions, Oncogenic Mutations {excluding V600}, Oncogenic Mutations"},
+                {"BRAF", "PAPSS1-BRAF Fusion", null, "PAPSS1-BRAF Fusion, Fusions, Oncogenic Mutations, Oncogenic Mutations {excluding V600}"},
+
+                // Check excluding issue
+                {"BRAF", "V600E", null, "V600E, V600A, V600D, V600G, V600K, V600L, V600M, V600Q, V600R, VK600EI, V600, Oncogenic Mutations"},
+                {"BRAF", "V600A", null, "V600A, V600D, V600E, V600G, V600K, V600L, V600M, V600Q, V600R, VK600EI, V600, Oncogenic Mutations, V600 {excluding V600E ; V600K}"},
+                {"BRAF", "L597S", null, "L597S, L597P, L597Q, L597R, L597V, L597, Oncogenic Mutations, Oncogenic Mutations {excluding V600}"},
+                {"EGFR", "Y764_D770dup", null, "762_823ins, A767_V769dup, S768_D770dup, A767_S768insASV, S768_V769insSVD, S768_V769insVAS, V769_D770insASV, V769_D770insGVV, D770delinsGTH, D770delinsGY, A763_Y764insFQEA, D770_N771insD, D770_N771insNPG, D770_N771insSVD, D770_N771insVDSVDNP, D770_P772dup, Oncogenic Mutations, 762_823ins {excluding A763_Y764insFQEA}"},
+                {"EGFR", "A763_Y764insFQEA", null, "A763_Y764insFQEA, A763insLQEA, Oncogenic Mutations"},
 
                 // The revert fusion should get picked
                 {"ABL1", "ABL1-BCR fusion", null, "BCR-ABL1 Fusion, Fusions"},
@@ -154,7 +162,12 @@ public class FindRelevantAlterationsTest {
         LinkedHashSet<Alteration> relevantAlterations =
             ApplicationContextSingleton.getAlterationBo()
                 .findRelevantAlterations(DEFAULT_REFERENCE_GENOME, alt, AlterationUtils.getAllAlterations(DEFAULT_REFERENCE_GENOME, alt.getGene()), true);
+        Set<Alteration> excludings = relevantAlterations.stream().filter(relevantAlt->relevantAlt.getAlteration().contains("exclud")).collect(Collectors.toSet());
+        relevantAlterations.removeAll(excludings);
         String relevantAltsName = AlterationUtils.toString(relevantAlterations);
+        if(excludings.size() > 0) {
+            relevantAltsName += ", " + AlterationUtils.toString(excludings);
+        }
 
         assertEquals("Relevant alterations are not matched on case " +
             hugoSymbol + " " + alteration + " " + alterationType + " ", expectedRelevantAlterations, relevantAltsName);
