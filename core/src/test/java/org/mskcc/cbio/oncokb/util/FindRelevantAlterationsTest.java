@@ -49,7 +49,7 @@ public class FindRelevantAlterationsTest {
                 {"BRAF", "V600A", null, "V600A, V600D, V600E, V600G, V600K, V600L, V600M, V600Q, V600R, VK600EI, V600, Oncogenic Mutations, V600 {excluding V600E ; V600K}"},
                 {"BRAF", "L597S", null, "L597S, L597P, L597Q, L597R, L597V, L597, Oncogenic Mutations, Oncogenic Mutations {excluding V600}"},
                 {"EGFR", "Y764_D770dup", null, "762_823ins, A767_V769dup, S768_D770dup, A767_S768insASV, S768_V769insSVD, S768_V769insVAS, V769_D770insASV, V769_D770insGVV, D770delinsGTH, D770delinsGY, A763_Y764insFQEA, D770_N771insD, D770_N771insNPG, D770_N771insSVD, D770_N771insVDSVDNP, D770_P772dup, Oncogenic Mutations, 762_823ins {excluding A763_Y764insFQEA}"},
-                {"EGFR", "A763_Y764insFQEA", null, "A763_Y764insFQEA, A763insLQEA, Oncogenic Mutations"},
+                {"EGFR", "A763_Y764insFQEA", null, "A763_Y764insFQEA, 762_823ins, A763insLQEA, Oncogenic Mutations"},
 
                 // The revert fusion should get picked
                 {"ABL1", "ABL1-BCR fusion", null, "BCR-ABL1 Fusion, Fusions"},
