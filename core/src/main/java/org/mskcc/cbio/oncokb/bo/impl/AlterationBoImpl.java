@@ -388,16 +388,6 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             }
         }
 
-        if (isEGFRSpecialVariant(alteration)) {
-            Iterator<Alteration> iter = alterations.iterator();
-            while (iter.hasNext()) {
-                Alteration alt = iter.next();
-                if (alt.getAlteration().equals("762_823ins")) {
-                    iter.remove();
-                }
-            }
-        }
-
         if (!addOncogenicMutations(alteration, alterations) && addVUSMutation(alteration, matchedAlt != null)) {
             Alteration VUSMutation = findAlteration(referenceGenome, InferredMutation.VUS.getVariant(), fullAlterations);
             if (VUSMutation != null) {
@@ -414,7 +404,13 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             relevantAlterationsWithoutAlternativeAlleles.add(alteration);
         }
         relevantAlterationsWithoutAlternativeAlleles.removeAll(AlterationUtils.getAlleleAlterations(referenceGenome, alteration, fullAlterations));
-        Set<String> alterationsName = relevantAlterationsWithoutAlternativeAlleles.stream().map(Alteration::getAlteration).collect(Collectors.toSet());
+        Set<String> alterationsName = new HashSet<>();
+        // if the alteration is inframe-ins/del, we should only match the alteration
+        if(alteration.getConsequence() != null && (alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm("inframe_deletion")) || alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm("inframe_insertion")))) {
+            alterationsName.add(alteration.getAlteration());
+        } else {
+            alterationsName.addAll(relevantAlterationsWithoutAlternativeAlleles.stream().map(Alteration::getAlteration).collect(Collectors.toSet()));
+        }
         alterations.stream().filter(alt -> AlterationUtils.hasExclusionCriteria(alt.getAlteration()))
             .forEach(alt -> {
                 Set<String> altsShouldBeExcluded = AlterationUtils.getExclusionAlterations(alt.getAlteration()).stream().map(alteration1->alteration1.getAlteration()).collect(Collectors.toSet());
@@ -425,10 +421,6 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             });
         alterations.removeAll(exclusionAlts);
         return alterations;
-    }
-
-    private boolean isEGFRSpecialVariant(Alteration alteration) {
-        return alteration != null && alteration.getGene().getHugoSymbol().equals("EGFR") && alteration.getAlteration().equals("A763_Y764insFQEA");
     }
 
     @Override

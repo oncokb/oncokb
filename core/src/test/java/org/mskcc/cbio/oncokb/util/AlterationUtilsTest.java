@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
 
@@ -58,7 +59,7 @@ public class AlterationUtilsTest extends TestCase
         for (Alteration alt : positionedAlterations) {
             alterations.add(alt.getAlteration());
         }
-        assertEquals("V600,V600 {excluding V600E ; V600K}", MainUtils.listToString(alterations, ","));
+        assertEquals("V600,V600 {excluding V600E ; V600K}", MainUtils.listToString(alterations, ",", true));
 
         // non missense should not be annotated
         alteration = new Alteration();
@@ -124,8 +125,8 @@ public class AlterationUtilsTest extends TestCase
         assertEquals("The relevant alterations do not match", "V600E, V600K, V600_V601delinsEB, V600", relevantAltsName);
 
         alterations = AlterationUtils.getRelevantAlterations(DEFAULT_REFERENCE_GENOME, v600k, fullAlteration);
-        relevantAltsName = AlterationUtils.toString(alterations);
-        assertEquals("The relevant alterations do not match", "V600K, V600E, V600_V601delinsEB, V600_V601delinsEB {excluding V600E}, V600, V600 {excluding V600E}", relevantAltsName);
+        relevantAltsName = AlterationUtils.toString(alterations, true);
+        assertEquals("The relevant alterations do not match", "V600, V600 {excluding V600E}, V600E, V600K, V600_V601delinsEB, V600_V601delinsEB {excluding V600E}", relevantAltsName);
 
         // Test alteration with exclusion
         Alteration fusionA = generateAlteration(gene, "AKAP9-BRAF Fusion");
