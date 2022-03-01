@@ -11,6 +11,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static org.mskcc.cbio.oncokb.Constants.IN_FRAME_DELETION;
+import static org.mskcc.cbio.oncokb.Constants.IN_FRAME_INSERTION;
 
 /**
  * Created by Hongxin on 8/10/15.
@@ -290,7 +291,7 @@ public class SummaryUtils {
             } else {
                 return hotspotSummary(alteration, query, false, oncogenic);
             }
-        } 
+        }
 
         if (oncogenic == null || oncogenic.equals(Oncogenicity.UNKNOWN)) {
             // Get oncogenic summary from alternative alleles
@@ -700,7 +701,7 @@ public class SummaryUtils {
         } else if (AlterationUtils.isGeneralAlterations(queryAlteration, false)
             || (alteration.getConsequence() != null
             && (alteration.getConsequence().getTerm().equals(IN_FRAME_DELETION)
-            || alteration.getConsequence().getTerm().equals("inframe_insertion")))
+            || alteration.getConsequence().getTerm().equals(IN_FRAME_INSERTION)))
             || StringUtils.containsIgnoreCase(queryAlteration, "indel")
             || StringUtils.containsIgnoreCase(queryAlteration, "dup")
             || StringUtils.containsIgnoreCase(queryAlteration, "del")
@@ -771,7 +772,7 @@ public class SummaryUtils {
             } else if (AlterationUtils.isGeneralAlterations(queryAlteration, false)
                 || (alteration.getConsequence() != null
                 && (alteration.getConsequence().getTerm().equals(IN_FRAME_DELETION)
-                || alteration.getConsequence().getTerm().equals("inframe_insertion")))
+                || alteration.getConsequence().getTerm().equals(IN_FRAME_INSERTION)))
                 || StringUtils.containsIgnoreCase(queryAlteration, "indel")
                 || StringUtils.containsIgnoreCase(queryAlteration, "dup")
                 || StringUtils.containsIgnoreCase(queryAlteration, "del")

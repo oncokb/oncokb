@@ -48,7 +48,7 @@ public interface AlterationBo extends GenericBo<Alteration> {
      * @param end
      * @return
      */
-    List<Alteration> findMutationsByConsequenceAndPosition(Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end, Set<Alteration> alterations);
+    List<Alteration> findRelevantOverlapAlterations(Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end, String proteinChange, Set<Alteration> alterations);
 
     /**
      * @param gene

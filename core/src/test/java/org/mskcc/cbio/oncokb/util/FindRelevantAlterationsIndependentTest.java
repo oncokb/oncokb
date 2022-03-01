@@ -122,7 +122,7 @@ public class FindRelevantAlterationsIndependentTest extends TestCase {
 
     }
 
-    public void testFindRelevantAlterationsForInframeDeletion() {
+    public void testFindRelevantAlterationsForInframeDeletionWithTrailing() {
         Gene gene = new Gene();
         gene.setHugoSymbol("PIK3CA");
         gene.setEntrezGeneId(5290);
