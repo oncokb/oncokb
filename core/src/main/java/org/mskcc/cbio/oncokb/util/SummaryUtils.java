@@ -42,11 +42,6 @@ public class SummaryUtils {
         Map<String, Object> tumorTypeSummary = newTumorTypeSummary();
         Alteration alteration = null;
 
-        //        if (gene.getHugoSymbol().equals("KIT")) {
-//            tumorTypeSummary = getKITtumorTypeSummaries(queryAlteration, alterations, queryTumorType, relevantTumorTypes);
-//        } else {
-        // Get all tumor type summary evidences specifically for the alteration
-
         if (exactMatchedAlt != null) {
             alteration = exactMatchedAlt;
         } else {
@@ -283,13 +278,15 @@ public class SummaryUtils {
 
         isHotspot = HotspotUtils.isHotspot(alteration);
 
-
+        if(AlterationUtils.isPositionedAlteration(alteration)) {
+            return positionalVariantSummary(alteration, query, isHotspot);
+        }
 
         if (isHotspot) {
             if (alteration != null && MainUtils.isVUS(alteration)) {
                 return vusAndHotspotSummary(alteration, query, isHotspot);
             } else {
-                return hotspotSummary(alteration, query, false, oncogenic);
+                return hotspotSummary(alteration, query, false);
             }
         }
 
@@ -393,7 +390,7 @@ public class SummaryUtils {
             }
 
             if (oncogenicity.equals(Oncogenicity.RESISTANCE)) {
-                return resistanceOncogenicitySummary(alteration.getGene(), query.getReferenceGenome(), query);
+                return resistanceOncogenicitySummary(alteration.getGene(), query);
             }
             if (appendThe) {
                 sb.append("The ");
@@ -503,7 +500,7 @@ public class SummaryUtils {
         return sb.toString();
     }
 
-    public static String resistanceOncogenicitySummary(Gene gene, ReferenceGenome referenceGenome, Query query) {
+    public static String resistanceOncogenicitySummary(Gene gene, Query query) {
         StringBuilder sb = new StringBuilder();
         sb.append("The ");
         sb.append(gene.getHugoSymbol());
@@ -521,7 +518,26 @@ public class SummaryUtils {
         return sb.toString();
     }
 
-    public static String hotspotSummary(Alteration alteration, Query query, Boolean usePronoun, Oncogenicity oncogenicity) {
+    public static String positionalVariantSummary(Alteration alteration, Query query, boolean isHotspot) {
+        if (isHotspot) {
+            return hotspotSummary(alteration, query, false, true);
+        } else {
+            StringBuilder sb = new StringBuilder();
+            sb.append("OncoKB assigns biological and oncogenic effects at the allele level, not the positional level.");
+            Set<Alteration> alleles = new HashSet<>(AlterationUtils.getAlleleAlterations(query.getReferenceGenome(), alteration));
+            if (alleles.size() > 0) {
+                sb.append(" Biological and oncogenic effects are curated for the following " + query.getHugoSymbol() + " " + query.getAlteration() + " alleles: ");
+                sb.append(allelesToStr(alleles));
+                sb.append(".");
+            }
+            return sb.toString();
+        }
+    }
+
+    public static String hotspotSummary(Alteration alteration, Query query, Boolean usePronoun) {
+        return hotspotSummary(alteration, query, usePronoun, false);
+    }
+    public static String hotspotSummary(Alteration alteration, Query query, Boolean usePronoun, boolean isPositionalVariant) {
         StringBuilder sb = new StringBuilder();
         if (usePronoun == null) {
             usePronoun = false;
@@ -531,9 +547,11 @@ public class SummaryUtils {
         } else {
             sb.append("The " + getGeneMutationNameInVariantSummary(alteration.getGene(), query.getReferenceGenome(), query.getHugoSymbol(), query.getAlteration()));
         }
-        sb.append(" has been identified as a statistically significant hotspot");
-        if (oncogenicity == null || !MainUtils.isValidHotspotOncogenicity(oncogenicity)) {
-            sb.append(" and is likely to be oncogenic");
+        sb.append(" has been identified as a statistically significant hotspot and ");
+        if (isPositionalVariant) {
+            sb.append("variants at this position are considered likely oncogenic");
+        } else {
+            sb.append("is likely to be oncogenic");
         }
         sb.append(".");
         return sb.toString();

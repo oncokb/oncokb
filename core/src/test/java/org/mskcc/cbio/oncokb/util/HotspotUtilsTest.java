@@ -20,9 +20,6 @@ public class HotspotUtilsTest extends TestCase {
         alteration = AlterationUtils.getAlteration("AKT1", "E17*", null, null, null, null, null);
         assertFalse("This stop gain variant should not be hotspot", HotspotUtils.isHotspot(alteration));
 
-        alteration = AlterationUtils.getAlteration("AKT1", "E17", null, null, null, null, null);
-        assertFalse(HotspotUtils.isHotspot(alteration));
-
         alteration = AlterationUtils.getAlteration("AKT1", "P68_C77dup", null, null, null, null, null);
         assertTrue(HotspotUtils.isHotspot(alteration));
 
@@ -50,6 +47,7 @@ public class HotspotUtilsTest extends TestCase {
         alteration = AlterationUtils.getAlteration("MET", "X1010splice", null, null, null, null, null);
         assertTrue(HotspotUtils.isHotspot(alteration));
 
+        // The range missense mutations should not be hotspot
         alteration = AlterationUtils.getAlteration("PIK3CA", "979_1068mis", null, null, null, null, null);
         assertFalse(HotspotUtils.isHotspot(alteration));
 
@@ -59,6 +57,12 @@ public class HotspotUtilsTest extends TestCase {
 
         // This is a test to govern when sample is in-frame indel and that range happens to be a hotspot of splie site. The variant should not be a hotspot
         alteration = AlterationUtils.getAlteration("TP53", "A307_L308insASFLS", null, null, null, null, null);
+        assertFalse(HotspotUtils.isHotspot(alteration));
+
+        // Positional variant should be considered similar to missense mutation
+        alteration = AlterationUtils.getAlteration("BRAF", "V600", null, null, null, null, null);
+        assertTrue(HotspotUtils.isHotspot(alteration));
+        alteration = AlterationUtils.getAlteration("BRAF", "T599", null, null, null, null, null);
         assertFalse(HotspotUtils.isHotspot(alteration));
 
         // Test reference genome
