@@ -71,7 +71,7 @@ public class FindRelevantAlterationsTest {
 
                 // Check inframe-insertion, inframe-deletion
                 {"EGFR", "Y764_D770dup", null, "762_823ins, Oncogenic Mutations, 762_823ins {excluding A763_Y764insFQEA}"},
-                {"EGFR", "A763_Y764insFQEA", null, "A763_Y764insFQEA, Oncogenic Mutations"},
+                {"EGFR", "A763_Y764insFQEA", null, "A763_Y764insFQEA, 762_823ins, Oncogenic Mutations"},
                 {"EGFR", "E746_A750del", null, "E746_A750del, 729_761del, Oncogenic Mutations"},
                 {"EGFR", "E746_A750delinsQ", null, "E746_A750delinsQ, 729_761del, Oncogenic Mutations"},
 
