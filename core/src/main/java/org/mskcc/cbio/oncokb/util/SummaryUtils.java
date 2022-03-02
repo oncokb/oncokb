@@ -542,10 +542,16 @@ public class SummaryUtils {
         if (usePronoun == null) {
             usePronoun = false;
         }
+        String altName = "";
+        if (isPositionalVariant) {
+            altName = query.getHugoSymbol() + " " + query.getAlteration();
+        } else {
+            altName = getGeneMutationNameInVariantSummary(alteration.getGene(), query.getReferenceGenome(), query.getHugoSymbol(), query.getAlteration());
+        }
         if (usePronoun) {
             sb.append("It");
         } else {
-            sb.append("The " + getGeneMutationNameInVariantSummary(alteration.getGene(), query.getReferenceGenome(), query.getHugoSymbol(), query.getAlteration()));
+            sb.append("The " + altName);
         }
         sb.append(" has been identified as a statistically significant hotspot and ");
         if (isPositionalVariant) {

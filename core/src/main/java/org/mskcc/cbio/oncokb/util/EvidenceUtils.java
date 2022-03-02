@@ -186,9 +186,6 @@ public class EvidenceUtils {
                 if (query.getAlterations() != null) {
                     alterations.addAll(query.getAlterations());
                 }
-                if (query.getAlleles() != null) {
-                    alterations.addAll(query.getAlleles());
-                }
             }
         } else {
             // this is really a performance blow if we compute based on all genes and all alterations, there is a collection disjoint in the base layer
