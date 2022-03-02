@@ -1329,11 +1329,15 @@ public final class AlterationUtils {
     }
 
     public static String toString(Collection<Alteration> relevantAlterations) {
+        return toString(relevantAlterations, false);
+    }
+
+    public static String toString(Collection<Alteration> relevantAlterations, boolean sort) {
         List<String> names = new ArrayList<>();
         for (Alteration alteration : relevantAlterations) {
             names.add(alteration.getAlteration());
         }
-        return MainUtils.listToString(names, ", ");
+        return MainUtils.listToString(names, ", ", sort);
     }
 
     private static boolean stringContainsItemFromSet(String inputString, Set<String> items) {
