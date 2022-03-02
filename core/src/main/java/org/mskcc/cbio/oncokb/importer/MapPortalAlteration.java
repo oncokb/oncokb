@@ -18,8 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
-import static org.mskcc.cbio.oncokb.Constants.IN_FRAME_DELETION;
-import static org.mskcc.cbio.oncokb.Constants.MISSENSE_VARIANT;
+import static org.mskcc.cbio.oncokb.Constants.*;
 
 /**
  * @author jiaojiao Sep/8/2017 Import alteration data from portal database
@@ -29,9 +28,9 @@ public class MapPortalAlteration {
         List<Alteration> alterations = new ArrayList<>();
         List<Alteration> alterationsSet = new ArrayList<>();
         HashMap<String, String[]> mapper = new HashMap<>();
-        mapper.put("Targeted_Region", new String[]{IN_FRAME_DELETION, "inframe_insertion"});
-        mapper.put("COMPLEX_INDEL", new String[]{IN_FRAME_DELETION, "inframe_insertion"});
-        mapper.put("Indel", new String[]{"frameshift_variant", IN_FRAME_DELETION, "inframe_insertion"});
+        mapper.put("Targeted_Region", new String[]{IN_FRAME_DELETION, IN_FRAME_INSERTION});
+        mapper.put("COMPLEX_INDEL", new String[]{IN_FRAME_DELETION, IN_FRAME_INSERTION});
+        mapper.put("Indel", new String[]{"frameshift_variant", IN_FRAME_DELETION, IN_FRAME_INSERTION});
         mapper.put("In_Frame_Del", new String[]{IN_FRAME_DELETION, "feature_truncation"});
         mapper.put("3'Flank", new String[]{"any"});
         mapper.put("5'Flank", new String[]{"any"});
@@ -43,7 +42,7 @@ public class MapPortalAlteration {
         mapper.put("Frame_Shift_Del", new String[]{"frameshift_variant"});
         mapper.put("Frame_Shift_Ins", new String[]{"frameshift_variant"});
         mapper.put("Fusion", new String[]{"fusion"});
-        mapper.put("In_Frame_Ins", new String[]{"inframe_insertion"});
+        mapper.put("In_Frame_Ins", new String[]{IN_FRAME_INSERTION});
         mapper.put("Missense", new String[]{MISSENSE_VARIANT});
         mapper.put("Missense_Mutation", new String[]{MISSENSE_VARIANT});
         mapper.put("Nonsense_Mutation", new String[]{"stop_gained"});
@@ -57,9 +56,9 @@ public class MapPortalAlteration {
         mapper.put("vIII deletion", new String[]{"any"});
         mapper.put("exon14skip", new String[]{IN_FRAME_DELETION});
         mapper.put("frameshift", new String[]{"frameshift_variant"});
-        mapper.put("nonframeshift insertion", new String[]{"frameshift_variant", IN_FRAME_DELETION, "inframe_insertion"});
-        mapper.put("nonframeshift_deletion", new String[]{"frameshift_variant", IN_FRAME_DELETION, "inframe_insertion"});
-        mapper.put("nonframeshift_insertion", new String[]{"frameshift_variant", IN_FRAME_DELETION, "inframe_insertion"});
+        mapper.put("nonframeshift insertion", new String[]{"frameshift_variant", IN_FRAME_DELETION, IN_FRAME_INSERTION});
+        mapper.put("nonframeshift_deletion", new String[]{"frameshift_variant", IN_FRAME_DELETION, IN_FRAME_INSERTION});
+        mapper.put("nonframeshift_insertion", new String[]{"frameshift_variant", IN_FRAME_DELETION, IN_FRAME_INSERTION});
         mapper.put("Nonsense", new String[]{"stop_gained"});
         mapper.put("splice", new String[]{"splice_region_variant"});
         mapper.put("Splice_Site_Indel", new String[]{"splice_region_variant"});

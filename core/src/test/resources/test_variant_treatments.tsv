@@ -30,7 +30,7 @@ PDGFRA	D842V	R1 (Gastrointestinal Stromal Tumor): Imatinib; 1 (Gastrointestinal 
 EGFR	A763_Y764insFQEA	2 (Non-Small Cell Lung Cancer): Erlotinib; 4 (Non-Small Cell Lung Cancer): Afatinib;
 
 # this one overlaps with A763_Y764insFQEA, but the rule only applies to exact match, so R1 will be used	
-EGFR	Y764_D770dup	R1 (Non-Small Cell Lung Cancer): Erlotinib; R1 (Non-Small Cell Lung Cancer): Gefitinib; R1 (Non-Small Cell Lung Cancer): Afatinib; 1 (Non-Small Cell Lung Cancer): Amivantamab; 1 (Non-Small Cell Lung Cancer): Mobocertinib; 2 (Non-Small Cell Lung Cancer): Erlotinib; 3A (Non-Small Cell Lung Cancer): Poziotinib; 3A (Non-Small Cell Lung Cancer): CLN-081; 4 (Non-Small Cell Lung Cancer): Afatinib;
+EGFR	Y764_D770dup	R1 (Non-Small Cell Lung Cancer): Erlotinib; R1 (Non-Small Cell Lung Cancer): Gefitinib; R1 (Non-Small Cell Lung Cancer): Afatinib; 1 (Non-Small Cell Lung Cancer): Amivantamab; 1 (Non-Small Cell Lung Cancer): Mobocertinib; 3A (Non-Small Cell Lung Cancer): Poziotinib; 3A (Non-Small Cell Lung Cancer): CLN-081;
 
 # this one does not overlap with A763_Y764insFQEA, so R1 for sure
 EGFR	N771delinsSTH	R1 (Non-Small Cell Lung Cancer): Erlotinib; R1 (Non-Small Cell Lung Cancer): Gefitinib; R1 (Non-Small Cell Lung Cancer): Afatinib; 1 (Non-Small Cell Lung Cancer): Amivantamab; 1 (Non-Small Cell Lung Cancer): Mobocertinib; 3A (Non-Small Cell Lung Cancer): Poziotinib; 3A (Non-Small Cell Lung Cancer): CLN-081;

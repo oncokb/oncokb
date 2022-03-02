@@ -24,7 +24,6 @@ public final class AlterationUtils {
         Oncogenicity.LIKELY.getOncogenic(), Oncogenicity.YES.getOncogenic()});
 
     private static AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
-    private static final String PROTEIN_CHANGE_EXCLUSION_REGEX = "(.*),\\s*(exclude|excluding)(.*)";
 
 
     private AlterationUtils() {
@@ -42,10 +41,41 @@ public final class AlterationUtils {
         }
     }
 
-    public static Set<Alteration> findOverlapAlteration(Set<Alteration> alterations, Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end) {
+    public static boolean isRangeInframeAlteration(Alteration alteration) {
+        boolean isInframeAlteration = isInframeAlteration(alteration);
+        if (!isInframeAlteration) {
+            return false;
+        }
+
+        Pattern p = Pattern.compile("([0-9]+)_([0-9]+)(ins|del)(.*)");
+        Matcher m = p.matcher(alteration.getAlteration());
+        return m.matches();
+    }
+
+    public static boolean isInframeAlteration(Alteration alteration) {
+        if (alteration == null || alteration.getConsequence() == null) {
+            return false;
+        }
+        return alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm(IN_FRAME_INSERTION)) || alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm(IN_FRAME_DELETION));
+    }
+
+    public static Set<Alteration> findOverlapAlteration(Set<Alteration> alterations, Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end, String proteinChange) {
         Set<Alteration> overlaps = new HashSet<>();
+        VariantConsequence inframeDeletionConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm(IN_FRAME_DELETION);
         for (Alteration alteration : alterations) {
             if (alteration.getGene().equals(gene) && alteration.getConsequence() != null && consequenceRelated(consequence, alteration.getConsequence()) && (referenceGenome == null || alteration.getReferenceGenomes().contains(referenceGenome))) {
+                if (isInframeAlteration(alteration)) {
+                    if (alteration.getConsequence().equals(inframeDeletionConsequence)) {
+                        if (alteration.getProteinStart() == start && alteration.getProteinEnd() == end && (proteinChange.equals(alteration.getAlteration()) || (!alteration.getAlteration().contains("delins") && !proteinChange.contains("delins")))) {
+                            overlaps.add(alteration);
+                            continue;
+                        }
+                    }
+                    // for inframe-deletion, we want to find the overlap of ranges.
+                    if (!isRangeInframeAlteration(alteration)) {
+                        continue;
+                    }
+                }
                 //For alteration without specific position, do not do intersection
                 if (start <= AlterationPositionBoundary.START.getValue() || end >= AlterationPositionBoundary.END.getValue()) {
                     if (start >= alteration.getProteinStart()
@@ -238,7 +268,7 @@ public final class AlterationUtils {
                     if (refL > varL) {
                         consequence = IN_FRAME_DELETION;
                     } else if (refL < varL) {
-                        consequence = "inframe_insertion";
+                        consequence = IN_FRAME_INSERTION;
                     } else {
                         consequence = MISSENSE_VARIANT;
                     }
@@ -264,7 +294,7 @@ public final class AlterationUtils {
                 }
                 String type = m.group(5);
                 if (type.equals("ins")) {
-                    consequence = "inframe_insertion";
+                    consequence = IN_FRAME_INSERTION;
                 } else if (type.equals("del")) {
                     consequence = IN_FRAME_DELETION;
                 } else {
@@ -272,7 +302,7 @@ public final class AlterationUtils {
                     Integer insertion = m.group(6).length();
 
                     if (insertion - deletion > 0) {
-                        consequence = "inframe_insertion";
+                        consequence = IN_FRAME_INSERTION;
                     } else if (insertion - deletion == 0) {
                         consequence = MISSENSE_VARIANT;
                     } else {
@@ -302,7 +332,7 @@ public final class AlterationUtils {
                                 consequence = MISSENSE_VARIANT;
                                 break;
                             case "ins":
-                                consequence = "inframe_insertion";
+                                consequence = IN_FRAME_INSERTION;
                                 break;
                             case "del":
                                 consequence = IN_FRAME_DELETION;
@@ -314,7 +344,7 @@ public final class AlterationUtils {
                                 consequence = "feature_truncation";
                                 break;
                             case "dup":
-                                consequence = "inframe_insertion";
+                                consequence = IN_FRAME_INSERTION;
                                 break;
                             case "mut":
                                 consequence = "any";
@@ -338,10 +368,10 @@ public final class AlterationUtils {
                                 String v = m.group(3);
                                 switch (v) {
                                     case "ins":
-                                        consequence = "inframe_insertion";
+                                        consequence = IN_FRAME_INSERTION;
                                         break;
                                     case "dup":
-                                        consequence = "inframe_insertion";
+                                        consequence = IN_FRAME_INSERTION;
                                         break;
                                     case "del":
                                         consequence = IN_FRAME_DELETION;
@@ -604,6 +634,9 @@ public final class AlterationUtils {
 
     public static Set<Alteration> getAllAlterations(ReferenceGenome referenceGenome, Gene gene) {
         Set<Alteration> alterations = new HashSet<>();
+        if (gene == null) {
+            return new HashSet<>();
+        }
         if (!CacheUtils.containAlterations(gene.getEntrezGeneId())) {
             CacheUtils.setAlterations(gene);
         }
@@ -887,9 +920,9 @@ public final class AlterationUtils {
             return new ArrayList<>();
         }
 
-        List<Alteration> missenseVariants = alterationBo.findMutationsByConsequenceAndPosition(
+        List<Alteration> missenseVariants = alterationBo.findRelevantOverlapAlterations(
             alteration.getGene(), referenceGenome, VariantConsequenceUtils.findVariantConsequenceByTerm(MISSENSE_VARIANT), alteration.getProteinStart(),
-            alteration.getProteinEnd(), fullAlterations);
+            alteration.getProteinEnd(), alteration.getAlteration(), fullAlterations);
 
         List<Alteration> alleles = new ArrayList<>();
         for (Alteration alt : missenseVariants) {
@@ -919,7 +952,7 @@ public final class AlterationUtils {
         if (alteration != null && alteration.getConsequence() != null && alteration.getConsequence().getTerm().equals(MISSENSE_VARIANT)) {
             // check for positional variant when the consequence is forced to be missense variant
             boolean isMissensePositionalVariant = StringUtils.isEmpty(alteration.getVariantResidues()) && alteration.getProteinStart() != null && alteration.getProteinEnd() != null && alteration.getProteinStart().equals(alteration.getProteinEnd());
-            List<Alteration> alternativeAlleles = alterationBo.findMutationsByConsequenceAndPosition(alteration.getGene(), referenceGenome, alteration.getConsequence(), alteration.getProteinStart(), alteration.getProteinEnd(), new HashSet<>(relevantAlterations));
+            List<Alteration> alternativeAlleles = alterationBo.findRelevantOverlapAlterations(alteration.getGene(), referenceGenome, alteration.getConsequence(), alteration.getProteinStart(), alteration.getProteinEnd(), alteration.getAlteration(), new HashSet<>(relevantAlterations));
             for (Alteration allele : alternativeAlleles) {
                 // remove all alleles if the alteration variant residue is empty
                 if (isMissensePositionalVariant && !StringUtils.isEmpty(allele.getVariantResidues())) {
@@ -1156,7 +1189,7 @@ public final class AlterationUtils {
                 for (int i = 0; i < insertedAAs.length(); i++) {
                     char varAA = insertedAAs.charAt(i);
                     int proteinStart = alteration.getProteinStart() + i;
-                    List<Alteration> alterations = alterationBo.findMutationsByConsequenceAndPosition(alteration.getGene(), referenceGenome, alteration.getConsequence(), proteinStart, proteinStart, allAlterations);
+                    List<Alteration> alterations = alterationBo.findRelevantOverlapAlterations(alteration.getGene(), referenceGenome, alteration.getConsequence(), proteinStart, proteinStart, alteration.getAlteration(), allAlterations);
                     for (Alteration alt : alterations) {
                         if ((referenceGenome == null || alt.getReferenceGenomes().contains(referenceGenome)) && alt.getVariantResidues() != null && alt.getVariantResidues().charAt(0) == varAA) {
                             matches.add(alt);

@@ -48,8 +48,7 @@ public class FindRelevantAlterationsTest {
                 {"BRAF", "V600E", null, "V600E, V600A, V600D, V600G, V600K, V600L, V600M, V600Q, V600R, VK600EI, V600, Oncogenic Mutations"},
                 {"BRAF", "V600A", null, "V600A, V600D, V600E, V600G, V600K, V600L, V600M, V600Q, V600R, VK600EI, V600, Oncogenic Mutations, V600 {excluding V600E ; V600K}"},
                 {"BRAF", "L597S", null, "L597S, L597P, L597Q, L597R, L597V, L597, Oncogenic Mutations, Oncogenic Mutations {excluding V600}"},
-                {"EGFR", "Y764_D770dup", null, "762_823ins, A767_V769dup, S768_D770dup, A767_S768insASV, S768_V769insSVD, S768_V769insVAS, V769_D770insASV, V769_D770insGVV, D770delinsGTH, D770delinsGY, A763_Y764insFQEA, D770_N771insD, D770_N771insNPG, D770_N771insSVD, D770_N771insVDSVDNP, D770_P772dup, Oncogenic Mutations, 762_823ins {excluding A763_Y764insFQEA}"},
-                {"EGFR", "A763_Y764insFQEA", null, "A763_Y764insFQEA, A763insLQEA, Oncogenic Mutations"},
+                {"EGFR", "Y764_D770dup", null, "762_823ins, Oncogenic Mutations, 762_823ins {excluding A763_Y764insFQEA}"},
 
                 // The revert fusion should get picked
                 {"ABL1", "ABL1-BCR fusion", null, "BCR-ABL1 Fusion, Fusions"},
@@ -69,6 +68,12 @@ public class FindRelevantAlterationsTest {
                 // Check stop_gained
                 {"MAP2K4", "R304*", null, "R304*, Truncating Mutations"},
 
+                // Check inframe-insertion, inframe-deletion
+                {"EGFR", "Y764_D770dup", null, "762_823ins, Oncogenic Mutations, 762_823ins {excluding A763_Y764insFQEA}"},
+                {"EGFR", "A763_Y764insFQEA", null, "A763_Y764insFQEA, Oncogenic Mutations"},
+                {"EGFR", "E746_A750del", null, "E746_A750del, 729_761del, Oncogenic Mutations"},
+                {"EGFR", "E746_A750delinsQ", null, "E746_A750delinsQ, 729_761del, Oncogenic Mutations"},
+
                 // EGFR exon deletion
                 {"EGFR", "vIII", null, "vIII, Oncogenic Mutations"},
                 {"EGFR", "CTD", null, "C-terminal domain, Oncogenic Mutations"},
@@ -82,7 +87,8 @@ public class FindRelevantAlterationsTest {
                 {"MED12", "G44D", null, "G44D, G44A, G44C, G44S, G44V, 34_68mis"},
                 {"MED12", "G44*", null, "Truncating Mutations"},
                 {"MED12", "K42_N46del", null, ""},
-                {"NOTCH1", "Q2405Rfs*17", null, "Q2405Rfs*17, T2375_K2555trunc, Truncating Mutations, Oncogenic Mutations"},
+                {"NOTCH1", "Q2405Rfs*17", null, "Q2405Rfs*17, 2375_2555trunc, Truncating Mutations, Oncogenic Mutations"},
+                {"CALR", "K385Nfs*47", null, "309_417trunc, Oncogenic Mutations"},
 
                 // VUS should get mapped to hotspot VUS, but should not get Oncogenic Mutations from the hotspot VUS.
                 // In this case VUS N109_R113del is covered by VUS I99_R113del, and I99_R113del is a hotpot.
@@ -90,14 +96,14 @@ public class FindRelevantAlterationsTest {
 //                {"MAP2K1", "N109_R113del", null, "N109_R113del, I99_R113del"},
 
                 // Range missense variant
-                {"PDGFRA", "D842I", null, "D842I, D842H, D842Y, D842_I843delinsIM, C814_S852mis, Oncogenic Mutations"},
+                {"PDGFRA", "D842I", null, "D842I, D842H, D842Y, D842_I843delinsIM, 814_852mis, Oncogenic Mutations"},
 
                 // D842V should not be mapped as alternative allele
-                {"PDGFRA", "D842I", null, "D842I, D842H, D842Y, D842_I843delinsIM, C814_S852mis, Oncogenic Mutations"},
-                {"PDGFRA", "D842V", null, "D842V, D842H, D842I, D842Y, D842_I843delinsIM, C814_S852mis, Oncogenic Mutations"},
+                {"PDGFRA", "D842I", null, "D842I, D842H, D842Y, D842_I843delinsIM, 814_852mis, Oncogenic Mutations"},
+                {"PDGFRA", "D842V", null, "D842V, D842H, D842I, D842Y, D842_I843delinsIM, 814_852mis, Oncogenic Mutations"},
 
                 // Check whether the overlapped variants(with the same consequence) will be mapped
-                {"MAP2K1", "E41_F53del", null, "E41_F53del, E41_L54del, L42_K57del, E51_Q58del, F53_Q58del, F53_Q58delinsL, Oncogenic Mutations"},
+                {"MAP2K1", "E41_F53del", null, "E41_F53del, Oncogenic Mutations"},
 
                 // Truncating Mutations in the Oncogene should not be mapped to any range mutation unless the consequence is truncating
                 {"KIT", "K509Nfs*2", null, "K509Nfs*2"},
@@ -108,7 +114,7 @@ public class FindRelevantAlterationsTest {
                 // But we do map if gene is oncogene and TSG. TSG here is a Oncogene+TSG
                 {"MED12", "A34*", null, "Truncating Mutations"},
 
-                {"NOTCH1", "Q2405Rfs*17", null, "Q2405Rfs*17, T2375_K2555trunc, Truncating Mutations, Oncogenic Mutations"},
+                {"NOTCH1", "Q2405Rfs*17", null, "Q2405Rfs*17, 2375_2555trunc, Truncating Mutations, Oncogenic Mutations"},
 
                 // Deletion
                 // With specific Deletion curated

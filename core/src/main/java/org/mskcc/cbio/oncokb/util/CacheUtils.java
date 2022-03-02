@@ -10,8 +10,6 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.mskcc.cbio.oncokb.util.TumorTypeUtils.getBySpecialTumor;
-
 
 /**
  * Created by Hongxin on 4/1/16.
@@ -330,8 +328,8 @@ public class CacheUtils {
         }
     }
 
-    public static Set<Alteration> findMutationsByConsequenceAndPosition(Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end) {
-        return AlterationUtils.findOverlapAlteration(getAlterations(gene.getEntrezGeneId()), gene, referenceGenome, consequence, start, end);
+    public static Set<Alteration> findRelevantOverlapAlterations(Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end, String proteinChange) {
+        return AlterationUtils.findOverlapAlteration(getAlterations(gene.getEntrezGeneId()), gene, referenceGenome, consequence, start, end, proteinChange);
     }
 
     public static Set<Alteration> findMutationsByConsequenceAndPositionOnSamePosition(Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end, String referenceResidue) {

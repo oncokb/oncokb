@@ -49,8 +49,8 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         } else {
             // For in-frame deletion, we should also look for variant with/out trailing amino acids
             VariantConsequence inframeDeletionConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm(IN_FRAME_DELETION);
-            if (inframeDeletionConsequence.equals(alteration.getConsequence())) {
-                List<Alteration> matches = findMutationsByConsequenceAndPosition(alteration.getGene(), referenceGenome, inframeDeletionConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations);
+            if (inframeDeletionConsequence.equals(alteration.getConsequence()) && !alteration.getAlteration().contains("delins")) {
+                List<Alteration> matches = findRelevantOverlapAlterations(alteration.getGene(), referenceGenome, inframeDeletionConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), alteration.getAlteration(), fullAlterations).stream().filter(alt -> !alt.getAlteration().contains("delins")).collect(Collectors.toList());
                 if (matches.size() > 0) {
                     return matches.iterator().next();
                 }
@@ -127,16 +127,16 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
     }
 
     @Override
-    public List<Alteration> findMutationsByConsequenceAndPosition(Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end, Set<Alteration> alterations) {
+    public List<Alteration> findRelevantOverlapAlterations(Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end, String proteinChange, Set<Alteration> alterations) {
         Set<Alteration> result = new HashSet<>();
 
         // Don't search for NA cases
         if (gene != null && consequence != null && !consequence.getTerm().equals("NA")) {
             if (alterations != null && alterations.size() > 0) {
-                result.addAll(AlterationUtils.findOverlapAlteration(alterations, gene, referenceGenome, consequence, start, end));
+                result.addAll(AlterationUtils.findOverlapAlteration(alterations, gene, referenceGenome, consequence, start, end, proteinChange));
             } else {
                 Collection<Alteration> queryResult;
-                queryResult = CacheUtils.findMutationsByConsequenceAndPosition(gene,referenceGenome, consequence, start, end);
+                queryResult = CacheUtils.findRelevantOverlapAlterations(gene,referenceGenome, consequence, start, end, proteinChange);
                 if (queryResult != null) {
                     result.addAll(queryResult);
                 }
@@ -356,7 +356,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             if (includeAlternativeAllele) {
                 alterations.addAll(AlterationUtils.getAlleleAlterations(referenceGenome, alteration, fullAlterations));
                 // Include the range mutation
-                List<Alteration> mutationsByConsequenceAndPosition = findMutationsByConsequenceAndPosition(alteration.getGene(), referenceGenome, alteration.getConsequence(), alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations);
+                List<Alteration> mutationsByConsequenceAndPosition = findRelevantOverlapAlterations(alteration.getGene(), referenceGenome, alteration.getConsequence(), alteration.getProteinStart(), alteration.getProteinEnd(), alteration.getAlteration(), fullAlterations);
                 for (Alteration alt : mutationsByConsequenceAndPosition) {
                     if (!alt.getProteinStart().equals(alt.getProteinEnd())) {
                         if (alt.getRefResidues() != null && alteration.getRefResidues() != null && alt.getProteinStart() != null && alteration.getProteinStart() != null) {
@@ -383,7 +383,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
                 }
             }
         } else {
-            alterations.addAll(findMutationsByConsequenceAndPosition(alteration.getGene(),referenceGenome, alteration.getConsequence(), alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations));
+            alterations.addAll(findRelevantOverlapAlterations(alteration.getGene(),referenceGenome, alteration.getConsequence(), alteration.getProteinStart(), alteration.getProteinEnd(), alteration.getAlteration(), fullAlterations));
         }
 
 
@@ -392,12 +392,12 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         }else{
             // Match non_truncating_variant for non truncating variant
             VariantConsequence nonTruncatingVariant = VariantConsequenceUtils.findVariantConsequenceByTerm("non_truncating_variant");
-            alterations.addAll(findMutationsByConsequenceAndPosition(alteration.getGene(),referenceGenome, nonTruncatingVariant, alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations));
+            alterations.addAll(findRelevantOverlapAlterations(alteration.getGene(),referenceGenome, nonTruncatingVariant, alteration.getProteinStart(), alteration.getProteinEnd(), alteration.getAlteration(), fullAlterations));
         }
 
         // Match all variants with `any` as consequence. Currently, only format start_end mut is supported.
         VariantConsequence anyConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm("any");
-        alterations.addAll(findMutationsByConsequenceAndPosition(alteration.getGene(),referenceGenome, anyConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations));
+        alterations.addAll(findRelevantOverlapAlterations(alteration.getGene(),referenceGenome, anyConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), alteration.getAlteration(),fullAlterations));
 
         // Remove all range mutations as relevant for truncating mutations in oncogenes
         alterations = oncogeneTruncMuts(alteration, alterations);
@@ -420,7 +420,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
 
         if (addTruncatingMutations) {
             VariantConsequence truncatingVariantConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm("feature_truncation");
-            alterations.addAll(findMutationsByConsequenceAndPosition(alteration.getGene(), referenceGenome, truncatingVariantConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), fullAlterations));
+            alterations.addAll(findRelevantOverlapAlterations(alteration.getGene(), referenceGenome, truncatingVariantConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), alteration.getAlteration(), fullAlterations));
         }
 
         if (addOncogenicMutations(alteration, alterations)) {
@@ -481,7 +481,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         relevantAlterationsWithoutAlternativeAlleles.removeAll(AlterationUtils.getAlleleAlterations(referenceGenome, alteration, fullAlterations));
         Set<String> alterationsName = new HashSet<>();
         // if the alteration is inframe-ins/del, we should only match the alteration
-        if(alteration.getConsequence() != null && (alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm("inframe_deletion")) || alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm("inframe_insertion")))) {
+        if(alteration.getConsequence() != null && (alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm("inframe_deletion")) || alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm(IN_FRAME_INSERTION)))) {
             alterationsName.add(alteration.getAlteration());
         } else {
             alterationsName.addAll(relevantAlterationsWithoutAlternativeAlleles.stream().map(Alteration::getAlteration).collect(Collectors.toSet()));

@@ -11,8 +11,7 @@ import java.util.Collection;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mskcc.cbio.oncokb.Constants.IN_FRAME_DELETION;
-import static org.mskcc.cbio.oncokb.Constants.MISSENSE_VARIANT;
+import static org.mskcc.cbio.oncokb.Constants.*;
 
 /**
  * Created by Hongxin on 12/23/16.
@@ -64,13 +63,13 @@ public class AnnotateAlterationTest {
 
                 // inframe event
                 {"T417_D419delinsI", "417", "419", "417", "419", null, null, IN_FRAME_DELETION},
-                {"V600delinsYM", "600", "600", "600", "600", "V", null, "inframe_insertion"},
-                {"I744_K745delinsKIPVAI", "744", "745", "744", "745", null, null, "inframe_insertion"},
-                {"762_823ins", "762", "823", "762", "823", null, null, "inframe_insertion"},
-                {"V561_I562insER", "561", "562", "561", "562", null, null, "inframe_insertion"},
-                {"R78_G79ins23", "78", "79", "78", "79", null, null, "inframe_insertion"},
-                {"IK744KIPVAI", "744", "745", "744", "745", "IK", "KIPVAI", "inframe_insertion"},
-                {"IKG744KIPVAI", "744", "746", "744", "746", "IKG", "KIPVAI", "inframe_insertion"},
+                {"V600delinsYM", "600", "600", "600", "600", "V", null, IN_FRAME_INSERTION},
+                {"I744_K745delinsKIPVAI", "744", "745", "744", "745", null, null, IN_FRAME_INSERTION},
+                {"762_823ins", "762", "823", "762", "823", null, null, IN_FRAME_INSERTION},
+                {"V561_I562insER", "561", "562", "561", "562", null, null, IN_FRAME_INSERTION},
+                {"R78_G79ins23", "78", "79", "78", "79", null, null, IN_FRAME_INSERTION},
+                {"IK744KIPVAI", "744", "745", "744", "745", "IK", "KIPVAI", IN_FRAME_INSERTION},
+                {"IKG744KIPVAI", "744", "746", "744", "746", "IKG", "KIPVAI", IN_FRAME_INSERTION},
 
                 {"E102_I103del", "102", "103", "102", "103", null, null, IN_FRAME_DELETION},
                 {"IK744K", "744", "745", "744", "745", "IK", "K", IN_FRAME_DELETION},
@@ -78,7 +77,7 @@ public class AnnotateAlterationTest {
                 {"G12delG", "12", "12", "12", "12", "G", null, IN_FRAME_DELETION},
                 {"G106_R108delGNR", "106", "108", "106", "108", null, null, IN_FRAME_DELETION},
 
-                {"P68_C77dup", "68", "77", "68", "77", null, null, "inframe_insertion"},
+                {"P68_C77dup", "68", "77", "68", "77", null, null, IN_FRAME_INSERTION},
 
                 // start_lost,
                 {"M1I", "1", "1", "1", "1", "M", "I", "start_lost"},

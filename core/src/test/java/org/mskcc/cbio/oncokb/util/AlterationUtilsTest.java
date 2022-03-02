@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
 
@@ -58,7 +59,7 @@ public class AlterationUtilsTest extends TestCase
         for (Alteration alt : positionedAlterations) {
             alterations.add(alt.getAlteration());
         }
-        assertEquals("V600,V600 {excluding V600E ; V600K}", MainUtils.listToString(alterations, ","));
+        assertEquals("V600,V600 {excluding V600E ; V600K}", MainUtils.listToString(alterations.stream().sorted().collect(Collectors.toList()), ","));
 
         // non missense should not be annotated
         alteration = new Alteration();
