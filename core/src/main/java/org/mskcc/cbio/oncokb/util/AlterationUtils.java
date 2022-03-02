@@ -911,8 +911,9 @@ public final class AlterationUtils {
     }
 
     private static List<Alteration> getAlleleAlterationsSub(ReferenceGenome referenceGenome, Alteration alteration, Set<Alteration> fullAlterations) {
+        boolean isPositionalVariant = AlterationUtils.isPositionedAlteration(alteration);
         if (alteration == null || alteration.getConsequence() == null ||
-            !alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm(MISSENSE_VARIANT))) {
+            !(isPositionalVariant || alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm(MISSENSE_VARIANT)))) {
             return new ArrayList<>();
         }
 
