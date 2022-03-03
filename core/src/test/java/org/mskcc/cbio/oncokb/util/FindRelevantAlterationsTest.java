@@ -40,6 +40,9 @@ public class FindRelevantAlterationsTest {
                 // Critical cases
                 {"BRAF", "V600E", null, "V600E, V600A, V600D, V600G, V600K, V600L, V600M, V600Q, V600R, VK600EI, V600, Oncogenic Mutations"},
                 {"SMARCB1", "R374Q", null, "R374Q, R374W, Oncogenic Mutations"},
+                {"EGFR", "S768I", null, "S768I, SV768IL, Oncogenic Mutations"},
+                {"EGFR", "S768_V769delinsIL", null, "S768I, V769L, V769M, SV768IL, Oncogenic Mutations"},
+
 
                 // Check Fusions
                 {"BRAF", "PAPSS1-BRAF Fusion", null, "PAPSS1-BRAF Fusion, Fusions, Oncogenic Mutations, Oncogenic Mutations {excluding V600}"},

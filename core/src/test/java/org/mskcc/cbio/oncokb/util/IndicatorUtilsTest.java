@@ -118,6 +118,20 @@ public class IndicatorUtilsTest {
         assertTrue("Shouldn't have any significant level", indicatorQueryResp.getOtherSignificantSensitiveLevels().size() == 0);
         assertTrue(treatmentsContainLevel(indicatorQueryResp.getTreatments(), LevelOfEvidence.LEVEL_3B));
 
+        // check variant exist
+        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "BRAF", "V600E", null, null, null, null, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
+        assertTrue("The variantExist should be true, but it's not", indicatorQueryResp.getVariantExist());
+        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "PIK3CA", "V105_R108delVGNR", null, null, null, null, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
+        assertTrue("The variantExist should be true, but it's not", indicatorQueryResp.getVariantExist());
+        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "PIK3CA", "V105_R108del", null, null, null, null, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
+        assertTrue("The variantExist should be true, but it's not", indicatorQueryResp.getVariantExist());
+        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "PIK3CA", "V10000", null, null, null, null, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
+        assertFalse("The variantExist should be false, but it's not", indicatorQueryResp.getVariantExist());
+
         // For treatments include both 2B and 3A, 3A should be shown first
         // Test disabled: we no longer have 2B which means the other significant levels are not used
 //        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "RET", "Fusions", null, null, "Medullary Thyroid Cancer", null, null, null, null);
@@ -195,8 +209,8 @@ public class IndicatorUtilsTest {
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "EGFR", "S768_V769delinsIL", null, null, "Non-Small Cell Lung Cancer", MISSENSE_VARIANT, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
         assertEquals("Gene should exist", true, indicatorQueryResp.getGeneExist());
-        assertEquals("Variant should exist(mapped to S768I)", true, indicatorQueryResp.getVariantExist());
-        assertEquals("Is expected to be likely oncogenic", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("Variant should not exist", false, indicatorQueryResp.getVariantExist());
+        assertEquals("Is expected to be likely oncogenic", Oncogenicity.LIKELY.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The highest sensitive level should be 1",
             LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
 

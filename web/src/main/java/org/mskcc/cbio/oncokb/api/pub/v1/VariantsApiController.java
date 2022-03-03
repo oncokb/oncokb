@@ -56,7 +56,10 @@ public class VariantsApiController implements VariantsApi {
                 Alteration alteration = new Alteration();
                 alteration.setGene(gene);
                 alteration.setAlteration(variant);
-                result = new ArrayList<>(AlterationUtils.findMatchedAlterations(matchedRG, alteration));
+                Alteration matchedAlteration = ApplicationContextSingleton.getAlterationBo().findExactlyMatchedAlteration(matchedRG, alteration, AlterationUtils.getAllAlterations(matchedRG, gene));
+                if (matchedAlteration != null) {
+                    result.add(matchedAlteration);
+                }
             }
         }
         return ResponseEntity.ok().body(JsonResultFactory.getAlteration(result, fields));

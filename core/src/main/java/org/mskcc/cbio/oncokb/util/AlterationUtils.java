@@ -24,6 +24,8 @@ public final class AlterationUtils {
         Oncogenicity.LIKELY.getOncogenic(), Oncogenicity.YES.getOncogenic()});
 
     private static AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
+    private static Pattern COMPLEX_MISSENSE_ONE = Pattern.compile("([A-Z])([0-9]+)_([A-Z])([0-9]+)delins([A-Z]+)");
+    private static Pattern COMPLEX_MISSENSE_TWO = Pattern.compile("([A-Z]+)([0-9]+)([A-Z]+)");
 
 
     private AlterationUtils() {
@@ -883,7 +885,62 @@ public final class AlterationUtils {
     }
 
     public static List<Alteration> getAllMissenseAlleles(ReferenceGenome referenceGenome, int position, Set<Alteration> fullAlterations) {
-        return fullAlterations.stream().filter(alt -> alt.getConsequence() != null && alt.getConsequence().getTerm().equals(MISSENSE_VARIANT) && alt.getProteinStart() != null && alt.getProteinStart() == position).collect(Collectors.toList());
+        return fullAlterations.stream().filter(alt -> alt.getReferenceGenomes().contains(referenceGenome) && alt.getConsequence() != null && alt.getConsequence().getTerm().equals(MISSENSE_VARIANT) && alt.getProteinStart() != null && alt.getProteinStart() == position).collect(Collectors.toList());
+    }
+
+    public static boolean isComplexMissense(String proteinChange) {
+        if (StringUtils.isEmpty(proteinChange)) {
+            return false;
+        }
+        Matcher m = COMPLEX_MISSENSE_ONE.matcher(proteinChange);
+        if (m.matches()) {
+            return (Integer.parseInt(m.group(4)) - Integer.parseInt(m.group(2)) + 1) == m.group(5).length();
+        }
+        m = COMPLEX_MISSENSE_TWO.matcher(proteinChange);
+        if (m.matches()) {
+            return m.group(3).length() == m.group(1).length();
+        }
+        return false;
+    }
+
+    public static List<Alteration> getMissenseProteinChangesFromComplexProteinChange(String proteinChange) {
+        if (isComplexMissense(proteinChange)) {
+            List<Alteration> matches = new ArrayList<>();
+            Matcher m = COMPLEX_MISSENSE_ONE.matcher(proteinChange);
+            if (m.matches()) {
+                for (int i = 0; i < m.group(5).length(); i++) {
+                    Alteration alteration = new Alteration();
+                    int position = Integer.valueOf(m.group(2)) + i;
+                    char varResidue = m.group(5).charAt(i);
+                    alteration.setConsequence(VariantConsequenceUtils.findVariantConsequenceByTerm(MISSENSE_VARIANT));
+                    alteration.setProteinStart(position);
+                    alteration.setProteinEnd(position);
+                    alteration.setVariantResidues(Character.toString(varResidue));
+                    alteration.setAlteration(Integer.toString(position) + varResidue);
+                    matches.add(alteration);
+                }
+            } else {
+                m = COMPLEX_MISSENSE_TWO.matcher(proteinChange);
+                if (m.matches()) {
+                    for (int i = 0; i < m.group(1).length(); i++) {
+                        Alteration alteration = new Alteration();
+                        int position = Integer.valueOf(m.group(2)) + i;
+                        char refResidue = m.group(1).charAt(i);
+                        char varResidue = m.group(3).charAt(i);
+                        alteration.setConsequence(VariantConsequenceUtils.findVariantConsequenceByTerm(MISSENSE_VARIANT));
+                        alteration.setProteinStart(position);
+                        alteration.setProteinEnd(position);
+                        alteration.setRefResidues(Character.toString(refResidue));
+                        alteration.setVariantResidues(Character.toString(varResidue));
+                        alteration.setAlteration(refResidue + Integer.toString(position) + varResidue);
+                        matches.add(alteration);
+                    }
+                }
+            }
+            return matches;
+        } else {
+            return new ArrayList<>();
+        }
     }
 
     // Only for missense alteration
@@ -925,6 +982,9 @@ public final class AlterationUtils {
             alteration.getGene(), referenceGenome, VariantConsequenceUtils.findVariantConsequenceByTerm(MISSENSE_VARIANT), alteration.getProteinStart(),
             alteration.getProteinEnd(), alteration.getAlteration(), fullAlterations);
 
+
+        List<Alteration> complexMissenseMuts = getMissenseProteinChangesFromComplexProteinChange(alteration.getAlteration());
+
         List<Alteration> alleles = new ArrayList<>();
         for (Alteration alt : missenseVariants) {
             if (alt.getProteinStart() != null &&
@@ -933,7 +993,18 @@ public final class AlterationUtils {
                 !alt.equals(alteration) &&
                 (alteration.getRefResidues() == null || alt.getRefResidues() == null || alt.getRefResidues().equals(alteration.getRefResidues()))
             ) {
-                alleles.add(alt);
+                // do not include the missense mutation from complex missense format
+                if (complexMissenseMuts.size() > 0) {
+                    Optional<Alteration> matched = complexMissenseMuts.stream().filter(mis -> {
+                        String altNameToCompare = StringUtils.isEmpty(mis.getRefResidues()) ? (Integer.toString(alt.getProteinStart()) + alt.getVariantResidues()) : (alt.getRefResidues() + Integer.toString(alt.getProteinStart()) + alt.getVariantResidues());
+                        return altNameToCompare.equals(mis.getAlteration());
+                    }).findAny();
+                    if (!matched.isPresent()) {
+                        alleles.add(alt);
+                    }
+                } else {
+                    alleles.add(alt);
+                }
             }
         }
 
@@ -1164,43 +1235,6 @@ public final class AlterationUtils {
             }
         }
         return matchedAlterations.stream().collect(Collectors.toList());
-    }
-
-    /**
-     * @param alteration Annotated alteration
-     * @return A list of alterations we consider the same
-     */
-    public static LinkedHashSet<Alteration> findMatchedAlterations(ReferenceGenome referenceGenome, Alteration alteration) {
-        LinkedHashSet<Alteration> matches = new LinkedHashSet<>();
-        Alteration matchedAlteration = findAlteration(alteration.getGene(), referenceGenome, alteration.getAlteration());
-        if (matchedAlteration != null) {
-            matches.add(matchedAlteration);
-        }
-        if (alteration.getConsequence() != null
-            && alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm(MISSENSE_VARIANT))
-            && !alteration.getProteinStart().equals(AlterationPositionBoundary.START)
-            && !alteration.getProteinEnd().equals(AlterationPositionBoundary.END)
-            && !alteration.getProteinStart().equals(alteration.getProteinEnd())
-        ) {
-            Pattern p = Pattern.compile(".*delins([A-Z]+)");
-            Matcher m = p.matcher(alteration.getAlteration());
-            if (m.matches()) {
-                Set<Alteration> allAlterations = getAllAlterations(referenceGenome, alteration.getGene());
-                String insertedAAs = m.group(1);
-                for (int i = 0; i < insertedAAs.length(); i++) {
-                    char varAA = insertedAAs.charAt(i);
-                    int proteinStart = alteration.getProteinStart() + i;
-                    List<Alteration> alterations = alterationBo.findRelevantOverlapAlterations(alteration.getGene(), referenceGenome, alteration.getConsequence(), proteinStart, proteinStart, alteration.getAlteration(), allAlterations);
-                    for (Alteration alt : alterations) {
-                        if ((referenceGenome == null || alt.getReferenceGenomes().contains(referenceGenome)) && alt.getVariantResidues() != null && alt.getVariantResidues().charAt(0) == varAA) {
-                            matches.add(alt);
-                        }
-                    }
-                }
-            }
-        }
-
-        return matches;
     }
 
     public static Boolean isOncogenicAlteration(Alteration alteration) {
