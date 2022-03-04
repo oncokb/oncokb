@@ -341,6 +341,8 @@ public class AnnotationsApiController {
                         );
                         if (gene == null) {
                             gene = new Gene();
+                            gene.setEntrezGeneId(query.getGene().getEntrezGeneId());
+                            gene.setHugoSymbol(query.getGene().getHugoSymbol());
                         }
                     } catch (ApiException e) {
                     }
