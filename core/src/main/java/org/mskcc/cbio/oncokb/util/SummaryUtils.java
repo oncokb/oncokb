@@ -526,7 +526,7 @@ public class SummaryUtils {
             sb.append("OncoKB assigns biological and oncogenic effects at the allele level, not the positional level.");
             Set<Alteration> alleles = new HashSet<>(AlterationUtils.getAlleleAlterations(query.getReferenceGenome(), alteration));
             if (alleles.size() > 0) {
-                sb.append(" Biological and oncogenic effects are curated for the following " + query.getHugoSymbol() + " " + query.getAlteration() + " alleles: ");
+                sb.append(" Biological and oncogenic effects are curated for the following " + query.getHugoSymbol() + " " + query.getAlteration() + " allele" + (alleles.size() > 1 ? "s" : "") + ": ");
                 sb.append(allelesToStr(alleles));
                 sb.append(".");
             }
