@@ -10,6 +10,7 @@ public class SemVer implements Serializable {
     Integer minor;
     Integer patch;
     String[] suffixTokens;
+    Boolean stable;
 
     public SemVer(String version) {
         if (version == null) {
@@ -24,6 +25,7 @@ public class SemVer implements Serializable {
         this.minor = semver.getMinor();
         this.patch = semver.getPatch();
         this.suffixTokens = semver.getSuffixTokens();
+        this.stable = semver.isStable();
     }
 
     public String getVersion() {
@@ -64,5 +66,13 @@ public class SemVer implements Serializable {
 
     public void setSuffixTokens(String[] suffixTokens) {
         this.suffixTokens = suffixTokens;
+    }
+
+    public Boolean getStable() {
+        return stable;
+    }
+
+    public void setStable(Boolean stable) {
+        this.stable = stable;
     }
 }
