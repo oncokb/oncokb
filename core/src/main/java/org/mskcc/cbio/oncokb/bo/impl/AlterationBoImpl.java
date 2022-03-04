@@ -30,7 +30,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         return alterations;
     }
 
-    private Alteration findExactlyMatchedAlteration(ReferenceGenome referenceGenome, Alteration alteration, Set<Alteration> fullAlterations) {
+    public Alteration findExactlyMatchedAlteration(ReferenceGenome referenceGenome, Alteration alteration, Set<Alteration> fullAlterations) {
         Alteration matchedByAlteration = findAlteration(referenceGenome, alteration.getAlteration(), fullAlterations);
         if (matchedByAlteration != null) {
             if (matchedByAlteration.getConsequence() == null
@@ -53,6 +53,22 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
                 List<Alteration> matches = findRelevantOverlapAlterations(alteration.getGene(), referenceGenome, inframeDeletionConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), alteration.getAlteration(), fullAlterations).stream().filter(alt -> !alt.getAlteration().contains("delins")).collect(Collectors.toList());
                 if (matches.size() > 0) {
                     return matches.iterator().next();
+                }
+            }
+
+            // check missense mutations that ignore reference allele.
+            VariantConsequence missenseConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm(MISSENSE_VARIANT);
+            if (missenseConsequence.equals(alteration.getConsequence())) {
+                Optional<Alteration> match = fullAlterations.stream().filter(alt ->
+                    alt.getReferenceGenomes().contains(referenceGenome) &&
+                        missenseConsequence.equals(alt.getConsequence()) &&
+                        alteration.getProteinStart().equals(alt.getProteinStart()) &&
+                        alteration.getProteinEnd().equals(alt.getProteinEnd()) &&
+                        (StringUtils.isNullOrEmpty(alteration.getRefResidues()) || alteration.getRefResidues().equals(alt.getRefResidues())) &&
+                        alt.getVariantResidues().equals(alteration.getVariantResidues())
+                ).findAny();
+                if (match.isPresent()) {
+                    return match.get();
                 }
             }
         }
@@ -352,6 +368,13 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         //Find Alternative Alleles for missense variant
         if (alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm(MISSENSE_VARIANT)) && !AlterationUtils.isPositionedAlteration(alteration)) {
             List<Alteration> includeRangeAlts = new ArrayList<>();
+
+            // for complex missense mutations, we need to include matched missense mutation on the same position
+            List<Alteration> complexMisMuts = AlterationUtils.getMissenseProteinChangesFromComplexProteinChange(alteration.getAlteration());
+            if (complexMisMuts.size() > 0) {
+                complexMisMuts = complexMisMuts.stream().map(mis -> findExactlyMatchedAlteration(referenceGenome, mis, fullAlterations)).filter(mis -> mis != null).collect(Collectors.toList());
+                alterations.addAll(complexMisMuts);
+            }
 
             if (includeAlternativeAllele) {
                 alterations.addAll(AlterationUtils.getAlleleAlterations(referenceGenome, alteration, fullAlterations));

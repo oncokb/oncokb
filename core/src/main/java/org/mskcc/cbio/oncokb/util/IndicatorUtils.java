@@ -199,14 +199,7 @@ public class IndicatorUtils {
             List<TumorType> relevantUpwardTumorTypes = new ArrayList<>();
             List<TumorType> relevantDownwardTumorTypes = new ArrayList<>();
 
-            Alteration matchedAlt = null;
-
-            LinkedHashSet<Alteration> matchedAlterations = AlterationUtils.findMatchedAlterations(query.getReferenceGenome(), alteration);
-            if (matchedAlterations.size() > 1) {
-                matchedAlt = pickMatchedAlteration(new ArrayList<>(matchedAlterations), query, levels, highestLevelOnly, evidenceTypes);
-            } else if (matchedAlterations.size() == 1) {
-                matchedAlt = matchedAlterations.iterator().next();
-            }
+            Alteration matchedAlt = ApplicationContextSingleton.getAlterationBo().findExactlyMatchedAlteration(query.getReferenceGenome(), alteration, AlterationUtils.getAllAlterations(query.getReferenceGenome(), gene));
 
             if (matchedAlt == null && isStructuralVariantEvent) {
                 matchedAlt = AlterationUtils.getRevertFusions(query.getReferenceGenome(), alteration);
@@ -636,8 +629,9 @@ public class IndicatorUtils {
         }
 
         if (indicatorQueryMutationEffect.getMutationEffect() == null || indicatorQueryMutationEffect.getMutationEffect().equals(MutationEffect.UNKNOWN)) {
+            boolean isPositionalVariant = AlterationUtils.isPositionedAlteration(alteration);
             // Find mutation effect from alternative alleles
-            if (alternativeAllele.size() > 0) {
+            if (alternativeAllele.size() > 0 && !isPositionalVariant) {
                 indicatorQueryMutationEffect =
                     MainUtils.setToAlternativeAlleleMutationEffect(
                         MainUtils.findHighestMutationEffectByEvidence(

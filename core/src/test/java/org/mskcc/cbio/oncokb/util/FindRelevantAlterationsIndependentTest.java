@@ -55,12 +55,6 @@ public class FindRelevantAlterationsIndependentTest extends TestCase {
 
         relevantAlterations =
             ApplicationContextSingleton.getAlterationBo()
-                .findRelevantAlterations(ReferenceGenome.GRCh37, query, allAlterations, true);
-
-        assertEquals(2, relevantAlterations.size());
-
-        relevantAlterations =
-            ApplicationContextSingleton.getAlterationBo()
                 .findRelevantAlterations(ReferenceGenome.GRCh38, query, allAlterations, true);
 
         assertEquals(1, relevantAlterations.size());

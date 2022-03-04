@@ -40,7 +40,7 @@ public interface AlterationBo extends GenericBo<Alteration> {
      */
     Alteration findAlterationFromDao(Gene gene, AlterationType alterationType, ReferenceGenome referenceGenome, String alteration, String name);
 
-
+    Alteration findExactlyMatchedAlteration(ReferenceGenome referenceGenome, Alteration alteration, Set<Alteration> fullAlterations);
     /**
      * @param gene
      * @param consequence
