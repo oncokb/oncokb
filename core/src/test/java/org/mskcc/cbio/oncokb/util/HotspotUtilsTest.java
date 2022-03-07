@@ -93,6 +93,23 @@ public class HotspotUtilsTest extends TestCase {
         assertTrue(HotspotUtils.isHotspot(alteration));
         alteration = AlterationUtils.getAlteration("BRAF", "A600E", null, null, null, null, null);
         assertFalse(HotspotUtils.isHotspot(alteration));
+
+        // for range alteration, unless the hotspot covers the whole range, it should not be considered hotspot
+        // the exact range
+        alteration = AlterationUtils.getAlteration("EGFR", "745_759del", null, null, null, null, null);
+        assertTrue(HotspotUtils.isHotspot(alteration));
+        alteration = AlterationUtils.getAlteration("EGFR", "745_759ins", null, null, null, null, null);
+        assertTrue(HotspotUtils.isHotspot(alteration));
+        // the range covered by hotspot
+        alteration = AlterationUtils.getAlteration("EGFR", "746_759del", null, null, null, null, null);
+        assertTrue(HotspotUtils.isHotspot(alteration));
+        alteration = AlterationUtils.getAlteration("EGFR", "746_759ins", null, null, null, null, null);
+        assertTrue(HotspotUtils.isHotspot(alteration));
+        // partial the range is outside the hotspot range
+        alteration = AlterationUtils.getAlteration("EGFR", "744_759del", null, null, null, null, null);
+        assertFalse(HotspotUtils.isHotspot(alteration));
+        alteration = AlterationUtils.getAlteration("EGFR", "744_759ins", null, null, null, null, null);
+        assertFalse(HotspotUtils.isHotspot(alteration));
     }
 
 }
