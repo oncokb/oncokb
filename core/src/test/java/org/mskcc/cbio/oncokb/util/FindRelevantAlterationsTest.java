@@ -51,8 +51,8 @@ public class FindRelevantAlterationsTest {
                 {"BRAF", "V600E", null, "V600E, V600A, V600D, V600G, V600K, V600L, V600M, V600Q, V600R, VK600EI, V600, Oncogenic Mutations"},
                 {"BRAF", "V600A", null, "V600A, V600D, V600E, V600G, V600K, V600L, V600M, V600Q, V600R, VK600EI, V600, Oncogenic Mutations, V600 {excluding V600E ; V600K}"},
                 {"BRAF", "L597S", null, "L597S, L597P, L597Q, L597R, L597V, L597, Oncogenic Mutations, Oncogenic Mutations {excluding V600}"},
-                {"EGFR", "Y764_D770dup", null, "762_823ins, Oncogenic Mutations, 762_823ins {excluding A763_Y764insFQEA}"},
-                {"EGFR", "A763_Y764insFQEA", null, "A763_Y764insFQEA, 762_823ins, Oncogenic Mutations"},
+                {"EGFR", "Y764_D770dup", null, "762_823ins, A767_V769dup, S768_D770dup, A767_S768insASV, S768_V769insSVD, S768_V769insVAS, V769_D770insASV, V769_D770insGVV, D770delinsGTH, D770delinsGY, A763_Y764insFQEA, D770_N771insD, D770_N771insNPG, D770_N771insSVD, D770_N771insVDSVDNP, D770_P772dup, Oncogenic Mutations, 762_823ins {excluding A763_Y764insFQEA}"},
+                {"EGFR", "A763_Y764insFQEA", null, "A763_Y764insFQEA, 762_823ins, A763insLQEA, Oncogenic Mutations"},
 
                 // The revert fusion should get picked
                 {"ABL1", "ABL1-BCR fusion", null, "BCR-ABL1 Fusion, Fusions"},
@@ -73,10 +73,10 @@ public class FindRelevantAlterationsTest {
                 {"MAP2K4", "R304*", null, "R304*, Truncating Mutations"},
 
                 // Check inframe-insertion, inframe-deletion
-                {"EGFR", "Y764_D770dup", null, "762_823ins, Oncogenic Mutations, 762_823ins {excluding A763_Y764insFQEA}"},
-                {"EGFR", "A763_Y764insFQEA", null, "A763_Y764insFQEA, 762_823ins, Oncogenic Mutations"},
-                {"EGFR", "E746_A750del", null, "E746_A750del, 729_761del, Oncogenic Mutations"},
-                {"EGFR", "E746_A750delinsQ", null, "E746_A750delinsQ, 729_761del, Oncogenic Mutations"},
+                {"EGFR", "Y764_D770dup", null, "762_823ins, A767_V769dup, S768_D770dup, A767_S768insASV, S768_V769insSVD, S768_V769insVAS, V769_D770insASV, V769_D770insGVV, D770delinsGTH, D770delinsGY, A763_Y764insFQEA, D770_N771insD, D770_N771insNPG, D770_N771insSVD, D770_N771insVDSVDNP, D770_P772dup, Oncogenic Mutations, 762_823ins {excluding A763_Y764insFQEA}"},
+                {"EGFR", "A763_Y764insFQEA", null, "A763_Y764insFQEA, 762_823ins, A763insLQEA, Oncogenic Mutations"},
+                {"EGFR", "E746_A750del", null, "E746_A750del, E746_A750delinsQ, E746_T751delinsA, E746_T751delinsL, E746_T751delinsVA, K745_A750del, E746_S752delinsA, E746_S752delinsI, E746_S752delinsV, 729_761del, L747_A750del, L747_A750delinsP, L747_T751del, L747_T751delinsP, L747_S752del, L747_P753del, L747_P753delinsS, L747_K754delinsATSPE, L747_E749del, A750_E758del, A750_E758delinsP, Oncogenic Mutations"},
+                {"EGFR", "E746_A750delinsQ", null, "E746_A750delinsQ, E746_A750del, E746_T751delinsA, E746_T751delinsL, E746_T751delinsVA, K745_A750del, E746_S752delinsA, E746_S752delinsI, E746_S752delinsV, 729_761del, L747_A750del, L747_A750delinsP, L747_T751del, L747_T751delinsP, L747_S752del, L747_P753del, L747_P753delinsS, L747_K754delinsATSPE, L747_E749del, A750_E758del, A750_E758delinsP, Oncogenic Mutations"},
 
                 // EGFR exon deletion
                 {"EGFR", "vIII", null, "vIII, Oncogenic Mutations"},
@@ -107,7 +107,7 @@ public class FindRelevantAlterationsTest {
                 {"PDGFRA", "D842V", null, "D842V, D842H, D842I, D842Y, D842_I843delinsIM, 814_852mis, Oncogenic Mutations"},
 
                 // Check whether the overlapped variants(with the same consequence) will be mapped
-                {"MAP2K1", "E41_F53del", null, "E41_F53del, Oncogenic Mutations"},
+                {"MAP2K1", "E41_F53del", null, "E41_F53del, E41_L54del, L42_K57del, E51_Q58del, F53_Q58del, F53_Q58delinsL, Oncogenic Mutations"},
 
                 // Truncating Mutations in the Oncogene should not be mapped to any range mutation unless the consequence is truncating
                 {"KIT", "K509Nfs*2", null, "K509Nfs*2"},

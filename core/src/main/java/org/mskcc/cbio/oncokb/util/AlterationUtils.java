@@ -66,18 +66,6 @@ public final class AlterationUtils {
         VariantConsequence inframeDeletionConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm(IN_FRAME_DELETION);
         for (Alteration alteration : alterations) {
             if (alteration.getGene().equals(gene) && alteration.getConsequence() != null && consequenceRelated(consequence, alteration.getConsequence()) && (referenceGenome == null || alteration.getReferenceGenomes().contains(referenceGenome))) {
-                if (isInframeAlteration(alteration)) {
-                    if (alteration.getConsequence().equals(inframeDeletionConsequence)) {
-                        if (alteration.getProteinStart() == start && alteration.getProteinEnd() == end && (proteinChange.equals(alteration.getAlteration()) || (!alteration.getAlteration().contains("delins") && !proteinChange.contains("delins")))) {
-                            overlaps.add(alteration);
-                            continue;
-                        }
-                    }
-                    // for inframe-deletion, we want to find the overlap of ranges.
-                    if (!isRangeInframeAlteration(alteration)) {
-                        continue;
-                    }
-                }
                 //For alteration without specific position, do not do intersection
                 if (start <= AlterationPositionBoundary.START.getValue() || end >= AlterationPositionBoundary.END.getValue()) {
                     if (start >= alteration.getProteinStart()
