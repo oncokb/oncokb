@@ -12,17 +12,13 @@ import java.util.Map;
  */
 public enum LevelOfEvidence {
     // Levels for therapeutic implications
-    LEVEL_0 ("0", "", "", ""),
     LEVEL_1 ("1", "FDA-recognized biomarker predictive of response to an FDA-approved drug in this indication", "<span><b>FDA-recognized</b> biomarker predictive of response to an <b>FDA-approved</b> drug <b>in this indication</b></span>", "#33A02C"),
     LEVEL_2 ("2", "Standard care biomarker recommended by the NCCN or other expert panels predictive of response to an FDA-approved drug in this indication", "<span><b>Standard care</b> biomarker recommended by the NCCN or other expert panels predictive of response to an <b>FDA-approved drug</b> in this indication</span>", "#1F78B4"),
-    LEVEL_2A ("2A", "Standard care biomarker recommended by the NCCN or other expert panels predictive of response to an FDA-approved drug in this indication", "<span><b>Standard care</b> biomarker recommended by the NCCN or other expert panels predictive of response to an <b>FDA-approved drug</b> in this indication</span>", "#1F78B4"),
-    LEVEL_2B ("2B", "", "", "#80B1D3"),
     LEVEL_3A ("3A", "Compelling clinical evidence supports the biomarker as being predictive of response to a drug in this indication", "<span><b>Compelling clinical evidence</b> supports the biomarker as being predictive of response to a drug <b>in this indication</b> but neither biomarker and drug are standard of care</span>", "#984EA3"),
     LEVEL_3B ("3B", "Standard care or investigational biomarker predictive of response to an FDA-approved or investigational drug in another indication", "<span><b>Standard care</b> or <b>investigational</b> biomarker predictive of response to an <b>FDA-approved</b> or <b>investigational</b> drug in another indication</span>", "#BE98CE"),
     LEVEL_4 ("4", "Compelling biological evidence supports the biomarker as being predictive of response to a drug", "<span><b>Compelling biological evidence</b> supports the biomarker as being predictive of response to a drug but neither biomarker and drug are standard of care</span>", "#424242"),
     LEVEL_R1 ("R1", "Standard care biomarker predictive of resistance to an FDA-approved drug in this indication", "<span><b>Standard of care</b> biomarker predictive of <b>resistance</b> to an <b>FDA-approved</b> drug <b>in this indication</b></span>", "#EE3424"),
     LEVEL_R2 ("R2", "Compelling clinical evidence supports the biomarker as being predictive of resistance to a drug", "<span><b>Compelling clinical evidence</b> supports the biomarker as being predictive of <b>resistance</b> to a drug</span>", "#F79A92"),
-    LEVEL_R3 ("R3", "", "", "#FCD6D3"),
 
     // Levels for prognostic implications
     LEVEL_Px1("Px1", "FDA and/or professional guideline-recognized biomarker prognostic in this indication based on well-powered studie(s)", "<span><b>FDA and/or professional guideline-recognized</b> biomarker prognostic in this indication based on <b>well-powered studie(s)</b></span>", ""),
