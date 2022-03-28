@@ -119,7 +119,7 @@ public class GenomeNexusUtils {
         }
     }
 
-    public static TranscriptConsequenceSummary getTranscriptConsequence(GNVariantAnnotationType type, String query, ReferenceGenome referenceGenome) {
+    public static TranscriptConsequenceSummary getTranscriptConsequence(GNVariantAnnotationType type, String query, ReferenceGenome referenceGenome) throws ApiException {
         if (StringUtils.isEmpty(query) || StringUtils.isEmpty(query.replace(",", ""))) {
             return null;
         }
@@ -141,19 +141,15 @@ public class GenomeNexusUtils {
         }
     }
 
-    private static VariantAnnotation getVariantAnnotation(GNVariantAnnotationType type, String query, ReferenceGenome referenceGenome) {
+    private static VariantAnnotation getVariantAnnotation(GNVariantAnnotationType type, String query, ReferenceGenome referenceGenome) throws ApiException {
         VariantAnnotation variantAnnotation = null;
         if (query != null && type != null) {
-            try {
-                List<String> gnFields = new ArrayList<>();
-                gnFields.add("annotation_summary");
-                if (type.equals(GNVariantAnnotationType.HGVS_G)) {
-                    variantAnnotation = getAnnotationControllerApi(referenceGenome).fetchVariantAnnotationGET(query, MSK_ISOFORM_OVERRIDE, null, gnFields);
-                } else {
-                    variantAnnotation = getAnnotationControllerApi(referenceGenome).fetchVariantAnnotationByGenomicLocationGET(query, MSK_ISOFORM_OVERRIDE, null, gnFields);
-                }
-            } catch (ApiException e) {
-                e.printStackTrace();
+            List<String> gnFields = new ArrayList<>();
+            gnFields.add("annotation_summary");
+            if (type.equals(GNVariantAnnotationType.HGVS_G)) {
+                variantAnnotation = getAnnotationControllerApi(referenceGenome).fetchVariantAnnotationGET(query, MSK_ISOFORM_OVERRIDE, null, gnFields);
+            } else {
+                variantAnnotation = getAnnotationControllerApi(referenceGenome).fetchVariantAnnotationByGenomicLocationGET(query, MSK_ISOFORM_OVERRIDE, null, gnFields);
             }
         }
         return variantAnnotation;

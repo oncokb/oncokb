@@ -25,7 +25,6 @@ public class MainUtils {
             Oncogenicity.UNKNOWN,
             Oncogenicity.INCONCLUSIVE,
             Oncogenicity.LIKELY_NEUTRAL,
-            Oncogenicity.PREDICTED,
             Oncogenicity.LIKELY,
             Oncogenicity.YES,
             Oncogenicity.RESISTANCE
@@ -398,7 +397,6 @@ public class MainUtils {
         oncogenicities.add(Oncogenicity.RESISTANCE);
         oncogenicities.add(Oncogenicity.YES);
         oncogenicities.add(Oncogenicity.LIKELY);
-        oncogenicities.add(Oncogenicity.PREDICTED);
         oncogenicities.add(Oncogenicity.LIKELY_NEUTRAL);
         oncogenicities.add(Oncogenicity.INCONCLUSIVE);
 
@@ -406,20 +404,13 @@ public class MainUtils {
     }
 
     public static boolean isOncogenic(Oncogenicity oncogenicity) {
-        return oncogenicity != null && (oncogenicity.equals(Oncogenicity.YES) || oncogenicity.equals(Oncogenicity.LIKELY) || oncogenicity.equals(Oncogenicity.PREDICTED) || oncogenicity.equals(Oncogenicity.RESISTANCE));
+        return oncogenicity != null && (oncogenicity.equals(Oncogenicity.YES) || oncogenicity.equals(Oncogenicity.LIKELY) || oncogenicity.equals(Oncogenicity.RESISTANCE));
     }
 
     public static Set<BiologicalVariant> getBiologicalVariants(Gene gene) {
         Set<BiologicalVariant> variants = new HashSet<>();
         if (gene != null) {
-            Long oldTime = new Date().getTime();
-            List<Alteration> alterations;
-
-            alterations = AlterationUtils.excludeVUS(gene, new ArrayList<>(AlterationUtils.getAllAlterations(null, gene)));
-            alterations = AlterationUtils.excludeInferredAlterations(alterations);
-            alterations = AlterationUtils.excludePositionedAlterations(alterations);
-
-//                oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Get all alterations for " + hugoSymbol);
+            Set<Alteration> alterations = AlterationUtils.getAllAlterations(null, gene);
 
             Set<EvidenceType> evidenceTypes = new HashSet<EvidenceType>() {{
                 add(EvidenceType.MUTATION_EFFECT);
@@ -433,11 +424,9 @@ public class MainUtils {
                 map.put(EvidenceType.MUTATION_EFFECT, new HashSet<Evidence>());
                 evidences.put(alteration, map);
             }
-//                oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Initialize evidences.");
 
             Map<Gene, Set<Evidence>> geneEvidences =
                 EvidenceUtils.getEvidenceByGenesAndEvidenceTypes(Collections.singleton(gene), evidenceTypes);
-//                oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Get all gene evidences.");
 
             for (Evidence evidence : geneEvidences.get(gene)) {
                 for (Alteration alteration : evidence.getAlterations()) {
@@ -446,7 +435,6 @@ public class MainUtils {
                     }
                 }
             }
-//                oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Seperate evidences.");
 
             for (Map.Entry<Alteration, Map<EvidenceType, Set<Evidence>>> entry : evidences.entrySet()) {
                 Alteration alteration = entry.getKey();
@@ -456,15 +444,16 @@ public class MainUtils {
                 variant.setVariant(alteration);
                 Oncogenicity oncogenicity = EvidenceUtils.getOncogenicityFromEvidence(map.get(EvidenceType.ONCOGENIC));
                 MutationEffect mutationEffect = EvidenceUtils.getMutationEffectFromEvidence(map.get(EvidenceType.MUTATION_EFFECT));
-                variant.setOncogenic(oncogenicity == null ? null : oncogenicity.getOncogenic());
-                variant.setMutationEffect(mutationEffect == null ? null : mutationEffect.getMutationEffect());
-                variant.setOncogenicPmids(EvidenceUtils.getPmids(map.get(EvidenceType.ONCOGENIC)));
-                variant.setMutationEffectPmids(EvidenceUtils.getPmids(map.get(EvidenceType.MUTATION_EFFECT)));
-                variant.setOncogenicAbstracts(EvidenceUtils.getAbstracts(map.get(EvidenceType.ONCOGENIC)));
-                variant.setMutationEffectAbstracts(EvidenceUtils.getAbstracts(map.get(EvidenceType.MUTATION_EFFECT)));
-                variants.add(variant);
+                if (oncogenicity != null || mutationEffect != null) {
+                    variant.setOncogenic(oncogenicity == null ? null : oncogenicity.getOncogenic());
+                    variant.setMutationEffect(mutationEffect == null ? null : mutationEffect.getMutationEffect());
+                    variant.setOncogenicPmids(EvidenceUtils.getPmids(map.get(EvidenceType.ONCOGENIC)));
+                    variant.setMutationEffectPmids(EvidenceUtils.getPmids(map.get(EvidenceType.MUTATION_EFFECT)));
+                    variant.setOncogenicAbstracts(EvidenceUtils.getAbstracts(map.get(EvidenceType.ONCOGENIC)));
+                    variant.setMutationEffectAbstracts(EvidenceUtils.getAbstracts(map.get(EvidenceType.MUTATION_EFFECT)));
+                    variants.add(variant);
+                }
             }
-//                oldTime = MainUtils.printTimeDiff(oldTime, new Date().getTime(), "Created biological annotations.");
         }
         return variants;
     }

@@ -15,7 +15,6 @@ public enum Oncogenicity {
     YES("Oncogenic"),
     LIKELY("Likely Oncogenic"),
     LIKELY_NEUTRAL("Likely Neutral"),
-    PREDICTED("Predicted Oncogenic"),
     INCONCLUSIVE("Inconclusive"),
     RESISTANCE("Resistance"),
     UNKNOWN("Unknown");

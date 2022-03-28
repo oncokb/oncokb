@@ -20,9 +20,6 @@ public class HotspotUtilsTest extends TestCase {
         alteration = AlterationUtils.getAlteration("AKT1", "E17*", null, null, null, null, null);
         assertFalse("This stop gain variant should not be hotspot", HotspotUtils.isHotspot(alteration));
 
-        alteration = AlterationUtils.getAlteration("AKT1", "E17", null, null, null, null, null);
-        assertFalse(HotspotUtils.isHotspot(alteration));
-
         alteration = AlterationUtils.getAlteration("AKT1", "P68_C77dup", null, null, null, null, null);
         assertTrue(HotspotUtils.isHotspot(alteration));
 
@@ -50,6 +47,7 @@ public class HotspotUtilsTest extends TestCase {
         alteration = AlterationUtils.getAlteration("MET", "X1010splice", null, null, null, null, null);
         assertTrue(HotspotUtils.isHotspot(alteration));
 
+        // The range missense mutations should not be hotspot
         alteration = AlterationUtils.getAlteration("PIK3CA", "979_1068mis", null, null, null, null, null);
         assertFalse(HotspotUtils.isHotspot(alteration));
 
@@ -59,6 +57,12 @@ public class HotspotUtilsTest extends TestCase {
 
         // This is a test to govern when sample is in-frame indel and that range happens to be a hotspot of splie site. The variant should not be a hotspot
         alteration = AlterationUtils.getAlteration("TP53", "A307_L308insASFLS", null, null, null, null, null);
+        assertFalse(HotspotUtils.isHotspot(alteration));
+
+        // Positional variant should be considered similar to missense mutation
+        alteration = AlterationUtils.getAlteration("BRAF", "V600", null, null, null, null, null);
+        assertTrue(HotspotUtils.isHotspot(alteration));
+        alteration = AlterationUtils.getAlteration("BRAF", "T599", null, null, null, null, null);
         assertFalse(HotspotUtils.isHotspot(alteration));
 
         // Test reference genome
@@ -88,6 +92,23 @@ public class HotspotUtilsTest extends TestCase {
         alteration = AlterationUtils.getAlteration("BRAF", "V600E", null, null, null, null, null);
         assertTrue(HotspotUtils.isHotspot(alteration));
         alteration = AlterationUtils.getAlteration("BRAF", "A600E", null, null, null, null, null);
+        assertFalse(HotspotUtils.isHotspot(alteration));
+
+        // for range alteration, unless the hotspot covers the whole range, it should not be considered hotspot
+        // the exact range
+        alteration = AlterationUtils.getAlteration("EGFR", "745_759del", null, null, null, null, null);
+        assertTrue(HotspotUtils.isHotspot(alteration));
+        alteration = AlterationUtils.getAlteration("EGFR", "745_759ins", null, null, null, null, null);
+        assertTrue(HotspotUtils.isHotspot(alteration));
+        // the range covered by hotspot
+        alteration = AlterationUtils.getAlteration("EGFR", "746_759del", null, null, null, null, null);
+        assertTrue(HotspotUtils.isHotspot(alteration));
+        alteration = AlterationUtils.getAlteration("EGFR", "746_759ins", null, null, null, null, null);
+        assertTrue(HotspotUtils.isHotspot(alteration));
+        // partial the range is outside the hotspot range
+        alteration = AlterationUtils.getAlteration("EGFR", "744_759del", null, null, null, null, null);
+        assertFalse(HotspotUtils.isHotspot(alteration));
+        alteration = AlterationUtils.getAlteration("EGFR", "744_759ins", null, null, null, null, null);
         assertFalse(HotspotUtils.isHotspot(alteration));
     }
 

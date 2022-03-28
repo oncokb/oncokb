@@ -1,7 +1,6 @@
 package org.mskcc.cbio.oncokb.util;
 
 import junit.framework.TestCase;
-import org.apache.commons.lang3.AnnotationUtils;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.Gene;
 
@@ -9,7 +8,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
 
@@ -347,5 +345,34 @@ public class AlterationUtilsTest extends TestCase
 
         AlterationUtils.removeAlternativeAllele(DEFAULT_REFERENCE_GENOME,delins, relevantAlterations);
         assertEquals(3, relevantAlterations.size());
+    }
+
+    public void testGetMissenseProteinChangesFromComplexProteinChange() {
+        String test = "S768_V769delinsIL";
+        List<Alteration> alterations = AlterationUtils.getMissenseProteinChangesFromComplexProteinChange(test);
+        String alt = AlterationUtils.toString(alterations);
+        assertEquals("768I, 769L", alt);
+
+        test = "SV768IL";
+        alterations = AlterationUtils.getMissenseProteinChangesFromComplexProteinChange(test);
+        alt = AlterationUtils.toString(alterations);
+        assertEquals("S768I, V769L", alt);
+
+        // inframe insertion should not get any match
+        test = "S768_V769delinsILA";
+        alterations = AlterationUtils.getMissenseProteinChangesFromComplexProteinChange(test);
+        assertEquals(alterations.size(), 0);
+        test = "SV768ILA";
+        alterations = AlterationUtils.getMissenseProteinChangesFromComplexProteinChange(test);
+        alt = AlterationUtils.toString(alterations);
+        assertEquals(alterations.size(), 0);
+        // inframe deletion should not get any match
+        test = "S768_V769delinsI";
+        alterations = AlterationUtils.getMissenseProteinChangesFromComplexProteinChange(test);
+        assertEquals(alterations.size(), 0);
+        test = "SV768I";
+        alterations = AlterationUtils.getMissenseProteinChangesFromComplexProteinChange(test);
+        alt = AlterationUtils.toString(alterations);
+        assertEquals(alterations.size(), 0);
     }
 }

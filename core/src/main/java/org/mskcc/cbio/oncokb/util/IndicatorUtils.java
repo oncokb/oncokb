@@ -164,7 +164,7 @@ public class IndicatorUtils {
             // If there are more than two genes have matches we need to compare the highest level, then oncogenicity
             TreeSet<IndicatorQueryResp> result = new TreeSet<>(new IndicatorQueryRespComp());
             for (Gene tmpGene : (List<Gene>) fusionGeneAltsMap.get("hasRelevantAltsGenes")) {
-                Query tmpQuery = new Query(query.getId(), query.getReferenceGenome(), query.getType(), tmpGene.getEntrezGeneId(),
+                Query tmpQuery = new Query(query.getId(), query.getReferenceGenome(), tmpGene.getEntrezGeneId(),
                     tmpGene.getHugoSymbol(), query.getAlteration(), null, query.getSvType(),
                     query.getTumorType(), query.getConsequence(), query.getProteinStart(),
                     query.getProteinEnd(), query.getHgvs());
@@ -199,14 +199,7 @@ public class IndicatorUtils {
             List<TumorType> relevantUpwardTumorTypes = new ArrayList<>();
             List<TumorType> relevantDownwardTumorTypes = new ArrayList<>();
 
-            Alteration matchedAlt = null;
-
-            LinkedHashSet<Alteration> matchedAlterations = AlterationUtils.findMatchedAlterations(query.getReferenceGenome(), alteration);
-            if (matchedAlterations.size() > 1) {
-                matchedAlt = pickMatchedAlteration(new ArrayList<>(matchedAlterations), query, levels, highestLevelOnly, evidenceTypes);
-            } else if (matchedAlterations.size() == 1) {
-                matchedAlt = matchedAlterations.iterator().next();
-            }
+            Alteration matchedAlt = ApplicationContextSingleton.getAlterationBo().findExactlyMatchedAlteration(query.getReferenceGenome(), alteration, AlterationUtils.getAllAlterations(query.getReferenceGenome(), gene));
 
             if (matchedAlt == null && isStructuralVariantEvent) {
                 matchedAlt = AlterationUtils.getRevertFusions(query.getReferenceGenome(), alteration);
@@ -322,9 +315,9 @@ public class IndicatorUtils {
                 }
             }
 
-            // Set hotspot oncogenicity to Predicted Oncogenic
+            // Set hotspot oncogenicity to Likely Oncogenic
             if (indicatorQuery.getHotspot() && !MainUtils.isValidHotspotOncogenicity(Oncogenicity.getByEffect(indicatorQuery.getOncogenic()))) {
-                indicatorQuery.setOncogenic(Oncogenicity.PREDICTED.getOncogenic());
+                indicatorQuery.setOncogenic(Oncogenicity.LIKELY.getOncogenic());
 
                 // Check whether the gene has Oncogenic Mutations annotated
                 List<Alteration> oncogenicMutations = new ArrayList<>(AlterationUtils.findOncogenicMutations(AlterationUtils.getAllAlterations(query.getReferenceGenome(), gene)));
@@ -479,7 +472,7 @@ public class IndicatorUtils {
 
         // Give default oncogenicity if no data has been assigned.
         if (indicatorQuery.getOncogenic() == null) {
-            indicatorQuery.setOncogenic("");
+            indicatorQuery.setOncogenic(Oncogenicity.UNKNOWN.getOncogenic());
         }
         return indicatorQuery;
     }
@@ -492,7 +485,7 @@ public class IndicatorUtils {
         Map<Oncogenicity, List<Alteration>> groupedOncogenicities = new HashedMap();
         Map<LevelOfEvidence, List<Alteration>> groupedLevel = new HashedMap();
         for (Alteration alteration : alterations) {
-            Query tmpQuery = new Query(null, originalQuery.getReferenceGenome(), null, alteration.getGene().getEntrezGeneId(),
+            Query tmpQuery = new Query(null, originalQuery.getReferenceGenome(), alteration.getGene().getEntrezGeneId(),
                 alteration.getGene().getHugoSymbol(), alteration.getAlteration(), null, null,
                 originalQuery.getTumorType(), alteration.getConsequence().getTerm(), alteration.getProteinStart(),
                 alteration.getProteinEnd(), null);
@@ -636,8 +629,9 @@ public class IndicatorUtils {
         }
 
         if (indicatorQueryMutationEffect.getMutationEffect() == null || indicatorQueryMutationEffect.getMutationEffect().equals(MutationEffect.UNKNOWN)) {
+            boolean isPositionalVariant = AlterationUtils.isPositionedAlteration(alteration);
             // Find mutation effect from alternative alleles
-            if (alternativeAllele.size() > 0) {
+            if (alternativeAllele.size() > 0 && !isPositionalVariant) {
                 indicatorQueryMutationEffect =
                     MainUtils.setToAlternativeAlleleMutationEffect(
                         MainUtils.findHighestMutationEffectByEvidence(

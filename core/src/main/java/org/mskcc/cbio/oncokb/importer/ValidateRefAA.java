@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 public class ValidateRefAA {
 
-    public void main(String[] args) throws ApiException {
+    public void main(String[] args) throws ApiException, IOException {
         for (Alteration alteration : AlterationUtils.excludeVUS(new ArrayList<>(AlterationUtils.getAllAlterations()))) {
             checkAlteration(alteration, false);
         }
@@ -44,7 +44,7 @@ public class ValidateRefAA {
         return note.stream().collect(Collectors.joining(" "));
     }
 
-    private void checkAlteration(Alteration alteration, Boolean isVus) throws ApiException {
+    private void checkAlteration(Alteration alteration, Boolean isVus) throws ApiException, IOException {
         if (alteration.getProteinStart() >= 0 && alteration.getReferenceGenomes() != null) {
             if (alteration.getReferenceGenomes() == null || alteration.getReferenceGenomes().size() == 0) {
                 System.out.println("Alteration " + alteration.getGene().getHugoSymbol() + " " + alteration.getName() + " does not have reference genome");
@@ -60,19 +60,15 @@ public class ValidateRefAA {
                         content.add("Reference amino acid does not match");
 
                         String response = null;
-                        try {
-                            response = HttpUtils.getRequest("http://localhost:9090/api/suggest-variant/" + alteration.getGene().getHugoSymbol() + "?proteinPosition=" + alteration.getProteinStart() + "&curatedResidue=" + alteration.getRefResidues() + "&grch37Transcript=" + alteration.getGene().getGrch37Isoform() + "&grch38Transcript=" + alteration.getGene().getGrch38Isoform());
+                        response = HttpUtils.getRequest("http://localhost:9090/api/suggest-variant/" + alteration.getGene().getHugoSymbol() + "?proteinPosition=" + alteration.getProteinStart() + "&curatedResidue=" + alteration.getRefResidues() + "&grch37Transcript=" + alteration.getGene().getGrch37Isoform() + "&grch38Transcript=" + alteration.getGene().getGrch38Isoform());
 
-                            List<String> note = new ArrayList<>();
-                            JSONObject jsonObj = new JSONObject(response);
+                        List<String> note = new ArrayList<>();
+                        JSONObject jsonObj = new JSONObject(response);
 
-                            note.add(getNote(jsonObj, ReferenceGenome.GRCh37));
-                            note.add(getNote(jsonObj, ReferenceGenome.GRCh38));
+                        note.add(getNote(jsonObj, ReferenceGenome.GRCh37));
+                        note.add(getNote(jsonObj, ReferenceGenome.GRCh38));
 
-                            content.add(note.stream().collect(Collectors.joining("; ")));
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                        content.add(note.stream().collect(Collectors.joining("; ")));
                         printContent(content);
                     }
                 }

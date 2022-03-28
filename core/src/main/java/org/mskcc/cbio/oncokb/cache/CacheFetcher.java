@@ -7,7 +7,6 @@ import org.cbioportal.genome_nexus.util.exception.InvalidHgvsException;
 import org.cbioportal.genome_nexus.util.exception.TypeNotSupportedException;
 import org.mskcc.cbio.oncokb.apiModels.CuratedGene;
 import org.mskcc.cbio.oncokb.apiModels.FdaAlteration;
-import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotationQueryType;
 import org.mskcc.cbio.oncokb.bo.OncokbTranscriptService;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.model.*;
@@ -18,6 +17,7 @@ import org.oncokb.oncokb_transcript.client.TranscriptDTO;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -35,12 +35,12 @@ public class CacheFetcher {
     }
 
     @Cacheable(cacheResolver = "generalCacheResolver", key = "'all'")
-    public List<CancerGene> getCancerGenes() {
+    public List<CancerGene> getCancerGenes() throws ApiException, IOException {
         return getCancerGeneList();
     }
 
     @Cacheable(cacheResolver = "generalCacheResolver", key = "'all'")
-    public String getCancerGenesTxt() {
+    public String getCancerGenesTxt() throws ApiException, IOException {
 
         String separator = "\t";
         String newLine = "\n";
@@ -96,15 +96,11 @@ public class CacheFetcher {
         return oncokbTranscriptService.findTranscriptGenesBySymbols(CacheUtils.getAllGenes().stream().filter(gene -> gene.getEntrezGeneId() > 0).map(gene -> gene.getEntrezGeneId().toString()).collect(Collectors.toList()));
     }
 
-    private List<CancerGene> getCancerGeneList() {
+    private List<CancerGene> getCancerGeneList() throws ApiException, IOException {
         List<CancerGene> cancerGenes = CancerGeneUtils.getCancerGeneList();
         List<String> hugos = cancerGenes.stream().map(CancerGene::getHugoSymbol).collect(Collectors.toList());
         List<Gene> genes = new ArrayList<>();
-        try {
-            genes = oncokbTranscriptService.findGenesBySymbols(hugos);
-        } catch (ApiException e) {
-            e.printStackTrace();
-        }
+        genes = oncokbTranscriptService.findGenesBySymbols(hugos);
         for (CancerGene cancerGene : cancerGenes) {
             if (cancerGene.getGeneAliases().size() == 0) {
                 List<Gene> matched = genes.stream().filter(gene -> gene.getEntrezGeneId().equals(cancerGene.getEntrezGeneId())).collect(Collectors.toList());
@@ -239,7 +235,7 @@ public class CacheFetcher {
         if (referenceGenome == null) {
             referenceGenome = DEFAULT_REFERENCE_GENOME;
         }
-        Query query = new Query(null, referenceGenome, AnnotationQueryType.REGULAR.getName(), entrezGeneId, hugoSymbol, alteration, alterationType, svType, tumorType, consequence, proteinStart, proteinEnd, hgvs);
+        Query query = new Query(null, referenceGenome, entrezGeneId, hugoSymbol, alteration, alterationType, svType, tumorType, consequence, proteinStart, proteinEnd, hgvs);
         return IndicatorUtils.processQuery(
             query, levels, highestLevelOnly,
             evidenceTypes
@@ -248,7 +244,7 @@ public class CacheFetcher {
 
     @Cacheable(cacheResolver = "generalCacheResolver",
         keyGenerator = "concatKeyGenerator")
-    public Alteration getAlterationFromGenomeNexus(GNVariantAnnotationType gnVariantAnnotationType, ReferenceGenome referenceGenome, String genomicLocation) {
+    public Alteration getAlterationFromGenomeNexus(GNVariantAnnotationType gnVariantAnnotationType, ReferenceGenome referenceGenome, String genomicLocation) throws org.genome_nexus.ApiException {
         return AlterationUtils.getAlterationFromGenomeNexus(gnVariantAnnotationType, genomicLocation, referenceGenome);
     }
 
