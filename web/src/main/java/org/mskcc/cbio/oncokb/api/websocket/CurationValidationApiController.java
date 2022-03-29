@@ -34,7 +34,7 @@ public class CurationValidationApiController {
     private Session session;
 
     @OnOpen
-    public void onOpen(Session session) {
+    public void onOpen(Session session) throws IOException {
         // Get session and WebSocket connection
         this.session = session;
 
@@ -162,7 +162,7 @@ public class CurationValidationApiController {
         }
     }
 
-    private void validateHugoSymbols() {
+    private void validateHugoSymbols() throws IOException {
         sendText(generateInfo(OUTDATED_HUGO_SYMBOLS, ValidationStatus.IS_PENDING, new JSONArray()));
 
         Set<Gene> curatedGenesToCheck = CacheUtils.getAllGenes().stream().filter(gene -> gene.getEntrezGeneId() > 0).collect(Collectors.toSet());

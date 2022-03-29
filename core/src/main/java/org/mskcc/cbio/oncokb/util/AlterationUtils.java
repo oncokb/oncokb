@@ -1,6 +1,7 @@
 package org.mskcc.cbio.oncokb.util;
 
 import org.apache.commons.lang3.StringUtils;
+import org.genome_nexus.ApiException;
 import org.genome_nexus.client.TranscriptConsequenceSummary;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
@@ -23,7 +24,8 @@ public final class AlterationUtils {
         Oncogenicity.LIKELY.getOncogenic(), Oncogenicity.YES.getOncogenic()});
 
     private static AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
-    private static final String PROTEIN_CHANGE_EXCLUSION_REGEX = "(.*),\\s*(exclude|excluding)(.*)";
+    private static Pattern COMPLEX_MISSENSE_ONE = Pattern.compile("([A-Z])([0-9]+)_([A-Z])([0-9]+)delins([A-Z]+)");
+    private static Pattern COMPLEX_MISSENSE_TWO = Pattern.compile("([A-Z]+)([0-9]+)([A-Z]+)");
 
 
     private AlterationUtils() {
@@ -41,8 +43,27 @@ public final class AlterationUtils {
         }
     }
 
-    public static Set<Alteration> findOverlapAlteration(Set<Alteration> alterations, Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end) {
+    public static boolean isRangeInframeAlteration(Alteration alteration) {
+        boolean isInframeAlteration = isInframeAlteration(alteration);
+        if (!isInframeAlteration) {
+            return false;
+        }
+
+        Pattern p = Pattern.compile("([0-9]+)_([0-9]+)(ins|del)(.*)");
+        Matcher m = p.matcher(alteration.getAlteration());
+        return m.matches();
+    }
+
+    public static boolean isInframeAlteration(Alteration alteration) {
+        if (alteration == null || alteration.getConsequence() == null) {
+            return false;
+        }
+        return alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm(IN_FRAME_INSERTION)) || alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm(IN_FRAME_DELETION));
+    }
+
+    public static Set<Alteration> findOverlapAlteration(Set<Alteration> alterations, Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end, String proteinChange) {
         Set<Alteration> overlaps = new HashSet<>();
+        VariantConsequence inframeDeletionConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm(IN_FRAME_DELETION);
         for (Alteration alteration : alterations) {
             if (alteration.getGene().equals(gene) && alteration.getConsequence() != null && consequenceRelated(consequence, alteration.getConsequence()) && (referenceGenome == null || alteration.getReferenceGenomes().contains(referenceGenome))) {
                 //For alteration without specific position, do not do intersection
@@ -65,6 +86,14 @@ public final class AlterationUtils {
         Pattern exclusionPatter = Pattern.compile("(.*)\\{\\s*(exclude|excluding)(.*)\\}", Pattern.CASE_INSENSITIVE);
         Matcher exclusionMatch = exclusionPatter.matcher(proteinChange);
         return exclusionMatch;
+    }
+
+    public static String removeExclusionCriteria(String proteinChange) {
+        Matcher exclusionMatch = getExclusionCriteriaMatcher(proteinChange);
+        if (exclusionMatch.matches()) {
+            proteinChange = exclusionMatch.group(1).trim();
+        }
+        return proteinChange;
     }
 
     public static Set<Alteration> getExclusionAlterations(String proteinChange) {
@@ -162,7 +191,10 @@ public final class AlterationUtils {
                 ret.add(alteration);
             }
         }
-        return ret;
+        return ret.stream().map(alteration -> {
+            annotateAlteration(alteration, alteration.getAlteration());
+            return alteration;
+        }).collect(Collectors.toList());
     }
 
     public static void annotateAlteration(Alteration alteration, String proteinChange) {
@@ -224,9 +256,9 @@ public final class AlterationUtils {
                 if (refL > 1 || varL > 1) {
                     // Handle in-frame insertion/deletion event. Exp: IK744K
                     if (refL > varL) {
-                        consequence = "inframe_deletion";
+                        consequence = IN_FRAME_DELETION;
                     } else if (refL < varL) {
-                        consequence = "inframe_insertion";
+                        consequence = IN_FRAME_INSERTION;
                     } else {
                         consequence = MISSENSE_VARIANT;
                     }
@@ -237,28 +269,34 @@ public final class AlterationUtils {
                 }
             }
         } else {
-            p = Pattern.compile("[A-Z]?([0-9]+)(_[A-Z]?([0-9]+))?(delins|ins)([A-Z0-9]+)");
+            p = Pattern.compile("([A-Z]?)([0-9]+)(_[A-Z]?([0-9]+))?(delins|ins|del)([A-Z0-9]+)");
             m = p.matcher(proteinChange);
             if (m.matches()) {
-                start = Integer.valueOf(m.group(1));
-                if (m.group(3) != null) {
-                    end = Integer.valueOf(m.group(3));
+                if (m.group(1) != null && m.group(3) == null) {
+                    // we only want to specify reference when it's one position ins/del
+                    ref = m.group(1);
+                }
+                start = Integer.valueOf(m.group(2));
+                if (m.group(4) != null) {
+                    end = Integer.valueOf(m.group(4));
                 } else {
                     end = start;
                 }
-                String type = m.group(4);
+                String type = m.group(5);
                 if (type.equals("ins")) {
-                    consequence = "inframe_insertion";
+                    consequence = IN_FRAME_INSERTION;
+                } else if (type.equals("del")) {
+                    consequence = IN_FRAME_DELETION;
                 } else {
                     Integer deletion = end - start + 1;
-                    Integer insertion = m.group(5).length();
+                    Integer insertion = m.group(6).length();
 
                     if (insertion - deletion > 0) {
-                        consequence = "inframe_insertion";
+                        consequence = IN_FRAME_INSERTION;
                     } else if (insertion - deletion == 0) {
                         consequence = MISSENSE_VARIANT;
                     } else {
-                        consequence = "inframe_deletion";
+                        consequence = IN_FRAME_DELETION;
                     }
                 }
             } else {
@@ -284,10 +322,10 @@ public final class AlterationUtils {
                                 consequence = MISSENSE_VARIANT;
                                 break;
                             case "ins":
-                                consequence = "inframe_insertion";
+                                consequence = IN_FRAME_INSERTION;
                                 break;
                             case "del":
-                                consequence = "inframe_deletion";
+                                consequence = IN_FRAME_DELETION;
                                 break;
                             case "fs":
                                 consequence = "frameshift_variant";
@@ -296,7 +334,7 @@ public final class AlterationUtils {
                                 consequence = "feature_truncation";
                                 break;
                             case "dup":
-                                consequence = "inframe_insertion";
+                                consequence = IN_FRAME_INSERTION;
                                 break;
                             case "mut":
                                 consequence = "any";
@@ -320,13 +358,13 @@ public final class AlterationUtils {
                                 String v = m.group(3);
                                 switch (v) {
                                     case "ins":
-                                        consequence = "inframe_insertion";
+                                        consequence = IN_FRAME_INSERTION;
                                         break;
                                     case "dup":
-                                        consequence = "inframe_insertion";
+                                        consequence = IN_FRAME_INSERTION;
                                         break;
                                     case "del":
-                                        consequence = "inframe_deletion";
+                                        consequence = IN_FRAME_DELETION;
                                         break;
                                 }
                             } else {
@@ -533,7 +571,7 @@ public final class AlterationUtils {
         return alt;
     }
 
-    public static Alteration getAlterationFromGenomeNexus(GNVariantAnnotationType type, String query, ReferenceGenome referenceGenome) {
+    public static Alteration getAlterationFromGenomeNexus(GNVariantAnnotationType type, String query, ReferenceGenome referenceGenome) throws ApiException {
         Alteration alteration = new Alteration();
         if (query != null && !query.trim().isEmpty()) {
             TranscriptConsequenceSummary transcriptConsequenceSummary = GenomeNexusUtils.getTranscriptConsequence(type, query, referenceGenome);
@@ -586,6 +624,9 @@ public final class AlterationUtils {
 
     public static Set<Alteration> getAllAlterations(ReferenceGenome referenceGenome, Gene gene) {
         Set<Alteration> alterations = new HashSet<>();
+        if (gene == null) {
+            return new HashSet<>();
+        }
         if (!CacheUtils.containAlterations(gene.getEntrezGeneId())) {
             CacheUtils.setAlterations(gene);
         }
@@ -831,6 +872,65 @@ public final class AlterationUtils {
         return getAlleleAlterationsSub(referenceGenome, alteration, fullAlterations);
     }
 
+    public static List<Alteration> getAllMissenseAlleles(ReferenceGenome referenceGenome, int position, Set<Alteration> fullAlterations) {
+        return fullAlterations.stream().filter(alt -> alt.getReferenceGenomes().contains(referenceGenome) && alt.getConsequence() != null && alt.getConsequence().getTerm().equals(MISSENSE_VARIANT) && alt.getProteinStart() != null && alt.getProteinStart() == position).collect(Collectors.toList());
+    }
+
+    public static boolean isComplexMissense(String proteinChange) {
+        if (StringUtils.isEmpty(proteinChange)) {
+            return false;
+        }
+        Matcher m = COMPLEX_MISSENSE_ONE.matcher(proteinChange);
+        if (m.matches()) {
+            return (Integer.parseInt(m.group(4)) - Integer.parseInt(m.group(2)) + 1) == m.group(5).length();
+        }
+        m = COMPLEX_MISSENSE_TWO.matcher(proteinChange);
+        if (m.matches()) {
+            return m.group(3).length() == m.group(1).length();
+        }
+        return false;
+    }
+
+    public static List<Alteration> getMissenseProteinChangesFromComplexProteinChange(String proteinChange) {
+        if (isComplexMissense(proteinChange)) {
+            List<Alteration> matches = new ArrayList<>();
+            Matcher m = COMPLEX_MISSENSE_ONE.matcher(proteinChange);
+            if (m.matches()) {
+                for (int i = 0; i < m.group(5).length(); i++) {
+                    Alteration alteration = new Alteration();
+                    int position = Integer.valueOf(m.group(2)) + i;
+                    char varResidue = m.group(5).charAt(i);
+                    alteration.setConsequence(VariantConsequenceUtils.findVariantConsequenceByTerm(MISSENSE_VARIANT));
+                    alteration.setProteinStart(position);
+                    alteration.setProteinEnd(position);
+                    alteration.setVariantResidues(Character.toString(varResidue));
+                    alteration.setAlteration(Integer.toString(position) + varResidue);
+                    matches.add(alteration);
+                }
+            } else {
+                m = COMPLEX_MISSENSE_TWO.matcher(proteinChange);
+                if (m.matches()) {
+                    for (int i = 0; i < m.group(1).length(); i++) {
+                        Alteration alteration = new Alteration();
+                        int position = Integer.valueOf(m.group(2)) + i;
+                        char refResidue = m.group(1).charAt(i);
+                        char varResidue = m.group(3).charAt(i);
+                        alteration.setConsequence(VariantConsequenceUtils.findVariantConsequenceByTerm(MISSENSE_VARIANT));
+                        alteration.setProteinStart(position);
+                        alteration.setProteinEnd(position);
+                        alteration.setRefResidues(Character.toString(refResidue));
+                        alteration.setVariantResidues(Character.toString(varResidue));
+                        alteration.setAlteration(refResidue + Integer.toString(position) + varResidue);
+                        matches.add(alteration);
+                    }
+                }
+            }
+            return matches;
+        } else {
+            return new ArrayList<>();
+        }
+    }
+
     // Only for missense alteration
     public static List<Alteration> getPositionedAlterations(ReferenceGenome referenceGenome, Alteration alteration) {
         return getPositionedAlterations(referenceGenome, alteration, getAllAlterations(referenceGenome, alteration.getGene()));
@@ -856,8 +956,9 @@ public final class AlterationUtils {
     }
 
     private static List<Alteration> getAlleleAlterationsSub(ReferenceGenome referenceGenome, Alteration alteration, Set<Alteration> fullAlterations) {
+        boolean isPositionalVariant = AlterationUtils.isPositionedAlteration(alteration);
         if (alteration == null || alteration.getConsequence() == null ||
-            !alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm(MISSENSE_VARIANT))) {
+            !(isPositionalVariant || alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm(MISSENSE_VARIANT)))) {
             return new ArrayList<>();
         }
 
@@ -865,9 +966,12 @@ public final class AlterationUtils {
             return new ArrayList<>();
         }
 
-        List<Alteration> missenseVariants = alterationBo.findMutationsByConsequenceAndPosition(
+        List<Alteration> missenseVariants = alterationBo.findRelevantOverlapAlterations(
             alteration.getGene(), referenceGenome, VariantConsequenceUtils.findVariantConsequenceByTerm(MISSENSE_VARIANT), alteration.getProteinStart(),
-            alteration.getProteinEnd(), fullAlterations);
+            alteration.getProteinEnd(), alteration.getAlteration(), fullAlterations);
+
+
+        List<Alteration> complexMissenseMuts = getMissenseProteinChangesFromComplexProteinChange(alteration.getAlteration());
 
         List<Alteration> alleles = new ArrayList<>();
         for (Alteration alt : missenseVariants) {
@@ -877,7 +981,18 @@ public final class AlterationUtils {
                 !alt.equals(alteration) &&
                 (alteration.getRefResidues() == null || alt.getRefResidues() == null || alt.getRefResidues().equals(alteration.getRefResidues()))
             ) {
-                alleles.add(alt);
+                // do not include the missense mutation from complex missense format
+                if (complexMissenseMuts.size() > 0) {
+                    Optional<Alteration> matched = complexMissenseMuts.stream().filter(mis -> {
+                        String altNameToCompare = StringUtils.isEmpty(mis.getRefResidues()) ? (Integer.toString(alt.getProteinStart()) + alt.getVariantResidues()) : (alt.getRefResidues() + Integer.toString(alt.getProteinStart()) + alt.getVariantResidues());
+                        return altNameToCompare.equals(mis.getAlteration());
+                    }).findAny();
+                    if (!matched.isPresent()) {
+                        alleles.add(alt);
+                    }
+                } else {
+                    alleles.add(alt);
+                }
             }
         }
 
@@ -897,7 +1012,7 @@ public final class AlterationUtils {
         if (alteration != null && alteration.getConsequence() != null && alteration.getConsequence().getTerm().equals(MISSENSE_VARIANT)) {
             // check for positional variant when the consequence is forced to be missense variant
             boolean isMissensePositionalVariant = StringUtils.isEmpty(alteration.getVariantResidues()) && alteration.getProteinStart() != null && alteration.getProteinEnd() != null && alteration.getProteinStart().equals(alteration.getProteinEnd());
-            List<Alteration> alternativeAlleles = alterationBo.findMutationsByConsequenceAndPosition(alteration.getGene(), referenceGenome, alteration.getConsequence(), alteration.getProteinStart(), alteration.getProteinEnd(), new HashSet<>(relevantAlterations));
+            List<Alteration> alternativeAlleles = alterationBo.findRelevantOverlapAlterations(alteration.getGene(), referenceGenome, alteration.getConsequence(), alteration.getProteinStart(), alteration.getProteinEnd(), alteration.getAlteration(), new HashSet<>(relevantAlterations));
             for (Alteration allele : alternativeAlleles) {
                 // remove all alleles if the alteration variant residue is empty
                 if (isMissensePositionalVariant && !StringUtils.isEmpty(allele.getVariantResidues())) {
@@ -1079,6 +1194,17 @@ public final class AlterationUtils {
         }
     }
 
+    public static boolean isCategoricalAlteration(String alteration) {
+        if (StringUtils.isEmpty(alteration)) {
+            return false;
+        }
+        alteration = removeExclusionCriteria(alteration);
+        List<String> categoricalAlterations = new ArrayList<>();
+        categoricalAlterations.addAll(getInferredMutations().stream().map(mut -> mut.toLowerCase()).collect(Collectors.toList()));
+        categoricalAlterations.addAll(getStructuralAlterations().stream().map(mut -> mut.toLowerCase()).collect(Collectors.toList()));
+        return categoricalAlterations.contains(alteration.toLowerCase());
+    }
+
     public static List<Alteration> findOncogenicMutations(Set<Alteration> fullAlterations) {
         return findAlterationsByRegex(InferredMutation.ONCOGENIC_MUTATIONS.getVariant() + ".*", fullAlterations);
     }
@@ -1097,43 +1223,6 @@ public final class AlterationUtils {
             }
         }
         return matchedAlterations.stream().collect(Collectors.toList());
-    }
-
-    /**
-     * @param alteration Annotated alteration
-     * @return A list of alterations we consider the same
-     */
-    public static LinkedHashSet<Alteration> findMatchedAlterations(ReferenceGenome referenceGenome, Alteration alteration) {
-        LinkedHashSet<Alteration> matches = new LinkedHashSet<>();
-        Alteration matchedAlteration = findAlteration(alteration.getGene(), referenceGenome, alteration.getAlteration());
-        if (matchedAlteration != null) {
-            matches.add(matchedAlteration);
-        }
-        if (alteration.getConsequence() != null
-            && alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm(MISSENSE_VARIANT))
-            && !alteration.getProteinStart().equals(AlterationPositionBoundary.START)
-            && !alteration.getProteinEnd().equals(AlterationPositionBoundary.END)
-            && !alteration.getProteinStart().equals(alteration.getProteinEnd())
-        ) {
-            Pattern p = Pattern.compile(".*delins([A-Z]+)");
-            Matcher m = p.matcher(alteration.getAlteration());
-            if (m.matches()) {
-                Set<Alteration> allAlterations = getAllAlterations(referenceGenome, alteration.getGene());
-                String insertedAAs = m.group(1);
-                for (int i = 0; i < insertedAAs.length(); i++) {
-                    char varAA = insertedAAs.charAt(i);
-                    int proteinStart = alteration.getProteinStart() + i;
-                    List<Alteration> alterations = alterationBo.findMutationsByConsequenceAndPosition(alteration.getGene(), referenceGenome, alteration.getConsequence(), proteinStart, proteinStart, allAlterations);
-                    for (Alteration alt : alterations) {
-                        if ((referenceGenome == null || alt.getReferenceGenomes().contains(referenceGenome)) && alt.getVariantResidues() != null && alt.getVariantResidues().charAt(0) == varAA) {
-                            matches.add(alt);
-                        }
-                    }
-                }
-            }
-        }
-
-        return matches;
     }
 
     public static Boolean isOncogenicAlteration(Alteration alteration) {

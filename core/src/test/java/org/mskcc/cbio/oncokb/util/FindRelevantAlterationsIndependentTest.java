@@ -55,12 +55,6 @@ public class FindRelevantAlterationsIndependentTest extends TestCase {
 
         relevantAlterations =
             ApplicationContextSingleton.getAlterationBo()
-                .findRelevantAlterations(ReferenceGenome.GRCh37, query, allAlterations, true);
-
-        assertEquals(2, relevantAlterations.size());
-
-        relevantAlterations =
-            ApplicationContextSingleton.getAlterationBo()
                 .findRelevantAlterations(ReferenceGenome.GRCh38, query, allAlterations, true);
 
         assertEquals(1, relevantAlterations.size());
@@ -120,6 +114,56 @@ public class FindRelevantAlterationsIndependentTest extends TestCase {
 
         assertEquals(0, relevantAlterations.size());
 
+    }
+
+    public void testFindRelevantAlterationsForInframeDeletionWithTrailing() {
+        Gene gene = new Gene();
+        gene.setHugoSymbol("PIK3CA");
+        gene.setEntrezGeneId(5290);
+
+        String inframeDelAltTrailing = "V105_R108delVGNR";
+        String inframeDelAlt = "V105_R108del";
+
+        // Check inframe deletion without trailing can be matched to with trailing
+        Alteration alt1 = new Alteration();
+        alt1.setGene(gene);
+        alt1.setAlteration(inframeDelAltTrailing);
+        AlterationUtils.annotateAlteration(alt1, alt1.getAlteration());
+
+
+        // alt should be matched when the consequence is the same
+        Alteration query = new Alteration();
+        query.setGene(gene);
+        query.setAlteration(inframeDelAlt);
+        AlterationUtils.annotateAlteration(query, query.getAlteration());
+
+        LinkedHashSet<Alteration> relevantAlterations =
+            ApplicationContextSingleton.getAlterationBo()
+                .findRelevantAlterations(ReferenceGenome.GRCh37, query, Collections.singleton(alt1), true);
+
+        assertEquals(1, relevantAlterations.size());
+        assertTrue(relevantAlterations.iterator().next().getAlteration().equals(inframeDelAltTrailing));
+
+
+        // Check inframe deletion with trailing can be matched to without trailing
+        alt1 = new Alteration();
+        alt1.setGene(gene);
+        alt1.setAlteration(inframeDelAlt);
+        AlterationUtils.annotateAlteration(alt1, alt1.getAlteration());
+
+
+        // alt should be matched when the consequence is the same
+        query = new Alteration();
+        query.setGene(gene);
+        query.setAlteration(inframeDelAltTrailing);
+        AlterationUtils.annotateAlteration(query, query.getAlteration());
+
+        relevantAlterations =
+            ApplicationContextSingleton.getAlterationBo()
+                .findRelevantAlterations(ReferenceGenome.GRCh37, query, Collections.singleton(alt1), true);
+
+        assertEquals(1, relevantAlterations.size());
+        assertTrue(relevantAlterations.iterator().next().getAlteration().equals(inframeDelAlt));
     }
 
 }

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -64,7 +65,7 @@ public class CacheController {
         @RequestParam(value = "cmd", required = false) String cmd,
         @RequestParam(value = "entrezGeneIds", required = false) Set<Integer> entrezGeneIds,
         @RequestParam(value = "propagation", required = false, defaultValue = "false") Boolean propagation
-    ) {
+    ) throws IOException {
         Map<String, String> result = new HashMap<>();
         if (cmd != null) {
             switch (cmd) {

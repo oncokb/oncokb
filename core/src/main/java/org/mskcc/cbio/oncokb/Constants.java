@@ -1,5 +1,6 @@
 package org.mskcc.cbio.oncokb;
 
+import com.vdurmont.semver4j.Semver;
 import org.mskcc.cbio.oncokb.model.ReferenceGenome;
 import org.mskcc.cbio.oncokb.model.VariantConsequence;
 import org.mskcc.cbio.oncokb.util.VariantConsequenceUtils;
@@ -15,10 +16,12 @@ import java.util.stream.Collectors;
 public final class Constants {
 
     public static final String MISSENSE_VARIANT = "missense_variant";
+    public static final String IN_FRAME_DELETION = "inframe_deletion";
+    public static final String IN_FRAME_INSERTION = "inframe_insertion";
     public static final String FIVE_UTR = "5_prime_UTR_variant";
     public static final String UPSTREAM_GENE = "upstream_gene_variant";
 
-    public static final String PUBLIC_API_VERSION = "v1.2.2";
+    public static final String PUBLIC_API_VERSION = "v1.3.0";
     public static final String PRIVATE_API_VERSION = "v1.3.0";
 
     // Defaults

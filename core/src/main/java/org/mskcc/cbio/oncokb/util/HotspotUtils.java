@@ -65,6 +65,8 @@ class EnrichedHotspot extends Hotspot {
 public class HotspotUtils {
     private static final String HOTSPOT_FILE_PATH = "/data/cancer-hotspots-gn.json";
     private static Map<Gene, List<EnrichedHotspot>> hotspotMutations = new HashMap<>();
+    private static final String POSITIONAL_MUTATION_TYPE="positional";
+    private static final String RANGE_INFRAME_MUTATION_TYPE="rangeInframe";
 
     static {
         System.out.println("Cache all hotspots at " + MainUtils.getCurrentTime());
@@ -116,7 +118,13 @@ public class HotspotUtils {
         ProteinLocation proteinLocation = new ProteinLocation();
         proteinLocation.setStart(alteration.getProteinStart());
         proteinLocation.setEnd(alteration.getProteinEnd());
-        proteinLocation.setMutationType(toGNMutationType(alteration.getConsequence()));
+        String mutationType = toGNMutationType(alteration.getConsequence());
+        if (AlterationUtils.isPositionedAlteration(alteration)) {
+            mutationType = POSITIONAL_MUTATION_TYPE;
+        } else if (AlterationUtils.isRangeInframeAlteration(alteration)) {
+            mutationType = RANGE_INFRAME_MUTATION_TYPE;
+        }
+        proteinLocation.setMutationType(mutationType);
         List<EnrichedHotspot> hotspots = new ArrayList<>();
 
         if (hotspotMutations.get(alteration.getGene()) == null) {
@@ -149,17 +157,23 @@ public class HotspotUtils {
             // Protein location
             int hotspotStart = hotspot.getStart();
             int hotspotStop = hotspot.getEnd();
-            validPosition &= (start <= hotspotStop && end >= hotspotStart);
+            if (type.equals(RANGE_INFRAME_MUTATION_TYPE)) {
+                validPosition = (start >= hotspotStart && end <= hotspotStop);
+            } else {
+                validPosition = (start <= hotspotStop && end >= hotspotStart);
+            }
 
             // Mutation type
+            boolean validPositional = type.equals(POSITIONAL_MUTATION_TYPE) && (hotspot.getType().contains("3d") || hotspot.getType().contains("single residue"));
             boolean validMissense = type.equals("Missense_Mutation") && (hotspot.getType().contains("3d") || hotspot.getType().contains("single residue"));
+            boolean validInFrameRange = type.equals(RANGE_INFRAME_MUTATION_TYPE) && (hotspot.getType().contains("in-frame"));
             boolean validInFrameInsertion = type.equals("In_Frame_Ins") && (hotspot.getType().contains("in-frame"));
             boolean validInFrameDeletion = type.equals("In_Frame_Del") && (hotspot.getType().contains("in-frame"));
             boolean validSplice = (type.equals("Splice_Site") || type.equals("Splice_Region")) && (hotspot.getType().contains("splice"));
 
             // Add hotspot
-            if (validPosition && (validMissense || validInFrameInsertion || validInFrameDeletion || validSplice)) {
-                if(validMissense) {
+            if (validPosition && (validPositional || validMissense || validInFrameRange || validInFrameInsertion || validInFrameDeletion || validSplice)) {
+                if(validPositional || validMissense) {
                     boolean validReferenceResidues = (referenceResidues + proteinLocation.getStart()).equals(hotspot.getResidue());
                     if (validReferenceResidues) {
                         result.add(hotspot);

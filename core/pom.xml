@@ -4,9 +4,9 @@
     <parent>
         <groupId>org.mskcc.cbio.oncokb</groupId>
         <artifactId>master</artifactId>
-        <version>3.6.8</version>
+        <version>3.7.0</version>
     </parent>
-    <version>3.6.8</version>
+    <version>3.7.0</version>
     <artifactId>core</artifactId>
     <packaging>jar</packaging>
     <name>OncoKB Core</name>
@@ -175,19 +175,13 @@
         <plugins>
           <!-- any other plugins -->
           <plugin>
-            <artifactId>maven-assembly-plugin</artifactId>
-            <executions>
-              <execution>
-                <phase>package</phase>
-                <goals>
-                  <goal>single</goal>
-                </goals>
-              </execution>
-            </executions>
+            <artifactId>maven-jar-plugin</artifactId>
             <configuration>
-              <descriptorRefs>
-                <descriptorRef>jar-with-dependencies</descriptorRef>
-              </descriptorRefs>
+                <archive>
+                    <manifest>
+                        <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                    </manifest>
+                </archive>
             </configuration>
           </plugin>
         </plugins>

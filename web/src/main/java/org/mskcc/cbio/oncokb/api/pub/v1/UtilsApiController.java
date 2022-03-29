@@ -9,12 +9,14 @@ import org.mskcc.cbio.oncokb.apiModels.download.FileExtension;
 import org.mskcc.cbio.oncokb.cache.CacheFetcher;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.*;
+import org.oncokb.oncokb_transcript.ApiException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -235,7 +237,7 @@ public class UtilsApiController implements UtilsApi {
     @Override
     public ResponseEntity<List<CancerGene>> utilsCancerGeneListGet(
         @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
-    ) {
+    ) throws ApiException, IOException {
         if (version != null) {
             return getDataDownloadResponseEntity(version, FileName.CANCER_GENE_LIST, FileExtension.JSON);
         }
@@ -246,7 +248,7 @@ public class UtilsApiController implements UtilsApi {
     @Override
     public ResponseEntity<String> utilsCancerGeneListTxtGet(
         @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
-    ) {
+    ) throws ApiException, IOException {
         if (version != null) {
             return getDataDownloadResponseEntity(version, FileName.CANCER_GENE_LIST, FileExtension.TEXT);
         }
