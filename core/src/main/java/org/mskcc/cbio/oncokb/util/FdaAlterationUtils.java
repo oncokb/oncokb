@@ -125,6 +125,10 @@ public class FdaAlterationUtils {
             "KRAS&Oncogenic Mutations&Rosai-Dorfman Disease&Cobimetinib, Trametinib",
             "NRAS&Oncogenic Mutations&Rosai-Dorfman Disease&Cobimetinib, Trametinib",
             "MAP2K1&Oncogenic Mutations&Rosai-Dorfman Disease&Cobimetinib, Trametinib",
+            "BRCA2&Oncogenic Mutations&Uterine Sarcoma&Niraparib, Olaparib, Rucaparib",
+            "PALB2&Oncogenic Mutations&Pancreatic Adenocarcinoma, Acinar Cell Carcinoma of the Pancreas&Rucaparib",
+            "BRCA1&Oncogenic Mutations&Pancreatic Adenocarcinoma, Acinar Cell Carcinoma of the Pancreas&Rucaparib",
+            "BRCA2&Oncogenic Mutations&Pancreatic Adenocarcinoma, Acinar Cell Carcinoma of the Pancreas&Rucaparib",
             "MAP2K2&Oncogenic Mutations&Rosai-Dorfman Disease&Cobimetinib, Trametinib"
         });
 
