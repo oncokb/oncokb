@@ -399,7 +399,7 @@ public class AnnotationsApiController {
             }
             if (geneA.getEntrezGeneId() == null && StringUtils.isEmpty(geneA.getHugoSymbol())) {
                 geneA.setEntrezGeneId(entrezGeneIdA);
-                geneA.setHugoSymbol(hugoSymbolA);
+                geneA.setHugoSymbol(hugoSymbolA == null ? "" : hugoSymbolA);
             }
             Gene geneB = new Gene();
             try {
@@ -411,30 +411,20 @@ public class AnnotationsApiController {
             }
             if (geneB.getEntrezGeneId() == null && StringUtils.isEmpty(geneB.getHugoSymbol())) {
                 geneB.setEntrezGeneId(entrezGeneIdB);
-                geneB.setHugoSymbol(hugoSymbolB);
+                geneB.setHugoSymbol(hugoSymbolB == null ? "" : hugoSymbolB);
             }
 
-            if (geneA != null) {
-                hugoSymbolA = geneA.getHugoSymbol();
-            }
-            if (geneB != null) {
-                hugoSymbolB = geneB.getHugoSymbol();
-            }
-            if (hugoSymbolA == null || hugoSymbolB == null) {
-                status = HttpStatus.BAD_REQUEST;
-            } else {
-                ReferenceGenome matchedRG = null;
-                if (!StringUtils.isEmpty(referenceGenome)) {
-                    matchedRG = MainUtils.searchEnum(ReferenceGenome.class, referenceGenome);
-                    if (matchedRG == null) {
-                        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-                    }
+            ReferenceGenome matchedRG = null;
+            if (!StringUtils.isEmpty(referenceGenome)) {
+                matchedRG = MainUtils.searchEnum(ReferenceGenome.class, referenceGenome);
+                if (matchedRG == null) {
+                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
                 }
-                String fusionName = FusionUtils.getFusionName(geneA, geneB);
-                indicatorQueryResp = this.cacheFetcher.processQuery(
-                    matchedRG, null, fusionName, null, AlterationType.STRUCTURAL_VARIANT.name(), tumorType, isFunctionalFusion ? "fusion" : null, null, null, structuralVariantType, null,
-                    null, false, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
             }
+            String fusionName = FusionUtils.getFusionName(geneA, geneB);
+            indicatorQueryResp = this.cacheFetcher.processQuery(
+                matchedRG, null, fusionName, null, AlterationType.STRUCTURAL_VARIANT.name(), tumorType, isFunctionalFusion ? "fusion" : null, null, null, structuralVariantType, null,
+                null, false, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
         }
         return new ResponseEntity<>(indicatorQueryResp, status);
     }
@@ -474,7 +464,7 @@ public class AnnotationsApiController {
                     }
                 }
                 if (StringUtils.isEmpty(geneA.getHugoSymbol()) && geneA.getEntrezGeneId() == null && query.getGeneA() != null) {
-                    geneA.setHugoSymbol(query.getGeneA().getHugoSymbol());
+                    geneA.setHugoSymbol(query.getGeneA().getHugoSymbol() == null ? "" : query.getGeneA().getHugoSymbol());
                     geneA.setEntrezGeneId(query.getGeneA().getEntrezGeneId());
                 }
 
@@ -493,7 +483,7 @@ public class AnnotationsApiController {
                     }
                 }
                 if (StringUtils.isEmpty(geneB.getHugoSymbol()) && geneB.getEntrezGeneId() == null && query.getGeneB() != null) {
-                    geneB.setHugoSymbol(query.getGeneB().getHugoSymbol());
+                    geneB.setHugoSymbol(query.getGeneB().getHugoSymbol() == null ? "" : query.getGeneB().getHugoSymbol());
                     geneB.setEntrezGeneId(query.getGeneB().getEntrezGeneId());
                 }
 

@@ -259,6 +259,10 @@ public class CacheFetcher {
         if (StringUtils.isEmpty(genomicLocation)) {
             return false;
         }
+        // when the transcript info is not available, we should always annotate the genomic location
+        if (allTranscriptsGenes == null || allTranscriptsGenes.isEmpty()) {
+            return true;
+        }
         GenomicLocation gl = null;
         try {
             if (gnVariantAnnotationType.equals(GNVariantAnnotationType.GENOMIC_LOCATION)) {
