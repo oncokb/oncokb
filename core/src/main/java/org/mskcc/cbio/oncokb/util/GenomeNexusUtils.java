@@ -82,12 +82,24 @@ public class GenomeNexusUtils {
         return new AnnotationControllerApi(getGNApiClient(url));
     }
 
+    private static String getGenomeNexusUrl(ReferenceGenome referenceGenome) {
+        switch (referenceGenome) {
+            case GRCh37:
+                String grch37Url = PropertiesUtils.getProperties("genome_nexus.grch37.url");
+                return StringUtils.isEmpty(grch37Url) ? GN_37_URL : grch37Url;
+            case GRCh38:
+                String grch38Url = PropertiesUtils.getProperties("genome_nexus.grch38.url");
+                return StringUtils.isEmpty(grch38Url) ? GN_38_URL : grch38Url;
+            default:
+                return null;
+        }
+    }
+
     private static EnsemblControllerApi getEnsemblControllerApi(ReferenceGenome referenceGenome) {
         switch (referenceGenome) {
             case GRCh37:
-                return getGNEnsemblControllerApi(GN_37_URL);
             case GRCh38:
-                return getGNEnsemblControllerApi(GN_38_URL);
+                return getGNEnsemblControllerApi(getGenomeNexusUrl(referenceGenome));
             default:
                 return new EnsemblControllerApi();
         }
@@ -96,9 +108,8 @@ public class GenomeNexusUtils {
     private static AnnotationControllerApi getAnnotationControllerApi(ReferenceGenome referenceGenome) {
         switch (referenceGenome) {
             case GRCh37:
-                return getGNAnnotationControllerApi(GN_37_URL);
             case GRCh38:
-                return getGNAnnotationControllerApi(GN_38_URL);
+                return getGNAnnotationControllerApi(getGenomeNexusUrl(referenceGenome));
             default:
                 return new AnnotationControllerApi();
         }
