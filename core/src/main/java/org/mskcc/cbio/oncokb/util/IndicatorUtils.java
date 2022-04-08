@@ -368,7 +368,7 @@ public class IndicatorUtils {
             }
 
             // Tumor type summary
-            if (evidenceTypes.contains(EvidenceType.TUMOR_TYPE_SUMMARY) && query.getTumorType() != null) {
+            if (evidenceTypes.contains(EvidenceType.TUMOR_TYPE_SUMMARY) && StringUtils.isNotEmpty(query.getTumorType())) {
                 Map<String, Object> tumorTypeSummary = SummaryUtils.tumorTypeSummary(EvidenceType.TUMOR_TYPE_SUMMARY, gene, query, matchedAlt,
                     new ArrayList<>(relevantAlterationsWithoutAlternativeAlleles),
                     matchedTumorType,
