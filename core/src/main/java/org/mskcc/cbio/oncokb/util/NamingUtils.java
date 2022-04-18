@@ -1,5 +1,6 @@
 package org.mskcc.cbio.oncokb.util;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -7,14 +8,10 @@ public class NamingUtils {
     private static Map<String, String> abbreviations = new HashMap<>();
     private static final String ABBREVIATION_ONTOLOGY_FILE = "/data/abbreviation-ontology.tsv";
 
-    public static void cacheAllAbbreviations() {
+    public static void cacheAllAbbreviations() throws IOException {
         List<String> lines = new ArrayList<>();
-        try {
-            lines = FileUtils.readTrimedLinesStream(
-                NamingUtils.class.getResourceAsStream(ABBREVIATION_ONTOLOGY_FILE));
-        } catch (Exception e) {
-            System.out.println("Failed to read abbreviation ontology file.");
-        }
+        lines = FileUtils.readTrimedLinesStream(
+            NamingUtils.class.getResourceAsStream(ABBREVIATION_ONTOLOGY_FILE));
         for (int i = 0; i < lines.size(); i++) {
             String line = lines.get(i);
             if (line.startsWith("#")) continue;

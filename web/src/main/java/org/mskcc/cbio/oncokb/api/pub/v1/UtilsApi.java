@@ -7,11 +7,13 @@ import org.mskcc.cbio.oncokb.apiModels.CuratedGene;
 import org.mskcc.cbio.oncokb.config.annotation.PremiumPublicApi;
 import org.mskcc.cbio.oncokb.config.annotation.PublicApi;
 import org.mskcc.cbio.oncokb.model.CancerGene;
+import org.oncokb.oncokb_transcript.ApiException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.io.IOException;
 import java.util.List;
 
 import static org.mskcc.cbio.oncokb.api.pub.v1.Constants.INCLUDE_EVIDENCE;
@@ -93,7 +95,7 @@ public interface UtilsApi {
 //        method = RequestMethod.GET)
     ResponseEntity<List<CancerGene>> utilsCancerGeneListGet(
         @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
-    );
+    ) throws ApiException, IOException;
 
     @PublicApi
     @PremiumPublicApi
@@ -108,7 +110,7 @@ public interface UtilsApi {
         method = RequestMethod.GET)
     ResponseEntity<String> utilsCancerGeneListTxtGet(
         @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
-    );
+    ) throws ApiException, IOException;
 
     @PublicApi
     @PremiumPublicApi

@@ -6,10 +6,10 @@
     <parent>
         <groupId>org.mskcc.cbio.oncokb</groupId>
         <artifactId>master</artifactId>
-        <version>3.6.8</version>
+        <version>3.7.3</version>
     </parent>
     <artifactId>web</artifactId>
-    <version>3.6.8</version>
+    <version>3.7.3</version>
     <packaging>war</packaging>
 
     <name>OncoKB Web</name>
@@ -80,7 +80,7 @@
         <profile>
             <id>curate</id>
             <properties>
-                <frontend.version>5f3b73aeb2</frontend.version>
+                <frontend.version>0.6.13</frontend.version>
                 <frontend.groupId>com.github.oncokb</frontend.groupId>
                 <frontend.artifactId>curation-platform</frontend.artifactId>
             </properties>
@@ -316,6 +316,7 @@
                                     <type>jar</type>
                                     <outputDirectory>dist</outputDirectory>
                                     <overWrite>true</overWrite>
+                                    <excludes>META-INF/</excludes>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
@@ -332,6 +333,11 @@
                             <targetPath></targetPath>
                         </resource>
                     </webResources>
+                    <archive>
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                        </manifest>
+                    </archive>
                 </configuration>
             </plugin>
             <plugin>

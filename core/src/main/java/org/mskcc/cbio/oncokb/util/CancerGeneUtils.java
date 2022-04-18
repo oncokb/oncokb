@@ -19,11 +19,11 @@ public class CancerGeneUtils {
     private static final String VOGELSTEIN_GENES = "vogelstein_125_genes.csv";
     private static final String CGC_GENES = "cancer_gene_census_11172020_576_genes_tier_1_only.csv";
 
-    public static List<CancerGene> getCancerGeneList() {
+    public static List<CancerGene> getCancerGeneList() throws IOException {
         return CacheUtils.getCancerGeneList();
     }
 
-    public static List<CancerGene> populateCancerGeneList() {
+    public static List<CancerGene> populateCancerGeneList() throws IOException {
         Set<CancerGene> cancerGenes = new HashSet<>();
 
         // We need to include all annotated genes
@@ -140,8 +140,7 @@ public class CancerGeneUtils {
         return cancerGenes.stream().sorted((Comparator.comparing(CancerGene::getOccurrenceCount).reversed().thenComparing(CancerGene::getHugoSymbol))).collect(Collectors.toList());
     }
 
-    private static Set<Gene> getGenes(String file) {
-        try {
+    private static Set<Gene> getGenes(String file) throws IOException {
             List<String> lines = FileUtils.readTrimedLinesStream(
                 CancerGeneUtils.class.getResourceAsStream("/data/cancerGenes/" + file));
 
@@ -171,8 +170,5 @@ public class CancerGeneUtils {
                 }
             }
             return allGenes;
-        } catch (IOException e) {
-            return Collections.emptySet();
-        }
     }
 }

@@ -46,7 +46,10 @@ public class GenomeNexusUtils {
 
         if (_ensemblTranscript.isPresent()) {
             transcriptMatchResult.setOriginalEnsemblTranscript(_ensemblTranscript.get());
-            Optional<Sequence> _sequence = getProteinSequence(transcript.getReferenceGenome(), _ensemblTranscript.get().getProteinId());
+            Optional<Sequence> _sequence = Optional.empty();
+            if (StringUtils.isNotEmpty(_ensemblTranscript.get().getProteinId())) {
+                _sequence = getProteinSequence(transcript.getReferenceGenome(), _ensemblTranscript.get().getProteinId());
+            }
             if (_sequence.isPresent()) {
                 List<EnsemblTranscript> targetEnsemblTranscripts = getEnsemblTranscriptList(hugoSymbol, referenceGenome);
                 if (targetEnsemblTranscripts.size() == 0) {
@@ -59,7 +62,7 @@ public class GenomeNexusUtils {
                     }
                 }
             } else {
-                transcriptMatchResult.setNote("The transcript is invalid");
+                transcriptMatchResult.setNote("No protein sequence available for transcript " + _ensemblTranscript.get().getTranscriptId());
             }
         } else {
             transcriptMatchResult.setNote("The transcript is invalid");
@@ -82,12 +85,24 @@ public class GenomeNexusUtils {
         return new AnnotationControllerApi(getGNApiClient(url));
     }
 
+    private static String getGenomeNexusUrl(ReferenceGenome referenceGenome) {
+        switch (referenceGenome) {
+            case GRCh37:
+                String grch37Url = PropertiesUtils.getProperties("genome_nexus.grch37.url");
+                return StringUtils.isEmpty(grch37Url) ? GN_37_URL : grch37Url;
+            case GRCh38:
+                String grch38Url = PropertiesUtils.getProperties("genome_nexus.grch38.url");
+                return StringUtils.isEmpty(grch38Url) ? GN_38_URL : grch38Url;
+            default:
+                return null;
+        }
+    }
+
     private static EnsemblControllerApi getEnsemblControllerApi(ReferenceGenome referenceGenome) {
         switch (referenceGenome) {
             case GRCh37:
-                return getGNEnsemblControllerApi(GN_37_URL);
             case GRCh38:
-                return getGNEnsemblControllerApi(GN_38_URL);
+                return getGNEnsemblControllerApi(getGenomeNexusUrl(referenceGenome));
             default:
                 return new EnsemblControllerApi();
         }
@@ -96,9 +111,8 @@ public class GenomeNexusUtils {
     private static AnnotationControllerApi getAnnotationControllerApi(ReferenceGenome referenceGenome) {
         switch (referenceGenome) {
             case GRCh37:
-                return getGNAnnotationControllerApi(GN_37_URL);
             case GRCh38:
-                return getGNAnnotationControllerApi(GN_38_URL);
+                return getGNAnnotationControllerApi(getGenomeNexusUrl(referenceGenome));
             default:
                 return new AnnotationControllerApi();
         }
@@ -119,7 +133,7 @@ public class GenomeNexusUtils {
         }
     }
 
-    public static TranscriptConsequenceSummary getTranscriptConsequence(GNVariantAnnotationType type, String query, ReferenceGenome referenceGenome) {
+    public static TranscriptConsequenceSummary getTranscriptConsequence(GNVariantAnnotationType type, String query, ReferenceGenome referenceGenome) throws ApiException {
         if (StringUtils.isEmpty(query) || StringUtils.isEmpty(query.replace(",", ""))) {
             return null;
         }
@@ -141,19 +155,15 @@ public class GenomeNexusUtils {
         }
     }
 
-    private static VariantAnnotation getVariantAnnotation(GNVariantAnnotationType type, String query, ReferenceGenome referenceGenome) {
+    private static VariantAnnotation getVariantAnnotation(GNVariantAnnotationType type, String query, ReferenceGenome referenceGenome) throws ApiException {
         VariantAnnotation variantAnnotation = null;
         if (query != null && type != null) {
-            try {
-                List<String> gnFields = new ArrayList<>();
-                gnFields.add("annotation_summary");
-                if (type.equals(GNVariantAnnotationType.HGVS_G)) {
-                    variantAnnotation = getAnnotationControllerApi(referenceGenome).fetchVariantAnnotationGET(query, MSK_ISOFORM_OVERRIDE, null, gnFields);
-                } else {
-                    variantAnnotation = getAnnotationControllerApi(referenceGenome).fetchVariantAnnotationByGenomicLocationGET(query, MSK_ISOFORM_OVERRIDE, null, gnFields);
-                }
-            } catch (ApiException e) {
-                e.printStackTrace();
+            List<String> gnFields = new ArrayList<>();
+            gnFields.add("annotation_summary");
+            if (type.equals(GNVariantAnnotationType.HGVS_G)) {
+                variantAnnotation = getAnnotationControllerApi(referenceGenome).fetchVariantAnnotationGET(query, MSK_ISOFORM_OVERRIDE, null, gnFields);
+            } else {
+                variantAnnotation = getAnnotationControllerApi(referenceGenome).fetchVariantAnnotationByGenomicLocationGET(query, MSK_ISOFORM_OVERRIDE, null, gnFields);
             }
         }
         return variantAnnotation;

@@ -19,7 +19,7 @@ public class LevelUtils {
             LevelOfEvidence.LEVEL_Px3, LevelOfEvidence.LEVEL_Px2, LevelOfEvidence.LEVEL_Px1,
             LevelOfEvidence.LEVEL_Dx3, LevelOfEvidence.LEVEL_Dx2, LevelOfEvidence.LEVEL_Dx1,
             LevelOfEvidence.LEVEL_R2, LevelOfEvidence.LEVEL_4, LevelOfEvidence.LEVEL_3B, LevelOfEvidence.LEVEL_3A,
-            LevelOfEvidence.LEVEL_2B, LevelOfEvidence.LEVEL_2A, LevelOfEvidence.LEVEL_2, LevelOfEvidence.LEVEL_1, LevelOfEvidence.LEVEL_R1
+            LevelOfEvidence.LEVEL_2, LevelOfEvidence.LEVEL_1, LevelOfEvidence.LEVEL_R1
             )
     );
 
@@ -27,7 +27,7 @@ public class LevelUtils {
 
     private static final List<LevelOfEvidence> THERAPEUTIC_SENSITIVE_LEVELS = Collections.unmodifiableList(
         Arrays.asList(LevelOfEvidence.LEVEL_4, LevelOfEvidence.LEVEL_3B, LevelOfEvidence.LEVEL_3A,
-            LevelOfEvidence.LEVEL_2B, LevelOfEvidence.LEVEL_2A, LevelOfEvidence.LEVEL_2, LevelOfEvidence.LEVEL_1)
+            LevelOfEvidence.LEVEL_2, LevelOfEvidence.LEVEL_1)
     );
 
     private static final List<LevelOfEvidence> THERAPEUTIC_RESISTANCE_LEVELS = Collections.unmodifiableList(
@@ -42,7 +42,7 @@ public class LevelUtils {
     // But 2B is still higher level of 3A
     private static final List<LevelOfEvidence> THERAPEUTIC_LEVELS_WITH_PRIORITY = Collections.unmodifiableList(
         Arrays.asList(LevelOfEvidence.LEVEL_R2, LevelOfEvidence.LEVEL_4, LevelOfEvidence.LEVEL_3B,
-            LevelOfEvidence.LEVEL_2B, LevelOfEvidence.LEVEL_3A, LevelOfEvidence.LEVEL_2A, LevelOfEvidence.LEVEL_2, LevelOfEvidence.LEVEL_1, LevelOfEvidence.LEVEL_R1)
+            LevelOfEvidence.LEVEL_3A, LevelOfEvidence.LEVEL_2, LevelOfEvidence.LEVEL_1, LevelOfEvidence.LEVEL_R1)
     );
 
     private static final List<LevelOfEvidence> THERAPEUTIC_OTHER_INDICATION_LEVELS = Collections.unmodifiableList(
@@ -264,7 +264,6 @@ public class LevelUtils {
 
     public static Set<LevelOfEvidence> getAllowedCurationLevels() {
         Set levels = new HashSet<>(PUBLIC_LEVELS);
-        levels.remove(LevelOfEvidence.LEVEL_0);
         levels.remove(LevelOfEvidence.LEVEL_3B);
         return levels;
     }

@@ -1,5 +1,6 @@
 package org.mskcc.cbio.oncokb.model;
 
+import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.apiModels.InfoLevel;
 import org.mskcc.cbio.oncokb.util.*;
 
@@ -17,7 +18,8 @@ public class OncoKBInfo implements Serializable {
     String ncitVersion;
     List<InfoLevel> levels;
     Version dataVersion;
-    String apiVersion;
+    SemVer appVersion;
+    SemVer apiVersion;
     Boolean publicInstance;
 
     public OncoKBInfo() {
@@ -32,8 +34,13 @@ public class OncoKBInfo implements Serializable {
         dataVersion.setDate(MainUtils.getDataVersionDate());
 
         this.dataVersion = dataVersion;
-        this.apiVersion = PUBLIC_API_VERSION;
+        this.apiVersion = new SemVer(PUBLIC_API_VERSION);
 
+        String appVersion = this.getClass().getPackage().getImplementationVersion();
+
+        if (StringUtils.isNotEmpty(appVersion)) {
+            this.appVersion = new SemVer(appVersion);
+        }
         String isPublicInstance = PropertiesUtils.getProperties(IS_PUBLIC_INSTANCE);
 
         if (isPublicInstance != null && Boolean.valueOf(isPublicInstance)) {
@@ -59,11 +66,15 @@ public class OncoKBInfo implements Serializable {
         return dataVersion;
     }
 
+    public SemVer getAppVersion() {
+        return appVersion;
+    }
+
     public Boolean getPublicInstance() {
         return publicInstance;
     }
 
-    public String getApiVersion() {
+    public SemVer getApiVersion() {
         return apiVersion;
     }
 }

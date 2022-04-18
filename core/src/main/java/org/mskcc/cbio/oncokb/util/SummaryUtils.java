@@ -10,7 +10,8 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-;
+import static org.mskcc.cbio.oncokb.Constants.IN_FRAME_DELETION;
+import static org.mskcc.cbio.oncokb.Constants.IN_FRAME_INSERTION;
 
 /**
  * Created by Hongxin on 8/10/15.
@@ -40,11 +41,6 @@ public class SummaryUtils {
     private static Map<String, Object> getTumorTypeSummarySubFunc(EvidenceType evidenceType, Gene gene, Query query, Alteration exactMatchedAlt, List<Alteration> relevantAlterations, TumorType matchedTumorType, List<TumorType> relevantTumorTypes) {
         Map<String, Object> tumorTypeSummary = newTumorTypeSummary();
         Alteration alteration = null;
-
-        //        if (gene.getHugoSymbol().equals("KIT")) {
-//            tumorTypeSummary = getKITtumorTypeSummaries(queryAlteration, alterations, queryTumorType, relevantTumorTypes);
-//        } else {
-        // Get all tumor type summary evidences specifically for the alteration
 
         if (exactMatchedAlt != null) {
             alteration = exactMatchedAlt;
@@ -276,7 +272,23 @@ public class SummaryUtils {
                 AlterationType.getByName(query.getAlterationType()), query.getConsequence(), query.getProteinStart(), query.getProteinEnd(), query.getReferenceGenome());
         }
 
+        if (oncogenic != null && !oncogenic.equals(Oncogenicity.UNKNOWN)) {
+            return getOncogenicSummaryFromOncogenicity(oncogenic, alteration, query);
+        }
+
         isHotspot = HotspotUtils.isHotspot(alteration);
+
+        if(AlterationUtils.isPositionedAlteration(alteration)) {
+            return positionalVariantSummary(alteration, query, isHotspot);
+        }
+
+        if (isHotspot) {
+            if (alteration != null && MainUtils.isVUS(alteration)) {
+                return vusAndHotspotSummary(alteration, query, isHotspot);
+            } else {
+                return hotspotSummary(alteration, query, false);
+            }
+        }
 
         if (oncogenic == null || oncogenic.equals(Oncogenicity.UNKNOWN)) {
             // Get oncogenic summary from alternative alleles
@@ -318,15 +330,11 @@ public class SummaryUtils {
         }
 
         if (oncogenic != null && !oncogenic.equals(Oncogenicity.UNKNOWN)) {
-            return getOncogenicSummaryFromOncogenicity(oncogenic, alteration, query, isHotspot);
+            return getOncogenicSummaryFromOncogenicity(oncogenic, alteration, query);
         }
 
         if (alteration != null && MainUtils.isVUS(alteration)) {
-            return vusAndHotspotSummary(alteration, query, isHotspot);
-        }
-
-        if (isHotspot) {
-            return hotspotSummary(alteration, query, false, oncogenic);
+            return getVUSOncogenicSummary(query.getReferenceGenome(), alteration, query);
         }
 
         String summary = unknownOncogenicSummary(gene, query.getReferenceGenome(), query);
@@ -362,16 +370,13 @@ public class SummaryUtils {
         return StringUtils.capitalize(sb.toString());
     }
 
-    private static String getOncogenicSummaryFromOncogenicity(Oncogenicity oncogenicity, Alteration alteration, Query query, Boolean isHotspot) {
+    private static String getOncogenicSummaryFromOncogenicity(Oncogenicity oncogenicity, Alteration alteration, Query query) {
         StringBuilder sb = new StringBuilder();
         String queryAlteration = query.getAlteration();
         String altName = getGeneMutationNameInVariantSummary(alteration.getGene(), query.getReferenceGenome(), query.getHugoSymbol(), queryAlteration);
         Boolean appendThe = appendThe(queryAlteration);
         Boolean isPlural = false;
 
-        if (isHotspot == null) {
-            isHotspot = false;
-        }
         if (queryAlteration.toLowerCase().contains("fusions") || queryAlteration.toLowerCase().endsWith("mutations")) {
             isPlural = true;
         }
@@ -385,7 +390,7 @@ public class SummaryUtils {
             }
 
             if (oncogenicity.equals(Oncogenicity.RESISTANCE)) {
-                return resistanceOncogenicitySummary(alteration.getGene(), query.getReferenceGenome(), query);
+                return resistanceOncogenicitySummary(alteration.getGene(), query);
             }
             if (appendThe) {
                 sb.append("The ");
@@ -424,8 +429,6 @@ public class SummaryUtils {
                 sb.append("considered likely");
             } else if (oncogenicity.equals(Oncogenicity.YES)) {
                 sb.append("known to be");
-            } else if (oncogenicity.equals(Oncogenicity.PREDICTED)) {
-                sb.append("predicted to be");
             } else {
                 // For Unknown
                 return "";
@@ -497,7 +500,7 @@ public class SummaryUtils {
         return sb.toString();
     }
 
-    public static String resistanceOncogenicitySummary(Gene gene, ReferenceGenome referenceGenome, Query query) {
+    public static String resistanceOncogenicitySummary(Gene gene, Query query) {
         StringBuilder sb = new StringBuilder();
         sb.append("The ");
         sb.append(gene.getHugoSymbol());
@@ -515,43 +518,48 @@ public class SummaryUtils {
         return sb.toString();
     }
 
-    public static String hotspotSummary(Alteration alteration, Query query, Boolean usePronoun, Oncogenicity oncogenicity) {
+    public static String positionalVariantSummary(Alteration alteration, Query query, boolean isHotspot) {
+        if (isHotspot) {
+            return hotspotSummary(alteration, query, false, true);
+        } else {
+            StringBuilder sb = new StringBuilder();
+            sb.append("OncoKB assigns biological and oncogenic effects at the allele level, not the positional level.");
+            Set<Alteration> alleles = new HashSet<>(AlterationUtils.getAlleleAlterations(query.getReferenceGenome(), alteration));
+            if (alleles.size() > 0) {
+                sb.append(" Biological and oncogenic effects are curated for the following " + query.getHugoSymbol() + " " + query.getAlteration() + " allele" + (alleles.size() > 1 ? "s" : "") + ": ");
+                sb.append(allelesToStr(alleles));
+                sb.append(".");
+            }
+            return sb.toString();
+        }
+    }
+
+    public static String hotspotSummary(Alteration alteration, Query query, Boolean usePronoun) {
+        return hotspotSummary(alteration, query, usePronoun, false);
+    }
+    public static String hotspotSummary(Alteration alteration, Query query, Boolean usePronoun, boolean isPositionalVariant) {
         StringBuilder sb = new StringBuilder();
         if (usePronoun == null) {
             usePronoun = false;
         }
+        String altName = "";
+        if (isPositionalVariant) {
+            altName = query.getHugoSymbol() + " " + query.getAlteration();
+        } else {
+            altName = getGeneMutationNameInVariantSummary(alteration.getGene(), query.getReferenceGenome(), query.getHugoSymbol(), query.getAlteration());
+        }
         if (usePronoun) {
             sb.append("It");
         } else {
-            sb.append("The " + getGeneMutationNameInVariantSummary(alteration.getGene(), query.getReferenceGenome(), query.getHugoSymbol(), query.getAlteration()));
+            sb.append("The " + altName);
         }
-        sb.append(" has been identified as a statistically significant hotspot");
-        if (oncogenicity == null || !MainUtils.isValidHotspotOncogenicity(oncogenicity)) {
-            sb.append(" and is predicted to be oncogenic");
+        sb.append(" has been identified as a statistically significant hotspot and ");
+        if (isPositionalVariant) {
+            sb.append("variants at this position are considered likely oncogenic");
+        } else {
+            sb.append("is likely to be oncogenic");
         }
-        sb.append(hotspotLink(query));
         sb.append(".");
-        return sb.toString();
-    }
-
-    private static String hotspotLink(Query query) {
-        StringBuilder sb = new StringBuilder();
-        if (query.getType() != null && query.getType().equals("web")) {
-            String cancerHotspotsLink = "";
-            try {
-                cancerHotspotsLink = PropertiesUtils.getProperties("cancerhotspots.website.link");
-                if (com.mysql.jdbc.StringUtils.isNullOrEmpty(cancerHotspotsLink))
-                    throw new Exception();
-            } catch (Exception e) {
-                cancerHotspotsLink = "http://cancerhotspots.org";
-            }
-            cancerHotspotsLink = cancerHotspotsLink.trim();
-            if (!cancerHotspotsLink.isEmpty()) {
-                sb.append(" (");
-                sb.append(cancerHotspotsLink);
-                sb.append(")");
-            }
-        }
         return sb.toString();
     }
 
@@ -560,9 +568,7 @@ public class SummaryUtils {
         sb.append(getVUSOncogenicSummary(query.getReferenceGenome(), alteration, query));
 
         if (isHotspot) {
-            sb.append(" However, it has been identified as a statistically significant hotspot and is predicted to be oncogenic");
-            sb.append(hotspotLink(query));
-            sb.append(".");
+            sb.append(" However, it has been identified as a statistically significant hotspot and is likely to be oncogenic.");
         }
         return sb.toString();
     }
@@ -718,8 +724,8 @@ public class SummaryUtils {
             sb.append(queryAlteration);
         } else if (AlterationUtils.isGeneralAlterations(queryAlteration, false)
             || (alteration.getConsequence() != null
-            && (alteration.getConsequence().getTerm().equals("inframe_deletion")
-            || alteration.getConsequence().getTerm().equals("inframe_insertion")))
+            && (alteration.getConsequence().getTerm().equals(IN_FRAME_DELETION)
+            || alteration.getConsequence().getTerm().equals(IN_FRAME_INSERTION)))
             || StringUtils.containsIgnoreCase(queryAlteration, "indel")
             || StringUtils.containsIgnoreCase(queryAlteration, "dup")
             || StringUtils.containsIgnoreCase(queryAlteration, "del")
@@ -789,8 +795,8 @@ public class SummaryUtils {
                 sb.append(queryAlteration);
             } else if (AlterationUtils.isGeneralAlterations(queryAlteration, false)
                 || (alteration.getConsequence() != null
-                && (alteration.getConsequence().getTerm().equals("inframe_deletion")
-                || alteration.getConsequence().getTerm().equals("inframe_insertion")))
+                && (alteration.getConsequence().getTerm().equals(IN_FRAME_DELETION)
+                || alteration.getConsequence().getTerm().equals(IN_FRAME_INSERTION)))
                 || StringUtils.containsIgnoreCase(queryAlteration, "indel")
                 || StringUtils.containsIgnoreCase(queryAlteration, "dup")
                 || StringUtils.containsIgnoreCase(queryAlteration, "del")

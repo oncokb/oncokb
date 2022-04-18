@@ -14,6 +14,7 @@ import org.oncokb.oncokb_transcript.auth.HttpBearerAuth;
 import org.oncokb.oncokb_transcript.client.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -25,6 +26,7 @@ public class OncokbTranscriptService {
     private ApiClient client;
     private final int TIMEOUT = 30000;
     private final String SEQUENCE_TYPE = "PROTEIN";
+    private Boolean enabled = false;
 
     public OncokbTranscriptService() {
         this.client = Configuration.getDefaultApiClient();
@@ -34,6 +36,9 @@ public class OncokbTranscriptService {
         String oncokbTranscriptToken = PropertiesUtils.getProperties("oncokb_transcript.token");
         HttpBearerAuth Authorization = (HttpBearerAuth) this.client.getAuthentication("Authorization");
         Authorization.setBearerToken(oncokbTranscriptToken);
+        if(StringUtils.isNotEmpty(oncokbTranscriptToken)) {
+            enabled = true;
+        }
     }
 
     public void updateTranscriptUsage(Gene gene, String grch37EnsemblTranscriptId, String grch38EnsemblTranscriptId) throws ApiException {
@@ -73,11 +78,7 @@ public class OncokbTranscriptService {
         TranscriptControllerApi controllerApi = new TranscriptControllerApi();
 
         Sequence pickedSequence = null;
-        try {
-            pickedSequence = sequenceControllerApi.findCanonicalSequenceUsingGET(referenceGenome.toString(), gene.getEntrezGeneId(), SEQUENCE_TYPE);
-        } catch (ApiException e) {
-            throw e;
-        }
+        pickedSequence = sequenceControllerApi.findCanonicalSequenceUsingGET(referenceGenome.toString(), gene.getEntrezGeneId(), SEQUENCE_TYPE);
         if (pickedSequence == null) {
             return null;
         } else {
@@ -123,11 +124,17 @@ public class OncokbTranscriptService {
     }
 
     public List<Drug> findDrugs(String query) throws ApiException {
+        if(!this.enabled) {
+            return new ArrayList<>();
+        }
         DrugControllerApi drugControllerApi = new DrugControllerApi();
         return drugControllerApi.findDrugsUsingGET(query);
     }
 
     public Drug findDrugByNcitCode(String code) throws ApiException {
+        if(!this.enabled) {
+            return null;
+        }
         DrugControllerApi drugControllerApi = new DrugControllerApi();
         return drugControllerApi.findDrugByCodeUsingGET(code);
     }
@@ -136,6 +143,9 @@ public class OncokbTranscriptService {
         Gene gene = GeneUtils.getGene(symbol);
         if (gene != null) {
             return gene;
+        }
+        if(!this.enabled) {
+            return null;
         }
         GeneControllerApi geneControllerApi = new GeneControllerApi();
         org.oncokb.oncokb_transcript.client.Gene transcriptGene = geneControllerApi.findGeneBySymbolUsingGET(symbol);
@@ -147,6 +157,9 @@ public class OncokbTranscriptService {
     }
 
     public List<TranscriptDTO> findEnsemblTranscriptsByIds(List<String> ensemblTranscriptIds, ReferenceGenome referenceGenome) throws ApiException {
+        if(!this.enabled) {
+            return new ArrayList<>();
+        }
         TranscriptControllerApi transcriptControllerApi = new TranscriptControllerApi();
         return transcriptControllerApi.findTranscriptsByEnsemblIdsUsingPOST(referenceGenome.name(), ensemblTranscriptIds);
     }
@@ -162,13 +175,16 @@ public class OncokbTranscriptService {
                 genes.add(gene);
             }
         }
-        if (unknownGenes.size() > 0) {
+        if (this.enabled && unknownGenes.size() > 0) {
             this.findTranscriptGenesBySymbols(unknownGenes).stream().filter(gene -> gene != null).forEach(gene -> genes.add(transcriptGeneMap(gene)));
         }
         return genes;
     }
 
     public Set<org.oncokb.oncokb_transcript.client.Gene> findTranscriptGenesBySymbols(List<String> symbols) throws ApiException {
+        if(!this.enabled) {
+            return new HashSet<>();
+        }
         GeneControllerApi geneControllerApi = new GeneControllerApi();
         return geneControllerApi.findGenesBySymbolsUsingPOST(symbols);
     }
@@ -182,5 +198,13 @@ public class OncokbTranscriptService {
             return gene;
         }
         return new Gene();
+    }
+
+    public Boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
     }
 }

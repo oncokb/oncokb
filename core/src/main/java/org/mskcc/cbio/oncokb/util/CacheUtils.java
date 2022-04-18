@@ -10,8 +10,6 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.mskcc.cbio.oncokb.util.TumorTypeUtils.getBySpecialTumor;
-
 
 /**
  * Created by Hongxin on 4/1/16.
@@ -122,7 +120,7 @@ public class CacheUtils {
         }
     };
 
-    private static void notifyOtherServices(String cmd, Set<Integer> entrezGeneIds) {
+    private static void notifyOtherServices(String cmd, Set<Integer> entrezGeneIds) throws IOException {
         System.out.println("Notify other services..." + " at " + MainUtils.getCurrentTime());
         if (cmd == null) {
             cmd = "";
@@ -132,22 +130,14 @@ public class CacheUtils {
             System.out.println("\t# of other services" + otherServices.size());
             for (String service : otherServices) {
                 if (!StringUtils.isNullOrEmpty(service)) {
-                    try {
-                        HttpUtils.postRequest(service + "?cmd=updateGene&entrezGeneIds=" +
-                            org.apache.commons.lang3.StringUtils.join(entrezGeneIds, ","), "");
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    HttpUtils.postRequest(service + "?cmd=updateGene&entrezGeneIds=" +
+                        org.apache.commons.lang3.StringUtils.join(entrezGeneIds, ","), "");
                 }
             }
         } else if (cmd == "reset") {
             for (String service : otherServices) {
                 if (!StringUtils.isNullOrEmpty(service)) {
-                    try {
-                        HttpUtils.postRequest(service + "?cmd=reset", "");
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    HttpUtils.postRequest(service + "?cmd=reset", "");
                 }
             }
         } else {
@@ -269,14 +259,14 @@ public class CacheUtils {
         System.out.println("Cached all genes: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
     }
 
-    public static List<CancerGene> getCancerGeneList() {
+    public static List<CancerGene> getCancerGeneList() throws IOException {
         if(cancerGeneList == null) {
             updateCancerGeneList();
         }
         return cancerGeneList;
     }
 
-    private static void updateCancerGeneList() {
+    private static void updateCancerGeneList() throws IOException {
         cancerGeneList = CancerGeneUtils.populateCancerGeneList();
     }
 
@@ -338,8 +328,8 @@ public class CacheUtils {
         }
     }
 
-    public static Set<Alteration> findMutationsByConsequenceAndPosition(Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end) {
-        return AlterationUtils.findOverlapAlteration(getAlterations(gene.getEntrezGeneId()), gene, referenceGenome, consequence, start, end);
+    public static Set<Alteration> findRelevantOverlapAlterations(Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end, String proteinChange) {
+        return AlterationUtils.findOverlapAlteration(getAlterations(gene.getEntrezGeneId()), gene, referenceGenome, consequence, start, end, proteinChange);
     }
 
     public static Set<Alteration> findMutationsByConsequenceAndPositionOnSamePosition(Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end, String referenceResidue) {
@@ -544,7 +534,7 @@ public class CacheUtils {
         alterations.remove(entrezGeneId);
     }
 
-    public static void updateGene(Set<Integer> entrezGeneIds, Boolean propagate) {
+    public static void updateGene(Set<Integer> entrezGeneIds, Boolean propagate) throws IOException {
         System.out.println("Update gene on instance " + PropertiesUtils.getProperties("app.name") + " at " + MainUtils.getCurrentTime());
         if (propagate == null) {
             propagate = false;
@@ -561,13 +551,13 @@ public class CacheUtils {
         }
     }
 
-    public static void resetAll() {
+    public static void resetAll() throws IOException {
         System.out.println("Reset all genes cache on instance " + PropertiesUtils.getProperties("app.name") + " at " + MainUtils.getCurrentTime());
         GeneObservable.getInstance().update("reset", null);
         notifyOtherServices("reset", null);
     }
 
-    public static void resetAll(Boolean propagate) {
+    public static void resetAll(Boolean propagate) throws IOException {
         System.out.println("Reset all genes cache on instance " + PropertiesUtils.getProperties("app.name") + " at " + MainUtils.getCurrentTime());
         GeneObservable.getInstance().update("reset", null);
         if (propagate == null) {

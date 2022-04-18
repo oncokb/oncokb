@@ -2,6 +2,7 @@ package org.mskcc.cbio.oncokb.api.pub.v1;
 
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang3.StringUtils;
+import org.genome_nexus.ApiException;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.model.*;
@@ -36,14 +37,9 @@ public class VariantsApiController implements VariantsApi {
         @ApiParam(value = "The entrez gene ID. entrezGeneId is prioritize than hugoSymbol if both parameters have been defined") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
         , @ApiParam(value = "The gene symbol used in Human Genome Organisation.") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
         , @ApiParam(value = "variant name.") @RequestParam(value = "variant", required = false) String variant
-        , @ApiParam(value = "") @RequestParam(value = "variantType", required = false) String variantType
-        , @ApiParam(value = "") @RequestParam(value = "consequence", required = false) String consequence
-        , @ApiParam(value = "") @RequestParam(value = "proteinStart", required = false) Integer proteinStart
-        , @ApiParam(value = "") @RequestParam(value = "proteinEnd", required = false) Integer proteinEnd
-        , @ApiParam(value = "HGVS varaint. Its priority is higher than entrezGeneId/hugoSymbol + variant combination") @RequestParam(value = "hgvs", required = false) String hgvs
         , @ApiParam(value = "Reference genome, either GRCh37 or GRCh38. The default is GRCh37", required = false, defaultValue = "GRCh37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") String referenceGenome
         , @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
-    ) {
+    ) throws ApiException {
         ReferenceGenome matchedRG = null;
         if (!StringUtils.isEmpty(referenceGenome)) {
             matchedRG = MainUtils.searchEnum(ReferenceGenome.class, referenceGenome);
@@ -51,15 +47,29 @@ public class VariantsApiController implements VariantsApi {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
         }
-        VariantSearchQuery query = new VariantSearchQuery(entrezGeneId, hugoSymbol, variant, variantType, consequence, proteinStart, proteinEnd, hgvs, matchedRG);
-        return ResponseEntity.ok().body(JsonResultFactory.getAlteration(getVariants(query), fields));
+        List<Alteration> result = new ArrayList<>();
+        Gene gene = GeneUtils.getGene(entrezGeneId, hugoSymbol);
+        if (gene != null) {
+            if (StringUtils.isEmpty(variant)) {
+                result = new ArrayList<>(AlterationUtils.getAllAlterations(matchedRG, gene));
+            } else {
+                Alteration alteration = new Alteration();
+                alteration.setGene(gene);
+                alteration.setAlteration(variant);
+                Alteration matchedAlteration = ApplicationContextSingleton.getAlterationBo().findExactlyMatchedAlteration(matchedRG, alteration, AlterationUtils.getAllAlterations(matchedRG, gene));
+                if (matchedAlteration != null) {
+                    result.add(matchedAlteration);
+                }
+            }
+        }
+        return ResponseEntity.ok().body(JsonResultFactory.getAlteration(result, fields));
     }
 
     @Override
     public ResponseEntity<List<List<Alteration>>> variantsLookupPost(
         @ApiParam(value = "List of queries.", required = true) @RequestBody(required = true) List<VariantSearchQuery> body
         , @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
-    ) {
+    ) throws ApiException {
         List<List<Alteration>> result = new ArrayList<>();
         if (body != null) {
             for (VariantSearchQuery query : body) {
@@ -69,7 +79,7 @@ public class VariantsApiController implements VariantsApi {
         return ResponseEntity.ok().body(JsonResultFactory.getAlteration2D(result, fields));
     }
 
-    private List<Alteration> getVariants(VariantSearchQuery query) {
+    private List<Alteration> getVariants(VariantSearchQuery query) throws ApiException {
         LinkedHashSet<Alteration> alterationSet = new LinkedHashSet<>();
         List<Alteration> alterationList = new ArrayList<>();
         if (query != null) {

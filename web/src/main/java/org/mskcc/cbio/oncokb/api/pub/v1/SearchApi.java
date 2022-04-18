@@ -42,7 +42,6 @@ public interface SearchApi {
         , @ApiParam(value = "Tumor type name. OncoTree code is supported.") @RequestParam(value = "tumorType", required = false) String tumorType
         , @ApiParam(value = "Level of evidences.") @RequestParam(value = "levels", required = false) String levels
         , @ApiParam(value = "Only show treatments of highest level") @RequestParam(value = "highestLevelOnly", required = false, defaultValue = "FALSE") Boolean highestLevelOnly
-        , @ApiParam(value = "Query type. There maybe slight differences between different query types. Currently support web or regular.") @RequestParam(value = "queryType", required = false, defaultValue = "regular") String queryType
         , @ApiParam(value = "Evidence type.") @RequestParam(value = "evidenceType", required = false) String evidenceType
         , @ApiParam(value = "HGVS varaint. Its priority is higher than entrezGeneId/hugoSymbol + variant combination") @RequestParam(value = "hgvs", required = false) String hgvs
         , @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields

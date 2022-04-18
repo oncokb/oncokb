@@ -40,7 +40,7 @@ public interface AlterationBo extends GenericBo<Alteration> {
      */
     Alteration findAlterationFromDao(Gene gene, AlterationType alterationType, ReferenceGenome referenceGenome, String alteration, String name);
 
-
+    Alteration findExactlyMatchedAlteration(ReferenceGenome referenceGenome, Alteration alteration, Set<Alteration> fullAlterations);
     /**
      * @param gene
      * @param consequence
@@ -48,7 +48,7 @@ public interface AlterationBo extends GenericBo<Alteration> {
      * @param end
      * @return
      */
-    List<Alteration> findMutationsByConsequenceAndPosition(Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end, Set<Alteration> alterations);
+    List<Alteration> findRelevantOverlapAlterations(Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end, String proteinChange, Set<Alteration> alterations);
 
     /**
      * @param gene
@@ -64,6 +64,11 @@ public interface AlterationBo extends GenericBo<Alteration> {
      * @return
      */
     LinkedHashSet<Alteration> findRelevantAlterations(ReferenceGenome referenceGenome, Alteration alteration, boolean includeAlternativeAllele);
+    /**
+     * @param alteration
+     * @return
+     */
+    LinkedHashSet<Alteration> findRelevantAlterationsForCategoricalAlt(ReferenceGenome referenceGenome, Alteration alteration, Set<Alteration> alterations);
 
     /**
      * @param alteration
