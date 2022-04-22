@@ -248,14 +248,25 @@ public class GenomeNexusUtils {
     private static List<EnsemblTranscript> getEnsemblTranscriptList(String hugoSymbol, ReferenceGenome referenceGenome) throws ApiException {
         EnsemblControllerApi controllerApi = GenomeNexusUtils.getEnsemblControllerApi(referenceGenome);
         Set<EnsemblTranscript> transcripts = new LinkedHashSet<>();
-        transcripts.add(getCanonicalEnsemblTranscript(hugoSymbol, referenceGenome));
+        EnsemblTranscript canonicalTranscript = getCanonicalEnsemblTranscript(hugoSymbol, referenceGenome);
+        if (canonicalTranscript != null) {
+            transcripts.add(canonicalTranscript);
+        }
         transcripts.addAll(controllerApi.fetchEnsemblTranscriptsGET(null, null, hugoSymbol));
         return new ArrayList<>(transcripts);
     }
 
     public static EnsemblTranscript getCanonicalEnsemblTranscript(String hugoSymbol, ReferenceGenome referenceGenome) throws ApiException {
         EnsemblControllerApi controllerApi = GenomeNexusUtils.getEnsemblControllerApi(referenceGenome);
-        return controllerApi.fetchCanonicalEnsemblTranscriptByHugoSymbolGET(hugoSymbol, MSK_ISOFORM_OVERRIDE);
+        try {
+            return controllerApi.fetchCanonicalEnsemblTranscriptByHugoSymbolGET(hugoSymbol, MSK_ISOFORM_OVERRIDE);
+        } catch (ApiException e) {
+            if (e.getCode() == HttpStatus.NOT_FOUND.value()) {
+                return null;
+            } else {
+                throw e;
+            }
+        }
     }
 
     private static Optional<EnsemblTranscript> getEnsemblTranscript(String hugoSymbol, TranscriptPair transcriptPair) throws ApiException {
