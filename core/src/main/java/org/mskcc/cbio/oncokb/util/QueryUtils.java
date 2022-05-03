@@ -3,10 +3,9 @@ package org.mskcc.cbio.oncokb.util;
 import com.mysql.jdbc.StringUtils;
 import org.mskcc.cbio.oncokb.model.*;
 
-import java.util.Arrays;
 import java.util.LinkedHashSet;
 
-import static org.mskcc.cbio.oncokb.util.FusionUtils.FUSION_SEPARATOR;
+import static org.mskcc.cbio.oncokb.Constants.UPSTREAM_GENE;
 
 /**
  * Created by Hongxin Zhang on 8/23/17.
@@ -45,7 +44,7 @@ public class QueryUtils {
         return name;
     }
 
-    public static Query getQueryForHgvsg(ReferenceGenome referenceGenome, String hgvsg, String tumorType, Alteration alteration) {
+    public static Query getQueryFromAlteration(ReferenceGenome referenceGenome, String tumorType, Alteration alteration, String hgvsg) {
         Query query = new Query();
         query.setReferenceGenome(referenceGenome);
         query.setHgvs(hgvsg);
@@ -59,6 +58,9 @@ public class QueryUtils {
         query.setProteinEnd(alteration.getProteinEnd());
         if (alteration.getConsequence() != null) {
             query.setConsequence(alteration.getConsequence().getTerm());
+            if (alteration.getConsequence().getTerm().equals(UPSTREAM_GENE) && StringUtils.isNullOrEmpty(query.getAlteration())) {
+                query.setAlteration(SpecialVariant.PROMOTER.getVariant());
+            }
         }
         return query;
     }
