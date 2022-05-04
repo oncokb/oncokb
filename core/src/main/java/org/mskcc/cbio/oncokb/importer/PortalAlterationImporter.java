@@ -24,8 +24,8 @@ public class PortalAlterationImporter {
 
     public static void main(String[] args) throws IOException {
         PortalAlterationBo portalAlterationBo = ApplicationContextSingleton.getPortalAlterationBo();
-        String sampleListsUrl = "http://www.cbioportal.org/api/studies/msk_impact_2017/sample-lists?projection=SUMMARY";
-        String sampleListsResult = FileUtils.readRemote(sampleListsUrl);
+        String sampleListsUrl = "http://cbioportal.mskcc.org/api/studies/msk_impact_2017/sample-lists?projection=SUMMARY";
+        String sampleListsResult = FileUtils.readMSKPortal(sampleListsUrl);
         JSONArray sampleListsJSONResult = new JSONArray(sampleListsResult);
         for (int i = 0; i < sampleListsJSONResult.length(); i++) {
             JSONObject jObject = sampleListsJSONResult.getJSONObject(i);
