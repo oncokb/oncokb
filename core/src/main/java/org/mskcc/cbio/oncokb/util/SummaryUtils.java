@@ -19,7 +19,7 @@ import static org.mskcc.cbio.oncokb.Constants.IN_FRAME_INSERTION;
 public class SummaryUtils {
     public static final String TERT_PROMOTER_MUTATION_SUMMARY = "Select hotspot mutations in the TERT promoter have been shown to be oncogenic.";
     public static final String TERT_PROMOTER_NO_THERAPY_TUMOR_TYPE_SUMMARY = "There are no FDA-approved or NCCN-compendium listed treatments specifically for patients with TERT promoter mutations in [[tumor type]].";
-    public static final String ONCOGENIC_MUTATIONS_DEFAULT_SUMMARY = "Oncogenic Mutations includes all variants annotated as oncogenic and likely oncogenic.";
+    public static final String ONCOGENIC_MUTATIONS_DEFAULT_SUMMARY = "\"Oncogenic Mutations\" includes all variants annotated as oncogenic and likely oncogenic.";
 
     public static Map<String, Object> tumorTypeSummary(EvidenceType evidenceType, Gene gene, Query query, Alteration exactMatchedAlt, List<Alteration> alterations, TumorType matchedTumorType, List<TumorType> relevantTumorTypes) {
         Map<String, Object> tumorTypeSummary = newTumorTypeSummary();
@@ -551,7 +551,10 @@ public class SummaryUtils {
         if (usePronoun) {
             sb.append("It");
         } else {
-            sb.append("The " + altName);
+            if (!isPositionalVariant) {
+                sb.append("The ");
+            }
+            sb.append(altName);
         }
         sb.append(" has been identified as a statistically significant hotspot and ");
         if (isPositionalVariant) {
