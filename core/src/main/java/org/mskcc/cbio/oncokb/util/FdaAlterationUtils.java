@@ -97,6 +97,12 @@ public class FdaAlterationUtils {
     private static boolean specialFdaL3(ClinicalVariant clinicalVariant) {
         List<String> specialList = Arrays.asList(new String[]{
             "ERBB2&Oncogenic Mutations&Non-Small Cell Lung Cancer&Ado-Trastuzumab Emtansine",
+            "ERBB2&Oncogenic Mutations&Non-Small Cell Lung Cancer&Trastuzumab Deruxtecan",
+            "EZH2&Oncogenic Mutations {excluding Y646S; Y646H; Y646C; Y646F; Y646N; A682G; A692V}&Follicular Lymphoma&Tazemetostat",
+            "FGFR1&Fusions&Myeloid/Lymphoid Neoplasms with FGFR1 Rearrangement&Pemigatinib",
+            "MET&Amplification&Non-Small Cell Lung Cancer&Crizotinib",
+            "PALB2&Oncogenic Mutations&Pancreatic Adenocarcinoma, Acinar Cell Carcinoma of the Pancreas&Rucaparib",
+            "PIK3CA&Oncogenic Mutations {excluding C420R; E542K; E545A; E545D; E545G; E545K; Q546E; Q546R; H1047L; H1047R; H1047Y}&Breast Cancer&Alpelisib + Fulvestrant",
             "EGFR&A763_Y764insFQEA&Non-Small Cell Lung Cancer&Erlotinib",
             "ALK&Fusions&Inflammatory Myofibroblastic Tumor&Crizotinib",
             "ALK&Fusions&Inflammatory Myofibroblastic Tumor&Ceritinib",
