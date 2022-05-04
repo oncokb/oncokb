@@ -508,8 +508,7 @@ public class AnnotationsApiController {
         } else {
             alteration = this.cacheFetcher.getAlterationFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, referenceGenome, genomicLocation);
         }
-        Query query = new Query();
-        query = new Query(null, referenceGenome, null, alteration.getGene() == null ? null : alteration.getGene().getHugoSymbol(), alteration.getAlteration(), null, null, tumorType, alteration.getConsequence() == null ? null : alteration.getConsequence().getTerm(), alteration.getProteinStart(), alteration.getProteinEnd(), null);
+        Query query = QueryUtils.getQueryFromAlteration(referenceGenome, tumorType, alteration, null);
         return this.cacheFetcher.processQuery(
             referenceGenome,
             query.getEntrezGeneId(),
@@ -535,7 +534,7 @@ public class AnnotationsApiController {
         } else {
             alteration = this.cacheFetcher.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, referenceGenome, hgvsg);
         }
-        Query query = QueryUtils.getQueryForHgvsg(referenceGenome, hgvsg, tumorType, alteration);
+        Query query = QueryUtils.getQueryFromAlteration(referenceGenome, tumorType, alteration, hgvsg);
 
         return this.cacheFetcher.processQuery(
             referenceGenome,
