@@ -287,7 +287,7 @@ public class CacheFetcher {
         List<org.oncokb.oncokb_transcript.client.Gene> filtered = allTranscriptsGenes.stream().filter(gene -> {
             Set<EnsemblGene> ensemblGenes = gene.getEnsemblGenes().stream().filter(ensemblGene -> ensemblGene.getCanonical() && ensemblGene.getReferenceGenome().equals(referenceGenome.name())).collect(Collectors.toSet());
             if (ensemblGenes.size() > 0) {
-                return ensemblGenes.stream().filter(ensemblGene -> finalGl.getChromosome().equals(ensemblGene.getChromosome()) && rangesIntersect(ensemblGene.getStart() + bpBuffer, ensemblGene.getEnd() + bpBuffer, finalGl.getStart(), finalGl.getEnd())).count() > 0;
+                return ensemblGenes.stream().filter(ensemblGene -> finalGl.getChromosome().equals(ensemblGene.getChromosome()) && rangesIntersect(ensemblGene.getStart() > bpBuffer ? (ensemblGene.getStart() - bpBuffer) : 0, ensemblGene.getEnd() + bpBuffer, finalGl.getStart(), finalGl.getEnd())).count() > 0;
             } else {
                 return false;
             }
