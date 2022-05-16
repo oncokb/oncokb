@@ -213,7 +213,9 @@ public class PrivateSearchApiController implements PrivateSearchApi {
                                 }
                             }
                         }
-                        result.addAll(convertVariant(new ArrayList<>(keywordsMatches), ""));
+                        if (keywordsMatches != null && keywordsMatches.size() > 0) {
+                            result.addAll(convertVariant(new ArrayList<>(keywordsMatches), ""));
+                        }
                     } else {
                         for (String keyword : keywords) {
                             if (!keyword.equals(entry.getKey()))
