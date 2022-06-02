@@ -45,6 +45,8 @@ public class AnnotateAlterationTest {
             new String[][]{
                 // any
                 {"449_514mut", "449", "514", "449", "514", null, null, "any"},
+                {"1003mut", "1003", "1003", "1003", "1003", null, null, "any"},
+                {"Y1003mut", "1003", "1003", "1003", "1003", "Y", null, "any"},
 
                 // Missense variant
                 {"V600E", "600", "600", "600", "600", "V", "E", MISSENSE_VARIANT},

@@ -349,7 +349,7 @@ public final class AlterationUtils {
 
                             consequence = "frameshift_variant";
                         } else {
-                            p = Pattern.compile("([A-Z]+)?([0-9]+)((ins)|(del)|(dup))");
+                            p = Pattern.compile("([A-Z]+)?([0-9]+)((ins)|(del)|(dup)|(mut))");
                             m = p.matcher(proteinChange);
                             if (m.matches()) {
                                 ref = m.group(1);
@@ -365,6 +365,9 @@ public final class AlterationUtils {
                                         break;
                                     case "del":
                                         consequence = IN_FRAME_DELETION;
+                                        break;
+                                    case "mut":
+                                        consequence = "any";
                                         break;
                                 }
                             } else {
