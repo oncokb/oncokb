@@ -43,6 +43,9 @@ public class FindRelevantAlterationsTest {
                 {"EGFR", "S768I", null, "S768I, SV768IL, Oncogenic Mutations"},
                 {"EGFR", "S768_V769delinsIL", null, "S768I, V769L, V769M, SV768IL, Oncogenic Mutations"},
 
+                // Check resisatnce mutations, they should be matched with Oncogenic Mutations
+                {"ALK", "G1202R", null, "G1202R, Oncogenic Mutations"},
+                {"FLT3", "N676D", null, "N676D, N676K, N676S, Oncogenic Mutations"},
 
                 // Check Fusions
                 {"BRAF", "PAPSS1-BRAF Fusion", null, "PAPSS1-BRAF Fusion, Fusions, Oncogenic Mutations, Oncogenic Mutations {excluding V600}"},
