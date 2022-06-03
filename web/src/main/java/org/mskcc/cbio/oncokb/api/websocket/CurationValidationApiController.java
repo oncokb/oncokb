@@ -10,6 +10,7 @@ import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.ReferenceGenome;
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.CacheUtils;
+import org.mskcc.cbio.oncokb.util.MainUtils;
 import org.mskcc.cbio.oncokb.util.ValidationUtils;
 import org.oncokb.oncokb_transcript.ApiException;
 import org.oncokb.oncokb_transcript.client.Sequence;
@@ -243,18 +244,18 @@ public class CurationValidationApiController {
                         break;
                     }
                 }
+                String altTargetName = alteration.getName()+" / " + (MainUtils.isVUS(alteration) ? "VUS" : "CURATED");
                 if (StringUtils.isNullOrEmpty(sequence)) {
-                    data.put(ValidationUtils.getErrorMessage(ValidationUtils.getTarget(alteration.getGene().getHugoSymbol(), alteration.getName()), "No sequence available for " + alteration.getGene().getHugoSymbol()));
+                    data.put(ValidationUtils.getErrorMessage(ValidationUtils.getTarget(alteration.getGene().getHugoSymbol(), altTargetName), "No sequence available for " + alteration.getGene().getHugoSymbol()));
                 } else if (referenceGenome != null) {
                     if (sequence.length() < alteration.getProteinStart()) {
-                        data.put(ValidationUtils.getErrorMessage(ValidationUtils.getTarget(alteration.getGene().getHugoSymbol(), alteration.getName()), "The gene only has " + sequence.length() + " AAs. But the variant protein start is " + alteration.getProteinStart()));
+                        data.put(ValidationUtils.getErrorMessage(ValidationUtils.getTarget(alteration.getGene().getHugoSymbol(), altTargetName), "The gene only has " + sequence.length() + " AAs. But the variant protein start is " + alteration.getProteinStart()));
                     } else if (sequence.length() < alteration.getProteinEnd()) {
-                        data.put(ValidationUtils.getErrorMessage(ValidationUtils.getTarget(alteration.getGene().getHugoSymbol(), alteration.getName()), "The gene only has " + sequence.length() + " AAs. But the variant protein end is " + alteration.getProteinEnd()));
+                        data.put(ValidationUtils.getErrorMessage(ValidationUtils.getTarget(alteration.getGene().getHugoSymbol(), altTargetName), "The gene only has " + sequence.length() + " AAs. But the variant protein end is " + alteration.getProteinEnd()));
                     } else {
                         String referenceAA = sequence.substring(alteration.getProteinStart() - 1, alteration.getProteinStart() + alteration.getRefResidues().length() - 1);
-                        ;
                         if (!referenceAA.equals(alteration.getRefResidues())) {
-                            data.put(ValidationUtils.getErrorMessage(ValidationUtils.getTarget(alteration.getGene().getHugoSymbol(), alteration.getName()), "The reference amino acid does not match with the curated variant. The expected AA is " + referenceAA));
+                            data.put(ValidationUtils.getErrorMessage(ValidationUtils.getTarget(alteration.getGene().getHugoSymbol(), altTargetName), "The reference amino acid does not match with the curated variant. The expected AA is " + referenceAA));
                         }
                     }
                 }
