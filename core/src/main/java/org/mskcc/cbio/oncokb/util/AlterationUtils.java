@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.mskcc.cbio.oncokb.Constants.*;
+import static org.mskcc.cbio.oncokb.util.MainUtils.isOncogenic;
 
 /**
  * @author jgao, Hongxin Zhang
@@ -349,7 +350,7 @@ public final class AlterationUtils {
 
                             consequence = "frameshift_variant";
                         } else {
-                            p = Pattern.compile("([A-Z]+)?([0-9]+)((ins)|(del)|(dup))");
+                            p = Pattern.compile("([A-Z]+)?([0-9]+)((ins)|(del)|(dup)|(mut))");
                             m = p.matcher(proteinChange);
                             if (m.matches()) {
                                 ref = m.group(1);
@@ -365,6 +366,9 @@ public final class AlterationUtils {
                                         break;
                                     case "del":
                                         consequence = IN_FRAME_DELETION;
+                                        break;
+                                    case "mut":
+                                        consequence = "any";
                                         break;
                                 }
                             } else {
@@ -1231,8 +1235,7 @@ public final class AlterationUtils {
         Boolean isOncogenic = null;
         for (Evidence evidence : oncogenicEvs) {
             Oncogenicity oncogenicity = Oncogenicity.getByEvidence(evidence);
-            if (oncogenicity != null
-                && (oncogenicity.equals(Oncogenicity.YES) || oncogenicity.equals(Oncogenicity.LIKELY))) {
+            if (isOncogenic(oncogenicity)) {
                 isOncogenic = true;
                 break;
             } else if (oncogenicity != null && oncogenicity.equals(Oncogenicity.LIKELY_NEUTRAL) && oncogenicity.equals(Oncogenicity.INCONCLUSIVE)) {
@@ -1264,6 +1267,7 @@ public final class AlterationUtils {
         Set<Oncogenicity> curatedOncogenicities = new HashSet<>();
         curatedOncogenicities.add(Oncogenicity.YES);
         curatedOncogenicities.add(Oncogenicity.LIKELY);
+        curatedOncogenicities.add(Oncogenicity.RESISTANCE);
         return !Collections.disjoint(curatedOncogenicities, oncogenicities);
     }
 

@@ -257,3 +257,7 @@ BRAF	V600E	Erdheim-Chester Disease	1: Vemurafenib; 3A: Dabrafenib;
 BRAF	K601E	Erdheim-Chester Disease	2: Cobimetinib; 2: Trametinib;
 ARAF	S214C	Erdheim-Chester Disease	2: Cobimetinib; 2: Trametinib; 3A: Sorafenib;
 ARAF	S214C	Langerhans Cell Histiocytosis	2: Cobimetinib; 2: Trametinib; 3A: Sorafenib;
+
+
+# Check resistance mutation
+ALK	G1202R	NSCLC	1: Lorlatinib; R2: Alectinib;
