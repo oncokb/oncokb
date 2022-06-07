@@ -4,11 +4,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.mskcc.cbio.oncokb.apiModels.Implication;
 import org.mskcc.cbio.oncokb.apiModels.MainType;
-import org.mskcc.cbio.oncokb.cache.CacheFetcher;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.apiModels.TumorType;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -635,7 +633,7 @@ public class IndicatorUtilsTest {
         // Test indicator endpoint supports HGVS
         String hgvsg = "7:g.140453136A>T";
         Alteration alteration = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, hgvsg, DEFAULT_REFERENCE_GENOME);
-        query = QueryUtils.getQueryForHgvsg(DEFAULT_REFERENCE_GENOME, hgvsg, "Melanoma", alteration);
+        query = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", alteration, hgvsg);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
         assertTrue("The geneExist is not true, but it should be.", indicatorQueryResp.getGeneExist() == true);
         assertEquals("The oncogenicity is not Oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
@@ -643,7 +641,7 @@ public class IndicatorUtilsTest {
 
         hgvsg = "7:g.140453136A>T";
         alteration = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, hgvsg, DEFAULT_REFERENCE_GENOME);
-        query1 = QueryUtils.getQueryForHgvsg(DEFAULT_REFERENCE_GENOME, hgvsg, "Melanoma", alteration);
+        query1 = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", alteration, hgvsg);
         query2 = new Query(null, DEFAULT_REFERENCE_GENOME, null, "BRAF", "V600E", null, null, "Melanoma", null, null, null, null);
 
         resp1 = IndicatorUtils.processQuery(query1, null, false, null);

@@ -424,7 +424,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             } else {
                 alterationModel = this.cacheFetcher.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, matchedRG, hgvsg);
             }
-            query = QueryUtils.getQueryForHgvsg(matchedRG, hgvsg, tumorType, alterationModel);
+            query = QueryUtils.getQueryFromAlteration(matchedRG, tumorType, alterationModel, hgvsg);
             gene = GeneUtils.getGeneByEntrezId(query.getEntrezGeneId());
         }
         query.setTumorType(tumorType);
