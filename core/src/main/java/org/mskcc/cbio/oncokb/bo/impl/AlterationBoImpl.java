@@ -65,7 +65,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
                         alteration.getProteinStart().equals(alt.getProteinStart()) &&
                         alteration.getProteinEnd().equals(alt.getProteinEnd()) &&
                         (StringUtils.isNullOrEmpty(alteration.getRefResidues()) || alteration.getRefResidues().equals(alt.getRefResidues())) &&
-                        alt.getVariantResidues().equals(alteration.getVariantResidues())
+                        (StringUtils.isNullOrEmpty(alteration.getVariantResidues()) || alteration.getVariantResidues().equals(alt.getVariantResidues()))
                 ).findAny();
                 if (match.isPresent()) {
                     return match.get();
@@ -378,6 +378,11 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
 
             if (includeAlternativeAllele) {
                 alterations.addAll(AlterationUtils.getAlleleAlterations(referenceGenome, alteration, fullAlterations));
+                if(complexMisMuts.size() > 0) {
+                    for (Alteration complexMisMut : complexMisMuts) {
+                        alterations.addAll(AlterationUtils.getAlleleAlterations(referenceGenome, complexMisMut, fullAlterations));
+                    }
+                }
                 // Include the range mutation
                 List<Alteration> mutationsByConsequenceAndPosition = findRelevantOverlapAlterations(alteration.getGene(), referenceGenome, alteration.getConsequence(), alteration.getProteinStart(), alteration.getProteinEnd(), alteration.getAlteration(), fullAlterations);
                 for (Alteration alt : mutationsByConsequenceAndPosition) {
