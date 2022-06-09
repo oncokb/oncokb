@@ -207,8 +207,9 @@ public class IndicatorUtilsTest {
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "EGFR", "S768_V769delinsIL", null, null, "Non-Small Cell Lung Cancer", MISSENSE_VARIANT, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
         assertEquals("Gene should exist", true, indicatorQueryResp.getGeneExist());
-        assertEquals("Variant should not exist", false, indicatorQueryResp.getVariantExist());
-        assertEquals("Is expected to be likely oncogenic", Oncogenicity.LIKELY.getOncogenic(), indicatorQueryResp.getOncogenic());
+        // this is equivalent to SV768IL which we curated
+        assertEquals("Variant should exist", true, indicatorQueryResp.getVariantExist());
+        assertEquals("Is expected to be oncogenic", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The highest sensitive level should be 1",
             LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
 
