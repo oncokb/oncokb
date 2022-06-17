@@ -217,12 +217,7 @@ public class IndicatorUtils {
             List<Alteration> relevantAlterationsWithoutAlternativeAlleles = new ArrayList<>(relevantAlterations);
             AlterationUtils.removeAlternativeAllele(query.getReferenceGenome(), matchedAlt, relevantAlterationsWithoutAlternativeAlleles);
 
-            // Whether alteration is hotpot from Matt's list
-            if (query.getProteinEnd() == null || query.getProteinStart() == null) {
-                indicatorQuery.setHotspot(HotspotUtils.isHotspot(matchedAlt));
-            } else {
-                indicatorQuery.setHotspot(HotspotUtils.isHotspot(matchedAlt));
-            }
+            indicatorQuery.setHotspot(HotspotUtils.isHotspot(matchedAlt));
 
             if (query.getTumorType() != null) {
                 relevantUpwardTumorTypes = TumorTypeUtils.findRelevantTumorTypes(query.getTumorType());

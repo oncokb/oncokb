@@ -50,7 +50,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             // For in-frame deletion, we should also look for variant with/out trailing amino acids
             VariantConsequence inframeDeletionConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm(IN_FRAME_DELETION);
             if (inframeDeletionConsequence.equals(alteration.getConsequence()) && !alteration.getAlteration().contains("delins")) {
-                List<Alteration> matches = findRelevantOverlapAlterations(alteration.getGene(), referenceGenome, inframeDeletionConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), alteration.getAlteration(), fullAlterations).stream().filter(alt -> !alt.getAlteration().contains("delins")).collect(Collectors.toList());
+                List<Alteration> matches = findMutationsByConsequenceAndPosition(alteration.getGene(), referenceGenome, inframeDeletionConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), alteration.getAlteration(), fullAlterations, false).stream().filter(alt -> !alt.getAlteration().contains("delins")).collect(Collectors.toList());
                 if (matches.size() > 0) {
                     return matches.iterator().next();
                 }
@@ -165,7 +165,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
     }
 
     @Override
-    public List<Alteration> findMutationsByConsequenceAndPositionOnSamePosition(Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end, String referenceResidue, Collection<Alteration> alterations) {
+    public List<Alteration> findMutationsByConsequenceAndPosition(Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end, String referenceResidue, Collection<Alteration> alterations, Boolean onSamePosition) {
         Set<Alteration> result = new HashSet<>();
 
         if (alterations != null && alterations.size() > 0) {
@@ -175,11 +175,12 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
                     && alteration.getProteinStart() != null
                     && alteration.getProteinEnd() != null
                     && (referenceGenome == null || alteration.getReferenceGenomes().contains(referenceGenome))
-                    && alteration.getProteinStart().equals(alteration.getProteinEnd())
                     && alteration.getProteinStart() >= start
                     && alteration.getProteinStart() <= end
                     && (alteration.getRefResidues() == null || referenceResidue == null || referenceResidue.equals(alteration.getRefResidues()))) {
-                    result.add(alteration);
+                    if (!onSamePosition || alteration.getProteinStart().equals(alteration.getProteinEnd())) {
+                        result.add(alteration);
+                    }
                 }
             }
         } else {
