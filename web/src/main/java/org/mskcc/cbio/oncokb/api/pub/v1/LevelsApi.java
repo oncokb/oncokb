@@ -50,24 +50,24 @@ public interface LevelsApi {
         method = RequestMethod.GET)
     ResponseEntity<Map<LevelOfEvidence, String>> levelsSensitiveGet();
 
-//    @PublicApi
-//    @PremiumPublicApi
-//    @ApiOperation(value = "", notes = "Get all prognostic levels.", response = Map.class, tags = {"Levels",})
-//    @ApiResponses(value = {
-//        @ApiResponse(code = 200, message = "OK", response = Map.class)})
-//    @RequestMapping(value = "/levels/prognostic",
-//        produces = {"application/json"},
-//        method = RequestMethod.GET)
+    @PublicApi
+    @PremiumPublicApi
+    @ApiOperation(value = "", notes = "Get all prognostic levels.", response = Map.class, tags = {"Levels",})
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK", response = Map.class)})
+    @RequestMapping(value = "/levels/prognostic",
+        produces = {"application/json"},
+        method = RequestMethod.GET)
     ResponseEntity<Map<LevelOfEvidence, String>> levelsPrognosticGet();
 
-//    @PublicApi
-//    @PremiumPublicApi
-//    @ApiOperation(value = "", notes = "Get all diagnostic levels.", response = Map.class, tags = {"Levels",})
-//    @ApiResponses(value = {
-//        @ApiResponse(code = 200, message = "OK", response = Map.class)})
-//    @RequestMapping(value = "/levels/diagnostic",
-//        produces = {"application/json"},
-//        method = RequestMethod.GET)
+    @PublicApi
+    @PremiumPublicApi
+    @ApiOperation(value = "", notes = "Get all diagnostic levels.", response = Map.class, tags = {"Levels",})
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK", response = Map.class)})
+    @RequestMapping(value = "/levels/diagnostic",
+        produces = {"application/json"},
+        method = RequestMethod.GET)
     ResponseEntity<Map<LevelOfEvidence, String>> levelsDiagnosticGet();
 
 }
