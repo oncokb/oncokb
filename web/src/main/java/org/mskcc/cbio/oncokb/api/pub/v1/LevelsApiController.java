@@ -18,8 +18,6 @@ public class LevelsApiController implements LevelsApi {
 
     public ResponseEntity<Map<LevelOfEvidence, String>> levelsGet() {
         Set<LevelOfEvidence> publicLevels = LevelUtils.getPublicLevels();
-        publicLevels.removeAll(LevelUtils.getDiagnosticLevels());
-        publicLevels.removeAll(LevelUtils.getPrognosticLevels());
         return new ResponseEntity<>(getMap(publicLevels), HttpStatus.OK);
     }
 
