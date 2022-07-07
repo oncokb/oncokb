@@ -16,6 +16,7 @@ categories:
   - title: '⚙️ REST API Changes'
     labels:
       - 'api'
+      - 'api-change'
   - title: '⚠️ Deprecation'
     labels:
         - 'deprecation'
