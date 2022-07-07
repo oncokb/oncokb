@@ -12,6 +12,7 @@ public enum EvidenceType {
     DIAGNOSTIC_SUMMARY("Diagnostic summary"),
     GENE_BACKGROUND("Gene background"),
     ONCOGENIC("Oncogenic"),
+    RESISTANCE("Resistance"),
     MUTATION_EFFECT("Mutation effect"),
     VUS("Variant of unknown significance"),
     PROGNOSTIC_IMPLICATION("Prognostic implications"),

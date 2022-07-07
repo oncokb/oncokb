@@ -333,6 +333,15 @@ public class DriveAnnotationParser {
 //            addDateToLastReviewSetFromLong(lastReviewDatesEffect, mutationEffect, "effect");
             String effect_uuid = getUUID(mutationEffect, "effect");
 
+            String resistance = mutationEffect.has("resistance") ?
+                (mutationEffect.getString("resistance").trim().isEmpty() ? null :
+                    mutationEffect.getString("resistance").trim())
+                : null;
+            String resistanceUuid = getUUID(mutationEffect, "resistance");
+            Date resistanceLastEdit = getLastEdit(mutationEffect, "resistance");
+            addDateToLastEditSetFromObject(lastEditDatesEffect, mutationEffect, "resistance");
+
+
             List<Alteration> mutations = AlterationUtils.parseMutationString(mutationStr, ",");
             for (Alteration mutation : mutations) {
                 Alteration alteration = alterationBo.findAlteration(gene, type, mutation.getAlteration());
@@ -351,6 +360,7 @@ public class DriveAnnotationParser {
                 }
                 alterations.add(alteration);
                 setOncogenic(gene, alteration, oncogenic, oncogenic_uuid, oncogenic_lastEdit);
+                setResistance(gene, alteration, resistance, resistanceUuid, resistanceLastEdit);
             }
 
             // mutation effect
@@ -495,6 +505,36 @@ public class DriveAnnotationParser {
                 evidences.get(0).setKnownEffect(oncogenic.getOncogenic());
                 evidences.get(0).setLastEdit(lastEdit);
                 evidenceBo.update(evidences.get(0));
+            }
+        }
+    }
+
+    private void setResistance(Gene gene, Alteration alteration, String resistance, String uuid, Date lastEdit) {
+        if (alteration != null && gene != null && StringUtils.isNotEmpty(resistance)) {
+            EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+            List<Evidence> evidences = evidenceBo.findEvidencesByAlteration(Collections.singleton(alteration), Collections.singleton(EvidenceType.RESISTANCE));
+            if (evidences.isEmpty()) {
+                Evidence evidence = new Evidence();
+                evidence.setGene(gene);
+                evidence.setAlterations(Collections.singleton(alteration));
+                evidence.setEvidenceType(EvidenceType.RESISTANCE);
+                evidence.setKnownEffect(resistance);
+                evidence.setUuid(uuid);
+                evidence.setLastEdit(lastEdit);
+//                evidence.setLastReview(lastReview);
+                evidenceBo.save(evidence);
+            } else {
+                if(StringUtils.isNotEmpty(uuid)) {
+                    evidences.stream().filter(evidence -> uuid.equals(evidence.getUuid())).forEach(evidence -> {
+                        evidence.setKnownEffect(resistance);
+                        evidence.setLastEdit(lastEdit);
+                        evidenceBo.update(evidence);
+                    });
+                }else{
+                    evidences.get(0).setKnownEffect(resistance);
+                    evidences.get(0).setLastEdit(lastEdit);
+                    evidenceBo.update(evidences.get(0));
+                }
             }
         }
     }
