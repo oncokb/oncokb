@@ -1213,6 +1213,10 @@ public final class AlterationUtils {
         return findAlterationsByRegex(InferredMutation.ONCOGENIC_MUTATIONS.getVariant() + ".*", fullAlterations);
     }
 
+    public static List<Alteration> findResistanceMutations(Set<Alteration> fullAlterations) {
+        return findAlterationsByRegex(InferredMutation.RESISTANCE_MUTATIONS.getVariant() + ".*", fullAlterations);
+    }
+
     public static List<Alteration> findFusions(Set<Alteration> fullAlterations) {
         return findAlterationsByRegex(StructuralAlteration.FUSIONS.getVariant() + ".*", fullAlterations);
     }
