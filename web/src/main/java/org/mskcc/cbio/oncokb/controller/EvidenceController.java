@@ -200,7 +200,7 @@ public class EvidenceController {
             description = description.trim();
         }
         Boolean isEmpty = false;
-        if (evidenceType.equals(EvidenceType.ONCOGENIC) || evidenceType.equals(EvidenceType.MUTATION_EFFECT)) {
+        if (evidenceType.equals(EvidenceType.ONCOGENIC) || evidenceType.equals(EvidenceType.MUTATION_EFFECT) || evidenceType.equals(EvidenceType.RESISTANCE)) {
             if (StringUtils.isNullOrEmpty(knownEffect) && StringUtils.isNullOrEmpty(description)) isEmpty = true;
         } else if (EvidenceTypeUtils.getTreatmentEvidenceTypes().contains(evidenceType)) {
             if (treatments == null && StringUtils.isNullOrEmpty(description)) isEmpty = true;

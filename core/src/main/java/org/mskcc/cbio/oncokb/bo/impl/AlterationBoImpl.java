@@ -459,6 +459,14 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             }
         }
 
+        // Link Resistance Mutations if curated to resistance mutation
+        if (addResistanceMutations(alteration)) {
+            List<Alteration> resistanceMutations = findResistanceMutations(fullAlterations);
+            if (!resistanceMutations.isEmpty()) {
+                alterations.addAll(resistanceMutations);
+            }
+        }
+
         // Looking for general biological effect variants. Gain-of-function mutations, Loss-of-function mutations etc.
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
         List<Evidence> mutationEffectEvs = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.MUTATION_EFFECT));
@@ -561,6 +569,13 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
                 }
             }
         return add;
+    }
+
+    private boolean addResistanceMutations(Alteration exactAlt) {
+        EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+        return evidenceBo
+            .findEvidencesByAlteration(Collections.singleton(exactAlt), Collections.singleton(EvidenceType.RESISTANCE))
+            .stream().filter(evidence -> Resistance.YES.getEffect().equalsIgnoreCase(evidence.getKnownEffect())).count() > 0;
     }
 
     private boolean addVUSMutation(Alteration alteration, boolean alterationIsCurated){

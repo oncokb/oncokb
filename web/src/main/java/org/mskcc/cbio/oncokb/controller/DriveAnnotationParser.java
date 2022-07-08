@@ -510,7 +510,8 @@ public class DriveAnnotationParser {
     }
 
     private void setResistance(Gene gene, Alteration alteration, String resistance, String uuid, Date lastEdit) {
-        if (alteration != null && gene != null && StringUtils.isNotEmpty(resistance)) {
+        Resistance res = Resistance.getByEffect(resistance);
+        if (alteration != null && gene != null && res != null) {
             EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
             List<Evidence> evidences = evidenceBo.findEvidencesByAlteration(Collections.singleton(alteration), Collections.singleton(EvidenceType.RESISTANCE));
             if (evidences.isEmpty()) {
@@ -518,7 +519,7 @@ public class DriveAnnotationParser {
                 evidence.setGene(gene);
                 evidence.setAlterations(Collections.singleton(alteration));
                 evidence.setEvidenceType(EvidenceType.RESISTANCE);
-                evidence.setKnownEffect(resistance);
+                evidence.setKnownEffect(res.getEffect());
                 evidence.setUuid(uuid);
                 evidence.setLastEdit(lastEdit);
 //                evidence.setLastReview(lastReview);
@@ -526,12 +527,12 @@ public class DriveAnnotationParser {
             } else {
                 if(StringUtils.isNotEmpty(uuid)) {
                     evidences.stream().filter(evidence -> uuid.equals(evidence.getUuid())).forEach(evidence -> {
-                        evidence.setKnownEffect(resistance);
+                        evidence.setKnownEffect(res.getEffect());
                         evidence.setLastEdit(lastEdit);
                         evidenceBo.update(evidence);
                     });
                 }else{
-                    evidences.get(0).setKnownEffect(resistance);
+                    evidences.get(0).setKnownEffect(res.getEffect());
                     evidences.get(0).setLastEdit(lastEdit);
                     evidenceBo.update(evidences.get(0));
                 }
