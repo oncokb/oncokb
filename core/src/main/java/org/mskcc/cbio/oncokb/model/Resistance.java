@@ -3,7 +3,7 @@ package org.mskcc.cbio.oncokb.model;
 import java.util.*;
 
 public enum Resistance {
-    YES("Yes");
+    YES("Resistance");
 
     private Resistance(String effect) {
         this.effect = effect;

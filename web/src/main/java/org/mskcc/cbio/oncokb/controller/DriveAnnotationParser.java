@@ -333,10 +333,10 @@ public class DriveAnnotationParser {
 //            addDateToLastReviewSetFromLong(lastReviewDatesEffect, mutationEffect, "effect");
             String effect_uuid = getUUID(mutationEffect, "effect");
 
-            String resistance = mutationEffect.has("resistance") ?
+            Resistance resistance = getResistanceByString(mutationEffect.has("resistance") ?
                 (mutationEffect.getString("resistance").trim().isEmpty() ? null :
                     mutationEffect.getString("resistance").trim())
-                : null;
+                : null);
             String resistanceUuid = getUUID(mutationEffect, "resistance");
             Date resistanceLastEdit = getLastEdit(mutationEffect, "resistance");
             addDateToLastEditSetFromObject(lastEditDatesEffect, mutationEffect, "resistance");
@@ -472,11 +472,29 @@ public class DriveAnnotationParser {
                 case "inconclusive":
                     oncogenic = Oncogenicity.INCONCLUSIVE;
                     break;
+                case "unknown":
+                    oncogenic = Oncogenicity.UNKNOWN;
+                    break;
                 default:
                     break;
             }
         }
         return oncogenic;
+    }
+
+    protected Resistance getResistanceByString(String resistanceStr) {
+        Resistance resistance = null;
+        if (resistanceStr != null) {
+            resistanceStr = resistanceStr.toLowerCase();
+            switch (resistanceStr) {
+                case "yes":
+                    resistance = Resistance.YES;
+                    break;
+                default:
+                    break;
+            }
+        }
+        return resistance;
     }
 
     private Oncogenicity getOncogenicity(JSONObject mutationEffect) throws JSONException {
@@ -509,9 +527,8 @@ public class DriveAnnotationParser {
         }
     }
 
-    private void setResistance(Gene gene, Alteration alteration, String resistance, String uuid, Date lastEdit) {
-        Resistance res = Resistance.getByEffect(resistance);
-        if (alteration != null && gene != null && res != null) {
+    private void setResistance(Gene gene, Alteration alteration, Resistance resistance, String uuid, Date lastEdit) {
+        if (alteration != null && gene != null && resistance != null) {
             EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
             List<Evidence> evidences = evidenceBo.findEvidencesByAlteration(Collections.singleton(alteration), Collections.singleton(EvidenceType.RESISTANCE));
             if (evidences.isEmpty()) {
@@ -519,7 +536,7 @@ public class DriveAnnotationParser {
                 evidence.setGene(gene);
                 evidence.setAlterations(Collections.singleton(alteration));
                 evidence.setEvidenceType(EvidenceType.RESISTANCE);
-                evidence.setKnownEffect(res.getEffect());
+                evidence.setKnownEffect(resistance.getEffect());
                 evidence.setUuid(uuid);
                 evidence.setLastEdit(lastEdit);
 //                evidence.setLastReview(lastReview);
@@ -527,12 +544,12 @@ public class DriveAnnotationParser {
             } else {
                 if(StringUtils.isNotEmpty(uuid)) {
                     evidences.stream().filter(evidence -> uuid.equals(evidence.getUuid())).forEach(evidence -> {
-                        evidence.setKnownEffect(res.getEffect());
+                        evidence.setKnownEffect(resistance.getEffect());
                         evidence.setLastEdit(lastEdit);
                         evidenceBo.update(evidence);
                     });
                 }else{
-                    evidences.get(0).setKnownEffect(res.getEffect());
+                    evidences.get(0).setKnownEffect(resistance.getEffect());
                     evidences.get(0).setLastEdit(lastEdit);
                     evidenceBo.update(evidences.get(0));
                 }

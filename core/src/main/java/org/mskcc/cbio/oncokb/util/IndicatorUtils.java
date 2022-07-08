@@ -40,6 +40,7 @@ public class IndicatorUtils {
         boolean hasDiagnosticImplicationEvidence = evidenceTypes.contains(EvidenceType.DIAGNOSTIC_IMPLICATION);
         boolean hasPrognosticImplicationEvidence = evidenceTypes.contains(EvidenceType.PROGNOSTIC_IMPLICATION);
         boolean hasOncogenicEvidence = evidenceTypes.contains(EvidenceType.ONCOGENIC);
+        boolean hasResistanceEvidence = evidenceTypes.contains(EvidenceType.RESISTANCE);
         boolean hasMutationEffectEvidence = evidenceTypes.contains(EvidenceType.MUTATION_EFFECT);
 
         IndicatorQueryResp indicatorQuery = new IndicatorQueryResp();
@@ -253,6 +254,18 @@ public class IndicatorUtils {
                     // Only set oncogenicity if no previous data assigned.
                     if (indicatorQuery.getOncogenic() == null && indicatorQueryOncogenicity.getOncogenicity() != null) {
                         indicatorQuery.setOncogenic(indicatorQueryOncogenicity.getOncogenicity().getOncogenic());
+                    }
+                }
+
+                if (hasResistanceEvidence) {
+                    IndicatorQueryResistance indicatorQueryResistance = getResistance(matchedAlt);
+
+                    if (indicatorQueryResistance.getResistanceEvidence() != null) {
+                        allQueryRelatedEvidences.add(indicatorQueryResistance.getResistanceEvidence());
+                    }
+
+                    if (indicatorQueryResistance.getResistance() != null) {
+                        indicatorQuery.setResistance(indicatorQueryResistance.getResistance().getEffect());
                     }
                 }
 
@@ -659,6 +672,20 @@ public class IndicatorUtils {
         return indicatorQueryMutationEffect;
     }
 
+    private static IndicatorQueryResistance getResistance(Alteration alteration) {
+        IndicatorQueryResistance indicatorQueryResistance = new IndicatorQueryResistance();
+        List<Evidence> selfAltMEEvis = EvidenceUtils.getEvidence(Collections.singletonList(alteration),
+            Collections.singleton(EvidenceType.RESISTANCE), null);
+        if (selfAltMEEvis != null) {
+            indicatorQueryResistance = MainUtils.findHighestResistanceByEvidence(new HashSet<>(selfAltMEEvis));
+        }
+
+        if (indicatorQueryResistance.getResistance() == null) {
+            indicatorQueryResistance.setResistance(null);
+        }
+        return indicatorQueryResistance;
+    }
+
     private static Date getLatestDateFromEvidences(Set<Evidence> evidences) {
         Date date = null;
         if (evidences != null) {
@@ -981,7 +1008,6 @@ class IndicatorQueryOncogenicity {
     }
 }
 
-
 class IndicatorQueryMutationEffect {
     MutationEffect mutationEffect;
     Evidence mutationEffectEvidence;
@@ -1003,6 +1029,30 @@ class IndicatorQueryMutationEffect {
 
     public void setMutationEffectEvidence(Evidence mutationEffectEvidence) {
         this.mutationEffectEvidence = mutationEffectEvidence;
+    }
+}
+
+class IndicatorQueryResistance {
+    Resistance resistance;
+    Evidence resistanceEvidence;
+
+    public IndicatorQueryResistance() {
+    }
+
+    public Resistance getResistance() {
+        return resistance;
+    }
+
+    public void setResistance(Resistance resistance) {
+        this.resistance = resistance;
+    }
+
+    public Evidence getResistanceEvidence() {
+        return resistanceEvidence;
+    }
+
+    public void setResistanceEvidence(Evidence resistanceEvidence) {
+        this.resistanceEvidence = resistanceEvidence;
     }
 }
 
