@@ -266,6 +266,8 @@ public class IndicatorUtils {
 
                     if (indicatorQueryResistance.getResistance() != null) {
                         indicatorQuery.setResistance(indicatorQueryResistance.getResistance().getEffect());
+                    } else {
+                        indicatorQuery.setResistance("");
                     }
                 }
 
