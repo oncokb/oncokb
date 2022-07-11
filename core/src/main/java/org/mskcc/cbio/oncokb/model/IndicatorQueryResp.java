@@ -18,6 +18,7 @@ public class IndicatorQueryResp implements java.io.Serializable {
     private Boolean variantExist;
     private Boolean alleleExist;
     private String oncogenic;
+    private String resistance;
     private MutationEffectResp mutationEffect;
     private LevelOfEvidence highestSensitiveLevel;
     private LevelOfEvidence highestResistanceLevel;
@@ -48,6 +49,7 @@ public class IndicatorQueryResp implements java.io.Serializable {
         newResp.setVariantExist(this.variantExist);
         newResp.setAlleleExist(this.alleleExist);
         newResp.setOncogenic(this.oncogenic);
+        newResp.setResistance(this.resistance);
         newResp.setMutationEffect(this.mutationEffect);
         newResp.setHighestSensitiveLevel(this.highestSensitiveLevel);
         newResp.setHighestResistanceLevel(this.highestResistanceLevel);
@@ -100,6 +102,14 @@ public class IndicatorQueryResp implements java.io.Serializable {
 
     public void setOncogenic(String oncogenic) {
         this.oncogenic = oncogenic;
+    }
+
+    public String getResistance() {
+        return resistance;
+    }
+
+    public void setResistance(String resistance) {
+        this.resistance = resistance;
     }
 
     public MutationEffectResp getMutationEffect() {

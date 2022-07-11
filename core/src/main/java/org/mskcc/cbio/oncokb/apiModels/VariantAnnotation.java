@@ -21,6 +21,7 @@ public class VariantAnnotation extends IndicatorQueryResp {
         this.setVariantExist(indicatorQueryResp.getVariantExist());
         this.setAlleleExist(indicatorQueryResp.getAlleleExist());
         this.setOncogenic(indicatorQueryResp.getOncogenic());
+        this.setResistance(indicatorQueryResp.getResistance());
         this.setMutationEffect(indicatorQueryResp.getMutationEffect());
         this.setHighestSensitiveLevel(indicatorQueryResp.getHighestSensitiveLevel());
         this.setHighestResistanceLevel(indicatorQueryResp.getHighestResistanceLevel());

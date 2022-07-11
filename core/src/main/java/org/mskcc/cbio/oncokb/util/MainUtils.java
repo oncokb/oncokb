@@ -30,6 +30,11 @@ public class MainUtils {
             Oncogenicity.RESISTANCE
             )
     );
+    private static final List<Resistance> PRIORITIZED_RESISTANCE = Collections.unmodifiableList(
+        Arrays.asList(
+            Resistance.YES
+        )
+    );
     private static final List<MutationEffect> PRIORITIZED_MUTATION_EFFECTS = Collections.unmodifiableList(
         Arrays.asList(MutationEffect.GAIN_OF_FUNCTION,
             MutationEffect.LIKELY_GAIN_OF_FUNCTION,
@@ -175,6 +180,21 @@ public class MainUtils {
             }
         }
         return indicatorQueryMutationEffect;
+    }
+
+    public static IndicatorQueryResistance findHighestResistanceByEvidence(Set<Evidence> evidences) {
+        int index = 100;
+        IndicatorQueryResistance indicatorQueryResistance = new IndicatorQueryResistance();
+        for (Evidence evidence : evidences) {
+            Resistance resistance = Resistance.getByEffect(evidence.getKnownEffect());
+            int _index = PRIORITIZED_RESISTANCE.indexOf(resistance);
+            if (_index >= 0 && _index < index) {
+                indicatorQueryResistance.setResistance(resistance);
+                indicatorQueryResistance.setResistanceEvidence(evidence);
+                index = _index;
+            }
+        }
+        return indicatorQueryResistance;
     }
 
     public static IndicatorQueryMutationEffect setToAlternativeAlleleMutationEffect(IndicatorQueryMutationEffect indicatorQueryMutationEffect) {
