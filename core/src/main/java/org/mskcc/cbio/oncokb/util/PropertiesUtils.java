@@ -65,6 +65,7 @@ public final class PropertiesUtils {
         curationPlatformConfigs.setPrivateApiLink(getProperties("curation_platform.private_link"));
         curationPlatformConfigs.setInternalPrivateApiLink(getProperties("curation_platform.internal_private_link"));
         curationPlatformConfigs.setPublicApiLink(getProperties("curation_platform.public_api_link"));
+        curationPlatformConfigs.setInternalPublicApiLink(getProperties("curation_platform.internal_public_api_link"));
         curationPlatformConfigs.setWebsocketApiLink(getProperties("curation_platform.websocket_api_link"));
         curationPlatformConfigs.setProduction(Boolean.valueOf(getProperties("curation_platform.production")));
         curationPlatformConfigs.setTesting(Boolean.valueOf(getProperties("curation_platform.testing")));

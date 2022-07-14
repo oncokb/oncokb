@@ -88,6 +88,9 @@ public class MvcConfiguration extends WebMvcConfigurerAdapter {
                 }
 
                 if (rootCause.getMessage() == null || (!rootCause.getMessage().contains("Broken pipe")
+                    && !rootCause.getMessage().contains("ClientAbortException")
+                    && !rootCause.getMessage().contains("Connection reset by peer")
+                    && !rootCause.getMessage().contains("Cannot deserialize value")
                     && !rootCause.getMessage().contains("Required request body content is missing")
                     && !rootCause.getMessage().contains("Required request body is missing")
                     && !rootCause.getMessage().contains("Failed to convert value of type 'java.lang.String' to required type 'java.lang.Integer'")
