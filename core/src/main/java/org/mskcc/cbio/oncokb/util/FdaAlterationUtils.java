@@ -4,14 +4,12 @@ import org.mskcc.cbio.oncokb.apiModels.FdaAlteration;
 import org.mskcc.cbio.oncokb.model.*;
 
 import java.util.*;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import static org.mskcc.cbio.oncokb.model.InferredMutation.ONCOGENIC_MUTATIONS;
 
 public class FdaAlterationUtils {
-    final static String FDA_L_2 = "FDAx2";
-    final static String FDA_L_3 = "FDAx3";
-
     public static Set<FdaAlteration> getAllFdaAlterations() {
         Set<Gene> genes = CacheUtils.getAllGenes();
         Set<FdaAlteration> alterations = new HashSet<>();
@@ -41,7 +39,10 @@ public class FdaAlterationUtils {
                         FdaAlteration fdaAlteration = new FdaAlteration();
                         String cancerTypeName = TumorTypeUtils.getTumorTypeName(tumorType);
                         fdaAlteration.setAlteration(alteration);
-                        fdaAlteration.setLevel(convertToFdaLevel(LevelOfEvidence.getByLevel(clinicalVariant.getLevel()), clinicalVariant));
+                        LevelOfEvidence fdaLevel = convertToFdaLevel(LevelOfEvidence.getByLevel(clinicalVariant.getLevel()));
+                        if (fdaLevel != null) {
+                            fdaAlteration.setLevel(fdaLevel.getLevel());
+                        }
                         fdaAlteration.setCancerType(cancerTypeName);
                         if (!resultMap.get(alteration).containsKey(cancerTypeName)) {
                             resultMap.get(alteration).put(cancerTypeName, new HashSet<>());
@@ -56,7 +57,7 @@ public class FdaAlterationUtils {
             for (Map.Entry<String, Set<FdaAlteration>> cancerTypeMap : alterationMap.getValue().entrySet()) {
                 FdaAlteration pickedFdaAlt = cancerTypeMap.getValue().iterator().next();
                 if (cancerTypeMap.getValue().size() > 1) {
-                    Optional<FdaAlteration> level2 = cancerTypeMap.getValue().stream().filter(fdaAlteration -> fdaAlteration.getLevel().equals(FDA_L_2)).findAny();
+                    Optional<FdaAlteration> level2 = cancerTypeMap.getValue().stream().filter(fdaAlteration -> fdaAlteration.getLevel().equals(LevelOfEvidence.LEVEL_Fda2.getLevel())).findAny();
                     if (level2.isPresent()) {
                         pickedFdaAlt = level2.get();
                     }
@@ -71,26 +72,21 @@ public class FdaAlterationUtils {
         return getAllFdaAlterations().stream().filter(fdaAlt -> fdaAlt.getAlteration().getGene().equals(gene)).collect(Collectors.toSet());
     }
 
-    private static String convertToFdaLevel(LevelOfEvidence level, ClinicalVariant clinicalVariant) {
+    public static LevelOfEvidence convertToFdaLevel(LevelOfEvidence level) {
         if (level == null) {
-            return "";
+            return null;
         }
         switch (level) {
             case LEVEL_1:
             case LEVEL_R1:
-                return FDA_L_2;
             case LEVEL_2:
-                if (specialFdaL3(clinicalVariant)) {
-                    return FDA_L_3;
-                } else {
-                    return FDA_L_2;
-                }
+                return LevelOfEvidence.LEVEL_Fda2;
             case LEVEL_3A:
             case LEVEL_4:
             case LEVEL_R2:
-                return FDA_L_3;
+                return LevelOfEvidence.LEVEL_Fda3;
             default:
-                return "";
+                return null;
         }
     }
 

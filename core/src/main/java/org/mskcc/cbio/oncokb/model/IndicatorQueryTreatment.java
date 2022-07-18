@@ -16,6 +16,7 @@ public class IndicatorQueryTreatment implements java.io.Serializable {
     private List<Drug> drugs = new ArrayList<>(0);
     private Set<String> approvedIndications = new HashSet<String>(0);
     private LevelOfEvidence level;
+    private LevelOfEvidence fdaLevel;
     private TumorType levelAssociatedCancerType;
     private Set<String> pmids = new HashSet<String>(0);
     private Set<ArticleAbstract> abstracts = new HashSet<ArticleAbstract>(0);
@@ -70,6 +71,14 @@ public class IndicatorQueryTreatment implements java.io.Serializable {
 
     public void setLevel(LevelOfEvidence level) {
         this.level = level;
+    }
+
+    public LevelOfEvidence getFdaLevel() {
+        return fdaLevel;
+    }
+
+    public void setFdaLevel(LevelOfEvidence fdaLevel) {
+        this.fdaLevel = fdaLevel;
     }
 
     public Set<String> getPmids() {

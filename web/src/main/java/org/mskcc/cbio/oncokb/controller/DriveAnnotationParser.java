@@ -67,6 +67,7 @@ public class DriveAnnotationParser {
     private static final String UUID_EXTENSION = "_uuid";
     private static final String SOLID_PROPAGATION_KEY = "propagation";
     private static final String LIQUID_PROPAGATION_KEY = "propagationLiquid";
+    private static final String FDA_LEVEL_KEY = "fdaLevel";
 
     public void parseVUS(Gene gene, JSONArray vus, Integer nestLevel) throws JSONException {
         System.out.println(spaceStrByNestLevel(nestLevel) + "Variants of unknown significance");
@@ -766,6 +767,17 @@ public class DriveAnnotationParser {
                     continue;
                 }
                 evidence.setLevelOfEvidence(levelOfEvidence);
+
+                LevelOfEvidence fdaLevel;
+                if (drugObj.has(FDA_LEVEL_KEY)) {
+                    String fdaLevelStr = drugObj.getString(FDA_LEVEL_KEY);
+                    fdaLevel = LevelOfEvidence.getByLevel(fdaLevelStr);
+                } else {
+                    fdaLevel = FdaAlterationUtils.convertToFdaLevel(evidence.getLevelOfEvidence());
+                }
+                if (fdaLevel != null && LevelUtils.getAllowedFdaLevels().contains(fdaLevel)) {
+                    evidence.setFdaLevel(fdaLevel);
+                }
 
                 if (drugObj.has(SOLID_PROPAGATION_KEY)) {
                     String definedPropagation = drugObj.getString(SOLID_PROPAGATION_KEY);

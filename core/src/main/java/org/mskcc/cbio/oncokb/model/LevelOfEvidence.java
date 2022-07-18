@@ -21,14 +21,19 @@ public enum LevelOfEvidence {
     LEVEL_R2 ("R2", "Compelling clinical evidence supports the biomarker as being predictive of resistance to a drug", "<span><b>Compelling clinical evidence</b> supports the biomarker as being predictive of <b>resistance</b> to a drug</span>", "#F79A92"),
 
     // Levels for prognostic implications
-    LEVEL_Px1("Px1", "FDA and/or professional guideline-recognized biomarker prognostic in this indication based on well-powered studie(s)", "<span><b>FDA and/or professional guideline-recognized</b> biomarker prognostic in this indication based on <b>well-powered studie(s)</b></span>", ""),
-    LEVEL_Px2("Px2", "FDA and/or professional guideline-recognized biomarker prognostic in this indication based on a single or multiple small studies", "<span><b>FDA and/or professional guideline-recognized</b> biomarker prognostic in this indication based on <b>a single or multiple small studies</b></span>", ""),
-    LEVEL_Px3("Px3", "Biomarker is prognostic in this indication based on clinical evidence in well-powered studies", "<span>Biomarker is prognostic in this indication based on <b>clinical evidence</b> in <b>well-powered studies</b></span>", ""),
+    LEVEL_Px1("Px1", "FDA and/or professional guideline-recognized biomarker prognostic in this indication based on well-powered studie(s)", "<span><b>FDA and/or professional guideline-recognized</b> biomarker prognostic in this indication based on <b>well-powered studie(s)</b></span>", "#33A02C"),
+    LEVEL_Px2("Px2", "FDA and/or professional guideline-recognized biomarker prognostic in this indication based on a single or multiple small studies", "<span><b>FDA and/or professional guideline-recognized</b> biomarker prognostic in this indication based on <b>a single or multiple small studies</b></span>", "#1F78B4"),
+    LEVEL_Px3("Px3", "Biomarker is prognostic in this indication based on clinical evidence in well-powered studies", "<span>Biomarker is prognostic in this indication based on <b>clinical evidence</b> in <b>well-powered studies</b></span>", "#984EA3"),
 
     // Levels for diagnostic implications
-    LEVEL_Dx1("Dx1", "FDA and/or professional guideline-recognized biomarker required for diagnosis in this indication", "<span><b>FDA and/or professional guideline-recognized</b> biomarker required for diagnosis in this indication</span>", ""),
-    LEVEL_Dx2("Dx2", "FDA and/or professional guideline-recognized biomarker that supports diagnosis in this indication", "<span><b>FDA and/or professional guideline-recognized</b> biomarker that supports diagnosis in this indication</span>", ""),
-    LEVEL_Dx3("Dx3", "Biomarker that may assist disease diagnosis in this indication based on clinical evidence", "<span>Biomarker that <b>may assist disease diagnosis</b> in this indication based on <b>clinical evidence</b></span>", ""),
+    LEVEL_Dx1("Dx1", "FDA and/or professional guideline-recognized biomarker required for diagnosis in this indication", "<span><b>FDA and/or professional guideline-recognized</b> biomarker required for diagnosis in this indication</span>", "#33A02C"),
+    LEVEL_Dx2("Dx2", "FDA and/or professional guideline-recognized biomarker that supports diagnosis in this indication", "<span><b>FDA and/or professional guideline-recognized</b> biomarker that supports diagnosis in this indication</span>", "#1F78B4"),
+    LEVEL_Dx3("Dx3", "Biomarker that may assist disease diagnosis in this indication based on clinical evidence", "<span>Biomarker that <b>may assist disease diagnosis</b> in this indication based on <b>clinical evidence</b></span>", "#984EA3"),
+
+    // FDA Levels for tumor profiling NGS tests
+    LEVEL_Fda1("Fda1", "Companion Diagnostics", "Companion Diagnostics", ""),
+    LEVEL_Fda2("Fda2", "Cancer Mutations with Evidence of Clinical Significance", "Cancer Mutations with Evidence of Clinical Significance", ""),
+    LEVEL_Fda3("Fda3", "Cancer Mutations with Potential of Clinical Significance", "Cancer Mutations with Potential of Clinical Significance", ""),
 
     NO("NO", "No level", "No Level", ""),
     ;

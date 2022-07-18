@@ -147,6 +147,10 @@ public class Evidence implements java.io.Serializable {
     @Enumerated(EnumType.STRING)
     private LevelOfEvidence levelOfEvidence;
 
+    @Column(name = "fda_level")
+    @Enumerated(EnumType.STRING)
+    private LevelOfEvidence fdaLevel;
+
     @Column(name = "solid_propagation_level")
     @Enumerated(EnumType.STRING)
     private LevelOfEvidence solidPropagationLevel;
@@ -323,6 +327,14 @@ public class Evidence implements java.io.Serializable {
         this.levelOfEvidence = levelOfEvidence;
     }
 
+    public LevelOfEvidence getFdaLevel() {
+        return fdaLevel;
+    }
+
+    public void setFdaLevel(LevelOfEvidence fdaLevel) {
+        this.fdaLevel = fdaLevel;
+    }
+
     public LevelOfEvidence getSolidPropagationLevel() {
         return solidPropagationLevel;
     }
@@ -397,6 +409,7 @@ public class Evidence implements java.io.Serializable {
         this.lastEdit = e.lastEdit;
         this.lastReview = e.lastReview;
         this.levelOfEvidence = e.levelOfEvidence;
+        this.fdaLevel = e.fdaLevel;
         this.solidPropagationLevel = e.solidPropagationLevel;
         this.liquidPropagationLevel = e.liquidPropagationLevel;
         // make deep copy of sets
@@ -408,6 +421,7 @@ public class Evidence implements java.io.Serializable {
     public Evidence(String uuid, EvidenceType evidenceType, Set<TumorType> cancerTypes, Set<TumorType> relevantCancerTypes, Gene gene, Set<Alteration> alterations, String description, String additionalInfo, List<Treatment> treatments,
                     String knownEffect, Date lastEdit, Date lastReview,
                     LevelOfEvidence levelOfEvidence,
+                    LevelOfEvidence fdaLevel,
                     LevelOfEvidence solidPropagationLevel, LevelOfEvidence liquidPropagationLevel,
                     Set<Article> articles) {
         this.uuid = uuid;
@@ -422,6 +436,7 @@ public class Evidence implements java.io.Serializable {
         this.lastEdit = lastEdit;
         this.lastReview = lastReview;
         this.levelOfEvidence = levelOfEvidence;
+        this.fdaLevel = fdaLevel;
         this.solidPropagationLevel = solidPropagationLevel;
         this.liquidPropagationLevel = liquidPropagationLevel;
         this.articles = articles;
