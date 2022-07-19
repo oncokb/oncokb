@@ -49,17 +49,17 @@ public class LevelUtils {
         Arrays.asList(LevelOfEvidence.LEVEL_3B)
     );
 
-    // Levels related to therapy
+    // Levels related to prognostic implications
     private static final List<LevelOfEvidence> PROGNOSTIC_LEVELS = Collections.unmodifiableList(
         Arrays.asList(LevelOfEvidence.LEVEL_Px3, LevelOfEvidence.LEVEL_Px2, LevelOfEvidence.LEVEL_Px1)
     );
 
-    // Levels related to therapy
+    // Levels related to diagnostic implications
     private static final List<LevelOfEvidence> DIAGNOSTIC_LEVELS = Collections.unmodifiableList(
         Arrays.asList(LevelOfEvidence.LEVEL_Dx3, LevelOfEvidence.LEVEL_Dx2, LevelOfEvidence.LEVEL_Dx1)
     );
 
-    // Levels related to therapy
+    // FDA Levels of Evidence
     private static final List<LevelOfEvidence> FDA_LEVELS = Collections.unmodifiableList(
         Arrays.asList(LevelOfEvidence.LEVEL_Fda3, LevelOfEvidence.LEVEL_Fda2, LevelOfEvidence.LEVEL_Fda1)
     );
