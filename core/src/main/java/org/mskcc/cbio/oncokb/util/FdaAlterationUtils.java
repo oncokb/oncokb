@@ -82,6 +82,7 @@ public class FdaAlterationUtils {
             case LEVEL_2:
                 return LevelOfEvidence.LEVEL_Fda2;
             case LEVEL_3A:
+            case LEVEL_3B:
             case LEVEL_4:
             case LEVEL_R2:
                 return LevelOfEvidence.LEVEL_Fda3;
