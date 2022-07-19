@@ -357,7 +357,7 @@ public class IndicatorUtils {
                     indicatorQuery.setHighestResistanceLevel(highestLevels.get("resistant"));
                     indicatorQuery.setOtherSignificantSensitiveLevels(getOtherSignificantLevels(indicatorQuery.getHighestSensitiveLevel(), "sensitive", treatmentEvidences));
                     indicatorQuery.setOtherSignificantResistanceLevels(getOtherSignificantLevels(indicatorQuery.getHighestResistanceLevel(), "resistance", treatmentEvidences));
-
+                    indicatorQuery.setHighestFdaLevel(LevelUtils.getHighestFdaLevel(treatments.stream().filter(t -> t.getFdaLevel() != null).map(t -> t.getFdaLevel()).collect(Collectors.toSet())));
                     allQueryRelatedEvidences.addAll(treatmentEvidences);
                 }
             }
