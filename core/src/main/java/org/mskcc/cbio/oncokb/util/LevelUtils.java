@@ -49,14 +49,19 @@ public class LevelUtils {
         Arrays.asList(LevelOfEvidence.LEVEL_3B)
     );
 
-    // Levels related to therapy
+    // Levels related to prognostic implications
     private static final List<LevelOfEvidence> PROGNOSTIC_LEVELS = Collections.unmodifiableList(
         Arrays.asList(LevelOfEvidence.LEVEL_Px3, LevelOfEvidence.LEVEL_Px2, LevelOfEvidence.LEVEL_Px1)
     );
 
-    // Levels related to therapy
+    // Levels related to diagnostic implications
     private static final List<LevelOfEvidence> DIAGNOSTIC_LEVELS = Collections.unmodifiableList(
         Arrays.asList(LevelOfEvidence.LEVEL_Dx3, LevelOfEvidence.LEVEL_Dx2, LevelOfEvidence.LEVEL_Dx1)
+    );
+
+    // FDA Levels of Evidence
+    private static final List<LevelOfEvidence> FDA_LEVELS = Collections.unmodifiableList(
+        Arrays.asList(LevelOfEvidence.LEVEL_Fda3, LevelOfEvidence.LEVEL_Fda2, LevelOfEvidence.LEVEL_Fda1)
     );
 
     // levels that should be provided as additional info. Highest level calculation should not remove it.
@@ -117,6 +122,10 @@ public class LevelUtils {
     }
     public static LevelOfEvidence getHighestResistanceLevel(Set<LevelOfEvidence> levels) {
         return getHighestLevelByType(levels, THERAPEUTIC_RESISTANCE_LEVELS);
+    }
+
+    public static LevelOfEvidence getHighestFdaLevel(Set<LevelOfEvidence> levels) {
+        return getHighestLevelByType(levels, FDA_LEVELS);
     }
 
     public static LevelOfEvidence getHighestLevelByType(Set<LevelOfEvidence> levels, List<LevelOfEvidence> levelPool) {
@@ -272,6 +281,10 @@ public class LevelUtils {
         return ALLOWED_PROPAGATION_LEVELS;
     }
 
+    public static List<LevelOfEvidence> getAllowedFdaLevels() {
+        return FDA_LEVELS;
+    }
+
     public static LevelOfEvidence getDefaultPropagationLevelByTumorForm(Evidence evidence, TumorForm tumorForm) {
         TumorForm evidenceTumorForm = resolveEvidenceTumorForm(evidence);
         if (evidenceTumorForm == null || tumorForm == null) {
@@ -318,6 +331,7 @@ public class LevelUtils {
         levels.addAll(CollectionUtils.intersection(PUBLIC_LEVELS, THERAPEUTIC_SENSITIVE_LEVELS));
         levels.addAll(CollectionUtils.intersection(PUBLIC_LEVELS, DIAGNOSTIC_LEVELS));
         levels.addAll(CollectionUtils.intersection(PUBLIC_LEVELS, PROGNOSTIC_LEVELS));
+        levels.addAll(CollectionUtils.intersection(PUBLIC_LEVELS, FDA_LEVELS));
         levels.sort(Comparator.comparing(LevelOfEvidence::getLevel));
 
         return levels.stream().map(levelOfEvidence -> new InfoLevel(levelOfEvidence)).collect(Collectors.toList());
