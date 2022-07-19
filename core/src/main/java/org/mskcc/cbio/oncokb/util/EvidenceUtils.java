@@ -439,6 +439,7 @@ public class EvidenceUtils {
                 || allowedLevels.contains(propagationLevel)) {
                 propagatedEvidence = new Evidence(evidence, evidence.getId());
                 propagatedEvidence.setLevelOfEvidence(propagationLevel);
+                propagatedEvidence.setFdaLevel(FdaAlterationUtils.convertToFdaLevel(propagationLevel));
             }
         }
         return propagatedEvidence;
