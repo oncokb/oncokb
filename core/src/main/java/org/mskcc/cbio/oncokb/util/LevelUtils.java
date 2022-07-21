@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 public class LevelUtils {
     private static final List<LevelOfEvidence> PUBLIC_LEVELS = Collections.unmodifiableList(
         Arrays.asList(
+            LevelOfEvidence.LEVEL_Fda3, LevelOfEvidence.LEVEL_Fda2, LevelOfEvidence.LEVEL_Fda1,
             LevelOfEvidence.LEVEL_Px3, LevelOfEvidence.LEVEL_Px2, LevelOfEvidence.LEVEL_Px1,
             LevelOfEvidence.LEVEL_Dx3, LevelOfEvidence.LEVEL_Dx2, LevelOfEvidence.LEVEL_Dx1,
             LevelOfEvidence.LEVEL_R2, LevelOfEvidence.LEVEL_4, LevelOfEvidence.LEVEL_3B, LevelOfEvidence.LEVEL_3A,
@@ -170,6 +171,10 @@ public class LevelUtils {
                 if (!levels.contains(level)) {
                     levels.add(level);
                 }
+                LevelOfEvidence fdaLevel = evidence.getFdaLevel();
+                if (!levels.contains(fdaLevel)) {
+                    levels.add(fdaLevel);
+                }
             }
 
         }
@@ -183,6 +188,10 @@ public class LevelUtils {
                 LevelOfEvidence level = evidence.getLevelOfEvidence();
                 if (levels.contains(level) && !result.contains(level)) {
                     result.add(level);
+                }
+                LevelOfEvidence fdaLevel = evidence.getFdaLevel();
+                if (levels.contains(fdaLevel) && !result.contains(fdaLevel)) {
+                    result.add(fdaLevel);
                 }
             }
 
@@ -269,6 +278,10 @@ public class LevelUtils {
 
     public static Set<LevelOfEvidence> getDiagnosticLevels() {
         return new HashSet<>(CollectionUtils.intersection(PUBLIC_LEVELS, DIAGNOSTIC_LEVELS));
+    }
+
+    public static Set<LevelOfEvidence> geFdaLevels() {
+        return new HashSet<>(CollectionUtils.intersection(PUBLIC_LEVELS, FDA_LEVELS));
     }
 
     public static Set<LevelOfEvidence> getAllowedCurationLevels() {

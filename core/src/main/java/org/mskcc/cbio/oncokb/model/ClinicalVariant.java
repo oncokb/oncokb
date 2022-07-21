@@ -17,6 +17,7 @@ public class ClinicalVariant {
     private Alteration variant = null;
     private String oncogenic = null;
     private String level = null;
+    private String fdaLevel = null;
     private Set<String> drug = new HashSet<String>();
     private Set<String> drugPmids = new HashSet<String>();
     private Set<ArticleAbstract> drugAbstracts = new HashSet<>();
@@ -68,6 +69,17 @@ public class ClinicalVariant {
         this.level = level;
     }
 
+    /**
+     **/
+    @ApiModelProperty(value = "")
+    @JsonProperty("fdaLevel")
+    public String getFdaLevel() {
+        return fdaLevel;
+    }
+
+    public void setFdaLevel(String fdaLevel) {
+        this.fdaLevel = fdaLevel;
+    }
 
     /**
      **/
@@ -117,6 +129,7 @@ public class ClinicalVariant {
             Objects.equals(getVariant(), that.getVariant()) &&
             Objects.equals(getOncogenic(), that.getOncogenic()) &&
             Objects.equals(getLevel(), that.getLevel()) &&
+            Objects.equals(getFdaLevel(), that.getFdaLevel()) &&
             Objects.equals(getDrug(), that.getDrug()) &&
             Objects.equals(getDrugPmids(), that.getDrugPmids()) &&
             Objects.equals(getDrugAbstracts(), that.getDrugAbstracts());
@@ -134,6 +147,7 @@ public class ClinicalVariant {
             ", variant=" + variant +
             ", oncogenic='" + oncogenic + '\'' +
             ", level='" + level + '\'' +
+            ", fdaLevel='" + fdaLevel + '\'' +
             ", drug=" + drug +
             ", drugPmids=" + drugPmids +
             ", drugAbstracts=" + drugAbstracts +

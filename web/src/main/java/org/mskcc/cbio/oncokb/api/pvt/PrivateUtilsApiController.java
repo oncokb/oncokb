@@ -149,23 +149,6 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     }
 
     @Override
-    public ResponseEntity<Map<String, Integer>> utilsNumbersFdaGet() {
-        List<FdaAlteration> fdaAlterations = utilsFdaAlterationsGet(null).getBody();
-        Map<String, Set<Gene>> map = new HashMap<>();
-        for (FdaAlteration fdaAlteration : fdaAlterations) {
-            if (!map.containsKey(fdaAlteration.getLevel())) {
-                map.put(fdaAlteration.getLevel(), new HashSet<>());
-            }
-            map.get(fdaAlteration.getLevel()).add(fdaAlteration.getAlteration().getGene());
-        }
-
-        Map<String, Integer> result = map.entrySet().stream().collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue().size()));
-        return new ResponseEntity<>(
-            result,
-            HttpStatus.OK);
-    }
-
-    @Override
     public ResponseEntity<Map<String, Boolean>> validateTrials(@ApiParam(value = "NCTID list") @RequestParam(value = "nctIds") List<String> nctIds) throws ParserConfigurationException, SAXException, IOException {
         return new ResponseEntity<>(MainUtils.validateTrials(nctIds), HttpStatus.OK);
     }
@@ -196,22 +179,6 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     @Override
     public ResponseEntity<List<TumorType>> utilsTumorTypesGet() {
         return new ResponseEntity<>(TumorTypeUtils.getAllTumorTypes(), HttpStatus.OK);
-    }
-
-    @Override
-    public ResponseEntity<List<FdaAlteration>> utilsFdaAlterationsGet(
-        @ApiParam(value = "Gene hugo symbol") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
-    ) {
-        if (StringUtils.isNullOrEmpty(hugoSymbol)) {
-            return new ResponseEntity<>(new ArrayList<>(this.cacheFetcher.getAllFdaAlterations()), HttpStatus.OK);
-        } else {
-            Gene gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
-            if (gene == null) {
-                return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>(this.cacheFetcher.getAllFdaAlterations().stream().filter(fdaAlt -> fdaAlt.getAlteration().getGene().equals(gene)).collect(Collectors.toList()), HttpStatus.OK);
-            }
-        }
     }
 
     @Override
