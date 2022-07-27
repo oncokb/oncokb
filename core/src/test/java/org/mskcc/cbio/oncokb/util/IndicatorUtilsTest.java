@@ -582,6 +582,15 @@ public class IndicatorUtilsTest {
         assertTrue("Highest sensitive levels are not the same, but they should.", LevelUtils.areSameLevels(resp1.getHighestSensitiveLevel(), resp2.getHighestSensitiveLevel()));
         assertTrue("Highest resistance levels are not the same, but they should.", LevelUtils.areSameLevels(resp1.getHighestResistanceLevel(), resp2.getHighestResistanceLevel()));
 
+        query1 = new Query(null, DEFAULT_REFERENCE_GENOME, null, "PRKACA-DNAJB1", null, AlterationType.STRUCTURAL_VARIANT.name(), null, "Melanoma", "fusion", null, null, null);
+        query2 = new Query(null, DEFAULT_REFERENCE_GENOME, null, "PRKACA::DNAJB1", null, AlterationType.STRUCTURAL_VARIANT.name(), null, "Melanoma", "fusion", null, null, null);
+        resp1 = IndicatorUtils.processQuery(query1, null, true, null);
+        resp2 = IndicatorUtils.processQuery(query2, null, true, null);
+        assertTrue("Genes are not the same, but they should.", resp1.getGeneSummary().equals(resp2.getGeneSummary()));
+        assertTrue("Oncogenicities are not the same, but they should.", resp1.getOncogenic().equals(resp2.getOncogenic()));
+        assertTrue("Treatments are not the same, but they should.", resp1.getTreatments().equals(resp2.getTreatments()));
+        assertTrue("Highest sensitive levels are not the same, but they should.", LevelUtils.areSameLevels(resp1.getHighestSensitiveLevel(), resp2.getHighestSensitiveLevel()));
+        assertTrue("Highest resistance levels are not the same, but they should.", LevelUtils.areSameLevels(resp1.getHighestResistanceLevel(), resp2.getHighestResistanceLevel()));
 
         // Compare EGFR CTD AND EGFR, EGFR CTD
         // Check EGFR CTD

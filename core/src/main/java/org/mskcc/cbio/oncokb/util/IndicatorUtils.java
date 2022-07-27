@@ -851,14 +851,14 @@ public class IndicatorUtils {
         } else {
             geneStrsList.addAll(FusionUtils.getGenesStrs(query.getHugoSymbol()));
         }
-        Set<String> geneStrsSet = new HashSet<>();
+        Set<String> geneStrsSet = new LinkedHashSet<>();
         Gene gene = null;
         List<Alteration> fusionPair = new ArrayList<>();
         List<Alteration> relevantAlterations = new ArrayList<>();
         Map<String, Object> map = new HashedMap();
 
         if (geneStrsList != null) {
-            geneStrsSet = new HashSet<>(geneStrsList);
+            geneStrsSet = new LinkedHashSet<>(geneStrsList);
             map.put("queryFusionGenes", geneStrsSet);
         }
 
@@ -875,7 +875,12 @@ public class IndicatorUtils {
 
                 List<Gene> hasRelevantAltsGenes = new ArrayList<>();
                 for (Gene tmpGene : tmpGenes) {
-                    List<Alteration> tmpRelevantAlts = findRelevantAlts(tmpGene, query.getReferenceGenome(), query.getHugoSymbol() + " Fusion");
+                    List<Alteration> tmpRelevantAlts = new ArrayList<>();
+                    if (!com.mysql.jdbc.StringUtils.isNullOrEmpty(query.getAlteration())) {
+                        tmpRelevantAlts = findRelevantAlts(tmpGene, query.getReferenceGenome(), query.getAlteration());
+                    } else {
+                        tmpRelevantAlts = findRelevantAlts(tmpGene, query.getReferenceGenome(), query.getHugoSymbol() + " Fusion");
+                    }
                     if (tmpRelevantAlts != null && tmpRelevantAlts.size() > 0) {
                         hasRelevantAltsGenes.add(tmpGene);
                     }
