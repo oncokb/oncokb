@@ -14,6 +14,7 @@ public class CurationPlatformConfigs {
     String privateApiLink;
     String internalPrivateApiLink;
     String publicApiLink;
+    String internalPublicApiLink;
     String websocketApiLink;
     Boolean testing;
     Boolean production;
@@ -57,6 +58,14 @@ public class CurationPlatformConfigs {
 
     public void setPublicApiLink(String publicApiLink) {
         this.publicApiLink = publicApiLink;
+    }
+
+    public String getInternalPublicApiLink() {
+        return internalPublicApiLink;
+    }
+
+    public void setInternalPublicApiLink(String internalPublicApiLink) {
+        this.internalPublicApiLink = internalPublicApiLink;
     }
 
     public String getWebsocketApiLink() {
