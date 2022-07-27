@@ -8,7 +8,6 @@ import java.util.Objects;
 
 
 @ApiModel(description = "")
-@javax.annotation.Generated(value = "class io.swagger.codegen.languages.SpringMVCServerCodegen", date = "2016-05-08T23:17:19.384Z")
 public class GeneNumber {
 
     private Gene gene = null;
@@ -18,6 +17,7 @@ public class GeneNumber {
     private String highestResistanceLevel = null;
     private String highestDiagnosticImplicationLevel = null;
     private String highestPrognosticImplicationLevel = null;
+    private String highestFdaLevel = null;
 
     /**
      **/
@@ -89,6 +89,14 @@ public class GeneNumber {
         this.highestPrognosticImplicationLevel = highestPrognosticImplicationLevel;
     }
 
+    public String getHighestFdaLevel() {
+        return highestFdaLevel;
+    }
+
+    public void setHighestFdaLevel(String highestFdaLevel) {
+        this.highestFdaLevel = highestFdaLevel;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -100,12 +108,13 @@ public class GeneNumber {
             Objects.equals(getHighestSensitiveLevel(), that.getHighestSensitiveLevel()) &&
             Objects.equals(getHighestResistanceLevel(), that.getHighestResistanceLevel()) &&
             Objects.equals(getHighestDiagnosticImplicationLevel(), that.getHighestDiagnosticImplicationLevel()) &&
-            Objects.equals(getHighestPrognosticImplicationLevel(), that.getHighestPrognosticImplicationLevel());
+            Objects.equals(getHighestPrognosticImplicationLevel(), that.getHighestPrognosticImplicationLevel()) &&
+            Objects.equals(getHighestFdaLevel(), that.getHighestFdaLevel());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getGene(), getAlteration(), getTumorType(), getHighestSensitiveLevel(), getHighestResistanceLevel(), getHighestDiagnosticImplicationLevel(), getHighestPrognosticImplicationLevel());
+        return Objects.hash(getGene(), getAlteration(), getTumorType(), getHighestSensitiveLevel(), getHighestResistanceLevel(), getHighestDiagnosticImplicationLevel(), getHighestPrognosticImplicationLevel(), getHighestFdaLevel());
     }
 
     @Override
@@ -118,6 +127,7 @@ public class GeneNumber {
             ", highestResistanceLevel='" + highestResistanceLevel + '\'' +
             ", highestDiagnosticImplicationLevel='" + highestDiagnosticImplicationLevel + '\'' +
             ", highestPrognosticImplicationLevel='" + highestPrognosticImplicationLevel + '\'' +
+            ", highestFdaLevel='" + highestFdaLevel + '\'' +
             '}';
     }
 }

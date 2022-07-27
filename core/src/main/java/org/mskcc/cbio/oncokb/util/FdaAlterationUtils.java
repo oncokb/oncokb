@@ -1,77 +1,10 @@
 package org.mskcc.cbio.oncokb.util;
 
-import org.mskcc.cbio.oncokb.apiModels.FdaAlteration;
 import org.mskcc.cbio.oncokb.model.*;
-
 import java.util.*;
-import java.util.logging.Level;
 import java.util.stream.Collectors;
 
-import static org.mskcc.cbio.oncokb.model.InferredMutation.ONCOGENIC_MUTATIONS;
-
 public class FdaAlterationUtils {
-    public static Set<FdaAlteration> getAllFdaAlterations() {
-        Set<Gene> genes = CacheUtils.getAllGenes();
-        Set<FdaAlteration> alterations = new HashSet<>();
-        Map<Alteration, Map<String, Set<FdaAlteration>>> resultMap = new HashMap<>();
-        for (Gene gene : genes) {
-            for (ClinicalVariant clinicalVariant : MainUtils.getClinicalVariants(gene)) {
-                LevelOfEvidence level = LevelOfEvidence.getByLevel(clinicalVariant.getLevel());
-                if (level == null || !LevelUtils.getTherapeuticLevels().contains(level)) {
-                    continue;
-                }
-                Set<Alteration> mappedAlterations = new HashSet<>();
-                if (clinicalVariant.getVariant().getAlteration().startsWith(ONCOGENIC_MUTATIONS.getVariant())) {
-                    for (BiologicalVariant annotatedAlt : MainUtils.getBiologicalVariants(gene)) {
-                        List<Alteration> relevantAlterations = AlterationUtils.getRelevantAlterations(ReferenceGenome.GRCh37, annotatedAlt.getVariant());
-                        if(relevantAlterations.contains(clinicalVariant.getVariant())) {
-                            mappedAlterations.add(annotatedAlt.getVariant());
-                        }
-                    }
-                } else {
-                    mappedAlterations.add(clinicalVariant.getVariant());
-                }
-                for (Alteration alteration : mappedAlterations) {
-                    if (!resultMap.containsKey(alteration)) {
-                        resultMap.put(alteration, new HashMap<>());
-                    }
-                    for (TumorType tumorType : clinicalVariant.getCancerTypes()) {
-                        FdaAlteration fdaAlteration = new FdaAlteration();
-                        String cancerTypeName = TumorTypeUtils.getTumorTypeName(tumorType);
-                        fdaAlteration.setAlteration(alteration);
-                        LevelOfEvidence fdaLevel = convertToFdaLevel(LevelOfEvidence.getByLevel(clinicalVariant.getLevel()));
-                        if (fdaLevel != null) {
-                            fdaAlteration.setLevel(fdaLevel.getLevel());
-                        }
-                        fdaAlteration.setCancerType(cancerTypeName);
-                        if (!resultMap.get(alteration).containsKey(cancerTypeName)) {
-                            resultMap.get(alteration).put(cancerTypeName, new HashSet<>());
-                        }
-                        resultMap.get(alteration).get(cancerTypeName).add(fdaAlteration);
-                    }
-                }
-            }
-        }
-
-        for (Map.Entry<Alteration, Map<String, Set<FdaAlteration>>> alterationMap : resultMap.entrySet()) {
-            for (Map.Entry<String, Set<FdaAlteration>> cancerTypeMap : alterationMap.getValue().entrySet()) {
-                FdaAlteration pickedFdaAlt = cancerTypeMap.getValue().iterator().next();
-                if (cancerTypeMap.getValue().size() > 1) {
-                    Optional<FdaAlteration> level2 = cancerTypeMap.getValue().stream().filter(fdaAlteration -> fdaAlteration.getLevel().equals(LevelOfEvidence.LEVEL_Fda2.getLevel())).findAny();
-                    if (level2.isPresent()) {
-                        pickedFdaAlt = level2.get();
-                    }
-                }
-                alterations.add(pickedFdaAlt);
-            }
-        }
-        return alterations;
-    }
-
-    public static Set<FdaAlteration> getGeneFdaAlterations(Gene gene) {
-        return getAllFdaAlterations().stream().filter(fdaAlt -> fdaAlt.getAlteration().getGene().equals(gene)).collect(Collectors.toSet());
-    }
-
     public static LevelOfEvidence convertToFdaLevel(LevelOfEvidence level) {
         if (level == null) {
             return null;

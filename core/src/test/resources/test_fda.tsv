@@ -1,12 +1,13 @@
 # Gene	Alteration	Cancer Type	The highest FDA Level
 # Level 1, 2 should be mapped to FDA Level 2			
 # Level 3, 4 should be mapped to FDA Level 3			
-BRAF	V600E	Melanoma	FDAx2
-BRAF	Fusions	Melanoma	FDAx3
+BRAF	V600E	Melanoma	Fda2
+BRAF	Fusions	Melanoma	Fda3
+
+# Level R1 should be mapped to FDA Level 2			
+# Level R2 should be mapped to FDA Level 3			
+BTK	C481S	CLLSLL	Fda2
+BTK	C481F	CLLSLL	Fda3
 			
 # Some special fda level 3 are from level 2			
-EGFR	A763_Y764insFQEA	Non-Small Cell Lung Cancer	FDAx3
-
-# oncogenic mutations should not be returned in the FDAAlteration list
-ERBB2	Oncogenic Mutations	Non-Small Cell Lung Cancer	
-BRAF	Oncogenic Mutations {excluding V600}	Langerhans Cell Histiocytosis	
+EGFR	A763_Y764insFQEA	Non-Small Cell Lung Cancer	Fda3
