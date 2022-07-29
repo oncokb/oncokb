@@ -357,7 +357,7 @@ public class IndicatorUtils {
                     indicatorQuery.setHighestResistanceLevel(highestLevels.get("resistant"));
                     indicatorQuery.setOtherSignificantSensitiveLevels(getOtherSignificantLevels(indicatorQuery.getHighestSensitiveLevel(), "sensitive", treatmentEvidences));
                     indicatorQuery.setOtherSignificantResistanceLevels(getOtherSignificantLevels(indicatorQuery.getHighestResistanceLevel(), "resistance", treatmentEvidences));
-
+                    indicatorQuery.setHighestFdaLevel(LevelUtils.getHighestFdaLevel(treatments.stream().filter(t -> t.getFdaLevel() != null).map(t -> t.getFdaLevel()).collect(Collectors.toSet())));
                     allQueryRelatedEvidences.addAll(treatmentEvidences);
                 }
             }
@@ -708,6 +708,7 @@ public class IndicatorUtils {
                     Map<Treatment, List<String>> alterationsMap = new HashMap<>();
                     Map<Treatment, Set<org.mskcc.cbio.oncokb.apiModels.TumorType>> tumorTypeMap = new HashMap<>();
                     Map<Treatment, String> descriptionMap = new HashMap<>();
+                    Map<Treatment, Set<LevelOfEvidence>> fdaLevelMap = new HashMap<>();
 
                     for (Evidence evidence : evidenceSetMap.get(level)) {
                         Citations citations = MainUtils.getCitationsByEvidence(evidence);
@@ -721,12 +722,16 @@ public class IndicatorUtils {
                             if (!alterationsMap.containsKey(treatment)) {
                                 alterationsMap.put(treatment, new ArrayList<>());
                             }
+                            if (!fdaLevelMap.containsKey(treatment)) {
+                                fdaLevelMap.put(treatment, new HashSet<>());
+                            }
                             hugoSymbolMap.put(treatment, evidence.getGene().getHugoSymbol());
                             pmidsMap.put(treatment, citations.getPmids());
                             abstractsMap.put(treatment, citations.getAbstracts());
                             alterationsMap.put(treatment, evidence.getAlterations().stream().map(alteration -> alteration.getName()).collect(Collectors.toList()));
                             tumorTypeMap.put(treatment, evidence.getCancerTypes().stream().map(tumorType -> new org.mskcc.cbio.oncokb.apiModels.TumorType(tumorType)).collect(Collectors.toSet()));
                             descriptionMap.put(treatment, evidence.getDescription());
+                            fdaLevelMap.get(treatment).add(evidence.getFdaLevel());
                         }
                         sameLevelTreatments.addAll(evidence.getTreatments());
                     }
@@ -746,6 +751,7 @@ public class IndicatorUtils {
                                 indicatorQueryTreatment.setDrugs(treatment.getDrugs());
                                 indicatorQueryTreatment.setApprovedIndications(treatment.getApprovedIndications().stream().map(indication -> SummaryUtils.enrichDescription(indication, hugoSymbol)).collect(Collectors.toSet()));
                                 indicatorQueryTreatment.setLevel(level);
+                                indicatorQueryTreatment.setFdaLevel(LevelUtils.getHighestFdaLevel(fdaLevelMap.get(treatment)));
                                 indicatorQueryTreatment.setPmids(pmidsMap.get(treatment));
                                 indicatorQueryTreatment.setAbstracts(abstractsMap.get(treatment));
                                 indicatorQueryTreatment.setAlterations(alterationsMap.get(treatment));

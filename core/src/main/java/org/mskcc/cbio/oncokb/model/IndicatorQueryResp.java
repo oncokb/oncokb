@@ -23,6 +23,7 @@ public class IndicatorQueryResp implements java.io.Serializable {
     private LevelOfEvidence highestResistanceLevel;
     private LevelOfEvidence highestDiagnosticImplicationLevel;
     private LevelOfEvidence highestPrognosticImplicationLevel;
+    private LevelOfEvidence highestFdaLevel;
     private List<LevelOfEvidence> otherSignificantSensitiveLevels = new ArrayList<>();
     private List<LevelOfEvidence> otherSignificantResistanceLevels = new ArrayList<>();
     private Boolean VUS;
@@ -140,6 +141,14 @@ public class IndicatorQueryResp implements java.io.Serializable {
 
     public void setHighestPrognosticImplicationLevel(LevelOfEvidence highestPrognosticImplicationLevel) {
         this.highestPrognosticImplicationLevel = highestPrognosticImplicationLevel;
+    }
+
+    public LevelOfEvidence getHighestFdaLevel() {
+        return highestFdaLevel;
+    }
+
+    public void setHighestFdaLevel(LevelOfEvidence highestFdaLevel) {
+        this.highestFdaLevel = highestFdaLevel;
     }
 
     public List<LevelOfEvidence> getOtherSignificantSensitiveLevels() {
