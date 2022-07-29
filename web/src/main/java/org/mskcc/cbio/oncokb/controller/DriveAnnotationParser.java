@@ -772,8 +772,12 @@ public class DriveAnnotationParser {
                 if (drugObj.has(FDA_LEVEL_KEY)) {
                     String fdaLevelStr = drugObj.getString(FDA_LEVEL_KEY);
                     fdaLevel = LevelOfEvidence.getByLevel(fdaLevelStr);
+                    System.out.println(spaceStrByNestLevel(nestLevel + 2) + "Manual FDA level: " + fdaLevel);
                 } else {
                     fdaLevel = FdaAlterationUtils.convertToFdaLevel(evidence.getLevelOfEvidence());
+                    if (fdaLevel != null) {
+                        System.out.println(spaceStrByNestLevel(nestLevel + 2) + "Default FDA level: " + fdaLevel);
+                    }
                 }
                 if (fdaLevel != null && LevelUtils.getAllowedFdaLevels().contains(fdaLevel)) {
                     evidence.setFdaLevel(fdaLevel);
