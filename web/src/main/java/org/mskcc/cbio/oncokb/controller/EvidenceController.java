@@ -243,6 +243,7 @@ public class EvidenceController {
         }
 
         Set<TumorType> cancerTypes = queryEvidence.getCancerTypes().stream().map(tumorType -> StringUtils.isNullOrEmpty(tumorType.getCode()) ? TumorTypeUtils.getByMainType(tumorType.getMainType()) : TumorTypeUtils.getByCode(tumorType.getCode())).collect(Collectors.toSet());
+        Set<TumorType> excludedCancerTypes = queryEvidence.getExcludedCancerTypes().stream().map(tumorType -> StringUtils.isNullOrEmpty(tumorType.getCode()) ? TumorTypeUtils.getByMainType(tumorType.getMainType()) : TumorTypeUtils.getByCode(tumorType.getCode())).collect(Collectors.toSet());
         Set<TumorType> relevantCancerTypes = queryEvidence.getRelevantCancerTypes().stream().map(tumorType -> StringUtils.isNullOrEmpty(tumorType.getCode()) ? TumorTypeUtils.getByMainType(tumorType.getMainType()) : TumorTypeUtils.getByCode(tumorType.getCode())).collect(Collectors.toSet());
         Boolean isCancerEvidence = true;
         if (queryEvidence.getCancerTypes().isEmpty()) {
@@ -287,6 +288,7 @@ public class EvidenceController {
 
                 Evidence tempEvidence = new Evidence(oldEvidence, null);
                 tempEvidence.setCancerTypes(queryEvidence.getCancerTypes().stream().map(tumorType -> StringUtils.isNullOrEmpty(tumorType.getCode()) ? TumorTypeUtils.getByMainType(tumorType.getMainType()) : TumorTypeUtils.getByCode(tumorType.getCode())).filter(tumorType -> tumorType != null).collect(Collectors.toSet()));
+                tempEvidence.setExcludedCancerTypes(queryEvidence.getExcludedCancerTypes().stream().map(tumorType -> StringUtils.isNullOrEmpty(tumorType.getCode()) ? TumorTypeUtils.getByMainType(tumorType.getMainType()) : TumorTypeUtils.getByCode(tumorType.getCode())).filter(tumorType -> tumorType != null).collect(Collectors.toSet()));
                 initEvidence(tempEvidence, new ArrayList<>(tempEvidence.getTreatments()));
 
                 evidenceBo.save(tempEvidence);
@@ -326,7 +328,7 @@ public class EvidenceController {
                 // save duplicated evidence record for string alteration oncogenic
                 for (Alteration alteration : alterations) {
                     Evidence evidence = new Evidence(
-                        uuid, evidenceType, new HashSet<>(), new HashSet<>(), gene, Collections.singleton(alteration),
+                        uuid, evidenceType, new HashSet<>(), new HashSet<>(), new HashSet<>(), gene, Collections.singleton(alteration),
                         description, additionalInfo, treatments, knownEffect, lastEdit, null,
                         level, fdaLevel, solidPropagation, liquidPropagation, articles
                     );
@@ -336,7 +338,7 @@ public class EvidenceController {
                 }
             } else if (!isCancerEvidence) {
                 Evidence evidence = new Evidence(
-                    uuid, evidenceType, new HashSet<>(), new HashSet<>(), gene, alterations,
+                    uuid, evidenceType, new HashSet<>(), new HashSet<>(), new HashSet<>(), gene, alterations,
                     description, additionalInfo, treatments, knownEffect, lastEdit, null,
                     level, fdaLevel, solidPropagation, liquidPropagation, articles
                 );
@@ -345,7 +347,7 @@ public class EvidenceController {
                 evidences.add(evidence);
             } else {
                 Evidence evidence = new Evidence(
-                    uuid, evidenceType, cancerTypes, relevantCancerTypes, gene, alterations,
+                    uuid, evidenceType, cancerTypes, excludedCancerTypes, relevantCancerTypes, gene, alterations,
                     description, additionalInfo, treatments, knownEffect, lastEdit, null,
                     level, fdaLevel, solidPropagation, liquidPropagation, articles
                 );
@@ -361,6 +363,7 @@ public class EvidenceController {
                 }
                 evidence.setEvidenceType(evidenceType);
                 evidence.setCancerTypes(new HashSet<>());
+                evidence.setExcludedCancerTypes(new HashSet<>());
                 evidence.setKnownEffect(knownEffect);
                 evidence.setLevelOfEvidence(level);
                 evidence.setDescription(description);
@@ -380,7 +383,7 @@ public class EvidenceController {
             // insert cancer type information and save it
             // create a new evidence based on input passed in, and gene and alterations information from the current evidences
             Evidence evidence = new Evidence(
-                uuid, evidenceType, cancerTypes, relevantCancerTypes, gene, alterations,
+                uuid, evidenceType, cancerTypes, excludedCancerTypes, relevantCancerTypes, gene, alterations,
                 description, additionalInfo, treatments, knownEffect, lastEdit, null,
                 level, fdaLevel, solidPropagation, liquidPropagation, articles
             );

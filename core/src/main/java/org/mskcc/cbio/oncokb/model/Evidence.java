@@ -106,6 +106,12 @@ public class Evidence implements java.io.Serializable {
     private Set<TumorType> cancerTypes = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "evidence_excluded_cancer_type",
+        joinColumns = @JoinColumn(name = "evidence_id", referencedColumnName = "id"),
+        inverseJoinColumns = @JoinColumn(name = "cancer_type_id", referencedColumnName = "id"))
+    private Set<TumorType> excludedCancerTypes = new HashSet<>();
+
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "evidence_relevant_cancer_type",
         joinColumns = @JoinColumn(name = "evidence_id", referencedColumnName = "id"),
         inverseJoinColumns = @JoinColumn(name = "cancer_type_id", referencedColumnName = "id"))
@@ -200,6 +206,14 @@ public class Evidence implements java.io.Serializable {
 
     public void setCancerTypes(Set<TumorType> cancerTypes) {
         this.cancerTypes = cancerTypes;
+    }
+
+    public Set<TumorType> getExcludedCancerTypes() {
+        return excludedCancerTypes;
+    }
+
+    public void setExcludedCancerTypes(Set<TumorType> excludedCancerTypes) {
+        this.excludedCancerTypes = excludedCancerTypes;
     }
 
     public Set<TumorType> getRelevantCancerTypes() {
@@ -402,6 +416,7 @@ public class Evidence implements java.io.Serializable {
         this.evidenceType = e.evidenceType;
         this.cancerTypes = e.cancerTypes;
         this.relevantCancerTypes = e.relevantCancerTypes;
+        this.excludedCancerTypes = e.excludedCancerTypes;
         this.gene = e.gene;
         this.description = e.description;
         this.additionalInfo = e.additionalInfo;
@@ -418,7 +433,7 @@ public class Evidence implements java.io.Serializable {
         this.articles = new HashSet<>(e.articles);
     }
 
-    public Evidence(String uuid, EvidenceType evidenceType, Set<TumorType> cancerTypes, Set<TumorType> relevantCancerTypes, Gene gene, Set<Alteration> alterations, String description, String additionalInfo, List<Treatment> treatments,
+    public Evidence(String uuid, EvidenceType evidenceType, Set<TumorType> cancerTypes, Set<TumorType> excludedCancerTypes, Set<TumorType> relevantCancerTypes, Gene gene, Set<Alteration> alterations, String description, String additionalInfo, List<Treatment> treatments,
                     String knownEffect, Date lastEdit, Date lastReview,
                     LevelOfEvidence levelOfEvidence,
                     LevelOfEvidence fdaLevel,
@@ -427,6 +442,7 @@ public class Evidence implements java.io.Serializable {
         this.uuid = uuid;
         this.evidenceType = evidenceType;
         this.cancerTypes = cancerTypes;
+        this.excludedCancerTypes = excludedCancerTypes;
         this.relevantCancerTypes = relevantCancerTypes;
         this.gene = gene;
         this.alterations = alterations;
