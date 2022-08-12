@@ -12,6 +12,7 @@ import org.mskcc.cbio.oncokb.bo.*;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.TumorType;
 import org.mskcc.cbio.oncokb.bo.OncokbTranscriptService;
+import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.Tumor;
 import org.mskcc.cbio.oncokb.util.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -505,6 +506,23 @@ public class DriveAnnotationParser {
         }
     }
 
+    private void saveDxPxSummaries(JSONObject cancerObj, String summaryKey, Gene gene, Set<Alteration> alterations, List<TumorType> tumorTypes, List<TumorType> excludedCancerTypes, List<TumorType> relevantCancerTypes, EvidenceType evidenceType, Integer nestLevel, LevelOfEvidence level) {
+        List<TumorType> rcts = new ArrayList<>(relevantCancerTypes);
+        if ((rcts == null || rcts.size() == 0) && LevelOfEvidence.LEVEL_Dx1.equals(level)) {
+            rcts.addAll(getDxOneRelevantCancerTypes(new HashSet<>(tumorTypes)));
+        }
+        saveTumorLevelSummaries(
+            cancerObj,
+            summaryKey,
+            gene,
+            alterations,
+            tumorTypes,
+            excludedCancerTypes,
+            rcts,
+            evidenceType,
+            nestLevel);
+    }
+
     private void saveTumorLevelSummaries(JSONObject cancerObj, String summaryKey, Gene gene, Set<Alteration> alterations, List<TumorType> tumorTypes, List<TumorType> excludedCancerTypes, List<TumorType> relevantCancerTypes, EvidenceType evidenceType, Integer nestLevel) {
         if (cancerObj.has(summaryKey) && !cancerObj.getString(summaryKey).isEmpty()) {
             EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
@@ -539,6 +557,18 @@ public class DriveAnnotationParser {
         }
     }
 
+    private Set<TumorType> getDxOneRelevantCancerTypes(Set<TumorType> tumorTypes) {
+        Set<TumorType> dxRelevantCancerTypes = new HashSet<>();
+        for (TumorType tumorType : tumorTypes) {
+            if (StringUtils.isEmpty(tumorType.getSubtype())) {
+                dxRelevantCancerTypes.add(tumorType);
+            } else {
+                dxRelevantCancerTypes.addAll(TumorTypeUtils.findRelevantTumorTypes(TumorTypeUtils.getTumorTypeName(tumorType), false, RelevantTumorTypeDirection.UPWARD).stream().filter(ct -> ct.getLevel() > 0).collect(Collectors.toSet()));
+            }
+        }
+        return dxRelevantCancerTypes;
+    }
+
     private void parseCancer(Gene gene, Set<Alteration> alterations, JSONObject cancerObj, List<TumorType> tumorTypes, List<TumorType> excludedCancerTypes, List<TumorType> relevantCancerTypes, Integer nestLevel) throws Exception {
         if (tumorTypes.isEmpty()) {
             return;
@@ -549,8 +579,20 @@ public class DriveAnnotationParser {
         // cancer type summary
         saveTumorLevelSummaries(cancerObj, "summary", gene, alterations, tumorTypes, excludedCancerTypes, relevantCancerTypes, EvidenceType.TUMOR_TYPE_SUMMARY, nestLevel);
 
+        // Prognostic implications
+        Evidence prognosticEvidence = parseImplication(gene, alterations, tumorTypes, excludedCancerTypes, relevantCancerTypes,
+            cancerObj.has("prognostic") ? cancerObj.getJSONObject("prognostic") : null,
+            getUUID(cancerObj, "prognostic"),
+            EvidenceType.PROGNOSTIC_IMPLICATION, nestLevel + 1);
+
+        // Diagnostic implications
+        Evidence diagnosticEvidence = parseImplication(gene, alterations, tumorTypes, excludedCancerTypes, relevantCancerTypes,
+            cancerObj.has("diagnostic") ? cancerObj.getJSONObject("diagnostic") : null,
+            getUUID(cancerObj, "diagnostic"),
+            EvidenceType.DIAGNOSTIC_IMPLICATION, nestLevel + 1);
+
         // diagnostic summary
-        saveTumorLevelSummaries(
+        saveDxPxSummaries(
             cancerObj,
             "diagnosticSummary",
             gene,
@@ -559,30 +601,22 @@ public class DriveAnnotationParser {
             excludedCancerTypes,
             cancerObj.has("diagnostic") && cancerObj.getJSONObject("diagnostic").has("relevantCancerTypes") ? getTumorTypes(cancerObj.getJSONObject("diagnostic").getJSONArray("relevantCancerTypes")) : relevantCancerTypes,
             EvidenceType.DIAGNOSTIC_SUMMARY,
-            nestLevel);
+            nestLevel,
+            diagnosticEvidence == null ? null : diagnosticEvidence.getLevelOfEvidence()
+        );
 
         // prognostic summary
-        saveTumorLevelSummaries(cancerObj,
+        saveDxPxSummaries(cancerObj,
             "prognosticSummary",
             gene,
             alterations,
             tumorTypes,
             excludedCancerTypes,
             cancerObj.has("prognostic") && cancerObj.getJSONObject("prognostic").has("relevantCancerTypes") ? getTumorTypes(cancerObj.getJSONObject("prognostic").getJSONArray("relevantCancerTypes")) : relevantCancerTypes,
-            EvidenceType.PROGNOSTIC_SUMMARY, nestLevel
+            EvidenceType.PROGNOSTIC_SUMMARY,
+            nestLevel,
+            prognosticEvidence == null ? null : prognosticEvidence.getLevelOfEvidence()
         );
-
-        // Prognostic implications
-        parseImplication(gene, alterations, tumorTypes, excludedCancerTypes, relevantCancerTypes,
-            cancerObj.has("prognostic") ? cancerObj.getJSONObject("prognostic") : null,
-            getUUID(cancerObj, "prognostic"),
-            EvidenceType.PROGNOSTIC_IMPLICATION, nestLevel + 1);
-
-        // Diagnostic implications
-        parseImplication(gene, alterations, tumorTypes, excludedCancerTypes, relevantCancerTypes,
-            cancerObj.has("diagnostic") ? cancerObj.getJSONObject("diagnostic") : null,
-            getUUID(cancerObj, "diagnostic"),
-            EvidenceType.DIAGNOSTIC_IMPLICATION, nestLevel + 1);
 
         JSONArray implications = cancerObj.getJSONArray("TIs");
 
@@ -874,7 +908,7 @@ public class DriveAnnotationParser {
         }
     }
 
-    private void parseImplication(Gene gene, Set<Alteration> alterations, List<TumorType> tumorTypes, List<TumorType> excludedCancerTypes, List<TumorType> relevantCancerTypes, JSONObject implication, String uuid, EvidenceType evidenceType, Integer nestLevel) throws Exception {
+    private Evidence parseImplication(Gene gene, Set<Alteration> alterations, List<TumorType> tumorTypes, List<TumorType> excludedCancerTypes, List<TumorType> relevantCancerTypes, JSONObject implication, String uuid, EvidenceType evidenceType, Integer nestLevel) throws Exception {
         if (evidenceType != null && implication != null &&
             ((implication.has("description") && !implication.getString("description").trim().isEmpty())
                 || (implication.has("level") && !implication.getString("level").trim().isEmpty()))) {
@@ -894,17 +928,19 @@ public class DriveAnnotationParser {
                 evidence.setExcludedCancerTypes(new HashSet<>(excludedCancerTypes));
             }
 
-            if (implication.has("relevantCancerTypes")) {
-                evidence.setRelevantCancerTypes(new HashSet<>(getTumorTypes(implication.getJSONArray("relevantCancerTypes"))));
-            } else if (relevantCancerTypes != null) {
-                evidence.setRelevantCancerTypes(new HashSet<>(relevantCancerTypes));
-            }
             if (implication.has("level") && !implication.getString("level").trim().isEmpty()) {
                 LevelOfEvidence level = LevelOfEvidence.getByLevel(implication.getString("level").trim());
                 System.out.println(spaceStrByNestLevel(nestLevel + 1) + "Level of the implication: " + level);
                 evidence.setLevelOfEvidence(level);
                 addDateToLastEditSetFromObject(lastEditDates, implication, "level");
-//                addDateToLastReviewSetFromLong(lastReviewDates, implication, "level");
+            }
+
+            if (implication.has("relevantCancerTypes")) {
+                evidence.setRelevantCancerTypes(new HashSet<>(getTumorTypes(implication.getJSONArray("relevantCancerTypes"))));
+            } else if (relevantCancerTypes != null && relevantCancerTypes.size() > 0) {
+                evidence.setRelevantCancerTypes(new HashSet<>(relevantCancerTypes));
+            } else if (LevelOfEvidence.LEVEL_Dx1.equals(evidence.getLevelOfEvidence())) {
+                evidence.setRelevantCancerTypes(getDxOneRelevantCancerTypes(new HashSet<>(tumorTypes)));
             }
 
             if (implication.has("description") && !implication.getString("description").trim().isEmpty()) {
@@ -930,7 +966,9 @@ public class DriveAnnotationParser {
 //                    "Last review on: " + MainUtils.getTimeByDate(lastReview));
 //            }
             evidenceBo.save(evidence);
+            return evidence;
         }
+        return null;
     }
 
     private String spaceStrByNestLevel(Integer nestLevel) {

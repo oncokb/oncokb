@@ -386,7 +386,7 @@ public class IndicatorUtils {
             }
 
             // Diagnostic summary
-            if (evidenceTypes.contains(EvidenceType.DIAGNOSTIC_SUMMARY)) {
+            if (evidenceTypes.contains(EvidenceType.DIAGNOSTIC_SUMMARY) && matchedTumorType != null) {
                 Map<String, Object> diagnosticSummary = new HashMap<>();
                 if (indicatorQuery.getDiagnosticImplications().stream().filter(implication -> implication.getLevelOfEvidence() != null && implication.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_Dx1)).findAny().isPresent()) {
                     diagnosticSummary = SummaryUtils.tumorTypeSummary(EvidenceType.DIAGNOSTIC_SUMMARY, gene, query, matchedAlt,
@@ -415,7 +415,7 @@ public class IndicatorUtils {
             }
 
             // Prognostic summary
-            if (evidenceTypes.contains(EvidenceType.PROGNOSTIC_SUMMARY)) {
+            if (evidenceTypes.contains(EvidenceType.PROGNOSTIC_SUMMARY) && matchedTumorType != null) {
                 Map<String, Object> prognosticSummary = SummaryUtils.tumorTypeSummary(EvidenceType.PROGNOSTIC_SUMMARY, gene, query, matchedAlt,
                     new ArrayList<>(relevantAlterationsWithoutAlternativeAlleles),
                     matchedTumorType,

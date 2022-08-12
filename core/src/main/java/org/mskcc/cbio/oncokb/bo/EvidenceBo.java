@@ -44,6 +44,7 @@ public interface EvidenceBo extends GenericBo<Evidence> {
      *
      * @param alterations
      * @param evidenceTypes
+     * @param tumorType
      * @param tumorTypes
      * @return
      */
@@ -54,7 +55,7 @@ public interface EvidenceBo extends GenericBo<Evidence> {
      *
      * @param alterations
      * @param evidenceTypes
-     * @param tumorTypes
+     * @param tumorType
      * @param levelOfEvidences
      * @return
      */

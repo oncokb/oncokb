@@ -200,10 +200,11 @@ public class EvidenceUtils {
             if (StringUtils.isNotEmpty(query.getQuery().getTumorType())) {
                 evidenceToReturn = evidenceToReturn.stream().filter(evidence -> {
                     if (evidence.getEvidenceType() != null) {
+                        Set<TumorType> relevantCancerTypes = TumorTypeUtils.findEvidenceRelevantCancerTypes(evidence);
                         if (evidence.getEvidenceType().equals(EvidenceType.DIAGNOSTIC_IMPLICATION) && evidence.getLevelOfEvidence() != null && evidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_Dx1)) {
-                            return !Collections.disjoint(downwardTumorTypes, evidence.getRelevantCancerTypes().isEmpty() ? evidence.getCancerTypes() : evidence.getRelevantCancerTypes());
+                            return !Collections.disjoint(downwardTumorTypes, relevantCancerTypes);
                         } else if (EvidenceTypeUtils.getTumorTypeEvidenceTypes().contains(evidence.getEvidenceType())) {
-                            return !Collections.disjoint(upwardTumorTypes, evidence.getRelevantCancerTypes().isEmpty() ? evidence.getCancerTypes() : evidence.getRelevantCancerTypes());
+                            return !Collections.disjoint(upwardTumorTypes, relevantCancerTypes);
                         } else {
                             return true;
                         }
@@ -376,16 +377,10 @@ public class EvidenceUtils {
                                 }
                                 filtered.add(evidence);
                             } else {
-                                Set<TumorType> tumorTypes = evidence.getRelevantCancerTypes().isEmpty() ? evidence.getCancerTypes() : evidence.getRelevantCancerTypes();
-
                                 TumorForm tumorForm = TumorTypeUtils.checkTumorForm(new HashSet<>(evidenceQuery.getOncoTreeTypes()));
 
                                 // for evidence has relevant cancer types, we should only look at the exact matched cancer type of the evidence query
-                                if (evidence.getRelevantCancerTypes().isEmpty()) {
-                                    hasjointed = !Collections.disjoint(evidenceQuery.getOncoTreeTypes(), tumorTypes);
-                                } else {
-                                    hasjointed = evidence.getRelevantCancerTypes().contains(evidenceQuery.getExactMatchedTumorType());
-                                }
+                                hasjointed = !Collections.disjoint(TumorTypeUtils.findEvidenceRelevantCancerTypes(evidence), evidenceQuery.getExactMatchedTumorType() == null ? evidenceQuery.getOncoTreeTypes() : Collections.singleton(evidenceQuery.getExactMatchedTumorType()));
 
                                 if (hasjointed || com.mysql.jdbc.StringUtils.isNullOrEmpty(evidenceQuery.getQuery().getTumorType())) {
                                     filtered.add(evidence);
@@ -916,12 +911,7 @@ public class EvidenceUtils {
                 TumorForm tumorForm = TumorTypeUtils.checkTumorForm(new HashSet<>(upwardTumorTypes));
                 for (Evidence evidence : query.getEvidences()) {
                     if (evidence.getLevelOfEvidence() != null && EvidenceTypeUtils.getTreatmentEvidenceTypes().contains(evidence.getEvidenceType()) && tumorForm != null) {
-                        boolean disjoint = false;
-                        if (evidence.getRelevantCancerTypes().isEmpty()) {
-                            disjoint = Collections.disjoint(upwardTumorTypes, evidence.getCancerTypes());
-                        } else {
-                            disjoint = !evidence.getRelevantCancerTypes().contains(query.getExactMatchedTumorType());
-                        }
+                        boolean disjoint = Collections.disjoint(TumorTypeUtils.findEvidenceRelevantCancerTypes(evidence), query.getExactMatchedTumorType() == null ? upwardTumorTypes : Collections.singleton(query.getExactMatchedTumorType()));
                         if (disjoint) {
                             Evidence propagatedLevel = getPropagateEvidence(allowedLevels, evidence, tumorForm);
                             if (propagatedLevel != null) {
