@@ -509,7 +509,7 @@ public class DriveAnnotationParser {
     private void saveDxPxSummaries(JSONObject cancerObj, String summaryKey, Gene gene, Set<Alteration> alterations, List<TumorType> tumorTypes, List<TumorType> excludedCancerTypes, List<TumorType> relevantCancerTypes, EvidenceType evidenceType, Integer nestLevel, LevelOfEvidence level) {
         List<TumorType> rcts = new ArrayList<>(relevantCancerTypes);
         if ((rcts == null || rcts.size() == 0) && LevelOfEvidence.LEVEL_Dx1.equals(level)) {
-            rcts.addAll(getDxOneRelevantCancerTypes(new HashSet<>(tumorTypes)));
+            rcts.addAll(TumorTypeUtils.getDxOneRelevantCancerTypes(new HashSet<>(tumorTypes)));
         }
         saveTumorLevelSummaries(
             cancerObj,
@@ -555,18 +555,6 @@ public class DriveAnnotationParser {
                 "Has description.");
             evidenceBo.save(evidence);
         }
-    }
-
-    private Set<TumorType> getDxOneRelevantCancerTypes(Set<TumorType> tumorTypes) {
-        Set<TumorType> dxRelevantCancerTypes = new HashSet<>();
-        for (TumorType tumorType : tumorTypes) {
-            if (StringUtils.isEmpty(tumorType.getSubtype())) {
-                dxRelevantCancerTypes.add(tumorType);
-            } else {
-                dxRelevantCancerTypes.addAll(TumorTypeUtils.findRelevantTumorTypes(TumorTypeUtils.getTumorTypeName(tumorType), false, RelevantTumorTypeDirection.UPWARD).stream().filter(ct -> ct.getLevel() > 0).collect(Collectors.toSet()));
-            }
-        }
-        return dxRelevantCancerTypes;
     }
 
     private void parseCancer(Gene gene, Set<Alteration> alterations, JSONObject cancerObj, List<TumorType> tumorTypes, List<TumorType> excludedCancerTypes, List<TumorType> relevantCancerTypes, Integer nestLevel) throws Exception {
@@ -940,7 +928,7 @@ public class DriveAnnotationParser {
             } else if (relevantCancerTypes != null && relevantCancerTypes.size() > 0) {
                 evidence.setRelevantCancerTypes(new HashSet<>(relevantCancerTypes));
             } else if (LevelOfEvidence.LEVEL_Dx1.equals(evidence.getLevelOfEvidence())) {
-                evidence.setRelevantCancerTypes(getDxOneRelevantCancerTypes(new HashSet<>(tumorTypes)));
+                evidence.setRelevantCancerTypes(TumorTypeUtils.getDxOneRelevantCancerTypes(new HashSet<>(tumorTypes)));
             }
 
             if (implication.has("description") && !implication.getString("description").trim().isEmpty()) {

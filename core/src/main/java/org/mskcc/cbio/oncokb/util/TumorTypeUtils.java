@@ -157,6 +157,18 @@ public class TumorTypeUtils {
         return findRelevantTumorTypes(tumorType, null, RelevantTumorTypeDirection.UPWARD);
     }
 
+    public static Set<TumorType> getDxOneRelevantCancerTypes(Set<TumorType> tumorTypes) {
+        Set<TumorType> dxRelevantCancerTypes = new HashSet<>();
+        for (TumorType tumorType : tumorTypes) {
+            if (StringUtils.isEmpty(tumorType.getSubtype())) {
+                dxRelevantCancerTypes.add(tumorType);
+            } else {
+                dxRelevantCancerTypes.addAll(TumorTypeUtils.findRelevantTumorTypes(TumorTypeUtils.getTumorTypeName(tumorType), false, RelevantTumorTypeDirection.UPWARD).stream().filter(ct -> ct.getLevel() > 0).collect(Collectors.toSet()));
+            }
+        }
+        return dxRelevantCancerTypes;
+    }
+
     public static Set<TumorType> findEvidenceRelevantCancerTypes(Evidence evidence) {
         if (evidence == null)
             return new HashSet<>();

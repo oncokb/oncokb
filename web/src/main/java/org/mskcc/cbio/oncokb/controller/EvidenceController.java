@@ -289,6 +289,12 @@ public class EvidenceController {
                 Evidence tempEvidence = new Evidence(oldEvidence, null);
                 tempEvidence.setCancerTypes(queryEvidence.getCancerTypes().stream().map(tumorType -> StringUtils.isNullOrEmpty(tumorType.getCode()) ? TumorTypeUtils.getByMainType(tumorType.getMainType()) : TumorTypeUtils.getByCode(tumorType.getCode())).filter(tumorType -> tumorType != null).collect(Collectors.toSet()));
                 tempEvidence.setExcludedCancerTypes(queryEvidence.getExcludedCancerTypes().stream().map(tumorType -> StringUtils.isNullOrEmpty(tumorType.getCode()) ? TumorTypeUtils.getByMainType(tumorType.getMainType()) : TumorTypeUtils.getByCode(tumorType.getCode())).filter(tumorType -> tumorType != null).collect(Collectors.toSet()));
+                if (queryEvidence.getRelevantCancerTypes() != null) {
+                    tempEvidence.setRelevantCancerTypes(queryEvidence.getRelevantCancerTypes());
+                } else if (LevelOfEvidence.LEVEL_Dx1.equals(tempEvidence.getLevelOfEvidence())) {
+                    tempEvidence.setRelevantCancerTypes(TumorTypeUtils.getDxOneRelevantCancerTypes(tempEvidence.getCancerTypes()));
+                }
+
                 initEvidence(tempEvidence, new ArrayList<>(tempEvidence.getTreatments()));
 
                 evidenceBo.save(tempEvidence);
