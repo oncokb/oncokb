@@ -6,16 +6,16 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.mskcc.cbio.oncokb.model.RelevantTumorTypeDirection;
-import org.mskcc.cbio.oncokb.model.SpecialTumorType;
-import org.mskcc.cbio.oncokb.model.TumorForm;
-import org.mskcc.cbio.oncokb.model.TumorType;
+import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.Tumor;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static org.mskcc.cbio.oncokb.model.SpecialTumorType.ALL_LIQUID_TUMORS;
+import static org.mskcc.cbio.oncokb.model.SpecialTumorType.ALL_SOLID_TUMORS;
 
 
 public class TumorTypeUtils {
@@ -48,6 +48,11 @@ public class TumorTypeUtils {
         return ApplicationContextSingleton.getTumorTypeBo().findAllSpecialCancerTypesCached();
     }
 
+    public static Set<TumorType> getAllSubtypesByMainType(String mainType) {
+        if (StringUtils.isEmpty(mainType)) return new HashSet<>();
+        return getAllSubtypes().stream().filter(cancerType -> mainType.equals(cancerType.getMainType())).collect(Collectors.toSet());
+    }
+
     public static TumorType getByName(String name) {
         if (StringUtils.isEmpty(name)) return null;
         TumorType tumorType = getByCode(name);
@@ -61,11 +66,15 @@ public class TumorTypeUtils {
     }
 
     public static SpecialTumorType getSpecialTumorTypeByName(String name) {
+        SpecialTumorType specialTumorType = null;
         try {
-            return SpecialTumorType.valueOf(name);
+            specialTumorType = SpecialTumorType.valueOf(name);
         } catch (Exception e) {
-            return null;
         }
+        if (specialTumorType == null) {
+            specialTumorType = SpecialTumorType.getByTumorType(name);
+        }
+        return specialTumorType;
     }
 
     public static TumorType getBySubtype(String subtype) {
@@ -148,6 +157,77 @@ public class TumorTypeUtils {
         return findRelevantTumorTypes(tumorType, null, RelevantTumorTypeDirection.UPWARD);
     }
 
+    public static Set<TumorType> getDxOneRelevantCancerTypes(Set<TumorType> tumorTypes) {
+        Set<TumorType> dxRelevantCancerTypes = new HashSet<>();
+        for (TumorType tumorType : tumorTypes) {
+            if (StringUtils.isEmpty(tumorType.getSubtype())) {
+                dxRelevantCancerTypes.add(tumorType);
+            } else {
+                dxRelevantCancerTypes.addAll(TumorTypeUtils.findRelevantTumorTypes(TumorTypeUtils.getTumorTypeName(tumorType), false, RelevantTumorTypeDirection.UPWARD).stream().filter(ct -> ct.getLevel() > 0).collect(Collectors.toSet()));
+            }
+        }
+        return dxRelevantCancerTypes;
+    }
+
+    public static Set<TumorType> findEvidenceRelevantCancerTypes(Evidence evidence) {
+        if (evidence == null)
+            return new HashSet<>();
+
+        if (!evidence.getRelevantCancerTypes().isEmpty())
+            return evidence.getRelevantCancerTypes();
+
+        RelevantTumorTypeDirection relevantTumorTypeDirection = RelevantTumorTypeDirection.DOWNWARD;
+        Set<TumorType> tumorTypes = evidence.getCancerTypes().stream().map(tumorType -> findEvidenceRelevantCancerTypes(getTumorTypeName(tumorType), StringUtils.isEmpty(tumorType.getSubtype()), relevantTumorTypeDirection)).flatMap(Collection::stream).collect(Collectors.toSet());
+        tumorTypes.removeAll(evidence.getExcludedCancerTypes().stream().map(tumorType -> findEvidenceRelevantCancerTypes(getTumorTypeName(tumorType), StringUtils.isEmpty(tumorType.getSubtype()), relevantTumorTypeDirection)).flatMap(Collection::stream).collect(Collectors.toSet()));
+        return tumorTypes;
+    }
+
+    private static List<TumorType> findEvidenceRelevantCancerTypes(String tumorType, boolean isMainType, RelevantTumorTypeDirection direction) {
+
+        // Check whether the tumorType is special tumor type
+        SpecialTumorType specialTumorType = getSpecialTumorTypeByName(tumorType);
+        if (specialTumorType != null) {
+            return findRelevantTumorTypesForSpecialCancerTypes(specialTumorType, direction);
+        }
+        LinkedHashSet<TumorType> mappedTumorTypes = new LinkedHashSet<>();
+
+
+        if (direction == null) {
+            direction = RelevantTumorTypeDirection.DOWNWARD;
+        }
+
+        if (direction.equals(RelevantTumorTypeDirection.DOWNWARD)) {
+            if (isMainType) {
+                TumorType mainType = getByMainType(tumorType);
+                if (mainType != null) {
+                    mappedTumorTypes.add(mainType);
+                    mappedTumorTypes.addAll(getAllSubtypesByMainType(mainType.getMainType()));
+                }
+            } else {
+                TumorType cancerType = getByName(tumorType);
+                if (cancerType != null) {
+                    mappedTumorTypes.add(cancerType);
+                    mappedTumorTypes.addAll(getChildTumorTypes(cancerType, true));
+                }
+            }
+        } else if (direction.equals(RelevantTumorTypeDirection.UPWARD)) {
+            if (isMainType) {
+                TumorType mainType = getByMainType(tumorType);
+                if (mainType != null) {
+                    mappedTumorTypes.add(mainType);
+                }
+            } else {
+                TumorType cancerType = getByName(tumorType);
+                if (cancerType != null) {
+                    mappedTumorTypes.add(cancerType);
+                    mappedTumorTypes.addAll(getParentTumorTypes(cancerType, true));
+                }
+            }
+        }
+
+        return new ArrayList<>(new LinkedHashSet<>(mappedTumorTypes));
+    }
+
     public static LinkedHashSet<TumorType> getParentTumorTypes(TumorType tumorType, boolean onlySameMaintype) {
         if (tumorType == null || tumorType.getParent() == null) return new LinkedHashSet<>();
         LinkedHashSet parentTumorTypes = new LinkedHashSet();
@@ -173,7 +253,61 @@ public class TumorTypeUtils {
         return childTumorTypes;
     }
 
+    public static List<TumorType> findRelevantTumorTypesForSpecialCancerTypes(SpecialTumorType specialTumorType, RelevantTumorTypeDirection direction) {
+        List<TumorType> relevantCancerTypes = new ArrayList<>();
+        if (specialTumorType == null) {
+            return relevantCancerTypes;
+        }
+        relevantCancerTypes.add(getBySpecialTumor(specialTumorType));
+        if (RelevantTumorTypeDirection.UPWARD.equals(direction)) {
+            switch (specialTumorType) {
+                case ALL_SOLID_TUMORS:
+                case ALL_LIQUID_TUMORS:
+                    relevantCancerTypes.add(getBySpecialTumor(SpecialTumorType.ALL_TUMORS));
+                    break;
+                default:
+                    break;
+            }
+        } else if (RelevantTumorTypeDirection.DOWNWARD.equals(direction)) {
+            Set<TumorType> allOncoTreeTypes =  new HashSet<>();
+            allOncoTreeTypes.addAll(getAllSubtypes());
+            allOncoTreeTypes.addAll(getAllMainTypes());
+            allOncoTreeTypes.removeAll(getAllSpecialTumorOncoTreeTypes());
+            switch (specialTumorType) {
+                case ALL_SOLID_TUMORS:
+                    relevantCancerTypes.addAll(
+                        allOncoTreeTypes
+                            .stream()
+                            .filter(tumorType -> TumorForm.SOLID.equals(tumorType.getTumorForm()) || TumorForm.MIXED.equals(tumorType.getTumorForm()))
+                            .collect(Collectors.toSet())
+                    );
+                    break;
+                case ALL_LIQUID_TUMORS:
+                    relevantCancerTypes.addAll(
+                        allOncoTreeTypes
+                            .stream()
+                            .filter(tumorType -> TumorForm.LIQUID.equals(tumorType.getTumorForm()) || TumorForm.MIXED.equals(tumorType.getTumorForm()))
+                            .collect(Collectors.toSet())
+                    );
+                    break;
+                case ALL_TUMORS:
+                    relevantCancerTypes.addAll(allOncoTreeTypes);
+                    relevantCancerTypes.add(TumorTypeUtils.getBySpecialTumor(ALL_SOLID_TUMORS));
+                    relevantCancerTypes.add(TumorTypeUtils.getBySpecialTumor(ALL_LIQUID_TUMORS));
+                    break;
+                default:
+                    break;
+            }
+        }
+        return relevantCancerTypes;
+    }
     public static List<TumorType> findRelevantTumorTypes(String tumorType, Boolean isMainType, RelevantTumorTypeDirection direction) {
+        // Check whether the tumorType is special tumor type
+        SpecialTumorType specialTumorType = getSpecialTumorTypeByName(tumorType);
+        if (specialTumorType != null) {
+            return findRelevantTumorTypesForSpecialCancerTypes(specialTumorType, direction);
+        }
+
         LinkedHashSet<TumorType> mappedTumorTypes = new LinkedHashSet<>();
         TumorType matchedTumorType = null;
 
@@ -204,19 +338,19 @@ public class TumorTypeUtils {
             }
         } else {
             if (matchedTumorType != null) {
-                // Add matched parent tumor types
+                // Add matched child tumor types
                 mappedTumorTypes.addAll(getChildTumorTypes(matchedTumorType, true));
             }
         }
 
         // Include all solid tumors
         if (hasSolidTumor(new HashSet<>(mappedTumorTypes))) {
-            mappedTumorTypes.add(getBySpecialTumor(SpecialTumorType.ALL_SOLID_TUMORS));
+            mappedTumorTypes.add(getBySpecialTumor(ALL_SOLID_TUMORS));
         }
 
         // Include all liquid tumors
         if (hasLiquidTumor(new HashSet<>(mappedTumorTypes))) {
-            mappedTumorTypes.add(getBySpecialTumor(SpecialTumorType.ALL_LIQUID_TUMORS));
+            mappedTumorTypes.add(getBySpecialTumor(ALL_LIQUID_TUMORS));
         }
 
         // Include all tumors
@@ -300,9 +434,9 @@ public class TumorTypeUtils {
         if (specialTumorType == null)
             return null;
 
-        if (specialTumorType.equals(SpecialTumorType.ALL_LIQUID_TUMORS) || specialTumorType.equals(SpecialTumorType.OTHER_LIQUID_TUMOR_TYPES)) {
+        if (specialTumorType.equals(ALL_LIQUID_TUMORS) || specialTumorType.equals(SpecialTumorType.OTHER_LIQUID_TUMOR_TYPES)) {
             return TumorForm.LIQUID;
-        } else if (specialTumorType.equals(SpecialTumorType.ALL_SOLID_TUMORS) || specialTumorType.equals(SpecialTumorType.OTHER_SOLID_TUMOR_TYPES)) {
+        } else if (specialTumorType.equals(ALL_SOLID_TUMORS) || specialTumorType.equals(SpecialTumorType.OTHER_SOLID_TUMOR_TYPES)) {
             return TumorForm.SOLID;
         } else {
             return TumorForm.MIXED;
