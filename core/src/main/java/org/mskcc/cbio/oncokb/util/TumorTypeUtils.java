@@ -380,6 +380,16 @@ public class TumorTypeUtils {
         return tumorTypes.stream().map(tumorType -> getTumorTypeName(tumorType)).collect(Collectors.joining(", "));
     }
 
+    public static String getTumorTypesNameWithExclusion(Collection<TumorType> tumorTypes, Collection<TumorType> excludedTumorTypes) {
+        StringBuilder sb = new StringBuilder(getTumorTypesName(tumorTypes));
+        if (excludedTumorTypes != null && excludedTumorTypes.size() > 0) {
+            sb.append(" (excluding ");
+            sb.append(getTumorTypesName(excludedTumorTypes));
+            sb.append(")");
+        }
+        return sb.toString();
+    }
+
     public static Map<String, org.mskcc.oncotree.model.TumorType> getAllNestedOncoTreeSubtypesFromSource() {
         String url = getOncoTreeApiUrl() + "tumorTypes?version=" + CacheUtils.getInfo().getOncoTreeVersion() + "&flat=false";
         Map<String, org.mskcc.oncotree.model.TumorType> result = new HashMap<>();
