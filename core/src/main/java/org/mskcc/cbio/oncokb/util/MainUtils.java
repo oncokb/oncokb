@@ -502,6 +502,7 @@ public class MainUtils {
                     for (Evidence evidence : __entry.getValue()) {
                         ClinicalVariant variant = new ClinicalVariant();
                         variant.setCancerTypes(evidence.getCancerTypes());
+                        variant.setExcludedCancerTypes(evidence.getExcludedCancerTypes());
                         variant.setVariant(alteration);
                         variant.setOncogenic(oncogenicityString);
                         variant.setLevel(evidence.getLevelOfEvidence().getLevel());

@@ -267,7 +267,11 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
                     if (!result.containsKey(level)) {
                         result.put(level, new HashSet<Evidence>());
                     }
-                    result.get(level).add(evidence);
+                    Evidence updatedEvidence = new Evidence(evidence, null);
+                    if (updatedEvidence.getRelevantCancerTypes() == null || updatedEvidence.getRelevantCancerTypes().size() == 0) {
+                        updatedEvidence.setRelevantCancerTypes(TumorTypeUtils.findEvidenceRelevantCancerTypes(updatedEvidence));
+                    }
+                    result.get(level).add(updatedEvidence);
                 }
             }
         }
@@ -411,7 +415,13 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             VariantAnnotationTumorType variantAnnotationTumorType = new VariantAnnotationTumorType();
             variantAnnotationTumorType.setRelevantTumorType(relevantTumorTypes.contains(uniqueTumorType));
             variantAnnotationTumorType.setTumorType(uniqueTumorType);
-            variantAnnotationTumorType.setEvidences(response.getEvidences().stream().filter(evidence -> !evidence.getCancerTypes().isEmpty() && evidence.getCancerTypes().contains(uniqueTumorType)).collect(Collectors.toList()));
+            variantAnnotationTumorType.setEvidences(response.getEvidences().stream().filter(evidence -> !evidence.getCancerTypes().isEmpty() && evidence.getCancerTypes().contains(uniqueTumorType)).map(evidence -> {
+                Evidence updatedEvidence = new Evidence(evidence, null);
+                if (updatedEvidence.getRelevantCancerTypes() == null || updatedEvidence.getRelevantCancerTypes().size() == 0) {
+                    updatedEvidence.setRelevantCancerTypes(TumorTypeUtils.findEvidenceRelevantCancerTypes(evidence));
+                }
+                return updatedEvidence;
+            }).collect(Collectors.toList()));
             annotation.getTumorTypes().add(variantAnnotationTumorType);
         }
         return new ResponseEntity<>(annotation, HttpStatus.OK);
