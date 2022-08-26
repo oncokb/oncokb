@@ -43,6 +43,49 @@ Please choose one of the profile when building the war file
 * public - core + API + public website (deprecated)
 
 You could find specific instructions in curate or public repo,
-         
+
+## Run with Docker containers
+
+**OncoKB Core** requires that a MySQL server is started and has the the oncokb data imported into the database. Reach out to contact@oncokb.org to get access to the data dump.
+
+To run local version of OncoKB Core without a local installation of Genome Nexus, follow the steps:
+1. Start local MySQL server with imported data
+2. Update oncokb core properties
+    * `-Djdbc.url`: MySQL database url
+    * `-Djdbc.username` and `-Djdbc.password`: MySQL server username and password
+    * `-Dgenome_nexus.grch37.url`: Change to https://www.genomenexus.org
+    * `-Dgenome_nexus.grch38.url`: Change to https://grch38.genomenexus.org
+
+3. Run docker-compose to pull oncokb docker image and create container
+    ```
+    docker-compose up -d
+    ```
+
+<br>
+
+**Genome Nexus** requires the following services:
+- Genome Nexus [Spring Boot](https://github.com/genome-nexus/genome-nexus) application
+- Local installation of [genome-nexus-vep](https://github.com/genome-nexus/genome-nexus-vep)
+- MongoDB database, using [genome-nexus-importer](https://github.com/genome-nexus/genome-nexus-importer) to setup static data
+
+1. Follow documentation on [downloading the Genome Nexus VEP Cache](https://github.com/genome-nexus/genome-nexus-vep/blob/master/README.md#create-vep-cache) for `GRCh37` and `GRCh38`.
+    ```
+    # Set location of GRCh37 local cache
+    export VEP_CACHE=
+
+    # Set location of GRCh38 local cache
+    export VEP_GRCH38_CACHE=
+    ```
+
+2. Run docker-compose to build images and create containers:
+    ```
+    docker-compose --profile genome-nexus up -d --build
+    ```
+
+Stop and remove containers:
+```
+docker-compose down
+```
+
 ## Questions?
 The best way is to send an email to contact@oncokb.org so all our team members can help.
