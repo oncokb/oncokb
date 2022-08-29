@@ -386,7 +386,7 @@ public class IndicatorUtils {
             }
 
             // Diagnostic summary
-            if (evidenceTypes.contains(EvidenceType.DIAGNOSTIC_SUMMARY)) {
+            if (evidenceTypes.contains(EvidenceType.DIAGNOSTIC_SUMMARY) && matchedTumorType != null) {
                 Map<String, Object> diagnosticSummary = new HashMap<>();
                 if (indicatorQuery.getDiagnosticImplications().stream().filter(implication -> implication.getLevelOfEvidence() != null && implication.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_Dx1)).findAny().isPresent()) {
                     diagnosticSummary = SummaryUtils.tumorTypeSummary(EvidenceType.DIAGNOSTIC_SUMMARY, gene, query, matchedAlt,
@@ -415,7 +415,7 @@ public class IndicatorUtils {
             }
 
             // Prognostic summary
-            if (evidenceTypes.contains(EvidenceType.PROGNOSTIC_SUMMARY)) {
+            if (evidenceTypes.contains(EvidenceType.PROGNOSTIC_SUMMARY) && matchedTumorType != null) {
                 Map<String, Object> prognosticSummary = SummaryUtils.tumorTypeSummary(EvidenceType.PROGNOSTIC_SUMMARY, gene, query, matchedAlt,
                     new ArrayList<>(relevantAlterationsWithoutAlternativeAlleles),
                     matchedTumorType,
@@ -706,11 +706,12 @@ public class IndicatorUtils {
                     Map<Treatment, Set<String>> pmidsMap = new HashMap<>();
                     Map<Treatment, Set<ArticleAbstract>> abstractsMap = new HashMap<>();
                     Map<Treatment, List<String>> alterationsMap = new HashMap<>();
-                    Map<Treatment, Set<org.mskcc.cbio.oncokb.apiModels.TumorType>> tumorTypeMap = new HashMap<>();
+                    Map<Treatment, Evidence> evidenceMap = new HashMap<>();
                     Map<Treatment, String> descriptionMap = new HashMap<>();
                     Map<Treatment, Set<LevelOfEvidence>> fdaLevelMap = new HashMap<>();
 
                     for (Evidence evidence : evidenceSetMap.get(level)) {
+                        String evidenceTumorTypesName = TumorTypeUtils.getTumorTypesNameWithExclusion(evidence.getCancerTypes(), evidence.getExcludedCancerTypes());
                         Citations citations = MainUtils.getCitationsByEvidence(evidence);
                         for (Treatment treatment : evidence.getTreatments()) {
                             if (!pmidsMap.containsKey(treatment)) {
@@ -729,7 +730,7 @@ public class IndicatorUtils {
                             pmidsMap.put(treatment, citations.getPmids());
                             abstractsMap.put(treatment, citations.getAbstracts());
                             alterationsMap.put(treatment, evidence.getAlterations().stream().map(alteration -> alteration.getName()).collect(Collectors.toList()));
-                            tumorTypeMap.put(treatment, evidence.getCancerTypes().stream().map(tumorType -> new org.mskcc.cbio.oncokb.apiModels.TumorType(tumorType)).collect(Collectors.toSet()));
+                            evidenceMap.put(treatment, evidence);
                             descriptionMap.put(treatment, evidence.getDescription());
                             fdaLevelMap.get(treatment).add(evidence.getFdaLevel());
                         }
@@ -740,13 +741,15 @@ public class IndicatorUtils {
                     for (Treatment treatment : list) {
                         String hugoSymbol = StringUtils.isEmpty(queryHugoSymbol) ? hugoSymbolMap.get(treatment) : queryHugoSymbol;
                         if (!filterSameTreatment || !treatmentExist(treatments, level, treatment.getDrugs())) {
-                            List<org.mskcc.cbio.oncokb.apiModels.TumorType> pickedCancerTypes = new ArrayList<>();
+                            List<TumorType> pickedCancerTypes = new ArrayList<>();
                             if (filterSameTreatment) {
-                                pickedCancerTypes.add(tumorTypeMap.get(treatment).iterator().next());
+                                pickedCancerTypes.add(evidenceMap.get(treatment).getCancerTypes().iterator().next());
                             } else {
-                                pickedCancerTypes.addAll(tumorTypeMap.get(treatment));
+                                pickedCancerTypes.addAll(evidenceMap.get(treatment).getCancerTypes());
                             }
-                            for (org.mskcc.cbio.oncokb.apiModels.TumorType tumorType :  pickedCancerTypes) {
+                            Evidence evidence = evidenceMap.get(treatment);
+                            for (TumorType tumorType :  pickedCancerTypes) {
+                                List<TumorType> relevantTumorTypes = TumorTypeUtils.findRelevantTumorTypes(TumorTypeUtils.getTumorTypeName(tumorType), StringUtils.isEmpty(tumorType.getSubtype()), RelevantTumorTypeDirection.DOWNWARD);
                                 IndicatorQueryTreatment indicatorQueryTreatment = new IndicatorQueryTreatment();
                                 indicatorQueryTreatment.setDrugs(treatment.getDrugs());
                                 indicatorQueryTreatment.setApprovedIndications(treatment.getApprovedIndications().stream().map(indication -> SummaryUtils.enrichDescription(indication, hugoSymbol)).collect(Collectors.toSet()));
@@ -755,7 +758,11 @@ public class IndicatorUtils {
                                 indicatorQueryTreatment.setPmids(pmidsMap.get(treatment));
                                 indicatorQueryTreatment.setAbstracts(abstractsMap.get(treatment));
                                 indicatorQueryTreatment.setAlterations(alterationsMap.get(treatment));
-                                indicatorQueryTreatment.setLevelAssociatedCancerType(tumorType);
+                                indicatorQueryTreatment.setLevelAssociatedCancerType(new org.mskcc.cbio.oncokb.apiModels.TumorType(tumorType));
+                                if (evidence.getExcludedCancerTypes().size() > 0) {
+                                    Set<org.mskcc.cbio.oncokb.apiModels.TumorType> excludedCancerTypes = evidence.getExcludedCancerTypes().stream().filter(ect -> relevantTumorTypes.contains(ect)).map(ect -> new org.mskcc.cbio.oncokb.apiModels.TumorType(ect)).collect(Collectors.toSet());
+                                    indicatorQueryTreatment.setLevelExcludedCancerTypes(excludedCancerTypes);
+                                }
                                 indicatorQueryTreatment.setDescription(SummaryUtils.enrichDescription(descriptionMap.get(treatment), queryHugoSymbol));
                                 treatments.add(indicatorQueryTreatment);
                             }
