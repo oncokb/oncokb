@@ -62,10 +62,7 @@ services:
     command: >
       java 
       -Dspring.data.mongodb.uri=mongodb://gn-mongo-grch38:27017/annotator
-      -Dgenexrefs.url=https://rest.ensembl.org/xrefs/id/ACCESSION?content-type=application/json
-      -Dvep.url=https://rest.ensembl.org/vep/human/hgvs/VARIANT?content-type=application/json&xref_refseq=1&ccds=1&canonical=1&domains=1&hgvs=1&numbers=1&protein=1
-      -DmutationAssessor.url=http://mutationassessor.org/r3/?cm=var&var=hg38,VARIANT&frm=json&fts=input,rgaa,rgvt,msa,pdb,F_impact,F_score,vc_score,vs_score,info,var,gene,uprot,rsprot,gaps,msa_height,chr,rs_pos,rs_res,up_pos,up_res,cnt_cosmic,cnt_snps
-      -Dmyvariantinfo.url=https://myvariant.info/v1/variant/VARIANT?assembly=hg38
+      -Dgn_vep.region.url=http://gn-vep-grch38:8080/vep/human/region/VARIANT
       -jar 
       /app.war
     links:
