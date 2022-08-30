@@ -13,12 +13,14 @@ import java.util.Set;
 @javax.annotation.Generated(value = "class io.swagger.codegen.languages.SpringMVCServerCodegen", date = "2016-05-10T02:49:36.208Z")
 public class ClinicalVariant {
 
-    private Set<TumorType> cancerTypes = null;
+    private Set<TumorType> cancerTypes = new HashSet<>();
+    private Set<TumorType> excludedCancerTypes = new HashSet<>();
     private Alteration variant = null;
     private String oncogenic = null;
     private String level = null;
-    private Set<String> drug = new HashSet<String>();
-    private Set<String> drugPmids = new HashSet<String>();
+    private String fdaLevel = null;
+    private Set<String> drug = new HashSet<>();
+    private Set<String> drugPmids = new HashSet<>();
     private Set<ArticleAbstract> drugAbstracts = new HashSet<>();
 
 
@@ -55,6 +57,17 @@ public class ClinicalVariant {
         this.cancerTypes = cancerTypes;
     }
 
+    /**
+     **/
+    @ApiModelProperty(value = "")
+    @JsonProperty("excludedCancerTypes")
+    public Set<TumorType> getExcludedCancerTypes() {
+        return excludedCancerTypes;
+    }
+
+    public void setExcludedCancerTypes(Set<TumorType> excludedCancerTypes) {
+        this.excludedCancerTypes = excludedCancerTypes;
+    }
 
     /**
      **/
@@ -68,6 +81,17 @@ public class ClinicalVariant {
         this.level = level;
     }
 
+    /**
+     **/
+    @ApiModelProperty(value = "")
+    @JsonProperty("fdaLevel")
+    public String getFdaLevel() {
+        return fdaLevel;
+    }
+
+    public void setFdaLevel(String fdaLevel) {
+        this.fdaLevel = fdaLevel;
+    }
 
     /**
      **/
@@ -117,6 +141,7 @@ public class ClinicalVariant {
             Objects.equals(getVariant(), that.getVariant()) &&
             Objects.equals(getOncogenic(), that.getOncogenic()) &&
             Objects.equals(getLevel(), that.getLevel()) &&
+            Objects.equals(getFdaLevel(), that.getFdaLevel()) &&
             Objects.equals(getDrug(), that.getDrug()) &&
             Objects.equals(getDrugPmids(), that.getDrugPmids()) &&
             Objects.equals(getDrugAbstracts(), that.getDrugAbstracts());
@@ -134,6 +159,7 @@ public class ClinicalVariant {
             ", variant=" + variant +
             ", oncogenic='" + oncogenic + '\'' +
             ", level='" + level + '\'' +
+            ", fdaLevel='" + fdaLevel + '\'' +
             ", drug=" + drug +
             ", drugPmids=" + drugPmids +
             ", drugAbstracts=" + drugAbstracts +

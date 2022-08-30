@@ -6,7 +6,6 @@ import org.cbioportal.genome_nexus.model.GenomicLocation;
 import org.cbioportal.genome_nexus.util.exception.InvalidHgvsException;
 import org.cbioportal.genome_nexus.util.exception.TypeNotSupportedException;
 import org.mskcc.cbio.oncokb.apiModels.CuratedGene;
-import org.mskcc.cbio.oncokb.apiModels.FdaAlteration;
 import org.mskcc.cbio.oncokb.bo.OncokbTranscriptService;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.model.*;
@@ -207,11 +206,6 @@ public class CacheFetcher {
     @Cacheable(cacheResolver = "generalCacheResolver")
     public Gene findGeneBySymbol(String symbol) throws ApiException {
         return this.oncokbTranscriptService.findGeneBySymbol(symbol);
-    }
-
-    @Cacheable(cacheResolver = "generalCacheResolver", key = "'all'")
-    public Set<FdaAlteration> getAllFdaAlterations() {
-        return FdaAlterationUtils.getAllFdaAlterations();
     }
 
     @Cacheable(

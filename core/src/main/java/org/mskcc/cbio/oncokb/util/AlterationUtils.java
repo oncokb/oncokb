@@ -950,7 +950,7 @@ public final class AlterationUtils {
             && alteration.getProteinStart().intValue() != AlterationPositionBoundary.START.getValue() && alteration.getProteinStart().intValue() != AlterationPositionBoundary.END.getValue()) {
             VariantConsequence variantConsequence = new VariantConsequence();
             variantConsequence.setTerm("NA");
-            return ApplicationContextSingleton.getAlterationBo().findMutationsByConsequenceAndPositionOnSamePosition(alteration.getGene(), referenceGenome, variantConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), alteration.getRefResidues(), fullAlterations);
+            return ApplicationContextSingleton.getAlterationBo().findMutationsByConsequenceAndPosition(alteration.getGene(), referenceGenome, variantConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), alteration.getRefResidues(), fullAlterations, true);
         }
         return new ArrayList<>();
     }

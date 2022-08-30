@@ -2,6 +2,9 @@
 
 package org.mskcc.cbio.oncokb.model;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author Hongxin
  */
@@ -23,5 +26,19 @@ public enum SpecialTumorType {
 
     public String getTumorType() {
         return tumorType;
+    }
+
+
+    private static final Map<String, SpecialTumorType> map = new HashMap<>();
+
+    static {
+        for (SpecialTumorType specialTumorType : SpecialTumorType.values()) {
+            map.put(specialTumorType.getTumorType().toLowerCase(), specialTumorType);
+        }
+    }
+
+    public static SpecialTumorType getByTumorType(String tumorType) {
+        if (tumorType == null) return null;
+        return map.get(tumorType.toLowerCase());
     }
 }

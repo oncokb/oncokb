@@ -149,23 +149,6 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     }
 
     @Override
-    public ResponseEntity<Map<String, Integer>> utilsNumbersFdaGet() {
-        List<FdaAlteration> fdaAlterations = utilsFdaAlterationsGet(null).getBody();
-        Map<String, Set<Gene>> map = new HashMap<>();
-        for (FdaAlteration fdaAlteration : fdaAlterations) {
-            if (!map.containsKey(fdaAlteration.getLevel())) {
-                map.put(fdaAlteration.getLevel(), new HashSet<>());
-            }
-            map.get(fdaAlteration.getLevel()).add(fdaAlteration.getAlteration().getGene());
-        }
-
-        Map<String, Integer> result = map.entrySet().stream().collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue().size()));
-        return new ResponseEntity<>(
-            result,
-            HttpStatus.OK);
-    }
-
-    @Override
     public ResponseEntity<Map<String, Boolean>> validateTrials(@ApiParam(value = "NCTID list") @RequestParam(value = "nctIds") List<String> nctIds) throws ParserConfigurationException, SAXException, IOException {
         return new ResponseEntity<>(MainUtils.validateTrials(nctIds), HttpStatus.OK);
     }
@@ -196,22 +179,6 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     @Override
     public ResponseEntity<List<TumorType>> utilsTumorTypesGet() {
         return new ResponseEntity<>(TumorTypeUtils.getAllTumorTypes(), HttpStatus.OK);
-    }
-
-    @Override
-    public ResponseEntity<List<FdaAlteration>> utilsFdaAlterationsGet(
-        @ApiParam(value = "Gene hugo symbol") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
-    ) {
-        if (StringUtils.isNullOrEmpty(hugoSymbol)) {
-            return new ResponseEntity<>(new ArrayList<>(this.cacheFetcher.getAllFdaAlterations()), HttpStatus.OK);
-        } else {
-            Gene gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
-            if (gene == null) {
-                return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>(this.cacheFetcher.getAllFdaAlterations().stream().filter(fdaAlt -> fdaAlt.getAlteration().getGene().equals(gene)).collect(Collectors.toList()), HttpStatus.OK);
-            }
-        }
     }
 
     @Override
@@ -300,7 +267,11 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
                     if (!result.containsKey(level)) {
                         result.put(level, new HashSet<Evidence>());
                     }
-                    result.get(level).add(evidence);
+                    Evidence updatedEvidence = new Evidence(evidence, null);
+                    if (updatedEvidence.getRelevantCancerTypes() == null || updatedEvidence.getRelevantCancerTypes().size() == 0) {
+                        updatedEvidence.setRelevantCancerTypes(TumorTypeUtils.findEvidenceRelevantCancerTypes(updatedEvidence));
+                    }
+                    result.get(level).add(updatedEvidence);
                 }
             }
         }
@@ -444,7 +415,13 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             VariantAnnotationTumorType variantAnnotationTumorType = new VariantAnnotationTumorType();
             variantAnnotationTumorType.setRelevantTumorType(relevantTumorTypes.contains(uniqueTumorType));
             variantAnnotationTumorType.setTumorType(uniqueTumorType);
-            variantAnnotationTumorType.setEvidences(response.getEvidences().stream().filter(evidence -> !evidence.getCancerTypes().isEmpty() && evidence.getCancerTypes().contains(uniqueTumorType)).collect(Collectors.toList()));
+            variantAnnotationTumorType.setEvidences(response.getEvidences().stream().filter(evidence -> !evidence.getCancerTypes().isEmpty() && evidence.getCancerTypes().contains(uniqueTumorType)).map(evidence -> {
+                Evidence updatedEvidence = new Evidence(evidence, null);
+                if (updatedEvidence.getRelevantCancerTypes() == null || updatedEvidence.getRelevantCancerTypes().size() == 0) {
+                    updatedEvidence.setRelevantCancerTypes(TumorTypeUtils.findEvidenceRelevantCancerTypes(evidence));
+                }
+                return updatedEvidence;
+            }).collect(Collectors.toList()));
             annotation.getTumorTypes().add(variantAnnotationTumorType);
         }
         return new ResponseEntity<>(annotation, HttpStatus.OK);

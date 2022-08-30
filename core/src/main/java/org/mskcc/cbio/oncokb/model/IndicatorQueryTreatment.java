@@ -14,11 +14,13 @@ import java.util.Set;
 public class IndicatorQueryTreatment implements java.io.Serializable {
     private List<String> alterations = new ArrayList<>();
     private List<Drug> drugs = new ArrayList<>(0);
-    private Set<String> approvedIndications = new HashSet<String>(0);
+    private Set<String> approvedIndications = new HashSet<>(0);
     private LevelOfEvidence level;
+    private LevelOfEvidence fdaLevel;
     private TumorType levelAssociatedCancerType;
-    private Set<String> pmids = new HashSet<String>(0);
-    private Set<ArticleAbstract> abstracts = new HashSet<ArticleAbstract>(0);
+    private Set<TumorType> levelExcludedCancerTypes = new HashSet<>();
+    private Set<String> pmids = new HashSet<>(0);
+    private Set<ArticleAbstract> abstracts = new HashSet<>(0);
     private String description = "";
 
     public IndicatorQueryTreatment() {
@@ -38,6 +40,14 @@ public class IndicatorQueryTreatment implements java.io.Serializable {
 
     public void setLevelAssociatedCancerType(TumorType levelAssociatedCancerType) {
         this.levelAssociatedCancerType = levelAssociatedCancerType;
+    }
+
+    public Set<TumorType> getLevelExcludedCancerTypes() {
+        return levelExcludedCancerTypes;
+    }
+
+    public void setLevelExcludedCancerTypes(Set<TumorType> levelExcludedCancerTypes) {
+        this.levelExcludedCancerTypes = levelExcludedCancerTypes;
     }
 
     public String getDescription() {
@@ -70,6 +80,14 @@ public class IndicatorQueryTreatment implements java.io.Serializable {
 
     public void setLevel(LevelOfEvidence level) {
         this.level = level;
+    }
+
+    public LevelOfEvidence getFdaLevel() {
+        return fdaLevel;
+    }
+
+    public void setFdaLevel(LevelOfEvidence fdaLevel) {
+        this.fdaLevel = fdaLevel;
     }
 
     public Set<String> getPmids() {

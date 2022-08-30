@@ -210,7 +210,8 @@ public class UtilsApiController implements UtilsApi {
                     abstracts.add(articleAbstract.getAbstractContent() + " " + articleAbstract.getLink());
                 }
 
-                for (TumorType tumorType : clinicalVariant.getCancerTypes()) {
+                if (clinicalVariant.getExcludedCancerTypes().size() > 0) {
+                    // for any clinical variant that has cancer type excluded, we no longer list the cancer types separately
                     actionableGenes.add(new ActionableGene(
                         gene.getGrch37Isoform(), gene.getGrch37RefSeq(),
                         gene.getGrch38Isoform(), gene.getGrch38RefSeq(),
@@ -219,12 +220,29 @@ public class UtilsApiController implements UtilsApi {
                         clinicalVariant.getVariant().getReferenceGenomes().stream().map(referenceGenome -> referenceGenome.name()).collect(Collectors.joining(", ")),
                         clinicalVariant.getVariant().getName(),
                         clinicalVariant.getVariant().getAlteration(),
-                        TumorTypeUtils.getTumorTypeName(tumorType),
+                        TumorTypeUtils.getTumorTypesNameWithExclusion(clinicalVariant.getCancerTypes(), clinicalVariant.getExcludedCancerTypes()),
                         clinicalVariant.getLevel(),
                         MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrug()), ", ", true),
                         MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrugPmids()), ", ", true),
-                        MainUtils.listToString(abstracts, "; ", true)));
-
+                        MainUtils.listToString(abstracts, "; ", true))
+                    );
+                } else {
+                    for (TumorType tumorType : clinicalVariant.getCancerTypes()) {
+                        actionableGenes.add(new ActionableGene(
+                            gene.getGrch37Isoform(), gene.getGrch37RefSeq(),
+                            gene.getGrch38Isoform(), gene.getGrch38RefSeq(),
+                            gene.getEntrezGeneId(),
+                            gene.getHugoSymbol(),
+                            clinicalVariant.getVariant().getReferenceGenomes().stream().map(referenceGenome -> referenceGenome.name()).collect(Collectors.joining(", ")),
+                            clinicalVariant.getVariant().getName(),
+                            clinicalVariant.getVariant().getAlteration(),
+                            TumorTypeUtils.getTumorTypeName(tumorType),
+                            clinicalVariant.getLevel(),
+                            MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrug()), ", ", true),
+                            MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrugPmids()), ", ", true),
+                            MainUtils.listToString(abstracts, "; ", true))
+                        );
+                    }
                 }
             }
         }
