@@ -80,7 +80,7 @@
         <profile>
             <id>curate</id>
             <properties>
-                <frontend.version>dcfb272d47</frontend.version>
+                <frontend.version>876ff98752</frontend.version>
                 <frontend.groupId>com.github.oncokb</frontend.groupId>
                 <frontend.artifactId>curation-platform</frontend.artifactId>
             </properties>
