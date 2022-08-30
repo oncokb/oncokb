@@ -4,7 +4,7 @@ services:
   # oncokb-core requires that a MySQL server is started and has the the oncokb data imported into the database.
   # Reach out to contact@oncokb.org to get access to the data dump
   oncokb-core:
-    image: oncokb/oncokb:3.9.5
+    image: oncokb/oncokb:3.9.6
     ports:
       - "8080:8080"
     environment:
@@ -14,8 +14,23 @@ services:
         -Djdbc.url=jdbc:mysql://[hostname]:3306/[database name]?useUnicode=yes&characterEncoding=UTF-8&useSSL=false
         -Djdbc.username=root
         -Djdbc.password=root
-        -Dgenome_nexus.grch37.url=http://gn-spring-boot:8888
-        -Dgenome_nexus.grch38.url=http://gn-spring-boot-grch38:8888
+        -Doncokb_transcript.url=http://oncokb-transcript:9090
+        -Doncokb_transcript.token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYXV0aCI6IlJPTEVfQURNSU4iLCJpYXQiOjE1MTYyMzkwMjJ9.XHIcA76cAnkgEIeJhyK9hyOrTsQhP3B5aUkVa4fkO6s
+    depends_on:
+      - "oncokb-transcript"
+  
+  # oncokb-transcript requires a MySQL server and oncokb-transcript data imported into the database.
+  # Reach out to contact@oncokb.org to get access to the data dump
+  oncokb-transcript:
+    image: oncokb/oncokb-transcript:0.8.0
+    ports:
+      - "9090:9090"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod,api-docs,no-liquibase
+      - APPLICATION_REDIS_ENABLED=false
+      - SPRING_DATASOURCE_URL=jdbc:mysql://[hostname]:3306/[database name]
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
 
   # Genome Nexus GRCh37
   gn-spring-boot:
