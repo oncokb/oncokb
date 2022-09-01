@@ -711,7 +711,6 @@ public class IndicatorUtils {
                     Map<Treatment, Set<LevelOfEvidence>> fdaLevelMap = new HashMap<>();
 
                     for (Evidence evidence : evidenceSetMap.get(level)) {
-                        String evidenceTumorTypesName = TumorTypeUtils.getTumorTypesNameWithExclusion(evidence.getCancerTypes(), evidence.getExcludedCancerTypes());
                         Citations citations = MainUtils.getCitationsByEvidence(evidence);
                         for (Treatment treatment : evidence.getTreatments()) {
                             if (!pmidsMap.containsKey(treatment)) {

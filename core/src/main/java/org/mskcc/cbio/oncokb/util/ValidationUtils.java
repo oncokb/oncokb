@@ -31,7 +31,8 @@ public class ValidationUtils {
             for (Evidence evidence : evidences) {
                 String hugoSymbol = gene.getHugoSymbol();
                 String alterationsName = getEvidenceAlterationsName(evidence);
-                String tumorTypesName = TumorTypeUtils.getTumorTypesName(evidence.getCancerTypes());
+                String tumorTypesName = TumorTypeUtils.getEvidenceTumorTypesName(evidence);
+                data.put(getErrorMessage(getTarget(hugoSymbol, alterationsName, tumorTypesName), NO_TREATMENT));
                 if (evidence.getTreatments().isEmpty()) {
                     data.put(getErrorMessage(getTarget(hugoSymbol, alterationsName, tumorTypesName), NO_TREATMENT));
                 } else {
@@ -117,17 +118,17 @@ public class ValidationUtils {
             if (evidence.getDescription() != null) {
                 Matcher matcher = reservedCharsRegex.matcher(evidence.getDescription());
                 if (matcher.find()) {
-                    data.put(getErrorMessage(getTarget(evidence.getGene().getHugoSymbol(), evidence.getEvidenceType(), getEvidenceAlterationsName(evidence), TumorTypeUtils.getTumorTypesName(evidence.getCancerTypes()), TreatmentUtils.getTreatmentName(evidence.getTreatments())), HTML_RESERVED_CHARS_EXIST));
+                    data.put(getErrorMessage(getTarget(evidence.getGene().getHugoSymbol(), evidence.getEvidenceType(), getEvidenceAlterationsName(evidence), TumorTypeUtils.getEvidenceTumorTypesName(evidence), TreatmentUtils.getTreatmentName(evidence.getTreatments())), HTML_RESERVED_CHARS_EXIST));
                 }
 
                 matcher = htmlFragmentRegex.matcher(evidence.getDescription());
                 if (matcher.find()) {
-                    data.put(getErrorMessage(getTarget(evidence.getGene().getHugoSymbol(), evidence.getEvidenceType(), getEvidenceAlterationsName(evidence), TumorTypeUtils.getTumorTypesName(evidence.getCancerTypes()), TreatmentUtils.getTreatmentName(evidence.getTreatments())), HTML_TAGS_EXIST));
+                    data.put(getErrorMessage(getTarget(evidence.getGene().getHugoSymbol(), evidence.getEvidenceType(), getEvidenceAlterationsName(evidence), TumorTypeUtils.getEvidenceTumorTypesName(evidence), TreatmentUtils.getTreatmentName(evidence.getTreatments())), HTML_TAGS_EXIST));
                 }
 
                 Set<String> incorrectPmids = findIncorrectPmids(evidence, allArticles);
                 if (incorrectPmids.size() > 0) {
-                    data.put(getErrorMessage(getTarget(evidence.getGene().getHugoSymbol(), evidence.getEvidenceType(), getEvidenceAlterationsName(evidence), TumorTypeUtils.getTumorTypesName(evidence.getCancerTypes()), TreatmentUtils.getTreatmentName(evidence.getTreatments())), CANNOT_FIND_PMIDS + String.join(", ", incorrectPmids)));
+                    data.put(getErrorMessage(getTarget(evidence.getGene().getHugoSymbol(), evidence.getEvidenceType(), getEvidenceAlterationsName(evidence), TumorTypeUtils.getEvidenceTumorTypesName(evidence), TreatmentUtils.getTreatmentName(evidence.getTreatments())), CANNOT_FIND_PMIDS + String.join(", ", incorrectPmids)));
                 }
             }
         }
@@ -233,7 +234,7 @@ public class ValidationUtils {
         strings.add(evidence.getLevelOfEvidence().name());
         strings.add(evidence.getGene().getHugoSymbol());
         strings.add(getEvidenceSortedAlterationsName(evidence));
-        strings.add(TumorTypeUtils.getTumorTypesName(evidence.getCancerTypes()));
+        strings.add(TumorTypeUtils.getEvidenceTumorTypesName(evidence));
         strings.add(TreatmentUtils.getTreatmentName(evidence.getTreatments()));
         List<String> pmids = EvidenceUtils.getPmids(Collections.singleton(evidence)).stream().sorted().collect(Collectors.toList());
         strings.add(pmids.size() > 0 ? String.join(", ", pmids) : " 0 pmids");
@@ -285,7 +286,7 @@ public class ValidationUtils {
     }
 
     private static String getAlterationName(Alteration alteration) {
-        if (alteration.getName().equals(alteration.getAlteration())) {
+        if (alteration.getName().equals(alteration.getAlteration()) || alteration.getAlteration().contains("excluding")) {
             return alteration.getName();
         } else {
             return alteration.getName() + " (" + alteration.getAlteration() + ")";
