@@ -37,7 +37,7 @@
         <dependency>
             <groupId>com.github.oncokb</groupId>
             <artifactId>oncokb-meta</artifactId>
-            <version>49fd530a58</version>
+            <version>ee9b767985</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>

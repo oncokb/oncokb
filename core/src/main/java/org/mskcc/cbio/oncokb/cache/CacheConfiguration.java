@@ -5,6 +5,9 @@ import org.mskcc.cbio.oncokb.util.PropertiesUtils;
 import org.mskcc.oncokb.meta.enumeration.RedisType;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
+import org.redisson.client.codec.StringCodec;
+import org.redisson.codec.MarshallingCodec;
+import org.redisson.codec.SnappyCodecV2;
 import org.redisson.config.Config;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
@@ -42,11 +45,16 @@ public class CacheConfiguration {
                 .setDnsMonitoringInterval(-1)
                 .addSentinelAddress(redisAddress)
                 .setPassword(redisPassword);
+        } else if (redisType.equals(RedisType.CLUSTER.getType())) {
+            config
+                .useClusterServers()
+                .addNodeAddress(redisAddress)
+                .setPassword(redisPassword);
         } else {
             throw new Exception(
                 "The redis type " +
                     redisType +
-                    " is not supported. Only single and sentinel are supported."
+                    " is not supported. Only single, sentinel, and cluster are supported."
             );
         }
         return Redisson.create(config);
