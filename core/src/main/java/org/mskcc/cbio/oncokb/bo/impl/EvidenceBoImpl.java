@@ -9,6 +9,7 @@ import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.Tumor;
 import org.mskcc.cbio.oncokb.util.CacheUtils;
 import org.mskcc.cbio.oncokb.model.TumorType;
 import org.mskcc.cbio.oncokb.util.EvidenceUtils;
+import org.mskcc.cbio.oncokb.util.TumorTypeUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -60,8 +61,8 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
     }
 
     @Override
-    public List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, TumorType matchedTumorType,  List<TumorType> relevantTumorTypes) {
-        if (relevantTumorTypes == null) {
+    public List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, TumorType matchedTumorType, List<TumorType> tumorTypes) {
+        if (matchedTumorType == null && tumorTypes == null) {
             if (evidenceTypes == null) {
                 return findEvidencesByAlteration(alterations);
             }
@@ -69,30 +70,39 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
         }
 
         Set<Evidence> alterationEvidences = new HashSet<>(findEvidencesByAlteration(alterations, evidenceTypes));
-        Set<Evidence> evidences = new LinkedHashSet<>();
-        for (TumorType relevantTumorType : relevantTumorTypes) {
-            for (Evidence evidence : alterationEvidences) {
-                boolean hasJointOnSubtype = false;
-                if (evidence.getRelevantCancerTypes().isEmpty()) {
-                    hasJointOnSubtype = evidence.getCancerTypes().contains(relevantTumorType);
-                } else {
-                    hasJointOnSubtype = matchedTumorType != null && evidence.getRelevantCancerTypes().contains(matchedTumorType);
-                }
-                if (hasJointOnSubtype) {
-                    evidences.add(evidence);
-                } else if (evidence.getRelevantCancerTypes().isEmpty()) {
-                    // we also like to check whether the evidence is assigned to a main type. Only check if the evidence relevant cancer type is empty.
-                    // If the evidence has the relevant cancer type curated, disjoin in the previous step should capture it
-                    Set<TumorType> evidenceMainTypes = evidence.getCancerTypes().stream().filter(cancerType -> StringUtils.isEmpty(cancerType.getCode()) && !StringUtils.isEmpty(cancerType.getMainType())).collect(Collectors.toSet());
-                    if (!evidenceMainTypes.isEmpty()) {
-                        if (evidenceMainTypes.stream().map(tumorType -> tumorType.getMainType()).collect(Collectors.toSet()).contains(relevantTumorType.getMainType())) {
-                            evidences.add(evidence);
-                        }
-                    }
+        List<Evidence> evidences = new ArrayList<>();
+        for (Evidence evidence : alterationEvidences) {
+            boolean hasJointOnSubtype = !Collections.disjoint(TumorTypeUtils.findEvidenceRelevantCancerTypes(evidence), matchedTumorType == null ? tumorTypes : Collections.singleton(matchedTumorType));
+            if (hasJointOnSubtype) {
+                evidences.add(evidence);
+            }
+        }
+
+        // Now all evidences left are relevant to the matchedTumorType or tumorTypes.
+        // We need to rank the evidences based on cancer type relevancy
+        List<TumorType> relevantMatchedTumorTypes = new ArrayList<>();
+        if (matchedTumorType != null) {
+            relevantMatchedTumorTypes = TumorTypeUtils.findRelevantTumorTypes(
+                TumorTypeUtils.getTumorTypeName(matchedTumorType),
+                StringUtils.isEmpty(matchedTumorType.getSubtype()),
+                RelevantTumorTypeDirection.UPWARD
+            );
+        } else if (tumorTypes != null) {
+            relevantMatchedTumorTypes = tumorTypes;
+        }
+
+        List<Evidence> sortedEvidences = new ArrayList<>();
+        for (TumorType tumorType : relevantMatchedTumorTypes) {
+            for (int i = 0; i < evidences.size(); i++) {
+                Evidence evidence = evidences.get(i);
+                if (evidence.getCancerTypes().contains(tumorType)) {
+                    sortedEvidences.add(evidence);
+                    evidences.remove(evidence);
                 }
             }
         }
-        return new ArrayList<>(evidences);
+        sortedEvidences.addAll(evidences);
+        return sortedEvidences;
     }
 
     @Override
@@ -135,7 +145,7 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
     public List<Evidence> findEvidencesByGene(Collection<Gene> genes, Collection<EvidenceType> evidenceTypes, Collection<TumorType> tumorTypes) {
         Set<Evidence> set = new LinkedHashSet<Evidence>();
         for (Gene gene : genes) {
-            set.addAll(CacheUtils.getEvidences(gene).stream().filter(evidence -> evidenceTypes.contains(evidence.getEvidenceType()) && !Collections.disjoint(evidence.getRelevantCancerTypes().isEmpty() ? evidence.getCancerTypes() : evidence.getRelevantCancerTypes(), tumorTypes)).collect(Collectors.toList()));
+            set.addAll(CacheUtils.getEvidences(gene).stream().filter(evidence -> evidenceTypes.contains(evidence.getEvidenceType()) && !Collections.disjoint(TumorTypeUtils.findEvidenceRelevantCancerTypes(evidence), tumorTypes)).collect(Collectors.toList()));
         }
         return new ArrayList<>(set);
     }

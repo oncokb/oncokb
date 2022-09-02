@@ -102,20 +102,6 @@ public class IndicatorUtilsTest {
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
         assertEquals("The oncogenicity of NOTCH1 intragenic should be Likely Oncogenic", "Likely Oncogenic", indicatorQueryResp.getOncogenic());
 
-        // Check other significant level
-        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "BRAF", "V600E", null, null, "Bladder Cancer", null, null, null, null);
-        indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
-        assertEquals("The highest sensitive level should be 3B", LevelOfEvidence.LEVEL_3B, indicatorQueryResp.getHighestSensitiveLevel());
-        assertTrue("The highest resistance level should be null", indicatorQueryResp.getHighestResistanceLevel() == null);
-        assertTrue(treatmentsContainLevel(indicatorQueryResp.getTreatments(), LevelOfEvidence.LEVEL_3B));
-
-        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "BRAF", "V600E", null, null, "Breast Cancer", null, null, null, null);
-        indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
-        assertEquals("The highest sensitive level should be 3B", LevelOfEvidence.LEVEL_3B, indicatorQueryResp.getHighestSensitiveLevel());
-        assertTrue("The highest resistance level should be null", indicatorQueryResp.getHighestResistanceLevel() == null);
-        assertTrue("Shouldn't have any significant level", indicatorQueryResp.getOtherSignificantSensitiveLevels().size() == 0);
-        assertTrue(treatmentsContainLevel(indicatorQueryResp.getTreatments(), LevelOfEvidence.LEVEL_3B));
-
         // check variant exist
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "BRAF", "V600E", null, null, null, null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);

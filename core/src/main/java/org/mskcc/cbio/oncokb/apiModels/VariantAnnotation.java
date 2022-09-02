@@ -26,6 +26,7 @@ public class VariantAnnotation extends IndicatorQueryResp {
         this.setHighestResistanceLevel(indicatorQueryResp.getHighestResistanceLevel());
         this.setHighestDiagnosticImplicationLevel(indicatorQueryResp.getHighestDiagnosticImplicationLevel());
         this.setHighestPrognosticImplicationLevel(indicatorQueryResp.getHighestPrognosticImplicationLevel());
+        this.setHighestFdaLevel(indicatorQueryResp.getHighestFdaLevel());
         this.setOtherSignificantSensitiveLevels(indicatorQueryResp.getOtherSignificantSensitiveLevels());
         this.setOtherSignificantResistanceLevels(indicatorQueryResp.getOtherSignificantResistanceLevels());
         this.setVUS(indicatorQueryResp.getVUS());

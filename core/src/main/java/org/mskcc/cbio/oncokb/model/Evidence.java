@@ -106,6 +106,12 @@ public class Evidence implements java.io.Serializable {
     private Set<TumorType> cancerTypes = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "evidence_excluded_cancer_type",
+        joinColumns = @JoinColumn(name = "evidence_id", referencedColumnName = "id"),
+        inverseJoinColumns = @JoinColumn(name = "cancer_type_id", referencedColumnName = "id"))
+    private Set<TumorType> excludedCancerTypes = new HashSet<>();
+
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "evidence_relevant_cancer_type",
         joinColumns = @JoinColumn(name = "evidence_id", referencedColumnName = "id"),
         inverseJoinColumns = @JoinColumn(name = "cancer_type_id", referencedColumnName = "id"))
@@ -146,6 +152,10 @@ public class Evidence implements java.io.Serializable {
     @Column(name = "level_of_evidence")
     @Enumerated(EnumType.STRING)
     private LevelOfEvidence levelOfEvidence;
+
+    @Column(name = "fda_level")
+    @Enumerated(EnumType.STRING)
+    private LevelOfEvidence fdaLevel;
 
     @Column(name = "solid_propagation_level")
     @Enumerated(EnumType.STRING)
@@ -196,6 +206,14 @@ public class Evidence implements java.io.Serializable {
 
     public void setCancerTypes(Set<TumorType> cancerTypes) {
         this.cancerTypes = cancerTypes;
+    }
+
+    public Set<TumorType> getExcludedCancerTypes() {
+        return excludedCancerTypes;
+    }
+
+    public void setExcludedCancerTypes(Set<TumorType> excludedCancerTypes) {
+        this.excludedCancerTypes = excludedCancerTypes;
     }
 
     public Set<TumorType> getRelevantCancerTypes() {
@@ -323,6 +341,14 @@ public class Evidence implements java.io.Serializable {
         this.levelOfEvidence = levelOfEvidence;
     }
 
+    public LevelOfEvidence getFdaLevel() {
+        return fdaLevel;
+    }
+
+    public void setFdaLevel(LevelOfEvidence fdaLevel) {
+        this.fdaLevel = fdaLevel;
+    }
+
     public LevelOfEvidence getSolidPropagationLevel() {
         return solidPropagationLevel;
     }
@@ -390,6 +416,7 @@ public class Evidence implements java.io.Serializable {
         this.evidenceType = e.evidenceType;
         this.cancerTypes = e.cancerTypes;
         this.relevantCancerTypes = e.relevantCancerTypes;
+        this.excludedCancerTypes = e.excludedCancerTypes;
         this.gene = e.gene;
         this.description = e.description;
         this.additionalInfo = e.additionalInfo;
@@ -397,6 +424,7 @@ public class Evidence implements java.io.Serializable {
         this.lastEdit = e.lastEdit;
         this.lastReview = e.lastReview;
         this.levelOfEvidence = e.levelOfEvidence;
+        this.fdaLevel = e.fdaLevel;
         this.solidPropagationLevel = e.solidPropagationLevel;
         this.liquidPropagationLevel = e.liquidPropagationLevel;
         // make deep copy of sets
@@ -405,14 +433,16 @@ public class Evidence implements java.io.Serializable {
         this.articles = new HashSet<>(e.articles);
     }
 
-    public Evidence(String uuid, EvidenceType evidenceType, Set<TumorType> cancerTypes, Set<TumorType> relevantCancerTypes, Gene gene, Set<Alteration> alterations, String description, String additionalInfo, List<Treatment> treatments,
+    public Evidence(String uuid, EvidenceType evidenceType, Set<TumorType> cancerTypes, Set<TumorType> excludedCancerTypes, Set<TumorType> relevantCancerTypes, Gene gene, Set<Alteration> alterations, String description, String additionalInfo, List<Treatment> treatments,
                     String knownEffect, Date lastEdit, Date lastReview,
                     LevelOfEvidence levelOfEvidence,
+                    LevelOfEvidence fdaLevel,
                     LevelOfEvidence solidPropagationLevel, LevelOfEvidence liquidPropagationLevel,
                     Set<Article> articles) {
         this.uuid = uuid;
         this.evidenceType = evidenceType;
         this.cancerTypes = cancerTypes;
+        this.excludedCancerTypes = excludedCancerTypes;
         this.relevantCancerTypes = relevantCancerTypes;
         this.gene = gene;
         this.alterations = alterations;
@@ -422,6 +452,7 @@ public class Evidence implements java.io.Serializable {
         this.lastEdit = lastEdit;
         this.lastReview = lastReview;
         this.levelOfEvidence = levelOfEvidence;
+        this.fdaLevel = fdaLevel;
         this.solidPropagationLevel = solidPropagationLevel;
         this.liquidPropagationLevel = liquidPropagationLevel;
         this.articles = articles;
