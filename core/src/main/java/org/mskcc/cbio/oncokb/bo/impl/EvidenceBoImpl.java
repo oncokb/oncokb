@@ -70,14 +70,39 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
         }
 
         Set<Evidence> alterationEvidences = new HashSet<>(findEvidencesByAlteration(alterations, evidenceTypes));
-        Set<Evidence> evidences = new LinkedHashSet<>();
+        List<Evidence> evidences = new ArrayList<>();
         for (Evidence evidence : alterationEvidences) {
             boolean hasJointOnSubtype = !Collections.disjoint(TumorTypeUtils.findEvidenceRelevantCancerTypes(evidence), matchedTumorType == null ? tumorTypes : Collections.singleton(matchedTumorType));
             if (hasJointOnSubtype) {
                 evidences.add(evidence);
             }
         }
-        return new ArrayList<>(evidences);
+
+        // Now all evidences left are relevant to the matchedTumorType or tumorTypes.
+        // We need to rank the evidences based on cancer type relevancy
+        List<TumorType> relevantMatchedTumorTypes = new ArrayList<>();
+        if (matchedTumorType != null) {
+            relevantMatchedTumorTypes = TumorTypeUtils.findRelevantTumorTypes(
+                TumorTypeUtils.getTumorTypeName(matchedTumorType),
+                StringUtils.isEmpty(matchedTumorType.getSubtype()),
+                RelevantTumorTypeDirection.UPWARD
+            );
+        } else if (tumorTypes != null) {
+            relevantMatchedTumorTypes = tumorTypes;
+        }
+
+        List<Evidence> sortedEvidences = new ArrayList<>();
+        for (TumorType tumorType : relevantMatchedTumorTypes) {
+            for (int i = 0; i < evidences.size(); i++) {
+                Evidence evidence = evidences.get(i);
+                if (evidence.getCancerTypes().contains(tumorType)) {
+                    sortedEvidences.add(evidence);
+                    evidences.remove(evidence);
+                }
+            }
+        }
+        sortedEvidences.addAll(evidences);
+        return sortedEvidences;
     }
 
     @Override
