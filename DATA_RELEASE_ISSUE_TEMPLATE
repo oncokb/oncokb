@@ -4,16 +4,15 @@ Prepare for data v*.* release
 - [ ] Run mvn test to make sure all tests pass, update tests accordingly
 - [ ] Generate v*.* database dumps by running https://github.com/knowledgesystems/oncokb-deployment/blob/master/oncokb-data-release/release.sh
 - [ ] Update News
-- [ ] Update public site
-    - [ ] Update database 
-    - [ ] Update public website
-    - [ ] Update annotation service
-- [ ] Update demo sitesite
-    - [ ] Update database 
-    - [ ] Update annotation service
-- [ ] Update trimmed public sitesite
-    - [ ] Update database 
-    - [ ] Update annotation service
 - [ ] Update release note
 - [ ] Update oncokb-annotator tests
 - [ ] Update oncokb_summary image and update the index.html in oncokb-public for the tags <meta name="twitter:image"> and <meta property="og:image">
+- [ ] Update public site
+    - [ ] Update database
+    - [ ] Update website using latest image
+- [ ] Update demo site
+    - [ ] Update database
+    - [ ] Update website using latest image
+- [ ] Update trimmed public site
+    - [ ] Update database
+    - [ ] Update website using latest image
