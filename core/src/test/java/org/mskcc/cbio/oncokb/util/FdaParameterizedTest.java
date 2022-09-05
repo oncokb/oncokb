@@ -3,9 +3,8 @@ package org.mskcc.cbio.oncokb.util;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.mskcc.cbio.oncokb.apiModels.FdaAlteration;
-import org.mskcc.cbio.oncokb.apiModels.Implication;
-import org.mskcc.cbio.oncokb.model.*;
+import org.mskcc.cbio.oncokb.model.IndicatorQueryResp;
+import org.mskcc.cbio.oncokb.model.Query;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -14,8 +13,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 
@@ -40,10 +37,12 @@ public class FdaParameterizedTest {
 
     @Test
     public void testSummary() throws Exception {
-        Gene gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
-        Set<FdaAlteration> fdaAlterations = FdaAlterationUtils.getGeneFdaAlterations(gene).stream().filter(fdaAlteration -> fdaAlteration.getAlteration().getAlteration().equals(variant) && fdaAlteration.getCancerType().equals(cancerType)).collect(Collectors.toSet());
-        String _query = hugoSymbol + " " + variant + " " + cancerType;
-        assertEquals("FDA Level, Query: " + _query, fdaLevel, fdaAlterations.stream().map(FdaAlteration::getLevel).collect(Collectors.joining(", ")));
+        Query query = new Query();
+        query.setHugoSymbol(hugoSymbol);
+        query.setAlteration(variant);
+        query.setTumorType(cancerType);
+        IndicatorQueryResp resp = IndicatorUtils.processQuery(query, null, true, null);
+        assertEquals(fdaLevel, resp.getHighestFdaLevel().getLevel());
     }
 
     @Parameterized.Parameters

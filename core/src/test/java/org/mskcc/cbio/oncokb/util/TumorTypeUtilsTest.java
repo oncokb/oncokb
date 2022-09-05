@@ -2,13 +2,10 @@ package org.mskcc.cbio.oncokb.util;
 
 import junit.framework.TestCase;
 import org.apache.commons.lang3.StringUtils;
-import org.mskcc.cbio.oncokb.model.RelevantTumorTypeDirection;
-import org.mskcc.cbio.oncokb.model.TumorType;
+import org.mskcc.cbio.oncokb.model.*;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 ;
 
@@ -187,11 +184,65 @@ public class TumorTypeUtilsTest extends TestCase {
         assertTrue("Tumor types set does not have liquid tumor, but one of tumor types Blood is liquid tumor.", TumorTypeUtils.hasLiquidTumor(tumorTypeSet));
     }
 
+    public void testFindEvidenceRelevantCancerTypes() {
+        Evidence testEvi = new Evidence();
+        Set<TumorType> cancerTypes = new HashSet<>();
+        String expectedResult = "";
+
+        // Check subtype
+        testEvi.setCancerTypes(Collections.singleton(TumorTypeUtils.getByCode("MEL")));
+        testEvi.setLevelOfEvidence(LevelOfEvidence.LEVEL_1);
+        cancerTypes = TumorTypeUtils.findEvidenceRelevantCancerTypes(testEvi);
+        expectedResult = "Acral Melanoma, Congenital Nevus, Cutaneous Melanoma, Desmoplastic Melanoma, Lentigo Maligna Melanoma, Melanoma, Melanoma of Unknown Primary, Spitzoid Melanoma";
+        assertEquals(expectedResult, tumorTypesToString(new ArrayList<>(cancerTypes), true));
+
+        // Check subtype with exclusion
+        testEvi.setExcludedCancerTypes(Collections.singleton(TumorTypeUtils.getByName("Desmoplastic Melanoma")));
+        cancerTypes = TumorTypeUtils.findEvidenceRelevantCancerTypes(testEvi);
+        expectedResult = "Acral Melanoma, Congenital Nevus, Cutaneous Melanoma, Lentigo Maligna Melanoma, Melanoma, Melanoma of Unknown Primary, Spitzoid Melanoma";
+        assertEquals(expectedResult, tumorTypesToString(new ArrayList<>(cancerTypes), true));
+
+        // Check main type
+        testEvi = new Evidence();
+        testEvi.setCancerTypes(Collections.singleton(TumorTypeUtils.getByMainType("Melanoma")));
+        testEvi.setLevelOfEvidence(LevelOfEvidence.LEVEL_1);
+        cancerTypes = TumorTypeUtils.findEvidenceRelevantCancerTypes(testEvi);
+        expectedResult = "Acral Melanoma, Anorectal Mucosal Melanoma, Congenital Nevus, Conjunctival Melanoma, Cutaneous Melanoma, Desmoplastic Melanoma, Head and Neck Mucosal Melanoma, Lentigo Maligna Melanoma, M:Melanoma, Melanoma, Melanoma of Unknown Primary, Mucosal Melanoma of the Esophagus, Mucosal Melanoma of the Urethra, Mucosal Melanoma of the Vulva/Vagina, Ocular Melanoma, Primary CNS Melanoma, Spitzoid Melanoma, Uveal Melanoma";
+        assertEquals(expectedResult, tumorTypesToString(new ArrayList<>(cancerTypes), true));
+
+        // Check main type with exclusion
+        testEvi.setExcludedCancerTypes(Collections.singleton(TumorTypeUtils.getByName("Desmoplastic Melanoma")));
+        cancerTypes = TumorTypeUtils.findEvidenceRelevantCancerTypes(testEvi);
+        expectedResult = "Acral Melanoma, Anorectal Mucosal Melanoma, Congenital Nevus, Conjunctival Melanoma, Cutaneous Melanoma, Head and Neck Mucosal Melanoma, Lentigo Maligna Melanoma, M:Melanoma, Melanoma, Melanoma of Unknown Primary, Mucosal Melanoma of the Esophagus, Mucosal Melanoma of the Urethra, Mucosal Melanoma of the Vulva/Vagina, Ocular Melanoma, Primary CNS Melanoma, Spitzoid Melanoma, Uveal Melanoma";
+        assertEquals(expectedResult, tumorTypesToString(new ArrayList<>(cancerTypes), true));
+
+        // Check for special cancer types
+        testEvi.setCancerTypes(Collections.singleton(TumorTypeUtils.getBySpecialTumor(SpecialTumorType.ALL_TUMORS)));
+        testEvi.setLevelOfEvidence(LevelOfEvidence.LEVEL_1);
+        cancerTypes = TumorTypeUtils.findEvidenceRelevantCancerTypes(testEvi);
+        assertEquals(982, cancerTypes.size());
+        testEvi.setCancerTypes(Collections.singleton(TumorTypeUtils.getBySpecialTumor(SpecialTumorType.ALL_LIQUID_TUMORS)));
+        testEvi.setLevelOfEvidence(LevelOfEvidence.LEVEL_1);
+        cancerTypes = TumorTypeUtils.findEvidenceRelevantCancerTypes(testEvi);
+        assertEquals(242, cancerTypes.size());
+        testEvi.setCancerTypes(Collections.singleton(TumorTypeUtils.getBySpecialTumor(SpecialTumorType.ALL_SOLID_TUMORS)));
+        testEvi.setLevelOfEvidence(LevelOfEvidence.LEVEL_1);
+        cancerTypes = TumorTypeUtils.findEvidenceRelevantCancerTypes(testEvi);
+        assertEquals(741, cancerTypes.size());
+    }
+
     private String tumorTypesToString(List<TumorType> tumorTypes) {
+        return tumorTypesToString(tumorTypes, false);
+    }
+
+    private String tumorTypesToString(List<TumorType> tumorTypes, Boolean sortAsc) {
         List<String> name = new ArrayList<>();
         for (TumorType tumorType : tumorTypes) {
             name.add(StringUtils.isEmpty(tumorType.getSubtype()) ?
                 ("M:" + tumorType.getMainType()) : tumorType.getSubtype());
+        }
+        if (sortAsc) {
+            Collections.sort(name);
         }
         return org.apache.commons.lang3.StringUtils.join(name, ", ");
     }
