@@ -1,9 +1,9 @@
 version: "3"
 
 services:
-  # oncokb-core requires that a MySQL server is started and has the the oncokb data imported into the database.
+  # oncokb requires that a MySQL server is started and has the the oncokb data imported into the database.
   # Reach out to contact@oncokb.org to get access to the data dump
-  oncokb-core:
+  oncokb:
     image: oncokb/oncokb:3.9.6
     ports:
       - "8080:8080"
