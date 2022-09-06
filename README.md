@@ -66,13 +66,13 @@ For this option, you need to download the VEP cache, which is used in the `gn-ve
     mkdir gn-vep-data && cd "$_"
 
     mkdir 98_GRCh37 && cd "$_"
-    wget https://oncokb.s3.amazonaws.com/gn-vep-data/98_GRCh37/98_GRCh37.tar
-    tar xvf homo_sapiens_vep_98_GRCh37.tar
+    curl -o 98_GRCh37.tar https://oncokb.s3.amazonaws.com/gn-vep-data/98_GRCh37/98_GRCh37.tar
+    tar xvf 98_GRCh37.tar
 
     cd ..
     mkdir 98_GRCh38 && cd "$_"
-    wget https://oncokb.s3.amazonaws.com/gn-vep-data/98_GRCh38/98_GRCh38.tar
-    tar xvf homo_sapiens_vep_98_GRCh37.tar
+    curl -o 98_GRCh38.tar https://oncokb.s3.amazonaws.com/gn-vep-data/98_GRCh38/98_GRCh38.tar
+    tar xvf 98_GRCh38.tar
     ```
 3. Set environment variable for the location of VEP caches
     ```
