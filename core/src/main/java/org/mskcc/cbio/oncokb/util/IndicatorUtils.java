@@ -355,8 +355,6 @@ public class IndicatorUtils {
                     highestLevels = findHighestLevel(new HashSet<>(treatments));
                     indicatorQuery.setHighestSensitiveLevel(highestLevels.get("sensitive"));
                     indicatorQuery.setHighestResistanceLevel(highestLevels.get("resistant"));
-                    indicatorQuery.setOtherSignificantSensitiveLevels(getOtherSignificantLevels(indicatorQuery.getHighestSensitiveLevel(), "sensitive", treatmentEvidences));
-                    indicatorQuery.setOtherSignificantResistanceLevels(getOtherSignificantLevels(indicatorQuery.getHighestResistanceLevel(), "resistance", treatmentEvidences));
                     indicatorQuery.setHighestFdaLevel(LevelUtils.getHighestFdaLevel(treatments.stream().filter(t -> t.getFdaLevel() != null).map(t -> t.getFdaLevel()).collect(Collectors.toSet())));
                     allQueryRelatedEvidences.addAll(treatmentEvidences);
                 }
@@ -675,23 +673,6 @@ public class IndicatorUtils {
         return date;
     }
 
-    private static List<LevelOfEvidence> getOtherSignificantLevels(LevelOfEvidence highestLevel, String type, Set<Evidence> evidences) {
-        List<LevelOfEvidence> otherSignificantLevels = new ArrayList<>();
-        if (type != null && highestLevel != null && evidences != null) {
-            if (type.equals("sensitive")) {
-//                if (highestLevel.equals(LevelOfEvidence.LEVEL_2B)) {
-//                    Map<LevelOfEvidence, Set<Evidence>> levels = EvidenceUtils.separateEvidencesByLevel(evidences);
-//                    if (levels.containsKey(LevelOfEvidence.LEVEL_3A)) {
-//                        otherSignificantLevels.add(LevelOfEvidence.LEVEL_3A);
-//                    }
-//                }
-            } else if (type.equals("resistance")) {
-
-            }
-        }
-        return otherSignificantLevels;
-    }
-
     private static List<IndicatorQueryTreatment> getIndicatorQueryTreatments(Set<Evidence> evidences, String queryHugoSymbol, Boolean filterSameTreatment) {
         List<IndicatorQueryTreatment> treatments = new ArrayList<>();
         if (evidences != null) {
@@ -711,7 +692,6 @@ public class IndicatorUtils {
                     Map<Treatment, Set<LevelOfEvidence>> fdaLevelMap = new HashMap<>();
 
                     for (Evidence evidence : evidenceSetMap.get(level)) {
-                        String evidenceTumorTypesName = TumorTypeUtils.getTumorTypesNameWithExclusion(evidence.getCancerTypes(), evidence.getExcludedCancerTypes());
                         Citations citations = MainUtils.getCitationsByEvidence(evidence);
                         for (Treatment treatment : evidence.getTreatments()) {
                             if (!pmidsMap.containsKey(treatment)) {

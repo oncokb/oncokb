@@ -23,6 +23,9 @@ import java.util.stream.Collectors;
  * Created by Hongxin Zhang on 2/24/21.
  */
 public class OncokbTranscriptService {
+
+    private static final String ONCOKB_TRANSCRIPT_URL = "https://transcript.oncokb.org";
+
     private ApiClient client;
     private final int TIMEOUT = 30000;
     private final String SEQUENCE_TYPE = "PROTEIN";
@@ -32,6 +35,7 @@ public class OncokbTranscriptService {
         this.client = Configuration.getDefaultApiClient();
         this.client.setConnectTimeout(TIMEOUT);
         this.client.setReadTimeout(TIMEOUT);
+        this.client.setBasePath(getOncokbTranscriptUrl());
 
         String oncokbTranscriptToken = PropertiesUtils.getProperties("oncokb_transcript.token");
         HttpBearerAuth Authorization = (HttpBearerAuth) this.client.getAuthentication("Authorization");
@@ -39,6 +43,11 @@ public class OncokbTranscriptService {
         if(StringUtils.isNotEmpty(oncokbTranscriptToken)) {
             enabled = true;
         }
+    }
+
+    private static String getOncokbTranscriptUrl() {
+        String oncokbTranscriptUrlProperty = PropertiesUtils.getProperties("oncokb_transcript.url");
+        return StringUtils.isEmpty(oncokbTranscriptUrlProperty) ? ONCOKB_TRANSCRIPT_URL : oncokbTranscriptUrlProperty;
     }
 
     public void updateTranscriptUsage(Gene gene, String grch37EnsemblTranscriptId, String grch38EnsemblTranscriptId) throws ApiException {

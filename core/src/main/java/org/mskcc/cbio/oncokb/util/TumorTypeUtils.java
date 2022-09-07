@@ -380,6 +380,10 @@ public class TumorTypeUtils {
         return tumorTypes.stream().map(tumorType -> getTumorTypeName(tumorType)).collect(Collectors.joining(", "));
     }
 
+    public static String getEvidenceTumorTypesName(Evidence evidence) {
+        return getTumorTypesNameWithExclusion(evidence.getCancerTypes(), evidence.getExcludedCancerTypes());
+    }
+
     public static String getTumorTypesNameWithExclusion(Collection<TumorType> tumorTypes, Collection<TumorType> excludedTumorTypes) {
         StringBuilder sb = new StringBuilder(getTumorTypesName(tumorTypes));
         if (excludedTumorTypes != null && excludedTumorTypes.size() > 0) {

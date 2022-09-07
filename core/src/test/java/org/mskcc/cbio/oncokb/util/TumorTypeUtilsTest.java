@@ -229,22 +229,6 @@ public class TumorTypeUtilsTest extends TestCase {
         testEvi.setLevelOfEvidence(LevelOfEvidence.LEVEL_1);
         cancerTypes = TumorTypeUtils.findEvidenceRelevantCancerTypes(testEvi);
         assertEquals(741, cancerTypes.size());
-
-
-        // special cases
-        testEvi = new Evidence();
-        testEvi.setCancerTypes(Collections.singleton(TumorTypeUtils.getByMainType("Myelodisplasia")));
-        testEvi.setLevelOfEvidence(LevelOfEvidence.LEVEL_1);
-        cancerTypes = TumorTypeUtils.findEvidenceRelevantCancerTypes(testEvi);
-        expectedResult = "Acral Melanoma, Anorectal Mucosal Melanoma, Congenital Nevus, Conjunctival Melanoma, Cutaneous Melanoma, Desmoplastic Melanoma, Head and Neck Mucosal Melanoma, Lentigo Maligna Melanoma, M:Melanoma, Melanoma, Melanoma of Unknown Primary, Mucosal Melanoma of the Esophagus, Mucosal Melanoma of the Urethra, Mucosal Melanoma of the Vulva/Vagina, Ocular Melanoma, Primary CNS Melanoma, Spitzoid Melanoma, Uveal Melanoma";
-        assertEquals(expectedResult, tumorTypesToString(new ArrayList<>(cancerTypes), true));
-
-        testEvi = new Evidence();
-        testEvi.setCancerTypes(Collections.singleton(TumorTypeUtils.getBySubtype("Myelodisplasia")));
-        testEvi.setLevelOfEvidence(LevelOfEvidence.LEVEL_1);
-        cancerTypes = TumorTypeUtils.findEvidenceRelevantCancerTypes(testEvi);
-        expectedResult = "Acral Melanoma, Anorectal Mucosal Melanoma, Congenital Nevus, Conjunctival Melanoma, Cutaneous Melanoma, Desmoplastic Melanoma, Head and Neck Mucosal Melanoma, Lentigo Maligna Melanoma, M:Melanoma, Melanoma, Melanoma of Unknown Primary, Mucosal Melanoma of the Esophagus, Mucosal Melanoma of the Urethra, Mucosal Melanoma of the Vulva/Vagina, Ocular Melanoma, Primary CNS Melanoma, Spitzoid Melanoma, Uveal Melanoma";
-        assertEquals(expectedResult, tumorTypesToString(new ArrayList<>(cancerTypes), true));
     }
 
     private String tumorTypesToString(List<TumorType> tumorTypes) {
