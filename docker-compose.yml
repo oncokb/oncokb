@@ -71,7 +71,7 @@ services:
   # Genome Nexus GRCh38
   gn-spring-boot-grch38:
     profiles: ["genome-nexus"]
-    image: genomenexus/gn-spring-boot:v1.1.48
+    image: genomenexus/gn-spring-boot:v1.1.49
     ports:
       - "8889:8888"
     environment:
