@@ -1,18 +1,108 @@
 version: "3"
 
 services:
-  app:
-    image: oncokb/oncokb
+  # oncokb requires that a MySQL server is started and has the the oncokb data imported into the database.
+  # Reach out to contact@oncokb.org to get access to the data dump
+  oncokb:
+    image: oncokb/oncokb:3.10.1
     ports:
       - "8080:8080"
     environment:
-      - "JAVA_OPTS=-Djdbc.driverClassName=com.mysql.jdbc.Driver -Djdbc.url=jdbc:mysql://db:3306/oncokb?useUnicode=yes&characterEncoding=UTF-8&useSSL=false -Djdbc.username=root -Djdbc.password=test"
+      # Update jdbc.url
+      JAVA_OPTS: >
+        -Djdbc.driverClassName=com.mysql.jdbc.Driver
+        -Djdbc.url=jdbc:mysql://[hostname]:3306/[database name]?useUnicode=yes&characterEncoding=UTF-8&useSSL=false
+        -Djdbc.username=root
+        -Djdbc.password=root
+        -Doncokb_transcript.url=http://oncokb-transcript:9090
+        -Doncokb_transcript.token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYXV0aCI6IlJPTEVfQURNSU4iLCJpYXQiOjE1MTYyMzkwMjJ9.XHIcA76cAnkgEIeJhyK9hyOrTsQhP3B5aUkVa4fkO6s
+        -Dgenome_nexus.grch37.url=http://gn-spring-boot:8888
+        -Dgenome_nexus.grch38.url=http://gn-spring-boot-grch38:8888
     depends_on:
-      - db
-  db:
-    image: mysql:5
+      - "oncokb-transcript"
+  
+  # oncokb-transcript requires a MySQL server and oncokb-transcript data imported into the database.
+  # Reach out to contact@oncokb.org to get access to the data dump
+  oncokb-transcript:
+    image: oncokb/oncokb-transcript:0.8.0
+    ports:
+      - "9090:9090"
     environment:
-      - MYSQL_ROOT_PASSWORD=test
-      - MYSQL_DATABASE=oncokb
+      - SPRING_PROFILES_ACTIVE=prod,api-docs,no-liquibase
+      - APPLICATION_REDIS_ENABLED=false
+      - SPRING_DATASOURCE_URL=jdbc:mysql://[hostname]:3306/[database name]
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+
+  # Genome Nexus GRCh37
+  gn-spring-boot:
+    profiles: ["genome-nexus"]
+    image: genomenexus/gn-spring-boot:v1.1.49
+    ports:
+      - "8888:8888"
+    environment:
+      - SERVER_PORT=8888
+    command: java -Dgn_vep.region.url=http://gn-vep:8080/vep/human/region/VARIANT -Dspring.data.mongodb.uri=mongodb://gn-mongo:27017/annotator -jar /app.war
+    links:
+      - gn-mongo
+    depends_on:
+      - gn-mongo
+
+  gn-mongo:
+    profiles: ["genome-nexus"]
+    build: https://github.com/genome-nexus/genome-nexus-importer.git
+    environment:
+      - REF_ENSEMBL_VERSION=grch37_ensembl92
+      - SPECIES=homo_sapiens
+    restart: always
+
+  gn-vep:
+    profiles: ["genome-nexus"]
+    build: https://github.com/genome-nexus/genome-nexus-vep.git
+    environment:
+      - VEP_ASSEMBLY=GRCh37
+    restart: always
+    ports:
+      - "6060:8080"
     volumes:
-      - ./core/src/main/resources/spring/database/oncokb.sql:/docker-entrypoint-initdb.d/oncokb.sql
+      - ${VEP_CACHE}:/opt/vep/.vep/
+  
+
+  # Genome Nexus GRCh38
+  gn-spring-boot-grch38:
+    profiles: ["genome-nexus"]
+    image: genomenexus/gn-spring-boot:v1.1.49
+    ports:
+      - "8889:8888"
+    environment:
+      - SERVER_PORT=8888
+    command: >
+      java 
+      -Dspring.data.mongodb.uri=mongodb://gn-mongo-grch38:27017/annotator
+      -Dgn_vep.region.url=http://gn-vep-grch38:8080/vep/human/region/VARIANT
+      -jar 
+      /app.war
+    links:
+      - gn-mongo-grch38
+    depends_on:
+      - gn-mongo-grch38
+
+  gn-mongo-grch38:
+    profiles: ["genome-nexus"]
+    build: https://github.com/genome-nexus/genome-nexus-importer.git
+    environment:
+      - REF_ENSEMBL_VERSION=grch38_ensembl95
+      - SPECIES=homo_sapiens
+    restart: always
+
+  gn-vep-grch38:
+    profiles: ["genome-nexus"]
+    build: https://github.com/genome-nexus/genome-nexus-vep.git
+    environment:
+      - VEP_ASSEMBLY=GRCh38
+      - VEP_FASTAFILERELATIVEPATH=homo_sapiens/98_GRCh38/Homo_sapiens.GRCh38.dna.toplevel.fa.gz
+    restart: always
+    ports:
+      - "6061:8080"
+    volumes:
+      - ${VEP_GRCH38_CACHE}:/opt/vep/.vep/
