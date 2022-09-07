@@ -16,7 +16,7 @@ services:
         -Djdbc.password=root
         -Doncokb_transcript.url=http://oncokb-transcript:9090
         -Doncokb_transcript.token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYXV0aCI6IlJPTEVfQURNSU4iLCJpYXQiOjE1MTYyMzkwMjJ9.XHIcA76cAnkgEIeJhyK9hyOrTsQhP3B5aUkVa4fkO6s
-        -Dgenome_nexus.grch37.url= http://gn-spring-boot:8888
+        -Dgenome_nexus.grch37.url=http://gn-spring-boot:8888
         -Dgenome_nexus.grch38.url=http://gn-spring-boot-grch38:8888
     depends_on:
       - "oncokb-transcript"
