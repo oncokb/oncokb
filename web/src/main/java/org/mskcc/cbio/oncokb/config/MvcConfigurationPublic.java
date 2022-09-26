@@ -1,7 +1,8 @@
 package org.mskcc.cbio.oncokb.config;
 
-import com.mysql.jdbc.StringUtils;
 import io.sentry.spring.SentryExceptionResolver;
+
+import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.config.annotation.PremiumPublicApi;
 import org.mskcc.cbio.oncokb.config.annotation.PublicApi;
 import org.mskcc.cbio.oncokb.util.PropertiesUtils;
@@ -19,14 +20,17 @@ import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.Contact;
 import springfox.documentation.spi.DocumentationType;
+import springfox.documentation.spring.web.paths.RelativePathProvider;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
-
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import static org.mskcc.cbio.oncokb.Constants.*;
+
+import java.util.Collections;
 
 @Configuration
 @ComponentScan(basePackages = {"org.mskcc.cbio.oncokb.api.pub.v1", "org.mskcc.cbio.oncokb.cache", "org.mskcc.cbio.oncokb.bo"})
@@ -50,10 +54,10 @@ public class MvcConfigurationPublic extends WebMvcConfigurerAdapter{
     }
 
     @Bean
-    public Docket publicApi() {
+    public Docket publicApi(ServletContext servletContext) {
         String swaggerDescription = PropertiesUtils.getProperties(SWAGGER_DESCRIPTION);
-        String finalDescription = StringUtils.isNullOrEmpty(swaggerDescription) ? SWAGGER_DEFAULT_DESCRIPTION : swaggerDescription;
-        return new Docket(DocumentationType.SWAGGER_2)
+        String finalDescription = StringUtils.isEmpty(swaggerDescription) ? SWAGGER_DEFAULT_DESCRIPTION : swaggerDescription;
+        Docket docket = new Docket(DocumentationType.SWAGGER_2)
             .groupName("Public APIs")
             .select()
             .apis(RequestHandlerSelectors.withMethodAnnotation(PublicApi.class))
@@ -68,6 +72,22 @@ public class MvcConfigurationPublic extends WebMvcConfigurerAdapter{
                 "https://www.oncokb.org/terms"
             ))
             .useDefaultResponseMessages(false);
+        
+        // Update swagger host with environment variable
+        String swaggerHost = PropertiesUtils.getProperties("swagger_hostname");
+        if (StringUtils.isNotEmpty(swaggerHost)) {
+            docket = docket
+                .pathProvider(new RelativePathProvider(servletContext) {
+                    @Override
+                    public String getApplicationBasePath() {
+                        return "/api/v1";
+                    }
+                })
+                .protocols(Collections.singleton("https"))
+                .host(swaggerHost);
+        }
+
+        return docket;
     }
 
     @Bean
