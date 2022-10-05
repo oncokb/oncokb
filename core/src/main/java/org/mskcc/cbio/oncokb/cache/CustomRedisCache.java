@@ -48,8 +48,7 @@ public abstract class CustomRedisCache extends AbstractValueAdaptingCache {
 
     @Override
     protected Object lookup(Object key) {
-        Object value = this.store.getBucket(name + REDIS_KEY_SEPARATOR + key).get();
-        return value;
+        return this.store.getBucket(name + REDIS_KEY_SEPARATOR + key).get();
     }
 
     private void asyncRefresh(Object key) {

@@ -5,8 +5,6 @@ import org.mskcc.cbio.oncokb.util.PropertiesUtils;
 import org.mskcc.oncokb.meta.enumeration.RedisType;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
-import org.redisson.client.codec.StringCodec;
-import org.redisson.codec.MarshallingCodec;
 import org.redisson.codec.SnappyCodecV2;
 import org.redisson.config.Config;
 import org.springframework.cache.CacheManager;
@@ -57,6 +55,9 @@ public class CacheConfiguration {
                     " is not supported. Only single, sentinel, and cluster are supported."
             );
         }
+        // Instead of using GZip to compress data manually, we can use configure Redisson to use
+        // snappy codec. Redisson will serialize and compress our cache values.
+        config.setCodec(new SnappyCodecV2());
         return Redisson.create(config);
     }
 
