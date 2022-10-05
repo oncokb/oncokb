@@ -49,10 +49,6 @@ public abstract class CustomRedisCache extends AbstractValueAdaptingCache {
     @Override
     protected Object lookup(Object key) {
         Object value = this.store.getBucket(name + REDIS_KEY_SEPARATOR + key).get();
-        if (value != null){
-            value = fromStoreValue(value);
-            asyncRefresh(key);
-        }
         return value;
     }
 
@@ -65,9 +61,9 @@ public abstract class CustomRedisCache extends AbstractValueAdaptingCache {
     @Override
     public void put(Object key, Object value) {
         if (ttlMinutes == INFINITE_TTL) {
-            this.store.getBucket(name + REDIS_KEY_SEPARATOR + key).setAsync(toStoreValue(value));
+            this.store.getBucket(name + REDIS_KEY_SEPARATOR + key).setAsync(value);
         } else {
-            this.store.getBucket(name + REDIS_KEY_SEPARATOR + key).setAsync(toStoreValue(value), ttlMinutes, TimeUnit.MINUTES);
+            this.store.getBucket(name + REDIS_KEY_SEPARATOR + key).setAsync(value, ttlMinutes, TimeUnit.MINUTES);
         }
     }
 
