@@ -55,7 +55,7 @@ public class CacheConfiguration {
                     " is not supported. Only single, sentinel, and cluster are supported."
             );
         }
-        // Instead of using GZip to compress data manually, we can use configure Redisson to use
+        // Instead of using GZip to compress data manually, we can configure Redisson to use
         // snappy codec. Redisson will serialize and compress our cache values.
         config.setCodec(new SnappyCodecV2());
         return Redisson.create(config);
