@@ -178,7 +178,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
 
     @Override
     public ResponseEntity<List<TumorType>> utilsTumorTypesGet() {
-        return new ResponseEntity<>(TumorTypeUtils.getAllTumorTypes(), HttpStatus.OK);
+        return new ResponseEntity<>(ApplicationContextSingleton.getTumorTypeBo().getAllTumorTypes(), HttpStatus.OK);
     }
 
     @Override
@@ -296,7 +296,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             .map(relevantCancerTypeQuery -> {
                 if (StringUtils.isNullOrEmpty(relevantCancerTypeQuery.getCode())) {
                     if (isLevelBased) {
-                        List<TumorType> queries = TumorTypeUtils.getAllTumorTypes();
+                        List<TumorType> queries = ApplicationContextSingleton.getTumorTypeBo().getAllTumorTypes();
                         if (direction.equals(RelevantTumorTypeDirection.UPWARD)) {
                             queries = TumorTypeUtils.findRelevantTumorTypes(relevantCancerTypeQuery.getMainType(), true, direction);
                         } else {

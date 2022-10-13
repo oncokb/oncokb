@@ -78,7 +78,7 @@ public class EvidenceUtils {
             List<TumorType> relevantTumorTypes = new ArrayList<>();
             if (query.getTumorType() != null) {
                 relevantTumorTypes = TumorTypeUtils.findRelevantTumorTypes(query.getTumorType());
-                evidenceQueryRes.setExactMatchedTumorType(TumorTypeUtils.getByName(query.getTumorType()));
+                evidenceQueryRes.setExactMatchedTumorType(ApplicationContextSingleton.getTumorTypeBo().getByName(query.getTumorType()));
             }
             evidenceQueryRes.setGene(gene);
             evidenceQueryRes.setQuery(query);
@@ -168,7 +168,7 @@ public class EvidenceUtils {
         Set<Evidence> evidences = new HashSet<>();
 
         Set<Gene> genes = new HashSet<>(); //Get gene evidences
-        TumorType matchedTumorType = TumorTypeUtils.getByName(query.getQuery().getTumorType());
+        TumorType matchedTumorType = ApplicationContextSingleton.getTumorTypeBo().getByName(query.getQuery().getTumorType());
         Set<Alteration> alterations = new HashSet<>();
         List<TumorType> upwardTumorTypes = new ArrayList<>();
         List<TumorType> downwardTumorTypes = new ArrayList<>();
@@ -862,7 +862,7 @@ public class EvidenceUtils {
                 query.setGene(GeneUtils.getGene(requestQuery.getEntrezGeneId(), requestQuery.getHugoSymbol()));
 
                 if (requestQuery.getTumorType() != null && !requestQuery.getTumorType().isEmpty()) {
-                    query.setExactMatchedTumorType(TumorTypeUtils.getByName(requestQuery.getTumorType()));
+                    query.setExactMatchedTumorType(ApplicationContextSingleton.getTumorTypeBo().getByName(requestQuery.getTumorType()));
                     query.setOncoTreeTypes(
                         TumorTypeUtils.findRelevantTumorTypes(requestQuery.getTumorType()));
                 }

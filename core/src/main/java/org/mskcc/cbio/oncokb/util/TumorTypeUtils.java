@@ -24,83 +24,6 @@ public class TumorTypeUtils {
         "Lymph", "Blood", "Lymphoid", "Myeloid"
     );
 
-    public static List<TumorType> getAllTumorTypes() {
-        return ApplicationContextSingleton.getTumorTypeBo().findAllCached().stream().filter(tumorType -> StringUtils.isEmpty(tumorType.getCode()) || tumorType.getLevel() > 0).collect(Collectors.toList());
-    }
-
-    /**
-     * Get all OncoTree subtypes
-     *
-     * @return
-     */
-    public static List<TumorType> getAllSubtypes() {
-        return ApplicationContextSingleton.getTumorTypeBo().findAllCached().stream().filter(tumorType -> StringUtils.isNotEmpty(tumorType.getCode()) && tumorType.getLevel() > 0).collect(Collectors.toList());
-    }
-
-    /**
-     * Get all OncoTree main types
-     */
-    public static List<TumorType> getAllMainTypes() {
-        return ApplicationContextSingleton.getTumorTypeBo().findAllCached().stream().filter(tumorType -> StringUtils.isEmpty(tumorType.getCode())).collect(Collectors.toList());
-    }
-
-    public static Set<TumorType> getAllSpecialTumorOncoTreeTypes() {
-        return ApplicationContextSingleton.getTumorTypeBo().findAllSpecialCancerTypesCached();
-    }
-
-    public static Set<TumorType> getAllSubtypesByMainType(String mainType) {
-        if (StringUtils.isEmpty(mainType)) return new HashSet<>();
-        return getAllSubtypes().stream().filter(cancerType -> mainType.equals(cancerType.getMainType())).collect(Collectors.toSet());
-    }
-
-    public static TumorType getByName(String name) {
-        if (StringUtils.isEmpty(name)) return null;
-        TumorType tumorType = getByCode(name);
-        if (tumorType != null) {
-            return tumorType;
-        }
-        tumorType = getBySubtype(name);
-        tumorType = tumorType == null ? getByMainType(name) : tumorType;
-        tumorType = tumorType == null ? getBySpecialTumor(getSpecialTumorTypeByName(name)) : tumorType;
-        return tumorType;
-    }
-
-    public static SpecialTumorType getSpecialTumorTypeByName(String name) {
-        SpecialTumorType specialTumorType = null;
-        try {
-            specialTumorType = SpecialTumorType.valueOf(name);
-        } catch (Exception e) {
-        }
-        if (specialTumorType == null) {
-            specialTumorType = SpecialTumorType.getByTumorType(name);
-        }
-        return specialTumorType;
-    }
-
-    public static TumorType getBySubtype(String subtype) {
-        if (StringUtils.isEmpty(subtype)) return null;
-        String lowercaseName = subtype.toLowerCase();
-        return getAllSubtypes().stream().filter(tumorType -> StringUtils.isNotEmpty(tumorType.getSubtype()) && tumorType.getSubtype().toLowerCase().equals(lowercaseName)).findAny().orElse(null);
-    }
-
-    public static TumorType getByMainType(String mainType) {
-        if (StringUtils.isEmpty(mainType)) return null;
-        String lowercaseMainType = mainType.toLowerCase();
-        Optional<TumorType> matchedMainTypeOptional = getAllMainTypes().stream().filter(tumorType -> StringUtils.isNotEmpty(tumorType.getMainType()) && tumorType.getMainType().toLowerCase().equals(lowercaseMainType)).findAny();
-        return matchedMainTypeOptional.isPresent() ? matchedMainTypeOptional.get() : null;
-    }
-
-    public static TumorType getByCode(String code) {
-        if (StringUtils.isEmpty(code)) return null;
-        String finalCode = code.toUpperCase();
-        return getAllSubtypes().stream().filter(subtype -> subtype.getCode().equals(finalCode)).findAny().orElse(null);
-    }
-
-    public static TumorType getBySpecialTumor(SpecialTumorType specialTumorType) {
-        if (specialTumorType == null) return null;
-        return getAllSpecialTumorOncoTreeTypes().stream().filter(cancerType -> cancerType.getMainType().equals(specialTumorType.getTumorType())).findAny().orElse(null);
-    }
-
     public static Boolean isSolidTumor(TumorType tumorType) {
         return isDesiredTumorForm(tumorType, TumorForm.SOLID);
     }
@@ -185,7 +108,7 @@ public class TumorTypeUtils {
     private static List<TumorType> findEvidenceRelevantCancerTypes(String tumorType, boolean isMainType, RelevantTumorTypeDirection direction) {
 
         // Check whether the tumorType is special tumor type
-        SpecialTumorType specialTumorType = getSpecialTumorTypeByName(tumorType);
+        SpecialTumorType specialTumorType = ApplicationContextSingleton.getTumorTypeBo().getSpecialTumorTypeByName(tumorType);
         if (specialTumorType != null) {
             return findRelevantTumorTypesForSpecialCancerTypes(specialTumorType, direction);
         }
@@ -198,13 +121,13 @@ public class TumorTypeUtils {
 
         if (direction.equals(RelevantTumorTypeDirection.DOWNWARD)) {
             if (isMainType) {
-                TumorType mainType = getByMainType(tumorType);
+                TumorType mainType = ApplicationContextSingleton.getTumorTypeBo().getByMainType(tumorType);
                 if (mainType != null) {
                     mappedTumorTypes.add(mainType);
-                    mappedTumorTypes.addAll(getAllSubtypesByMainType(mainType.getMainType()));
+                    mappedTumorTypes.addAll(ApplicationContextSingleton.getTumorTypeBo().getAllSubtypesByMainType(mainType.getMainType()));
                 }
             } else {
-                TumorType cancerType = getByName(tumorType);
+                TumorType cancerType = ApplicationContextSingleton.getTumorTypeBo().getByName(tumorType);
                 if (cancerType != null) {
                     mappedTumorTypes.add(cancerType);
                     mappedTumorTypes.addAll(getChildTumorTypes(cancerType, true));
@@ -212,12 +135,12 @@ public class TumorTypeUtils {
             }
         } else if (direction.equals(RelevantTumorTypeDirection.UPWARD)) {
             if (isMainType) {
-                TumorType mainType = getByMainType(tumorType);
+                TumorType mainType = ApplicationContextSingleton.getTumorTypeBo().getByMainType(tumorType);
                 if (mainType != null) {
                     mappedTumorTypes.add(mainType);
                 }
             } else {
-                TumorType cancerType = getByName(tumorType);
+                TumorType cancerType = ApplicationContextSingleton.getTumorTypeBo().getByName(tumorType);
                 if (cancerType != null) {
                     mappedTumorTypes.add(cancerType);
                     mappedTumorTypes.addAll(getParentTumorTypes(cancerType, true));
@@ -258,21 +181,21 @@ public class TumorTypeUtils {
         if (specialTumorType == null) {
             return relevantCancerTypes;
         }
-        relevantCancerTypes.add(getBySpecialTumor(specialTumorType));
+        relevantCancerTypes.add(ApplicationContextSingleton.getTumorTypeBo().getBySpecialTumor(specialTumorType));
         if (RelevantTumorTypeDirection.UPWARD.equals(direction)) {
             switch (specialTumorType) {
                 case ALL_SOLID_TUMORS:
                 case ALL_LIQUID_TUMORS:
-                    relevantCancerTypes.add(getBySpecialTumor(SpecialTumorType.ALL_TUMORS));
+                    relevantCancerTypes.add(ApplicationContextSingleton.getTumorTypeBo().getBySpecialTumor(SpecialTumorType.ALL_TUMORS));
                     break;
                 default:
                     break;
             }
         } else if (RelevantTumorTypeDirection.DOWNWARD.equals(direction)) {
             Set<TumorType> allOncoTreeTypes =  new HashSet<>();
-            allOncoTreeTypes.addAll(getAllSubtypes());
-            allOncoTreeTypes.addAll(getAllMainTypes());
-            allOncoTreeTypes.removeAll(getAllSpecialTumorOncoTreeTypes());
+            allOncoTreeTypes.addAll(ApplicationContextSingleton.getTumorTypeBo().getAllSubtypes());
+            allOncoTreeTypes.addAll(ApplicationContextSingleton.getTumorTypeBo().getAllMainTypes());
+            allOncoTreeTypes.removeAll(ApplicationContextSingleton.getTumorTypeBo().getAllSpecialTumorOncoTreeTypes());
             switch (specialTumorType) {
                 case ALL_SOLID_TUMORS:
                     relevantCancerTypes.addAll(
@@ -292,8 +215,8 @@ public class TumorTypeUtils {
                     break;
                 case ALL_TUMORS:
                     relevantCancerTypes.addAll(allOncoTreeTypes);
-                    relevantCancerTypes.add(TumorTypeUtils.getBySpecialTumor(ALL_SOLID_TUMORS));
-                    relevantCancerTypes.add(TumorTypeUtils.getBySpecialTumor(ALL_LIQUID_TUMORS));
+                    relevantCancerTypes.add(ApplicationContextSingleton.getTumorTypeBo().getBySpecialTumor(ALL_SOLID_TUMORS));
+                    relevantCancerTypes.add(ApplicationContextSingleton.getTumorTypeBo().getBySpecialTumor(ALL_LIQUID_TUMORS));
                     break;
                 default:
                     break;
@@ -303,7 +226,7 @@ public class TumorTypeUtils {
     }
     public static List<TumorType> findRelevantTumorTypes(String tumorType, Boolean isMainType, RelevantTumorTypeDirection direction) {
         // Check whether the tumorType is special tumor type
-        SpecialTumorType specialTumorType = getSpecialTumorTypeByName(tumorType);
+        SpecialTumorType specialTumorType = ApplicationContextSingleton.getTumorTypeBo().getSpecialTumorTypeByName(tumorType);
         if (specialTumorType != null) {
             return findRelevantTumorTypesForSpecialCancerTypes(specialTumorType, direction);
         }
@@ -312,9 +235,9 @@ public class TumorTypeUtils {
         TumorType matchedTumorType = null;
 
         if (isMainType != Boolean.TRUE) {
-            matchedTumorType = getByCode(tumorType);
+            matchedTumorType = ApplicationContextSingleton.getTumorTypeBo().getByCode(tumorType);
             if (matchedTumorType == null) {
-                matchedTumorType = getBySubtype(tumorType);
+                matchedTumorType = ApplicationContextSingleton.getTumorTypeBo().getBySubtype(tumorType);
             }
         }
 
@@ -326,7 +249,7 @@ public class TumorTypeUtils {
         }
 
         // Add main type
-        TumorType matchedMainType = getByMainType(mainTypeName);
+        TumorType matchedMainType = ApplicationContextSingleton.getTumorTypeBo().getByMainType(mainTypeName);
         if (matchedMainType != null) {
             mappedTumorTypes.add(matchedMainType);
         }
@@ -345,16 +268,16 @@ public class TumorTypeUtils {
 
         // Include all solid tumors
         if (hasSolidTumor(new HashSet<>(mappedTumorTypes))) {
-            mappedTumorTypes.add(getBySpecialTumor(ALL_SOLID_TUMORS));
+            mappedTumorTypes.add(ApplicationContextSingleton.getTumorTypeBo().getBySpecialTumor(ALL_SOLID_TUMORS));
         }
 
         // Include all liquid tumors
         if (hasLiquidTumor(new HashSet<>(mappedTumorTypes))) {
-            mappedTumorTypes.add(getBySpecialTumor(ALL_LIQUID_TUMORS));
+            mappedTumorTypes.add(ApplicationContextSingleton.getTumorTypeBo().getBySpecialTumor(ALL_LIQUID_TUMORS));
         }
 
         // Include all tumors
-        TumorType allTumor = getBySpecialTumor(SpecialTumorType.ALL_TUMORS);
+        TumorType allTumor = ApplicationContextSingleton.getTumorTypeBo().getBySpecialTumor(SpecialTumorType.ALL_TUMORS);
         if (allTumor != null) {
             mappedTumorTypes.add(allTumor);
         }
@@ -476,12 +399,12 @@ public class TumorTypeUtils {
 
     public static TumorForm checkTumorForm(Set<TumorType> tumorTypes) {
         Set<TumorType> withoutSpecial = new HashSet<>(tumorTypes);
-        withoutSpecial.removeAll(TumorTypeUtils.getAllSpecialTumorOncoTreeTypes());
+        withoutSpecial.removeAll(ApplicationContextSingleton.getTumorTypeBo().getAllSpecialTumorOncoTreeTypes());
 
         TumorForm tumorForm = getTumorForm(withoutSpecial);
         if (tumorForm == null) {
             Set<TumorType> existSpecial = new HashSet<>(tumorTypes);
-            existSpecial.retainAll(TumorTypeUtils.getAllSpecialTumorOncoTreeTypes());
+            existSpecial.retainAll(ApplicationContextSingleton.getTumorTypeBo().getAllSpecialTumorOncoTreeTypes());
             return getTumorForm(existSpecial.stream().filter(tumorType -> tumorType.getTumorForm() != null && !tumorType.getTumorForm().equals(TumorForm.MIXED)).collect(Collectors.toSet()));
         } else {
             return tumorForm;

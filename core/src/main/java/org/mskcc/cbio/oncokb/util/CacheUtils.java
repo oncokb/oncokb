@@ -8,6 +8,7 @@ import org.mskcc.cbio.oncokb.model.TumorType;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
@@ -44,7 +45,13 @@ public class CacheUtils {
     private static Map<Integer, Set<Alteration>> VUS = new HashMap<>(); //Gene based VUSs
 
     private static List<TumorType> cancerTypes = new ArrayList<>();
-    private static Set<TumorType> specialCancerTypes = new HashSet<>();
+    private static Map<String, TumorType> cancerTypesByCode = new HashMap<>();
+    private static Map<String, TumorType> cancerTypesByMainType = new HashMap<>();
+    private static Map<String, TumorType> cancerTypesByLowercaseSubtype = new HashMap<>();
+    private static Map<SpecialTumorType, TumorType> cancerTypesBySpecialTumorType = new HashMap<>();
+    private static List<TumorType> subtypes = new ArrayList<>();
+    private static List<TumorType> mainTypes = new ArrayList<>();
+    private static List<TumorType> specialCancerTypes = new ArrayList<>();
 
     // Other services which will be defined in the property cache.update separated by comma
     // Every time the observer is triggered, all other services will be triggered as well
@@ -190,11 +197,24 @@ public class CacheUtils {
             current = MainUtils.getCurrentTimestamp();
 
             cancerTypes = ApplicationContextSingleton.getTumorTypeBo().findAll();
+            cancerTypes.stream().forEach(ct -> {
+                if (!StringUtils.isNullOrEmpty(ct.getCode())) {
+                    cancerTypesByCode.put(ct.getCode(), ct);
+                }
+                if (StringUtils.isNullOrEmpty(ct.getCode()) && !StringUtils.isNullOrEmpty(ct.getMainType())) {
+                    cancerTypesByMainType.put(ct.getMainType().toLowerCase(), ct);
+                }
+                if (!StringUtils.isNullOrEmpty(ct.getSubtype())) {
+                    cancerTypesByLowercaseSubtype.put(ct.getSubtype().toLowerCase(), ct);
+                }
+            });
+            subtypes = cancerTypes.stream().filter(tumorType -> org.apache.commons.lang3.StringUtils.isNotEmpty(tumorType.getCode()) && tumorType.getLevel() > 0).collect(Collectors.toList());
+            mainTypes = cancerTypes.stream().filter(tumorType -> org.apache.commons.lang3.StringUtils.isEmpty(tumorType.getCode()) || tumorType.getLevel() > 0).collect(Collectors.toList());
             System.out.println("Cached all tumor types: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
             current = MainUtils.getCurrentTimestamp();
 
             System.out.println("Cached all special tumor types: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
-            specialCancerTypes = Arrays.stream(SpecialTumorType.values()).map(specialTumorType -> cancerTypes.stream().filter(cancerType -> !StringUtils.isNullOrEmpty(cancerType.getMainType()) && cancerType.getMainType().equals(specialTumorType.getTumorType())).findAny().orElse(null)).filter(cancerType -> cancerType != null).collect(Collectors.toSet());
+            specialCancerTypes = Arrays.stream(SpecialTumorType.values()).map(specialTumorType -> cancerTypes.stream().filter(cancerType -> !StringUtils.isNullOrEmpty(cancerType.getMainType()) && cancerType.getMainType().equals(specialTumorType.getTumorType())).findAny().orElse(null)).filter(cancerType -> cancerType != null).collect(Collectors.toList());
 
             NamingUtils.cacheAllAbbreviations();
             System.out.println("Cached abbreviation ontology: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
@@ -525,8 +545,26 @@ public class CacheUtils {
     public static List<TumorType> getAllCancerTypes() {
         return cancerTypes.stream().collect(Collectors.toList());
     }
+    public static List<TumorType> getAllMainTypes() {
+        return mainTypes.stream().collect(Collectors.toList());
+    }
+    public static List<TumorType> getAllSubtypes() {
+        return subtypes.stream().collect(Collectors.toList());
+    }
 
-    public static Set<TumorType> getAllSpecialCancerTypes() {
+    public static Map<String, TumorType> getCodedTumorTypeMap() {
+        return cancerTypesByCode;
+    }
+
+    public static Map<String, TumorType> getLowercaseSubtypeTumorTypeMap() {
+        return cancerTypesByLowercaseSubtype;
+    }
+
+    public static Map<String, TumorType> getMainTypeTumorTypeMap() {
+        return cancerTypesByMainType;
+    }
+
+    public static List<TumorType> getAllSpecialCancerTypes() {
         return specialCancerTypes;
     }
 

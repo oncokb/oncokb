@@ -33,6 +33,7 @@ public enum SpecialTumorType {
 
     static {
         for (SpecialTumorType specialTumorType : SpecialTumorType.values()) {
+            map.put(specialTumorType.name().toLowerCase(), specialTumorType);
             map.put(specialTumorType.getTumorType().toLowerCase(), specialTumorType);
         }
     }

@@ -195,7 +195,7 @@ public class IndicatorUtils {
 
             List<Alteration> nonVUSRelevantAlts = AlterationUtils.excludeVUS(relevantAlterations);
             Map<String, LevelOfEvidence> highestLevels = new HashMap<>();
-            TumorType matchedTumorType = TumorTypeUtils.getByName(query.getTumorType());
+            TumorType matchedTumorType = ApplicationContextSingleton.getTumorTypeBo().getByName(query.getTumorType());
             List<TumorType> relevantUpwardTumorTypes = new ArrayList<>();
             List<TumorType> relevantDownwardTumorTypes = new ArrayList<>();
 
@@ -433,7 +433,7 @@ public class IndicatorUtils {
             if (gene != null && (gene.getHugoSymbol().equals("KRAS") || gene.getHugoSymbol().equals("NRAS"))
                 && query.getAlteration() != null
                 && StringUtils.containsIgnoreCase(query.getAlteration(), "wildtype")) {
-                if (relevantUpwardTumorTypes.contains(TumorTypeUtils.getByMainType("Colorectal Cancer"))) {
+                if (relevantUpwardTumorTypes.contains(ApplicationContextSingleton.getTumorTypeBo().getByMainType("Colorectal Cancer"))) {
                     indicatorQuery.setGeneSummary("RAS (KRAS/NRAS) which is wildtype (not mutated) in this sample, encodes an upstream activator of the pro-oncogenic MAP- and PI3-kinase pathways and is mutated in approximately 40% of late stage colorectal cancers.");
                     indicatorQuery.setVariantSummary("The absence of a mutation in the RAS genes is clinically important because it expands approved treatments available to treat this tumor. RAS status in stage IV colorectal cancer influences patient responses to the anti-EGFR antibody therapies cetuximab and panitumumab.");
                     indicatorQuery.setTumorTypeSummary("These drugs are FDA-approved for the treatment of KRAS wildtype colorectal tumors together with chemotherapy or alone following progression through standard chemotherapy.");
