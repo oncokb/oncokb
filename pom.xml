@@ -121,7 +121,7 @@
         <dependency>
             <groupId>com.github.oncokb</groupId>
             <artifactId>oncokb-java-api-client</artifactId>
-            <version>838a0a4b1a</version>
+            <version>af6b4ee87b</version>
         </dependency>
         <dependency>
             <groupId>com.vdurmont</groupId>
