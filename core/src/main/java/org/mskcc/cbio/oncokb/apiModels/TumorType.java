@@ -2,8 +2,7 @@ package org.mskcc.cbio.oncokb.apiModels;
 
 import io.swagger.annotations.ApiModel;
 import org.mskcc.cbio.oncokb.model.TumorForm;
-import org.mskcc.cbio.oncokb.util.MainUtils;
-import org.mskcc.cbio.oncokb.util.TumorTypeUtils;
+import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -135,7 +134,7 @@ public class TumorType implements Serializable {
         if (tumorType.getMainType() != null) {
             MainType mainType = new MainType();
             mainType.setName(tumorType.getMainType());
-            org.mskcc.cbio.oncokb.model.TumorType mainTumorType = TumorTypeUtils.getByMainType(tumorType.getMainType());
+            org.mskcc.cbio.oncokb.model.TumorType mainTumorType = ApplicationContextSingleton.getTumorTypeBo().getByMainType(tumorType.getMainType());
             mainType.setTumorForm(mainTumorType.getTumorForm());
             this.setMainType(mainType);
         }

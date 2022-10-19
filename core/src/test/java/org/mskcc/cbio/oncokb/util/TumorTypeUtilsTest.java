@@ -82,8 +82,8 @@ public class TumorTypeUtilsTest extends TestCase {
         tumorTypes = TumorTypeUtils.findRelevantTumorTypes("Soft Tissue Sarcoma", true, RelevantTumorTypeDirection.DOWNWARD);
         expectedResult = "M:Soft Tissue Sarcoma, M:All Tumors";
         assertEquals(expectedResult, tumorTypesToString(tumorTypes));
-        // 863 subtypes, 1 tissue root  117 main types, 7 special tumor types
-        assertEquals(988, ApplicationContextSingleton.getTumorTypeBo().findAllCached().size());
+        // 863 subtypes, 117 main types, 7 special tumor types
+        assertEquals(987, ApplicationContextSingleton.getTumorTypeBo().getAllTumorTypes().size());
     }
 
     // Is solid tumor is decided on tissue level
@@ -131,7 +131,7 @@ public class TumorTypeUtilsTest extends TestCase {
         tumorType.setTumorForm(TumorTypeUtils.getTumorForm(tumorType.getTissue()));
         assertTrue("Blood tissue is not liquid tumor, but it should be.", TumorTypeUtils.isLiquidTumor(tumorType));
 
-        tumorType = TumorTypeUtils.getByCode("CMLBCRABL1");
+        tumorType = ApplicationContextSingleton.getTumorTypeBo().getByCode("CMLBCRABL1");
         tumorType.setTumorForm(TumorTypeUtils.getTumorForm(tumorType.getTissue()));
         assertTrue("Blood tissue is not liquid tumor, but it should be.", TumorTypeUtils.isLiquidTumor(tumorType));
     }
@@ -190,42 +190,42 @@ public class TumorTypeUtilsTest extends TestCase {
         String expectedResult = "";
 
         // Check subtype
-        testEvi.setCancerTypes(Collections.singleton(TumorTypeUtils.getByCode("MEL")));
+        testEvi.setCancerTypes(Collections.singleton(ApplicationContextSingleton.getTumorTypeBo().getByCode("MEL")));
         testEvi.setLevelOfEvidence(LevelOfEvidence.LEVEL_1);
         cancerTypes = TumorTypeUtils.findEvidenceRelevantCancerTypes(testEvi);
         expectedResult = "Acral Melanoma, Congenital Nevus, Cutaneous Melanoma, Desmoplastic Melanoma, Lentigo Maligna Melanoma, Melanoma, Melanoma of Unknown Primary, Spitzoid Melanoma";
         assertEquals(expectedResult, tumorTypesToString(new ArrayList<>(cancerTypes), true));
 
         // Check subtype with exclusion
-        testEvi.setExcludedCancerTypes(Collections.singleton(TumorTypeUtils.getByName("Desmoplastic Melanoma")));
+        testEvi.setExcludedCancerTypes(Collections.singleton(ApplicationContextSingleton.getTumorTypeBo().getByName("Desmoplastic Melanoma")));
         cancerTypes = TumorTypeUtils.findEvidenceRelevantCancerTypes(testEvi);
         expectedResult = "Acral Melanoma, Congenital Nevus, Cutaneous Melanoma, Lentigo Maligna Melanoma, Melanoma, Melanoma of Unknown Primary, Spitzoid Melanoma";
         assertEquals(expectedResult, tumorTypesToString(new ArrayList<>(cancerTypes), true));
 
         // Check main type
         testEvi = new Evidence();
-        testEvi.setCancerTypes(Collections.singleton(TumorTypeUtils.getByMainType("Melanoma")));
+        testEvi.setCancerTypes(Collections.singleton(ApplicationContextSingleton.getTumorTypeBo().getByMainType("Melanoma")));
         testEvi.setLevelOfEvidence(LevelOfEvidence.LEVEL_1);
         cancerTypes = TumorTypeUtils.findEvidenceRelevantCancerTypes(testEvi);
         expectedResult = "Acral Melanoma, Anorectal Mucosal Melanoma, Congenital Nevus, Conjunctival Melanoma, Cutaneous Melanoma, Desmoplastic Melanoma, Head and Neck Mucosal Melanoma, Lentigo Maligna Melanoma, M:Melanoma, Melanoma, Melanoma of Unknown Primary, Mucosal Melanoma of the Esophagus, Mucosal Melanoma of the Urethra, Mucosal Melanoma of the Vulva/Vagina, Ocular Melanoma, Primary CNS Melanoma, Spitzoid Melanoma, Uveal Melanoma";
         assertEquals(expectedResult, tumorTypesToString(new ArrayList<>(cancerTypes), true));
 
         // Check main type with exclusion
-        testEvi.setExcludedCancerTypes(Collections.singleton(TumorTypeUtils.getByName("Desmoplastic Melanoma")));
+        testEvi.setExcludedCancerTypes(Collections.singleton(ApplicationContextSingleton.getTumorTypeBo().getByName("Desmoplastic Melanoma")));
         cancerTypes = TumorTypeUtils.findEvidenceRelevantCancerTypes(testEvi);
         expectedResult = "Acral Melanoma, Anorectal Mucosal Melanoma, Congenital Nevus, Conjunctival Melanoma, Cutaneous Melanoma, Head and Neck Mucosal Melanoma, Lentigo Maligna Melanoma, M:Melanoma, Melanoma, Melanoma of Unknown Primary, Mucosal Melanoma of the Esophagus, Mucosal Melanoma of the Urethra, Mucosal Melanoma of the Vulva/Vagina, Ocular Melanoma, Primary CNS Melanoma, Spitzoid Melanoma, Uveal Melanoma";
         assertEquals(expectedResult, tumorTypesToString(new ArrayList<>(cancerTypes), true));
 
         // Check for special cancer types
-        testEvi.setCancerTypes(Collections.singleton(TumorTypeUtils.getBySpecialTumor(SpecialTumorType.ALL_TUMORS)));
+        testEvi.setCancerTypes(Collections.singleton(ApplicationContextSingleton.getTumorTypeBo().getBySpecialTumor(SpecialTumorType.ALL_TUMORS)));
         testEvi.setLevelOfEvidence(LevelOfEvidence.LEVEL_1);
         cancerTypes = TumorTypeUtils.findEvidenceRelevantCancerTypes(testEvi);
         assertEquals(982, cancerTypes.size());
-        testEvi.setCancerTypes(Collections.singleton(TumorTypeUtils.getBySpecialTumor(SpecialTumorType.ALL_LIQUID_TUMORS)));
+        testEvi.setCancerTypes(Collections.singleton(ApplicationContextSingleton.getTumorTypeBo().getBySpecialTumor(SpecialTumorType.ALL_LIQUID_TUMORS)));
         testEvi.setLevelOfEvidence(LevelOfEvidence.LEVEL_1);
         cancerTypes = TumorTypeUtils.findEvidenceRelevantCancerTypes(testEvi);
         assertEquals(242, cancerTypes.size());
-        testEvi.setCancerTypes(Collections.singleton(TumorTypeUtils.getBySpecialTumor(SpecialTumorType.ALL_SOLID_TUMORS)));
+        testEvi.setCancerTypes(Collections.singleton(ApplicationContextSingleton.getTumorTypeBo().getBySpecialTumor(SpecialTumorType.ALL_SOLID_TUMORS)));
         testEvi.setLevelOfEvidence(LevelOfEvidence.LEVEL_1);
         cancerTypes = TumorTypeUtils.findEvidenceRelevantCancerTypes(testEvi);
         assertEquals(741, cancerTypes.size());

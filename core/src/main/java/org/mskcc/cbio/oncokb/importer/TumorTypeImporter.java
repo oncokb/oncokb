@@ -90,13 +90,13 @@ public class TumorTypeImporter {
     private static void saveAndIterate(org.mskcc.oncotree.model.TumorType tumorType) {
         TumorTypeBo tumorTypeBo = ApplicationContextSingleton.getTumorTypeBo();
         if (StringUtils.isNotEmpty(tumorType.getCode())) {
-            TumorType matchedTumorType = tumorTypeBo.findTumorTypeByCode(tumorType.getCode());
-            TumorType matchedParentTumorType = tumorTypeBo.findTumorTypeByCode(tumorType.getParent());
+            TumorType matchedTumorType = tumorTypeBo.getByCode(tumorType.getCode());
+            TumorType matchedParentTumorType = tumorTypeBo.getByCode(tumorType.getParent());
             if (matchedTumorType != null) {
                 matchedTumorType.setParent(matchedParentTumorType);
                 Set<TumorType> childTumorTypes = new HashSet<>();
                 tumorType.getChildren().values().forEach(child -> {
-                    TumorType matchedChild = tumorTypeBo.findTumorTypeByCode(child.getCode());
+                    TumorType matchedChild = tumorTypeBo.getByCode(child.getCode());
                     if (matchedChild != null) {
                         childTumorTypes.add(matchedChild);
                     }
