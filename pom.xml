@@ -32,7 +32,7 @@
         <dependency>
             <groupId>org.redisson</groupId>
             <artifactId>redisson</artifactId>
-            <version>3.15.5</version>
+            <version>3.17.7</version>
         </dependency>
         <dependency>
             <groupId>org.xerial.snappy</groupId>
