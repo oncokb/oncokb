@@ -86,7 +86,7 @@ public class VariantsApiController implements VariantsApi {
             if (query.getHgvs() != null && !query.getHgvs().isEmpty()) {
                 Alteration alteration = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, query.getHgvs(), query.getReferenceGenome());
                 if (alteration != null && alteration.getGene() != null) {
-                    Set<Alteration> allAlterations = AlterationUtils.getAllAlterations(query.getReferenceGenome(), alteration.getGene());
+                    List<Alteration> allAlterations = AlterationUtils.getAllAlterations(query.getReferenceGenome(), alteration.getGene());
                     alterationList.addAll(ApplicationContextSingleton.getAlterationBo().findRelevantAlterations(query.getReferenceGenome(), alteration, allAlterations, true));
                 }
             } else if (query.getHugoSymbol() != null || query.getEntrezGeneId() != null) {
@@ -102,7 +102,7 @@ public class VariantsApiController implements VariantsApi {
                     } else if (AlterationUtils.isLikelyInferredAlterations(query.getVariant())) {
                         alterationSet.addAll(AlterationUtils.getAlterationsByKnownEffectInGene(gene, AlterationUtils.getInferredAlterationsKnownEffect(query.getVariant()), false));
                     } else {
-                        Set<Alteration> allAlterations = AlterationUtils.getAllAlterations(query.getReferenceGenome(), gene);
+                        List<Alteration> allAlterations = AlterationUtils.getAllAlterations(query.getReferenceGenome(), gene);
                         if (query.getVariant() == null && query.getProteinStart() == null && query.getProteinEnd() == null) {
                             alterationSet.addAll(allAlterations);
                         } else {

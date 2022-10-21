@@ -203,17 +203,24 @@ public class TumorType implements Serializable {
         if (this == o) return true;
         if (!(o instanceof TumorType)) return false;
         TumorType tumorType = (TumorType) o;
-        return Objects.equals(getId(), tumorType.getId()) &&
-            Objects.equals(getCode(), tumorType.getCode()) &&
-            Objects.equals(getTissue(), tumorType.getTissue()) &&
-            Objects.equals(getLevel(), tumorType.getLevel()) &&
-            Objects.equals(getColor(), tumorType.getColor()) &&
-            Objects.equals(getSubtype(), tumorType.getSubtype()) &&
-            Objects.equals(getMainType(), tumorType.getMainType());
+        if (getId() != null && tumorType.getId() != null) {
+            return Objects.equals(getId(), tumorType.getId());
+        } else {
+            return Objects.equals(getCode(), tumorType.getCode()) &&
+                Objects.equals(getTissue(), tumorType.getTissue()) &&
+                Objects.equals(getLevel(), tumorType.getLevel()) &&
+                Objects.equals(getColor(), tumorType.getColor()) &&
+                Objects.equals(getSubtype(), tumorType.getSubtype()) &&
+                Objects.equals(getMainType(), tumorType.getMainType());
+        }
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getCode(), getSubtype(), getMainType());
+        if (getId() != null) {
+            return getId();
+        } else {
+            return Objects.hash(getCode(), getSubtype(), getMainType());
+        }
     }
 }

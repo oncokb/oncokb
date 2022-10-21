@@ -23,24 +23,27 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
     public List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations) {
         Set<Evidence> set = new LinkedHashSet<Evidence>();
         Set<Alteration> alterationSet = new HashSet<>(alterations);
-        for (Evidence evidence : EvidenceUtils.getAllEvidencesByAlterationsGenes(alterations)) {
+        List<Evidence> evidences = EvidenceUtils.getAllEvidencesByAlterationsGenes(alterations);
+        for (int i = 0; i < evidences.size(); i++) {
+            Evidence evidence = evidences.get(i);
             if (!Collections.disjoint(evidence.getAlterations(), alterationSet)) {
                 set.add(evidence);
             }
         }
-        return new ArrayList<Evidence>(set);
+        return new ArrayList<>(set);
     }
 
     @Override
     public List<Evidence> findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes) {
-        Set<Evidence> set = new LinkedHashSet<Evidence>();
-        Set<Alteration> altsSet = new HashSet<>(alterations);
-        for (Evidence evidence : EvidenceUtils.getAllEvidencesByAlterationsGenes(alterations)) {
-            if (evidenceTypes.contains(evidence.getEvidenceType()) && !Collections.disjoint(evidence.getAlterations(), altsSet)) {
+        Set<Evidence> set = new LinkedHashSet<>();
+        List<Evidence> evidences = EvidenceUtils.getAllEvidencesByAlterationsGenes(alterations);
+        for (int i = 0; i < evidences.size(); i++) {
+            Evidence evidence = evidences.get(i);
+            if (evidenceTypes.contains(evidence.getEvidenceType()) && !Collections.disjoint(evidence.getAlterations(), alterations)) {
                 set.add(evidence);
             }
         }
-        return new ArrayList<Evidence>(set);
+        return new ArrayList<>(set);
     }
 
     @Override
@@ -48,16 +51,17 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
         if (evidenceTypes == null) {
             return findEvidencesByAlteration(alterations, evidenceTypes);
         }
-        Set<Evidence> set = new LinkedHashSet<Evidence>();
-
-        for (Evidence evidence : EvidenceUtils.getAllEvidencesByAlterationsGenes(alterations)) {
+        Set<Evidence> set = new LinkedHashSet<>();
+        List<Evidence> evidences = EvidenceUtils.getAllEvidencesByAlterationsGenes(alterations);
+        for (int i = 0; i < evidences.size(); i++) {
+            Evidence evidence = evidences.get(i);
             if (Sets.intersection(evidence.getAlterations(), new HashSet(alterations)).size() > 0
                 && evidenceTypes.contains(evidence.getEvidenceType())
                 && levelOfEvidences.contains(evidence.getLevelOfEvidence())) {
                 set.add(evidence);
             }
         }
-        return new ArrayList<Evidence>(set);
+        return new ArrayList<>(set);
     }
 
     @Override

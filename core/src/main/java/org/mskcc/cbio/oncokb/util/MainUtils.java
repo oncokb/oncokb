@@ -410,7 +410,7 @@ public class MainUtils {
     public static Set<BiologicalVariant> getBiologicalVariants(Gene gene) {
         Set<BiologicalVariant> variants = new HashSet<>();
         if (gene != null) {
-            Set<Alteration> alterations = AlterationUtils.getAllAlterations(null, gene);
+            List<Alteration> alterations = AlterationUtils.getAllAlterations(null, gene);
 
             Set<EvidenceType> evidenceTypes = new HashSet<EvidenceType>() {{
                 add(EvidenceType.MUTATION_EFFECT);

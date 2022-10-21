@@ -193,7 +193,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
             if (entry.getValue().size() > 0) {
                 for (Gene gene : entry.getValue()) {
 
-                    Set<Alteration> alterations = AlterationUtils.getAllAlterations(null, gene);
+                    List<Alteration> alterations = AlterationUtils.getAllAlterations(null, gene);
                     // When more than two keywords present, the index does not matter anymore.
                     // As long as there is match, return it.
                     if (keywords.size() > 2) {

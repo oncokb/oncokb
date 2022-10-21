@@ -98,10 +98,10 @@ public class GenesApiController implements GenesApi {
             return new ResponseEntity<>(alterationList, HttpStatus.BAD_REQUEST);
         }
 
-        Set<Alteration> alterations = AlterationUtils.getAllAlterations(null, gene);
+        List<Alteration> alterations = AlterationUtils.getAllAlterations(null, gene);
 
         if (alterations == null) {
-            alterations = new HashSet<>();
+            alterations = new ArrayList<>();
         }
         alterationList.addAll(alterations);
         return ResponseEntity.ok().body(JsonResultFactory.getAlteration(alterationList, fields));

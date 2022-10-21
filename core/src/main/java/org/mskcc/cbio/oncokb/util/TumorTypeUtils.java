@@ -96,6 +96,13 @@ public class TumorTypeUtils {
         if (evidence == null)
             return new HashSet<>();
 
+        if (evidence.getId() != null) {
+            Set<TumorType> relevantCancerTypes = CacheUtils.getEvidenceRelevantCancerTypes(evidence.getGene().getEntrezGeneId(), evidence.getId());
+            if (relevantCancerTypes != null) {
+                return relevantCancerTypes;
+            }
+        }
+
         if (!evidence.getRelevantCancerTypes().isEmpty())
             return evidence.getRelevantCancerTypes();
 
