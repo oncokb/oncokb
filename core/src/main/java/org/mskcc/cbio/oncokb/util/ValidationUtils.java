@@ -32,7 +32,6 @@ public class ValidationUtils {
                 String hugoSymbol = gene.getHugoSymbol();
                 String alterationsName = getEvidenceAlterationsName(evidence);
                 String tumorTypesName = TumorTypeUtils.getEvidenceTumorTypesName(evidence);
-                data.put(getErrorMessage(getTarget(hugoSymbol, alterationsName, tumorTypesName), NO_TREATMENT));
                 if (evidence.getTreatments().isEmpty()) {
                     data.put(getErrorMessage(getTarget(hugoSymbol, alterationsName, tumorTypesName), NO_TREATMENT));
                 } else {
