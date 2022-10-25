@@ -220,13 +220,12 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
 
             LinkedHashSet<Alteration> relevantAlterations = new LinkedHashSet<>();
             if (isGeneralAlteration) {
-                Set<Alteration> allAlterations = AlterationUtils.getAllAlterations(referenceGenome, gene);
+                List<Alteration> allAlterations = AlterationUtils.getAllAlterations(referenceGenome, gene);
 
                 // If the general alteration is not annotated system, at least we need to add
                 // it into the list for mapping.
                 Alteration exactMatch = AlterationUtils.findAlteration(gene, referenceGenome, variant);
                 if (exactMatch == null) {
-                    allAlterations = new HashSet<>(allAlterations);
                     allAlterations.add(oncokbVariant);
                 }
                 relevantAlterations = alterationBo.findRelevantAlterations(referenceGenome, exampleVariant, allAlterations, true);
@@ -237,11 +236,11 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
                     }
                 }
             } else {
-                relevantAlterations = alterationBo.findRelevantAlterations(referenceGenome, exampleVariant, Collections.singleton(oncokbVariant), false);
+                relevantAlterations = alterationBo.findRelevantAlterations(referenceGenome, exampleVariant, Collections.singletonList(oncokbVariant), false);
 
 
                 // We should not do alternative allele rule in here
-                List<Alteration> alternativeAlleles = AlterationUtils.getAlleleAlterations(referenceGenome, exampleVariant, Collections.singleton(oncokbVariant));
+                List<Alteration> alternativeAlleles = AlterationUtils.getAlleleAlterations(referenceGenome, exampleVariant, Collections.singletonList(oncokbVariant));
                 relevantAlterations.removeAll(alternativeAlleles);
 
                 isMatched = relevantAlterations.size() > 0;

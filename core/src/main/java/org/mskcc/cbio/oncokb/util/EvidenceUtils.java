@@ -263,9 +263,11 @@ public class EvidenceUtils {
     public static List<Evidence> getAlterationEvidences(List<Alteration> alterations) {
         List<Evidence> evidences = new ArrayList<>();
 
-        Set<Evidence> geneEvidences = getAllEvidencesByAlterationsGenes(alterations);
-        for (Evidence evidence : geneEvidences) {
-            if (!Collections.disjoint(evidence.getAlterations(), alterations)) {
+        List<Evidence> geneEvidences = getAllEvidencesByAlterationsGenes(alterations);
+        Set<Alteration> altSet = new HashSet<>(alterations);
+        for (int i = 0; i < geneEvidences.size(); i++) {
+            Evidence evidence = geneEvidences.get(i);
+            if (!Collections.disjoint(evidence.getAlterations(), altSet)) {
                 evidences.add(evidence);
             }
         }
@@ -276,7 +278,7 @@ public class EvidenceUtils {
         Map<Gene, Set<Evidence>> evidences = new HashMap<>();
         for (Gene gene : genes) {
             if (gene != null) {
-                evidences.put(gene, CacheUtils.getEvidences(gene));
+                evidences.put(gene, new HashSet<>(CacheUtils.getEvidences(gene)));
             }
         }
         return evidences;
@@ -288,7 +290,7 @@ public class EvidenceUtils {
             return result;
         for (Gene gene : genes) {
             if (gene != null) {
-                Set<Evidence> evidences = CacheUtils.getEvidences(gene);
+                List<Evidence> evidences = CacheUtils.getEvidences(gene);
                 Set<Evidence> filtered = new HashSet<>();
                 for (Evidence evidence : evidences) {
                     if (evidenceTypes.contains(evidence.getEvidenceType())) {
@@ -304,8 +306,9 @@ public class EvidenceUtils {
     public static Set<Evidence> getEvidenceByGeneAndEvidenceTypes(Gene gene, Set<EvidenceType> evidenceTypes) {
         Set<Evidence> result = new HashSet<>();
         if (gene != null) {
-            Set<Evidence> evidences = CacheUtils.getEvidences(gene);
-            for (Evidence evidence : evidences) {
+            List<Evidence> evidences = CacheUtils.getEvidences(gene);
+            for (int i = 0; i < evidences.size(); i++) {
+                Evidence evidence = evidences.get(i);
                 if (evidenceTypes.contains(evidence.getEvidenceType())) {
                     result.add(evidence);
                 }
@@ -440,11 +443,11 @@ public class EvidenceUtils {
         return propagatedEvidence;
     }
 
-    public static Map<Gene, Set<Evidence>> separateEvidencesByGene(Set<Gene> genes, Set<Evidence> evidences) {
-        Map<Gene, Set<Evidence>> result = new HashMap<>();
+    public static Map<Gene, List<Evidence>> separateEvidencesByGene(Set<Gene> genes, Set<Evidence> evidences) {
+        Map<Gene, List<Evidence>> result = new HashMap<>();
 
         for (Gene gene : genes) {
-            result.put(gene, new HashSet<Evidence>());
+            result.put(gene, new ArrayList<>());
         }
 
         for (Evidence evidence : evidences) {
@@ -1092,17 +1095,18 @@ public class EvidenceUtils {
         return evidences;
     }
 
-    public static Set<Evidence> getAllEvidencesByAlterationsGenes(Collection<Alteration> alterations) {
+    public static List<Evidence> getAllEvidencesByAlterationsGenes(Collection<Alteration> alterations) {
         Set<Gene> genes = new HashSet<>();
-        Set<Evidence> evidences = new HashSet<>();
+        List<Evidence> evidences = new ArrayList<>();
         for (Alteration alteration : alterations) {
             genes.add(alteration.getGene());
         }
         if (genes.size() == 1) {
-            return CacheUtils.getEvidences(genes.iterator().next());
-        }
-        for (Gene gene : genes) {
-            evidences.addAll(CacheUtils.getEvidences(gene));
+            evidences.addAll(CacheUtils.getEvidences(genes.iterator().next()));
+        } else {
+            for (Gene gene : genes) {
+                evidences.addAll(CacheUtils.getEvidences(gene));
+            }
         }
         return evidences;
     }

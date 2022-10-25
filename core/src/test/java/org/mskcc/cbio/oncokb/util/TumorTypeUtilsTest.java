@@ -63,7 +63,7 @@ public class TumorTypeUtilsTest extends TestCase {
         assertEquals(expectedResult, tumorTypesToString(tumorTypes));
 
         tumorTypes = TumorTypeUtils.findRelevantTumorTypes("MEL", false, RelevantTumorTypeDirection.DOWNWARD);
-        expectedResult = "Melanoma, M:Melanoma, Congenital Nevus, Melanoma of Unknown Primary, Lentigo Maligna Melanoma, Desmoplastic Melanoma, Acral Melanoma, Cutaneous Melanoma, Spitzoid Melanoma, M:All Solid Tumors, M:All Tumors";
+        expectedResult = "Melanoma, M:Melanoma, Acral Melanoma, Congenital Nevus, Lentigo Maligna Melanoma, Cutaneous Melanoma, Melanoma of Unknown Primary, Desmoplastic Melanoma, Spitzoid Melanoma, M:All Solid Tumors, M:All Tumors";
         assertEquals(expectedResult, tumorTypesToString(tumorTypes));
 
         tumorTypes = TumorTypeUtils.findRelevantTumorTypes("Melanoma", true, RelevantTumorTypeDirection.UPWARD);

@@ -21,16 +21,16 @@ public class AlterationUtilsTest extends TestCase
         Alteration alteration = createBRAFAlteration("BRAF-MKRN1 fusion");
 
         // Check when alteration is not available
-        Set<Alteration> fullAlterations = new HashSet<>();
+        List<Alteration> fullAlterations = new ArrayList<>();
         Alteration result = AlterationUtils.getRevertFusions(DEFAULT_REFERENCE_GENOME, alteration, fullAlterations);
         assertEquals("The result should be null", null, result);
 
-        fullAlterations = new HashSet<>();
+        fullAlterations = new ArrayList<>();
         fullAlterations.add(createBRAFAlteration("BRAF-MKRN1 fusion"));
         result = AlterationUtils.getRevertFusions(DEFAULT_REFERENCE_GENOME, alteration, fullAlterations);
         assertEquals("The result should be null", null, result);
 
-        fullAlterations = new HashSet<>();
+        fullAlterations = new ArrayList<>();
         fullAlterations.add(createBRAFAlteration("MKRN1-BRAF fusion"));
         result = AlterationUtils.getRevertFusions(DEFAULT_REFERENCE_GENOME, alteration, fullAlterations);
         assertTrue("The result should not be null", result != null);
@@ -109,7 +109,7 @@ public class AlterationUtilsTest extends TestCase
         Alteration rangeMissenseExcluded = generateAlteration(gene, "V600_V601delinsEB {excluding V600E}");
         Alteration rangeMissenseExcludesPosition = generateAlteration(gene, "V600_V601delinsEB {excluding V600}");
 
-        Set<Alteration> fullAlteration = new HashSet<>();
+        List<Alteration> fullAlteration = new ArrayList<>();
         fullAlteration.add(v600e);
         fullAlteration.add(v600k);
         fullAlteration.add(v600);
@@ -133,7 +133,7 @@ public class AlterationUtilsTest extends TestCase
         Alteration fusions = generateAlteration(gene, "Fusions");
         Alteration oncogenicMutationsExcludesFusion = generateAlteration(gene, "Fusions {excluding AKAP9-BRAF Fusion; FAM131B-BRAF Fusion}");
 
-        fullAlteration = new HashSet<>();
+        fullAlteration = new ArrayList<>();
         fullAlteration.add(fusionA);
         fullAlteration.add(fusionB);
         fullAlteration.add(fusionC);
