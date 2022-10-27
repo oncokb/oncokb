@@ -185,8 +185,8 @@ MAP2K1	K57N	Erdheim-Chester Disease	2: Cobimetinib; 2: Trametinib;
 MAP2K1	K57N	Lung Adenocarcinoma	3A: Trametinib; 3A: Cobimetinib;
 MAP2K1	K57N	Glioblastoma	3B: Trametinib; 3B: Cobimetinib;
 #MAP2K1	K57N	Diffuse Large B-Cell Lymphoma, NOS
-PIK3CA	E545K	Breast Cancer	1: Alpelisib+Fulvestrant;
-PIK3CA	E545K	Ovarian Cancer	3B: Alpelisib+Fulvestrant;
+PIK3CA	E545K	Breast Cancer	1: Alpelisib+Fulvestrant; 4: RLY-2608; 4: RLY-2608+Fulvestrant;
+PIK3CA	E545K	Ovarian Cancer	3B: Alpelisib+Fulvestrant; 4: RLY-2608;
 #PIK3CA	E545K	Acute Myeloid Leukemia
 NRAS	G12C	Breast Cancer	3B: Binimetinib;
 #NRAS	G12C	Chronic Myelogenous Leukemia
@@ -196,9 +196,9 @@ SF3B1	R625G	Breast Cancer
 # Sotorasib should only work for KRAS G12C, not alternative allele
 # the following tests should be enabled when the liquid propagation is in production also the AGM-510 treatment is in place
 KRAS	G12C	Breast Cancer	3B: Adagrasib; 3B: Sotorasib; 3B: Adagrasib+Cetuximab; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
-KRAS	G12D	Breast Cancer	4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
+KRAS	G12D	Breast Cancer	4: RMC-6236; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
 KRAS	G12C	NSCLC	1: Sotorasib; 3A: Adagrasib; 3B: Adagrasib+Cetuximab; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
-KRAS	G12D	NSCLC	4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
+KRAS	G12D	NSCLC	4: RMC-6236; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
 KRAS	G12C	AML
 KRAS	G12D	AML
 KRAS	G12C	Leukemia
@@ -246,11 +246,11 @@ KRAS	G12C	Histiocytosis	3A: Cobimetinib; 3A: Trametinib;
 KRAS	G12A	Histiocytosis	3A: Cobimetinib; 3A: Trametinib;
 IDH1	R132H	AML	1: Ivosidenib;
 IDH1	R132G	AML	1: Ivosidenib;
-FGFR2	FGFR2-BICC1 Fusion	Cholangiocarcinoma	1: Pemigatinib; 1: Infigratinib; 3A: Futibatinib; 3B: Erdafitinib; 4: Debio1347; 4: AZD4547;
+FGFR2	FGFR2-BICC1 Fusion	Cholangiocarcinoma	1: Pemigatinib; 1: Infigratinib; 1: Futibatinib; 3B: Erdafitinib; 4: Debio1347; 4: AZD4547;
 ERBB2	Amplification	Breast Cancer	1: Trastuzumab; 1: Trastuzumab+Chemotherapy; 1: Ado-Trastuzumab Emtansine; 1: Lapatinib+Capecitabine; 1: Lapatinib+Letrozole; 1: Trastuzumab+Pertuzumab+Chemotherapy; 1: Neratinib; 1: Neratinib+Capecitabine; 1: Trastuzumab+Tucatinib+Capecitabine; 1: Trastuzumab Deruxtecan; 1: Margetuximab+Chemotherapy; 3B: Trastuzumab+Carboplatin-Taxol Regimen; 3B: Trastuzumab+Pertuzumab; 3B: Lapatinib+Trastuzumab; 3B: Pembrolizumab+Trastuzumab+Chemotherapy;
 RET	KIF5B-RET Fusion	NSCLC	1: Selpercatinib; 1: Pralsetinib; 2: Cabozantinib; 3A: Vandetanib;
-RET	KIF5B-RET Fusion	Bladder Cancer	3B: Cabozantinib; 3B: Vandetanib; 3B: Selpercatinib; 3B: Pralsetinib;
-MET	Amplification	Non-Small Cell Lung Cancer	2: Crizotinib; 2: Capmatinib; 2: Tepotinib; R2: Erlotinib; R2: Gefitinib; R2: Osimertinib;
+RET	KIF5B-RET Fusion	Bladder Cancer	1: Selpercatinib; 3B: Cabozantinib; 3B: Vandetanib; 3B: Pralsetinib;
+MET	Amplification	Non-Small Cell Lung Cancer	2: Crizotinib; 2: Capmatinib; 2: Tepotinib; 3A: Telisotuzumab Vedotin; R2: Erlotinib; R2: Gefitinib; R2: Osimertinib;
 
 # Check the exclusion rule. Example： Oncogenic Mutations {excluding V600}
 BRAF	V600E	Erdheim-Chester Disease	1: Vemurafenib; 3A: Dabrafenib;
