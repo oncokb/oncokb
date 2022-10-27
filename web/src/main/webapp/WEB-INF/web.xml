@@ -39,6 +39,7 @@
 		<url-pattern>/</url-pattern>
         <url-pattern>/api/v1/*</url-pattern>
         <url-pattern>/api/private/*</url-pattern>
+        <url-pattern>/legacy-api</url-pattern>
 	</servlet-mapping>
     <servlet>
         <servlet-name>PublicSinglePage</servlet-name>

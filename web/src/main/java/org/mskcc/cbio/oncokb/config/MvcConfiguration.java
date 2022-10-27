@@ -40,7 +40,7 @@ import static org.mskcc.cbio.oncokb.Constants.*;
 import static org.mskcc.cbio.oncokb.Constants.PUBLIC_API_VERSION;
 
 @Configuration
-@ComponentScan(basePackages = {"org.mskcc.cbio.oncokb.api.pub.v1", "org.mskcc.cbio.oncokb.api.pvt", "org.mskcc.cbio.oncokb.cache", "org.mskcc.cbio.oncokb.bo"})
+@ComponentScan(basePackages = {"org.mskcc.cbio.oncokb.api.pub.v1", "org.mskcc.cbio.oncokb.api.pvt", "org.mskcc.cbio.oncokb.controller", "org.mskcc.cbio.oncokb.cache", "org.mskcc.cbio.oncokb.bo"})
 @EnableWebMvc
 @EnableSwagger2
 public class MvcConfiguration extends WebMvcConfigurerAdapter {
