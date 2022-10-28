@@ -395,7 +395,7 @@ public final class AlterationUtils {
                                         var = ref = m.group(1);
                                         start = Integer.valueOf(m.group(2));
                                         end = start;
-                                        if (ref.equals("*")) {
+                                        if (ref != null && ref.equals("*")) {
                                             consequence = "stop_retained_variant";
                                         } else {
                                             consequence = "synonymous_variant";
