@@ -25,11 +25,6 @@ import org.springframework.context.annotation.*;
 public class CacheConfiguration {
     
     private final int DEFAULT_TTL = 60;
-    private String redisSlaveConnectionMinimumIdleSize;
-    private String redisSlaveConnectionPoolSize;
-    private String redisMasterConnectionMinimumIdleSize;
-    private String redisMasterConnectionPoolSize;
-    private String redisClientName;
 
     @Bean
     public RedissonClient redissonClient()
@@ -39,11 +34,10 @@ public class CacheConfiguration {
         String redisPassword = PropertiesUtils.getProperties("redis.password");
         String redisAddress = PropertiesUtils.getProperties("redis.address");
         String redisMasterName = PropertiesUtils.getProperties("redis.masterName");
-        redisSlaveConnectionMinimumIdleSize = PropertiesUtils.getProperties("redis.slaveConnectionMinimumIdleSize");
-        redisSlaveConnectionPoolSize = PropertiesUtils.getProperties("redis.slaveConnectionPoolSize");
-        redisMasterConnectionMinimumIdleSize = PropertiesUtils.getProperties("redis.masterConnectionMinimumIdleSize");
-        redisMasterConnectionPoolSize = PropertiesUtils.getProperties("redis.masterConnectionPoolSize");
-        redisClientName = PropertiesUtils.getProperties("redis.clientName");
+        String redisSlaveConnectionMinimumIdleSize = PropertiesUtils.getProperties("redis.slaveConnectionMinimumIdleSize");
+        String redisSlaveConnectionPoolSize = PropertiesUtils.getProperties("redis.slaveConnectionPoolSize");
+        String redisMasterConnectionMinimumIdleSize = PropertiesUtils.getProperties("redis.masterConnectionMinimumIdleSize");
+        String redisMasterConnectionPoolSize = PropertiesUtils.getProperties("redis.masterConnectionPoolSize");
 
         if (redisType.equals(RedisType.SINGLE.getType())) {
             SingleServerConfig singleServerConfig = config
@@ -64,7 +58,7 @@ public class CacheConfiguration {
                 .setDnsMonitoringInterval(-1)
                 .addSentinelAddress(redisAddress)
                 .setPassword(redisPassword);
-            setRedisConnectionPoolSize(sentinelConfig);
+            setRedisConnectionPoolSize(sentinelConfig, redisSlaveConnectionMinimumIdleSize, redisSlaveConnectionPoolSize, redisMasterConnectionMinimumIdleSize, redisMasterConnectionPoolSize);
             setRedisClientName(sentinelConfig);
         } else if (redisType.equals(RedisType.CLUSTER.getType())) {
             ClusterServersConfig clusterConfig = 
@@ -72,7 +66,7 @@ public class CacheConfiguration {
                     .useClusterServers()
                     .addNodeAddress(redisAddress)
                     .setPassword(redisPassword);
-            setRedisConnectionPoolSize(clusterConfig);
+            setRedisConnectionPoolSize(clusterConfig, redisSlaveConnectionMinimumIdleSize, redisSlaveConnectionPoolSize, redisMasterConnectionMinimumIdleSize, redisMasterConnectionPoolSize);
             setRedisClientName(clusterConfig);
         } else {
             throw new Exception(
@@ -88,7 +82,7 @@ public class CacheConfiguration {
         return Redisson.create(config);
     }
 
-    private void setRedisConnectionPoolSize(BaseMasterSlaveServersConfig baseMasterSlaveServersConfig) {
+    private void setRedisConnectionPoolSize(BaseMasterSlaveServersConfig baseMasterSlaveServersConfig, String redisSlaveConnectionMinimumIdleSize, String redisSlaveConnectionPoolSize, String redisMasterConnectionMinimumIdleSize, String redisMasterConnectionPoolSize) {
         baseMasterSlaveServersConfig.setSubscriptionConnectionMinimumIdleSize(0);
         baseMasterSlaveServersConfig.setSubscriptionConnectionPoolSize(0);
 
@@ -107,10 +101,11 @@ public class CacheConfiguration {
     }
 
     private void setRedisClientName(BaseConfig baseConfig) {
-        if (StringUtils.isNotEmpty(redisClientName)) {
-            baseConfig.setClientName(redisClientName);
+        String appName = PropertiesUtils.getProperties("app.name");
+        if (StringUtils.isNotEmpty(appName)) {
+            baseConfig.setClientName(appName);
         } else {
-            baseConfig.setClientName("oncokb-core-client");
+            baseConfig.setClientName("oncokb-core");
         }
     }
 
