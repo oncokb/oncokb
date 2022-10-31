@@ -40,7 +40,7 @@ public interface AlterationBo extends GenericBo<Alteration> {
      */
     Alteration findAlterationFromDao(Gene gene, AlterationType alterationType, ReferenceGenome referenceGenome, String alteration, String name);
 
-    Alteration findExactlyMatchedAlteration(ReferenceGenome referenceGenome, Alteration alteration, Set<Alteration> fullAlterations);
+    Alteration findExactlyMatchedAlteration(ReferenceGenome referenceGenome, Alteration alteration, List<Alteration> fullAlterations);
     /**
      * @param gene
      * @param consequence
@@ -48,7 +48,7 @@ public interface AlterationBo extends GenericBo<Alteration> {
      * @param end
      * @return
      */
-    List<Alteration> findRelevantOverlapAlterations(Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end, String proteinChange, Set<Alteration> alterations);
+    List<Alteration> findRelevantOverlapAlterations(Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end, String proteinChange, List<Alteration> alterations);
 
     /**
      * @param gene
@@ -57,7 +57,7 @@ public interface AlterationBo extends GenericBo<Alteration> {
      * @param end
      * @return
      */
-    List<Alteration> findMutationsByConsequenceAndPosition(Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end, String referenceResidue, Collection<Alteration> alterations, Boolean onSamePosition);
+    List<Alteration> findMutationsByConsequenceAndPosition(Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end, String referenceResidue, List<Alteration> alterations, Boolean onSamePosition);
 
     /**
      * @param alteration
@@ -68,13 +68,13 @@ public interface AlterationBo extends GenericBo<Alteration> {
      * @param alteration
      * @return
      */
-    LinkedHashSet<Alteration> findRelevantAlterationsForCategoricalAlt(ReferenceGenome referenceGenome, Alteration alteration, Set<Alteration> alterations);
+    LinkedHashSet<Alteration> findRelevantAlterationsForCategoricalAlt(ReferenceGenome referenceGenome, Alteration alteration, List<Alteration> alterations);
 
     /**
      * @param alteration
      * @return
      */
-    LinkedHashSet<Alteration> findRelevantAlterations(ReferenceGenome referenceGenome, Alteration alteration, Set<Alteration> alterations, boolean includeAlternativeAllele);
+    LinkedHashSet<Alteration> findRelevantAlterations(ReferenceGenome referenceGenome, Alteration alteration, List<Alteration> alterations, boolean includeAlternativeAllele);
 
     void deleteMutationsWithoutEvidenceAssociatedByGene(Gene gene);
 }

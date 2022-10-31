@@ -220,12 +220,11 @@ public class Alteration implements java.io.Serializable {
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 83 * hash + (this.gene != null ? this.gene.hashCode() : 0);
-        hash = 83 * hash + (this.alteration != null ? this.alteration.hashCode() : 0);
-        hash = 83 * hash + (this.alterationType != null ? this.alterationType.hashCode() : 0);
-        hash = 83 * hash + (this.referenceGenomes != null ? this.referenceGenomes.hashCode() : 0);
-        return hash;
+        if (getId() != null) {
+            return getId();
+        } else {
+            return Objects.hash(this.gene, this.alteration, this.referenceGenomes);
+        }
     }
 
     @Override
@@ -233,6 +232,9 @@ public class Alteration implements java.io.Serializable {
         if (this == o) return true;
         if (!(o instanceof Alteration)) return false;
         Alteration that = (Alteration) o;
+        if (getId() != null && that.getId() != null) {
+            return Objects.equals(getId(), that.getId());
+        }
         return Objects.equals(getId(), that.getId()) &&
             Objects.equals(getUuid(), that.getUuid()) &&
             Objects.equals(getGene(), that.getGene()) &&

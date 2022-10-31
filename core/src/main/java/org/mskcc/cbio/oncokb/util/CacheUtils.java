@@ -13,13 +13,13 @@ import java.util.stream.Collectors;
 
 /**
  * Created by Hongxin on 4/1/16.
- * <p/>
+ *
  * CacheUtils is used to manage cached variant summaries, relevant alterations, alterations which all gene based.
  * It also includes mapped tumor types which is based on query tumor type name.
- * <p/>
+ *
  * The GeneObservable manages all gene based caches. Any updates happen on gene will automatically trigger
  * GeneObservable to notify all observers to update relative cache.
- * <p/>
+ *
  * TODO:
  * Ideally, we should place cache functions in the cache BAO with a factory which controls the source of data.
  * In this way, user can easily to choose to get data from cache or database directly.
@@ -39,12 +39,19 @@ public class CacheUtils {
     // Cache data from database
     private static Set<Gene> genes = new HashSet<>();
     private static Set<Drug> drugs = new HashSet<>();
-    private static Map<Integer, Set<Evidence>> evidences = new HashMap<>(); //Gene based evidences
-    private static Map<Integer, Set<Alteration>> alterations = new HashMap<>(); //Gene based alterations
+    private static Map<Integer, List<Evidence>> evidences = new HashMap<>(); //Gene based evidences
+    private static Map<Integer, Map<Integer, Set<TumorType>>> evidenceRelevantCancerTypes = new HashedMap();
+    private static Map<Integer, List<Alteration>> alterations = new HashMap<>(); //Gene based alterations
+    private static Map<Integer, Map<ReferenceGenome, List<Alteration>>> alterationsByReferenceGenome = new HashMap<>(); //Gene based alterations
     private static Map<Integer, Set<Alteration>> VUS = new HashMap<>(); //Gene based VUSs
 
     private static List<TumorType> cancerTypes = new ArrayList<>();
-    private static Set<TumorType> specialCancerTypes = new HashSet<>();
+    private static Map<String, TumorType> cancerTypesByCode = new HashMap<>();
+    private static Map<String, TumorType> cancerTypesByMainType = new HashMap<>();
+    private static Map<String, TumorType> cancerTypesByLowercaseSubtype = new HashMap<>();
+    private static List<TumorType> subtypes = new ArrayList<>();
+    private static List<TumorType> mainTypes = new ArrayList<>();
+    private static List<TumorType> specialCancerTypes = new ArrayList<>();
 
     // Other services which will be defined in the property cache.update separated by comma
     // Every time the observer is triggered, all other services will be triggered as well
@@ -81,8 +88,10 @@ public class CacheUtils {
             if (operation.get("cmd") == "update") {
                 Integer entrezGeneId = Integer.parseInt(operation.get("val"));
                 alterations.remove(entrezGeneId);
+                alterationsByReferenceGenome.remove(entrezGeneId);
             } else if (operation.get("cmd") == "reset") {
                 alterations.clear();
+                alterationsByReferenceGenome.clear();
             }
         }
     };
@@ -109,12 +118,14 @@ public class CacheUtils {
             if (operation.get("cmd") == "update") {
                 Integer entrezGeneId = Integer.parseInt(operation.get("val"));
                 evidences.remove(entrezGeneId);
+                evidenceRelevantCancerTypes.remove(entrezGeneId);
                 Gene gene = ApplicationContextSingleton.getGeneBo().findGeneByEntrezGeneId(entrezGeneId);
                 if (gene != null) {
                     setEvidences(gene);
                 }
             } else if (operation.get("cmd") == "reset") {
                 evidences.clear();
+                evidenceRelevantCancerTypes.clear();
                 cacheAllEvidencesByGenes();
             }
         }
@@ -166,35 +177,36 @@ public class CacheUtils {
             System.out.println("Cached all drugs: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
             current = MainUtils.getCurrentTimestamp();
 
-            Set<Evidence> geneEvidences = new HashSet<>(ApplicationContextSingleton.getEvidenceBo().findAll());
-            System.out.println("Get all evidences: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
-            current = MainUtils.getCurrentTimestamp();
-
-            Map<Gene, Set<Evidence>> mappedEvidence = EvidenceUtils.separateEvidencesByGene(genes, geneEvidences);
-
-            System.out.println("Separate all evidences: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
-            current = MainUtils.getCurrentTimestamp();
-
-            Iterator it = mappedEvidence.entrySet().iterator();
-            while (it.hasNext()) {
-                Map.Entry<Gene, Set<Evidence>> pair = (Map.Entry) it.next();
-                evidences.put(pair.getKey().getEntrezGeneId(), pair.getValue());
-            }
-            System.out.println("Cached all evidences: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
-            current = MainUtils.getCurrentTimestamp();
-
-            for (Map.Entry<Integer, Set<Evidence>> entry : evidences.entrySet()) {
-                setVUS(entry.getKey(), entry.getValue());
-            }
-            System.out.println("Cached all VUSs: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
-            current = MainUtils.getCurrentTimestamp();
-
             cancerTypes = ApplicationContextSingleton.getTumorTypeBo().findAll();
+            cancerTypes.stream().forEach(ct -> {
+                if (!StringUtils.isNullOrEmpty(ct.getCode())) {
+                    cancerTypesByCode.put(ct.getCode(), ct);
+                }
+                if (StringUtils.isNullOrEmpty(ct.getCode()) && !StringUtils.isNullOrEmpty(ct.getMainType())) {
+                    cancerTypesByMainType.put(ct.getMainType().toLowerCase(), ct);
+                }
+                if (!StringUtils.isNullOrEmpty(ct.getSubtype())) {
+                    cancerTypesByLowercaseSubtype.put(ct.getSubtype().toLowerCase(), ct);
+                }
+            });
+            subtypes = cancerTypes.stream().filter(tumorType -> org.apache.commons.lang3.StringUtils.isNotEmpty(tumorType.getCode()) && tumorType.getLevel() > 0).collect(Collectors.toList());
+            mainTypes = cancerTypes.stream().filter(tumorType -> org.apache.commons.lang3.StringUtils.isEmpty(tumorType.getCode()) || tumorType.getLevel() > 0).collect(Collectors.toList());
             System.out.println("Cached all tumor types: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
             current = MainUtils.getCurrentTimestamp();
 
+            specialCancerTypes = Arrays.stream(SpecialTumorType.values()).map(specialTumorType -> cancerTypes.stream().filter(cancerType -> !StringUtils.isNullOrEmpty(cancerType.getMainType()) && cancerType.getMainType().equals(specialTumorType.getTumorType())).findAny().orElse(null)).filter(cancerType -> cancerType != null).collect(Collectors.toList());
             System.out.println("Cached all special tumor types: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
-            specialCancerTypes = Arrays.stream(SpecialTumorType.values()).map(specialTumorType -> cancerTypes.stream().filter(cancerType -> !StringUtils.isNullOrEmpty(cancerType.getMainType()) && cancerType.getMainType().equals(specialTumorType.getTumorType())).findAny().orElse(null)).filter(cancerType -> cancerType != null).collect(Collectors.toSet());
+
+            current = MainUtils.getCurrentTimestamp();
+            synEvidences();
+            System.out.println("Cached all evidences: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
+            current = MainUtils.getCurrentTimestamp();
+
+            for (Map.Entry<Integer, List<Evidence>> entry : evidences.entrySet()) {
+                setVUS(entry.getKey(), new HashSet<>(entry.getValue()));
+            }
+            System.out.println("Cached all VUSs: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
+            current = MainUtils.getCurrentTimestamp();
 
             NamingUtils.cacheAllAbbreviations();
             System.out.println("Cached abbreviation ontology: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
@@ -304,7 +316,7 @@ public class CacheUtils {
             Gene gene = GeneUtils.getGeneByEntrezId(entrezGeneId);
             if (gene != null) {
                 synEvidences();
-                setVUS(entrezGeneId, getEvidences(gene));
+                setVUS(entrezGeneId, new HashSet<>(getEvidences(gene)));
             }
             return VUS.get(entrezGeneId) == null ? new HashSet<Alteration>() : Collections.unmodifiableSet(VUS.get(entrezGeneId));
         }
@@ -318,23 +330,23 @@ public class CacheUtils {
         return numbers.get(type);
     }
 
-    public static Set<Alteration> getAlterations(Integer entrezGeneId) {
+    public static List<Alteration> getAlterations(Integer entrezGeneId, ReferenceGenome referenceGenome) {
         synAlterations();
-        Set<Alteration> result = alterations.get(entrezGeneId);
+        List<Alteration> result = referenceGenome == null ? alterations.get(entrezGeneId) : (alterationsByReferenceGenome.get(entrezGeneId) == null ? null : alterationsByReferenceGenome.get(entrezGeneId).get(referenceGenome));
         if (result == null) {
-            return new HashSet<>();
+            return new ArrayList<>();
         }else {
-            return Collections.unmodifiableSet(result);
+            return Collections.unmodifiableList(result);
         }
     }
 
     public static Set<Alteration> findRelevantOverlapAlterations(Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end, String proteinChange) {
-        return AlterationUtils.findOverlapAlteration(getAlterations(gene.getEntrezGeneId()), gene, referenceGenome, consequence, start, end, proteinChange);
+        return AlterationUtils.findOverlapAlteration(getAlterations(gene.getEntrezGeneId(), referenceGenome), gene, referenceGenome, consequence, start, end, proteinChange);
     }
 
     public static Set<Alteration> findMutationsByConsequenceAndPositionOnSamePosition(Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end, String referenceResidue) {
         Set<Alteration> alterations = new HashSet<>();
-        for (Alteration alteration : getAlterations(gene.getEntrezGeneId())) {
+        for (Alteration alteration : getAlterations(gene.getEntrezGeneId(), referenceGenome)) {
             if (AlterationUtils.consequenceRelated(alteration.getConsequence(), consequence)
                 && (referenceGenome == null || alteration.getReferenceGenomes().contains(referenceGenome))
                 && alteration.getProteinStart().equals(alteration.getProteinEnd())
@@ -355,7 +367,19 @@ public class CacheUtils {
 
     public static void setAlterations(Gene gene) {
         if (gene != null && genes.contains(gene)) {
-            alterations.put(gene.getEntrezGeneId(), new HashSet<>(ApplicationContextSingleton.getAlterationBo().findAlterationsByGene(Collections.singleton(gene))));
+            List<Alteration> geneAlterations = ApplicationContextSingleton.getAlterationBo().findAlterationsByGene(Collections.singleton(gene));
+            if (!alterationsByReferenceGenome.containsKey(gene.getEntrezGeneId())) {
+                alterationsByReferenceGenome.put(gene.getEntrezGeneId(), new HashMap<>());
+            }
+            alterations.put(gene.getEntrezGeneId(), geneAlterations);
+            for (Alteration alteration : geneAlterations) {
+                for (ReferenceGenome refGenome : alteration.getReferenceGenomes()) {
+                    if (!alterationsByReferenceGenome.get(gene.getEntrezGeneId()).containsKey(refGenome)) {
+                        alterationsByReferenceGenome.get(gene.getEntrezGeneId()).put(refGenome, new ArrayList<>());
+                    }
+                    alterationsByReferenceGenome.get(gene.getEntrezGeneId()).get(refGenome).add(alteration);
+                }
+            }
         }
     }
 
@@ -373,9 +397,19 @@ public class CacheUtils {
         for (Alteration alteration : allAlterations) {
             Gene gene = alteration.getGene();
             if (!alterations.containsKey(gene.getEntrezGeneId())) {
-                alterations.put(gene.getEntrezGeneId(), new HashSet<Alteration>());
+                alterations.put(gene.getEntrezGeneId(), new ArrayList<>());
+            }
+            if (!alterationsByReferenceGenome.containsKey(gene.getEntrezGeneId())) {
+                alterationsByReferenceGenome.put(gene.getEntrezGeneId(), new HashMap<>());
             }
             alterations.get(gene.getEntrezGeneId()).add(alteration);
+
+            for (ReferenceGenome refGenome : alteration.getReferenceGenomes()) {
+                if (!alterationsByReferenceGenome.get(gene.getEntrezGeneId()).containsKey(refGenome)) {
+                    alterationsByReferenceGenome.get(gene.getEntrezGeneId()).put(refGenome, new ArrayList<>());
+                }
+                alterationsByReferenceGenome.get(gene.getEntrezGeneId()).get(refGenome).add(alteration);
+            }
         }
         System.out.println("Cached all alterations: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
     }
@@ -406,23 +440,23 @@ public class CacheUtils {
 
     public static Set<Evidence> getAllEvidences() {
         Set<Evidence> evis = new HashSet<>();
-        for (Map.Entry<Integer, Set<Evidence>> map : evidences.entrySet()) {
+        for (Map.Entry<Integer, List<Evidence>> map : evidences.entrySet()) {
             evis.addAll(map.getValue());
         }
         return evis;
     }
 
-    public static Set<Evidence> getEvidences(Gene gene) {
+    public static List<Evidence> getEvidences(Gene gene) {
         if (gene == null) {
-            return new HashSet<>();
+            return new ArrayList<>();
         }
 
         synEvidences();
 
         if (evidences.containsKey(gene.getEntrezGeneId())) {
-            return evidences.get(gene.getEntrezGeneId()) == null ? new HashSet<Evidence>() : Collections.unmodifiableSet(evidences.get(gene.getEntrezGeneId()));
+            return evidences.get(gene.getEntrezGeneId()) == null ? new ArrayList<>() : Collections.unmodifiableList(evidences.get(gene.getEntrezGeneId()));
         } else {
-            return new HashSet<>();
+            return new ArrayList<>();
         }
     }
 
@@ -431,7 +465,7 @@ public class CacheUtils {
 
         Set<Evidence> mappedEvis = new HashSet<>();
         if (ids != null) {
-            for (Map.Entry<Integer, Set<Evidence>> map : evidences.entrySet()) {
+            for (Map.Entry<Integer, List<Evidence>> map : evidences.entrySet()) {
                 for (Evidence evidence : map.getValue()) {
                     if (ids.contains(evidence.getId())) {
                         mappedEvis.add(evidence);
@@ -465,7 +499,7 @@ public class CacheUtils {
 
         Set<Evidence> mappedEvis = new HashSet<>();
         if (uuid != null) {
-            for (Map.Entry<Integer, Set<Evidence>> map : evidences.entrySet()) {
+            for (Map.Entry<Integer, List<Evidence>> map : evidences.entrySet()) {
                 for (Evidence evidence : map.getValue()) {
                     if (uuid.equals(evidence.getUuid())) {
                         mappedEvis.add(evidence);
@@ -481,7 +515,7 @@ public class CacheUtils {
 
         Set<Evidence> mappedEvis = new HashSet<>();
         if (uuids != null) {
-            for (Map.Entry<Integer, Set<Evidence>> map : evidences.entrySet()) {
+            for (Map.Entry<Integer, List<Evidence>> map : evidences.entrySet()) {
                 for (Evidence evidence : map.getValue()) {
                     if (evidence != null && uuids.contains(evidence.getUuid())) {
                         mappedEvis.add(evidence);
@@ -493,7 +527,9 @@ public class CacheUtils {
     }
 
     private static void setEvidences(Gene gene) {
-        evidences.put(gene.getEntrezGeneId(), new HashSet<>(ApplicationContextSingleton.getEvidenceBo().findEvidencesByGeneFromDB(Collections.singleton(gene))));
+        List<Evidence> geneEvidences = ApplicationContextSingleton.getEvidenceBo().findEvidencesByGeneFromDB(Collections.singleton(gene));
+        evidences.put(gene.getEntrezGeneId(), geneEvidences);
+        updateEvidenceRelevantCancerTypes(gene.getEntrezGeneId(), geneEvidences);
     }
 
     private static void synEvidences() {
@@ -525,13 +561,32 @@ public class CacheUtils {
     public static List<TumorType> getAllCancerTypes() {
         return cancerTypes.stream().collect(Collectors.toList());
     }
+    public static List<TumorType> getAllMainTypes() {
+        return mainTypes.stream().collect(Collectors.toList());
+    }
+    public static List<TumorType> getAllSubtypes() {
+        return subtypes.stream().collect(Collectors.toList());
+    }
 
-    public static Set<TumorType> getAllSpecialCancerTypes() {
+    public static Map<String, TumorType> getCodedTumorTypeMap() {
+        return cancerTypesByCode;
+    }
+
+    public static Map<String, TumorType> getLowercaseSubtypeTumorTypeMap() {
+        return cancerTypesByLowercaseSubtype;
+    }
+
+    public static Map<String, TumorType> getMainTypeTumorTypeMap() {
+        return cancerTypesByMainType;
+    }
+
+    public static List<TumorType> getAllSpecialCancerTypes() {
         return specialCancerTypes;
     }
 
     public static void forceUpdateGeneAlterations(Integer entrezGeneId) {
         alterations.remove(entrezGeneId);
+        alterationsByReferenceGenome.remove(entrezGeneId);
     }
 
     public static void updateGene(Set<Integer> entrezGeneIds, Boolean propagate) throws IOException {
@@ -572,15 +627,37 @@ public class CacheUtils {
     private static void cacheAllEvidencesByGenes() {
         Long current = MainUtils.getCurrentTimestamp();
 
-        Map<Gene, Set<Evidence>> mappedEvidence =
+        Map<Gene, List<Evidence>> mappedEvidence =
             EvidenceUtils.separateEvidencesByGene(genes, new HashSet<>(
                 ApplicationContextSingleton.getEvidenceBo().findAll()));
         Iterator it = mappedEvidence.entrySet().iterator();
         while (it.hasNext()) {
-            Map.Entry<Gene, Set<Evidence>> pair = (Map.Entry) it.next();
-            evidences.put(pair.getKey().getEntrezGeneId(), pair.getValue());
+            Map.Entry<Gene, List<Evidence>> pair = (Map.Entry) it.next();
+            int entrezGeneId = pair.getKey().getEntrezGeneId();
+            evidences.put(entrezGeneId, pair.getValue());
+            updateEvidenceRelevantCancerTypes(entrezGeneId, pair.getValue());
         }
         System.out.println("Cached all evidences by gene: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
+    }
+
+    public static void updateEvidenceRelevantCancerTypes(Integer entrezGeneId, List<Evidence> geneEvidences) {
+        evidenceRelevantCancerTypes.put(entrezGeneId, new HashMap<>());
+        for (Evidence evidence : geneEvidences) {
+            if (evidence.getId() != null) {
+                evidenceRelevantCancerTypes.get(entrezGeneId).put(evidence.getId(), TumorTypeUtils.findEvidenceRelevantCancerTypes(evidence));
+            }
+        }
+    }
+
+    public static Set<TumorType> getEvidenceRelevantCancerTypes(Integer entrezGeneId, Integer evidenceId) {
+        if (entrezGeneId == null || evidenceId == null) {
+            return null;
+        }
+        if (evidenceRelevantCancerTypes.containsKey(entrezGeneId) && evidenceRelevantCancerTypes.get(entrezGeneId).containsKey(evidenceId)) {
+            return evidenceRelevantCancerTypes.get(entrezGeneId).get(evidenceId);
+        } else {
+            return null;
+        }
     }
 
     public static Map<String, Long> getRecordTime() {

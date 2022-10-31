@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.mskcc.cbio.oncokb</groupId>
     <artifactId>master</artifactId>
-    <version>3.10.1</version>
+    <version>3.11.0</version>
     <packaging>pom</packaging>
     <modules>
         <module>web</module>
@@ -32,12 +32,17 @@
         <dependency>
             <groupId>org.redisson</groupId>
             <artifactId>redisson</artifactId>
-            <version>3.15.5</version>
+            <version>3.17.7</version>
+        </dependency>
+        <dependency>
+            <groupId>org.xerial.snappy</groupId>
+            <artifactId>snappy-java</artifactId>
+            <version>1.1.8.4</version>
         </dependency>
         <dependency>
             <groupId>com.github.oncokb</groupId>
             <artifactId>oncokb-meta</artifactId>
-            <version>49fd530a58</version>
+            <version>ee9b767985</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
@@ -116,7 +121,7 @@
         <dependency>
             <groupId>com.github.oncokb</groupId>
             <artifactId>oncokb-java-api-client</artifactId>
-            <version>838a0a4b1a</version>
+            <version>8e06a548fb</version>
         </dependency>
         <dependency>
             <groupId>com.vdurmont</groupId>

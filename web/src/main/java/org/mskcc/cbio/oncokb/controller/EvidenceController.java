@@ -66,7 +66,7 @@ public class EvidenceController {
     synchronized ResponseEntity updateEvidence(@RequestBody Set<Evidence> evidences) throws IOException {
         Set<Evidence> updatedEvidenceSet = new HashSet<>();
         evidences.forEach(evidence -> {
-            Set<TumorType> cancerTypes = evidence.getRelevantCancerTypes().stream().map(tumorType -> StringUtils.isNullOrEmpty(tumorType.getCode()) ? TumorTypeUtils.getByMainType(tumorType.getMainType()) : TumorTypeUtils.getByCode(tumorType.getCode())).collect(Collectors.toSet());
+            Set<TumorType> cancerTypes = evidence.getRelevantCancerTypes().stream().map(tumorType -> StringUtils.isNullOrEmpty(tumorType.getCode()) ? ApplicationContextSingleton.getTumorTypeBo().getByMainType(tumorType.getMainType()) : ApplicationContextSingleton.getTumorTypeBo().getByCode(tumorType.getCode())).collect(Collectors.toSet());
             List<Evidence> persistenceEvidences = ApplicationContextSingleton.getEvidenceBo().findEvidenceByUUIDs(Collections.singletonList(evidence.getUuid()));
             persistenceEvidences.forEach(persistenceEvidence -> {
                 persistenceEvidence.setRelevantCancerTypes(cancerTypes);
@@ -242,9 +242,9 @@ public class EvidenceController {
             return new ArrayList<>();
         }
 
-        Set<TumorType> cancerTypes = queryEvidence.getCancerTypes().stream().map(tumorType -> StringUtils.isNullOrEmpty(tumorType.getCode()) ? TumorTypeUtils.getByMainType(tumorType.getMainType()) : TumorTypeUtils.getByCode(tumorType.getCode())).collect(Collectors.toSet());
-        Set<TumorType> excludedCancerTypes = queryEvidence.getExcludedCancerTypes().stream().map(tumorType -> StringUtils.isNullOrEmpty(tumorType.getCode()) ? TumorTypeUtils.getByMainType(tumorType.getMainType()) : TumorTypeUtils.getByCode(tumorType.getCode())).collect(Collectors.toSet());
-        Set<TumorType> relevantCancerTypes = queryEvidence.getRelevantCancerTypes().stream().map(tumorType -> StringUtils.isNullOrEmpty(tumorType.getCode()) ? TumorTypeUtils.getByMainType(tumorType.getMainType()) : TumorTypeUtils.getByCode(tumorType.getCode())).collect(Collectors.toSet());
+        Set<TumorType> cancerTypes = queryEvidence.getCancerTypes().stream().map(tumorType -> StringUtils.isNullOrEmpty(tumorType.getCode()) ? ApplicationContextSingleton.getTumorTypeBo().getByMainType(tumorType.getMainType()) : ApplicationContextSingleton.getTumorTypeBo().getByCode(tumorType.getCode())).collect(Collectors.toSet());
+        Set<TumorType> excludedCancerTypes = queryEvidence.getExcludedCancerTypes().stream().map(tumorType -> StringUtils.isNullOrEmpty(tumorType.getCode()) ? ApplicationContextSingleton.getTumorTypeBo().getByMainType(tumorType.getMainType()) : ApplicationContextSingleton.getTumorTypeBo().getByCode(tumorType.getCode())).collect(Collectors.toSet());
+        Set<TumorType> relevantCancerTypes = queryEvidence.getRelevantCancerTypes().stream().map(tumorType -> StringUtils.isNullOrEmpty(tumorType.getCode()) ? ApplicationContextSingleton.getTumorTypeBo().getByMainType(tumorType.getMainType()) : ApplicationContextSingleton.getTumorTypeBo().getByCode(tumorType.getCode())).collect(Collectors.toSet());
         Boolean isCancerEvidence = true;
         if (queryEvidence.getCancerTypes().isEmpty()) {
             isCancerEvidence = false;
@@ -287,8 +287,8 @@ public class EvidenceController {
                 evidences.removeAll(evidences);
 
                 Evidence tempEvidence = new Evidence(oldEvidence, null);
-                tempEvidence.setCancerTypes(queryEvidence.getCancerTypes().stream().map(tumorType -> StringUtils.isNullOrEmpty(tumorType.getCode()) ? TumorTypeUtils.getByMainType(tumorType.getMainType()) : TumorTypeUtils.getByCode(tumorType.getCode())).filter(tumorType -> tumorType != null).collect(Collectors.toSet()));
-                tempEvidence.setExcludedCancerTypes(queryEvidence.getExcludedCancerTypes().stream().map(tumorType -> StringUtils.isNullOrEmpty(tumorType.getCode()) ? TumorTypeUtils.getByMainType(tumorType.getMainType()) : TumorTypeUtils.getByCode(tumorType.getCode())).filter(tumorType -> tumorType != null).collect(Collectors.toSet()));
+                tempEvidence.setCancerTypes(queryEvidence.getCancerTypes().stream().map(tumorType -> StringUtils.isNullOrEmpty(tumorType.getCode()) ? ApplicationContextSingleton.getTumorTypeBo().getByMainType(tumorType.getMainType()) : ApplicationContextSingleton.getTumorTypeBo().getByCode(tumorType.getCode())).filter(tumorType -> tumorType != null).collect(Collectors.toSet()));
+                tempEvidence.setExcludedCancerTypes(queryEvidence.getExcludedCancerTypes().stream().map(tumorType -> StringUtils.isNullOrEmpty(tumorType.getCode()) ? ApplicationContextSingleton.getTumorTypeBo().getByMainType(tumorType.getMainType()) : ApplicationContextSingleton.getTumorTypeBo().getByCode(tumorType.getCode())).filter(tumorType -> tumorType != null).collect(Collectors.toSet()));
                 if (queryEvidence.getRelevantCancerTypes() != null) {
                     tempEvidence.setRelevantCancerTypes(queryEvidence.getRelevantCancerTypes());
                 } else if (LevelOfEvidence.LEVEL_Dx1.equals(tempEvidence.getLevelOfEvidence())) {

@@ -62,10 +62,11 @@ public final class AlterationUtils {
         return alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm(IN_FRAME_INSERTION)) || alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm(IN_FRAME_DELETION));
     }
 
-    public static Set<Alteration> findOverlapAlteration(Set<Alteration> alterations, Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end, String proteinChange) {
+    public static Set<Alteration> findOverlapAlteration(List<Alteration> alterations, Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end, String proteinChange) {
         Set<Alteration> overlaps = new HashSet<>();
         VariantConsequence inframeDeletionConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm(IN_FRAME_DELETION);
-        for (Alteration alteration : alterations) {
+        for (int i = 0; i < alterations.size(); i++) {
+            Alteration alteration = alterations.get(i);
             if (alteration.getGene().equals(gene) && alteration.getConsequence() != null && consequenceRelated(consequence, alteration.getConsequence()) && (referenceGenome == null || alteration.getReferenceGenomes().contains(referenceGenome))) {
                 //For alteration without specific position, do not do intersection
                 if (start <= AlterationPositionBoundary.START.getValue() || end >= AlterationPositionBoundary.END.getValue()) {
@@ -394,7 +395,7 @@ public final class AlterationUtils {
                                         var = ref = m.group(1);
                                         start = Integer.valueOf(m.group(2));
                                         end = start;
-                                        if (ref.equals("*")) {
+                                        if (ref != null && ref.equals("*")) {
                                             consequence = "stop_retained_variant";
                                         } else {
                                             consequence = "synonymous_variant";
@@ -489,7 +490,7 @@ public final class AlterationUtils {
         }
     }
 
-    public static Alteration getRevertFusions(ReferenceGenome referenceGenome, Alteration alteration, Set<Alteration> fullAlterations) {
+    public static Alteration getRevertFusions(ReferenceGenome referenceGenome, Alteration alteration, List<Alteration> fullAlterations) {
         if (fullAlterations == null) {
             return getRevertFusions(referenceGenome, alteration);
         } else {
@@ -626,26 +627,20 @@ public final class AlterationUtils {
         return oncogenic;
     }
 
-    public static Set<Alteration> getAllAlterations(ReferenceGenome referenceGenome, Gene gene) {
+    public static List<Alteration> getAllAlterations(ReferenceGenome referenceGenome, Gene gene) {
         Set<Alteration> alterations = new HashSet<>();
         if (gene == null) {
-            return new HashSet<>();
+            return new ArrayList<>();
         }
         if (!CacheUtils.containAlterations(gene.getEntrezGeneId())) {
             CacheUtils.setAlterations(gene);
         }
-        alterations = CacheUtils.getAlterations(gene.getEntrezGeneId());
-
-        if (referenceGenome == null) {
-            return alterations;
-        } else {
-            return alterations.stream().filter(alteration -> alteration.getReferenceGenomes().contains(referenceGenome)).collect(Collectors.toSet());
-        }
+        return CacheUtils.getAlterations(gene.getEntrezGeneId(), referenceGenome);
     }
 
-    public static Set<Alteration> getAllAlterations() {
+    public static List<Alteration> getAllAlterations() {
         Set<Gene> genes = CacheUtils.getAllGenes();
-        Set<Alteration> alterations = new HashSet<>();
+        List<Alteration> alterations = new ArrayList<>();
         for (Gene gene : genes) {
             alterations.addAll(getAllAlterations(null, gene));
         }
@@ -807,7 +802,7 @@ public final class AlterationUtils {
         return knownEffect;
     }
 
-    private static List<Alteration> getAlterations(Gene gene, ReferenceGenome referenceGenome, String alteration, AlterationType alterationType, String consequence, Integer proteinStart, Integer proteinEnd, Set<Alteration> fullAlterations) {
+    private static List<Alteration> getAlterations(Gene gene, ReferenceGenome referenceGenome, String alteration, AlterationType alterationType, String consequence, Integer proteinStart, Integer proteinEnd, List<Alteration> fullAlterations) {
         List<Alteration> alterations = new ArrayList<>();
         VariantConsequence variantConsequence = null;
 
@@ -872,11 +867,11 @@ public final class AlterationUtils {
         return getAlleleAlterationsSub(referenceGenome, alteration, getAllAlterations(referenceGenome, alteration.getGene()));
     }
 
-    public static List<Alteration> getAlleleAlterations(ReferenceGenome referenceGenome, Alteration alteration, Set<Alteration> fullAlterations) {
+    public static List<Alteration> getAlleleAlterations(ReferenceGenome referenceGenome, Alteration alteration, List<Alteration> fullAlterations) {
         return getAlleleAlterationsSub(referenceGenome, alteration, fullAlterations);
     }
 
-    public static List<Alteration> getAllMissenseAlleles(ReferenceGenome referenceGenome, int position, Set<Alteration> fullAlterations) {
+    public static List<Alteration> getAllMissenseAlleles(ReferenceGenome referenceGenome, int position, List<Alteration> fullAlterations) {
         return fullAlterations.stream().filter(alt -> alt.getReferenceGenomes().contains(referenceGenome) && alt.getConsequence() != null && alt.getConsequence().getTerm().equals(MISSENSE_VARIANT) && alt.getProteinStart() != null && alt.getProteinStart() == position).collect(Collectors.toList());
     }
 
@@ -941,7 +936,7 @@ public final class AlterationUtils {
     }
 
     // Only for missense alteration
-    public static List<Alteration> getPositionedAlterations(ReferenceGenome referenceGenome, Alteration alteration, Set<Alteration> fullAlterations) {
+    public static List<Alteration> getPositionedAlterations(ReferenceGenome referenceGenome, Alteration alteration, List<Alteration> fullAlterations) {
         if (alteration.getGene().getHugoSymbol().equals("ABL1") && alteration.getAlteration().equals("T315I")) {
             return new ArrayList<>();
         }
@@ -959,7 +954,7 @@ public final class AlterationUtils {
         return new ArrayList<>(new LinkedHashSet<>(alterations));
     }
 
-    private static List<Alteration> getAlleleAlterationsSub(ReferenceGenome referenceGenome, Alteration alteration, Set<Alteration> fullAlterations) {
+    private static List<Alteration> getAlleleAlterationsSub(ReferenceGenome referenceGenome, Alteration alteration, List<Alteration> fullAlterations) {
         boolean isPositionalVariant = AlterationUtils.isPositionedAlteration(alteration);
         if (alteration == null || alteration.getConsequence() == null ||
             !(isPositionalVariant || alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm(MISSENSE_VARIANT)))) {
@@ -1016,7 +1011,7 @@ public final class AlterationUtils {
         if (alteration != null && alteration.getConsequence() != null && alteration.getConsequence().getTerm().equals(MISSENSE_VARIANT)) {
             // check for positional variant when the consequence is forced to be missense variant
             boolean isMissensePositionalVariant = StringUtils.isEmpty(alteration.getVariantResidues()) && alteration.getProteinStart() != null && alteration.getProteinEnd() != null && alteration.getProteinStart().equals(alteration.getProteinEnd());
-            List<Alteration> alternativeAlleles = alterationBo.findRelevantOverlapAlterations(alteration.getGene(), referenceGenome, alteration.getConsequence(), alteration.getProteinStart(), alteration.getProteinEnd(), alteration.getAlteration(), new HashSet<>(relevantAlterations));
+            List<Alteration> alternativeAlleles = alterationBo.findRelevantOverlapAlterations(alteration.getGene(), referenceGenome, alteration.getConsequence(), alteration.getProteinStart(), alteration.getProteinEnd(), alteration.getAlteration(), relevantAlterations);
             for (Alteration allele : alternativeAlleles) {
                 // remove all alleles if the alteration variant residue is empty
                 if (isMissensePositionalVariant && !StringUtils.isEmpty(allele.getVariantResidues())) {
@@ -1080,7 +1075,7 @@ public final class AlterationUtils {
         return null;
     }
 
-    public static List<Alteration> lookupVariant(String query, Boolean exactMatch, Set<Alteration> alterations) {
+    public static List<Alteration> lookupVariant(String query, Boolean exactMatch, List<Alteration> alterations) {
         List<Alteration> alterationList = new ArrayList<>();
         // Only support columns(alteration/name) blur search.
         query = query.toLowerCase().trim();
@@ -1161,7 +1156,7 @@ public final class AlterationUtils {
         return getRelevantAlterations(referenceGenome, alteration, getAllAlterations(referenceGenome, gene));
     }
 
-    public static List<Alteration> getRelevantAlterations(ReferenceGenome referenceGenome, Alteration alteration, Set<Alteration> fullAlterations) {
+    public static List<Alteration> getRelevantAlterations(ReferenceGenome referenceGenome, Alteration alteration, List<Alteration> fullAlterations) {
         if (alteration == null || alteration.getGene() == null) {
             return new ArrayList<>();
         }
@@ -1209,12 +1204,12 @@ public final class AlterationUtils {
         return categoricalAlterations.contains(alteration.toLowerCase());
     }
 
-    public static List<Alteration> findOncogenicMutations(Set<Alteration> fullAlterations) {
-        return findAlterationsByRegex(InferredMutation.ONCOGENIC_MUTATIONS.getVariant() + ".*", fullAlterations);
+    public static List<Alteration> findOncogenicMutations(List<Alteration> fullAlterations) {
+        return findAlterationsByStartWith(InferredMutation.ONCOGENIC_MUTATIONS.getVariant(), fullAlterations);
     }
 
-    public static List<Alteration> findFusions(Set<Alteration> fullAlterations) {
-        return findAlterationsByRegex(StructuralAlteration.FUSIONS.getVariant() + ".*", fullAlterations);
+    public static List<Alteration> findFusions(List<Alteration> fullAlterations) {
+        return findAlterationsByStartWith(StructuralAlteration.FUSIONS.getVariant(), fullAlterations);
     }
 
     private static List<Alteration> findAlterationsByRegex(String regex, Set<Alteration> fullAlterations) {
@@ -1223,6 +1218,23 @@ public final class AlterationUtils {
         // Implement the data access logic
         for (Alteration alt : fullAlterations) {
             if (alt.getAlteration() != null && alt.getAlteration().matches(regex)) {
+                matchedAlterations.add(alt);
+            }
+        }
+        return matchedAlterations.stream().collect(Collectors.toList());
+    }
+
+    private static boolean startsWithIgnoreCase(String url, String param) {
+        return url.regionMatches(true, 0, param, 0, param.length());
+    }
+
+    private static List<Alteration> findAlterationsByStartWith(String startWith, List<Alteration> fullAlterations) {
+        Comparator<Alteration> byAlt = Comparator.comparing(Alteration::getAlteration).reversed();
+        TreeSet<Alteration> matchedAlterations = new TreeSet<>(byAlt);
+
+        for (int i = 0; i < fullAlterations.size(); i++) {
+            Alteration alt = fullAlterations.get(i);
+            if (alt.getAlteration() != null && startsWithIgnoreCase(alt.getAlteration(), startWith)) {
                 matchedAlterations.add(alt);
             }
         }

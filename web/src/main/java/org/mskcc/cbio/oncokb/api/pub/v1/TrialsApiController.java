@@ -20,6 +20,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.mskcc.cbio.oncokb.config.annotation.PremiumPublicApi;
+import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -31,7 +32,6 @@ import org.mskcc.cbio.oncokb.model.SpecialTumorType;
 import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.*;
 import org.mskcc.cbio.oncokb.model.TumorType;
 import org.mskcc.cbio.oncokb.util.PropertiesUtils;
-import org.mskcc.cbio.oncokb.util.TumorTypeUtils;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -128,7 +128,7 @@ public class TrialsApiController {
                 Set<String> nctIDSet = new HashSet<>();
                 List<Trial> addTrials = new ArrayList<>();
                 List<Trial> trials = new ArrayList<>();
-                SpecialTumorType specialTumorType = TumorTypeUtils.getSpecialTumorTypeByName(cancerType);
+                SpecialTumorType specialTumorType = ApplicationContextSingleton.getTumorTypeBo().getSpecialTumorTypeByName(cancerType);
                 if (specialTumorType != null) {
                     trials = getTrialsForSpecialCancerType(jsonObject, specialTumorType);
                 } else {
@@ -187,7 +187,7 @@ public class TrialsApiController {
         List<Trial> trials = new ArrayList<>();
         if(specialTumorType == null) return trials;
 
-        TumorType matchedSpecialTumorType = TumorTypeUtils.getBySpecialTumor(specialTumorType);
+        TumorType matchedSpecialTumorType = ApplicationContextSingleton.getTumorTypeBo().getBySpecialTumor(specialTumorType);
         if (matchedSpecialTumorType == null) return trials;
 
         switch (specialTumorType) {
@@ -195,7 +195,7 @@ public class TrialsApiController {
                 return new ArrayList<>(getAllTrials(tumors));
             case ALL_SOLID_TUMORS:
             case ALL_LIQUID_TUMORS:
-                return TumorTypeUtils.getAllTumorTypes().stream()
+                return ApplicationContextSingleton.getTumorTypeBo().getAllTumorTypes().stream()
                     .filter(tumorType -> tumorType.getTumorForm() != null && tumorType.getTumorForm().equals(matchedSpecialTumorType.getTumorForm()))
                     .map(tumorType -> getTrialsByCancerType(tumors, StringUtils.isNotEmpty(tumorType.getSubtype()) ? tumorType.getSubtype() : tumorType.getMainType()))
                     .flatMap(Collection::stream).collect(Collectors.toList());
@@ -208,7 +208,7 @@ public class TrialsApiController {
         List<Trial> trials = new ArrayList<>();
 
         Set<String> tumorCodesByMainType = new HashSet<>();
-        List<TumorType> allOncoTreeSubtypes = TumorTypeUtils.getAllSubtypes();
+        List<TumorType> allOncoTreeSubtypes = ApplicationContextSingleton.getTumorTypeBo().getAllSubtypes();
         for (TumorType oncoTreeType : allOncoTreeSubtypes) {
             if (oncoTreeType.getMainType() != null && oncoTreeType.getMainType() != null && cancerType.equalsIgnoreCase(oncoTreeType.getMainType())) {
                 tumorCodesByMainType.add(oncoTreeType.getCode());
@@ -220,7 +220,7 @@ public class TrialsApiController {
                     trials.addAll(getTumor(tumors, code).getTrials());
             }
         } else {
-            TumorType matchedSubtype = TumorTypeUtils.getBySubtype(cancerType);
+            TumorType matchedSubtype = ApplicationContextSingleton.getTumorTypeBo().getBySubtype(cancerType);
             if (matchedSubtype != null) {
                 String codeByName = matchedSubtype.getCode();
                 if (tumors.containsKey(codeByName))
