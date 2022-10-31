@@ -32,49 +32,8 @@
 		<servlet-name>SpringDispatcher</servlet-name>
 		<url-pattern>/</url-pattern>
         <url-pattern>/api/v1/*</url-pattern>
-        <url-pattern>/api/private/*</url-pattern>
-        <url-pattern>/legacy-api</url-pattern>
 	</servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>legacyApi</servlet-name>
-        <url-pattern>/*</url-pattern>
-    </servlet-mapping>
 
-    <servlet>
-        <servlet-name>SiteMapIndex</servlet-name>
-        <jsp-file>/sitemap_index.jsp</jsp-file>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>SiteMapIndex</servlet-name>
-        <url-pattern>/sitemap_index.xml</url-pattern>
-    </servlet-mapping>
-
-    <servlet>
-        <servlet-name>SiteMapGeneral</servlet-name>
-        <jsp-file>/sitemap_general.jsp</jsp-file>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>SiteMapGeneral</servlet-name>
-        <url-pattern>/sitemap_general.xml</url-pattern>
-    </servlet-mapping>
-
-    <servlet>
-        <servlet-name>SiteMapGene</servlet-name>
-        <jsp-file>/sitemap_gene.jsp</jsp-file>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>SiteMapGene</servlet-name>
-        <url-pattern>/sitemap_gene.xml</url-pattern>
-    </servlet-mapping>
-
-    <servlet>
-        <servlet-name>RobotsIndex</servlet-name>
-        <jsp-file>/robots.jsp</jsp-file>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>RobotsIndex</servlet-name>
-        <url-pattern>/robots.txt</url-pattern>
-    </servlet-mapping>
     <!-- The cors needs to be enabled here, we do need the CORS support in the internal instances -->
     <session-config>
         <session-timeout>1</session-timeout>

@@ -39,9 +39,8 @@ import java.util.Optional;
 import static org.mskcc.cbio.oncokb.Constants.*;
 import static org.mskcc.cbio.oncokb.Constants.PUBLIC_API_VERSION;
 
-@ComponentScan(basePackages = "org.mskcc.cbio.oncokb.controller")
 @Configuration
-@ComponentScan(basePackages = {"org.mskcc.cbio.oncokb.api.pub.v1", "org.mskcc.cbio.oncokb.api.pvt", "org.mskcc.cbio.oncokb.controller", "org.mskcc.cbio.oncokb.cache", "org.mskcc.cbio.oncokb.bo"})
+@ComponentScan(basePackages = {"org.mskcc.cbio.oncokb.api.pub.v1", "org.mskcc.cbio.oncokb.cache", "org.mskcc.cbio.oncokb.bo"})
 @EnableWebMvc
 @EnableSwagger2
 public class MvcConfiguration extends WebMvcConfigurerAdapter {
@@ -75,13 +74,12 @@ public class MvcConfiguration extends WebMvcConfigurerAdapter {
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
 
+        registry.addViewController("/").setViewName("redirect:/api/v1/swagger-ui.html");
+
         registry.addViewController("/api").setViewName("redirect:/api/v1/swagger-ui.html");
         registry.addViewController("/api/").setViewName("redirect:/api/v1/swagger-ui.html");
         registry.addViewController("/api/v1/").setViewName("redirect:/api/v1/swagger-ui.html");
         registry.addViewController("/api/v1").setViewName("redirect:/api/v1/swagger-ui.html");
-
-        registry.addViewController("/api/private").setViewName("redirect:/api/private/swagger-ui.html");
-        registry.addViewController("/api/private/").setViewName("redirect:/api/private/swagger-ui.html");
     }
 
     @Bean
@@ -155,30 +153,6 @@ public class MvcConfiguration extends WebMvcConfigurerAdapter {
             .apiInfo(getDefaultApiInfo("OncoKB APIs", getSwaggerDescription(), PUBLIC_API_VERSION))
             .useDefaultResponseMessages(false);
         updateDocketHost(docket, servletContext, "/api/v1");
-        return docket;
-    }
-
-    @Bean
-    public Docket premiumPublicApi(ServletContext servletContext) {
-        Docket docket = new Docket(DocumentationType.SWAGGER_2)
-            .groupName("Private APIs")
-            .select()
-            .apis(RequestHandlerSelectors.withMethodAnnotation(PremiumPublicApi.class))
-            .build()
-            .apiInfo(getDefaultApiInfo("OncoKB Private APIs", "These endpoints are for private use only.", PUBLIC_API_VERSION))
-            .useDefaultResponseMessages(false);
-        updateDocketHost(docket, servletContext, "/api/v1");
-        return docket;
-    }
-
-    @Bean
-    public Docket privateApi(ServletContext servletContext) {
-        Docket docket = new Docket(DocumentationType.SWAGGER_2)
-            .select()
-            .apis(RequestHandlerSelectors.basePackage("org.mskcc.cbio.oncokb.api.pvt"))
-            .build()
-            .apiInfo(getDefaultApiInfo("OncoKB APIs", getSwaggerDescription(), PRIVATE_API_VERSION));
-        updateDocketHost(docket, servletContext, "/api/private");
         return docket;
     }
 
