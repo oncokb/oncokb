@@ -29,13 +29,13 @@ public class FindRelevantAlterationsIndependentTest extends TestCase {
 
         LinkedHashSet<Alteration> relevantAlterations =
             ApplicationContextSingleton.getAlterationBo()
-                .findRelevantAlterations(ReferenceGenome.GRCh37, query, Collections.singleton(alt1), true);
+                .findRelevantAlterations(ReferenceGenome.GRCh37, query, Collections.singletonList(alt1), true);
 
         assertEquals(1, relevantAlterations.size());
 
         relevantAlterations =
             ApplicationContextSingleton.getAlterationBo()
-                .findRelevantAlterations(ReferenceGenome.GRCh38, query, Collections.singleton(alt1), true);
+                .findRelevantAlterations(ReferenceGenome.GRCh38, query, Collections.singletonList(alt1), true);
 
         assertEquals(0, relevantAlterations.size());
 
@@ -49,7 +49,7 @@ public class FindRelevantAlterationsIndependentTest extends TestCase {
         bothRG.setReferenceGenomes(referenceGenomes);
         AlterationUtils.annotateAlteration(bothRG, bothRG.getAlteration());
 
-        Set<Alteration> allAlterations = new HashSet<>();
+        List<Alteration> allAlterations = new ArrayList<>();
         allAlterations.add(alt1);
         allAlterations.add(bothRG);
 
@@ -82,7 +82,7 @@ public class FindRelevantAlterationsIndependentTest extends TestCase {
 
         LinkedHashSet<Alteration> relevantAlterations =
             ApplicationContextSingleton.getAlterationBo()
-                .findRelevantAlterations(ReferenceGenome.GRCh37, query, Collections.singleton(alt1), true);
+                .findRelevantAlterations(ReferenceGenome.GRCh37, query, Collections.singletonList(alt1), true);
 
         assertEquals(1, relevantAlterations.size());
 
@@ -96,7 +96,7 @@ public class FindRelevantAlterationsIndependentTest extends TestCase {
 
         relevantAlterations =
             ApplicationContextSingleton.getAlterationBo()
-                .findRelevantAlterations(ReferenceGenome.GRCh37, query, Collections.singleton(alt1), true);
+                .findRelevantAlterations(ReferenceGenome.GRCh37, query, Collections.singletonList(alt1), true);
 
         assertEquals(1, relevantAlterations.size());
 
@@ -110,7 +110,7 @@ public class FindRelevantAlterationsIndependentTest extends TestCase {
 
         relevantAlterations =
             ApplicationContextSingleton.getAlterationBo()
-                .findRelevantAlterations(ReferenceGenome.GRCh37, query, Collections.singleton(alt1), true);
+                .findRelevantAlterations(ReferenceGenome.GRCh37, query, Collections.singletonList(alt1), true);
 
         assertEquals(0, relevantAlterations.size());
 
@@ -139,7 +139,7 @@ public class FindRelevantAlterationsIndependentTest extends TestCase {
 
         LinkedHashSet<Alteration> relevantAlterations =
             ApplicationContextSingleton.getAlterationBo()
-                .findRelevantAlterations(ReferenceGenome.GRCh37, query, Collections.singleton(alt1), true);
+                .findRelevantAlterations(ReferenceGenome.GRCh37, query, Collections.singletonList(alt1), true);
 
         assertEquals(1, relevantAlterations.size());
         assertTrue(relevantAlterations.iterator().next().getAlteration().equals(inframeDelAltTrailing));
@@ -160,7 +160,7 @@ public class FindRelevantAlterationsIndependentTest extends TestCase {
 
         relevantAlterations =
             ApplicationContextSingleton.getAlterationBo()
-                .findRelevantAlterations(ReferenceGenome.GRCh37, query, Collections.singleton(alt1), true);
+                .findRelevantAlterations(ReferenceGenome.GRCh37, query, Collections.singletonList(alt1), true);
 
         assertEquals(1, relevantAlterations.size());
         assertTrue(relevantAlterations.iterator().next().getAlteration().equals(inframeDelAlt));

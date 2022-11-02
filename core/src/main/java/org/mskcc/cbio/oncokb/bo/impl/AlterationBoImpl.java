@@ -30,7 +30,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         return alterations;
     }
 
-    public Alteration findExactlyMatchedAlteration(ReferenceGenome referenceGenome, Alteration alteration, Set<Alteration> fullAlterations) {
+    public Alteration findExactlyMatchedAlteration(ReferenceGenome referenceGenome, Alteration alteration, List<Alteration> fullAlterations) {
         Alteration matchedByAlteration = findAlteration(referenceGenome, alteration.getAlteration(), fullAlterations);
         if (matchedByAlteration != null) {
             if (matchedByAlteration.getConsequence() == null
@@ -76,12 +76,13 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         return null;
     }
 
-    private Alteration findAlteration(ReferenceGenome referenceGenome, String alteration, Set<Alteration> fullAlterations) {
+    private Alteration findAlteration(ReferenceGenome referenceGenome, String alteration, List<Alteration> fullAlterations) {
         if (alteration == null) {
             return null;
         }
         // Implement the data access logic
-        for (Alteration alt : fullAlterations) {
+        for (int i = 0; i < fullAlterations.size(); i++) {
+            Alteration alt = fullAlterations.get(i);
             if (alt.getAlteration() != null && alt.getAlteration().equalsIgnoreCase(alteration)) {
                 if (referenceGenome == null) {
                     return alt;
@@ -90,7 +91,8 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
                 }
             }
         }
-        for (Alteration alt : fullAlterations) {
+        for (int i = 0; i < fullAlterations.size(); i++) {
+            Alteration alt = fullAlterations.get(i);
             if (alt.getAlteration() != null && alt.getName().equalsIgnoreCase(alteration)) {
                 if (referenceGenome == null) {
                     return alt;
@@ -106,7 +108,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         return null;
     }
 
-    private Alteration findAlteration(ReferenceGenome referenceGenome, String alteration, String name, Set<Alteration> fullAlterations) {
+    private Alteration findAlteration(ReferenceGenome referenceGenome, String alteration, String name, List<Alteration> fullAlterations) {
         if (alteration == null) {
             return null;
         }
@@ -129,12 +131,12 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
 
     @Override
     public Alteration findAlteration(Gene gene, AlterationType alterationType, ReferenceGenome referenceGenome, String alteration) {
-        return findAlteration(referenceGenome, alteration, CacheUtils.getAlterations(gene.getEntrezGeneId()));
+        return findAlteration(referenceGenome, alteration, CacheUtils.getAlterations(gene.getEntrezGeneId(), referenceGenome));
     }
 
     @Override
     public Alteration findAlteration(Gene gene, AlterationType alterationType, ReferenceGenome referenceGenome, String alteration, String name) {
-        return findAlteration(referenceGenome, alteration, name, CacheUtils.getAlterations(gene.getEntrezGeneId()));
+        return findAlteration(referenceGenome, alteration, name, CacheUtils.getAlterations(gene.getEntrezGeneId(), referenceGenome));
     }
 
     @Override
@@ -143,7 +145,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
     }
 
     @Override
-    public List<Alteration> findRelevantOverlapAlterations(Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end, String proteinChange, Set<Alteration> alterations) {
+    public List<Alteration> findRelevantOverlapAlterations(Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end, String proteinChange, List<Alteration> alterations) {
         Set<Alteration> result = new HashSet<>();
 
         // Don't search for NA cases
@@ -165,11 +167,12 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
     }
 
     @Override
-    public List<Alteration> findMutationsByConsequenceAndPosition(Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end, String referenceResidue, Collection<Alteration> alterations, Boolean onSamePosition) {
+    public List<Alteration> findMutationsByConsequenceAndPosition(Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end, String referenceResidue, List<Alteration> alterations, Boolean onSamePosition) {
         Set<Alteration> result = new HashSet<>();
 
         if (alterations != null && alterations.size() > 0) {
-            for (Alteration alteration : alterations) {
+            for (int i = 0; i < alterations.size(); i++) {
+                Alteration alteration = alterations.get(i);
                 if (alteration.getGene().equals(gene) && alteration.getConsequence() != null
                     && consequenceRelated(alteration.getConsequence(), consequence)
                     && alteration.getProteinStart() != null
@@ -213,7 +216,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
      * @return
      */
     @Override
-    public LinkedHashSet<Alteration> findRelevantAlterations(ReferenceGenome referenceGenome, Alteration alteration, Set<Alteration> fullAlterations, boolean includeAlternativeAllele) {
+    public LinkedHashSet<Alteration> findRelevantAlterations(ReferenceGenome referenceGenome, Alteration alteration, List<Alteration> fullAlterations, boolean includeAlternativeAllele) {
         if (fullAlterations == null) {
             return new LinkedHashSet<>();
         }
@@ -241,14 +244,14 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         return EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Collections.singleton(EvidenceType.MUTATION_EFFECT)).stream().filter(evidence -> !StringUtils.isNullOrEmpty(evidence.getKnownEffect()) && mutationEffect.equals(evidence.getKnownEffect().toLowerCase().replace("likely", "").trim())).map(evidence -> evidence.getAlterations()).flatMap(Collection::stream).filter(alt -> alt.getReferenceGenomes().contains(referenceGenome)).collect(Collectors.toSet());
     }
 
-    private Set<Alteration> getRelevantAlterationsForTruncatingMutations(ReferenceGenome referenceGenome, Set<Alteration> fullAlterations) {
+    private Set<Alteration> getRelevantAlterationsForTruncatingMutations(ReferenceGenome referenceGenome, List<Alteration> fullAlterations) {
         return fullAlterations.stream().filter(alt -> {
             VariantConsequence variantConsequence = alt.getConsequence();
             return variantConsequence != null && variantConsequence.getIsGenerallyTruncating() && alt.getReferenceGenomes().contains(referenceGenome);
         }).collect(Collectors.toSet());
     }
 
-    private Set<Alteration> getRelevantAlterationsForFusions(ReferenceGenome referenceGenome, Set<Alteration> fullAlterations) {
+    private Set<Alteration> getRelevantAlterationsForFusions(ReferenceGenome referenceGenome, List<Alteration> fullAlterations) {
         return fullAlterations.stream().filter(alt -> alt.getAlteration().toLowerCase().contains("fusion") && alt.getReferenceGenomes().contains(referenceGenome)).collect(Collectors.toSet());
     }
 
@@ -259,7 +262,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         }).map(evidence -> evidence.getAlterations()).flatMap(Collection::stream).filter(alt -> alt.getReferenceGenomes().contains(referenceGenome)).collect(Collectors.toSet());
     }
 
-    public LinkedHashSet<Alteration> findRelevantAlterationsForCategoricalAlt(ReferenceGenome referenceGenome, Alteration alteration, Set<Alteration> fullAlterations) {
+    public LinkedHashSet<Alteration> findRelevantAlterationsForCategoricalAlt(ReferenceGenome referenceGenome, Alteration alteration, List<Alteration> fullAlterations) {
         String altName = removeExclusionCriteria(alteration.getAlteration()).toLowerCase();
         LinkedHashSet<Alteration> relevant = new LinkedHashSet();
 
@@ -301,7 +304,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
      * @param fullAlterations
      * @return
      */
-    private LinkedHashSet<Alteration> findRelevantAlterationsSub(ReferenceGenome referenceGenome, Alteration alteration, Set<Alteration> fullAlterations, boolean includeAlternativeAllele) {
+    private LinkedHashSet<Alteration> findRelevantAlterationsSub(ReferenceGenome referenceGenome, Alteration alteration, List<Alteration> fullAlterations, boolean includeAlternativeAllele) {
         LinkedHashSet<Alteration> alterations = new LinkedHashSet<>();
         Boolean addTruncatingMutations = false;
         Boolean addDeletion = false;

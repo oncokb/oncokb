@@ -2,8 +2,7 @@ package org.mskcc.cbio.oncokb.apiModels;
 
 import io.swagger.annotations.ApiModel;
 import org.mskcc.cbio.oncokb.model.TumorForm;
-import org.mskcc.cbio.oncokb.util.MainUtils;
-import org.mskcc.cbio.oncokb.util.TumorTypeUtils;
+import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -128,6 +127,7 @@ public class TumorType implements Serializable {
 
     // do not include parent and child
     public TumorType(org.mskcc.cbio.oncokb.model.TumorType tumorType) {
+        this.setId(tumorType.getId());
         this.setName(tumorType.getSubtype());
         this.setTissue(tumorType.getTissue());
         this.setCode(tumorType.getCode());
@@ -135,7 +135,7 @@ public class TumorType implements Serializable {
         if (tumorType.getMainType() != null) {
             MainType mainType = new MainType();
             mainType.setName(tumorType.getMainType());
-            org.mskcc.cbio.oncokb.model.TumorType mainTumorType = TumorTypeUtils.getByMainType(tumorType.getMainType());
+            org.mskcc.cbio.oncokb.model.TumorType mainTumorType = ApplicationContextSingleton.getTumorTypeBo().getByMainType(tumorType.getMainType());
             mainType.setTumorForm(mainTumorType.getTumorForm());
             this.setMainType(mainType);
         }
@@ -152,15 +152,22 @@ public class TumorType implements Serializable {
         if (this == o) return true;
         if (!(o instanceof TumorType)) return false;
         TumorType tumorType = (TumorType) o;
-        return Objects.equals(getId(), tumorType.getId()) &&
-            Objects.equals(getCode(), tumorType.getCode()) &&
-            Objects.equals(getName(), tumorType.getName()) &&
-            Objects.equals(getMainType(), tumorType.getMainType());
+        if (getId() != null && tumorType.getId() != null) {
+            return Objects.equals(getId(), tumorType.getId());
+        } else {
+            return Objects.equals(getCode(), tumorType.getCode()) &&
+                Objects.equals(getName(), tumorType.getName()) &&
+                Objects.equals(getMainType(), tumorType.getMainType());
+        }
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getCode(), getName(), getMainType());
+        if (getId() != null) {
+            return getId();
+        } else {
+            return Objects.hash(getCode(), getName(), getMainType());
+        }
     }
 
     @Override

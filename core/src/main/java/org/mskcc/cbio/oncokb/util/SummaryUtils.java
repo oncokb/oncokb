@@ -178,8 +178,8 @@ public class SummaryUtils {
             List<Evidence> evidences = EvidenceUtils.getEvidence(
                 Collections.singletonList(alteration),
                 Collections.singleton(evidenceType),
-                TumorTypeUtils.getBySpecialTumor(specialTumorType),
-                Collections.singletonList(TumorTypeUtils.getBySpecialTumor(specialTumorType)), null);
+                ApplicationContextSingleton.getTumorTypeBo().getBySpecialTumor(specialTumorType),
+                Collections.singletonList(ApplicationContextSingleton.getTumorTypeBo().getBySpecialTumor(specialTumorType)), null);
             if (evidences.size() > 0) {
                 return getTumorTypeSummaryFromEvidences(evidences);
             }

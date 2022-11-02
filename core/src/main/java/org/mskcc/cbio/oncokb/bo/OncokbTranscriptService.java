@@ -13,10 +13,7 @@ import org.oncokb.oncokb_transcript.Configuration;
 import org.oncokb.oncokb_transcript.auth.HttpBearerAuth;
 import org.oncokb.oncokb_transcript.client.*;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -31,6 +28,9 @@ public class OncokbTranscriptService {
     private final String SEQUENCE_TYPE = "PROTEIN";
     private Boolean enabled = false;
 
+    private static List<org.oncokb.oncokb_transcript.client.Gene> transcriptGenes = new ArrayList<>();
+    private static Map<String, org.oncokb.oncokb_transcript.client.Gene> transcriptGeneByKeywords = new HashMap<>();
+
     public OncokbTranscriptService() {
         this.client = Configuration.getDefaultApiClient();
         this.client.setConnectTimeout(TIMEOUT);
@@ -40,8 +40,9 @@ public class OncokbTranscriptService {
         String oncokbTranscriptToken = PropertiesUtils.getProperties("oncokb_transcript.token");
         HttpBearerAuth Authorization = (HttpBearerAuth) this.client.getAuthentication("Authorization");
         Authorization.setBearerToken(oncokbTranscriptToken);
-        if(StringUtils.isNotEmpty(oncokbTranscriptToken)) {
+        if (StringUtils.isNotEmpty(oncokbTranscriptToken)) {
             enabled = true;
+            cacheAllGenes();
         }
     }
 
@@ -82,7 +83,7 @@ public class OncokbTranscriptService {
         return transcriptUpdateValidationVM;
     }
 
-    private TranscriptComparisonResultVM compareTranscript(TranscriptPairVM.ReferenceGenomeEnum referenceGenome, Gene gene, String ensemblTranscriptId)  throws ApiException{
+    private TranscriptComparisonResultVM compareTranscript(TranscriptPairVM.ReferenceGenomeEnum referenceGenome, Gene gene, String ensemblTranscriptId) throws ApiException {
         SequenceControllerApi sequenceControllerApi = new SequenceControllerApi();
         TranscriptControllerApi controllerApi = new TranscriptControllerApi();
 
@@ -133,7 +134,7 @@ public class OncokbTranscriptService {
     }
 
     public List<Drug> findDrugs(String query) throws ApiException {
-        if(!this.enabled) {
+        if (!this.enabled) {
             return new ArrayList<>();
         }
         DrugControllerApi drugControllerApi = new DrugControllerApi();
@@ -141,32 +142,47 @@ public class OncokbTranscriptService {
     }
 
     public Drug findDrugByNcitCode(String code) throws ApiException {
-        if(!this.enabled) {
+        if (!this.enabled) {
             return null;
         }
         DrugControllerApi drugControllerApi = new DrugControllerApi();
         return drugControllerApi.findDrugByCodeUsingGET(code);
     }
 
-    public Gene findGeneBySymbol(String symbol) throws ApiException {
+    public void cacheAllGenes() {
+        GeneResourceApi geneResourceApi = new GeneResourceApi();
+        try {
+            transcriptGenes = geneResourceApi.getAllGenesUsingGET();
+            transcriptGenes.forEach(gene -> {
+                transcriptGeneByKeywords.put(gene.getHugoSymbol().toLowerCase(), gene);
+                transcriptGeneByKeywords.put(gene.getEntrezGeneId().toString(), gene);
+                gene.getGeneAliases().forEach(ea -> {
+                    transcriptGeneByKeywords.put(ea.getName().toLowerCase(), gene);
+                });
+            });
+        } catch (ApiException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public org.oncokb.oncokb_transcript.client.Gene findTranscriptGeneBySymbol(String symbol) {
+        return transcriptGeneByKeywords.get(symbol.toLowerCase());
+    }
+
+    public Gene findGeneBySymbol(String symbol) {
         Gene gene = GeneUtils.getGene(symbol);
         if (gene != null) {
             return gene;
         }
-        if(!this.enabled) {
+        if (!this.enabled) {
             return null;
         }
-        GeneControllerApi geneControllerApi = new GeneControllerApi();
-        org.oncokb.oncokb_transcript.client.Gene transcriptGene = geneControllerApi.findGeneBySymbolUsingGET(symbol);
-        if (transcriptGene != null) {
-            return transcriptGeneMap(transcriptGene);
-        } else {
-            return null;
-        }
+        org.oncokb.oncokb_transcript.client.Gene transcriptGene = findTranscriptGeneBySymbol(symbol);
+        return transcriptGene == null ? null : transcriptGeneMap(transcriptGene);
     }
 
     public List<TranscriptDTO> findEnsemblTranscriptsByIds(List<String> ensemblTranscriptIds, ReferenceGenome referenceGenome) throws ApiException {
-        if(!this.enabled) {
+        if (!this.enabled) {
             return new ArrayList<>();
         }
         TranscriptControllerApi transcriptControllerApi = new TranscriptControllerApi();
@@ -185,17 +201,21 @@ public class OncokbTranscriptService {
             }
         }
         if (this.enabled && unknownGenes.size() > 0) {
-            this.findTranscriptGenesBySymbols(unknownGenes).stream().filter(gene -> gene != null).forEach(gene -> genes.add(transcriptGeneMap(gene)));
+            unknownGenes.forEach(ug -> {
+                Gene gene = this.findGeneBySymbol(ug);
+                if (gene != null) {
+                    genes.add(gene);
+                }
+            });
         }
         return genes;
     }
 
     public Set<org.oncokb.oncokb_transcript.client.Gene> findTranscriptGenesBySymbols(List<String> symbols) throws ApiException {
-        if(!this.enabled) {
+        if (!this.enabled) {
             return new HashSet<>();
         }
-        GeneControllerApi geneControllerApi = new GeneControllerApi();
-        return geneControllerApi.findGenesBySymbolsUsingPOST(symbols);
+        return symbols.stream().map(symbol -> findTranscriptGeneBySymbol(symbol)).filter(g -> g != null).collect(Collectors.toSet());
     }
 
     private Gene transcriptGeneMap(org.oncokb.oncokb_transcript.client.Gene transcriptGene) {

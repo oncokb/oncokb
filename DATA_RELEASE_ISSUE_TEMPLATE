@@ -10,6 +10,9 @@ Prepare for data v*.* release
 - [ ] Update public site
     - [ ] Update database
     - [ ] Update website using latest image
+- [ ] Update EU public site
+    - [ ] Update database
+    - [ ] Update website using latest image
 - [ ] Update demo site
     - [ ] Update database
     - [ ] Update website using latest image

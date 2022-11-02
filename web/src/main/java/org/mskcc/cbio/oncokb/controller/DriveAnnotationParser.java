@@ -429,14 +429,14 @@ public class DriveAnnotationParser {
             String code = (subTT.has("code") && !subTT.getString("code").equals("")) ? subTT.getString("code") : null;
             String mainType = subTT.has("mainType") ? subTT.getString("mainType") : null;
             if (code != null) {
-                TumorType matchedTumorType = TumorTypeUtils.getByCode(code);
+                TumorType matchedTumorType = ApplicationContextSingleton.getTumorTypeBo().getByCode(code);
                 if (matchedTumorType == null) {
                     throw new Exception("The tumor type code does not exist: " + code);
                 } else {
                     tumorTypes.add(matchedTumorType);
                 }
             } else if(mainType != null){
-                TumorType matchedTumorType = TumorTypeUtils.getByMainType(mainType);
+                TumorType matchedTumorType = ApplicationContextSingleton.getTumorTypeBo().getByMainType(mainType);
                 if (matchedTumorType == null) {
                     throw new Exception("The tumor main type does not exist: " + mainType);
                 } else {

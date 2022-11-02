@@ -51,7 +51,7 @@ public class CacheController {
             result.put("geneEvidences", geneEvidences);
             result.put("gene", CacheUtils.getGeneByEntrezId(gene.getEntrezGeneId()));
             result.put("vus", CacheUtils.getVUS(gene.getEntrezGeneId()));
-            result.put("cachedGeneAlts", CacheUtils.getAlterations(gene.getEntrezGeneId()));
+            result.put("cachedGeneAlts", CacheUtils.getAlterations(gene.getEntrezGeneId(), null));
         }
 
         return result;
