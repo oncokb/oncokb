@@ -6,10 +6,10 @@
     <parent>
         <groupId>org.mskcc.cbio.oncokb</groupId>
         <artifactId>master</artifactId>
-        <version>3.11.0</version>
+        <version>3.11.1</version>
     </parent>
     <artifactId>web</artifactId>
-    <version>3.11.0</version>
+    <version>3.11.1</version>
     <packaging>war</packaging>
 
     <name>OncoKB Web</name>
@@ -92,25 +92,44 @@
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>com.spotify</groupId>
-                        <artifactId>dockerfile-maven-plugin</artifactId>
-                        <version>1.4.8</version>
+                        <groupId>com.google.cloud.tools</groupId>
+                        <artifactId>jib-maven-plugin</artifactId>
+                        <version>3.3.0</version>
+                        <configuration>
+                            <from>
+                                <image>openjdk:8-jre</image>
+                                <platforms>
+                                    <platform>
+                                        <architecture>amd64</architecture>
+                                        <os>linux</os>
+                                    </platform>
+                                    <platform>
+                                        <architecture>arm64</architecture>
+                                        <os>linux</os>
+                                    </platform>
+                                </platforms>
+                            </from>
+                            <to>
+                                <image>oncokb/oncokb:0.0.1-snapshot</image>
+                            </to>
+                            <extraDirectories>
+                                <paths>
+                                    <path>target/dependency</path>
+                                    <path>
+                                        <from>target</from>
+                                        <includes>*.war</includes>
+                                    </path>
+                                </paths>
+                            </extraDirectories>
+                        </configuration>
                         <executions>
                             <execution>
-                                <id>default</id>
+                                <phase>package</phase>
                                 <goals>
                                     <goal>build</goal>
-                                    <goal>push</goal>
                                 </goals>
                             </execution>
                         </executions>
-                        <configuration>
-                            <repository>oncokb/oncokb</repository>
-                            <tag>${project.version}</tag>
-                            <buildArgs>
-                                <JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
-                            </buildArgs>
-                        </configuration>
                     </plugin>
                 </plugins>
             </build>
@@ -354,6 +373,13 @@
             <version>2.3</version>
             <scope>compile</scope>
         </dependency>
+
+        <dependency>
+            <groupId>com.google.cloud.tools</groupId>
+            <artifactId>jib-maven-plugin</artifactId>
+            <version>3.3.0</version>
+            <type>maven-plugin</type>
+        </dependency>
     </dependencies>
 
     <repositories>
@@ -370,7 +396,7 @@
     </repositories>
 
     <build>
-        <finalName>oncokb</finalName>
+        <finalName>app</finalName>
         <plugins>
             <plugin>
                 <artifactId>maven-clean-plugin</artifactId>
