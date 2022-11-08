@@ -34,15 +34,15 @@ jobs:
         run: |
           mvn --batch-mode versions:set -DnewVersion=${TAG_NAME:1}-no-frontend -DgenerateBackupPoms=false
 
-      - name: Login to DockerHub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Build the docker image and push
+      - name: Package application with Jib
         env:
+          DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}
+          DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
           TAG_NAME: ${{ github.event.release.tag_name }}
+          REPOSITORY: ${{ github.repository }}
         run: |
-          mvn -ntp package -DskipTests -P production
-          docker push oncokb/oncokb:${TAG_NAME:1}-no-frontend
+          mvn -ntp package -P production \
+          -DskipTests \
+          -Djib.to.image="${REPOSITORY}:${TAG_NAME}-no-frontend" \
+          -Djib.to.auth.username=$DOCKER_USERNAME \
+          -Djib.to.auth.password=$DOCKER_PASSWORD
