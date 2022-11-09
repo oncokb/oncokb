@@ -166,6 +166,9 @@ public class OncokbTranscriptService {
     }
 
     public org.oncokb.oncokb_transcript.client.Gene findTranscriptGeneBySymbol(String symbol) {
+        if(StringUtils.isEmpty(symbol)){
+            return null;
+        }
         return transcriptGeneByKeywords.get(symbol.toLowerCase());
     }
 
@@ -211,8 +214,8 @@ public class OncokbTranscriptService {
         return genes;
     }
 
-    public Set<org.oncokb.oncokb_transcript.client.Gene> findTranscriptGenesBySymbols(List<String> symbols) throws ApiException {
-        if (!this.enabled) {
+    public Set<org.oncokb.oncokb_transcript.client.Gene> findTranscriptGenesBySymbols(List<String> symbols) {
+        if (!this.enabled || symbols == null) {
             return new HashSet<>();
         }
         return symbols.stream().map(symbol -> findTranscriptGeneBySymbol(symbol)).filter(g -> g != null).collect(Collectors.toSet());
