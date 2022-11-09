@@ -55,7 +55,7 @@ services:
 
   gn-vep:
     profiles: ["genome-nexus"]
-    image: genomenexus/gn-vep:05c7b326506ad9ec46cdc23be50f871730eb8c42
+    image: genomenexus/genome-nexus-vep:v0.0.1
     environment:
       - VEP_ASSEMBLY=GRCh37
     restart: always
@@ -91,7 +91,7 @@ services:
 
   gn-vep-grch38:
     profiles: ["genome-nexus"]
-    image: genomenexus/gn-vep:05c7b326506ad9ec46cdc23be50f871730eb8c42
+    image: genomenexus/genome-nexus-vep:v0.0.1
     environment:
       - VEP_ASSEMBLY=GRCh38
       - VEP_FASTAFILERELATIVEPATH=homo_sapiens/98_GRCh38/Homo_sapiens.GRCh38.dna.toplevel.fa.gz
