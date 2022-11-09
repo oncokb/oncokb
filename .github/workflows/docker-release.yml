@@ -24,6 +24,6 @@ jobs:
         run: |
           mvn -ntp package -P public,production \
           -DskipTests \
-          -Djib.to.image="${REPOSITORY}:${TAG_NAME}" \
+          -Djib.to.image="${REPOSITORY}:${TAG_NAME:1}" \
           -Djib.to.auth.username=$DOCKER_USERNAME \
           -Djib.to.auth.password=$DOCKER_PASSWORD
