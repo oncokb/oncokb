@@ -89,9 +89,9 @@ For this option, you need to download the VEP cache, which is used in the `gn-ve
     export VEP_CACHE=~/gn-vep-data/98_GRCh37
     export VEP_GRCH38_CACHE=~/gn-vep-data/98_GRCh38
     ```
-4. Run docker-compose to build images and create containers.
+4. Run docker-compose to create containers.
     ```
-    docker-compose --profile genome-nexus up -d --build
+    docker-compose --profile genome-nexus up -d
     ```
     **Note:** The --profile argument is used as a way to selectively enable services. Services with the genome-nexus profile will only be spun up when the profile is specified.
 
