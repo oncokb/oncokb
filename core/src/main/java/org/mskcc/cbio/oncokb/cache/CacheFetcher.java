@@ -14,6 +14,8 @@ import org.oncokb.oncokb_transcript.ApiException;
 import org.oncokb.oncokb_transcript.client.EnsemblGene;
 import org.oncokb.oncokb_transcript.client.TranscriptDTO;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -249,9 +251,16 @@ public class CacheFetcher {
         return oncokbTranscriptService.findEnsemblTranscriptsByIds(ids, referenceGenome);
     }
 
-    public boolean genomicLocationShouldBeAnnotated(GNVariantAnnotationType gnVariantAnnotationType, String genomicLocation, ReferenceGenome referenceGenome, Set<org.oncokb.oncokb_transcript.client.Gene> allTranscriptsGenes) throws ApiException {
-        if (StringUtils.isEmpty(genomicLocation)) {
+    public boolean genomicLocationShouldBeAnnotated(GNVariantAnnotationType gnVariantAnnotationType, String query, ReferenceGenome referenceGenome, Set<org.oncokb.oncokb_transcript.client.Gene> allTranscriptsGenes) throws ApiException {
+        if (StringUtils.isEmpty(query)) {
             return false;
+        }else{
+            query = query.trim();
+        }
+        if (GNVariantAnnotationType.HGVS_G.equals(gnVariantAnnotationType)) {
+            if (!AlterationUtils.isValidHgvsg(query)) {
+                return false;
+            }
         }
         // when the transcript info is not available, we should always annotate the genomic location
         if (allTranscriptsGenes == null || allTranscriptsGenes.isEmpty()) {
@@ -260,17 +269,17 @@ public class CacheFetcher {
         GenomicLocation gl = null;
         try {
             if (gnVariantAnnotationType.equals(GNVariantAnnotationType.GENOMIC_LOCATION)) {
-                gl = notationConverter.parseGenomicLocation(genomicLocation);
+                gl = notationConverter.parseGenomicLocation(query);
             } else if (gnVariantAnnotationType.equals(GNVariantAnnotationType.HGVS_G)) {
-                genomicLocation = notationConverter.hgvsNormalizer(genomicLocation);
-                gl = notationConverter.hgvsgToGenomicLocation(genomicLocation);
+                query = notationConverter.hgvsNormalizer(query);
+                gl = notationConverter.hgvsgToGenomicLocation(query);
             }
             if (gl == null) {
                 return false;
             }
         } catch (InvalidHgvsException | TypeNotSupportedException e) {
             // If GN throws InvalidHgvsException, we still need to check whether it's a duplication. The GN does not support dup in HGVSg format but it can still be annotated by VEP.
-            if (genomicLocation.endsWith("dup")) {
+            if (query.endsWith("dup")) {
                 return true;
             } else {
                 return false;
