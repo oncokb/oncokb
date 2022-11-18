@@ -207,7 +207,7 @@ public class AnnotationsApiController {
         HttpStatus status = HttpStatus.OK;
         IndicatorQueryResp indicatorQueryResp = null;
 
-        if (hgvsg == null) {
+        if (StringUtils.isEmpty(hgvsg)) {
             status = HttpStatus.BAD_REQUEST;
         } else {
             ReferenceGenome matchedRG = null;
@@ -217,6 +217,11 @@ public class AnnotationsApiController {
                     return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
                 }
             }
+
+            if (!AlterationUtils.isValidHgvsg(hgvsg)) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+
             indicatorQueryResp = this.getIndicatorQueryFromHGVSg(
                 matchedRG,
                 hgvsg,
