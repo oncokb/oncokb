@@ -375,4 +375,40 @@ public class AlterationUtilsTest extends TestCase
         alt = AlterationUtils.toString(alterations);
         assertEquals(alterations.size(), 0);
     }
+
+    public void testHgvsgFomat() {
+        String hgvsg = "7:g.140453136A>T";
+        assertTrue(AlterationUtils.isValidHgvsg(hgvsg));
+        hgvsg = " 7:g.140453136A>T";
+        assertTrue(AlterationUtils.isValidHgvsg(hgvsg));
+        hgvsg = " 7:g.140453136A>T ";
+        assertTrue(AlterationUtils.isValidHgvsg(hgvsg));
+
+        hgvsg = "X:g.140453136A>T";
+        assertTrue(AlterationUtils.isValidHgvsg(hgvsg));
+        hgvsg = "x:g.140453136A>T";
+        assertTrue(AlterationUtils.isValidHgvsg(hgvsg));
+        hgvsg = "y:g.140453136A>T";
+        assertTrue(AlterationUtils.isValidHgvsg(hgvsg));
+
+        hgvsg = "";
+        assertFalse(AlterationUtils.isValidHgvsg(hgvsg));
+        hgvsg = " ";
+        assertFalse(AlterationUtils.isValidHgvsg(hgvsg));
+        hgvsg = "test";
+        assertFalse(AlterationUtils.isValidHgvsg(hgvsg));
+
+        hgvsg = ":g.140453136A>T";
+        assertFalse(AlterationUtils.isValidHgvsg(hgvsg));
+        hgvsg = "7g.140453136A>T";
+        assertFalse(AlterationUtils.isValidHgvsg(hgvsg));
+        hgvsg = "7:.140453136A>T";
+        assertFalse(AlterationUtils.isValidHgvsg(hgvsg));
+        hgvsg = "7:g140453136A>T";
+        assertFalse(AlterationUtils.isValidHgvsg(hgvsg));
+        hgvsg = "7:g.A>T";
+        assertFalse(AlterationUtils.isValidHgvsg(hgvsg));
+        hgvsg = "a:g.140453136A>T";
+        assertFalse(AlterationUtils.isValidHgvsg(hgvsg));
+    }
 }

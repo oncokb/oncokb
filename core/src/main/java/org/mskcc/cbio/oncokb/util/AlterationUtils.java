@@ -28,6 +28,10 @@ public final class AlterationUtils {
     private static Pattern COMPLEX_MISSENSE_ONE = Pattern.compile("([A-Z])([0-9]+)_([A-Z])([0-9]+)delins([A-Z]+)");
     private static Pattern COMPLEX_MISSENSE_TWO = Pattern.compile("([A-Z]+)([0-9]+)([A-Z]+)");
 
+    // We do not intend to do comprehensive checking, but only eliminate some basic errors.
+    // GenomeNexus will evaluate it further
+    public static Pattern HGVSG_FORMAT = Pattern.compile("[\\dXY]+:g\\.\\d+.*", Pattern.CASE_INSENSITIVE);
+
 
     private AlterationUtils() {
         throw new AssertionError();
@@ -42,6 +46,14 @@ public final class AlterationUtils {
         } else {
             return consequence.equals(compareTo);
         }
+    }
+
+    public static boolean isValidHgvsg(String hgvsg) {
+        hgvsg = hgvsg == null ? null : hgvsg.trim();
+        if (StringUtils.isEmpty(hgvsg)) {
+            return false;
+        }
+        return HGVSG_FORMAT.matcher(hgvsg).matches();
     }
 
     public static boolean isRangeInframeAlteration(Alteration alteration) {

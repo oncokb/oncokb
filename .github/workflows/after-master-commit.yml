@@ -36,7 +36,7 @@ jobs:
             git config user.email dev.oncokb@gmail.com
             git add .
             git commit -m "Update action files to align the version level to $VERSION_LEVEL"
-            git push
+            git push -f
           fi
 
 
@@ -85,5 +85,5 @@ jobs:
             git config user.email dev.oncokb@gmail.com
             git add .
             git commit -m 'Update pom version'
-            git push
+            git push -f
           fi
