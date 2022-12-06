@@ -11,10 +11,10 @@ import org.mskcc.cbio.oncokb.apiModels.TranscriptMatchResult;
 import org.mskcc.cbio.oncokb.apiModels.TranscriptPair;
 import org.mskcc.cbio.oncokb.apiModels.ensembl.Sequence;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
-import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.ReferenceGenome;
 import org.mskcc.cbio.oncokb.model.VariantConsequence;
+import org.mskcc.cbio.oncokb.model.genomeNexusPreAnnotations.GenomeNexusAnnotatedVariantInfo;
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
 
@@ -139,6 +139,50 @@ public class GenomeNexusUtils {
         }
         VariantAnnotation annotation = getVariantAnnotation(type, query, referenceGenome);
         return getConsequence(annotation, referenceGenome);
+    }
+
+    public static GenomeNexusAnnotatedVariantInfo getAnnotatedVariantFromGenomeNexus(GNVariantAnnotationType type, String query, ReferenceGenome referenceGenome) throws ApiException {
+        if (StringUtils.isEmpty(query) || StringUtils.isEmpty(query.replace(",", ""))) {
+            return null;
+        }
+
+        GenomeNexusAnnotatedVariantInfo preAnnotatedVariantInfo = new GenomeNexusAnnotatedVariantInfo();
+        preAnnotatedVariantInfo.setOriginalVariantQuery(query);
+        preAnnotatedVariantInfo.setReferenceGenome(referenceGenome);
+
+        VariantAnnotation annotation = null;
+        try {
+            annotation = getVariantAnnotation(type, query, referenceGenome);
+        } catch (ApiException e){
+            // If there is an ApiException thrown by GN because it cannot annotate the variant, then we still
+            // want to finish annotating the rest of the annotations in the POST request.
+            e.printStackTrace();
+        }
+        
+        if (annotation != null) {
+            preAnnotatedVariantInfo.setHgvsg(annotation.getHgvsg());
+
+            if (type.equals(GNVariantAnnotationType.GENOMIC_LOCATION) && annotation.isSuccessfullyAnnotated()) {
+                preAnnotatedVariantInfo.setGenomicLocation(query);
+            }
+        }
+
+        TranscriptConsequenceSummary transcriptConsequenceSummary = getConsequence(annotation, referenceGenome);
+        if (transcriptConsequenceSummary != null) {
+            preAnnotatedVariantInfo.setHugoSymbol(transcriptConsequenceSummary.getHugoGeneSymbol());
+            Integer entrezGeneId = StringUtils.isNumeric(transcriptConsequenceSummary.getEntrezGeneId()) ? Integer.parseInt(transcriptConsequenceSummary.getEntrezGeneId()) : null;
+            preAnnotatedVariantInfo.setEntrezGeneId(entrezGeneId);
+            preAnnotatedVariantInfo.setHgvspShort(transcriptConsequenceSummary.getHgvspShort());
+            if (transcriptConsequenceSummary.getProteinPosition() != null) {
+                preAnnotatedVariantInfo.setProteinStart(transcriptConsequenceSummary.getProteinPosition().getStart());
+            }
+            if (transcriptConsequenceSummary.getProteinPosition() != null) {
+                preAnnotatedVariantInfo.setProteinEnd(transcriptConsequenceSummary.getProteinPosition().getEnd());
+            }
+            preAnnotatedVariantInfo.setConsequenceTerms(transcriptConsequenceSummary.getConsequenceTerms());
+        }
+
+        return preAnnotatedVariantInfo;
     }
 
     private static String getIsoform(Gene gene, ReferenceGenome referenceGenome) {

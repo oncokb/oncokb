@@ -2,6 +2,8 @@ package org.mskcc.cbio.oncokb.api.pvt;
 
 import io.swagger.annotations.*;
 import org.mskcc.cbio.oncokb.apiModels.*;
+import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotateMutationByGenomicChangeQuery;
+import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotateMutationByHGVSgQuery;
 import org.mskcc.cbio.oncokb.apiModels.download.DownloadAvailability;
 import org.mskcc.cbio.oncokb.apiModels.ensembl.EnsemblGene;
 import org.mskcc.cbio.oncokb.model.*;
@@ -257,5 +259,30 @@ public interface PrivateUtilsApi {
     ResponseEntity<byte[]> utilDataSqlDumpGet(
         @ApiParam(value = "version", required = true) @RequestParam(value = "version") String version
     );
+
+    @ApiOperation(value = "", notes = "Filter HGVSg based on oncokb coverage", response = String.class, responseContainer = "List")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK", response = String.class, responseContainer = "List"),
+        @ApiResponse(code = 400, message = "Error, error message will be given.", response = String.class)})
+    @RequestMapping(value = "/utils/filterHgvsgBasedOnCoverage",
+        consumes = {"application/json"},
+        produces = {"application/json"},
+        method = RequestMethod.POST)
+    ResponseEntity<List<String>> utilFilterHgvsgBasedOnCoveragePost(
+        @ApiParam(value = "List of queries.", required = true) @RequestBody List<AnnotateMutationByHGVSgQuery> body
+    ) throws ApiException, org.genome_nexus.ApiException;
+
+    @ApiOperation(value = "", notes = "Filter genomic change based on oncokb coverage", response = String.class, responseContainer = "List")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK", response = String.class, responseContainer = "List"),
+        @ApiResponse(code = 400, message = "Error, error message will be given.", response = String.class)})
+    @RequestMapping(value = "/utils/filterGenomicChangeBasedOnCoverage",
+        consumes = {"application/json"},
+        produces = {"application/json"},
+        method = RequestMethod.POST)
+    ResponseEntity<List<String>> utilFilterGenomicChangeBasedOnCoveragePost(
+        @ApiParam(value = "List of queries.", required = true) @RequestBody List<AnnotateMutationByGenomicChangeQuery> body
+    ) throws ApiException, org.genome_nexus.ApiException;
+
 }
 

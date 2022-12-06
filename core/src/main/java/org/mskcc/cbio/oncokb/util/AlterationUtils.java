@@ -596,7 +596,6 @@ public final class AlterationUtils {
                 String hugoSymbol = transcriptConsequenceSummary.getHugoGeneSymbol();
                 Integer entrezGeneId = StringUtils.isNumeric(transcriptConsequenceSummary.getEntrezGeneId()) ? Integer.parseInt(transcriptConsequenceSummary.getEntrezGeneId()) : null;
                 if (StringUtils.isNotEmpty(transcriptConsequenceSummary.getHugoGeneSymbol())) {
-
                     Gene gene = GeneUtils.getGene(hugoSymbol);
                     if (gene == null) {
                         gene = new Gene();
