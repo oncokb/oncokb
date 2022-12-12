@@ -190,7 +190,7 @@ public class DriveAnnotationParser {
                             throw new IOException("!!!!!!!!!Could not find gene " + hugo + ".");
                         } else {
                             updateGeneInfo(geneInfo, gene);
-                            geneBo.save(gene);
+                            geneBo.saveOrUpdate(gene);
                         }
                     } else {
                         return null;
