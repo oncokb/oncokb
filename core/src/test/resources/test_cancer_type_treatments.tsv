@@ -175,10 +175,10 @@ TP53	K292T	Colorectal cancer
 ABL1	BCR-ABL1 Fusion	B-Lymphoblastic Leukemia/Lymphoma	1: Imatinib; 1: Dasatinib; 1: Ponatinib; 2: Bosutinib; 2: Nilotinib;
 ABL1	BCR-ABL1 Fusion	Chronic Myelogenous Leukemia	1: Imatinib; 1: Nilotinib; 1: Dasatinib; 1: Bosutinib; 1: Asciminib;
 ABL1	BCR-ABL1 Fusion	Acute Myeloid Leukemia
-IDH1	R132H	Acute Myeloid Leukemia	1: Ivosidenib;
+IDH1	R132H	Acute Myeloid Leukemia	1: Ivosidenib; 1: Olutasidenib;
 IDH1	R132H	Glioblastoma	3A: Ivosidenib;
 IDH1	R132H	B-Lymphoblastic Leukemia/Lymphoma	3B: Ivosidenib;
-IDH1	R132H	Therapy-Related Acute Myeloid Leukemia	1: Ivosidenib;
+IDH1	R132H	Therapy-Related Acute Myeloid Leukemia	1: Ivosidenib; 1: Olutasidenib;
 IDH2	R172K	Acute Myeloid Leukemia	1: Enasidenib;
 IDH2	R172K	Melanoma	3B: Enasidenib;
 MAP2K1	K57N	Erdheim-Chester Disease	2: Cobimetinib; 2: Trametinib;
@@ -244,8 +244,8 @@ KRAS	G12A	NSCLC	4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
 KRAS	G12A	Melanoma	4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
 KRAS	G12C	Histiocytosis	3A: Cobimetinib; 3A: Trametinib;
 KRAS	G12A	Histiocytosis	3A: Cobimetinib; 3A: Trametinib;
-IDH1	R132H	AML	1: Ivosidenib;
-IDH1	R132G	AML	1: Ivosidenib;
+IDH1	R132H	AML	1: Ivosidenib; 1: Olutasidenib;
+IDH1	R132G	AML	1: Ivosidenib; 1: Olutasidenib;
 FGFR2	FGFR2-BICC1 Fusion	Cholangiocarcinoma	1: Pemigatinib; 1: Infigratinib; 1: Futibatinib; 3B: Erdafitinib; 4: Debio1347; 4: AZD4547;
 ERBB2	Amplification	Breast Cancer	1: Trastuzumab; 1: Trastuzumab+Chemotherapy; 1: Ado-Trastuzumab Emtansine; 1: Lapatinib+Capecitabine; 1: Lapatinib+Letrozole; 1: Trastuzumab+Pertuzumab+Chemotherapy; 1: Neratinib; 1: Neratinib+Capecitabine; 1: Trastuzumab+Tucatinib+Capecitabine; 1: Trastuzumab Deruxtecan; 1: Margetuximab+Chemotherapy; 3B: Trastuzumab+Carboplatin-Taxol Regimen; 3B: Trastuzumab+Pertuzumab; 3B: Lapatinib+Trastuzumab; 3B: Pembrolizumab+Trastuzumab+Chemotherapy;
 RET	KIF5B-RET Fusion	NSCLC	1: Selpercatinib; 1: Pralsetinib; 2: Cabozantinib; 3A: Vandetanib;
