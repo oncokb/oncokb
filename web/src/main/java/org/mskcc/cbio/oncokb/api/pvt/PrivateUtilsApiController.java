@@ -3,6 +3,8 @@ package org.mskcc.cbio.oncokb.api.pvt;
 import com.mysql.jdbc.StringUtils;
 import io.swagger.annotations.ApiParam;
 import org.mskcc.cbio.oncokb.apiModels.*;
+import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotateMutationByGenomicChangeQuery;
+import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotateMutationByHGVSgQuery;
 import org.mskcc.cbio.oncokb.apiModels.download.DownloadAvailability;
 import org.mskcc.cbio.oncokb.apiModels.download.FileExtension;
 import org.mskcc.cbio.oncokb.apiModels.download.FileName;
@@ -561,4 +563,45 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     ) {
         return getDataDownloadResponseEntity(version, getOncoKBSqlDumpFileName(version), FileExtension.GZ);
     }
+
+    @Override
+    public ResponseEntity<List<String>> utilFilterHgvsgBasedOnCoveragePost(
+        @ApiParam(value = "List of queries.", required = true) @RequestBody List<AnnotateMutationByHGVSgQuery> body
+    ) throws ApiException, org.genome_nexus.ApiException {
+        HttpStatus status = HttpStatus.OK;
+        List<String> result = new ArrayList<>();
+    
+        if (body == null) {
+            status = HttpStatus.BAD_REQUEST;
+        } else {
+            Set<org.oncokb.oncokb_transcript.client.Gene> genes = this.cacheFetcher.getAllTranscriptGenes();
+            for (AnnotateMutationByHGVSgQuery query : body) {
+                if(this.cacheFetcher.genomicLocationShouldBeAnnotated(GNVariantAnnotationType.HGVS_G, query.getHgvsg(), query.getReferenceGenome(), genes)){
+                    result.add(query.getHgvsg());
+                }
+            }
+        }
+        return new ResponseEntity<>(result, status);
+    }
+
+    @Override
+    public ResponseEntity<List<String>> utilFilterGenomicChangeBasedOnCoveragePost(
+        @ApiParam(value = "List of queries.", required = true) @RequestBody List<AnnotateMutationByGenomicChangeQuery> body
+    ) throws ApiException, org.genome_nexus.ApiException {
+        HttpStatus status = HttpStatus.OK;
+        List<String> result = new ArrayList<>();
+    
+        if (body == null) {
+            status = HttpStatus.BAD_REQUEST;
+        } else {
+            Set<org.oncokb.oncokb_transcript.client.Gene> genes = this.cacheFetcher.getAllTranscriptGenes();
+            for (AnnotateMutationByGenomicChangeQuery query : body) {
+                if(this.cacheFetcher.genomicLocationShouldBeAnnotated(GNVariantAnnotationType.GENOMIC_LOCATION, query.getGenomicLocation(), query.getReferenceGenome(), genes)){
+                    result.add(query.getGenomicLocation());
+                }
+            }
+        }
+        return new ResponseEntity<>(result, status);
+    }
+
 }

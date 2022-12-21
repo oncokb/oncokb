@@ -43,9 +43,11 @@ public class FindRelevantAlterationsTest {
                 {"EGFR", "S768I", null, "S768I, SV768IL, Oncogenic Mutations"},
                 {"EGFR", "S768_V769delinsIL", null, "SV768IL, S768I, V769L, V769M, Oncogenic Mutations"},
 
-                // Check resisatnce mutations, they should be matched with Oncogenic Mutations
+                // Check resistance mutations, they should be matched with Oncogenic Mutations
                 {"ALK", "G1202R", null, "G1202R, Oncogenic Mutations"},
                 {"FLT3", "N676D", null, "N676D, N676K, N676S, Oncogenic Mutations"},
+                // but the alternative allele should not be resistance, therefore, should not get Oncogenic Mutations matched
+                {"ALK", "G1202E", null, "G1202R"},
 
                 // Check Fusions
                 {"BRAF", "PAPSS1-BRAF Fusion", null, "PAPSS1-BRAF Fusion, Fusions, Oncogenic Mutations, Oncogenic Mutations {excluding V600}"},
