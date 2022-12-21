@@ -443,14 +443,20 @@ public class MainUtils {
                 BiologicalVariant variant = new BiologicalVariant();
                 variant.setVariant(alteration);
                 Oncogenicity oncogenicity = EvidenceUtils.getOncogenicityFromEvidence(map.get(EvidenceType.ONCOGENIC));
-                MutationEffect mutationEffect = EvidenceUtils.getMutationEffectFromEvidence(map.get(EvidenceType.MUTATION_EFFECT));
+                Set<Evidence> mutationEffectEvidences = map.get(EvidenceType.MUTATION_EFFECT);
+                MutationEffect mutationEffect = EvidenceUtils.getMutationEffectFromEvidence(mutationEffectEvidences);
                 if (oncogenicity != null || mutationEffect != null) {
-                    variant.setOncogenic(oncogenicity == null ? null : oncogenicity.getOncogenic());
-                    variant.setMutationEffect(mutationEffect == null ? null : mutationEffect.getMutationEffect());
-                    variant.setOncogenicPmids(EvidenceUtils.getPmids(map.get(EvidenceType.ONCOGENIC)));
-                    variant.setMutationEffectPmids(EvidenceUtils.getPmids(map.get(EvidenceType.MUTATION_EFFECT)));
-                    variant.setOncogenicAbstracts(EvidenceUtils.getAbstracts(map.get(EvidenceType.ONCOGENIC)));
-                    variant.setMutationEffectAbstracts(EvidenceUtils.getAbstracts(map.get(EvidenceType.MUTATION_EFFECT)));
+                    if (oncogenicity != null) {
+                        variant.setOncogenic(oncogenicity.getOncogenic());
+                        variant.setOncogenicPmids(EvidenceUtils.getPmids(map.get(EvidenceType.ONCOGENIC)));
+                        variant.setOncogenicAbstracts(EvidenceUtils.getAbstracts(map.get(EvidenceType.ONCOGENIC)));
+                    }
+                    if (mutationEffect != null) {
+                        variant.setMutationEffect(mutationEffect.getMutationEffect());
+                        variant.setMutationEffectPmids(EvidenceUtils.getPmids(mutationEffectEvidences));
+                        variant.setMutationEffectAbstracts(EvidenceUtils.getAbstracts(mutationEffectEvidences));
+                        variant.setMutationEffectDescription(mutationEffectEvidences.iterator().next().getDescription());
+                    }
                     variants.add(variant);
                 }
             }
@@ -512,6 +518,7 @@ public class MainUtils {
                         variant.setDrug(EvidenceUtils.getDrugs(Collections.singleton(evidence)));
                         variant.setDrugPmids(EvidenceUtils.getPmids(Collections.singleton(evidence)));
                         variant.setDrugAbstracts(EvidenceUtils.getAbstracts(Collections.singleton(evidence)));
+                        variant.setDrugDescription(evidence.getDescription());
                         variants.add(variant);
                     }
                 }

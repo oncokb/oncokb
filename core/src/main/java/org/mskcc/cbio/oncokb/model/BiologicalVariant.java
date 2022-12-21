@@ -17,6 +17,7 @@ public class BiologicalVariant {
     private String mutationEffect = null;
     private Set<String> mutationEffectPmids = new HashSet<>();
     private Set<ArticleAbstract> mutationEffectAbstracts = new HashSet<>();
+    private String mutationEffectDescription = null;
     private String oncogenic = null;
     private Set<String> oncogenicPmids = new HashSet<>();
     private Set<ArticleAbstract> oncogenicAbstracts = new HashSet<>();
@@ -60,6 +61,13 @@ public class BiologicalVariant {
         this.mutationEffectPmids = mutationEffectPmids;
     }
 
+    public String getMutationEffectDescription() {
+        return mutationEffectDescription;
+    }
+
+    public void setMutationEffectDescription(String mutationEffectDescription) {
+        this.mutationEffectDescription = mutationEffectDescription;
+    }
 
     /**
      **/
@@ -120,6 +128,8 @@ public class BiologicalVariant {
             return false;
         if (mutationEffectAbstracts != null ? !mutationEffectAbstracts.equals(that.mutationEffectAbstracts) : that.mutationEffectAbstracts != null)
             return false;
+        if (mutationEffectDescription != null ? !mutationEffectDescription.equals(that.mutationEffectDescription) : that.mutationEffectDescription != null)
+            return false;
         if (oncogenic != null ? !oncogenic.equals(that.oncogenic) : that.oncogenic != null) return false;
         if (oncogenicPmids != null ? !oncogenicPmids.equals(that.oncogenicPmids) : that.oncogenicPmids != null)
             return false;
@@ -136,6 +146,7 @@ public class BiologicalVariant {
             ", mutationEffect='" + mutationEffect + '\'' +
             ", mutationEffectPmids=" + mutationEffectPmids +
             ", mutationEffectAbstracts=" + mutationEffectAbstracts +
+            ", mutationEffectDescription=" + mutationEffectDescription +
             ", oncogenic='" + oncogenic + '\'' +
             ", oncogenicPmids=" + oncogenicPmids +
             ", oncogenicAbstracts=" + oncogenicAbstracts +
