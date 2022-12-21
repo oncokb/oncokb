@@ -197,7 +197,7 @@ SF3B1	R625G	Breast Cancer
 # the following tests should be enabled when the liquid propagation is in production also the AGM-510 treatment is in place
 KRAS	G12C	Breast Cancer	3B: Adagrasib; 3B: Sotorasib; 3B: Adagrasib+Cetuximab; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
 KRAS	G12D	Breast Cancer	4: RMC-6236; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
-KRAS	G12C	NSCLC	1: Sotorasib; 3A: Adagrasib; 3B: Adagrasib+Cetuximab; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
+KRAS	G12C	NSCLC	1: Sotorasib; 1: Adagrasib; 3B: Adagrasib+Cetuximab; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
 KRAS	G12D	NSCLC	4: RMC-6236; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
 KRAS	G12C	AML
 KRAS	G12D	AML
@@ -238,7 +238,7 @@ EGFR	L861R	NSCLC
 EGFR	L861M	NSCLC
 EGFR	G724S	NSCLC	R2: Osimertinib;
 EGFR	G724S	MEL
-KRAS	G12C	NSCLC	1: Sotorasib; 3A: Adagrasib; 3B: Adagrasib+Cetuximab; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
+KRAS	G12C	NSCLC	1: Sotorasib; 1: Adagrasib; 3B: Adagrasib+Cetuximab; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
 KRAS	G12C	Melanoma	3B: Adagrasib; 3B: Sotorasib; 3B: Adagrasib+Cetuximab; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
 KRAS	G12A	NSCLC	4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
 KRAS	G12A	Melanoma	4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
