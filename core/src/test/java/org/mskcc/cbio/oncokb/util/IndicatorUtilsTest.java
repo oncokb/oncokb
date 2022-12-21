@@ -102,6 +102,13 @@ public class IndicatorUtilsTest {
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
         assertEquals("The oncogenicity of NOTCH1 intragenic should be Likely Oncogenic", "Likely Oncogenic", indicatorQueryResp.getOncogenic());
 
+        // Check mutation effect
+        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "BRAF", "V600E", null, null, "MEL", null, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
+        assertTrue("The mutation effect should not be empty", StringUtils.isNotEmpty(indicatorQueryResp.getMutationEffect().getKnownEffect()));
+        assertTrue("The mutation effect description should not be empty", StringUtils.isNotEmpty(indicatorQueryResp.getMutationEffect().getDescription()));
+        assertTrue("There should be pmids associated", indicatorQueryResp.getMutationEffect().getCitations().getPmids().size() > 0);
+
         // check variant exist
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "BRAF", "V600E", null, null, null, null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
@@ -369,13 +376,13 @@ public class IndicatorUtilsTest {
         // Check the predefined TERT Promoter summary
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "TERT", "Promoter", null, null, "Ovarian Cancer", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
-        assertEquals("The Oncogenicity is not Oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The Oncogenicity is not Likely Oncogenic, but it should be.", Oncogenicity.LIKELY.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The variant summary is not expected.", SummaryUtils.TERT_PROMOTER_MUTATION_SUMMARY, indicatorQueryResp.getVariantSummary());
         assertEquals("The tumor type summary is not expected.", SummaryUtils.TERT_PROMOTER_NO_THERAPY_TUMOR_TYPE_SUMMARY.replace("[[tumor type]]", "ovarian cancer"), indicatorQueryResp.getTumorTypeSummary());
 
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "TERT", "promoter ", null, null, "Ovarian Cancer", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
-        assertEquals("The Oncogenicity is not Oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The Oncogenicity is not Likely Oncogenic, but it should be.", Oncogenicity.LIKELY.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The variant summary is not expected.", SummaryUtils.TERT_PROMOTER_MUTATION_SUMMARY, indicatorQueryResp.getVariantSummary());
         assertEquals("The tumor type summary is not expected.", SummaryUtils.TERT_PROMOTER_NO_THERAPY_TUMOR_TYPE_SUMMARY.replace("[[tumor type]]", "ovarian cancer"), indicatorQueryResp.getTumorTypeSummary());
 
@@ -677,7 +684,7 @@ public class IndicatorUtilsTest {
         // Test for the promoter mutation
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "TERT", null, null, null, "Acute Myeloid Leukemia", UPSTREAM_GENE, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
-        assertEquals("The oncogenicity is not oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The oncogenicity is not likely oncogenic, but it should be.", Oncogenicity.LIKELY.getOncogenic(), indicatorQueryResp.getOncogenic());
 
 //        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "TERT", null, null, null, "Acute Myeloid Leukemia", FIVE_UTR, null, null, null);
 //        indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
@@ -685,7 +692,7 @@ public class IndicatorUtilsTest {
 
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "TERT", "", null, null, "Acute Myeloid Leukemia", UPSTREAM_GENE, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
-        assertEquals("The oncogenicity is not oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The oncogenicity is not likley oncogenic, but it should be.", Oncogenicity.LIKELY.getOncogenic(), indicatorQueryResp.getOncogenic());
 
 
         // Check the same protein change in different reference genome
