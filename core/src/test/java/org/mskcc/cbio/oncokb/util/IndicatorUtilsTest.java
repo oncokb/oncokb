@@ -429,14 +429,14 @@ public class IndicatorUtilsTest {
         assertEquals("The highest resistance level should be R1",
             LevelOfEvidence.LEVEL_R2, indicatorQueryResp.getHighestResistanceLevel());
 
-        // The oncogenic mutations should not be mapped to Resistance mutation. So the summary from OM should no apply here.
+        // The oncogenic mutations should not be mapped to Resistance mutation. So the summary from OM should not apply here.
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "KIT", "D820E", null, null, "AMLRUNX1RUNX1T1", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null);
         assertEquals("The oncogenicity should be 'Resistance'", Oncogenicity.RESISTANCE.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The tumor type summary is not expected.",
             "There are no FDA-approved or NCCN-compendium listed treatments specifically for patients with KIT D820E mutant AML with t(8;21)(q22;q22.1);RUNX1-RUNX1T1.", indicatorQueryResp.getTumorTypeSummary());
 
-        // The oncogenic mutations should not be mapped to Resistance mutation. So the summary from OM should no apply here.
+        // The oncogenic mutations should not be mapped to Resistance mutation. So the summary from OM should not apply here.
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "BRAF", "V600E", null, null, "MEL", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null);
         assertTrue("The data version should not be empty.", StringUtils.isNotEmpty(indicatorQueryResp.getDataVersion()));
