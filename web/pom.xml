@@ -283,7 +283,7 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk</artifactId>
-            <version>1.11.163</version>
+            <version>1.12.372</version>
         </dependency>
 
         <dependency>
@@ -356,7 +356,7 @@
                     <webResources>
                         <resource>
                             <directory>dist</directory>
-                            <targetPath></targetPath>
+                            <targetPath/>
                         </resource>
                     </webResources>
                     <archive>
