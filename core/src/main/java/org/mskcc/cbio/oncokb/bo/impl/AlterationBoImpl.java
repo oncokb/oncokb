@@ -336,6 +336,8 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             }
         }
 
+        List<Alteration> alternativeAlleles = AlterationUtils.getAlleleAlterations(referenceGenome, alteration, fullAlterations);
+
 
         if (addEGFRCTD(alteration)) {
             Alteration alt = findAlteration(referenceGenome, "CTD", fullAlterations);
@@ -381,7 +383,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             }
 
             if (includeAlternativeAllele) {
-                alterations.addAll(AlterationUtils.getAlleleAlterations(referenceGenome, alteration, fullAlterations));
+                alterations.addAll(alternativeAlleles);
                 if(complexMisMuts.size() > 0) {
                     for (Alteration complexMisMut : complexMisMuts) {
                         alterations.addAll(AlterationUtils.getAlleleAlterations(referenceGenome, complexMisMut, fullAlterations));
@@ -455,7 +457,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             alterations.addAll(findRelevantOverlapAlterations(alteration.getGene(), referenceGenome, truncatingVariantConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), alteration.getAlteration(), fullAlterations));
         }
 
-        if (addOncogenicMutations(alteration, alterations)) {
+        if (addOncogenicMutations(alteration, alternativeAlleles, new ArrayList<>(alterations))) {
             List<Alteration> oncogenicMutations = findOncogenicMutations(fullAlterations);
             if (!oncogenicMutations.isEmpty()) {
                 alterations.addAll(oncogenicMutations);
@@ -485,7 +487,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             }
         }
 
-        if (!addOncogenicMutations(alteration, alterations) && addVUSMutation(alteration, matchedAlt != null)) {
+        if (!addOncogenicMutations(alteration, alternativeAlleles, new ArrayList<>(alterations)) && addVUSMutation(alteration, matchedAlt != null)) {
             Alteration VUSMutation = findAlteration(referenceGenome, InferredMutation.VUS.getVariant(), fullAlterations);
             if (VUSMutation != null) {
                 alterations.add(VUSMutation);
@@ -500,7 +502,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         if (matchedAlt == null) {
             relevantAlterationsWithoutAlternativeAlleles.add(alteration);
         }
-        relevantAlterationsWithoutAlternativeAlleles.removeAll(AlterationUtils.getAlleleAlterations(referenceGenome, alteration, fullAlterations));
+        relevantAlterationsWithoutAlternativeAlleles.removeAll(alternativeAlleles);
         Set<String> alterationsName = new HashSet<>();
         // if the alteration is inframe-ins/del, we should only match the alteration
         if(alteration.getConsequence() != null && (alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm("inframe_deletion")) || alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm(IN_FRAME_INSERTION)))) {
@@ -538,31 +540,14 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         return add;
     }
 
-    private boolean addOncogenicMutations(Alteration exactAlt, Set<Alteration> relevantAlts) {
+    private boolean addOncogenicMutations(Alteration exactAlt, List<Alteration> alternativeAllele, List<Alteration> relevantAlterations) {
         boolean add = false;
-            if (!exactAlt.getAlteration().trim().equalsIgnoreCase("amplification")) {
-                Set<Oncogenicity> oncogenicities = AlterationUtils.getCuratedOncogenicity(exactAlt);
-                boolean has = AlterationUtils.hasImportantCuratedOncogenicity(oncogenicities);
-                if (has) {
-                    Boolean isOncogenic = AlterationUtils.hasOncogenic(oncogenicities);
-
-                    if (isOncogenic != null && isOncogenic) {
-                        add = true;
-                    }
-                } else if (HotspotUtils.isHotspot(exactAlt)) {
-                    add = true;
-                } else {
-                    // When we look at the oncogenicity, the VUS relevant variants should be excluded.
-                    for (Alteration alt : AlterationUtils.excludeVUS(new ArrayList<>(relevantAlts))) {
-                        Boolean isOncogenic = AlterationUtils.isOncogenicAlteration(alt);
-
-                        if (isOncogenic != null && isOncogenic) {
-                            add = true;
-                            break;
-                        }
-                    }
-                }
+        if (!exactAlt.getAlteration().trim().equalsIgnoreCase("amplification")) {
+            IndicatorQueryOncogenicity indicatorQueryOncogenicity = IndicatorUtils.getOncogenicity(exactAlt, alternativeAllele, relevantAlterations);
+            if (MainUtils.isOncogenic(indicatorQueryOncogenicity.getOncogenicity())) {
+                add = true;
             }
+        }
         return add;
     }
 

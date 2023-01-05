@@ -485,7 +485,7 @@ public class IndicatorUtils {
 
             // Add oncogenicity
             IndicatorQueryOncogenicity indicatorQueryOncogenicity = getOncogenicity(alteration, new ArrayList<>(), new ArrayList<>());
-            Oncogenicity oncogenicity = indicatorQueryOncogenicity.oncogenicity;
+            Oncogenicity oncogenicity = indicatorQueryOncogenicity.getOncogenicity();
             if (!groupedOncogenicities.containsKey(oncogenicity)) {
                 groupedOncogenicities.put(oncogenicity, new ArrayList<>());
             }
@@ -608,6 +608,11 @@ public class IndicatorUtils {
 
         if (oncogenicity == null) {
             oncogenicity = Oncogenicity.UNKNOWN;
+
+            if (HotspotUtils.isHotspot(alteration)) {
+                oncogenicity = Oncogenicity.LIKELY;
+                oncogenicityEvidence = null;
+            }
         }
         return new IndicatorQueryOncogenicity(oncogenicity, oncogenicityEvidence);
     }
@@ -960,25 +965,6 @@ class IndicatorQueryRespComp implements Comparator<IndicatorQueryResp> {
         return -1;
     }
 }
-
-class IndicatorQueryOncogenicity {
-    Oncogenicity oncogenicity;
-    Evidence oncogenicityEvidence;
-
-    public IndicatorQueryOncogenicity(Oncogenicity oncogenicity, Evidence oncogenicityEvidence) {
-        this.oncogenicity = oncogenicity;
-        this.oncogenicityEvidence = oncogenicityEvidence;
-    }
-
-    public Oncogenicity getOncogenicity() {
-        return oncogenicity;
-    }
-
-    public Evidence getOncogenicityEvidence() {
-        return oncogenicityEvidence;
-    }
-}
-
 
 class IndicatorQueryMutationEffect {
     MutationEffect mutationEffect;
