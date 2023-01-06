@@ -69,7 +69,7 @@
         <dependency>
             <groupId>com.google.apis</groupId>
             <artifactId>google-api-services-drive</artifactId>
-            <version>v2-rev100-1.17.0-rc</version>
+            <version>v2-rev20220709-2.0.0</version>
             <type>jar</type>
         </dependency>
         <dependency>
