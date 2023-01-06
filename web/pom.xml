@@ -74,6 +74,13 @@
                             <to>
                                 <image>oncokb/oncokb:0.0.1-snapshot</image>
                             </to>
+                            <container>
+                                <entrypoint>
+                                    <arg>/bin/sh</arg>
+                                    <arg>-c</arg>
+                                    <arg>exec java ${JAVA_OPTS} -jar /webapp-runner.jar ${WEBAPPRUNNER_OPTS} /app.war</arg>
+                                </entrypoint>
+                            </container>
                             <extraDirectories>
                                 <paths>
                                     <path>target/dependency</path>
@@ -301,7 +308,7 @@
         <dependency>
             <groupId>com.google.cloud.tools</groupId>
             <artifactId>jib-maven-plugin</artifactId>
-            <version>3.3.0</version>
+            <version>3.3.1</version>
             <type>maven-plugin</type>
         </dependency>
     </dependencies>
