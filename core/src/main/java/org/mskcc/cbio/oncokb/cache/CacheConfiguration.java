@@ -15,6 +15,7 @@ import org.redisson.config.SentinelServersConfig;
 import org.redisson.config.SingleServerConfig;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.context.annotation.*;
@@ -110,12 +111,18 @@ public class CacheConfiguration {
     }
 
     @Bean
+    public CacheErrorHandler cacheErrorHandler() {
+        return new LoggingCacheErrorHandler();
+    }
+
+    @Bean
     public org.springframework.cache.CacheManager cacheManager(
         RedissonClient redissonClient,
-        CacheNameResolver cacheNameResolver
+        CacheNameResolver cacheNameResolver,
+        CacheErrorHandler cacheErrorHandler
     ) {
         Integer redisExpiration = Integer.parseInt(PropertiesUtils.getProperties("redis.expiration"));
-        CustomRedisCacheManager cm = new CustomRedisCacheManager(redissonClient, redisExpiration == null ? DEFAULT_TTL : redisExpiration, cacheNameResolver);
+        CustomRedisCacheManager cm = new CustomRedisCacheManager(redissonClient, redisExpiration == null ? DEFAULT_TTL : redisExpiration, cacheNameResolver, cacheErrorHandler);
         cm.clearAll();
         return cm;
     }
