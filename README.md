@@ -29,7 +29,6 @@ cp -r core/src/main/resources/properties-EXAMPLE core/src/main/resources/propert
     * jdbc.username & jdbc.password: MySQL user name and password
 2. config.properties
     * oncotree.api: [OncoTree service](http://oncotree.info/). Default: http://oncotree.info/api/
-    * google.username & google.password(Optional) : Google account info. It is used to send email
     
     
 ## Build the WAR file
