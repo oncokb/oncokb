@@ -1,5 +1,7 @@
 package org.mskcc.cbio.oncokb.cache;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.Cache;
 import org.springframework.cache.interceptor.CacheErrorHandler;
 
@@ -12,27 +14,29 @@ import org.springframework.cache.interceptor.CacheErrorHandler;
 
 public class LoggingCacheErrorHandler implements CacheErrorHandler {
 
+    private static final Logger LOG = LoggerFactory.getLogger(LoggingCacheErrorHandler.class);
+
     @Override
     public void handleCacheGetError(RuntimeException exception, Cache cache, Object key) {
-        System.out.println(String.format("Cache '%s' failed to get entry with key '%s'", cache.getName(), key));
+        LOG.error(String.format("Cache '%s' failed to get entry with key '%s'", cache.getName(), key), exception);
         exception.printStackTrace();
     }
 
     @Override
     public void handleCachePutError(RuntimeException exception, Cache cache, Object key, Object value) {
-        System.out.println(String.format("Cache '%s' failed to put entry with key '%s'", cache.getName(), key));
+        LOG.error(String.format("Cache '%s' failed to put entry with key '%s'", cache.getName(), key), exception);
         exception.printStackTrace();
     }
 
     @Override
     public void handleCacheEvictError(RuntimeException exception, Cache cache, Object key) {
-        System.out.println(String.format("Cache '%s' failed to evict entry with key '%s'", cache.getName(), key));
+        LOG.error(String.format("Cache '%s' failed to evict entry with key '%s'", cache.getName(), key), exception);
         exception.printStackTrace();
     }
 
     @Override
     public void handleCacheClearError(RuntimeException exception, Cache cache) {
-        System.out.println(String.format("Cache '%s' failed to clear entries", cache.getName()));
+        LOG.error(String.format("Cache '%s' failed to clear entries", cache.getName()), exception);
         exception.printStackTrace();
     }
     
