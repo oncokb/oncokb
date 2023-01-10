@@ -4,6 +4,7 @@ import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.Cache;
+import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.cache.support.AbstractValueAdaptingCache;
 import org.springframework.cache.support.SimpleValueWrapper;
 
@@ -24,16 +25,19 @@ public abstract class CustomRedisCache extends AbstractValueAdaptingCache {
     protected final String name;
     protected final long ttlMinutes;
     protected final RedissonClient store;
+    
+    protected CacheErrorHandler cacheErrorHandler;
 
     /**
      * Create a new ConcurrentMapCache with the specified name.
      * @param name the name of the cache
      */
-    public CustomRedisCache(String name, RedissonClient client, long ttlMinutes) {
+    public CustomRedisCache(String name, RedissonClient client, long ttlMinutes, CacheErrorHandler cacheErrorHandler) {
         super(true);
         this.name = name;
         this.store = client;
         this.ttlMinutes = ttlMinutes;
+        this.cacheErrorHandler = cacheErrorHandler;
     }
 
     @Override
@@ -48,7 +52,13 @@ public abstract class CustomRedisCache extends AbstractValueAdaptingCache {
 
     @Override
     protected Object lookup(Object key) {
-        return this.store.getBucket(name + REDIS_KEY_SEPARATOR + key).get();
+        try {
+            return this.store.getBucket(name + REDIS_KEY_SEPARATOR + key).get();
+        } catch (RuntimeException e) {
+            this.cacheErrorHandler.handleCacheGetError(e, this, key);
+            // After CacheErrorHandler handles the error, return null to use non-cached version.
+            return null;
+        }
     }
 
     private void asyncRefresh(Object key) {
@@ -59,11 +69,16 @@ public abstract class CustomRedisCache extends AbstractValueAdaptingCache {
 
     @Override
     public void put(Object key, Object value) {
-        if (ttlMinutes == INFINITE_TTL) {
-            this.store.getBucket(name + REDIS_KEY_SEPARATOR + key).setAsync(value);
-        } else {
-            this.store.getBucket(name + REDIS_KEY_SEPARATOR + key).setAsync(value, ttlMinutes, TimeUnit.MINUTES);
+        try{
+            if (ttlMinutes == INFINITE_TTL) {
+                this.store.getBucket(name + REDIS_KEY_SEPARATOR + key).setAsync(value);
+            } else {
+                this.store.getBucket(name + REDIS_KEY_SEPARATOR + key).setAsync(value, ttlMinutes, TimeUnit.MINUTES);
+            }
+        } catch (RuntimeException e) {
+            this.cacheErrorHandler.handleCachePutError(e, this, key, value);
         }
+
     }
 
     @Override
@@ -84,7 +99,11 @@ public abstract class CustomRedisCache extends AbstractValueAdaptingCache {
 
     @Override
     public void clear() {
-        this.store.getKeys().deleteByPattern(name + REDIS_KEY_SEPARATOR + "*");
+        try {
+            this.store.getKeys().deleteByPattern(name + REDIS_KEY_SEPARATOR + "*");
+        } catch (RuntimeException e) {
+            this.cacheErrorHandler.handleCacheClearError(e, this);
+        }
     }
 
     @Override
