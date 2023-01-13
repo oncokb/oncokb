@@ -132,6 +132,35 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>matchminer-curate</id>
+            <properties>
+                <frontend.version>9e25a0c99a</frontend.version>
+                <frontend.groupId>com.github.zhx828</frontend.groupId>
+                <frontend.artifactId>matchminer-curate</frontend.artifactId>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <executions>
+                            <execution>
+                                <id>Version Calculation</id>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <phase>process-resources</phase>
+                                <configuration>
+                                    <executable>bash</executable>
+                                    <commandlineArgs>scripts/generate_content_jsp.sh -p matchminer-curate</commandlineArgs>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
     <properties>
@@ -439,3 +468,4 @@
         </plugins>
     </reporting>
 </project>
+
