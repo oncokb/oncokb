@@ -3,6 +3,7 @@ package org.mskcc.cbio.oncokb.cache;
 import org.redisson.api.RedissonClient;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.interceptor.CacheErrorHandler;
 
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,11 +14,13 @@ public class CustomRedisCacheManager implements CacheManager {
     private final RedissonClient client;
     private final long ttlInMins;
     private CacheNameResolver cacheNameResolver;
+    private CacheErrorHandler cacheErrorHandler;
 
-    public CustomRedisCacheManager(RedissonClient client, long ttlInMins, CacheNameResolver cacheNameResolver) {
+    public CustomRedisCacheManager(RedissonClient client, long ttlInMins, CacheNameResolver cacheNameResolver, CacheErrorHandler cacheErrorHandler) {
         this.client = client;
         this.ttlInMins = ttlInMins;
         this.cacheNameResolver = cacheNameResolver;
+        this.cacheErrorHandler = cacheErrorHandler;
     }
 
     /**
@@ -48,7 +51,7 @@ public class CustomRedisCacheManager implements CacheManager {
         long clientTTLInMinutes = expires ? ttlInMins : CustomRedisCache.INFINITE_TTL;
         String cacheName = this.cacheNameResolver.getCacheName(name);
         return caches.computeIfAbsent(cacheName, k -> {
-            return new CustomBucketRedisCache(cacheName, client, clientTTLInMinutes);
+            return new CustomBucketRedisCache(cacheName, client, clientTTLInMinutes, cacheErrorHandler);
         });
     }
 
