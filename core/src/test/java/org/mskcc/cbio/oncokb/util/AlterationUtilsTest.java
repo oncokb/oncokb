@@ -391,6 +391,18 @@ public class AlterationUtilsTest extends TestCase
         hgvsg = "y:g.140453136A>T";
         assertTrue(AlterationUtils.isValidHgvsg(hgvsg));
 
+        // we should allow the chr prefix
+        hgvsg = "chr7:g.140453136A>T";
+        assertTrue(AlterationUtils.isValidHgvsg(hgvsg));
+        hgvsg = "CHR7:g.140453136A>T";
+        assertTrue(AlterationUtils.isValidHgvsg(hgvsg));
+        hgvsg = "Chr7:g.140453136A>T";
+        assertTrue(AlterationUtils.isValidHgvsg(hgvsg));
+        hgvsg = " chr7:g.140453136A>T";
+        assertTrue(AlterationUtils.isValidHgvsg(hgvsg));
+        hgvsg = "chr7:g.140453136A>T ";
+        assertTrue(AlterationUtils.isValidHgvsg(hgvsg));
+
         hgvsg = "";
         assertFalse(AlterationUtils.isValidHgvsg(hgvsg));
         hgvsg = " ";
@@ -410,5 +422,6 @@ public class AlterationUtilsTest extends TestCase
         assertFalse(AlterationUtils.isValidHgvsg(hgvsg));
         hgvsg = "a:g.140453136A>T";
         assertFalse(AlterationUtils.isValidHgvsg(hgvsg));
+
     }
 }
