@@ -30,7 +30,7 @@ public final class AlterationUtils {
 
     // We do not intend to do comprehensive checking, but only eliminate some basic errors.
     // GenomeNexus will evaluate it further
-    public static Pattern HGVSG_FORMAT = Pattern.compile("[\\dXY]+:g\\.\\d+.*", Pattern.CASE_INSENSITIVE);
+    public static Pattern HGVSG_FORMAT = Pattern.compile("(chr)?[\\dxy]+:g\\.\\d+.*", Pattern.CASE_INSENSITIVE);
 
 
     private AlterationUtils() {
