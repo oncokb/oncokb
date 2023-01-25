@@ -10,4 +10,6 @@ import org.mskcc.cbio.oncokb.model.Info;
  */
 public interface InfoBo extends GenericBo<Info> {
     Info get();
+
+    void update(Info info);
 }

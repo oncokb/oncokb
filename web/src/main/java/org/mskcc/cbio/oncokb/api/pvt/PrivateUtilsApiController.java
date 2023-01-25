@@ -481,8 +481,8 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         , @ApiParam(value = "grch37RefSeq") @RequestParam(required = false) String grch37RefSeq
         , @ApiParam(value = "grch38Isoform") @RequestParam(required = false) String grch38Isoform
         , @ApiParam(value = "grch38RefSeq") @RequestParam(required = false) String grch38RefSeq
-    ) throws ApiException, IOException {
-        // this is an util to upgrade oncokb transcript which operates on the grch37
+    ) throws ApiException {
+        // this is a util to upgrade oncokb transcript which operates on the grch37
         Gene gene = GeneUtils.getGene(entrezGeneId, hugoSymbol);
 
         if (gene == null) {
@@ -501,7 +501,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         gene.setGrch38RefSeq(grch38RefSeq);
 
         ApplicationContextSingleton.getGeneBo().update(gene);
-        CacheUtils.updateGene(Collections.singleton(gene.getEntrezGeneId()), true);
+        CacheUtils.updateGene(Collections.singleton(gene.getEntrezGeneId()));
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -513,7 +513,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         , @ApiParam(value = "grch37Isoform") @RequestParam(required = false) String grch37Isoform
         , @ApiParam(value = "grch38Isoform") @RequestParam(required = false) String grch38Isoform
     ) throws ApiException {
-        // this is an util to upgrade oncokb transcript which operates on the grch37
+        // this is a util to upgrade oncokb transcript which operates on the grch37
         Gene gene = GeneUtils.getGene(entrezGeneId, hugoSymbol);
 
         if (gene == null) {
@@ -570,7 +570,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     ) throws ApiException, org.genome_nexus.ApiException {
         HttpStatus status = HttpStatus.OK;
         List<String> result = new ArrayList<>();
-    
+
         if (body == null) {
             status = HttpStatus.BAD_REQUEST;
         } else {
@@ -590,7 +590,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     ) throws ApiException, org.genome_nexus.ApiException {
         HttpStatus status = HttpStatus.OK;
         List<String> result = new ArrayList<>();
-    
+
         if (body == null) {
             status = HttpStatus.BAD_REQUEST;
         } else {

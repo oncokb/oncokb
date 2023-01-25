@@ -38,7 +38,7 @@ public class DrugController {
             Set<Gene> genes = GeneUtils.getGenesWithDrug(drug);
             DrugUtils.updateDrugName(drug, preferredName);
             drugBo.update(drug);
-            CacheUtils.updateGene(genes.stream().map(gene -> gene.getEntrezGeneId()).collect(Collectors.toSet()), true);
+            CacheUtils.updateGene(genes.stream().map(gene -> gene.getEntrezGeneId()).collect(Collectors.toSet()));
         }
 
         return new ResponseEntity(HttpStatus.OK);

@@ -3,10 +3,12 @@ package org.mskcc.cbio.oncokb.util;
 import com.mysql.jdbc.StringUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.mskcc.cbio.oncokb.apiModels.download.DownloadAvailability;
+import org.mskcc.cbio.oncokb.bo.InfoBo;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.TumorType;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -130,31 +132,6 @@ public class CacheUtils {
             }
         }
     };
-
-    private static void notifyOtherServices(String cmd, Set<Integer> entrezGeneIds) throws IOException {
-        System.out.println("Notify other services..." + " at " + MainUtils.getCurrentTime());
-        if (cmd == null) {
-            cmd = "";
-        }
-        System.out.println("\tcmd is " + cmd);
-        if (cmd == "update" && entrezGeneIds != null && entrezGeneIds.size() > 0) {
-            System.out.println("\t# of other services" + otherServices.size());
-            for (String service : otherServices) {
-                if (!StringUtils.isNullOrEmpty(service)) {
-                    HttpUtils.postRequest(service + "?cmd=updateGene&entrezGeneIds=" +
-                        org.apache.commons.lang3.StringUtils.join(entrezGeneIds, ","), "");
-                }
-            }
-        } else if (cmd == "reset") {
-            for (String service : otherServices) {
-                if (!StringUtils.isNullOrEmpty(service)) {
-                    HttpUtils.postRequest(service + "?cmd=reset", "");
-                }
-            }
-        } else {
-            System.out.println("\tcmd=" + cmd + ", has gene:" + entrezGeneIds != null && entrezGeneIds.size() > 0);
-        }
-    }
 
     static {
         try {
@@ -589,38 +566,22 @@ public class CacheUtils {
         alterationsByReferenceGenome.remove(entrezGeneId);
     }
 
-    public static void updateGene(Set<Integer> entrezGeneIds, Boolean propagate) throws IOException {
+    public static void updateGene(Set<Integer> entrezGeneIds) {
         System.out.println("Update gene on instance " + PropertiesUtils.getProperties("app.name") + " at " + MainUtils.getCurrentTime());
-        if (propagate == null) {
-            propagate = false;
-        }
         if(entrezGeneIds == null || entrezGeneIds.size() == 0){
             System.out.println("\tThere is no entrez gene ids specified.");
             return;
         }
         entrezGeneIds.forEach(entrezGeneId -> GeneObservable.getInstance().update("update", entrezGeneId.toString()));
-        if (propagate) {
-            notifyOtherServices("update", entrezGeneIds);
-        }else{
-            System.out.println("\tDo not propagate.");
-        }
+        InfoBo infoBo = ApplicationContextSingleton.getInfoBo();
+        Info info = infoBo.get();
+        info.setLastDataUpdate(Date.from(Instant.now()));
+        infoBo.update(info);
     }
 
-    public static void resetAll() throws IOException {
+    public static void resetAll() {
         System.out.println("Reset all genes cache on instance " + PropertiesUtils.getProperties("app.name") + " at " + MainUtils.getCurrentTime());
         GeneObservable.getInstance().update("reset", null);
-        notifyOtherServices("reset", null);
-    }
-
-    public static void resetAll(Boolean propagate) throws IOException {
-        System.out.println("Reset all genes cache on instance " + PropertiesUtils.getProperties("app.name") + " at " + MainUtils.getCurrentTime());
-        GeneObservable.getInstance().update("reset", null);
-        if (propagate == null) {
-            propagate = false;
-        }
-        if (propagate) {
-            notifyOtherServices("reset", null);
-        }
     }
 
 
@@ -658,20 +619,6 @@ public class CacheUtils {
         } else {
             return null;
         }
-    }
-
-    public static Map<String, Long> getRecordTime() {
-        return recordTime;
-    }
-
-    public static void emptyRecordTime() {
-        recordTime = new HashedMap();
-    }
-
-    public static void addRecordTime(String key, Long time) {
-        if (!recordTime.containsKey(key))
-            recordTime.put(key, (long) 0);
-        recordTime.put(key, recordTime.get(key) + time);
     }
 
     public static List<DownloadAvailability> getDownloadAvailabilities() {

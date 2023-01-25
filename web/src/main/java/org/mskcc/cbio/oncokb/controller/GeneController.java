@@ -81,7 +81,7 @@ public class GeneController {
             ApplicationContextSingleton.getEvidenceBo().deleteAll(new ArrayList<>(CacheUtils.getEvidences(gene)));
             ApplicationContextSingleton.getAlterationBo().deleteAll(new ArrayList<>(AlterationUtils.getAllAlterations(null, gene)));
             ApplicationContextSingleton.getGeneBo().delete(gene);
-            CacheUtils.updateGene(Collections.singleton(gene.getEntrezGeneId()), true);
+            CacheUtils.updateGene(Collections.singleton(gene.getEntrezGeneId()));
         }
         return "success";
     }

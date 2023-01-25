@@ -9,4 +9,6 @@ import org.mskcc.cbio.oncokb.model.Info;
  */
 public interface InfoDao extends GenericDao<Info, Integer> {
     Info get();
+
+    void update(Info info);
 }

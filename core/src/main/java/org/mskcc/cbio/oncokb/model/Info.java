@@ -24,6 +24,9 @@ public class Info implements Serializable {
     @Column(name = "data_version_date")
     Date dataVersionDate;
 
+    @Column(name = "last_data_update")
+    Date lastDataUpdate;
+
     public Integer getId() {
         return id;
     }
@@ -64,4 +67,11 @@ public class Info implements Serializable {
         this.dataVersionDate = dataVersionDate;
     }
 
+    public Date getLastDataUpdate() {
+        return lastDataUpdate;
+    }
+
+    public void setLastDataUpdate(Date lastDateUpdate) {
+        this.lastDataUpdate = lastDateUpdate;
+    }
 }

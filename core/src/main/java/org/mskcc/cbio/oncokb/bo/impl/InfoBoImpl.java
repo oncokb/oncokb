@@ -15,4 +15,9 @@ public class InfoBoImpl extends GenericBoImpl<Info, InfoDao> implements InfoBo {
     public Info get() {
         return getDao().get();
     }
+
+    @Override
+    public void update(Info info) {
+        getDao().update(info);
+    }
 }

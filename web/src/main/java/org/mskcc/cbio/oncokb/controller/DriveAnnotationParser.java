@@ -215,7 +215,7 @@ public class DriveAnnotationParser {
                         alterationBo.delete(alteration);
                     }
 
-                    CacheUtils.updateGene(Collections.singleton(gene.getEntrezGeneId()), false);
+                    CacheUtils.updateGene(Collections.singleton(gene.getEntrezGeneId()));
 
                     // summary
                     parseSummary(gene, geneInfo.has("summary") ? geneInfo.getString("summary").trim() : null, getUUID(geneInfo, "summary"), getLastEdit(geneInfo, "summary"), nestLevel + 1);
@@ -229,7 +229,7 @@ public class DriveAnnotationParser {
                     // Variants of unknown significance
                     parseVUS(gene, vus, nestLevel + 1);
 
-                    CacheUtils.updateGene(Collections.singleton(gene.getEntrezGeneId()), true);
+                    CacheUtils.updateGene(Collections.singleton(gene.getEntrezGeneId()));
                 } else {
                     System.out.print(spaceStrByNestLevel(nestLevel) + "No info about " + hugo);
                 }

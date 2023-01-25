@@ -17,4 +17,9 @@ public class InfoDaoImpl
         // the info table have and should only have one row
         return infoList.size() > 0 ? infoList.iterator().next() : null;
     }
+
+    @Override
+    public void update(Info info) {
+        super.update(info);
+    }
 }

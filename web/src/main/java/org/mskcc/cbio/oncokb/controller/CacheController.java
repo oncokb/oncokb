@@ -63,17 +63,16 @@ public class CacheController {
     Map<String, String> postAlteration(
         HttpMethod method,
         @RequestParam(value = "cmd", required = false) String cmd,
-        @RequestParam(value = "entrezGeneIds", required = false) Set<Integer> entrezGeneIds,
-        @RequestParam(value = "propagation", required = false, defaultValue = "false") Boolean propagation
+        @RequestParam(value = "entrezGeneIds", required = false) Set<Integer> entrezGeneIds
     ) throws IOException {
         Map<String, String> result = new HashMap<>();
         if (cmd != null) {
             switch (cmd) {
                 case "reset":
-                    resetCache(propagation);
+                    resetCache();
                     break;
                 case "updateGene":
-                    CacheUtils.updateGene(entrezGeneIds, propagation);
+                    CacheUtils.updateGene(entrezGeneIds);
                     break;
                 case "updateAbbreviationOntology":
                     NamingUtils.cacheAllAbbreviations();
@@ -86,10 +85,10 @@ public class CacheController {
         return result;
     }
 
-    private Boolean resetCache(Boolean propagation) {
+    private Boolean resetCache() {
         Boolean operation = true;
         try {
-            CacheUtils.resetAll(propagation);
+            CacheUtils.resetAll();
         } catch (Exception e) {
             operation = false;
         }
