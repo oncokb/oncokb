@@ -159,11 +159,17 @@ public class GenomeNexusUtils {
             e.printStackTrace();
         }
         
+        // Get HGVSg and Genomic Location from Genome Nexus annotation
         if (annotation != null) {
-            preAnnotatedVariantInfo.setHgvsg(annotation.getHgvsg());
+            if (StringUtils.isNotEmpty(annotation.getHgvsg())) {
+                preAnnotatedVariantInfo.setHgvsg(annotation.getHgvsg());
+            }
 
-            if (type.equals(GNVariantAnnotationType.GENOMIC_LOCATION) && annotation.isSuccessfullyAnnotated()) {
-                preAnnotatedVariantInfo.setGenomicLocation(query);
+            if (annotation.getAnnotationSummary() != null && annotation.getAnnotationSummary().getGenomicLocation() != null) {
+                String genomicLocation = annotation.getAnnotationSummary().getGenomicLocation().toString();
+                if (StringUtils.isNotEmpty(genomicLocation)) {
+                    preAnnotatedVariantInfo.setGenomicLocation(genomicLocation);
+                }
             }
         }
 
