@@ -166,9 +166,10 @@ public class GenomeNexusUtils {
             }
 
             if (annotation.getAnnotationSummary() != null && annotation.getAnnotationSummary().getGenomicLocation() != null) {
-                String genomicLocation = annotation.getAnnotationSummary().getGenomicLocation().toString();
-                if (StringUtils.isNotEmpty(genomicLocation)) {
-                    preAnnotatedVariantInfo.setGenomicLocation(genomicLocation);
+                org.genome_nexus.client.GenomicLocation gl = annotation.getAnnotationSummary().getGenomicLocation();
+                String glString = gl.getChromosome() + "," + gl.getStart() + "," + gl.getEnd() + "," + gl.getReferenceAllele() + "," + gl.getVariantAllele();
+                if (StringUtils.isNotEmpty(glString)) {
+                    preAnnotatedVariantInfo.setGenomicLocation(glString);
                 }
             }
         }
