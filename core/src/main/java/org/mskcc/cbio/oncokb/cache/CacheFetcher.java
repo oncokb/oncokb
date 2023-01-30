@@ -253,8 +253,8 @@ public class CacheFetcher {
         Alteration alteration = new Alteration();
 
         // Build the Alteration object from the pre-annotated GN variant object.
-        if (StringUtils.isNotEmpty(gnAnnotatedVariantInfo.getHugoSymbol())) {
-            Gene gene = GeneUtils.getGene(gnAnnotatedVariantInfo.getHugoSymbol());
+        if (StringUtils.isNotEmpty(gnAnnotatedVariantInfo.getHugoSymbol()) && gnAnnotatedVariantInfo.getEntrezGeneId() != null) {
+            Gene gene = GeneUtils.getGene(gnAnnotatedVariantInfo.getEntrezGeneId(), gnAnnotatedVariantInfo.getHugoSymbol());
             if (gene == null) {
                 gene = new Gene();
                 gene.setHugoSymbol(gnAnnotatedVariantInfo.getHugoSymbol());
@@ -274,12 +274,12 @@ public class CacheFetcher {
         // Store pre-annotated alteration into Redis cache
         Cache cache = cacheManager.getCache(CacheCategory.GENERAL.getKey() + REDIS_KEY_SEPARATOR + "getAlterationFromGenomeNexus");
         if (StringUtils.isNotEmpty(hgvsg)) {
-            String cacheKey = org.springframework.util.StringUtils.arrayToDelimitedString(new Object[]{GNVariantAnnotationType.HGVS_G, referenceGenome, hgvsg}, REDIS_KEY_SEPARATOR);
+            String cacheKey = String.join(REDIS_KEY_SEPARATOR, new String[]{GNVariantAnnotationType.HGVS_G.name(), referenceGenome.name(), hgvsg});
             cache.putIfAbsent(cacheKey, alteration);
         }
 
         if (StringUtils.isNotEmpty(genomicLocation)) {
-            String cacheKey = org.springframework.util.StringUtils.arrayToDelimitedString(new Object[]{GNVariantAnnotationType.GENOMIC_LOCATION, referenceGenome, genomicLocation}, REDIS_KEY_SEPARATOR);
+            String cacheKey = String.join(REDIS_KEY_SEPARATOR, new String[]{GNVariantAnnotationType.GENOMIC_LOCATION.name(), referenceGenome.name(), genomicLocation});
             cache.putIfAbsent(cacheKey, alteration);
         }
 
