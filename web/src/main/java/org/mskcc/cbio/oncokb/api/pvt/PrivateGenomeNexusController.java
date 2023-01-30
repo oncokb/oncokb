@@ -42,16 +42,19 @@ public class PrivateGenomeNexusController {
     public ResponseEntity<TranscriptResult> getTranscript(
         @PathVariable String hugoSymbol
     ) throws ApiException {
-        EnsemblTranscript grch37Transcript = getCanonicalEnsemblTranscript(hugoSymbol, ReferenceGenome.GRCh37);
-        TranscriptPair transcriptPair = new TranscriptPair();
-        transcriptPair.setReferenceGenome(ReferenceGenome.GRCh37);
-        transcriptPair.setTranscript(grch37Transcript.getTranscriptId());
-        TranscriptMatchResult transcriptMatchResult = matchTranscript(transcriptPair, ReferenceGenome.GRCh38, hugoSymbol);
-
         TranscriptResult transcriptResult = new TranscriptResult();
-        transcriptResult.setGrch37Transcript(transcriptMatchResult.getOriginalEnsemblTranscript());
-        transcriptResult.setGrch38Transcript(transcriptMatchResult.getTargetEnsemblTranscript());
-        transcriptResult.setNote(transcriptMatchResult.getNote());
+
+        EnsemblTranscript grch37Transcript = getCanonicalEnsemblTranscript(hugoSymbol, ReferenceGenome.GRCh37);
+        if (grch37Transcript != null) {
+            TranscriptPair transcriptPair = new TranscriptPair();
+            transcriptPair.setReferenceGenome(ReferenceGenome.GRCh37);
+            transcriptPair.setTranscript(grch37Transcript.getTranscriptId());
+            TranscriptMatchResult transcriptMatchResult = matchTranscript(transcriptPair, ReferenceGenome.GRCh38, hugoSymbol);
+
+            transcriptResult.setGrch37Transcript(transcriptMatchResult.getOriginalEnsemblTranscript());
+            transcriptResult.setGrch38Transcript(transcriptMatchResult.getTargetEnsemblTranscript());
+            transcriptResult.setNote(transcriptMatchResult.getNote());
+        }
 
         return new ResponseEntity<>(transcriptResult, HttpStatus.OK);
     }
