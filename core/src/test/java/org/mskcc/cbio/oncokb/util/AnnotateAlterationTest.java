@@ -138,6 +138,8 @@ public class AnnotateAlterationTest {
 
     @Test
     public void testAnnotateAlteration() throws Exception {
+        // This test mainly test when protein change/start/end are specified
+        // Please see AnnotateAlterationParameterizedTest for testing combinations
         // Particularly test expectedConsequence
         Alteration alt = new Alteration();
         alt.setProteinStart(Integer.parseInt(proteinStart));

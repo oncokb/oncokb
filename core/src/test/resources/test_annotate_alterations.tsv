@@ -1,0 +1,80 @@
+#
+# List of alterations for testing.  Each line is the following format:
+#
+# Protein Change\tExpected consequence\tExpected Reference Allele\tExpected Variant Allele\tExpected Protein Start\tExpected Protein End
+#
+
+# missense variants
+N505I	missense_variant	N	I	505	505
+E323_D324delinsKN	missense_variant			323	324
+814_852mis	missense_variant			814	852
+IK744KI	missense_variant	IK	KI	744	745
+
+# inframes
+Q58_Q59insL	inframe_insertion			58	59
+58_Q59insL	inframe_insertion			58	59
+Q58_59insL	inframe_insertion			58	59
+58_59insL	inframe_insertion			58	59
+P68_C77dup	inframe_insertion			68	77
+P68_77dup	inframe_insertion			68	77
+68_C77dup	inframe_insertion			68	77
+68_77dup	inframe_insertion			68	77
+T599delinsIP	inframe_insertion	T		599	599
+599delinsIP	inframe_insertion			599	599
+C359del	inframe_deletion	C		359	359
+359del	inframe_deletion			359	359
+1459_1468del	inframe_deletion			1459	1468
+A1459_D1468del	inframe_deletion			1459	1468
+1459_D1468del	inframe_deletion			1459	1468
+A1459_1468del	inframe_deletion			1459	1468
+D1161_S1172delinsE	inframe_deletion			1161	1172
+D1161_1172delinsE	inframe_deletion			1161	1172
+1161_S1172delinsE	inframe_deletion			1161	1172
+1161_1172delinsE	inframe_deletion			1161	1172
+
+
+# frame shifts
+S859Afs*12	frameshift_variant	S		859	859
+859Afs*12	frameshift_variant			859	859
+S859fs*12	frameshift_variant	S		859	859
+G314fs	frameshift_variant	G		314	314
+314fs	frameshift_variant			314	314
+S330_S352fs	frameshift_variant			330	352
+330_S352fs	frameshift_variant			330	352
+S330_352fs	frameshift_variant			330	352
+330_352fs	frameshift_variant			330	352
+
+#  truncating mutations
+W143_A314trunc	feature_truncation			143	314
+W143_314trunc	feature_truncation			143	314
+143_A314trunc	feature_truncation			143	314
+422_605trunc	feature_truncation			422	605
+Truncating Mutations	feature_truncation			-1	100000
+
+# splice variants
+596_619splice	splice_region_variant			596	619
+X1429_splice	splice_region_variant			1429	1429
+1429_splice	splice_region_variant			1429	1429
+M1I	start_lost	M	I	1	1
+1I	start_lost		I	1	1
+M1?	start_lost	M	?	1	1
+A149*	stop_gained	A	*	149	149
+149*	stop_gained		*	149	149
+*757Kext*36	stop_lost	*		757	757
+*149*	stop_lost	*	*	149	149
+
+# synonymous variants
+K24K	synonymous_variant	K	K	24	24
+
+# any
+449_514mut	any			449	514
+
+# NA variants
+D399	NA	D		399	399
+MCUR1-AKT1 fusion	NA			-1	100000
+Fusions	NA			-1	100000
+Deletion	NA			-1	100000
+Amplification	NA			-1	100000
+Oncogenic Mutations	NA			-1	100000
+Oncogenic Mutations {excluding V600}	NA			-1	100000
+

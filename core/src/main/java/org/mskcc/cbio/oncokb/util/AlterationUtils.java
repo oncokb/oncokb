@@ -244,51 +244,12 @@ public final class AlterationUtils {
 
         proteinChange = proteinChange.trim();
 
-        Pattern p = Pattern.compile("^([A-Z\\*]+)([0-9]+)([A-Z\\*\\?]*)$");
+        Pattern p = Pattern.compile("([A-Z]?)([0-9]+)(_[A-Z]?([0-9]+))?(delins|ins|del)([A-Z0-9]+)", Pattern.CASE_INSENSITIVE);
         Matcher m = p.matcher(proteinChange);
-        if (m.matches()) {
-            ref = m.group(1);
-            start = Integer.valueOf(m.group(2));
-            end = start;
-            var = m.group(3);
-
-            Integer refL = ref.length();
-            Integer varL = var.length();
-
-            if (ref.equals("*")) {
-                consequence = "stop_lost";
-            } else if (var.equals("*")) {
-                consequence = "stop_gained";
-            } else if (ref.equals(var)) {
-                consequence = "synonymous_variant";
-            } else if (start == 1) {
-                consequence = "start_lost";
-            } else if (var.equals("?")) {
-                consequence = "any";
-            } else {
-                end = start + refL - 1;
-                if (refL > 1 || varL > 1) {
-                    // Handle in-frame insertion/deletion event. Exp: IK744K
-                    if (refL > varL) {
-                        consequence = IN_FRAME_DELETION;
-                    } else if (refL < varL) {
-                        consequence = IN_FRAME_INSERTION;
-                    } else {
-                        consequence = MISSENSE_VARIANT;
-                    }
-                } else if (refL == 1 && varL == 1) {
-                    consequence = MISSENSE_VARIANT;
-                } else {
-                    consequence = "NA";
-                }
-            }
-        } else {
-            p = Pattern.compile("([A-Z]?)([0-9]+)(_[A-Z]?([0-9]+))?(delins|ins|del)([A-Z0-9]+)");
-            m = p.matcher(proteinChange);
             if (m.matches()) {
                 if (m.group(1) != null && m.group(3) == null) {
                     // we only want to specify reference when it's one position ins/del
-                    ref = m.group(1);
+                    ref = m.group(1).toUpperCase();
                 }
                 start = Integer.valueOf(m.group(2));
                 if (m.group(4) != null) {
@@ -314,7 +275,7 @@ public final class AlterationUtils {
                     }
                 }
             } else {
-                p = Pattern.compile("[A-Z]?([0-9]+)(_[A-Z]?([0-9]+))?(_)?splice");
+                p = Pattern.compile("[A-Z]?([0-9]+)(_[A-Z]?([0-9]+))?(_)?splice", Pattern.CASE_INSENSITIVE);
                 m = p.matcher(proteinChange);
                 if (m.matches()) {
                     start = Integer.valueOf(m.group(1));
@@ -325,12 +286,12 @@ public final class AlterationUtils {
                     }
                     consequence = "splice_region_variant";
                 } else {
-                    p = Pattern.compile("[A-Z]?([0-9]+)_[A-Z]?([0-9]+)(.+)");
+                    p = Pattern.compile("[A-Z]?([0-9]+)_[A-Z]?([0-9]+)(.+)", Pattern.CASE_INSENSITIVE);
                     m = p.matcher(proteinChange);
                     if (m.matches()) {
                         start = Integer.valueOf(m.group(1));
                         end = Integer.valueOf(m.group(2));
-                        String v = m.group(3);
+                        String v = m.group(3).toLowerCase();
                         switch (v) {
                             case "mis":
                                 consequence = MISSENSE_VARIANT;
@@ -354,22 +315,22 @@ public final class AlterationUtils {
                                 consequence = "any";
                         }
                     } else {
-                        p = Pattern.compile("([A-Z\\*])([0-9]+)[A-Z]?fs.*");
+                        p = Pattern.compile("([A-Z\\*])?([0-9]+)[A-Z]?fs.*", Pattern.CASE_INSENSITIVE);
                         m = p.matcher(proteinChange);
                         if (m.matches()) {
-                            ref = m.group(1);
+                            ref = m.group(1) == null ? null : m.group(1).toUpperCase();
                             start = Integer.valueOf(m.group(2));
                             end = start;
 
                             consequence = "frameshift_variant";
                         } else {
-                            p = Pattern.compile("([A-Z]+)?([0-9]+)((ins)|(del)|(dup)|(mut))");
+                            p = Pattern.compile("([A-Z]+)?([0-9]+)((ins)|(del)|(dup)|(mut))", Pattern.CASE_INSENSITIVE);
                             m = p.matcher(proteinChange);
                             if (m.matches()) {
-                                ref = m.group(1);
+                                ref = m.group(1) == null ? null : m.group(1).toUpperCase();
                                 start = Integer.valueOf(m.group(2));
                                 end = start;
-                                String v = m.group(3);
+                                String v = m.group(3).toLowerCase();
                                 switch (v) {
                                     case "ins":
                                         consequence = IN_FRAME_INSERTION;
@@ -393,24 +354,64 @@ public final class AlterationUtils {
                                  * *315TextALGT*
                                  * *327Aext*?
                                  */
-                                p = Pattern.compile("(\\*)([0-9]+)[A-Z]ext([A-Z]+)?\\*([0-9]+)?(\\?)?");
+                                p = Pattern.compile("(\\*)([0-9]+)[A-Z]ext([A-Z]+)?\\*([0-9]+)?(\\?)?", Pattern.CASE_INSENSITIVE);
                                 m = p.matcher(proteinChange);
                                 if (m.matches()) {
-                                    ref = m.group(1);
+                                    ref = m.group(1).toUpperCase();
                                     start = Integer.valueOf(m.group(2));
                                     end = start;
                                     consequence = "stop_lost";
                                 } else {
-                                    p = Pattern.compile("([A-Z\\*])?([0-9]+)=");
+                                    p = Pattern.compile("([A-Z\\*])?([0-9]+)=", Pattern.CASE_INSENSITIVE);
                                     m = p.matcher(proteinChange);
                                     if (m.matches()) {
-                                        var = ref = m.group(1);
+                                        var = ref = m.group(1).toUpperCase();
                                         start = Integer.valueOf(m.group(2));
                                         end = start;
                                         if (ref != null && ref.equals("*")) {
                                             consequence = "stop_retained_variant";
                                         } else {
                                             consequence = "synonymous_variant";
+                                        }
+                                    }else {
+                                        p = Pattern.compile("^([A-Z\\*]+)?([0-9]+)([A-Z\\*\\?]*)$", Pattern.CASE_INSENSITIVE);
+                                        m = p.matcher(proteinChange);
+                                        if (m.matches()) {
+                                            ref = m.group(1) == null ? "" : m.group(1).toUpperCase();
+                                            start = Integer.valueOf(m.group(2));
+                                            end = start;
+                                            var = m.group(3).toUpperCase();
+
+                                            Integer refL = ref.length();
+                                            Integer varL = var.length();
+
+                                            if (ref.equals("*")) {
+                                                consequence = "stop_lost";
+                                            } else if (var.equals("*")) {
+                                                consequence = "stop_gained";
+                                            } else if (ref.equalsIgnoreCase(var)) {
+                                                consequence = "synonymous_variant";
+                                            } else if (start == 1) {
+                                                consequence = "start_lost";
+                                            } else if (var.equals("?")) {
+                                                consequence = "any";
+                                            } else {
+                                                end = start + refL - 1;
+                                                if (refL > 1 || varL > 1) {
+                                                    // Handle in-frame insertion/deletion event. Exp: IK744K
+                                                    if (refL > varL) {
+                                                        consequence = IN_FRAME_DELETION;
+                                                    } else if (refL < varL) {
+                                                        consequence = IN_FRAME_INSERTION;
+                                                    } else {
+                                                        consequence = MISSENSE_VARIANT;
+                                                    }
+                                                } else if (refL == 1 && varL == 1) {
+                                                    consequence = MISSENSE_VARIANT;
+                                                } else {
+                                                    consequence = "NA";
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -419,7 +420,6 @@ public final class AlterationUtils {
                     }
                 }
             }
-        }
 
         // truncating
         if (proteinChange.toLowerCase().matches("truncating mutations?")) {
