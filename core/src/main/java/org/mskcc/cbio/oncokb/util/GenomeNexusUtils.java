@@ -172,6 +172,16 @@ public class GenomeNexusUtils {
                     preAnnotatedVariantInfo.setGenomicLocation(glString);
                 }
             }
+
+            // Use the original query if HGVSg or Genomic Location is missing
+            if (annotation.isSuccessfullyAnnotated()) {
+                if (StringUtils.isEmpty(preAnnotatedVariantInfo.getHgvsg()) && type == GNVariantAnnotationType.HGVS_G) {
+                    preAnnotatedVariantInfo.setHgvsg(query);
+                }
+                if (StringUtils.isEmpty(preAnnotatedVariantInfo.getGenomicLocation()) && type == GNVariantAnnotationType.GENOMIC_LOCATION) {
+                    preAnnotatedVariantInfo.setGenomicLocation(query);
+                }
+            }
         }
 
         TranscriptConsequenceSummary transcriptConsequenceSummary = getConsequence(annotation, referenceGenome);
