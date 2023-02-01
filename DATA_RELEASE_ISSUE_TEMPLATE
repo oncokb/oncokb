@@ -13,6 +13,9 @@ Prepare for data v*.* release
 - [ ] Update EU public site
     - [ ] Update database
     - [ ] Update website using latest image
+- [ ] Update MSK public site
+    - [ ] Update database
+    - [ ] Update website using latest image
 - [ ] Update demo site
     - [ ] Update database
     - [ ] Update website using latest image
