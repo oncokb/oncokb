@@ -94,13 +94,13 @@ public class IndicatorUtilsTest {
         assertEquals("The oncogenicity of BRAF-TMPRSS2 fusion should be Likely Oncogenic", "Likely Oncogenic", indicatorQueryResp.getOncogenic());
 
         // Test Intragenic Mutation
-        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "NOTCH1", "NOTCH1-intragenic", null, null, "Ovarian Cancer", null, null, null, null);
+        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "ATM", "ATM-intragenic", null, null, "Ovarian Cancer", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
-        assertEquals("The oncogenicity of NOTCH1-intragenic should be Likely Oncogenic", "Likely Oncogenic", indicatorQueryResp.getOncogenic());
+        assertEquals("The oncogenicity of ATM-intragenic should be Likely Oncogenic", "Likely Oncogenic", indicatorQueryResp.getOncogenic());
 
-        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "NOTCH1", "NOTCH1 intragenic", null, null, "Ovarian Cancer", null, null, null, null);
+        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "ATM", "ATM intragenic", null, null, "Ovarian Cancer", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
-        assertEquals("The oncogenicity of NOTCH1 intragenic should be Likely Oncogenic", "Likely Oncogenic", indicatorQueryResp.getOncogenic());
+        assertEquals("The oncogenicity of ATM intragenic should be Likely Oncogenic", "Likely Oncogenic", indicatorQueryResp.getOncogenic());
 
         // Check mutation effect
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "BRAF", "V600E", null, null, "MEL", null, null, null, null);
