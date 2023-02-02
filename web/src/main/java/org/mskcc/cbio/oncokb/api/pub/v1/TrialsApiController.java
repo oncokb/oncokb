@@ -57,7 +57,7 @@ public class TrialsApiController {
         @ApiResponse(code = 400, message = "Error", response = String.class)})
     @RequestMapping(value = "/trials", produces = {"application/json"}, method = RequestMethod.GET)
     public ResponseEntity<List<Trial>> trialsMatchingGet(
-        @ApiParam(value = "", required = false) @RequestParam(value = "", required = false) String oncoTreeCode,
+        @ApiParam(value = "", required = true) @RequestParam(value = "", required = true) String oncoTreeCode,
         @ApiParam(value = "", required = false) @RequestParam(value = "", required = false) String treatment)
         throws IOException, ParseException {
         HttpStatus status = HttpStatus.OK;
