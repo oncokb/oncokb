@@ -21,8 +21,15 @@ P68_77dup	inframe_insertion			68	77
 68_77dup	inframe_insertion			68	77
 T599delinsIP	inframe_insertion	T		599	599
 599delinsIP	inframe_insertion			599	599
+599delins	NA			599	599
+599delins2	inframe_insertion			599	599
+I744KI	inframe_insertion	I	KI	744	744
+M1ext-1	inframe_insertion			1	1
+1ext-1	inframe_insertion			1	1
+1ext	inframe_insertion			1	1
 C359del	inframe_deletion	C		359	359
 359del	inframe_deletion			359	359
+IK744A	inframe_deletion	IK	A	744	745
 1459_1468del	inframe_deletion			1459	1468
 A1459_D1468del	inframe_deletion			1459	1468
 1459_D1468del	inframe_deletion			1459	1468
@@ -31,7 +38,6 @@ D1161_S1172delinsE	inframe_deletion			1161	1172
 D1161_1172delinsE	inframe_deletion			1161	1172
 1161_S1172delinsE	inframe_deletion			1161	1172
 1161_1172delinsE	inframe_deletion			1161	1172
-
 
 # frame shifts
 S859Afs*12	frameshift_variant	S		859	859
@@ -60,8 +66,14 @@ M1I	start_lost	M	I	1	1
 M1?	start_lost	M	?	1	1
 A149*	stop_gained	A	*	149	149
 149*	stop_gained		*	149	149
-*757Kext*36	stop_lost	*		757	757
 *149*	stop_lost	*	*	149	149
+
+# extension
+*757Kext*36	stop_lost	*		757	757
+757Kext*36	stop_lost			757	757
+*757ext*36	stop_lost	*		757	757
+*757Kext*	stop_lost	*		757	757
+*757Kext*?	stop_lost	*		757	757
 
 # synonymous variants
 K24K	synonymous_variant	K	K	24	24

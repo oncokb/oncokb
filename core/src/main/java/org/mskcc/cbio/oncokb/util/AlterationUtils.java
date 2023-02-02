@@ -244,7 +244,7 @@ public final class AlterationUtils {
 
         proteinChange = proteinChange.trim();
 
-        Pattern p = Pattern.compile("([A-Z]?)([0-9]+)(_[A-Z]?([0-9]+))?(delins|ins|del)([A-Z0-9]+)", Pattern.CASE_INSENSITIVE);
+        Pattern p = Pattern.compile("([A-Z]?)([0-9]+)(_[A-Z]?([0-9]+))?(delins|ins|del)([A-Z0-9]*)", Pattern.CASE_INSENSITIVE);
         Matcher m = p.matcher(proteinChange);
             if (m.matches()) {
                 if (m.group(1) != null && m.group(3) == null) {
@@ -263,15 +263,31 @@ public final class AlterationUtils {
                 } else if (type.equals("del")) {
                     consequence = IN_FRAME_DELETION;
                 } else {
+                    // this will be delins, it requires AA after delins to be specified, otherwise, you won't be able to know its consequence
                     Integer deletion = end - start + 1;
-                    Integer insertion = m.group(6).length();
+                    String groupSix = m.group(6);
+                    String groupSixWithoutDigits = MainUtils.removeDigits(groupSix);
 
-                    if (insertion - deletion > 0) {
-                        consequence = IN_FRAME_INSERTION;
-                    } else if (insertion - deletion == 0) {
-                        consequence = MISSENSE_VARIANT;
+                    if (groupSixWithoutDigits.length() != groupSix.length() && groupSixWithoutDigits.length() > 0) {
+                        if (groupSixWithoutDigits.length() > deletion) {
+                            consequence = IN_FRAME_INSERTION;
+                        } else {
+                            consequence = "NA";
+                        }
                     } else {
-                        consequence = IN_FRAME_DELETION;
+                        Integer insertion = groupSix.length();
+                        if (groupSixWithoutDigits.length() == 0 && insertion > 0) {
+                            insertion = Integer.parseInt(groupSix);
+                        }
+                        if (insertion == 0) {
+                            consequence = "NA";
+                        } else if (insertion - deletion > 0) {
+                            consequence = IN_FRAME_INSERTION;
+                        } else if (insertion - deletion == 0) {
+                            consequence = MISSENSE_VARIANT;
+                        } else {
+                            consequence = IN_FRAME_DELETION;
+                        }
                     }
                 }
             } else {
@@ -346,70 +362,78 @@ public final class AlterationUtils {
                                         break;
                                 }
                             } else {
-                                /**
-                                 * support extension variant (https://varnomen.hgvs.org/recommendations/protein/variant/extension/)
-                                 * the following examples are supported
-                                 * *959Qext*14
-                                 * *110Gext*17
-                                 * *315TextALGT*
-                                 * *327Aext*?
-                                 */
-                                p = Pattern.compile("(\\*)([0-9]+)[A-Z]ext([A-Z]+)?\\*([0-9]+)?(\\?)?", Pattern.CASE_INSENSITIVE);
+                                p = Pattern.compile("M?1ext(-[0-9]+)?", Pattern.CASE_INSENSITIVE);
                                 m = p.matcher(proteinChange);
                                 if (m.matches()) {
-                                    ref = m.group(1).toUpperCase();
-                                    start = Integer.valueOf(m.group(2));
+                                    start = 1;
                                     end = start;
-                                    consequence = "stop_lost";
+                                    consequence = IN_FRAME_INSERTION;
                                 } else {
-                                    p = Pattern.compile("([A-Z\\*])?([0-9]+)=", Pattern.CASE_INSENSITIVE);
+                                    /**
+                                     * support extension variant (https://varnomen.hgvs.org/recommendations/protein/variant/extension/)
+                                     * the following examples are supported
+                                     * *959Qext*14
+                                     * *110Gext*17
+                                     * *315TextALGT*
+                                     * *327Aext*?
+                                     */
+                                    p = Pattern.compile("(\\*)?([0-9]+)[A-Z]?ext([A-Z]+)?\\*([0-9]+)?(\\?)?", Pattern.CASE_INSENSITIVE);
                                     m = p.matcher(proteinChange);
                                     if (m.matches()) {
-                                        var = ref = m.group(1).toUpperCase();
+                                        ref = m.group(1) == null ? "" : m.group(1).toUpperCase();
                                         start = Integer.valueOf(m.group(2));
                                         end = start;
-                                        if (ref != null && ref.equals("*")) {
-                                            consequence = "stop_retained_variant";
-                                        } else {
-                                            consequence = "synonymous_variant";
-                                        }
-                                    }else {
-                                        p = Pattern.compile("^([A-Z\\*]+)?([0-9]+)([A-Z\\*\\?]*)$", Pattern.CASE_INSENSITIVE);
+                                        consequence = "stop_lost";
+                                    } else {
+                                        p = Pattern.compile("([A-Z\\*])?([0-9]+)=", Pattern.CASE_INSENSITIVE);
                                         m = p.matcher(proteinChange);
                                         if (m.matches()) {
-                                            ref = m.group(1) == null ? "" : m.group(1).toUpperCase();
+                                            var = ref = m.group(1).toUpperCase();
                                             start = Integer.valueOf(m.group(2));
                                             end = start;
-                                            var = m.group(3).toUpperCase();
-
-                                            Integer refL = ref.length();
-                                            Integer varL = var.length();
-
-                                            if (ref.equals("*")) {
-                                                consequence = "stop_lost";
-                                            } else if (var.equals("*")) {
-                                                consequence = "stop_gained";
-                                            } else if (ref.equalsIgnoreCase(var)) {
-                                                consequence = "synonymous_variant";
-                                            } else if (start == 1) {
-                                                consequence = "start_lost";
-                                            } else if (var.equals("?")) {
-                                                consequence = "any";
+                                            if (ref != null && ref.equals("*")) {
+                                                consequence = "stop_retained_variant";
                                             } else {
-                                                end = start + refL - 1;
-                                                if (refL > 1 || varL > 1) {
-                                                    // Handle in-frame insertion/deletion event. Exp: IK744K
-                                                    if (refL > varL) {
-                                                        consequence = IN_FRAME_DELETION;
-                                                    } else if (refL < varL) {
-                                                        consequence = IN_FRAME_INSERTION;
-                                                    } else {
-                                                        consequence = MISSENSE_VARIANT;
-                                                    }
-                                                } else if (refL == 1 && varL == 1) {
-                                                    consequence = MISSENSE_VARIANT;
+                                                consequence = "synonymous_variant";
+                                            }
+                                        } else {
+                                            p = Pattern.compile("^([A-Z\\*]+)?([0-9]+)([A-Z\\*\\?]*)$", Pattern.CASE_INSENSITIVE);
+                                            m = p.matcher(proteinChange);
+                                            if (m.matches()) {
+                                                ref = m.group(1) == null ? "" : m.group(1).toUpperCase();
+                                                start = Integer.valueOf(m.group(2));
+                                                end = start;
+                                                var = m.group(3).toUpperCase();
+
+                                                Integer refL = ref.length();
+                                                Integer varL = var.length();
+
+                                                if (ref.equals("*")) {
+                                                    consequence = "stop_lost";
+                                                } else if (var.equals("*")) {
+                                                    consequence = "stop_gained";
+                                                } else if (ref.equalsIgnoreCase(var)) {
+                                                    consequence = "synonymous_variant";
+                                                } else if (start == 1) {
+                                                    consequence = "start_lost";
+                                                } else if (var.equals("?")) {
+                                                    consequence = "any";
                                                 } else {
-                                                    consequence = "NA";
+                                                    end = start + refL - 1;
+                                                    if (refL > 1 || varL > 1) {
+                                                        // Handle in-frame insertion/deletion event. Exp: IK744K
+                                                        if (refL > varL) {
+                                                            consequence = IN_FRAME_DELETION;
+                                                        } else if (refL < varL) {
+                                                            consequence = IN_FRAME_INSERTION;
+                                                        } else {
+                                                            consequence = MISSENSE_VARIANT;
+                                                        }
+                                                    } else if (refL == 1 && varL == 1) {
+                                                        consequence = MISSENSE_VARIANT;
+                                                    } else {
+                                                        consequence = "NA";
+                                                    }
                                                 }
                                             }
                                         }
