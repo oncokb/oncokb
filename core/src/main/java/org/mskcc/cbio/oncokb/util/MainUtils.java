@@ -691,4 +691,11 @@ public class MainUtils {
             return true;
         }
     }
+
+    public static String removeDigits(String text) {
+        if (text == null) {
+            return "";
+        }
+        return text.replaceAll("\\d", "");
+    }
 }
