@@ -119,7 +119,7 @@ public class PrivateGenomeNexusController {
         method = RequestMethod.POST)
     public ResponseEntity<Void> cacheGenomeNexusVariantInfoPost(
         @ApiParam(value = "List of queries. Please see swagger.json for request body format.", required = true) @RequestBody() List<GenomeNexusAnnotatedVariantInfo> body
-    ) throws ApiException, org.genome_nexus.ApiException {
+    ) throws ApiException, org.genome_nexus.ApiException, IllegalStateException {
         HttpStatus status = HttpStatus.OK;
 
         if (body == null) {

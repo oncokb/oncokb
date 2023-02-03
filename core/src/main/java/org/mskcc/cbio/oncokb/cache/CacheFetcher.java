@@ -33,7 +33,8 @@ public class CacheFetcher {
     OncokbTranscriptService oncokbTranscriptService = new OncokbTranscriptService();
     NotationConverter notationConverter = new NotationConverter();
 
-    @Autowired CacheManager cacheManager;
+    @Autowired(required = false) 
+    CacheManager cacheManager;
 
     @Cacheable(cacheResolver = "generalCacheResolver", key = "'all'")
     public OncoKBInfo getOncoKBInfo() {
@@ -249,7 +250,11 @@ public class CacheFetcher {
         return AlterationUtils.getAlterationFromGenomeNexus(gnVariantAnnotationType, genomicLocation, referenceGenome);
     }
 
-    public void cacheAlterationFromGenomeNexus(GenomeNexusAnnotatedVariantInfo gnAnnotatedVariantInfo) {
+    public void cacheAlterationFromGenomeNexus(GenomeNexusAnnotatedVariantInfo gnAnnotatedVariantInfo) throws IllegalStateException {
+        if (cacheManager == null) {
+            throw new IllegalStateException("Cannot cache pre-annotated GN variants. Change property redis.enable to True.");
+        }
+
         Alteration alteration = new Alteration();
 
         // Build the Alteration object from the pre-annotated GN variant object.
