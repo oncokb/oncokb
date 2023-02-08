@@ -114,7 +114,7 @@ public class AnnotateAlterationTest {
                 {"*315TextALGT*", "315", "315", "315", "315", "*", null, "stop_lost"},
                 {"*327Aext*?", "327", "327", "327", "327", "*", null, "stop_lost"},
                 {"*151*", "151", "151", "151", "151", "*", "*", "stop_lost"},
-                {"327Aext*?", "327", "327", "327", "327", null, null, "NA"},
+                {"327Aext*?", "327", "327", "327", "327", null, null, "stop_lost"},
 
                 // Synonymous Variant
                 {"G500G", "500", "500", "500", "500", "G", "G", "synonymous_variant"},
@@ -138,6 +138,8 @@ public class AnnotateAlterationTest {
 
     @Test
     public void testAnnotateAlteration() throws Exception {
+        // This test mainly test when protein change/start/end are specified
+        // Please see AnnotateAlterationParameterizedTest for testing combinations
         // Particularly test expectedConsequence
         Alteration alt = new Alteration();
         alt.setProteinStart(Integer.parseInt(proteinStart));
