@@ -268,6 +268,9 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
                     if (!result.containsKey(level)) {
                         result.put(level, new HashSet<Evidence>());
                     }
+                    if (evidence.getGene().getHugoSymbol().equals("ESR1")) {
+                        evidence = MainUtils.convertSpecialESR1Evidence(evidence);
+                    }
                     Evidence updatedEvidence = new Evidence(evidence, null);
                     if (updatedEvidence.getRelevantCancerTypes() == null || updatedEvidence.getRelevantCancerTypes().size() == 0) {
                         updatedEvidence.setRelevantCancerTypes(TumorTypeUtils.findEvidenceRelevantCancerTypes(updatedEvidence));
@@ -418,6 +421,9 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             variantAnnotationTumorType.setTumorType(uniqueTumorType);
             variantAnnotationTumorType.setEvidences(response.getEvidences().stream().filter(evidence -> !evidence.getCancerTypes().isEmpty() && evidence.getCancerTypes().contains(uniqueTumorType)).map(evidence -> {
                 Evidence updatedEvidence = new Evidence(evidence, evidence.getId());
+                if (updatedEvidence.getGene().getHugoSymbol().equals("ESR1")) {
+                    updatedEvidence = MainUtils.convertSpecialESR1Evidence(updatedEvidence);
+                }
                 if (updatedEvidence.getRelevantCancerTypes() == null || updatedEvidence.getRelevantCancerTypes().size() == 0) {
                     updatedEvidence.setRelevantCancerTypes(TumorTypeUtils.findEvidenceRelevantCancerTypes(evidence));
                 }
@@ -570,7 +576,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     ) throws ApiException, org.genome_nexus.ApiException {
         HttpStatus status = HttpStatus.OK;
         List<String> result = new ArrayList<>();
-    
+
         if (body == null) {
             status = HttpStatus.BAD_REQUEST;
         } else {
@@ -590,7 +596,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     ) throws ApiException, org.genome_nexus.ApiException {
         HttpStatus status = HttpStatus.OK;
         List<String> result = new ArrayList<>();
-    
+
         if (body == null) {
             status = HttpStatus.BAD_REQUEST;
         } else {
