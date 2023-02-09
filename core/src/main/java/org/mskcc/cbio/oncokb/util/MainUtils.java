@@ -484,7 +484,7 @@ public class MainUtils {
             evidence = new Evidence(evidence, null);
             evidence.setAlterations(Collections.singleton(esr1Alt));
         } else if (evidence.getUuid() != null && evidence.getUuid().equals("0e5d873c-c96e-4c98-a4fb-ff66690e86e8")) {
-            Alteration esr1Alt = createSpecialAlteration(evidence.getGene(), "Oncogenic Ligand-Binding Domain Non-missense Mutations");
+            Alteration esr1Alt = createSpecialAlteration(evidence.getGene(), "Oncogenic Ligand-Binding Domain In-Frame Insertions or Deletions");
             evidence = new Evidence(evidence, null);
             evidence.setAlterations(Collections.singleton(esr1Alt));
         }
