@@ -480,11 +480,11 @@ public class MainUtils {
 
     public static Evidence convertSpecialESR1Evidence(Evidence evidence) {
         if (evidence.getUuid() != null && evidence.getUuid().equals("f2527ea6-c1ca-4629-a517-8456addfaf99")) {
-            Alteration esr1Alt = createSpecialAlteration(evidence.getGene(), "Oncogenic ligand-binding domain missense mutations");
+            Alteration esr1Alt = createSpecialAlteration(evidence.getGene(), "Oncogenic Ligand-Binding Domain Missense Mutations");
             evidence = new Evidence(evidence, null);
             evidence.setAlterations(Collections.singleton(esr1Alt));
         } else if (evidence.getUuid() != null && evidence.getUuid().equals("0e5d873c-c96e-4c98-a4fb-ff66690e86e8")) {
-            Alteration esr1Alt = createSpecialAlteration(evidence.getGene(), "Oncogenic ligand-binding domain non-missense mutations");
+            Alteration esr1Alt = createSpecialAlteration(evidence.getGene(), "Oncogenic Ligand-Binding Domain Non-missense Mutations");
             evidence = new Evidence(evidence, null);
             evidence.setAlterations(Collections.singleton(esr1Alt));
         }
