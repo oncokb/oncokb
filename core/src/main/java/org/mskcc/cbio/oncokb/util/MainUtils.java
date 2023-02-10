@@ -464,6 +464,33 @@ public class MainUtils {
         return variants;
     }
 
+    private static Alteration createSpecialAlteration(Gene gene, String proteinChange) {
+        Alteration alt = new Alteration();
+        alt.setGene(gene);
+        alt.setName(proteinChange);
+        alt.setAlteration(proteinChange);
+        alt.setProteinStart(AlterationPositionBoundary.START.getValue());
+        alt.setProteinEnd(AlterationPositionBoundary.END.getValue());
+        Set<ReferenceGenome> referenceGenomes = new HashSet<>();
+        referenceGenomes.add(ReferenceGenome.GRCh37);
+        referenceGenomes.add(ReferenceGenome.GRCh38);
+        alt.setReferenceGenomes(referenceGenomes);
+        return alt;
+    }
+
+    public static Evidence convertSpecialESR1Evidence(Evidence evidence) {
+        if (evidence.getUuid() != null && evidence.getUuid().equals("f2527ea6-c1ca-4629-a517-8456addfaf99")) {
+            Alteration esr1Alt = createSpecialAlteration(evidence.getGene(), "Oncogenic Ligand-Binding Domain Missense Mutations");
+            evidence = new Evidence(evidence, null);
+            evidence.setAlterations(Collections.singleton(esr1Alt));
+        } else if (evidence.getUuid() != null && evidence.getUuid().equals("0e5d873c-c96e-4c98-a4fb-ff66690e86e8")) {
+            Alteration esr1Alt = createSpecialAlteration(evidence.getGene(), "Oncogenic Ligand-Binding Domain In-Frame Insertions or Deletions");
+            evidence = new Evidence(evidence, null);
+            evidence.setAlterations(Collections.singleton(esr1Alt));
+        }
+        return evidence;
+    }
+
     public static Set<ClinicalVariant> getClinicalVariants(Gene gene) {
         Set<ClinicalVariant> variants = new HashSet<>();
         if (gene != null) {
@@ -482,6 +509,14 @@ public class MainUtils {
 
             for (Evidence evidence : geneEvidences.get(gene)) {
                 if (!evidence.getCancerTypes().isEmpty()) {
+                    if (evidence.getGene().getHugoSymbol().equals("ESR1")) {
+                        evidence = convertSpecialESR1Evidence(evidence);
+                        for (Alteration alteration : evidence.getAlterations()) {
+                            if (!evidences.containsKey(alteration)) {
+                                evidences.put(alteration, new HashMap<>());
+                            }
+                        }
+                    }
                     for (Alteration alteration : evidence.getAlterations()) {
                         if (evidences.containsKey(alteration)) {
                             if (publicLevels.contains(evidence.getLevelOfEvidence())) {

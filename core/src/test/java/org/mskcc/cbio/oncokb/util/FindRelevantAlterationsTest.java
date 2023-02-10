@@ -40,8 +40,8 @@ public class FindRelevantAlterationsTest {
                 // Critical cases
                 {"BRAF", "V600E", null, "V600E, V600A, V600D, V600G, V600K, V600L, V600M, V600Q, V600R, VK600EI, V600, Oncogenic Mutations"},
                 {"SMARCB1", "R374Q", null, "R374Q, R374W, Oncogenic Mutations"},
-                {"EGFR", "S768I", null, "S768I, SV768IL, Oncogenic Mutations"},
-                {"EGFR", "S768_V769delinsIL", null, "SV768IL, S768I, V769L, V769M, Oncogenic Mutations"},
+                {"EGFR", "S768I", null, "S768I, S768T, SV768IL, Oncogenic Mutations"},
+                {"EGFR", "S768_V769delinsIL", null, "SV768IL, S768I, V769L, S768T, V769M, Oncogenic Mutations"},
 
                 // Check resistance mutations, they should be matched with Oncogenic Mutations
                 {"ALK", "G1202R", null, "G1202R, Oncogenic Mutations"},
@@ -95,7 +95,7 @@ public class FindRelevantAlterationsTest {
                 {"MED12", "G44S", null, "G44S, G44A, G44C, G44D, G44V, 34_68mis"},
                 {"MED12", "G44D", null, "G44D, G44A, G44C, G44S, G44V, 34_68mis"},
                 {"MED12", "G44*", null, "Truncating Mutations"},
-                {"MED12", "K42_N46del", null, ""},
+                {"MED12", "38_40del", null, ""},
                 {"NOTCH1", "Q2405Rfs*17", null, "Q2405Rfs*17, 2375_2555trunc, Oncogenic Mutations"},
                 {"CALR", "K385Nfs*47", null, "309_417trunc, Oncogenic Mutations"},
 
