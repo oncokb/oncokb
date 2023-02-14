@@ -388,7 +388,7 @@ public final class AlterationUtils {
                                         p = Pattern.compile("([A-Z\\*])?([0-9]+)=", Pattern.CASE_INSENSITIVE);
                                         m = p.matcher(proteinChange);
                                         if (m.matches()) {
-                                            var = ref = m.group(1).toUpperCase();
+                                            var = ref = m.group(1) == null ? "" : m.group(1).toUpperCase();
                                             start = Integer.valueOf(m.group(2));
                                             end = start;
                                             if (ref != null && ref.equals("*")) {
