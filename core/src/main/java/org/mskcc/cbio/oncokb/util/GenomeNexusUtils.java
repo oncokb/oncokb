@@ -159,11 +159,28 @@ public class GenomeNexusUtils {
             e.printStackTrace();
         }
         
+        // Get HGVSg and Genomic Location from Genome Nexus annotation
         if (annotation != null) {
-            preAnnotatedVariantInfo.setHgvsg(annotation.getHgvsg());
+            if (StringUtils.isNotEmpty(annotation.getHgvsg())) {
+                preAnnotatedVariantInfo.setHgvsg(annotation.getHgvsg());
+            }
 
-            if (type.equals(GNVariantAnnotationType.GENOMIC_LOCATION) && annotation.isSuccessfullyAnnotated()) {
-                preAnnotatedVariantInfo.setGenomicLocation(query);
+            if (annotation.getAnnotationSummary() != null && annotation.getAnnotationSummary().getGenomicLocation() != null) {
+                org.genome_nexus.client.GenomicLocation gl = annotation.getAnnotationSummary().getGenomicLocation();
+                if (gl.getChromosome() != null && gl.getStart() != null && gl.getEnd() != null && gl.getReferenceAllele() != null && gl.getVariantAllele() != null ) {
+                    String glString = gl.getChromosome() + "," + gl.getStart() + "," + gl.getEnd() + "," + gl.getReferenceAllele() + "," + gl.getVariantAllele();
+                    preAnnotatedVariantInfo.setGenomicLocation(glString);
+                }
+            }
+
+            // Use the original query if HGVSg or Genomic Location is missing
+            if (annotation.isSuccessfullyAnnotated()) {
+                if (StringUtils.isEmpty(preAnnotatedVariantInfo.getHgvsg()) && type == GNVariantAnnotationType.HGVS_G) {
+                    preAnnotatedVariantInfo.setHgvsg(query);
+                }
+                if (StringUtils.isEmpty(preAnnotatedVariantInfo.getGenomicLocation()) && type == GNVariantAnnotationType.GENOMIC_LOCATION) {
+                    preAnnotatedVariantInfo.setGenomicLocation(query);
+                }
             }
         }
 
