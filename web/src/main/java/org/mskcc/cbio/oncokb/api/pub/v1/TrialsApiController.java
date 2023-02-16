@@ -66,12 +66,12 @@ public class TrialsApiController {
         AmazonS3 s3client = AmazonS3ClientBuilder.standard()
             .withCredentials(new AWSStaticCredentialsProvider(credentials)).withRegion(s3Region).build();
 
-        S3Object s3objectTrials = s3client.getObject("oncokb-clinical-trials", "trials.json");
+        S3Object s3objectTrials = s3client.getObject("oncokb-clinical-trials", "results/trials.json");
         S3ObjectInputStream inputStreamTrials = s3objectTrials.getObjectContent();
         JSONParser jsonParser = new JSONParser();
         JSONObject jsonObjectTrials = (JSONObject) jsonParser.parse(new InputStreamReader(inputStreamTrials, "UTF-8"));
         
-        S3Object s3objectOncotree = s3client.getObject("oncokb-clinical-trials", "oncotree_mapping.json");
+        S3Object s3objectOncotree = s3client.getObject("oncokb-clinical-trials", "results/oncotree_mapping.json");
         S3ObjectInputStream inputStreamOncotree = s3objectOncotree.getObjectContent();
         JSONObject jsonObjectOncotree = (JSONObject) jsonParser.parse(new InputStreamReader(inputStreamOncotree, "UTF-8"));
 
@@ -108,12 +108,12 @@ public class TrialsApiController {
                 .withCredentials(new AWSStaticCredentialsProvider(credentials))
                 .withRegion(s3Region)
                 .build();
-            S3Object s3objectTrials = s3client.getObject("oncokb-clinical-trials", "trials.json");
+            S3Object s3objectTrials = s3client.getObject("oncokb-clinical-trials", "results/trials.json");
             S3ObjectInputStream inputStreamTrials = s3objectTrials.getObjectContent();
             JSONParser jsonParser = new JSONParser();
             JSONObject jsonObjectTrials = (JSONObject) jsonParser.parse(new InputStreamReader(inputStreamTrials, "UTF-8"));
 
-            S3Object s3objectOncotree = s3client.getObject("oncokb-clinical-trials", "oncotree_mapping.json");
+            S3Object s3objectOncotree = s3client.getObject("oncokb-clinical-trials", "results/oncotree_mapping.json");
             S3ObjectInputStream inputStreamOncotree = s3objectOncotree.getObjectContent();
             JSONObject jsonObjectOncotree = (JSONObject) jsonParser.parse(new InputStreamReader(inputStreamOncotree, "UTF-8"));
 
@@ -168,7 +168,6 @@ public class TrialsApiController {
         if (jsonObjectOncotree.containsKey(oncoTreeCode)) {
             JSONObject tumorObj = (JSONObject) jsonObjectOncotree.get(oncoTreeCode);
             Gson gson = new Gson();
-            // System.out.println(tumorObj.toString());
             tumor = gson.fromJson(tumorObj.toString(), Tumor.class);
 
             List<Object> trials = (List<Object>) tumorObj.get("trials");
@@ -204,10 +203,16 @@ public class TrialsApiController {
     private List<Trial> getTrialByDrugName(List<Trial> trials, Set<String> drugsNames) {
         List<Trial> res = new ArrayList<>();
         for (Trial trial : trials) {
-            for (Arms arm : trial.getArms()) {
-                if (arm.getDrugs().stream().map(Drug::getDrugName).collect(Collectors.toSet()).containsAll(drugsNames)) {
-                    res.add(trial);
-                    break;
+            List<Arms> arms = trial.getArms();
+            if(arms != null && !arms.isEmpty()) {
+                for (Arms arm : trial.getArms()) {
+                    List<Drug> drugs = arm.getDrugs();
+                    if (drugs != null && !drugs.isEmpty()) {
+                        if (arm.getDrugs().stream().map(Drug::getDrugName).collect(Collectors.toSet()).containsAll(drugsNames)) {
+                            res.add(trial);
+                            break;
+                        }
+                    }
                 }
             }
         }
