@@ -1,27 +1,18 @@
 package org.mskcc.cbio.oncokb.api.pub.v1;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.s3.model.S3Object;
-import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.mskcc.cbio.oncokb.config.annotation.PremiumPublicApi;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
+import org.mskcc.cbio.oncokb.util.CacheUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -47,9 +38,6 @@ import io.swagger.annotations.ApiResponses;
 @Api(tags = "Trials", description = "Clinical Trials Matching")
 @Controller
 public class TrialsApiController {
-    final String s3AccessKey = PropertiesUtils.getProperties("aws.s3.accessKey");
-    final String s3SecretKey = PropertiesUtils.getProperties("aws.s3.secretKey");
-    final String s3Region = PropertiesUtils.getProperties("aws.s3.region");
 
     @PremiumPublicApi
     @ApiOperation("Return a list of trials using OncoTree Code and/or treatment")
@@ -61,19 +49,9 @@ public class TrialsApiController {
         @ApiParam(value = "", required = false) @RequestParam(value = "", required = false) String treatment)
         throws IOException, ParseException {
         HttpStatus status = HttpStatus.OK;
-
-        AWSCredentials credentials = new BasicAWSCredentials(s3AccessKey, s3SecretKey);
-        AmazonS3 s3client = AmazonS3ClientBuilder.standard()
-            .withCredentials(new AWSStaticCredentialsProvider(credentials)).withRegion(s3Region).build();
-
-        S3Object s3objectTrials = s3client.getObject("oncokb-clinical-trials", "results/trials.json");
-        S3ObjectInputStream inputStreamTrials = s3objectTrials.getObjectContent();
-        JSONParser jsonParser = new JSONParser();
-        JSONObject jsonObjectTrials = (JSONObject) jsonParser.parse(new InputStreamReader(inputStreamTrials, "UTF-8"));
-        
-        S3Object s3objectOncotree = s3client.getObject("oncokb-clinical-trials", "results/oncotree_mapping.json");
-        S3ObjectInputStream inputStreamOncotree = s3objectOncotree.getObjectContent();
-        JSONObject jsonObjectOncotree = (JSONObject) jsonParser.parse(new InputStreamReader(inputStreamOncotree, "UTF-8"));
+    
+        JSONObject jsonObjectTrials = CacheUtils.getTrialsJSON();
+        JSONObject jsonObjectOncotree = CacheUtils.getOncotreeJSON();
 
         Tumor tumor = new Tumor();
         if (jsonObjectOncotree.containsKey(oncoTreeCode)) {
@@ -103,19 +81,8 @@ public class TrialsApiController {
         if (body == null) {
             status = HttpStatus.BAD_REQUEST;
         } else {
-            AWSCredentials credentials = new BasicAWSCredentials(s3AccessKey, s3SecretKey);
-            AmazonS3 s3client = AmazonS3ClientBuilder.standard()
-                .withCredentials(new AWSStaticCredentialsProvider(credentials))
-                .withRegion(s3Region)
-                .build();
-            S3Object s3objectTrials = s3client.getObject("oncokb-clinical-trials", "results/trials.json");
-            S3ObjectInputStream inputStreamTrials = s3objectTrials.getObjectContent();
-            JSONParser jsonParser = new JSONParser();
-            JSONObject jsonObjectTrials = (JSONObject) jsonParser.parse(new InputStreamReader(inputStreamTrials, "UTF-8"));
-
-            S3Object s3objectOncotree = s3client.getObject("oncokb-clinical-trials", "results/oncotree_mapping.json");
-            S3ObjectInputStream inputStreamOncotree = s3objectOncotree.getObjectContent();
-            JSONObject jsonObjectOncotree = (JSONObject) jsonParser.parse(new InputStreamReader(inputStreamOncotree, "UTF-8"));
+            JSONObject jsonObjectTrials = CacheUtils.getTrialsJSON();
+            JSONObject jsonObjectOncotree = CacheUtils.getOncotreeJSON();
 
             Set<String> cancerTypes = new HashSet<>(body.getCancerTypes());
             if (cancerTypes.contains(SpecialTumorType.ALL_TUMORS.getTumorType())) {

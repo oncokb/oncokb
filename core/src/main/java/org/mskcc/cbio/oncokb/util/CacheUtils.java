@@ -2,6 +2,14 @@ package org.mskcc.cbio.oncokb.util;
 
 import com.mysql.jdbc.StringUtils;
 import org.apache.commons.collections.map.HashedMap;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.util.*;
+import java.util.stream.Collectors;
 import org.mskcc.cbio.oncokb.apiModels.download.DownloadAvailability;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.TumorType;
@@ -9,6 +17,14 @@ import org.mskcc.cbio.oncokb.model.TumorType;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
 
 
 /**
@@ -52,6 +68,8 @@ public class CacheUtils {
     private static List<TumorType> subtypes = new ArrayList<>();
     private static List<TumorType> mainTypes = new ArrayList<>();
     private static List<TumorType> specialCancerTypes = new ArrayList<>();
+    private static JSONObject jsonObjectTrials;
+    private static JSONObject jsonObjectOncotree;
 
     // Other services which will be defined in the property cache.update separated by comma
     // Every time the observer is triggered, all other services will be triggered as well
@@ -221,6 +239,24 @@ public class CacheUtils {
             registerOtherServices();
             System.out.println("Register other services: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
             current = MainUtils.getCurrentTimestamp();
+
+            final String s3AccessKey = PropertiesUtils.getProperties("aws.s3.accessKey");
+            final String s3SecretKey = PropertiesUtils.getProperties("aws.s3.secretKey");
+            final String s3Region = PropertiesUtils.getProperties("aws.s3.region");
+
+            AWSCredentials credentials = new BasicAWSCredentials(s3AccessKey, s3SecretKey);
+            AmazonS3 s3client = AmazonS3ClientBuilder.standard()
+                .withCredentials(new AWSStaticCredentialsProvider(credentials))
+                .withRegion(s3Region)
+                .build();
+            S3Object s3objectTrials = s3client.getObject("oncokb", "clinical-trials/results/trials.json");
+            S3ObjectInputStream inputStreamTrials = s3objectTrials.getObjectContent();
+            JSONParser jsonParser = new JSONParser();
+            jsonObjectTrials = (JSONObject) jsonParser.parse(new InputStreamReader(inputStreamTrials, "UTF-8"));
+
+            S3Object s3objectOncotree = s3client.getObject("oncokb", "clinical-trials/results/oncotree_mapping.json");
+            S3ObjectInputStream inputStreamOncotree = s3objectOncotree.getObjectContent();
+            jsonObjectOncotree = (JSONObject) jsonParser.parse(new InputStreamReader(inputStreamOncotree, "UTF-8"));
 
         } catch (Exception e) {
             System.out.println(e + " at " + MainUtils.getCurrentTime());
@@ -686,5 +722,13 @@ public class CacheUtils {
         } catch (NoPropertyException exception) {
             System.out.println("The data access token is not available");
         }
+    }
+
+    public static JSONObject getOncotreeJSON() {
+        return jsonObjectOncotree;
+    }
+
+    public static JSONObject getTrialsJSON() {
+        return jsonObjectTrials;
     }
 }
