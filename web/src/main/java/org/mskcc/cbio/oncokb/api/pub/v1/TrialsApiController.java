@@ -1,5 +1,6 @@
 package org.mskcc.cbio.oncokb.api.pub.v1;
 
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
@@ -9,10 +10,13 @@ import com.google.gson.Gson;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.mskcc.cbio.oncokb.cache.CacheFetcher;
 import org.mskcc.cbio.oncokb.config.annotation.PremiumPublicApi;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 import org.mskcc.cbio.oncokb.util.CacheUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -39,6 +43,9 @@ import io.swagger.annotations.ApiResponses;
 @Controller
 public class TrialsApiController {
 
+    @Autowired
+    CacheFetcher cacheFetcher;
+
     @PremiumPublicApi
     @ApiOperation("Return a list of trials using OncoTree Code and/or treatment")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "OK", responseContainer = "List"),
@@ -49,9 +56,16 @@ public class TrialsApiController {
         @ApiParam(value = "", required = false) @RequestParam(value = "", required = false) String treatment)
         throws IOException, ParseException {
         HttpStatus status = HttpStatus.OK;
-    
-        JSONObject jsonObjectTrials = CacheUtils.getTrialsJSON();
-        JSONObject jsonObjectOncotree = CacheUtils.getOncotreeJSON();
+
+        JSONObject jsonObjectTrials;
+        JSONObject jsonObjectOncotree;
+
+        try {
+            jsonObjectTrials= this.cacheFetcher.getTrialsJSON();
+            jsonObjectOncotree = this.cacheFetcher.getOncotreeJSON();
+        } catch (Exception e) {
+            return new ResponseEntity<List<Trial>>(new ArrayList<>(),HttpStatus.BAD_REQUEST);
+        }
 
         Tumor tumor = new Tumor();
         if (jsonObjectOncotree.containsKey(oncoTreeCode)) {
@@ -81,8 +95,15 @@ public class TrialsApiController {
         if (body == null) {
             status = HttpStatus.BAD_REQUEST;
         } else {
-            JSONObject jsonObjectTrials = CacheUtils.getTrialsJSON();
-            JSONObject jsonObjectOncotree = CacheUtils.getOncotreeJSON();
+            JSONObject jsonObjectTrials;
+            JSONObject jsonObjectOncotree;
+    
+            try {
+                jsonObjectTrials= this.cacheFetcher.getTrialsJSON();
+                jsonObjectOncotree = this.cacheFetcher.getOncotreeJSON();
+            } catch (Exception e) {
+                return new ResponseEntity<>(new HashMap<>(),HttpStatus.BAD_REQUEST);
+            }
 
             Set<String> cancerTypes = new HashSet<>(body.getCancerTypes());
             if (cancerTypes.contains(SpecialTumorType.ALL_TUMORS.getTumorType())) {

@@ -5,6 +5,8 @@ import org.cbioportal.genome_nexus.component.annotation.NotationConverter;
 import org.cbioportal.genome_nexus.model.GenomicLocation;
 import org.cbioportal.genome_nexus.util.exception.InvalidHgvsException;
 import org.cbioportal.genome_nexus.util.exception.TypeNotSupportedException;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.mskcc.cbio.oncokb.apiModels.CuratedGene;
 import org.mskcc.cbio.oncokb.bo.OncokbTranscriptService;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
@@ -21,8 +23,17 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
 
 import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
 import static org.mskcc.cbio.oncokb.util.MainUtils.rangesIntersect;
@@ -32,6 +43,15 @@ import static org.mskcc.cbio.oncokb.cache.Constants.REDIS_KEY_SEPARATOR;
 public class CacheFetcher {
     OncokbTranscriptService oncokbTranscriptService = new OncokbTranscriptService();
     NotationConverter notationConverter = new NotationConverter();
+    
+    final String s3AccessKey = PropertiesUtils.getProperties("aws.s3.accessKey");
+    final String s3SecretKey = PropertiesUtils.getProperties("aws.s3.secretKey");
+    final String s3Region = PropertiesUtils.getProperties("aws.s3.region");
+    AWSCredentials credentials = new BasicAWSCredentials(s3AccessKey, s3SecretKey);
+            AmazonS3 s3client = AmazonS3ClientBuilder.standard()
+                .withCredentials(new AWSStaticCredentialsProvider(credentials))
+                .withRegion(s3Region)
+                .build();
 
     @Autowired(required = false) 
     CacheManager cacheManager;
@@ -342,5 +362,31 @@ public class CacheFetcher {
             }
         }).collect(Collectors.toList());
         return filtered.size() > 0;
+    }
+
+    @Cacheable(cacheResolver = "generalCacheResolver")
+    public JSONObject getTrialsJSON() throws Exception {
+        try {
+            S3Object s3objectTrials = s3client.getObject("oncokb", "clinical-trials/results/trials.json");
+            S3ObjectInputStream inputStreamTrials = s3objectTrials.getObjectContent();
+            JSONParser jsonParser = new JSONParser();
+            return (JSONObject) jsonParser.parse(new InputStreamReader(inputStreamTrials, "UTF-8"));
+        } catch(Exception e) {
+            System.out.print("There was an error fetching the trials.");
+            throw new Exception(e);
+        }
+    }
+
+    @Cacheable(cacheResolver = "generalCacheResolver")
+    public JSONObject getOncotreeJSON() throws Exception {
+        try {
+            S3Object s3objectOncotree = s3client.getObject("oncokb", "clinical-trials/results/oncotree_mapping.json");
+            S3ObjectInputStream inputStreamOncotree = s3objectOncotree.getObjectContent();
+            JSONParser jsonParser = new JSONParser();
+            return (JSONObject) jsonParser.parse(new InputStreamReader(inputStreamOncotree, "UTF-8"));
+        } catch(Exception e) {
+            System.out.print("There was an error fetching the oncotree mapping.");
+            throw new Exception(e);
+        }
     }
 }
