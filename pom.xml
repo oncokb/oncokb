@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.mskcc.cbio.oncokb</groupId>
     <artifactId>master</artifactId>
-    <version>3.12.0</version>
+    <version>3.12.7</version>
     <packaging>pom</packaging>
     <modules>
         <module>web</module>
@@ -87,18 +87,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.google.api-client</groupId>
-            <artifactId>google-api-client</artifactId>
-            <version>1.19.0</version>
-            <type>jar</type>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.google.guava</groupId>
-                    <artifactId>guava-jdk5</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
             <groupId>log4j</groupId>
             <artifactId>apache-log4j-extras</artifactId>
             <version>1.1</version>
@@ -111,7 +99,7 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
-            <version>1.6.1</version>
+            <version>1.7.36</version>
         </dependency>
         <dependency>
             <groupId>jstl</groupId>

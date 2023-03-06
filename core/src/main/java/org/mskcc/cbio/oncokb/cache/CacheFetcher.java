@@ -9,13 +9,15 @@ import org.mskcc.cbio.oncokb.apiModels.CuratedGene;
 import org.mskcc.cbio.oncokb.bo.OncokbTranscriptService;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.model.*;
+import org.mskcc.cbio.oncokb.model.genomeNexusPreAnnotations.GenomeNexusAnnotatedVariantInfo;
 import org.mskcc.cbio.oncokb.util.*;
 import org.oncokb.oncokb_transcript.ApiException;
 import org.oncokb.oncokb_transcript.client.EnsemblGene;
 import org.oncokb.oncokb_transcript.client.TranscriptDTO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -24,11 +26,15 @@ import java.util.stream.Collectors;
 
 import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
 import static org.mskcc.cbio.oncokb.util.MainUtils.rangesIntersect;
+import static org.mskcc.cbio.oncokb.cache.Constants.REDIS_KEY_SEPARATOR;
 
 @Component
 public class CacheFetcher {
     OncokbTranscriptService oncokbTranscriptService = new OncokbTranscriptService();
     NotationConverter notationConverter = new NotationConverter();
+
+    @Autowired(required = false) 
+    CacheManager cacheManager;
 
     @Cacheable(cacheResolver = "generalCacheResolver", key = "'all'")
     public OncoKBInfo getOncoKBInfo() {
@@ -242,6 +248,46 @@ public class CacheFetcher {
         keyGenerator = "concatKeyGenerator")
     public Alteration getAlterationFromGenomeNexus(GNVariantAnnotationType gnVariantAnnotationType, ReferenceGenome referenceGenome, String genomicLocation) throws org.genome_nexus.ApiException {
         return AlterationUtils.getAlterationFromGenomeNexus(gnVariantAnnotationType, genomicLocation, referenceGenome);
+    }
+
+    public void cacheAlterationFromGenomeNexus(GenomeNexusAnnotatedVariantInfo gnAnnotatedVariantInfo) throws IllegalStateException {
+        if (cacheManager == null) {
+            throw new IllegalStateException("Cannot cache pre-annotated GN variants. Change property redis.enable to True.");
+        }
+
+        Alteration alteration = new Alteration();
+
+        // Build the Alteration object from the pre-annotated GN variant object.
+        if (StringUtils.isNotEmpty(gnAnnotatedVariantInfo.getHugoSymbol()) && gnAnnotatedVariantInfo.getEntrezGeneId() != null) {
+            Gene gene = GeneUtils.getGene(gnAnnotatedVariantInfo.getEntrezGeneId(), gnAnnotatedVariantInfo.getHugoSymbol());
+            if (gene == null) {
+                gene = new Gene();
+                gene.setHugoSymbol(gnAnnotatedVariantInfo.getHugoSymbol());
+                gene.setEntrezGeneId(gnAnnotatedVariantInfo.getEntrezGeneId());
+            }
+            alteration.setGene(gene);
+        }
+        alteration.setAlteration(gnAnnotatedVariantInfo.getHgvspShort());
+        alteration.setProteinStart(gnAnnotatedVariantInfo.getProteinStart());
+        alteration.setProteinEnd(gnAnnotatedVariantInfo.getProteinEnd());
+        alteration.setConsequence(VariantConsequenceUtils.findVariantConsequenceByTerm(gnAnnotatedVariantInfo.getConsequenceTerms()));
+
+        String hgvsg = gnAnnotatedVariantInfo.getHgvsg();
+        String genomicLocation = gnAnnotatedVariantInfo.getGenomicLocation();
+        ReferenceGenome referenceGenome = gnAnnotatedVariantInfo.getReferenceGenome();
+
+        // Store pre-annotated alteration into Redis cache
+        Cache cache = cacheManager.getCache(CacheCategory.GENERAL.getKey() + REDIS_KEY_SEPARATOR + "getAlterationFromGenomeNexus");
+        if (StringUtils.isNotEmpty(hgvsg)) {
+            String cacheKey = String.join(REDIS_KEY_SEPARATOR, new String[]{GNVariantAnnotationType.HGVS_G.name(), referenceGenome.name(), hgvsg});
+            cache.putIfAbsent(cacheKey, alteration);
+        }
+
+        if (StringUtils.isNotEmpty(genomicLocation)) {
+            String cacheKey = String.join(REDIS_KEY_SEPARATOR, new String[]{GNVariantAnnotationType.GENOMIC_LOCATION.name(), referenceGenome.name(), genomicLocation});
+            cache.putIfAbsent(cacheKey, alteration);
+        }
+
     }
 
     @Cacheable(cacheResolver = "generalCacheResolver",

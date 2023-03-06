@@ -12,6 +12,7 @@ import org.mskcc.cbio.oncokb.apiModels.TranscriptPair;
 import org.mskcc.cbio.oncokb.apiModels.TranscriptResult;
 import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotateMutationByGenomicChangeQuery;
 import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotateMutationByHGVSgQuery;
+import org.mskcc.cbio.oncokb.cache.CacheFetcher;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.model.ReferenceGenome;
 import org.mskcc.cbio.oncokb.model.genomeNexusPreAnnotations.GenomeNexusAnnotatedVariantInfo;
@@ -33,6 +34,8 @@ import java.util.List;
 @Api(tags = "Transcript", description = "The transcript API")
 public class PrivateGenomeNexusController {
 
+    @Autowired CacheFetcher cacheFetcher;
+
     @ApiOperation(value = "", notes = "Get transcript info in both GRCh37 and 38.", response = TranscriptResult.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK")})
@@ -42,16 +45,19 @@ public class PrivateGenomeNexusController {
     public ResponseEntity<TranscriptResult> getTranscript(
         @PathVariable String hugoSymbol
     ) throws ApiException {
-        EnsemblTranscript grch37Transcript = getCanonicalEnsemblTranscript(hugoSymbol, ReferenceGenome.GRCh37);
-        TranscriptPair transcriptPair = new TranscriptPair();
-        transcriptPair.setReferenceGenome(ReferenceGenome.GRCh37);
-        transcriptPair.setTranscript(grch37Transcript.getTranscriptId());
-        TranscriptMatchResult transcriptMatchResult = matchTranscript(transcriptPair, ReferenceGenome.GRCh38, hugoSymbol);
-
         TranscriptResult transcriptResult = new TranscriptResult();
-        transcriptResult.setGrch37Transcript(transcriptMatchResult.getOriginalEnsemblTranscript());
-        transcriptResult.setGrch38Transcript(transcriptMatchResult.getTargetEnsemblTranscript());
-        transcriptResult.setNote(transcriptMatchResult.getNote());
+
+        EnsemblTranscript grch37Transcript = getCanonicalEnsemblTranscript(hugoSymbol, ReferenceGenome.GRCh37);
+        if (grch37Transcript != null) {
+            TranscriptPair transcriptPair = new TranscriptPair();
+            transcriptPair.setReferenceGenome(ReferenceGenome.GRCh37);
+            transcriptPair.setTranscript(grch37Transcript.getTranscriptId());
+            TranscriptMatchResult transcriptMatchResult = matchTranscript(transcriptPair, ReferenceGenome.GRCh38, hugoSymbol);
+
+            transcriptResult.setGrch37Transcript(transcriptMatchResult.getOriginalEnsemblTranscript());
+            transcriptResult.setGrch38Transcript(transcriptMatchResult.getTargetEnsemblTranscript());
+            transcriptResult.setNote(transcriptMatchResult.getNote());
+        }
 
         return new ResponseEntity<>(transcriptResult, HttpStatus.OK);
     }
@@ -104,6 +110,29 @@ public class PrivateGenomeNexusController {
             }
         }
         return new ResponseEntity<>(result, status);
+    }
+
+    @ApiOperation(value = "", notes = "cache Genome Nexus variant info")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK"),
+        @ApiResponse(code = 400, message = "Error, error message will be given.", response = String.class)})
+    @RequestMapping(value = "/cacheGnVariantInfo",
+        consumes = {"application/json"},
+        produces = {"application/json"},
+        method = RequestMethod.POST)
+    public ResponseEntity<Void> cacheGenomeNexusVariantInfoPost(
+        @ApiParam(value = "List of queries. Please see swagger.json for request body format.", required = true) @RequestBody() List<GenomeNexusAnnotatedVariantInfo> body
+    ) throws ApiException, org.genome_nexus.ApiException, IllegalStateException {
+        HttpStatus status = HttpStatus.OK;
+
+        if (body == null) {
+            status = HttpStatus.BAD_REQUEST;
+        } else {
+            for (GenomeNexusAnnotatedVariantInfo query : body) {
+                cacheFetcher.cacheAlterationFromGenomeNexus(query);
+            }
+        }
+        return new ResponseEntity<>(status);
     }
 
 }

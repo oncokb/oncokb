@@ -6,10 +6,10 @@
     <parent>
         <groupId>org.mskcc.cbio.oncokb</groupId>
         <artifactId>master</artifactId>
-        <version>3.12.0</version>
+        <version>3.12.7</version>
     </parent>
     <artifactId>web</artifactId>
-    <version>3.12.0</version>
+    <version>3.12.7</version>
     <packaging>war</packaging>
 
     <name>OncoKB Web</name>
@@ -74,6 +74,13 @@
                             <to>
                                 <image>oncokb/oncokb:0.0.1-snapshot</image>
                             </to>
+                            <container>
+                                <entrypoint>
+                                    <arg>/bin/sh</arg>
+                                    <arg>-c</arg>
+                                    <arg>exec java ${JAVA_OPTS} -jar /webapp-runner.jar ${WEBAPPRUNNER_OPTS} /app.war</arg>
+                                </entrypoint>
+                            </container>
                             <extraDirectories>
                                 <paths>
                                     <path>target/dependency</path>
@@ -99,7 +106,7 @@
         <profile>
             <id>curate</id>
             <properties>
-                <frontend.version>0.8.0</frontend.version>
+                <frontend.version>0.8.1</frontend.version>
                 <frontend.groupId>com.github.oncokb</frontend.groupId>
                 <frontend.artifactId>curation-platform</frontend.artifactId>
             </properties>
@@ -202,7 +209,7 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.6</version>
+            <version>5.1.49</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -283,7 +290,7 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk</artifactId>
-            <version>1.11.163</version>
+            <version>1.12.377</version>
         </dependency>
 
         <dependency>
@@ -301,7 +308,7 @@
         <dependency>
             <groupId>com.google.cloud.tools</groupId>
             <artifactId>jib-maven-plugin</artifactId>
-            <version>3.3.0</version>
+            <version>3.3.1</version>
             <type>maven-plugin</type>
         </dependency>
     </dependencies>
@@ -356,7 +363,7 @@
                     <webResources>
                         <resource>
                             <directory>dist</directory>
-                            <targetPath></targetPath>
+                            <targetPath/>
                         </resource>
                     </webResources>
                     <archive>

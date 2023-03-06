@@ -174,7 +174,7 @@ public class HotspotUtils {
             // Add hotspot
             if (validPosition && (validPositional || validMissense || validInFrameRange || validInFrameInsertion || validInFrameDeletion || validSplice)) {
                 if(validPositional || validMissense) {
-                    boolean validReferenceResidues = (referenceResidues + proteinLocation.getStart()).equals(hotspot.getResidue());
+                    boolean validReferenceResidues = (referenceResidues + proteinLocation.getStart()).equalsIgnoreCase(hotspot.getResidue());
                     if (validReferenceResidues) {
                         result.add(hotspot);
                     }
