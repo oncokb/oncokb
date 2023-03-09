@@ -68,6 +68,10 @@ public class CacheUtils {
     private static List<TumorType> subtypes = new ArrayList<>();
     private static List<TumorType> mainTypes = new ArrayList<>();
     private static List<TumorType> specialCancerTypes = new ArrayList<>();
+
+    private static String oncokbS3Bucket = "oncokb";
+    private static String trialsS3Path = "clinical-trials/mappings/trials.json";
+    private static String oncotreeS3Path = "clinical-trials/mappings/oncotree_mapping.json";
     private static JSONObject jsonObjectTrials;
     private static JSONObject jsonObjectOncotree;
 
@@ -249,12 +253,13 @@ public class CacheUtils {
                 .withCredentials(new AWSStaticCredentialsProvider(credentials))
                 .withRegion(s3Region)
                 .build();
-            S3Object s3objectTrials = s3client.getObject("oncokb", "clinical-trials/results/trials.json");
+
+            S3Object s3objectTrials = s3client.getObject(oncokbS3Bucket, trialsS3Path);
             S3ObjectInputStream inputStreamTrials = s3objectTrials.getObjectContent();
             JSONParser jsonParser = new JSONParser();
             jsonObjectTrials = (JSONObject) jsonParser.parse(new InputStreamReader(inputStreamTrials, "UTF-8"));
 
-            S3Object s3objectOncotree = s3client.getObject("oncokb", "clinical-trials/results/oncotree_mapping.json");
+            S3Object s3objectOncotree = s3client.getObject(oncokbS3Bucket, oncotreeS3Path);
             S3ObjectInputStream inputStreamOncotree = s3objectOncotree.getObjectContent();
             jsonObjectOncotree = (JSONObject) jsonParser.parse(new InputStreamReader(inputStreamOncotree, "UTF-8"));
 

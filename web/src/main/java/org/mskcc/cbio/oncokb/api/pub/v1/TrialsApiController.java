@@ -57,15 +57,8 @@ public class TrialsApiController {
         throws IOException, ParseException {
         HttpStatus status = HttpStatus.OK;
 
-        JSONObject jsonObjectTrials;
-        JSONObject jsonObjectOncotree;
-
-        try {
-            jsonObjectTrials= this.cacheFetcher.getTrialsJSON();
-            jsonObjectOncotree = this.cacheFetcher.getOncotreeJSON();
-        } catch (Exception e) {
-            return new ResponseEntity<List<Trial>>(new ArrayList<>(),HttpStatus.BAD_REQUEST);
-        }
+        JSONObject jsonObjectTrials = CacheUtils.getTrialsJSON();
+        JSONObject jsonObjectOncotree = CacheUtils.getOncotreeJSON();
 
         Tumor tumor = new Tumor();
         if (jsonObjectOncotree.containsKey(oncoTreeCode)) {
@@ -95,15 +88,8 @@ public class TrialsApiController {
         if (body == null) {
             status = HttpStatus.BAD_REQUEST;
         } else {
-            JSONObject jsonObjectTrials;
-            JSONObject jsonObjectOncotree;
-    
-            try {
-                jsonObjectTrials= this.cacheFetcher.getTrialsJSON();
-                jsonObjectOncotree = this.cacheFetcher.getOncotreeJSON();
-            } catch (Exception e) {
-                return new ResponseEntity<>(new HashMap<>(),HttpStatus.BAD_REQUEST);
-            }
+            JSONObject jsonObjectTrials = CacheUtils.getTrialsJSON();
+            JSONObject jsonObjectOncotree = CacheUtils.getOncotreeJSON();
 
             Set<String> cancerTypes = new HashSet<>(body.getCancerTypes());
             if (cancerTypes.contains(SpecialTumorType.ALL_TUMORS.getTumorType())) {
