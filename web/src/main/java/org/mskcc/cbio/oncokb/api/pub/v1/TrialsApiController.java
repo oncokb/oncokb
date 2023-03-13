@@ -43,9 +43,6 @@ import io.swagger.annotations.ApiResponses;
 @Controller
 public class TrialsApiController {
 
-    @Autowired
-    CacheFetcher cacheFetcher;
-
     @PremiumPublicApi
     @ApiOperation("Return a list of trials using OncoTree Code and/or treatment")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "OK", responseContainer = "List"),

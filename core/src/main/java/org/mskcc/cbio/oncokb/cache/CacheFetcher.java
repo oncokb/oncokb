@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-
 import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
 import static org.mskcc.cbio.oncokb.util.MainUtils.rangesIntersect;
 import static org.mskcc.cbio.oncokb.cache.Constants.REDIS_KEY_SEPARATOR;
@@ -33,6 +32,10 @@ import static org.mskcc.cbio.oncokb.cache.Constants.REDIS_KEY_SEPARATOR;
 public class CacheFetcher {
     OncokbTranscriptService oncokbTranscriptService = new OncokbTranscriptService();
     NotationConverter notationConverter = new NotationConverter();
+
+    @Autowired(required = false) 
+    CacheManager cacheManager;
+
     @Cacheable(cacheResolver = "generalCacheResolver", key = "'all'")
     public OncoKBInfo getOncoKBInfo() {
         return new OncoKBInfo();
