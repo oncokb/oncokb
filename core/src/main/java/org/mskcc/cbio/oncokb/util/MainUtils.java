@@ -16,6 +16,12 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+
 /**
  * Created by Hongxin Zhang on 4/5/16.
  */
@@ -725,6 +731,19 @@ public class MainUtils {
         } else {
             return true;
         }
+    }
+
+    public static AmazonS3 startAWSClient() {
+        String s3AccessKey = PropertiesUtils.getProperties("aws.s3.accessKey");
+        String s3SecretKey = PropertiesUtils.getProperties("aws.s3.secretKey");
+        String s3Region = PropertiesUtils.getProperties("aws.s3.region");
+
+        AWSCredentials credentials = new BasicAWSCredentials(s3AccessKey, s3SecretKey);
+        AmazonS3 s3client = AmazonS3ClientBuilder.standard()
+            .withCredentials(new AWSStaticCredentialsProvider(credentials))
+            .withRegion(s3Region)
+            .build();
+        return s3client;
     }
 
     public static String removeDigits(String text) {

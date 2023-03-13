@@ -57,12 +57,12 @@ public class TrialsApiController {
         throws IOException, ParseException {
         HttpStatus status = HttpStatus.OK;
 
-        JSONObject jsonObjectTrials = CacheUtils.getTrialsJSON();
-        JSONObject jsonObjectOncotree = CacheUtils.getOncotreeJSON();
+        JSONObject trialsJSON = CacheUtils.getTrialsJSON();
+        JSONObject oncotreeMappingJSON = CacheUtils.getOncoTreeMappingTrials();
 
         Tumor tumor = new Tumor();
-        if (jsonObjectOncotree.containsKey(oncoTreeCode)) {
-            tumor = getTumor(jsonObjectOncotree,jsonObjectTrials, oncoTreeCode);
+        if (oncotreeMappingJSON.containsKey(oncoTreeCode)) {
+            tumor = getTumor(oncotreeMappingJSON,trialsJSON, oncoTreeCode);
 
             if (treatment == null) {
                 return new ResponseEntity<List<Trial>>(tumor.getTrials(), status);
@@ -88,16 +88,16 @@ public class TrialsApiController {
         if (body == null) {
             status = HttpStatus.BAD_REQUEST;
         } else {
-            JSONObject jsonObjectTrials = CacheUtils.getTrialsJSON();
-            JSONObject jsonObjectOncotree = CacheUtils.getOncotreeJSON();
+            JSONObject trialsJSON = CacheUtils.getTrialsJSON();
+            JSONObject oncotreeMappingJSON = CacheUtils.getOncoTreeMappingTrials();
 
             Set<String> cancerTypes = new HashSet<>(body.getCancerTypes());
             if (cancerTypes.contains(SpecialTumorType.ALL_TUMORS.getTumorType())) {
                 List<Trial> trials = new ArrayList<>();
                 Set<String> nctIDSet = new HashSet<>();
-                for (Object item : jsonObjectOncotree.keySet()) {
+                for (Object item : oncotreeMappingJSON.keySet()) {
                     String oncoTreeCode = (String) item;
-                    Tumor tumor = getTumor(jsonObjectOncotree, jsonObjectTrials, oncoTreeCode);
+                    Tumor tumor = getTumor(oncotreeMappingJSON, trialsJSON, oncoTreeCode);
 
                     for (Trial curTrial : tumor.getTrials()) {
                         if (!nctIDSet.contains(curTrial.getNctId())) {
@@ -116,9 +116,9 @@ public class TrialsApiController {
                 List<Trial> trials = new ArrayList<>();
                 SpecialTumorType specialTumorType = ApplicationContextSingleton.getTumorTypeBo().getSpecialTumorTypeByName(cancerType);
                 if (specialTumorType != null) {
-                    trials = getTrialsForSpecialCancerType(jsonObjectOncotree, jsonObjectTrials, specialTumorType);
+                    trials = getTrialsForSpecialCancerType(oncotreeMappingJSON, trialsJSON, specialTumorType);
                 } else {
-                    trials = getTrialsByCancerType(jsonObjectOncotree, jsonObjectTrials, cancerType);
+                    trials = getTrialsByCancerType(oncotreeMappingJSON, trialsJSON, cancerType);
                 }
                 for (Trial trial : trials) {
                     if (!nctIDSet.contains(trial.getNctId())) {
@@ -137,10 +137,10 @@ public class TrialsApiController {
         return new ResponseEntity<>(result, status);
     }
 
-    private Tumor getTumor(JSONObject jsonObjectOncotree, JSONObject jsonObjectTrials, String oncoTreeCode) {
+    private Tumor getTumor(JSONObject oncotreeMappingJSON, JSONObject trialsJSON, String oncoTreeCode) {
         Tumor tumor = new Tumor();
-        if (jsonObjectOncotree.containsKey(oncoTreeCode)) {
-            JSONObject tumorObj = (JSONObject) jsonObjectOncotree.get(oncoTreeCode);
+        if (oncotreeMappingJSON.containsKey(oncoTreeCode)) {
+            JSONObject tumorObj = (JSONObject) oncotreeMappingJSON.get(oncoTreeCode);
             Gson gson = new Gson();
             tumor = gson.fromJson(tumorObj.toString(), Tumor.class);
 
@@ -154,8 +154,8 @@ public class TrialsApiController {
     
             List<Trial> trialsInfo = new ArrayList<>();
             for (String nctID: nctIDList) {
-                if (jsonObjectTrials.containsKey(nctID)) {
-                    JSONObject trialObj = (JSONObject) jsonObjectTrials.get(nctID);
+                if (trialsJSON.containsKey(nctID)) {
+                    JSONObject trialObj = (JSONObject) trialsJSON.get(nctID);
                     Trial trial = gson.fromJson(trialObj.toString(), Trial.class);
                     trialsInfo.add(trial);
                 }

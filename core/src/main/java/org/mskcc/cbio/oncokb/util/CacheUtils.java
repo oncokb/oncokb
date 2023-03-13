@@ -18,11 +18,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 
@@ -70,8 +66,9 @@ public class CacheUtils {
     private static List<TumorType> specialCancerTypes = new ArrayList<>();
 
     private static String oncokbS3Bucket = "oncokb";
-    private static String trialsS3Path = "clinical-trials/mappings/trials.json";
-    private static String oncotreeS3Path = "clinical-trials/mappings/oncotree_mapping.json";
+    private static String mappingsS3Path = "clinical-trials/mappings";
+    private static String trialsS3Path = String.format("%s/trials.json",mappingsS3Path);
+    private static String oncotreeS3Path = String.format("%s/oncotree_mapping.json",mappingsS3Path);
     private static JSONObject jsonObjectTrials;
     private static JSONObject jsonObjectOncotree;
 
@@ -244,15 +241,7 @@ public class CacheUtils {
             System.out.println("Register other services: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
             current = MainUtils.getCurrentTimestamp();
 
-            final String s3AccessKey = PropertiesUtils.getProperties("aws.s3.accessKey");
-            final String s3SecretKey = PropertiesUtils.getProperties("aws.s3.secretKey");
-            final String s3Region = PropertiesUtils.getProperties("aws.s3.region");
-
-            AWSCredentials credentials = new BasicAWSCredentials(s3AccessKey, s3SecretKey);
-            AmazonS3 s3client = AmazonS3ClientBuilder.standard()
-                .withCredentials(new AWSStaticCredentialsProvider(credentials))
-                .withRegion(s3Region)
-                .build();
+            AmazonS3 s3client = MainUtils.startAWSClient();
 
             S3Object s3objectTrials = s3client.getObject(oncokbS3Bucket, trialsS3Path);
             S3ObjectInputStream inputStreamTrials = s3objectTrials.getObjectContent();
@@ -729,7 +718,7 @@ public class CacheUtils {
         }
     }
 
-    public static JSONObject getOncotreeJSON() {
+    public static JSONObject getOncoTreeMappingTrials() {
         return jsonObjectOncotree;
     }
 
