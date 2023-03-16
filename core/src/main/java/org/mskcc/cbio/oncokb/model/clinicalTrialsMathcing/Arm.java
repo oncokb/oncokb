@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * Created by Yifu Yao on 2020-09-08
  */
-public class Arms {
+public class Arm {
     private String armDescription;
     private List<Drug> drugs;
 

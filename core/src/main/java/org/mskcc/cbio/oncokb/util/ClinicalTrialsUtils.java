@@ -1,6 +1,5 @@
-package org.mskcc.cbio.oncokb.api.pub.v1;
+package org.mskcc.cbio.oncokb.util;
 
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
@@ -10,49 +9,16 @@ import com.google.gson.Gson;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.mskcc.cbio.oncokb.cache.CacheFetcher;
-import org.mskcc.cbio.oncokb.config.annotation.PremiumPublicApi;
-import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
-import org.mskcc.cbio.oncokb.util.CacheUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.mskcc.cbio.oncokb.model.SpecialTumorType;
 import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.*;
 import org.mskcc.cbio.oncokb.model.TumorType;
-import org.mskcc.cbio.oncokb.util.PropertiesUtils;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+public class ClinicalTrialsUtils {
 
 
-/**
- * Created by Yifu Yao on 2020-09-08
- */
-@Api(tags = "Trials", description = "Clinical Trials Matching")
-@Controller
-public class TrialsApiController {
-
-    @PremiumPublicApi
-    @ApiOperation("Return a list of trials using OncoTree Code and/or treatment")
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "OK", responseContainer = "List"),
-        @ApiResponse(code = 400, message = "Error", response = String.class)})
-    @RequestMapping(value = "/trials", produces = {"application/json"}, method = RequestMethod.GET)
-    public ResponseEntity<List<Trial>> trialsMatchingGet(
-        @ApiParam(value = "", required = true) @RequestParam(value = "", required = true) String oncoTreeCode,
-        @ApiParam(value = "", required = false) @RequestParam(value = "", required = false) String treatment)
+    public List<Trial> trialsMatchingGet(String oncoTreeCode, String treatment)
         throws IOException, ParseException {
-        HttpStatus status = HttpStatus.OK;
 
         JSONObject trialsJSON = CacheUtils.getTrialsJSON();
         JSONObject oncotreeMappingJSON = CacheUtils.getOncoTreeMappingTrials();
@@ -62,29 +28,19 @@ public class TrialsApiController {
             tumor = getTumor(oncotreeMappingJSON,trialsJSON, oncoTreeCode);
 
             if (treatment == null) {
-                return new ResponseEntity<List<Trial>>(tumor.getTrials(), status);
+                return new ArrayList<Trial>(tumor.getTrials());
             }
 
             List<Trial> trial = getTrialByTreatment(tumor.getTrials(), treatment);
-            return new ResponseEntity<List<Trial>>(trial, status);
+            return new ArrayList<Trial>(trial);
         }
-        return new ResponseEntity<List<Trial>>(new ArrayList<>(), status);
+        return new ArrayList<Trial>(new ArrayList<>());
     }
 
-    @PremiumPublicApi
-    @ApiOperation("Return a list of trials using cancer types")
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "OK", responseContainer = "Map"),
-        @ApiResponse(code = 400, message = "Error", response = String.class)})
-    @RequestMapping(value = "/trials/cancerTypes", produces = {"application/json"}, method = RequestMethod.POST)
-    public ResponseEntity<Map<String, List<Trial>>> trialsGetByCancerTypes(
-        @ApiParam(value = "", required = true) @RequestBody() CancerTypesQuery body)
+    public Map<String, List<Trial>> trialsGetByCancerTypes(CancerTypesQuery body)
         throws UnsupportedEncodingException, IOException, ParseException {
-        HttpStatus status = HttpStatus.OK;
         Map<String, List<Trial>> result = new HashMap<>();
 
-        if (body == null) {
-            status = HttpStatus.BAD_REQUEST;
-        } else {
             JSONObject trialsJSON = CacheUtils.getTrialsJSON();
             JSONObject oncotreeMappingJSON = CacheUtils.getOncoTreeMappingTrials();
 
@@ -104,7 +60,7 @@ public class TrialsApiController {
                     }
                 }
                 result.put(SpecialTumorType.ALL_TUMORS.getTumorType(), trials);
-                return new ResponseEntity<>(result, status);
+                return result;
             }
 
             for (String cancerType : cancerTypes) {
@@ -124,14 +80,8 @@ public class TrialsApiController {
                     }
                 }
                 result.put(cancerType, addTrials);
-            }
-
-            if (result.isEmpty()) {
-                status = HttpStatus.NOT_FOUND;
-                return new ResponseEntity<>(result, status);
-            }
         }
-        return new ResponseEntity<>(result, status);
+        return result;
     }
 
     private Tumor getTumor(JSONObject oncotreeMappingJSON, JSONObject trialsJSON, String oncoTreeCode) {

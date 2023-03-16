@@ -9,6 +9,7 @@ import org.mskcc.cbio.oncokb.apiModels.Implication;
 import org.mskcc.cbio.oncokb.apiModels.MutationEffectResp;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.TumorType;
+import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.Trial;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -749,6 +750,23 @@ public class IndicatorUtils {
                                     indicatorQueryTreatment.setLevelExcludedCancerTypes(excludedCancerTypes);
                                 }
                                 indicatorQueryTreatment.setDescription(SummaryUtils.enrichDescription(descriptionMap.get(treatment), queryHugoSymbol));
+
+                                ClinicalTrialsUtils clinicalTrialUtils = new ClinicalTrialsUtils();
+                                List<Trial> trials = new ArrayList<>();
+                                String oncotreeCode = tumorType.getCode();
+                                for (Drug drug : treatment.getDrugs()) {
+                                    String drugName = drug.getDrugName();
+                                    try {
+                                        List<Trial> trialsByTreatmentAndCode = clinicalTrialUtils.trialsMatchingGet(oncotreeCode,drugName);
+                                        trials.addAll(trialsByTreatmentAndCode);
+                                    } catch (Exception e) {
+                                        System.out.println(e.getMessage());
+                                        System.out.println("Trials could not be added successfully to IndicatorQueryTreatment.");
+                                    }
+                                }
+                                Set<Trial> trialsSet = new HashSet<>(trials);
+                                indicatorQueryTreatment.setTrials(trialsSet);
+
                                 treatments.add(indicatorQueryTreatment);
                             }
                         }
