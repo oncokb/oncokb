@@ -87,7 +87,7 @@ public enum LevelOfEvidence {
 
     public static LevelOfEvidence getByName(String name) {
         for (LevelOfEvidence levelOfEvidence : LevelOfEvidence.values()) {
-            if(levelOfEvidence.name().equals(name)) {
+            if(levelOfEvidence.name().equalsIgnoreCase(name)) {
                 return levelOfEvidence;
             }
         }

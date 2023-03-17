@@ -1,6 +1,5 @@
 package org.mskcc.cbio.oncokb.util;
 
-import com.sun.mail.iap.ByteArray;
 import org.apache.commons.io.IOUtils;
 import org.kohsuke.github.GHBlob;
 import org.kohsuke.github.GHContent;
@@ -101,8 +100,8 @@ public class GitHubUtils {
             if (checkFileNameExists(files, getFileName(FileName.ALL_ANNOTATED_VARIANTS, FileExtension.TEXT))) {
                 downloadAvailability.setHasAllAnnotatedVariants(true);
             }
-            if (checkFileNameExists(files, getFileName(FileName.ALL_ACTIONABLE_VARIANTS, FileExtension.TEXT))) {
-                downloadAvailability.setHasAllActionableVariants(true);
+            if (checkFileNameExists(files, getFileName(FileName.ALL_ACTIONABLE_GENES, FileExtension.TEXT))) {
+                downloadAvailability.setHasAllActionableGenes(true);
             }
             if (checkFileNameExists(files, getFileName(FileName.ALL_CURATED_GENES, FileExtension.TEXT))) {
                 downloadAvailability.setHasAllCuratedGenes(true);

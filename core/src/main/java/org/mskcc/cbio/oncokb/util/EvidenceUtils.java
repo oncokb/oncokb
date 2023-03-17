@@ -177,7 +177,7 @@ public class EvidenceUtils {
         if (query.getOncoTreeTypes() != null) {
             upwardTumorTypes.addAll(query.getOncoTreeTypes());
         }
-        downwardTumorTypes.addAll(TumorTypeUtils.findRelevantTumorTypes(query.getQuery().getTumorType(),null, DOWNWARD));
+        downwardTumorTypes.addAll(TumorTypeUtils.findRelevantTumorTypes(query.getQuery().getTumorType(), null, DOWNWARD));
 
         if (query.getGene() != null) {
             genes.add(query.getGene());
@@ -259,6 +259,32 @@ public class EvidenceUtils {
         }
 
         return evidences;
+    }
+
+    public static Map<LevelOfEvidence, Set<Evidence>> getEvidencesByLevels() {
+        Map<Gene, Set<Evidence>> evidences = EvidenceUtils.getAllGeneBasedEvidences();
+
+        Map<LevelOfEvidence, Set<Evidence>> result = new HashMap<>();
+
+        for (Map.Entry<Gene, Set<Evidence>> entry : evidences.entrySet()) {
+            for (Evidence evidence : entry.getValue()) {
+                LevelOfEvidence level = evidence.getLevelOfEvidence();
+                if (level != null && LevelUtils.getPublicLevels().contains(level)) {
+                    if (!result.containsKey(level)) {
+                        result.put(level, new HashSet<Evidence>());
+                    }
+                    if (evidence.getGene().getHugoSymbol().equals("ESR1")) {
+                        evidence = MainUtils.convertSpecialESR1Evidence(evidence);
+                    }
+                    Evidence updatedEvidence = new Evidence(evidence, null);
+                    if (updatedEvidence.getRelevantCancerTypes() == null || updatedEvidence.getRelevantCancerTypes().size() == 0) {
+                        updatedEvidence.setRelevantCancerTypes(TumorTypeUtils.findEvidenceRelevantCancerTypes(updatedEvidence));
+                    }
+                    result.get(level).add(updatedEvidence);
+                }
+            }
+        }
+        return result;
     }
 
     public static List<Evidence> getAlterationEvidences(List<Alteration> alterations) {
@@ -524,7 +550,7 @@ public class EvidenceUtils {
         return result;
     }
 
-    public static Set<String> getDrugs(Set<Evidence> evidences) {
+    public static Set<String> getDrugNames(Set<Evidence> evidences) {
         Set<String> result = new HashSet<>();
 
         for (Evidence evidence : evidences) {
@@ -536,6 +562,17 @@ public class EvidenceUtils {
                     }
                 }
                 result.add(StringUtils.join(drugsInTreatment, " + "));
+            }
+        }
+        return result;
+    }
+
+    public static Set<Drug> getDrugs(Set<Evidence> evidences) {
+        Set<Drug> result = new HashSet<>();
+
+        for (Evidence evidence : evidences) {
+            for (Treatment treatment : evidence.getTreatments()) {
+                result.addAll(treatment.getDrugs());
             }
         }
         return result;

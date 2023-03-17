@@ -6,7 +6,6 @@ import org.mskcc.cbio.oncokb.apiModels.AnnotatedVariant;
 import org.mskcc.cbio.oncokb.apiModels.Citations;
 import org.mskcc.cbio.oncokb.apiModels.CuratedGene;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.TumorType;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -575,7 +574,7 @@ public class MainUtils {
                         if (evidence.getFdaLevel() != null) {
                             variant.setFdaLevel(evidence.getFdaLevel().getLevel());
                         }
-                        variant.setDrug(EvidenceUtils.getDrugs(Collections.singleton(evidence)));
+                        variant.setDrug(EvidenceUtils.getDrugNames(Collections.singleton(evidence)));
                         variant.setDrugPmids(EvidenceUtils.getPmids(Collections.singleton(evidence)));
                         variant.setDrugAbstracts(EvidenceUtils.getAbstracts(Collections.singleton(evidence)));
                         variant.setDrugDescription(evidence.getDescription());
@@ -690,7 +689,7 @@ public class MainUtils {
         });
     }
 
-    public static void sortActionableVariants(List<ActionableGene> variants) {
+    public static void sortActionableGenes(List<ActionableGene> variants) {
         Collections.sort(variants, new Comparator<ActionableGene>() {
             @Override
             public int compare(ActionableGene a1, ActionableGene a2) {

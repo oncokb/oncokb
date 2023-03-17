@@ -7,7 +7,7 @@ package org.mskcc.cbio.oncokb.apiModels.download;
 public class DownloadAvailability {
     private String version;
     private Boolean hasReadme = false;
-    private Boolean hasAllActionableVariants = false;
+    private Boolean hasAllActionableGenes = false;
     private Boolean hasAllAnnotatedVariants = false;
     private Boolean hasAllCuratedGenes = false;
     private Boolean hasCancerGeneList = false;
@@ -33,12 +33,12 @@ public class DownloadAvailability {
         this.hasReadme = hasReadme;
     }
 
-    public Boolean getHasAllActionableVariants() {
-        return hasAllActionableVariants;
+    public Boolean getHasAllActionableGenes() {
+        return hasAllActionableGenes;
     }
 
-    public void setHasAllActionableVariants(Boolean hasAllActionableVariants) {
-        this.hasAllActionableVariants = hasAllActionableVariants;
+    public void setHasAllActionableGenes(Boolean hasAllActionableGenes) {
+        this.hasAllActionableGenes = hasAllActionableGenes;
     }
 
     public Boolean getHasAllAnnotatedVariants() {

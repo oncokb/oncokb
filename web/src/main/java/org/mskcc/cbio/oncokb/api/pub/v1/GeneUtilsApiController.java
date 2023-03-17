@@ -1,12 +1,14 @@
 package org.mskcc.cbio.oncokb.api.pub.v1;
 
-import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.*;
 import org.mskcc.cbio.oncokb.apiModels.ActionableGene;
-import org.mskcc.cbio.oncokb.apiModels.AnnotatedVariant;
+import org.mskcc.cbio.oncokb.apiModels.ActionableGeneEvidence;
 import org.mskcc.cbio.oncokb.apiModels.CuratedGene;
 import org.mskcc.cbio.oncokb.apiModels.download.FileName;
 import org.mskcc.cbio.oncokb.apiModels.download.FileExtension;
 import org.mskcc.cbio.oncokb.cache.CacheFetcher;
+import org.mskcc.cbio.oncokb.config.annotation.PremiumPublicApi;
+import org.mskcc.cbio.oncokb.config.annotation.PublicApi;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.*;
 import org.oncokb.oncokb_transcript.ApiException;
@@ -14,6 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.IOException;
@@ -23,130 +28,126 @@ import java.util.stream.Collectors;
 import static org.mskcc.cbio.oncokb.api.pub.v1.Constants.INCLUDE_EVIDENCE;
 import static org.mskcc.cbio.oncokb.api.pub.v1.Constants.VERSION;
 import static org.mskcc.cbio.oncokb.util.HttpUtils.getDataDownloadResponseEntity;
+import static org.springframework.util.MimeTypeUtils.TEXT_PLAIN_VALUE;
 
-/**
- * Created by Hongxin on 10/28/16.
- */
+@Api(tags = "Cancer Genes", description = "OncoKB gene relevant info. Cancer genes, curated genes, actionable genes.")
 @Controller
-public class UtilsApiController implements UtilsApi {
+public class GeneUtilsApiController {
     @Autowired
     CacheFetcher cacheFetcher;
 
-    @Override
-    public ResponseEntity<List<AnnotatedVariant>> utilsAllAnnotatedVariantsGet(
-        @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
-    ) {
-        if (version != null) {
-            return getDataDownloadResponseEntity(version, FileName.ALL_ANNOTATED_VARIANTS, FileExtension.JSON);
-        }
-        return new ResponseEntity<>(getAllAnnotatedVariants(), HttpStatus.OK);
-    }
-
-    @Override
-    public ResponseEntity<String> utilsAllAnnotatedVariantsTxtGet(
-        @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
-    ) {
-        if (version != null) {
-            return getDataDownloadResponseEntity(version, FileName.ALL_ANNOTATED_VARIANTS, FileExtension.TEXT);
-        }
-        String separator = "\t";
-        String newLine = "\n";
-
-        StringBuilder sb = new StringBuilder();
-        List<String> header = new ArrayList<>();
-        header.add("GRCh37 Isoform");
-        header.add("GRCh37 RefSeq");
-        header.add("GRCh38 Isoform");
-        header.add("GRCh38 RefSeq");
-        header.add("Entrez Gene ID");
-        header.add("Hugo Symbol");
-        header.add("Reference Genome");
-        header.add("Alteration");
-        header.add("Protein Change");
-        header.add("Oncogenicity");
-        header.add("Mutation Effect");
-        header.add("PMIDs for Mutation Effect");
-        header.add("Abstracts for Mutation Effect");
-        sb.append(MainUtils.listToString(header, separator));
-        sb.append(newLine);
-
-        for (AnnotatedVariant annotatedVariant : getAllAnnotatedVariants()) {
-            List<String> row = new ArrayList<>();
-            row.add(annotatedVariant.getGrch37Isoform());
-            row.add(annotatedVariant.getGrch37RefSeq());
-            row.add(annotatedVariant.getGrch38Isoform());
-            row.add(annotatedVariant.getGrch38RefSeq());
-            row.add(String.valueOf(annotatedVariant.getEntrezGeneId()));
-            row.add(annotatedVariant.getGene());
-            row.add(annotatedVariant.getReferenceGenome());
-            row.add(annotatedVariant.getVariant());
-            row.add(annotatedVariant.getProteinChange());
-            row.add(annotatedVariant.getOncogenicity());
-            row.add(annotatedVariant.getMutationEffect());
-            row.add(annotatedVariant.getMutationEffectPmids());
-            row.add(annotatedVariant.getMutationEffectAbstracts());
-            sb.append(MainUtils.listToString(row, separator));
-            sb.append(newLine);
-        }
-        return new ResponseEntity<>(sb.toString(), HttpStatus.OK);
-    }
-
-    private List<AnnotatedVariant> getAllAnnotatedVariants() {
-        List<AnnotatedVariant> annotatedVariantList = new ArrayList<>();
-        Set<Gene> genes = CacheUtils.getAllGenes();
-        Map<Gene, Set<BiologicalVariant>> map = new HashMap<>();
-
-        for (Gene gene : genes) {
-            map.put(gene, MainUtils.getBiologicalVariants(gene));
-        }
-
-        Set<AnnotatedVariant> annotatedVariants = new HashSet<>();
-        for (Map.Entry<Gene, Set<BiologicalVariant>> entry : map.entrySet()) {
-            Gene gene = entry.getKey();
-            for (BiologicalVariant biologicalVariant : entry.getValue()) {
-                Set<ArticleAbstract> articleAbstracts = biologicalVariant.getMutationEffectAbstracts();
-                List<String> abstracts = new ArrayList<>();
-                for (ArticleAbstract articleAbstract : articleAbstracts) {
-                    abstracts.add(articleAbstract.getAbstractContent() + " " + articleAbstract.getLink());
+    @PublicApi
+    @PremiumPublicApi
+    @ApiOperation(value = "", notes = "Find actionable gene evidences.", response = ActionableGeneEvidence.class, responseContainer = "List")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK", response = ActionableGeneEvidence.class, responseContainer = "List"),
+    })
+    @RequestMapping(value = "/utils/actionableGeneEvidences", produces = {"application/json"},
+        method = RequestMethod.GET)
+    public ResponseEntity<List<ActionableGeneEvidence>> utilsActionableGenesGet(
+        @ApiParam(value = "Gene entrez gene id or hugo symbol. Example: BRAF") @RequestParam(value = "gene", required = false) String gene
+        , @ApiParam(value = "Level of evidence, see allowed levels at https://www.oncokb.org/api/v1/info. Example: LEVEL_1") @RequestParam(value = "level", required = false) String level
+        , @ApiParam(value = "OncoTree(https://oncotree.info) tumor type name. The field supports OncoTree Code, OncoTree Name and OncoTree Main type. Example: Melanoma") @RequestParam(value = "tumorType", required = false) String tumorType
+        , @ApiParam(value = "Exact drug name. Example: Dabrafenib") @RequestParam(value = "drug", required = false) String drug
+    ) throws Exception {
+        List<Evidence> filteredEvidences = new ArrayList<>();
+        Map<LevelOfEvidence, Set<Evidence>> levelEvidences = EvidenceUtils.getEvidencesByLevels();
+        if (StringUtils.isEmpty(level)) {
+            for (Map.Entry<LevelOfEvidence, Set<Evidence>> entry : levelEvidences.entrySet()) {
+                filteredEvidences.addAll(entry.getValue());
+            }
+        } else {
+            LevelOfEvidence levelOfEvidence = LevelOfEvidence.getByName(level);
+            if (levelOfEvidence == null) {
+                throw new Exception("Level is not supported");
+            } else {
+                if (levelEvidences.containsKey(levelOfEvidence)) {
+                    filteredEvidences = new ArrayList<>(levelEvidences.get(levelOfEvidence));
+                } else {
+                    filteredEvidences = new ArrayList<>();
                 }
-                annotatedVariants.add(new AnnotatedVariant(
-                    gene.getGrch37Isoform(),
-                    gene.getGrch37RefSeq(),
-                    gene.getGrch38Isoform(),
-                    gene.getGrch38RefSeq(),
-                    gene.getEntrezGeneId(),
-                    gene.getHugoSymbol(),
-                    biologicalVariant.getVariant().getReferenceGenomes().stream().map(referenceGenome -> referenceGenome.name()).collect(Collectors.joining(", ")),
-                    biologicalVariant.getVariant().getName(),
-                    biologicalVariant.getVariant().getAlteration(),
-                    biologicalVariant.getOncogenic(),
-                    biologicalVariant.getMutationEffect(),
-                    MainUtils.listToString(new ArrayList<>(biologicalVariant.getMutationEffectPmids()), ", ", true),
-                    MainUtils.listToString(abstracts, "; ", true)));
+            }
+        }
+        if (!StringUtils.isEmpty(gene)) {
+            LinkedHashSet<Gene> genes = GeneUtils.searchGene(gene, true);
+            if (genes.size() == 0) {
+                filteredEvidences = new ArrayList<>();
+            } else {
+                filteredEvidences = filteredEvidences.stream().filter(evidence -> genes.iterator().next().equals(evidence.getGene())).collect(Collectors.toList());
             }
         }
 
-        annotatedVariantList.addAll(annotatedVariants);
-        MainUtils.sortAnnotatedVariants(annotatedVariantList);
-        return annotatedVariantList;
-    }
-
-    @Override
-    public ResponseEntity<List<ActionableGene>> utilsAllActionableVariantsGet(
-        @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
-    ) {
-        if (version != null) {
-            return getDataDownloadResponseEntity(version, FileName.ALL_ACTIONABLE_VARIANTS, FileExtension.JSON);
+        if (!StringUtils.isEmpty(tumorType)) {
+            TumorType matchedTumorType = ApplicationContextSingleton.getTumorTypeBo().getByName(tumorType);
+            if (matchedTumorType == null) {
+                throw new Exception("Cannot find matched tumor type");
+            }
+            filteredEvidences = filteredEvidences.stream().filter(evidence -> evidence.getRelevantCancerTypes().contains(matchedTumorType)).collect(Collectors.toList());
         }
-        return new ResponseEntity<>(getAllActionableVariants(), HttpStatus.OK);
+
+        if (!StringUtils.isEmpty(drug)) {
+            Set<Drug> drugs = DrugUtils.getDrugsByNames(Collections.singleton(drug), true);
+            if (drugs.size() > 1) {
+                throw new Exception("Multi entries for the drug name");
+            } else if (drugs.size() == 0) {
+                filteredEvidences = new ArrayList<>();
+            } else {
+                Drug matchedDrug = drugs.iterator().next();
+                filteredEvidences = filteredEvidences.stream().filter(evidence -> EvidenceUtils.getDrugs(Collections.singleton(evidence)).contains(matchedDrug)).collect(Collectors.toList());
+            }
+        }
+        filteredEvidences.stream().forEach(evidence -> {
+            evidence.setId(null);
+            evidence.setUuid(null);
+            evidence.setRelevantCancerTypes(new HashSet<>());
+        });
+        return new ResponseEntity<>(filteredEvidences.stream().map(evidence -> {
+            ActionableGeneEvidence actionableGeneEvidence = new ActionableGeneEvidence();
+            actionableGeneEvidence.setGene(evidence.getGene());
+            actionableGeneEvidence.setAlterations(evidence.getAlterations());
+            actionableGeneEvidence.setLevelOfEvidence(evidence.getLevelOfEvidence());
+            actionableGeneEvidence.setFdaLevel(evidence.getFdaLevel());
+            actionableGeneEvidence.setCancerTypes(evidence.getCancerTypes());
+            actionableGeneEvidence.setExcludedCancerTypes(evidence.getExcludedCancerTypes());
+            actionableGeneEvidence.setTreatments(evidence.getTreatments());
+            actionableGeneEvidence.setCitations(MainUtils.getCitationsByEvidence(evidence));
+            return actionableGeneEvidence;
+        }).collect(Collectors.toList()), HttpStatus.OK);
     }
 
-    @Override
-    public ResponseEntity<String> utilsAllActionableVariantsTxtGet(
+    @PremiumPublicApi
+    @ApiOperation(value = "", notes = "Get all actionable genes.", response = ActionableGene.class, responseContainer = "List")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK", response = ActionableGene.class, responseContainer = "List"),
+        @ApiResponse(code = 404, message = "Not Found"),
+        @ApiResponse(code = 503, message = "Service Unavailable")
+    })
+    @RequestMapping(value = "/utils/allActionableGenes", produces = {"application/json"},
+        method = RequestMethod.GET)
+    public ResponseEntity<List<ActionableGene>> utilsAllActionableGenesGet(
         @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
     ) {
         if (version != null) {
-            return getDataDownloadResponseEntity(version, FileName.ALL_ACTIONABLE_VARIANTS, FileExtension.TEXT);
+            return getDataDownloadResponseEntity(version, FileName.ALL_ACTIONABLE_GENES, FileExtension.JSON);
+        }
+        return new ResponseEntity<>(getAllActionableGenes(), HttpStatus.OK);
+    }
+
+    @PremiumPublicApi
+    @ApiOperation(value = "", notes = "Get all actionable genes in text file.")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK"),
+        @ApiResponse(code = 404, message = "Not Found"),
+        @ApiResponse(code = 503, message = "Service Unavailable")
+    })
+    @RequestMapping(value = "/utils/allActionableGenes.txt",
+        produces = TEXT_PLAIN_VALUE,
+        method = RequestMethod.GET)
+    public ResponseEntity<String> utilsAllActionableGenesTxtGet(
+        @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
+    ) {
+        if (version != null) {
+            return getDataDownloadResponseEntity(version, FileName.ALL_ACTIONABLE_GENES, FileExtension.TEXT);
         }
         String separator = "\t";
         String newLine = "\n";
@@ -169,7 +170,7 @@ public class UtilsApiController implements UtilsApi {
         sb.append(MainUtils.listToString(header, separator));
         sb.append(newLine);
 
-        for (ActionableGene actionableGene : getAllActionableVariants()) {
+        for (ActionableGene actionableGene : getAllActionableGenes()) {
             List<String> row = new ArrayList<>();
             row.add(actionableGene.getGrch37Isoform());
             row.add(actionableGene.getGrch37RefSeq());
@@ -191,7 +192,7 @@ public class UtilsApiController implements UtilsApi {
         return new ResponseEntity<>(sb.toString(), HttpStatus.OK);
     }
 
-    private List<ActionableGene> getAllActionableVariants() {
+    private List<ActionableGene> getAllActionableGenes() {
         List<ActionableGene> actionableGeneList = new ArrayList<>();
         Set<Gene> genes = CacheUtils.getAllGenes();
         Map<Gene, Set<ClinicalVariant>> map = new HashMap<>();
@@ -248,11 +249,21 @@ public class UtilsApiController implements UtilsApi {
         }
 
         actionableGeneList.addAll(actionableGenes);
-        MainUtils.sortActionableVariants(actionableGeneList);
+        MainUtils.sortActionableGenes(actionableGeneList);
         return actionableGeneList;
     }
 
-    @Override
+    @PublicApi
+    @PremiumPublicApi
+    @ApiOperation(value = "", notes = "Get cancer gene list")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK"),
+        @ApiResponse(code = 404, message = "Not Found"),
+        @ApiResponse(code = 503, message = "Service Unavailable")
+    })
+    @RequestMapping(value = "/utils/cancerGeneList",
+        produces = {"application/json"},
+        method = RequestMethod.GET)
     public ResponseEntity<List<CancerGene>> utilsCancerGeneListGet(
         @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
     ) throws ApiException, IOException {
@@ -263,7 +274,17 @@ public class UtilsApiController implements UtilsApi {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-    @Override
+    @PublicApi
+    @PremiumPublicApi
+    @ApiOperation(value = "", notes = "Get cancer gene list in text file.")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK"),
+        @ApiResponse(code = 404, message = "Not Found"),
+        @ApiResponse(code = 503, message = "Service Unavailable")
+    })
+    @RequestMapping(value = "/utils/cancerGeneList.txt",
+        produces = TEXT_PLAIN_VALUE,
+        method = RequestMethod.GET)
     public ResponseEntity<String> utilsCancerGeneListTxtGet(
         @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
     ) throws ApiException, IOException {
@@ -274,7 +295,17 @@ public class UtilsApiController implements UtilsApi {
     }
 
 
-    @Override
+    @PublicApi
+    @PremiumPublicApi
+    @ApiOperation(value = "", notes = "Get list of genes OncoKB curated")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK"),
+        @ApiResponse(code = 404, message = "Not Found"),
+        @ApiResponse(code = 503, message = "Service Unavailable")
+    })
+    @RequestMapping(value = "/utils/allCuratedGenes",
+        produces = {"application/json"},
+        method = RequestMethod.GET)
     public ResponseEntity<List<CuratedGene>> utilsAllCuratedGenesGet(
         @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
         , @ApiParam(value = INCLUDE_EVIDENCE, defaultValue = "TRUE") @RequestParam(value = "includeEvidence", required = false, defaultValue = "TRUE") Boolean includeEvidence
@@ -285,7 +316,17 @@ public class UtilsApiController implements UtilsApi {
         return new ResponseEntity<>(this.cacheFetcher.getCuratedGenes(includeEvidence), HttpStatus.OK);
     }
 
-    @Override
+    @PublicApi
+    @PremiumPublicApi
+    @ApiOperation(value = "", notes = "Get list of genes OncoKB curated in text file.")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK"),
+        @ApiResponse(code = 404, message = "Not Found"),
+        @ApiResponse(code = 503, message = "Service Unavailable")
+    })
+    @RequestMapping(value = "/utils/allCuratedGenes.txt",
+        produces = TEXT_PLAIN_VALUE,
+        method = RequestMethod.GET)
     public ResponseEntity<String> utilsAllCuratedGenesTxtGet(
         @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
         , @ApiParam(value = INCLUDE_EVIDENCE, defaultValue = "TRUE") @RequestParam(value = "includeEvidence", required = false, defaultValue = "TRUE") Boolean includeEvidence

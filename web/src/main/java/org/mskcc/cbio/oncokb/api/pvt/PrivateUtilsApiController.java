@@ -254,33 +254,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
 
     @Override
     public ResponseEntity<Map<LevelOfEvidence, Set<Evidence>>> utilsEvidencesByLevelsGet() {
-        return new ResponseEntity<>(getEvidencesByLevels(), HttpStatus.OK);
-    }
-
-    private Map<LevelOfEvidence, Set<Evidence>> getEvidencesByLevels() {
-        Map<Gene, Set<Evidence>> evidences = EvidenceUtils.getAllGeneBasedEvidences();
-
-        Map<LevelOfEvidence, Set<Evidence>> result = new HashMap<>();
-
-        for (Map.Entry<Gene, Set<Evidence>> entry : evidences.entrySet()) {
-            for (Evidence evidence : entry.getValue()) {
-                LevelOfEvidence level = evidence.getLevelOfEvidence();
-                if (level != null && LevelUtils.getPublicLevels().contains(level)) {
-                    if (!result.containsKey(level)) {
-                        result.put(level, new HashSet<Evidence>());
-                    }
-                    if (evidence.getGene().getHugoSymbol().equals("ESR1")) {
-                        evidence = MainUtils.convertSpecialESR1Evidence(evidence);
-                    }
-                    Evidence updatedEvidence = new Evidence(evidence, null);
-                    if (updatedEvidence.getRelevantCancerTypes() == null || updatedEvidence.getRelevantCancerTypes().size() == 0) {
-                        updatedEvidence.setRelevantCancerTypes(TumorTypeUtils.findEvidenceRelevantCancerTypes(updatedEvidence));
-                    }
-                    result.get(level).add(updatedEvidence);
-                }
-            }
-        }
-        return result;
+        return new ResponseEntity<>(EvidenceUtils.getEvidencesByLevels(), HttpStatus.OK);
     }
 
     @Override
