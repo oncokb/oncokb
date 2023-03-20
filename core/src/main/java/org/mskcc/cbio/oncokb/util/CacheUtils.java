@@ -241,7 +241,7 @@ public class CacheUtils {
             System.out.println("Register other services: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
             current = MainUtils.getCurrentTimestamp();
 
-            AmazonS3 s3client = MainUtils.startAWSClient();
+            AmazonS3 s3client = MainUtils.getAWSClient();
 
             S3Object s3objectTrials = s3client.getObject(oncokbS3Bucket, trialsS3Path);
             S3ObjectInputStream inputStreamTrials = s3objectTrials.getObjectContent();

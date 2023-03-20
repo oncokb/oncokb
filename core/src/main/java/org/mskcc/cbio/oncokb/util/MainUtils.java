@@ -733,7 +733,7 @@ public class MainUtils {
         }
     }
 
-    public static AmazonS3 startAWSClient() {
+    public static AmazonS3 getAWSClient() {
         String s3AccessKey = PropertiesUtils.getProperties("aws.s3.accessKey");
         String s3SecretKey = PropertiesUtils.getProperties("aws.s3.secretKey");
         String s3Region = PropertiesUtils.getProperties("aws.s3.region");
