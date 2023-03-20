@@ -2,6 +2,14 @@ package org.mskcc.cbio.oncokb.util;
 
 import com.mysql.jdbc.StringUtils;
 import org.apache.commons.collections.map.HashedMap;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.util.*;
+import java.util.stream.Collectors;
 import org.mskcc.cbio.oncokb.apiModels.download.DownloadAvailability;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.health.InMemoryCacheSizes;
@@ -9,6 +17,10 @@ import org.mskcc.cbio.oncokb.model.health.InMemoryCacheSizes;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
 
 
 /**
@@ -53,6 +65,13 @@ public class CacheUtils {
     private static List<TumorType> subtypes = new ArrayList<>();
     private static List<TumorType> mainTypes = new ArrayList<>();
     private static List<TumorType> specialCancerTypes = new ArrayList<>();
+
+    private static String oncokbS3Bucket = "oncokb";
+    private static String mappingsS3Path = "clinical-trials/mappings";
+    private static String trialsS3Path = String.format("%s/trials.json",mappingsS3Path);
+    private static String oncotreeS3Path = String.format("%s/oncotree_mapping.json",mappingsS3Path);
+    private static JSONObject jsonObjectTrials;
+    private static JSONObject jsonObjectOncotree;
 
     // Other services which will be defined in the property cache.update separated by comma
     // Every time the observer is triggered, all other services will be triggered as well
@@ -240,6 +259,17 @@ public class CacheUtils {
             registerOtherServices();
             System.out.println("Register other services " + CacheUtils.getCacheCompletionMessage(current));
             current = MainUtils.getCurrentTimestamp();
+
+            AmazonS3 s3client = MainUtils.getAWSClient();
+
+            S3Object s3objectTrials = s3client.getObject(oncokbS3Bucket, trialsS3Path);
+            S3ObjectInputStream inputStreamTrials = s3objectTrials.getObjectContent();
+            JSONParser jsonParser = new JSONParser();
+            jsonObjectTrials = (JSONObject) jsonParser.parse(new InputStreamReader(inputStreamTrials, "UTF-8"));
+
+            S3Object s3objectOncotree = s3client.getObject(oncokbS3Bucket, oncotreeS3Path);
+            S3ObjectInputStream inputStreamOncotree = s3objectOncotree.getObjectContent();
+            jsonObjectOncotree = (JSONObject) jsonParser.parse(new InputStreamReader(inputStreamOncotree, "UTF-8"));
 
         } catch (Exception e) {
             System.out.println(e + " at " + MainUtils.getCurrentTime());
@@ -705,5 +735,13 @@ public class CacheUtils {
         } catch (NoPropertyException exception) {
             System.out.println("The data access token is not available");
         }
+    }
+
+    public static JSONObject getOncoTreeMappingTrials() {
+        return jsonObjectOncotree;
+    }
+
+    public static JSONObject getTrialsJSON() {
+        return jsonObjectTrials;
     }
 }
