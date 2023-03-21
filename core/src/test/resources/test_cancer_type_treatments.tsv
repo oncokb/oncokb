@@ -45,7 +45,7 @@ KIT	V654A	Melanoma	2: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Ripretinib;
 KIT	V654A	Colorectal Cancer	3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Ripretinib;
 KIT	V654A	AML
 
-MTOR	L2427Q	Renal Clear Cell Carcinoma	3A: Temsirolimus; 4: Everolimus;
+MTOR	L2427Q	Renal Clear Cell Carcinoma	3A: Temsirolimus;
 PDGFRA	D842I	GIST	1: Avapritinib; 2: Imatinib; 2: Sunitinib; 2: Regorafenib; 2: Ripretinib;
 PDGFRA	D842I	Thymic Tumor	3B: Avapritinib; 3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Ripretinib;
 PDGFRA	D842V	GIST	R1: Imatinib; 1: Avapritinib; 2: Dasatinib; 2: Sunitinib; 2: Regorafenib; 2: Ripretinib;
