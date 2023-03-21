@@ -280,12 +280,12 @@ public class CacheFetcher {
         Cache cache = cacheManager.getCache(CacheCategory.GENERAL.getKey() + REDIS_KEY_SEPARATOR + "getAlterationFromGenomeNexus");
         if (StringUtils.isNotEmpty(hgvsg)) {
             String cacheKey = String.join(REDIS_KEY_SEPARATOR, new String[]{GNVariantAnnotationType.HGVS_G.name(), referenceGenome.name(), hgvsg});
-            cache.putIfAbsent(cacheKey, alteration);
+            cache.put(cacheKey, alteration);
         }
 
         if (StringUtils.isNotEmpty(genomicLocation)) {
             String cacheKey = String.join(REDIS_KEY_SEPARATOR, new String[]{GNVariantAnnotationType.GENOMIC_LOCATION.name(), referenceGenome.name(), genomicLocation});
-            cache.putIfAbsent(cacheKey, alteration);
+            cache.put(cacheKey, alteration);
         }
 
     }
