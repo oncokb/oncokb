@@ -268,7 +268,7 @@ public interface PrivateUtilsApi {
         consumes = {"application/json"},
         produces = {"application/json"},
         method = RequestMethod.POST)
-    ResponseEntity<List<String>> utilFilterHgvsgBasedOnCoveragePost(
+    ResponseEntity<List<TranscriptCoverageFilterResult>> utilFilterHgvsgBasedOnCoveragePost(
         @ApiParam(value = "List of queries.", required = true) @RequestBody List<AnnotateMutationByHGVSgQuery> body
     ) throws ApiException, org.genome_nexus.ApiException;
 
@@ -280,7 +280,7 @@ public interface PrivateUtilsApi {
         consumes = {"application/json"},
         produces = {"application/json"},
         method = RequestMethod.POST)
-    ResponseEntity<List<String>> utilFilterGenomicChangeBasedOnCoveragePost(
+    ResponseEntity<List<TranscriptCoverageFilterResult>> utilFilterGenomicChangeBasedOnCoveragePost(
         @ApiParam(value = "List of queries.", required = true) @RequestBody List<AnnotateMutationByGenomicChangeQuery> body
     ) throws ApiException, org.genome_nexus.ApiException;
 

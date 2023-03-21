@@ -12,6 +12,7 @@ import org.mskcc.cbio.oncokb.apiModels.TranscriptPair;
 import org.mskcc.cbio.oncokb.apiModels.TranscriptResult;
 import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotateMutationByGenomicChangeQuery;
 import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotateMutationByHGVSgQuery;
+import org.mskcc.cbio.oncokb.cache.CacheFetcher;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.model.ReferenceGenome;
 import org.mskcc.cbio.oncokb.model.genomeNexusPreAnnotations.GenomeNexusAnnotatedVariantInfo;
@@ -32,6 +33,8 @@ import java.util.List;
 @RestController
 @Api(tags = "Transcript", description = "The transcript API")
 public class PrivateGenomeNexusController {
+
+    @Autowired CacheFetcher cacheFetcher;
 
     @ApiOperation(value = "", notes = "Get transcript info in both GRCh37 and 38.", response = TranscriptResult.class)
     @ApiResponses(value = {
@@ -107,6 +110,29 @@ public class PrivateGenomeNexusController {
             }
         }
         return new ResponseEntity<>(result, status);
+    }
+
+    @ApiOperation(value = "", notes = "cache Genome Nexus variant info")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK"),
+        @ApiResponse(code = 400, message = "Error, error message will be given.", response = String.class)})
+    @RequestMapping(value = "/cacheGnVariantInfo",
+        consumes = {"application/json"},
+        produces = {"application/json"},
+        method = RequestMethod.POST)
+    public ResponseEntity<Void> cacheGenomeNexusVariantInfoPost(
+        @ApiParam(value = "List of queries. Please see swagger.json for request body format.", required = true) @RequestBody() List<GenomeNexusAnnotatedVariantInfo> body
+    ) throws ApiException, org.genome_nexus.ApiException, IllegalStateException {
+        HttpStatus status = HttpStatus.OK;
+
+        if (body == null) {
+            status = HttpStatus.BAD_REQUEST;
+        } else {
+            for (GenomeNexusAnnotatedVariantInfo query : body) {
+                cacheFetcher.cacheAlterationFromGenomeNexus(query);
+            }
+        }
+        return new ResponseEntity<>(status);
     }
 
 }
