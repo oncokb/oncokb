@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.mskcc.cbio.oncokb.model.SpecialTumorType;
+import org.mskcc.cbio.oncokb.model.TumorForm;
 import org.mskcc.cbio.oncokb.model.TumorType;
 import org.mskcc.cbio.oncokb.model.clinicalTrialsMatching.*;
 import org.mskcc.cbio.oncokb.util.PropertiesUtils;
@@ -199,7 +200,7 @@ public class TrialsApiController {
             case ALL_SOLID_TUMORS:
             case ALL_LIQUID_TUMORS:
                 return ApplicationContextSingleton.getTumorTypeBo().getAllTumorTypes().stream()
-                    .filter(tumorType -> tumorType.getTumorForm() != null && tumorType.getTumorForm().equals(matchedSpecialTumorType.getTumorForm()))
+                    .filter(tumorType -> tumorType.getTumorForm() != null && (tumorType.getTumorForm().equals(matchedSpecialTumorType.getTumorForm()) || tumorType.getTumorForm().equals(TumorForm.MIXED)))
                     .map(tumorType -> getTrialsByCancerType(oncotreeMapping, trialsMapping, StringUtils.isNotEmpty(tumorType.getSubtype()) ? tumorType.getSubtype() : tumorType.getMainType()))
                     .flatMap(Collection::stream).collect(Collectors.toList());
             default:

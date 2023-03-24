@@ -752,18 +752,26 @@ public class IndicatorUtils {
                                 indicatorQueryTreatment.setDescription(SummaryUtils.enrichDescription(descriptionMap.get(treatment), queryHugoSymbol));
 
                                 ClinicalTrialsUtils clinicalTrialUtils = new ClinicalTrialsUtils();
-                                List<Trial> trials = new ArrayList<>();
+                                List<List<Trial>> trialByDrug = new ArrayList<>();
                                 String oncotreeCode = tumorType.getCode();
                                 for (Drug drug : treatment.getDrugs()) {
                                     String drugName = drug.getDrugName();
                                     try {
-                                        List<Trial> trialsByTreatmentAndCode = clinicalTrialUtils.getTrials(oncotreeCode,drugName);
-                                        trials.addAll(trialsByTreatmentAndCode);
+                                        List<Trial> trials = clinicalTrialUtils.getTrials(oncotreeCode,drugName);
+                                        trialByDrug.add(trials);
                                     } catch (Exception e) {
                                         System.out.println(e.getMessage());
                                         System.out.println("Trials could not be added successfully to IndicatorQueryTreatment.");
                                     }
                                 }
+                                List<Trial> trials = new ArrayList<>();
+                                if (!trialByDrug.isEmpty()) {
+                                    trials = trialByDrug.get(0);
+                                    for (List<Trial> t : trialByDrug) {
+                                        trials.retainAll(t);
+                                    }
+                                }
+
                                 Set<Trial> trialsSet = new HashSet<>(trials);
                                 indicatorQueryTreatment.setTrials(trialsSet);
 
