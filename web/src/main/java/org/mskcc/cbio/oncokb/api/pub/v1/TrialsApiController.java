@@ -25,8 +25,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.mskcc.cbio.oncokb.model.SpecialTumorType;
-import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.*;
 import org.mskcc.cbio.oncokb.model.TumorType;
+import org.mskcc.cbio.oncokb.model.clinicalTrialsMatching.*;
 import org.mskcc.cbio.oncokb.util.PropertiesUtils;
 
 import io.swagger.annotations.Api;
@@ -54,12 +54,12 @@ public class TrialsApiController {
         throws IOException, ParseException {
         HttpStatus status = HttpStatus.OK;
 
-        JSONObject trialsJSON = CacheUtils.getTrialsJSON();
-        JSONObject oncotreeMappingJSON = CacheUtils.getOncoTreeMappingTrials();
+        Map<String, Trial> trialsMapping = CacheUtils.getTrialsMapping();
+        Map<String, Tumor> oncotreeMapping = CacheUtils.getOncoTreeMappingTrials();
 
         Tumor tumor = new Tumor();
-        if (oncotreeMappingJSON.containsKey(oncoTreeCode)) {
-            tumor = getTumor(oncotreeMappingJSON,trialsJSON, oncoTreeCode);
+        if (oncotreeMapping.containsKey(oncoTreeCode)) {
+            tumor = getTumor(oncotreeMapping,trialsMapping, oncoTreeCode);
 
             if (treatment == null) {
                 return new ResponseEntity<List<Trial>>(tumor.getTrials(), status);
@@ -76,7 +76,7 @@ public class TrialsApiController {
     @ApiResponses(value = {@ApiResponse(code = 200, message = "OK", responseContainer = "Map"),
         @ApiResponse(code = 400, message = "Error", response = String.class)})
     @RequestMapping(value = "/trials/cancerTypes", produces = {"application/json"}, method = RequestMethod.POST)
-    public ResponseEntity<Map<String, List<Trial>>> trialsGetByCancerTypes(
+    public ResponseEntity<Map<String, List<Trial>>> getTrialsByCancerTypes(
         @ApiParam(value = "", required = true) @RequestBody() CancerTypesQuery body)
         throws UnsupportedEncodingException, IOException, ParseException {
         HttpStatus status = HttpStatus.OK;
@@ -85,16 +85,16 @@ public class TrialsApiController {
         if (body == null) {
             status = HttpStatus.BAD_REQUEST;
         } else {
-            JSONObject trialsJSON = CacheUtils.getTrialsJSON();
-            JSONObject oncotreeMappingJSON = CacheUtils.getOncoTreeMappingTrials();
+            Map<String, Trial> trialsMapping = CacheUtils.getTrialsMapping();
+            Map<String, Tumor> oncotreeMapping = CacheUtils.getOncoTreeMappingTrials();
 
             Set<String> cancerTypes = new HashSet<>(body.getCancerTypes());
             if (cancerTypes.contains(SpecialTumorType.ALL_TUMORS.getTumorType())) {
                 List<Trial> trials = new ArrayList<>();
                 Set<String> nctIDSet = new HashSet<>();
-                for (Object item : oncotreeMappingJSON.keySet()) {
+                for (Object item : oncotreeMapping.keySet()) {
                     String oncoTreeCode = (String) item;
-                    Tumor tumor = getTumor(oncotreeMappingJSON, trialsJSON, oncoTreeCode);
+                    Tumor tumor = getTumor(oncotreeMapping, trialsMapping, oncoTreeCode);
 
                     for (Trial curTrial : tumor.getTrials()) {
                         if (!nctIDSet.contains(curTrial.getNctId())) {
@@ -113,9 +113,9 @@ public class TrialsApiController {
                 List<Trial> trials = new ArrayList<>();
                 SpecialTumorType specialTumorType = ApplicationContextSingleton.getTumorTypeBo().getSpecialTumorTypeByName(cancerType);
                 if (specialTumorType != null) {
-                    trials = getTrialsForSpecialCancerType(oncotreeMappingJSON, trialsJSON, specialTumorType);
+                    trials = getTrialsForSpecialCancerType(oncotreeMapping, trialsMapping, specialTumorType);
                 } else {
-                    trials = getTrialsByCancerType(oncotreeMappingJSON, trialsJSON, cancerType);
+                    trials = getTrialsByCancerType(oncotreeMapping, trialsMapping, cancerType);
                 }
                 for (Trial trial : trials) {
                     if (!nctIDSet.contains(trial.getNctId())) {
@@ -134,26 +134,22 @@ public class TrialsApiController {
         return new ResponseEntity<>(result, status);
     }
 
-    private Tumor getTumor(JSONObject oncotreeMappingJSON, JSONObject trialsJSON, String oncoTreeCode) {
+    private Tumor getTumor(Map<String, Tumor> oncotreeMapping, Map<String, Trial> trialsMapping, String oncoTreeCode) {
         Tumor tumor = new Tumor();
-        if (oncotreeMappingJSON.containsKey(oncoTreeCode)) {
-            JSONObject tumorObj = (JSONObject) oncotreeMappingJSON.get(oncoTreeCode);
-            Gson gson = new Gson();
-            tumor = gson.fromJson(tumorObj.toString(), Tumor.class);
-
-            List<Object> trials = (List<Object>) tumorObj.get("trials");
+        if (oncotreeMapping.containsKey(oncoTreeCode)) {
+            tumor = oncotreeMapping.get(oncoTreeCode);
+            
+            List<Trial> trials = tumor.getTrials();
             List<String> nctIDList = new ArrayList<>();
-            for (Object t: trials) {
-                JSONObject trial = (JSONObject) t;
-                String nctID = (String) trial.get("nctId");
+            for (Trial t: trials) {
+                String nctID = t.getNctId();
                 nctIDList.add(nctID);
             }
     
             List<Trial> trialsInfo = new ArrayList<>();
             for (String nctID: nctIDList) {
-                if (trialsJSON.containsKey(nctID)) {
-                    JSONObject trialObj = (JSONObject) trialsJSON.get(nctID);
-                    Trial trial = gson.fromJson(trialObj.toString(), Trial.class);
+                if (trialsMapping.containsKey(nctID)) {
+                    Trial trial = trialsMapping.get(nctID);
                     trialsInfo.add(trial);
                 }
             }
@@ -190,7 +186,7 @@ public class TrialsApiController {
         return res;
     }
 
-    private List<Trial> getTrialsForSpecialCancerType(JSONObject tumors, JSONObject trialData, SpecialTumorType specialTumorType) {
+    private List<Trial> getTrialsForSpecialCancerType(Map<String, Tumor> oncotreeMapping, Map<String, Trial> trialsMapping, SpecialTumorType specialTumorType) {
         List<Trial> trials = new ArrayList<>();
         if(specialTumorType == null) return trials;
 
@@ -199,19 +195,19 @@ public class TrialsApiController {
 
         switch (specialTumorType) {
             case ALL_TUMORS:
-                return new ArrayList<>(getAllTrials(tumors, trialData));
+                return new ArrayList<>(getAllTrials(oncotreeMapping, trialsMapping));
             case ALL_SOLID_TUMORS:
             case ALL_LIQUID_TUMORS:
                 return ApplicationContextSingleton.getTumorTypeBo().getAllTumorTypes().stream()
                     .filter(tumorType -> tumorType.getTumorForm() != null && tumorType.getTumorForm().equals(matchedSpecialTumorType.getTumorForm()))
-                    .map(tumorType -> getTrialsByCancerType(tumors, trialData, StringUtils.isNotEmpty(tumorType.getSubtype()) ? tumorType.getSubtype() : tumorType.getMainType()))
+                    .map(tumorType -> getTrialsByCancerType(oncotreeMapping, trialsMapping, StringUtils.isNotEmpty(tumorType.getSubtype()) ? tumorType.getSubtype() : tumorType.getMainType()))
                     .flatMap(Collection::stream).collect(Collectors.toList());
             default:
                 return trials;
         }
     }
 
-    private List<Trial> getTrialsByCancerType(JSONObject tumors, JSONObject trialData, String cancerType) {
+    private List<Trial> getTrialsByCancerType(Map<String, Tumor> oncotreeMapping, Map<String, Trial> trialsMapping, String cancerType) {
         List<Trial> trials = new ArrayList<>();
 
         Set<String> tumorCodesByMainType = new HashSet<>();
@@ -223,26 +219,26 @@ public class TrialsApiController {
         }
         if (tumorCodesByMainType.size() > 0) {
             for (String code : tumorCodesByMainType) {
-                if (tumors.containsKey(code))
-                    trials.addAll(getTumor(tumors, trialData, code).getTrials());
+                if (oncotreeMapping.containsKey(code))
+                    trials.addAll(getTumor(oncotreeMapping, trialsMapping, code).getTrials());
             }
         } else {
             TumorType matchedSubtype = ApplicationContextSingleton.getTumorTypeBo().getBySubtype(cancerType);
             if (matchedSubtype != null) {
                 String codeByName = matchedSubtype.getCode();
-                if (tumors.containsKey(codeByName))
-                    trials.addAll(getTumor(tumors, trialData, codeByName).getTrials());
+                if (oncotreeMapping.containsKey(codeByName))
+                    trials.addAll(getTumor(oncotreeMapping, trialsMapping, codeByName).getTrials());
             }
         }
 
         return trials;
     }
 
-    private Set<Trial> getAllTrials(JSONObject tumors, JSONObject trialData) {
+    private Set<Trial> getAllTrials(Map<String, Tumor> oncotreeMapping, Map<String, Trial> trialsMapping) {
         Set<Trial> trials = new HashSet<>();
 
-        tumors.entrySet().forEach(code -> {
-            trials.addAll(getTumor(tumors, trialData, (String) code).getTrials());
+        oncotreeMapping.entrySet().forEach(code -> {
+            trials.addAll(getTumor(oncotreeMapping, trialsMapping, (String) code.getKey()).getTrials());
         });
         return trials;
     }

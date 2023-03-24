@@ -1,4 +1,4 @@
-package org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing;
+package org.mskcc.cbio.oncokb.model.clinicalTrialsMatching;
 
 public class UnstructuredEligibility {
     private String description;

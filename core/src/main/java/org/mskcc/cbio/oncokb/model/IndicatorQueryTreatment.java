@@ -2,7 +2,7 @@ package org.mskcc.cbio.oncokb.model;
 
 
 import org.mskcc.cbio.oncokb.apiModels.TumorType;
-import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.Trial;
+import org.mskcc.cbio.oncokb.model.clinicalTrialsMatching.Trial;
 
 import java.util.ArrayList;
 import java.util.HashSet;

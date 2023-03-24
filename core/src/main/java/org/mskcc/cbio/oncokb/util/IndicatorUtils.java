@@ -9,7 +9,7 @@ import org.mskcc.cbio.oncokb.apiModels.Implication;
 import org.mskcc.cbio.oncokb.apiModels.MutationEffectResp;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.TumorType;
-import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.Trial;
+import org.mskcc.cbio.oncokb.model.clinicalTrialsMatching.Trial;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -757,7 +757,7 @@ public class IndicatorUtils {
                                 for (Drug drug : treatment.getDrugs()) {
                                     String drugName = drug.getDrugName();
                                     try {
-                                        List<Trial> trialsByTreatmentAndCode = clinicalTrialUtils.trialsMatchingGet(oncotreeCode,drugName);
+                                        List<Trial> trialsByTreatmentAndCode = clinicalTrialUtils.getTrials(oncotreeCode,drugName);
                                         trials.addAll(trialsByTreatmentAndCode);
                                     } catch (Exception e) {
                                         System.out.println(e.getMessage());

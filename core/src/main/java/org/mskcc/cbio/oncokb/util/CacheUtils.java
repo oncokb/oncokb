@@ -13,6 +13,8 @@ import java.util.stream.Collectors;
 import org.mskcc.cbio.oncokb.apiModels.download.DownloadAvailability;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.TumorType;
+import org.mskcc.cbio.oncokb.model.clinicalTrialsMatching.Trial;
+import org.mskcc.cbio.oncokb.model.clinicalTrialsMatching.Tumor;
 
 import java.io.IOException;
 import java.util.*;
@@ -69,8 +71,8 @@ public class CacheUtils {
     private static String mappingsS3Path = "clinical-trials/mappings";
     private static String trialsS3Path = String.format("%s/trials.json",mappingsS3Path);
     private static String oncotreeS3Path = String.format("%s/oncotree_mapping.json",mappingsS3Path);
-    private static JSONObject jsonObjectTrials;
-    private static JSONObject jsonObjectOncotree;
+    private static Map<String, Trial> trialsMapping;
+    private static Map<String, Tumor> oncotreeMapping;
 
     // Other services which will be defined in the property cache.update separated by comma
     // Every time the observer is triggered, all other services will be triggered as well
@@ -246,11 +248,11 @@ public class CacheUtils {
             S3Object s3objectTrials = s3client.getObject(oncokbS3Bucket, trialsS3Path);
             S3ObjectInputStream inputStreamTrials = s3objectTrials.getObjectContent();
             JSONParser jsonParser = new JSONParser();
-            jsonObjectTrials = (JSONObject) jsonParser.parse(new InputStreamReader(inputStreamTrials, "UTF-8"));
+            trialsMapping = (Map<String, Trial>) jsonParser.parse(new InputStreamReader(inputStreamTrials, "UTF-8"));
 
             S3Object s3objectOncotree = s3client.getObject(oncokbS3Bucket, oncotreeS3Path);
             S3ObjectInputStream inputStreamOncotree = s3objectOncotree.getObjectContent();
-            jsonObjectOncotree = (JSONObject) jsonParser.parse(new InputStreamReader(inputStreamOncotree, "UTF-8"));
+            oncotreeMapping = (Map<String, Tumor>) jsonParser.parse(new InputStreamReader(inputStreamOncotree, "UTF-8"));
 
         } catch (Exception e) {
             System.out.println(e + " at " + MainUtils.getCurrentTime());
@@ -718,11 +720,11 @@ public class CacheUtils {
         }
     }
 
-    public static JSONObject getOncoTreeMappingTrials() {
-        return jsonObjectOncotree;
+    public static Map<String, Tumor> getOncoTreeMappingTrials() {
+        return oncotreeMapping;
     }
 
-    public static JSONObject getTrialsJSON() {
-        return jsonObjectTrials;
+    public static Map<String, Trial> getTrialsMapping() {
+        return trialsMapping;
     }
 }

@@ -1,4 +1,4 @@
-package org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing;
+package org.mskcc.cbio.oncokb.model.clinicalTrialsMatching;
 
 public class Collaborator {
     private String name;
@@ -7,7 +7,7 @@ public class Collaborator {
         return name;
     }
 
-    public void setDrugName(String name) {
+    public void setName(String name) {
         this.name = name;
     }
 }
