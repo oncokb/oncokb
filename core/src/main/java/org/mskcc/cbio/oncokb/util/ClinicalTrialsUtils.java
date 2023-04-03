@@ -21,8 +21,8 @@ public class ClinicalTrialsUtils {
     public List<Trial> getTrials(String oncoTreeCode, String treatment)
         throws IOException, ParseException {
 
-        Map<String, Trial> trialsMapping = CacheUtils.getTrialsMapping();
-        Map<String, Tumor> oncotreeMapping = CacheUtils.getOncoTreeMappingTrials();
+        JSONObject trialsMapping = CacheUtils.getTrialsMapping();
+        JSONObject oncotreeMapping = CacheUtils.getOncoTreeMappingTrials();
 
         Tumor tumor = new Tumor();
         if (oncotreeMapping.containsKey(oncoTreeCode)) {
@@ -42,8 +42,8 @@ public class ClinicalTrialsUtils {
         throws UnsupportedEncodingException, IOException, ParseException {
         Map<String, List<Trial>> result = new HashMap<>();
 
-            Map<String, Trial> trialsMapping = CacheUtils.getTrialsMapping();
-            Map<String, Tumor> oncotreeMapping = CacheUtils.getOncoTreeMappingTrials();
+            JSONObject trialsMapping = CacheUtils.getTrialsMapping();
+            JSONObject oncotreeMapping = CacheUtils.getOncoTreeMappingTrials();
 
             Set<String> cancerTypes = new HashSet<>(body.getCancerTypes());
             if (cancerTypes.contains(SpecialTumorType.ALL_TUMORS.getTumorType())) {
@@ -85,22 +85,26 @@ public class ClinicalTrialsUtils {
         return result;
     }
 
-    private Tumor getTumor(Map<String, Tumor> oncotreeMapping, Map<String, Trial> trialsMapping, String oncoTreeCode) {
+    private Tumor getTumor(JSONObject oncotreeMapping, JSONObject trialsMapping, String oncoTreeCode) {
         Tumor tumor = new Tumor();
         if (oncotreeMapping.containsKey(oncoTreeCode)) {
-            tumor = oncotreeMapping.get(oncoTreeCode);
-            
-            List<Trial> trials = tumor.getTrials();
+            JSONObject tumorObj = (JSONObject) oncotreeMapping.get(oncoTreeCode);
+            Gson gson = new Gson();
+            tumor = gson.fromJson(tumorObj.toString(), Tumor.class);
+
+            List<Object> trials = (List<Object>) tumorObj.get("trials");
             List<String> nctIDList = new ArrayList<>();
-            for (Trial t: trials) {
-                String nctID = t.getNctId();
+            for (Object t: trials) {
+                JSONObject trial = (JSONObject) t;
+                String nctID = (String) trial.get("nctId");
                 nctIDList.add(nctID);
             }
-    
+
             List<Trial> trialsInfo = new ArrayList<>();
             for (String nctID: nctIDList) {
                 if (trialsMapping.containsKey(nctID)) {
-                    Trial trial = trialsMapping.get(nctID);
+                    JSONObject trialObj = (JSONObject) trialsMapping.get(nctID);
+                    Trial trial = gson.fromJson(trialObj.toString(), Trial.class);
                     trialsInfo.add(trial);
                 }
             }
@@ -137,7 +141,7 @@ public class ClinicalTrialsUtils {
         return res;
     }
 
-    private List<Trial> getTrialsForSpecialCancerType(Map<String, Tumor> oncotreeMapping, Map<String, Trial> trialsMapping, SpecialTumorType specialTumorType) {
+    private List<Trial> getTrialsForSpecialCancerType(JSONObject oncotreeMapping, JSONObject trialsMapping, SpecialTumorType specialTumorType) {
         List<Trial> trials = new ArrayList<>();
         if(specialTumorType == null) return trials;
 
@@ -158,7 +162,7 @@ public class ClinicalTrialsUtils {
         }
     }
 
-    private List<Trial> getTrialsByCancerType(Map<String, Tumor> oncotreeMapping, Map<String, Trial> trialsMapping, String cancerType) {
+    private List<Trial> getTrialsByCancerType(JSONObject oncotreeMapping, JSONObject trialsMapping, String cancerType) {
         List<Trial> trials = new ArrayList<>();
 
         Set<String> tumorCodesByMainType = new HashSet<>();
@@ -185,11 +189,11 @@ public class ClinicalTrialsUtils {
         return trials;
     }
 
-    private Set<Trial> getAllTrials(Map<String, Tumor> oncotreeMapping, Map<String, Trial> trialsMapping) {
+    private Set<Trial> getAllTrials(JSONObject oncotreeMapping, JSONObject trialsMapping) {
         Set<Trial> trials = new HashSet<>();
 
         oncotreeMapping.entrySet().forEach(code -> {
-            trials.addAll(getTumor(oncotreeMapping, trialsMapping, (String) code.getKey()).getTrials());
+            trials.addAll(getTumor(oncotreeMapping, trialsMapping, (String) code).getTrials());
         });
         return trials;
     }

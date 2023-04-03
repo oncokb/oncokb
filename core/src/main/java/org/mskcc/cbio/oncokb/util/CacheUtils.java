@@ -23,6 +23,8 @@ import java.util.stream.Collectors;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import com.google.api.client.json.Json;
+import com.google.gson.JsonObject;
 
 
 /**
@@ -71,8 +73,8 @@ public class CacheUtils {
     private static String mappingsS3Path = "clinical-trials/mappings";
     private static String trialsS3Path = String.format("%s/trials.json",mappingsS3Path);
     private static String oncotreeS3Path = String.format("%s/oncotree_mapping.json",mappingsS3Path);
-    private static Map<String, Trial> trialsMapping;
-    private static Map<String, Tumor> oncotreeMapping;
+    private static JSONObject trialsMappingJson;
+    private static JSONObject oncotreeMappingJson;
 
     // Other services which will be defined in the property cache.update separated by comma
     // Every time the observer is triggered, all other services will be triggered as well
@@ -248,11 +250,11 @@ public class CacheUtils {
             S3Object s3objectTrials = s3client.getObject(oncokbS3Bucket, trialsS3Path);
             S3ObjectInputStream inputStreamTrials = s3objectTrials.getObjectContent();
             JSONParser jsonParser = new JSONParser();
-            trialsMapping = (Map<String, Trial>) jsonParser.parse(new InputStreamReader(inputStreamTrials, "UTF-8"));
+            trialsMappingJson = (JSONObject) jsonParser.parse(new InputStreamReader(inputStreamTrials, "UTF-8"));
 
             S3Object s3objectOncotree = s3client.getObject(oncokbS3Bucket, oncotreeS3Path);
             S3ObjectInputStream inputStreamOncotree = s3objectOncotree.getObjectContent();
-            oncotreeMapping = (Map<String, Tumor>) jsonParser.parse(new InputStreamReader(inputStreamOncotree, "UTF-8"));
+            oncotreeMappingJson = (JSONObject) jsonParser.parse(new InputStreamReader(inputStreamOncotree, "UTF-8"));
 
         } catch (Exception e) {
             System.out.println(e + " at " + MainUtils.getCurrentTime());
@@ -720,11 +722,11 @@ public class CacheUtils {
         }
     }
 
-    public static Map<String, Tumor> getOncoTreeMappingTrials() {
-        return oncotreeMapping;
+    public static JSONObject getOncoTreeMappingTrials() {
+        return oncotreeMappingJson;
     }
 
-    public static Map<String, Trial> getTrialsMapping() {
-        return trialsMapping;
+    public static JSONObject getTrialsMapping() {
+        return trialsMappingJson;
     }
 }
