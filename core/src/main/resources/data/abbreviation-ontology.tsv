@@ -1,9 +1,10 @@
-# Abbreviation	Full Name
+# Abbreviation(will be converted to all uppercase)	Full Name(This is preferred name that used in the summary.)
 CTD	C-terminal domain
 KDD	kinase domain duplication
 ITD	internal tandem duplication
-TMB	Tumor Mutational Burden
-TMB-H	Tumor Mutational Burden-High
-MSI	Microsatellite Instability
-MSI-H	Microsatellite Instability-High
-VUS	Variants of Unknown Significance
+PTD	partial tandem duplication
+TMB	tumor mutational burden
+TMB-H	tumor mutational burden-high
+MSI	microsatellite instability
+MSI-H	microsatellite instability-high
+VUS	variants of unknown significance
