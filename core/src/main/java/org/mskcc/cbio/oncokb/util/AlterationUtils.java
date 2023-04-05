@@ -1131,7 +1131,7 @@ public final class AlterationUtils {
             }
         }
 
-        // if the query is all upper case, we want to look at the abbreviations
+        // if the query is part of the abbreviation list, the corresponding full name should be indexed.
         if (NamingUtils.hasAbbreviation(query)) {
             String fullName = NamingUtils.getFullName(query);
             if (fullName != null) {
