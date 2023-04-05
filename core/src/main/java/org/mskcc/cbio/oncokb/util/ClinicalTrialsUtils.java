@@ -18,24 +18,30 @@ import org.mskcc.cbio.oncokb.model.clinicalTrialsMatching.*;
 public class ClinicalTrialsUtils {
 
 
-    public List<Trial> getTrials(String oncoTreeCode, String treatment)
+    public List<Trial> getTrials(String treatment, String cancerType)
         throws IOException, ParseException {
 
         JSONObject trialsMapping = CacheUtils.getTrialsMapping();
         JSONObject oncotreeMapping = CacheUtils.getOncoTreeMappingTrials();
 
-        Tumor tumor = new Tumor();
-        if (oncotreeMapping.containsKey(oncoTreeCode)) {
-            tumor = getTumor(oncotreeMapping,trialsMapping, oncoTreeCode);
-
-            if (treatment == null) {
-                return new ArrayList<>(tumor.getTrials());
+        SpecialTumorType specialTumorType = SpecialTumorType.getByTumorType(cancerType);
+        if(specialTumorType != null) {
+            List<Trial> trials = getTrialsForSpecialCancerType(oncotreeMapping, trialsMapping, specialTumorType);
+            if (treatment != null) {
+                trials = getTrialByTreatment(trials,treatment);
             }
-
-            List<Trial> trial = getTrialByTreatment(tumor.getTrials(), treatment);
-            return new ArrayList<Trial>(trial);
+            return new ArrayList<Trial>(trials); 
+        } else {
+            List<TumorType> tumorTypes = TumorTypeUtils.findRelevantTumorTypes(cancerType);
+            List<Trial> trials = new ArrayList<>();
+            for (TumorType tumorType: tumorTypes) {
+                trials.addAll(getTrialsByCancerType(oncotreeMapping, trialsMapping, tumorType.getSubtype()));
+            }
+            if (treatment != null) {
+                trials = getTrialByTreatment(trials,treatment);
+            }
+            return new ArrayList<Trial>(trials);
         }
-        return new ArrayList<Trial>(new ArrayList<>());
     }
 
     public Map<String, List<Trial>> getTrialsByCancerTypes(CancerTypesQuery body)
@@ -192,7 +198,7 @@ public class ClinicalTrialsUtils {
     private Set<Trial> getAllTrials(JSONObject oncotreeMapping, JSONObject trialsMapping) {
         Set<Trial> trials = new HashSet<>();
 
-        oncotreeMapping.entrySet().forEach(code -> {
+        oncotreeMapping.keySet().forEach(code -> {
             trials.addAll(getTumor(oncotreeMapping, trialsMapping, (String) code).getTrials());
         });
         return trials;

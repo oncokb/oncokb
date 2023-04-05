@@ -757,8 +757,17 @@ public class IndicatorUtils {
                                 for (Drug drug : treatment.getDrugs()) {
                                     String drugName = drug.getDrugName();
                                     try {
-                                        List<Trial> trials = clinicalTrialUtils.getTrials(oncotreeCode,drugName);
-                                        trialByDrug.add(trials);
+                                        if (oncotreeCode != null) {
+                                            List<Trial> trials = clinicalTrialUtils.getTrials(drugName, null);
+                                            trialByDrug.add(trials);
+                                        } else {
+                                            List<Trial> trialsByTumorType = new ArrayList<>();
+                                            for (TumorType tumor : relevantTumorTypes) {
+                                                List<Trial> trials = clinicalTrialUtils.getTrials(drugName, tumor.getMainType());
+                                                trialsByTumorType.addAll(trials);
+                                            }
+                                            trialByDrug.add(trialsByTumorType);
+                                        }
                                     } catch (Exception e) {
                                         System.out.println(e.getMessage());
                                         System.out.println("Trials could not be added successfully to IndicatorQueryTreatment.");

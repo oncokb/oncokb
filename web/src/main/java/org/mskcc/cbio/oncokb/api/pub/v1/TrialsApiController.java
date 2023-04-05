@@ -29,6 +29,7 @@ import org.mskcc.cbio.oncokb.model.TumorForm;
 import org.mskcc.cbio.oncokb.model.TumorType;
 import org.mskcc.cbio.oncokb.model.clinicalTrialsMatching.*;
 import org.mskcc.cbio.oncokb.util.PropertiesUtils;
+import org.mskcc.cbio.oncokb.util.TumorTypeUtils;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -50,26 +51,32 @@ public class TrialsApiController {
         @ApiResponse(code = 400, message = "Error", response = String.class)})
     @RequestMapping(value = "/trials", produces = {"application/json"}, method = RequestMethod.GET)
     public ResponseEntity<List<Trial>> trialsMatchingGet(
-        @ApiParam(value = "", required = true) @RequestParam(value = "", required = true) String oncoTreeCode,
-        @ApiParam(value = "", required = false) @RequestParam(value = "", required = false) String treatment)
-        throws IOException, ParseException {
+            @ApiParam(value = "", required = false) @RequestParam(value = "", required = false) String treatment,
+            @ApiParam(value = "", required = true) @RequestParam(value = "", required = true) String cancerType)
+            throws IOException, ParseException {
         HttpStatus status = HttpStatus.OK;
 
         JSONObject trialsMapping = CacheUtils.getTrialsMapping();
         JSONObject oncotreeMapping = CacheUtils.getOncoTreeMappingTrials();
 
-        Tumor tumor = new Tumor();
-        if (oncotreeMapping.containsKey(oncoTreeCode)) {
-            tumor = getTumor(oncotreeMapping,trialsMapping, oncoTreeCode);
-
-            if (treatment == null) {
-                return new ResponseEntity<List<Trial>>(tumor.getTrials(), status);
+        SpecialTumorType specialTumorType = SpecialTumorType.getByTumorType(cancerType);
+        if(specialTumorType != null) {
+            List<Trial> trials = getTrialsForSpecialCancerType(oncotreeMapping, trialsMapping, specialTumorType);
+            if (treatment != null) {
+                trials = getTrialByTreatment(trials,treatment);
             }
-
-            List<Trial> trial = getTrialByTreatment(tumor.getTrials(), treatment);
-            return new ResponseEntity<List<Trial>>(trial, status);
+            return new ResponseEntity<List<Trial>>(trials, status); 
+        } else {
+            List<TumorType> tumorTypes = TumorTypeUtils.findRelevantTumorTypes(cancerType);
+            List<Trial> trials = new ArrayList<>();
+            for (TumorType tumorType: tumorTypes) {
+                trials.addAll(getTrialsByCancerType(oncotreeMapping, trialsMapping, tumorType.getSubtype()));
+            }
+            if (treatment != null) {
+                trials = getTrialByTreatment(trials,treatment);
+            }
+            return new ResponseEntity<List<Trial>>(trials, status); 
         }
-        return new ResponseEntity<List<Trial>>(new ArrayList<>(), status);
     }
 
     @PremiumPublicApi
@@ -242,7 +249,7 @@ public class TrialsApiController {
     private Set<Trial> getAllTrials(JSONObject oncotreeMapping, JSONObject trialsMapping) {
         Set<Trial> trials = new HashSet<>();
 
-        oncotreeMapping.entrySet().forEach(code -> {
+        oncotreeMapping.keySet().forEach(code -> {
             trials.addAll(getTumor(oncotreeMapping, trialsMapping, (String) code).getTrials());
         });
         return trials;
