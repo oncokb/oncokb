@@ -70,7 +70,7 @@ public class TrialsApiController {
             List<TumorType> tumorTypes = TumorTypeUtils.findRelevantTumorTypes(cancerType);
             List<Trial> trials = new ArrayList<>();
             for (TumorType tumorType: tumorTypes) {
-                trials.addAll(getTrialsByCancerType(oncotreeMapping, trialsMapping, tumorType.getSubtype()));
+                trials.addAll(getTrialsByCancerType(oncotreeMapping, trialsMapping, tumorType.getMainType()));
             }
             if (treatment != null) {
                 trials = getTrialByTreatment(trials,treatment);
