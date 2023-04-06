@@ -14,9 +14,7 @@ import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
 /**
  * Created by Hongxin Zhang on 6/20/18.
  */
-public class AlterationUtilsTest extends TestCase
-
-{
+public class AlterationUtilsTest extends TestCase {
     public void testGetRevertFusions() throws Exception {
         Alteration alteration = createBRAFAlteration("BRAF-MKRN1 fusion");
 
@@ -307,7 +305,7 @@ public class AlterationUtilsTest extends TestCase
         alteration = createBRAFAlteration("VK600EI");
         relevantAlterations.add(alteration);
 
-        AlterationUtils.removeAlternativeAllele(DEFAULT_REFERENCE_GENOME,createBRAFAlteration("V600K"), relevantAlterations);
+        AlterationUtils.removeAlternativeAllele(DEFAULT_REFERENCE_GENOME, createBRAFAlteration("V600K"), relevantAlterations);
         assertEquals(0, relevantAlterations.size());
 
         // Check missense match delins
@@ -316,7 +314,7 @@ public class AlterationUtilsTest extends TestCase
         relevantAlterations = new ArrayList<>();
         relevantAlterations.add(v600e);
 
-        AlterationUtils.removeAlternativeAllele(DEFAULT_REFERENCE_GENOME,delins, relevantAlterations);
+        AlterationUtils.removeAlternativeAllele(DEFAULT_REFERENCE_GENOME, delins, relevantAlterations);
         assertEquals(1, relevantAlterations.size());
 
         // Check missense match delins plus mix
@@ -325,7 +323,7 @@ public class AlterationUtilsTest extends TestCase
         relevantAlterations.add(createBRAFAlteration("V600R"));
         relevantAlterations.add(createBRAFAlteration("Oncogenic Mutations"));
 
-        AlterationUtils.removeAlternativeAllele(DEFAULT_REFERENCE_GENOME,delins, relevantAlterations);
+        AlterationUtils.removeAlternativeAllele(DEFAULT_REFERENCE_GENOME, delins, relevantAlterations);
         assertEquals(2, relevantAlterations.size());
 
         // Check missense match delins plus positional
@@ -333,7 +331,7 @@ public class AlterationUtilsTest extends TestCase
         relevantAlterations.add(v600e);
         relevantAlterations.add(createBRAFAlteration("V600"));
 
-        AlterationUtils.removeAlternativeAllele(DEFAULT_REFERENCE_GENOME,delins, relevantAlterations);
+        AlterationUtils.removeAlternativeAllele(DEFAULT_REFERENCE_GENOME, delins, relevantAlterations);
         assertEquals(2, relevantAlterations.size());
 
 
@@ -343,7 +341,7 @@ public class AlterationUtilsTest extends TestCase
         relevantAlterations.add(createBRAFAlteration("V600"));
         relevantAlterations.add(createBRAFAlteration("VK600EI"));
 
-        AlterationUtils.removeAlternativeAllele(DEFAULT_REFERENCE_GENOME,delins, relevantAlterations);
+        AlterationUtils.removeAlternativeAllele(DEFAULT_REFERENCE_GENOME, delins, relevantAlterations);
         assertEquals(3, relevantAlterations.size());
     }
 
@@ -423,5 +421,38 @@ public class AlterationUtilsTest extends TestCase
         hgvsg = "a:g.140453136A>T";
         assertFalse(AlterationUtils.isValidHgvsg(hgvsg));
 
+    }
+
+    public void testTrimComment() {
+        assertEquals("", AlterationUtils.trimComment(""));
+        assertEquals("", AlterationUtils.trimComment(" "));
+        assertEquals("", AlterationUtils.trimComment(null));
+
+        assertEquals("A1B", AlterationUtils.trimComment("A1B"));
+        assertEquals("A1B", AlterationUtils.trimComment("A1B "));
+        assertEquals("A1B", AlterationUtils.trimComment(" A1B"));
+        assertEquals("A1B,B1C", AlterationUtils.trimComment("A1B,B1C"));
+        assertEquals("A1B,B1C", AlterationUtils.trimComment("A1B,B1C "));
+        assertEquals("A1B,B1C", AlterationUtils.trimComment(" A1B,B1C"));
+
+        assertEquals("A1B", AlterationUtils.trimComment("A1B(test1)"));
+        assertEquals("A1B", AlterationUtils.trimComment("A1B (test1)"));
+        assertEquals("A1B", AlterationUtils.trimComment("A1B(test1) "));
+        assertEquals("A1B", AlterationUtils.trimComment("A1B(test1,test2)"));
+        assertEquals("A1B", AlterationUtils.trimComment("A1B(test1, test2)"));
+        assertEquals("A1B", AlterationUtils.trimComment("A1B(test1 ,test2)"));
+        assertEquals("A1B", AlterationUtils.trimComment("A1B (test1,test2)"));
+        assertEquals("A1B", AlterationUtils.trimComment("A1B(test1,test2) "));
+        assertEquals("A1B,B1C", AlterationUtils.trimComment("A1B(test1,test2),B1C"));
+        assertEquals("A1B, B1C", AlterationUtils.trimComment("A1B(test1,test2), B1C"));
+        assertEquals("A1B,B1C", AlterationUtils.trimComment("A1B(test1,test2),B1C "));
+        assertEquals("A1B,B1C", AlterationUtils.trimComment("A1B(test1,test2),B1C(test1,test2)"));
+        assertEquals("A1B,B1C", AlterationUtils.trimComment("A1B(test1,test2),B1C (test1,test2)"));
+        assertEquals("A1B,B1C", AlterationUtils.trimComment("A1B(test1,test2),B1C(test1,test2) "));
+        assertEquals("A1B,B1C", AlterationUtils.trimComment("A1B(test1,test2),B1C(test1, test2)"));
+        assertEquals("A1B,B1C", AlterationUtils.trimComment("A1B(test1,test2),B1C (test1 ,test2)"));
+
+        assertEquals("A1B,B1C[test1,test2]", AlterationUtils.trimComment("A1B(test1,test2),B1C[test1,test2]"));
+        assertEquals("A1B,B1C[test1,test2],C1D", AlterationUtils.trimComment("A1B(test1,test2),B1C[test1,test2],C1D(test1,test2)"));
     }
 }
