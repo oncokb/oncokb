@@ -125,16 +125,11 @@ public final class AlterationUtils {
         return exclusionMatch.matches();
     }
 
-    private static String trimComment(String mutationStr) {
+    public static String trimComment(String mutationStr) {
         if (StringUtils.isEmpty(mutationStr)) {
             return "";
         }
-        mutationStr = mutationStr.trim();
-        if (mutationStr.endsWith(")")) {
-            int commentStartIndex = mutationStr.lastIndexOf("(");
-            mutationStr = mutationStr.substring(0, commentStartIndex);
-        }
-        return mutationStr.trim();
+        return mutationStr.replaceAll("\\([\\s\\S]*?\\)", "").trim();
     }
 
     public static List<Alteration> parseMutationString(String mutationStr, String mutationSeparator) {
