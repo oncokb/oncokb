@@ -18,7 +18,7 @@ import org.mskcc.cbio.oncokb.model.clinicalTrialsMatching.*;
 public class ClinicalTrialsUtils {
 
 
-    public List<Trial> getTrials(String treatment, String cancerType)
+    public static List<Trial> getTrials(String treatment, String cancerType)
         throws IOException, ParseException {
 
         JSONObject trialsMapping = CacheUtils.getTrialsMapping();
@@ -91,7 +91,7 @@ public class ClinicalTrialsUtils {
         return result;
     }
 
-    private Tumor getTumor(JSONObject oncotreeMapping, JSONObject trialsMapping, String oncoTreeCode) {
+    private static Tumor getTumor(JSONObject oncotreeMapping, JSONObject trialsMapping, String oncoTreeCode) {
         Tumor tumor = new Tumor();
         if (oncotreeMapping.containsKey(oncoTreeCode)) {
             JSONObject tumorObj = (JSONObject) oncotreeMapping.get(oncoTreeCode);
@@ -120,7 +120,7 @@ public class ClinicalTrialsUtils {
         return tumor;
     }
 
-    private List<Trial> getTrialByTreatment(List<Trial> trials, String treatment) {
+    private static List<Trial> getTrialByTreatment(List<Trial> trials, String treatment) {
         List<Trial> res = new ArrayList<>();
         Set<String> drugsNames = Arrays.stream(treatment.split(",|\\+")).map(item -> item.trim()).collect(Collectors.toSet());
 
@@ -128,7 +128,7 @@ public class ClinicalTrialsUtils {
         return res;
     }
 
-    private List<Trial> getTrialsByDrugName(List<Trial> trials, Set<String> drugsNames) {
+    private static List<Trial> getTrialsByDrugName(List<Trial> trials, Set<String> drugsNames) {
         List<Trial> res = new ArrayList<>();
         for (Trial trial : trials) {
             List<Arm> arms = trial.getArms();
@@ -147,7 +147,7 @@ public class ClinicalTrialsUtils {
         return res;
     }
 
-    private List<Trial> getTrialsForSpecialCancerType(JSONObject oncotreeMapping, JSONObject trialsMapping, SpecialTumorType specialTumorType) {
+    private static List<Trial> getTrialsForSpecialCancerType(JSONObject oncotreeMapping, JSONObject trialsMapping, SpecialTumorType specialTumorType) {
         List<Trial> trials = new ArrayList<>();
         if(specialTumorType == null) return trials;
 
@@ -168,7 +168,7 @@ public class ClinicalTrialsUtils {
         }
     }
 
-    private List<Trial> getTrialsByCancerType(JSONObject oncotreeMapping, JSONObject trialsMapping, String cancerType) {
+    private static List<Trial> getTrialsByCancerType(JSONObject oncotreeMapping, JSONObject trialsMapping, String cancerType) {
         List<Trial> trials = new ArrayList<>();
 
         Set<String> tumorCodesByMainType = new HashSet<>();
@@ -195,7 +195,7 @@ public class ClinicalTrialsUtils {
         return trials;
     }
 
-    private Set<Trial> getAllTrials(JSONObject oncotreeMapping, JSONObject trialsMapping) {
+    private static Set<Trial> getAllTrials(JSONObject oncotreeMapping, JSONObject trialsMapping) {
         Set<Trial> trials = new HashSet<>();
 
         oncotreeMapping.keySet().forEach(code -> {

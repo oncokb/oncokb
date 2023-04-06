@@ -751,23 +751,16 @@ public class IndicatorUtils {
                                 }
                                 indicatorQueryTreatment.setDescription(SummaryUtils.enrichDescription(descriptionMap.get(treatment), queryHugoSymbol));
 
-                                ClinicalTrialsUtils clinicalTrialUtils = new ClinicalTrialsUtils();
                                 List<List<Trial>> trialByDrug = new ArrayList<>();
-                                String oncotreeCode = tumorType.getCode();
                                 for (Drug drug : treatment.getDrugs()) {
                                     String drugName = drug.getDrugName();
                                     try {
-                                        if (oncotreeCode != null) {
-                                            List<Trial> trials = clinicalTrialUtils.getTrials(drugName, null);
-                                            trialByDrug.add(trials);
-                                        } else {
-                                            List<Trial> trialsByTumorType = new ArrayList<>();
-                                            for (TumorType tumor : relevantTumorTypes) {
-                                                List<Trial> trials = clinicalTrialUtils.getTrials(drugName, tumor.getMainType());
-                                                trialsByTumorType.addAll(trials);
-                                            }
-                                            trialByDrug.add(trialsByTumorType);
+                                        List<Trial> trialsByTumorType = new ArrayList<>();
+                                        for (TumorType tumor : relevantTumorTypes) {
+                                            List<Trial> trials = ClinicalTrialsUtils.getTrials(drugName, tumor.getMainType());
+                                            trialsByTumorType.addAll(trials);
                                         }
+                                        trialByDrug.add(trialsByTumorType);
                                     } catch (Exception e) {
                                         System.out.println(e.getMessage());
                                         System.out.println("Trials could not be added successfully to IndicatorQueryTreatment.");
