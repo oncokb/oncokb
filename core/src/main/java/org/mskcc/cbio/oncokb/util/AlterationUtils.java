@@ -1130,6 +1130,18 @@ public final class AlterationUtils {
                 continue;
             }
         }
+
+        // if the query is part of the abbreviation list, the corresponding full name should be indexed.
+        if (NamingUtils.hasAbbreviation(query)) {
+            String fullName = NamingUtils.getFullName(query);
+            if (fullName != null) {
+                for (Alteration alteration : alterations) {
+                    if (isMatch(exactMatch, fullName, alteration.getName())) {
+                        alterationList.add(alteration);
+                    }
+                }
+            }
+        }
         return alterationList;
     }
 
