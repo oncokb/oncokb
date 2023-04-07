@@ -84,7 +84,7 @@ public class VariantsApiController implements VariantsApi {
         List<Alteration> alterationList = new ArrayList<>();
         if (query != null) {
             if (query.getHgvs() != null && !query.getHgvs().isEmpty()) {
-                Alteration alteration = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, query.getHgvs(), query.getReferenceGenome());
+                Alteration alteration = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, query.getReferenceGenome(), query.getHgvs());
                 if (alteration != null && alteration.getGene() != null) {
                     List<Alteration> allAlterations = AlterationUtils.getAllAlterations(query.getReferenceGenome(), alteration.getGene());
                     alterationList.addAll(ApplicationContextSingleton.getAlterationBo().findRelevantAlterations(query.getReferenceGenome(), alteration, allAlterations, true));
