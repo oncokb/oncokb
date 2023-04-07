@@ -607,7 +607,7 @@ public final class AlterationUtils {
         return alt;
     }
 
-    public static Alteration getAlterationFromGenomeNexus(GNVariantAnnotationType type, String query, ReferenceGenome referenceGenome) throws ApiException {
+    public static Alteration getAlterationFromGenomeNexus(GNVariantAnnotationType type, ReferenceGenome referenceGenome, String query) throws ApiException {
         Alteration alteration = new Alteration();
         if (query != null && !query.trim().isEmpty()) {
             TranscriptConsequenceSummary transcriptConsequenceSummary = GenomeNexusUtils.getTranscriptConsequence(type, query, referenceGenome);
