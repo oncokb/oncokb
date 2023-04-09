@@ -245,8 +245,6 @@ public class ValidationUtils {
         Set<String> names = new HashSet<>();
         names.addAll(NamingUtils.getAllAbbreviations());
         names.addAll(NamingUtils.getAllAbbreviationFullNames());
-        names.add("MSI-H");
-        names.add("TMB-H");
         names.add("M1?");
         return names;
     }

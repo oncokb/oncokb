@@ -18,16 +18,16 @@ public class NamingUtils {
 
             String[] parts = line.split("\t");
             if (parts.length >= 2)
-                abbreviations.put(parts[0], parts[1]);
+                abbreviations.put(parts[0].toUpperCase(), parts[1]);
         }
     }
 
     public static String getFullName(String abbreviation) {
-        return abbreviation == null ? null : abbreviations.get(abbreviation);
+        return abbreviation == null ? null : abbreviations.get(abbreviation.toUpperCase());
     }
 
     public static boolean hasAbbreviation(String abbreviation) {
-        return abbreviation == null ? false : abbreviations.containsKey(abbreviation);
+        return abbreviation == null ? false : abbreviations.containsKey(abbreviation.toUpperCase());
     }
 
     public static Set<String> getAllAbbreviations() {
