@@ -571,40 +571,38 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     }
 
     @Override
-    public ResponseEntity<List<String>> utilFilterHgvsgBasedOnCoveragePost(
+    public ResponseEntity<List<TranscriptCoverageFilterResult>> utilFilterHgvsgBasedOnCoveragePost(
         @ApiParam(value = "List of queries.", required = true) @RequestBody List<AnnotateMutationByHGVSgQuery> body
     ) throws ApiException, org.genome_nexus.ApiException {
         HttpStatus status = HttpStatus.OK;
-        List<String> result = new ArrayList<>();
+        List<TranscriptCoverageFilterResult> result = new ArrayList<>();
 
         if (body == null) {
             status = HttpStatus.BAD_REQUEST;
         } else {
             Set<org.oncokb.oncokb_transcript.client.Gene> genes = this.cacheFetcher.getAllTranscriptGenes();
             for (AnnotateMutationByHGVSgQuery query : body) {
-                if(this.cacheFetcher.genomicLocationShouldBeAnnotated(GNVariantAnnotationType.HGVS_G, query.getHgvsg(), query.getReferenceGenome(), genes)){
-                    result.add(query.getHgvsg());
-                }
+                boolean shouldAnnotate = this.cacheFetcher.genomicLocationShouldBeAnnotated(GNVariantAnnotationType.HGVS_G, query.getHgvsg(), query.getReferenceGenome(), genes);
+                result.add(new TranscriptCoverageFilterResult(query.getHgvsg(), shouldAnnotate));
             }
         }
         return new ResponseEntity<>(result, status);
     }
 
     @Override
-    public ResponseEntity<List<String>> utilFilterGenomicChangeBasedOnCoveragePost(
+    public ResponseEntity<List<TranscriptCoverageFilterResult>> utilFilterGenomicChangeBasedOnCoveragePost(
         @ApiParam(value = "List of queries.", required = true) @RequestBody List<AnnotateMutationByGenomicChangeQuery> body
     ) throws ApiException, org.genome_nexus.ApiException {
         HttpStatus status = HttpStatus.OK;
-        List<String> result = new ArrayList<>();
+        List<TranscriptCoverageFilterResult> result = new ArrayList<>();
 
         if (body == null) {
             status = HttpStatus.BAD_REQUEST;
         } else {
             Set<org.oncokb.oncokb_transcript.client.Gene> genes = this.cacheFetcher.getAllTranscriptGenes();
             for (AnnotateMutationByGenomicChangeQuery query : body) {
-                if(this.cacheFetcher.genomicLocationShouldBeAnnotated(GNVariantAnnotationType.GENOMIC_LOCATION, query.getGenomicLocation(), query.getReferenceGenome(), genes)){
-                    result.add(query.getGenomicLocation());
-                }
+                boolean shouldAnnotate = this.cacheFetcher.genomicLocationShouldBeAnnotated(GNVariantAnnotationType.GENOMIC_LOCATION, query.getGenomicLocation(), query.getReferenceGenome(), genes);
+                result.add(new TranscriptCoverageFilterResult(query.getGenomicLocation(), shouldAnnotate));
             }
         }
         return new ResponseEntity<>(result, status);

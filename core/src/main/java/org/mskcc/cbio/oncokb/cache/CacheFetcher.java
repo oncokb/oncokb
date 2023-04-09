@@ -247,7 +247,7 @@ public class CacheFetcher {
     @Cacheable(cacheResolver = "generalCacheResolver",
         keyGenerator = "concatKeyGenerator")
     public Alteration getAlterationFromGenomeNexus(GNVariantAnnotationType gnVariantAnnotationType, ReferenceGenome referenceGenome, String genomicLocation) throws org.genome_nexus.ApiException {
-        return AlterationUtils.getAlterationFromGenomeNexus(gnVariantAnnotationType, genomicLocation, referenceGenome);
+        return AlterationUtils.getAlterationFromGenomeNexus(gnVariantAnnotationType, referenceGenome, genomicLocation);
     }
 
     public void cacheAlterationFromGenomeNexus(GenomeNexusAnnotatedVariantInfo gnAnnotatedVariantInfo) throws IllegalStateException {
@@ -280,12 +280,12 @@ public class CacheFetcher {
         Cache cache = cacheManager.getCache(CacheCategory.GENERAL.getKey() + REDIS_KEY_SEPARATOR + "getAlterationFromGenomeNexus");
         if (StringUtils.isNotEmpty(hgvsg)) {
             String cacheKey = String.join(REDIS_KEY_SEPARATOR, new String[]{GNVariantAnnotationType.HGVS_G.name(), referenceGenome.name(), hgvsg});
-            cache.putIfAbsent(cacheKey, alteration);
+            cache.put(cacheKey, alteration);
         }
 
         if (StringUtils.isNotEmpty(genomicLocation)) {
             String cacheKey = String.join(REDIS_KEY_SEPARATOR, new String[]{GNVariantAnnotationType.GENOMIC_LOCATION.name(), referenceGenome.name(), genomicLocation});
-            cache.putIfAbsent(cacheKey, alteration);
+            cache.put(cacheKey, alteration);
         }
 
     }
@@ -333,14 +333,14 @@ public class CacheFetcher {
         }
         GenomicLocation finalGl = gl;
         int bpBuffer = 10000; // add some buffer on determine which genomic change should be annotated. We use the gene range from oncokb-transcript but that does not include gene regulatory sequence. Before having proper range, we use a buffer range instead.
-        List<org.oncokb.oncokb_transcript.client.Gene> filtered = allTranscriptsGenes.stream().filter(gene -> {
+        Boolean shouldBeAnnotated = allTranscriptsGenes.stream().anyMatch(gene -> {
             Set<EnsemblGene> ensemblGenes = gene.getEnsemblGenes().stream().filter(ensemblGene -> ensemblGene.getCanonical() && ensemblGene.getReferenceGenome().equals(referenceGenome.name())).collect(Collectors.toSet());
             if (ensemblGenes.size() > 0) {
-                return ensemblGenes.stream().filter(ensemblGene -> finalGl.getChromosome().equals(ensemblGene.getChromosome()) && rangesIntersect(ensemblGene.getStart() > bpBuffer ? (ensemblGene.getStart() - bpBuffer) : 0, ensemblGene.getEnd() + bpBuffer, finalGl.getStart(), finalGl.getEnd())).count() > 0;
+                return ensemblGenes.stream().anyMatch(ensemblGene -> finalGl.getChromosome().equals(ensemblGene.getChromosome()) && rangesIntersect(ensemblGene.getStart() > bpBuffer ? (ensemblGene.getStart() - bpBuffer) : 0, ensemblGene.getEnd() + bpBuffer, finalGl.getStart(), finalGl.getEnd()));
             } else {
                 return false;
             }
-        }).collect(Collectors.toList());
-        return filtered.size() > 0;
+        });
+        return shouldBeAnnotated;
     }
 }

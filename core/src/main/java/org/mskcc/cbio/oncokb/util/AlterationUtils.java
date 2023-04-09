@@ -125,16 +125,11 @@ public final class AlterationUtils {
         return exclusionMatch.matches();
     }
 
-    private static String trimComment(String mutationStr) {
+    public static String trimComment(String mutationStr) {
         if (StringUtils.isEmpty(mutationStr)) {
             return "";
         }
-        mutationStr = mutationStr.trim();
-        if (mutationStr.endsWith(")")) {
-            int commentStartIndex = mutationStr.lastIndexOf("(");
-            mutationStr = mutationStr.substring(0, commentStartIndex);
-        }
-        return mutationStr.trim();
+        return mutationStr.replaceAll("\\([\\s\\S]*?\\)", "").trim();
     }
 
     public static List<Alteration> parseMutationString(String mutationStr, String mutationSeparator) {
@@ -612,7 +607,7 @@ public final class AlterationUtils {
         return alt;
     }
 
-    public static Alteration getAlterationFromGenomeNexus(GNVariantAnnotationType type, String query, ReferenceGenome referenceGenome) throws ApiException {
+    public static Alteration getAlterationFromGenomeNexus(GNVariantAnnotationType type, ReferenceGenome referenceGenome, String query) throws ApiException {
         Alteration alteration = new Alteration();
         if (query != null && !query.trim().isEmpty()) {
             TranscriptConsequenceSummary transcriptConsequenceSummary = GenomeNexusUtils.getTranscriptConsequence(type, query, referenceGenome);
@@ -1128,6 +1123,18 @@ public final class AlterationUtils {
             if (isMatch(exactMatch, query, alteration.getName())) {
                 alterationList.add(alteration);
                 continue;
+            }
+        }
+
+        // if the query is part of the abbreviation list, the corresponding full name should be indexed.
+        if (NamingUtils.hasAbbreviation(query)) {
+            String fullName = NamingUtils.getFullName(query);
+            if (fullName != null) {
+                for (Alteration alteration : alterations) {
+                    if (isMatch(exactMatch, fullName, alteration.getName())) {
+                        alterationList.add(alteration);
+                    }
+                }
             }
         }
         return alterationList;

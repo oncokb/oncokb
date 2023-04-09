@@ -635,7 +635,7 @@ public class IndicatorUtilsTest {
 
         // Test indicator endpoint supports HGVS
         String hgvsg = "7:g.140453136A>T";
-        Alteration alteration = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, hgvsg, DEFAULT_REFERENCE_GENOME);
+        Alteration alteration = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, DEFAULT_REFERENCE_GENOME, hgvsg);
         query = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", alteration, hgvsg);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
         assertTrue("The geneExist is not true, but it should be.", indicatorQueryResp.getGeneExist() == true);
@@ -643,7 +643,7 @@ public class IndicatorUtilsTest {
         assertEquals("The highest sensitive level is not 1, but it should be.", LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
 
         hgvsg = "7:g.140453136A>T";
-        alteration = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, hgvsg, DEFAULT_REFERENCE_GENOME);
+        alteration = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, DEFAULT_REFERENCE_GENOME, hgvsg);
         query1 = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", alteration, hgvsg);
         query2 = new Query(null, DEFAULT_REFERENCE_GENOME, null, "BRAF", "V600E", null, null, "Melanoma", null, null, null, null);
 

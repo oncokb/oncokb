@@ -156,7 +156,7 @@ public class AnnotationsApiController {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
         }
-        indicatorQueryResp = this.getIndicatorQueryFromGenomicLocation(matchedRG, genomicLocation, tumorType, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
+        indicatorQueryResp = this.getIndicatorQueryFromGenomicLocation(matchedRG, genomicLocation, tumorType, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")), cacheFetcher.getAllTranscriptGenes());
         return new ResponseEntity<>(indicatorQueryResp, status);
     }
 
@@ -179,8 +179,9 @@ public class AnnotationsApiController {
         if (body == null) {
             status = HttpStatus.BAD_REQUEST;
         } else {
+            Set<org.oncokb.oncokb_transcript.client.Gene> allTranscriptGenes = cacheFetcher.getAllTranscriptGenes();
             for (AnnotateMutationByGenomicChangeQuery query : body) {
-                IndicatorQueryResp resp = this.getIndicatorQueryFromGenomicLocation(query.getReferenceGenome(), query.getGenomicLocation(), query.getTumorType(), query.getEvidenceTypes());
+                IndicatorQueryResp resp = this.getIndicatorQueryFromGenomicLocation(query.getReferenceGenome(), query.getGenomicLocation(), query.getTumorType(), query.getEvidenceTypes(), allTranscriptGenes);
                 resp.getQuery().setId(query.getId());
                 result.add(resp);
             }
@@ -226,7 +227,8 @@ public class AnnotationsApiController {
                 matchedRG,
                 hgvsg,
                 tumorType,
-                new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ","))
+                new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")),
+                cacheFetcher.getAllTranscriptGenes()
             );
         }
         return new ResponseEntity<>(indicatorQueryResp, status);
@@ -251,12 +253,14 @@ public class AnnotationsApiController {
         if (body == null) {
             status = HttpStatus.BAD_REQUEST;
         } else {
+            Set<org.oncokb.oncokb_transcript.client.Gene> allTranscriptGenes = cacheFetcher.getAllTranscriptGenes();
             for (AnnotateMutationByHGVSgQuery query : body) {
                 IndicatorQueryResp resp = this.getIndicatorQueryFromHGVSg(
                     query.getReferenceGenome(),
                     query.getHgvsg(),
                     query.getTumorType(),
-                    query.getEvidenceTypes()
+                    query.getEvidenceTypes(),
+                    allTranscriptGenes
                 );
                 resp.getQuery().setId(query.getId());
                 result.add(resp);
@@ -506,9 +510,15 @@ public class AnnotationsApiController {
 
 
 
-    private IndicatorQueryResp getIndicatorQueryFromGenomicLocation(ReferenceGenome referenceGenome, String genomicLocation, String tumorType, Set<EvidenceType> evidenceTypes) throws ApiException, org.genome_nexus.ApiException {
+    private IndicatorQueryResp getIndicatorQueryFromGenomicLocation(
+        ReferenceGenome referenceGenome,
+        String genomicLocation,
+        String tumorType,
+        Set<EvidenceType> evidenceTypes,
+        Set<org.oncokb.oncokb_transcript.client.Gene> allTranscriptGenes
+    ) throws ApiException, org.genome_nexus.ApiException {
         Alteration alteration;
-        if (!this.cacheFetcher.genomicLocationShouldBeAnnotated(GNVariantAnnotationType.GENOMIC_LOCATION, genomicLocation, referenceGenome, this.cacheFetcher.getAllTranscriptGenes())) {
+        if (!this.cacheFetcher.genomicLocationShouldBeAnnotated(GNVariantAnnotationType.GENOMIC_LOCATION, genomicLocation, referenceGenome, allTranscriptGenes)) {
             alteration = new Alteration();
         } else {
             alteration = this.cacheFetcher.getAlterationFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, referenceGenome, genomicLocation);
@@ -532,9 +542,15 @@ public class AnnotationsApiController {
         );
     }
 
-    private IndicatorQueryResp getIndicatorQueryFromHGVSg(ReferenceGenome referenceGenome, String hgvsg, String tumorType, Set<EvidenceType> evidenceTypes) throws ApiException, org.genome_nexus.ApiException {
+    private IndicatorQueryResp getIndicatorQueryFromHGVSg(
+        ReferenceGenome referenceGenome,
+        String hgvsg,
+        String tumorType,
+        Set<EvidenceType> evidenceTypes,
+        Set<org.oncokb.oncokb_transcript.client.Gene> allTranscriptGenes
+    ) throws ApiException, org.genome_nexus.ApiException {
         Alteration alteration;
-        if (!this.cacheFetcher.genomicLocationShouldBeAnnotated(GNVariantAnnotationType.HGVS_G, hgvsg, referenceGenome, this.cacheFetcher.getAllTranscriptGenes())) {
+        if (!this.cacheFetcher.genomicLocationShouldBeAnnotated(GNVariantAnnotationType.HGVS_G, hgvsg, referenceGenome, allTranscriptGenes)) {
             alteration = new Alteration();
         } else {
             alteration = this.cacheFetcher.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, referenceGenome, hgvsg);
