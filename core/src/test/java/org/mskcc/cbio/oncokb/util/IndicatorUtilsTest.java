@@ -150,8 +150,8 @@ public class IndicatorUtilsTest {
         // The position has high truncating rate
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "ALK", "R401Q", null, null, "Colon Adenocarcinoma", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null);
-        assertEquals("The oncogenicity should not be 'Likely Oncogenic'", Oncogenicity.UNKNOWN.getOncogenic(), indicatorQueryResp.getOncogenic());
-        assertEquals("The variant summary is not expected.", "The biologic significance of the ALK R401Q mutation is unknown (last reviewed 02/01/2019).", indicatorQueryResp.getVariantSummary());
+        assertEquals("The oncogenicity should not be 'Likely Oncogenic'", Oncogenicity.LIKELY_NEUTRAL.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The variant summary is not expected.", "The ALK R401Q mutation is likely neutral.", indicatorQueryResp.getVariantSummary());
         assertEquals("The isHotspot is not false, but it should be.", Boolean.FALSE, indicatorQueryResp.getHotspot());
 
         // No longer test 3A. KRAS has been downgraded to level 4

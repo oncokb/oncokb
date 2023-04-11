@@ -12,6 +12,7 @@ public enum ValidationCategory {
     INCORRECT_ALTERATION_NAME_FORMAT(ValidationType.TEST, "Whether alteration is named appropriately"),
     OUTDATED_HUGO_SYMBOLS(ValidationType.TEST, "Whether all genes are using the latest hugo symbol"),
     MISMATCH_REF_AA(ValidationType.TEST, "Whether all variants have matched reference amino acid on the position curated"),
+    TRUNCATING_MUTATIONS_NOT_UNDER_TSG(ValidationType.TEST, "Whether all genes are tumor suppressor genes if Truncating Mutations curated under the gene"),
     ;
 
     ValidationCategory(ValidationType type, String name) {
