@@ -760,7 +760,9 @@ public class IndicatorUtils {
                                             List<Trial> trials = ClinicalTrialsUtils.getTrials(drugName, tumor.getMainType());
                                             trialsByTumorType.addAll(trials);
                                         }
-                                        trialByDrug.add(trialsByTumorType);
+                                        if(!trialsByTumorType.isEmpty()) {
+                                            trialByDrug.add(trialsByTumorType);
+                                        }
                                     } catch (Exception e) {
                                         System.out.println(e.getMessage());
                                         System.out.println("Trials could not be added successfully to IndicatorQueryTreatment.");
