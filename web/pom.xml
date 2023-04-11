@@ -106,7 +106,7 @@
         <profile>
             <id>curate</id>
             <properties>
-                <frontend.version>0.8.3</frontend.version>
+                <frontend.version>0.8.4</frontend.version>
                 <frontend.groupId>com.github.oncokb</frontend.groupId>
                 <frontend.artifactId>curation-platform</frontend.artifactId>
             </properties>
