@@ -776,7 +776,10 @@ public class IndicatorUtils {
                                     }
                                 }
 
-                                Set<Trial> trialsSet = new HashSet<>(trials);
+                                Set<Trial> trialsSet = trials
+                                        .stream()
+                                        .collect(Collectors.toCollection(
+                                                () -> new TreeSet<>(Comparator.comparing(Trial::getNctId))));
                                 indicatorQueryTreatment.setTrials(trialsSet);
 
                                 treatments.add(indicatorQueryTreatment);
