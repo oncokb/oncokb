@@ -158,30 +158,33 @@ public class GenomeNexusUtils {
             // want to finish annotating the rest of the annotations in the POST request.
             e.printStackTrace();
         }
-        
-        // Get HGVSg and Genomic Location from Genome Nexus annotation
+
         if (annotation != null) {
-            if (StringUtils.isNotEmpty(annotation.getHgvsg())) {
-                preAnnotatedVariantInfo.setHgvsg(annotation.getHgvsg());
-            }
-
-            if (annotation.getAnnotationSummary() != null && annotation.getAnnotationSummary().getGenomicLocation() != null) {
-                org.genome_nexus.client.GenomicLocation gl = annotation.getAnnotationSummary().getGenomicLocation();
-                if (gl.getChromosome() != null && gl.getStart() != null && gl.getEnd() != null && gl.getReferenceAllele() != null && gl.getVariantAllele() != null ) {
-                    String glString = gl.getChromosome() + "," + gl.getStart() + "," + gl.getEnd() + "," + gl.getReferenceAllele() + "," + gl.getVariantAllele();
-                    preAnnotatedVariantInfo.setGenomicLocation(glString);
-                }
-            }
-
-            // Use the original query if HGVSg or Genomic Location is missing
+            // Use original query for HGVSg/Genomic Location.
             if (annotation.isSuccessfullyAnnotated()) {
-                if (StringUtils.isEmpty(preAnnotatedVariantInfo.getHgvsg()) && type == GNVariantAnnotationType.HGVS_G) {
+                if (type == GNVariantAnnotationType.HGVS_G) {
                     preAnnotatedVariantInfo.setHgvsg(query);
                 }
-                if (StringUtils.isEmpty(preAnnotatedVariantInfo.getGenomicLocation()) && type == GNVariantAnnotationType.GENOMIC_LOCATION) {
+                if (type == GNVariantAnnotationType.GENOMIC_LOCATION) {
                     preAnnotatedVariantInfo.setGenomicLocation(query);
                 }
             }
+
+            // Use Genome Nexus annotation to translate original query to HGVSg or Genomic Location
+            if (type == GNVariantAnnotationType.GENOMIC_LOCATION && StringUtils.isNotEmpty(annotation.getHgvsg())) {
+                preAnnotatedVariantInfo.setHgvsg(annotation.getHgvsg());
+            }
+
+            if (type == GNVariantAnnotationType.HGVS_G) {
+                if (annotation.getAnnotationSummary() != null && annotation.getAnnotationSummary().getGenomicLocation() != null) {
+                    org.genome_nexus.client.GenomicLocation gl = annotation.getAnnotationSummary().getGenomicLocation();
+                    if (gl.getChromosome() != null && gl.getStart() != null && gl.getEnd() != null && gl.getReferenceAllele() != null && gl.getVariantAllele() != null ) {
+                        String glString = gl.getChromosome() + "," + gl.getStart() + "," + gl.getEnd() + "," + gl.getReferenceAllele() + "," + gl.getVariantAllele();
+                        preAnnotatedVariantInfo.setGenomicLocation(glString);
+                    }
+                }
+            }
+
         }
 
         TranscriptConsequenceSummary transcriptConsequenceSummary = getConsequence(annotation, referenceGenome);
@@ -252,8 +255,17 @@ public class GenomeNexusUtils {
 
         if (variantAnnotation.getAnnotationSummary() != null && variantAnnotation.getAnnotationSummary().getTranscriptConsequenceSummaries() != null) {
             for (TranscriptConsequenceSummary consequenceSummary : variantAnnotation.getAnnotationSummary().getTranscriptConsequenceSummaries()) {
-                if (StringUtils.isNotEmpty(consequenceSummary.getEntrezGeneId()) && StringUtils.isNotEmpty(consequenceSummary.getTranscriptId())) {
-                    Gene gene = GeneUtils.getGeneByEntrezId(Integer.parseInt(consequenceSummary.getEntrezGeneId()));
+                Integer entrezGeneId = null;
+                if (StringUtils.isNotEmpty(consequenceSummary.getEntrezGeneId())) {
+                    entrezGeneId = Integer.parseInt(consequenceSummary.getEntrezGeneId());
+                }
+                String hugoSymbol = null;
+                if (StringUtils.isNotEmpty(consequenceSummary.getHugoGeneSymbol())) {
+                    hugoSymbol = consequenceSummary.getHugoGeneSymbol();
+                }
+
+                if (StringUtils.isNotEmpty(consequenceSummary.getTranscriptId())) {
+                    Gene gene = GeneUtils.getGene(entrezGeneId, hugoSymbol);
                     String isoform = getIsoform(gene, referenceGenome);
                     if (gene != null && (StringUtils.isEmpty(isoform) || isoform.equals(consequenceSummary.getTranscriptId()))) {
                         summaries.add(consequenceSummary);
