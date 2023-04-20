@@ -69,8 +69,16 @@ public class TrialsApiController {
         } else {
             List<TumorType> tumorTypes = TumorTypeUtils.findRelevantTumorTypes(cancerType);
             List<Trial> trials = new ArrayList<>();
+            Boolean cancerTypeInTumorTypes = false;
             for (TumorType tumorType: tumorTypes) {
-                trials.addAll(getTrialsByCancerType(oncotreeMapping, trialsMapping, tumorType.getMainType()));
+                String mainType = tumorType.getMainType();
+                trials.addAll(getTrialsByCancerType(oncotreeMapping, trialsMapping, mainType));
+                if (mainType == cancerType) {
+                    cancerTypeInTumorTypes = true;
+                }
+            }
+            if (!cancerTypeInTumorTypes) {
+                trials.addAll(getTrialsByCancerType(oncotreeMapping, trialsMapping, cancerType.toLowerCase()));
             }
             if (treatment != null) {
                 trials = getTrialByTreatment(trials,treatment);
@@ -225,9 +233,13 @@ public class TrialsApiController {
         Set<String> tumorCodesByMainType = new HashSet<>();
         List<TumorType> allOncoTreeSubtypes = ApplicationContextSingleton.getTumorTypeBo().getAllSubtypes();
         for (TumorType oncoTreeType : allOncoTreeSubtypes) {
-            if (oncoTreeType.getMainType() != null && oncoTreeType.getMainType() != null && cancerType.equalsIgnoreCase(oncoTreeType.getMainType())) {
+            if (oncoTreeType.getMainType() != null && cancerType.equalsIgnoreCase(oncoTreeType.getMainType())) {
                 tumorCodesByMainType.add(oncoTreeType.getCode());
+                tumorCodesByMainType.add(oncoTreeType.getMainType());
             }
+        }
+        if (!tumorCodesByMainType.contains(cancerType.toLowerCase())) {
+            tumorCodesByMainType.add(cancerType.toLowerCase());
         }
         if (tumorCodesByMainType.size() > 0) {
             for (String code : tumorCodesByMainType) {
