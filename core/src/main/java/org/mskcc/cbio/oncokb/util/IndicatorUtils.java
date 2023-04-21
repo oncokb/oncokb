@@ -774,10 +774,20 @@ public class IndicatorUtils {
                                     }
                                 }
 
-                                Set<Trial> trialsSet = trials
-                                        .stream()
-                                        .collect(Collectors.toCollection(
-                                                () -> new TreeSet<>(Comparator.comparing(Trial::getNctId))));
+                                Set<String> nctIdSet = new HashSet<>();
+                                trials = trials.stream()
+                                    .filter(t -> nctIdSet.add(t.getNctId()))
+                                    .collect(Collectors.toList());
+
+                                
+
+                                Collections.sort(trials,Comparator.comparing(Trial::getCurrentTrialStatus, Comparator.reverseOrder())
+                                            .thenComparing(Trial::getPhase, Comparator.reverseOrder() )
+                                            .thenComparing(Trial::getNctId)
+                                    );
+
+                                Set<Trial> trialsSet = new LinkedHashSet(trials);
+
                                 indicatorQueryTreatment.setTrials(trialsSet);
 
                                 treatments.add(indicatorQueryTreatment);
