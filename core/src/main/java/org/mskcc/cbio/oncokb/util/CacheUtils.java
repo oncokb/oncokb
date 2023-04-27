@@ -1,5 +1,7 @@
 package org.mskcc.cbio.oncokb.util;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.mysql.jdbc.StringUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.json.simple.JSONObject;
@@ -8,6 +10,7 @@ import org.json.simple.parser.ParseException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.mskcc.cbio.oncokb.apiModels.download.DownloadAvailability;
@@ -25,6 +28,8 @@ import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.google.api.client.json.Json;
 import com.google.gson.JsonObject;
+
+import static org.mskcc.cbio.oncokb.util.ClinicalTrialsUtils.getTrialsByCancerType;
 
 
 /**
@@ -74,7 +79,13 @@ public class CacheUtils {
     private static String trialsS3Path = String.format("%s/trials.json",mappingsS3Path);
     private static String oncotreeS3Path = String.format("%s/oncotree_mapping.json",mappingsS3Path);
     private static JSONObject trialsMappingJson;
+    private static Map<String, Trial>  trialsMappingMap;
     private static JSONObject oncotreeMappingJson;
+    private static Map<String, Tumor> oncotreeMappingMap;
+
+    private static Set<Trial> allTrials;
+    private static Set<Trial> allSolidTrials;
+    private static Set<Trial> allLiquidTrials;
 
     // Other services which will be defined in the property cache.update separated by comma
     // Every time the observer is triggered, all other services will be triggered as well
@@ -251,10 +262,22 @@ public class CacheUtils {
             S3ObjectInputStream inputStreamTrials = s3objectTrials.getObjectContent();
             JSONParser jsonParser = new JSONParser();
             trialsMappingJson = (JSONObject) jsonParser.parse(new InputStreamReader(inputStreamTrials, "UTF-8"));
+            Gson gson = new Gson();
+            Type empMapType = new TypeToken<Map<String, Trial>>() {
+            }.getType();
+            trialsMappingMap = gson.fromJson(trialsMappingJson.toJSONString(), empMapType);
 
             S3Object s3objectOncotree = s3client.getObject(oncokbS3Bucket, oncotreeS3Path);
             S3ObjectInputStream inputStreamOncotree = s3objectOncotree.getObjectContent();
             oncotreeMappingJson = (JSONObject) jsonParser.parse(new InputStreamReader(inputStreamOncotree, "UTF-8"));
+            gson = new Gson();
+            empMapType = new TypeToken<Map<String, Tumor>>() {
+            }.getType();
+            oncotreeMappingMap = gson.fromJson(oncotreeMappingJson.toJSONString(), empMapType);
+
+            allTrials = ClinicalTrialsUtils.getAllTrials(oncotreeMappingMap, trialsMappingMap);
+            allSolidTrials = getAllTrialsByTumorForm(TumorForm.SOLID);
+            allLiquidTrials = getAllTrialsByTumorForm(TumorForm.LIQUID);
 
         } catch (Exception e) {
             System.out.println(e + " at " + MainUtils.getCurrentTime());
@@ -722,11 +745,32 @@ public class CacheUtils {
         }
     }
 
-    public static JSONObject getOncoTreeMappingTrials() {
-        return oncotreeMappingJson;
+    public static Map<String, Tumor> getOncoTreeMappingTrials() {
+        return oncotreeMappingMap;
     }
 
-    public static JSONObject getTrialsMapping() {
-        return trialsMappingJson;
+    public static Map<String, Trial> getTrialsMapping() {
+        return trialsMappingMap;
+    }
+
+
+    public static Set<Trial> getAllTrialsBySpecialTumorType(SpecialTumorType specialTumorType) {
+        switch (specialTumorType) {
+            case ALL_TUMORS:
+                return allTrials;
+            case ALL_SOLID_TUMORS:
+                return allSolidTrials;
+            case ALL_LIQUID_TUMORS:
+                return allLiquidTrials;
+            default:
+                return new HashSet<>();
+        }
+    }
+
+    private static Set<Trial> getAllTrialsByTumorForm(TumorForm tumorForm) {
+        return ApplicationContextSingleton.getTumorTypeBo().getAllTumorTypes().stream()
+            .filter(tumorType -> tumorType.getTumorForm() != null && (tumorType.getTumorForm().equals(tumorForm) || tumorType.getTumorForm().equals(TumorForm.MIXED)))
+            .map(tumorType -> getTrialsByCancerType(getOncoTreeMappingTrials(), getTrialsMapping(), org.apache.commons.lang3.StringUtils.isNotEmpty(tumorType.getSubtype()) ? tumorType.getSubtype() : tumorType.getMainType()))
+            .flatMap(Collection::stream).collect(Collectors.toSet());
     }
 }
