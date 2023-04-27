@@ -346,7 +346,7 @@ public class IndicatorUtils {
                     treatmentEvidences = filteredEvis;
                 }
                 if (!treatmentEvidences.isEmpty()) {
-                    List<IndicatorQueryTreatment> treatments = getIndicatorQueryTreatments(treatmentEvidences, query.getHugoSymbol(), StringUtils.isEmpty(query.getTumorType()) ? false : true);
+                    List<IndicatorQueryTreatment> treatments = getIndicatorQueryTreatments(treatmentEvidences, query.getHugoSymbol(), StringUtils.isEmpty(query.getTumorType()) ? false : true, relevantUpwardTumorTypes);
 
                     // Make sure the treatment in KIT is always sorted.
                     if (gene.getHugoSymbol().equals("KIT")) {
@@ -679,7 +679,7 @@ public class IndicatorUtils {
         return date;
     }
 
-    private static List<IndicatorQueryTreatment> getIndicatorQueryTreatments(Set<Evidence> evidences, String queryHugoSymbol, Boolean filterSameTreatment) {
+    private static List<IndicatorQueryTreatment> getIndicatorQueryTreatments(Set<Evidence> evidences, String queryHugoSymbol, Boolean filterSameTreatment, List<TumorType> relevantCancerTypes) {
         List<IndicatorQueryTreatment> treatments = new ArrayList<>();
         if (evidences != null) {
             Map<LevelOfEvidence, Set<Evidence>> evidenceSetMap = EvidenceUtils.separateEvidencesByLevel(evidences);
@@ -756,8 +756,8 @@ public class IndicatorUtils {
                                     String drugName = drug.getDrugName();
                                     try {
                                         List<Trial> trialsByTumorType = new ArrayList<>();
-                                        for (TumorType tumor : relevantTumorTypes) {
-                                            List<Trial> trials = ClinicalTrialsUtils.getTrials(drugName, tumor.getMainType());
+                                        for (TumorType tumor : relevantCancerTypes) {
+                                            List<Trial> trials = ClinicalTrialsUtils.getTrials(drugName, tumor);
                                             trialsByTumorType.addAll(trials);
                                         }
                                             trialByDrug.add(trialsByTumorType);
@@ -779,7 +779,7 @@ public class IndicatorUtils {
                                     .filter(t -> nctIdSet.add(t.getNctId()))
                                     .collect(Collectors.toList());
 
-                                
+
 
                                 Collections.sort(trials,Comparator.comparing(Trial::getCurrentTrialStatus, Comparator.reverseOrder())
                                             .thenComparing(Trial::getPhase, Comparator.reverseOrder() )

@@ -20,38 +20,36 @@ import static org.mskcc.cbio.oncokb.util.CacheUtils.getAllTrialsBySpecialTumorTy
 public class ClinicalTrialsUtils {
 
 
-    public static List<Trial> getTrials(String treatment, String cancerType)
+    public static List<Trial> getTrials(String treatment, TumorType cancerType)
         throws IOException, ParseException {
 
         Map<String, Trial> trialsMapping = CacheUtils.getTrialsMapping();
-        Map<String, Tumor>  oncotreeMapping = CacheUtils.getOncoTreeMappingTrials();
+        Map<String, Tumor> oncotreeMapping = CacheUtils.getOncoTreeMappingTrials();
 
-        SpecialTumorType specialTumorType = SpecialTumorType.getByTumorType(cancerType);
-        if(specialTumorType != null) {
-            List<Trial> trials = getTrialsForSpecialCancerType(specialTumorType);
-            if (treatment != null) {
-                trials = getTrialByTreatment(trials,treatment);
-            }
-            return new ArrayList<Trial>(trials);
-        } else {
-            List<TumorType> tumorTypes = TumorTypeUtils.findRelevantTumorTypes(cancerType);
-            List<Trial> trials = new ArrayList<>();
-            Boolean cancerTypeInTumorTypes = false;
-            for (TumorType tumorType: tumorTypes) {
-                String mainType = tumorType.getMainType();
-                trials.addAll(getTrialsByCancerType(oncotreeMapping, trialsMapping, mainType));
-                if (mainType == cancerType) {
-                    cancerTypeInTumorTypes = true;
-                }
-            }
-            if (!cancerTypeInTumorTypes) {
-                trials.addAll(getTrialsByCancerType(oncotreeMapping, trialsMapping, cancerType.toLowerCase()));
-            }
-            if (treatment != null) {
-                trials = getTrialByTreatment(trials,treatment);
-            }
-            return new ArrayList<Trial>(trials);
+        List<String> cancerTypeQueries = new ArrayList<>();
+        if (StringUtils.isNotEmpty(cancerType.getCode())) {
+            cancerTypeQueries.add(cancerType.getCode());
         }
+        if (StringUtils.isNotEmpty(cancerType.getMainType())) {
+            cancerTypeQueries.add(cancerType.getMainType().toLowerCase());
+        }
+        List<Trial> trials = new ArrayList<>();
+        List<String> nctIds = new ArrayList<>();
+
+        for (String query : cancerTypeQueries) {
+            if (oncotreeMapping.containsKey(query)) {
+                nctIds.addAll(oncotreeMapping.get(query).getTrials().stream().map(Trial::getNctId).collect(Collectors.toSet()));
+            }
+        }
+        for (String nctId : nctIds) {
+            if (trialsMapping.containsKey(nctId)) {
+                trials.add(trialsMapping.get(nctId));
+            }
+        }
+        if (treatment != null) {
+            trials = getTrialByTreatment(trials, treatment);
+        }
+        return new ArrayList<>(trials);
     }
 
     public Map<String, List<Trial>> getTrialsByCancerTypes(CancerTypesQuery body)
