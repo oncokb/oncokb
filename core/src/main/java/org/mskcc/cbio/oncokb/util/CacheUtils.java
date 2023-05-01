@@ -78,10 +78,8 @@ public class CacheUtils {
     private static String mappingsS3Path = "clinical-trials/mappings";
     private static String trialsS3Path = String.format("%s/trials.json",mappingsS3Path);
     private static String oncotreeS3Path = String.format("%s/oncotree_mapping.json",mappingsS3Path);
-    private static JSONObject trialsMappingJson;
-    private static Map<String, Trial>  trialsMappingMap;
-    private static JSONObject oncotreeMappingJson;
-    private static Map<String, Tumor> oncotreeMappingMap;
+    private static Map<String, Trial>  trialsMapping;
+    private static Map<String, Tumor> oncotreeMapping;
 
     private static Set<Trial> allTrials;
     private static Set<Trial> allSolidTrials;
@@ -261,21 +259,20 @@ public class CacheUtils {
             S3Object s3objectTrials = s3client.getObject(oncokbS3Bucket, trialsS3Path);
             S3ObjectInputStream inputStreamTrials = s3objectTrials.getObjectContent();
             JSONParser jsonParser = new JSONParser();
-            trialsMappingJson = (JSONObject) jsonParser.parse(new InputStreamReader(inputStreamTrials, "UTF-8"));
+            JSONObject trialsMappingJson = (JSONObject) jsonParser.parse(new InputStreamReader(inputStreamTrials, "UTF-8"));
             Gson gson = new Gson();
             Type empMapType = new TypeToken<Map<String, Trial>>() {
             }.getType();
-            trialsMappingMap = gson.fromJson(trialsMappingJson.toJSONString(), empMapType);
+            trialsMapping = gson.fromJson(trialsMappingJson.toJSONString(), empMapType);
 
             S3Object s3objectOncotree = s3client.getObject(oncokbS3Bucket, oncotreeS3Path);
             S3ObjectInputStream inputStreamOncotree = s3objectOncotree.getObjectContent();
-            oncotreeMappingJson = (JSONObject) jsonParser.parse(new InputStreamReader(inputStreamOncotree, "UTF-8"));
-            gson = new Gson();
+            JSONObject oncotreeMappingJson = (JSONObject) jsonParser.parse(new InputStreamReader(inputStreamOncotree, "UTF-8"));
             empMapType = new TypeToken<Map<String, Tumor>>() {
             }.getType();
-            oncotreeMappingMap = gson.fromJson(oncotreeMappingJson.toJSONString(), empMapType);
+            oncotreeMapping = gson.fromJson(oncotreeMappingJson.toJSONString(), empMapType);
 
-            allTrials = ClinicalTrialsUtils.getAllTrials(oncotreeMappingMap, trialsMappingMap);
+            allTrials = ClinicalTrialsUtils.getAllTrials(oncotreeMapping, trialsMapping);
             allSolidTrials = getAllTrialsByTumorForm(TumorForm.SOLID);
             allLiquidTrials = getAllTrialsByTumorForm(TumorForm.LIQUID);
 
@@ -746,11 +743,11 @@ public class CacheUtils {
     }
 
     public static Map<String, Tumor> getOncoTreeMappingTrials() {
-        return oncotreeMappingMap;
+        return oncotreeMapping;
     }
 
     public static Map<String, Trial> getTrialsMapping() {
-        return trialsMappingMap;
+        return trialsMapping;
     }
 
 
