@@ -121,5 +121,49 @@ The docker compose file has a pre-generated oncokb-transcript [JWT](https://jwt.
     - You can also change the default base64 secret used for encoding by generating a base64 string and add the environment variable, `JHIPSTER_SECURITY_AUTHENTICATION_JWT_BASE64_SECRET: <new-base64-string>`, to oncokb-transcript.
 3. Replace `-Doncokb_transcript.token` with the JWT token you generated.
 
+
+#### Generating new VEP data
+
+OncoKB predownloads VEP data and saves it to AWS S3 bucket. These steps are for OncoKB developers and show how to download and upload new Ensembl VEP data to S3. However, you can follow along and
+save VEP data to your own S3 bucket.
+
+1. Change Ensembl image in genome-nexus-vep [Dockerfile](https://github.com/genome-nexus/genome-nexus-vep/blob/8479402d4f9db8236ab297f7cea6aada43f98574/Dockerfile#L7) to desired version
+1. [Follow instructions](https://github.com/genome-nexus/genome-nexus-vep/blob/master/README.md#create-vep-cache) to download VEP cache files and FASTA files for GRCh37 and GRCh38.
+2. After downloading your directory should like:
+```
+VEP_CACHE/
+├─ homo_sapiens/
+│  ├─ 98_GRCh37/
+│  ├─ 98_GRCh38/
+```
+3. Zip the files
+```
+tar cf 98_GRCh37.tar homo_sapiens/98_GRCh37
+tar cf 98_GRCh38.tar homo_sapiens/98_GRCh38
+```
+4. Go to AWS S3 webpage and under `oncokb/gn-vep-data/`, create two folders:
+```
+98_GRCh37/
+98_GRCh38/
+``` 
+5. Upload `tar` files to corresponding S3 folders
+6. Make the two S3 folders (`oncokb/gn-vep-data/98_GRCh37/` and `oncokb/gn-vep-data/98_GRCh38/`) publicly accessible
+7. Update `gn-vep` and `gn-vep-grch38` services in `docker-compose.yml`
+```
+Modify environment variable to point to the new FASTA file
+
+gn-vep
+VEP_FASTAFILERELATIVEPATH=homo_sapiens/98_GRCh37/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa.gz
+
+gn-vep-grch38
+VEP_FASTAFILERELATIVEPATH=homo_sapiens/98_GRCh38/Homo_sapiens.GRCh38.dna.toplevel.fa.gz
+```
+
+7. Modify [Dockerfile line](https://github.com/genome-nexus/genome-nexus-vep/blob/master/Dockerfile#LL7C2-L7C2) in [genome-nexus-vep](https://github.com/genome-nexus/genome-nexus-vep) to use the new Ensembl VEP image. As of 4/28/2023, genome-nexus-vep uses `ensemblorg/ensembl-vep:release_98.3`. 
+8. Push new genome-nexus-vep image to DockerHub
+9. Change the image for both `gn-vep` and `gn-vep-grch38` to the image built in step 7.
+
+
+
 ## Questions?
 The best way is to send an email to contact@oncokb.org so all our team members can help.

@@ -18,13 +18,13 @@ import org.oncokb.oncokb_transcript.client.Sequence;
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.mskcc.cbio.oncokb.api.websocket.ValidationCategory.*;
+import static org.mskcc.cbio.oncokb.model.StructuralAlteration.TRUNCATING_MUTATIONS;
 
 /**
  * Created by Hongxin on 12/12/16.
@@ -50,6 +50,8 @@ public class CurationValidationApiController {
         validateEvidenceDescriptionInfo();
 
         validateAlterationName();
+
+        validateTruncatingMutationsUnderTSG();
 
         validateMismatchedRefAA();
 
@@ -163,6 +165,24 @@ public class CurationValidationApiController {
         }
     }
 
+    private void validateTruncatingMutationsUnderTSG() {
+        sendText(generateInfo(TRUNCATING_MUTATIONS_NOT_UNDER_TSG, ValidationStatus.IS_PENDING, new JSONArray()));
+
+        JSONArray data = null;
+        try {
+            data = getTruncatingMutationsNotUnderTSG();
+            if (data.length() == 0) {
+                sendText(generateInfo(TRUNCATING_MUTATIONS_NOT_UNDER_TSG, ValidationStatus.IS_COMPLETE, new JSONArray()));
+            } else {
+                sendText(generateInfo(TRUNCATING_MUTATIONS_NOT_UNDER_TSG, ValidationStatus.IS_ERROR, data));
+            }
+        } catch (ApiException e) {
+            data = new JSONArray();
+            data.put(ValidationUtils.getErrorMessage("API ERROR", e.getMessage()));
+            sendText(generateInfo(TRUNCATING_MUTATIONS_NOT_UNDER_TSG, ValidationStatus.IS_ERROR, data));
+        }
+    }
+
     private void validateHugoSymbols() throws IOException {
         sendText(generateInfo(OUTDATED_HUGO_SYMBOLS, ValidationStatus.IS_PENDING, new JSONArray()));
 
@@ -244,7 +264,7 @@ public class CurationValidationApiController {
                         break;
                     }
                 }
-                String altTargetName = alteration.getName()+" / " + (MainUtils.isVUS(alteration) ? "VUS" : "CURATED");
+                String altTargetName = alteration.getName() + " / " + (MainUtils.isVUS(alteration) ? "VUS" : "CURATED");
                 if (StringUtils.isNullOrEmpty(sequence)) {
                     data.put(ValidationUtils.getErrorMessage(ValidationUtils.getTarget(alteration.getGene().getHugoSymbol(), altTargetName), "No sequence available for " + alteration.getGene().getHugoSymbol()));
                 } else if (referenceGenome != null) {
@@ -261,6 +281,24 @@ public class CurationValidationApiController {
                 }
             }
         }
+        return data;
+    }
+
+    public JSONArray getTruncatingMutationsNotUnderTSG() throws ApiException {
+        JSONArray data = new JSONArray();
+
+        Set<Gene> genes = new HashSet<>();
+
+        for (Alteration alteration : AlterationUtils.getAllAlterations().stream().filter(alt -> alt.getName().equals(TRUNCATING_MUTATIONS.getVariant())).collect(Collectors.toList())) {
+            genes.add(alteration.getGene());
+        }
+
+        for (Gene gene : genes) {
+            if (!gene.getTSG()) {
+                data.put(ValidationUtils.getErrorMessage(ValidationUtils.getTarget(gene.getHugoSymbol()), "The gene " + gene.getHugoSymbol() + " is not tumor suppressor gene but has Truncating Mutations curated."));
+            }
+        }
+
         return data;
     }
 
