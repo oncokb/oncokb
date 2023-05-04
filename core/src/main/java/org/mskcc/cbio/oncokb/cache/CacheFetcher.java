@@ -259,15 +259,15 @@ public class CacheFetcher {
         Alteration alteration = new Alteration();
 
         // Sometimes the VEP does not return the entrezGeneId and only returns the hugoSymbol.
-        Gene gene = GeneUtils.getGene(gnAnnotatedVariantInfo.getEntrezGeneId(), gnAnnotatedVariantInfo.getHugoSymbol());
-
-        // If gene cannot be found in our database, then we create a new Gene object.
-        if (gene == null) {
-            gene = new Gene();
-            gene.setHugoSymbol(gnAnnotatedVariantInfo.getHugoSymbol());
-            gene.setEntrezGeneId(gnAnnotatedVariantInfo.getEntrezGeneId());
+        if (StringUtils.isNotEmpty(gnAnnotatedVariantInfo.getHugoSymbol()) || gnAnnotatedVariantInfo.getEntrezGeneId() != null) {
+            Gene gene = GeneUtils.getGene(gnAnnotatedVariantInfo.getEntrezGeneId(), gnAnnotatedVariantInfo.getHugoSymbol());
+            if (gene == null) {
+                gene = new Gene();
+                gene.setHugoSymbol(gnAnnotatedVariantInfo.getHugoSymbol());
+                gene.setEntrezGeneId(gnAnnotatedVariantInfo.getEntrezGeneId());
+            }
+            alteration.setGene(gene);
         }
-        alteration.setGene(gene);
 
         alteration.setAlteration(gnAnnotatedVariantInfo.getHgvspShort());
         alteration.setProteinStart(gnAnnotatedVariantInfo.getProteinStart());
