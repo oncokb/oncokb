@@ -125,8 +125,7 @@ public class ClinicalTrialsUtils {
 
     public static List<Trial> getTrialByTreatment(List<Trial> trials, String treatment) {
         List<Trial> res = new ArrayList<>();
-        Set<String> drugsNames = Arrays.stream(treatment.split(",|\\+")).map(item -> item.trim()).collect(Collectors.toSet());
-
+        Set<String> drugsNames = Arrays.stream(treatment.split(",|\\+")).map(item -> item.trim().toLowerCase()).collect(Collectors.toSet());
         res = getTrialsByDrugName(trials, drugsNames);
         return res;
     }
@@ -139,7 +138,7 @@ public class ClinicalTrialsUtils {
                 for (Arm arm : trial.getArms()) {
                     List<Drug> drugs = arm.getDrugs();
                     if (drugs != null && !drugs.isEmpty()) {
-                        if (arm.getDrugs().stream().map(Drug::getDrugName).collect(Collectors.toSet()).containsAll(drugsNames)) {
+                        if (arm.getDrugs().stream().map(drug -> drug.getDrugName().toLowerCase()).collect(Collectors.toSet()).containsAll(drugsNames)) {
                             res.add(trial);
                             break;
                         }

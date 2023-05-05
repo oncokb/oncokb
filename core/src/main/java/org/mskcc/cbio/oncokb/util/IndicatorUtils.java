@@ -779,10 +779,8 @@ public class IndicatorUtils {
                                     .filter(t -> nctIdSet.add(t.getNctId()))
                                     .collect(Collectors.toList());
 
-
-
-                                Collections.sort(trials,Comparator.comparing(Trial::getCurrentTrialStatus, Comparator.reverseOrder())
-                                            .thenComparing(Trial::getPhase, Comparator.reverseOrder() )
+                                Collections.sort(trials,Comparator.comparing(Trial::getCurrentTrialStatus, Comparator.nullsLast(Comparator.reverseOrder()))
+                                            .thenComparing(Trial::getPhase, Comparator.nullsLast(Comparator.reverseOrder()))
                                             .thenComparing(Trial::getNctId)
                                     );
 
