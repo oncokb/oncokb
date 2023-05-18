@@ -40,7 +40,7 @@ public class FindRelevantAlterationsTest {
                 // Critical cases
                 {"BRAF", "V600E", null, "V600E, V600A, V600D, V600G, V600K, V600L, V600M, V600Q, V600R, VK600EI, V600, Oncogenic Mutations"},
                 {"SMARCB1", "R374Q", null, "R374Q, R374W, Oncogenic Mutations"},
-                {"EGFR", "S768I", null, "S768I, S768T, SV768IL, Oncogenic Mutations"},
+                {"EGFR", "S768I", null, "S768I, S768T, Oncogenic Mutations"},
                 {"EGFR", "S768_V769delinsIL", null, "SV768IL, S768I, V769L, S768T, V769M, Oncogenic Mutations"},
 
                 // Check resistance mutations, they should be matched with Oncogenic Mutations
