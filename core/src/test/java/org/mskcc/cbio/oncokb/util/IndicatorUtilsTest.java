@@ -201,8 +201,9 @@ public class IndicatorUtilsTest {
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
         assertEquals("Gene should exist", true, indicatorQueryResp.getGeneExist());
         // this is equivalent to SV768IL which we curated
-        assertEquals("Variant should exist", true, indicatorQueryResp.getVariantExist());
-        assertEquals("Is expected to be oncogenic", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
+        // The variant SV768IL has been deleted from the curation platform
+        // assertEquals("Variant should exist", true, indicatorQueryResp.getVariantExist());
+        assertEquals("Is expected to be Likely Oncogenic", Oncogenicity.LIKELY.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The highest sensitive level should be 1",
             LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
 
