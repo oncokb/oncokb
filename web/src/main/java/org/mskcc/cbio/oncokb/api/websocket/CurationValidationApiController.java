@@ -4,23 +4,15 @@ import com.mysql.jdbc.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mskcc.cbio.oncokb.bo.OncokbTranscriptService;
-import org.mskcc.cbio.oncokb.model.Alteration;
-import org.mskcc.cbio.oncokb.model.CancerGene;
-import org.mskcc.cbio.oncokb.model.Gene;
-import org.mskcc.cbio.oncokb.model.ReferenceGenome;
-import org.mskcc.cbio.oncokb.util.AlterationUtils;
-import org.mskcc.cbio.oncokb.util.CacheUtils;
-import org.mskcc.cbio.oncokb.util.MainUtils;
-import org.mskcc.cbio.oncokb.util.ValidationUtils;
+import org.mskcc.cbio.oncokb.model.*;
+import org.mskcc.cbio.oncokb.util.*;
 import org.oncokb.oncokb_transcript.ApiException;
 import org.oncokb.oncokb_transcript.client.Sequence;
 
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.mskcc.cbio.oncokb.api.websocket.ValidationCategory.*;
@@ -50,6 +42,8 @@ public class CurationValidationApiController {
         validateEvidenceDescriptionInfo();
 
         validateAlterationName();
+
+        validateDuplicatedAlteration();
 
         validateTruncatingMutationsUnderTSG();
 
@@ -162,6 +156,24 @@ public class CurationValidationApiController {
             data = new JSONArray();
             data.put(ValidationUtils.getErrorMessage("API ERROR", e.getMessage()));
             sendText(generateInfo(MISMATCH_REF_AA, ValidationStatus.IS_ERROR, data));
+        }
+    }
+
+    private void validateDuplicatedAlteration() {
+        sendText(generateInfo(DUP_ALTERATION, ValidationStatus.IS_PENDING, new JSONArray()));
+
+        JSONArray data = null;
+        try {
+            data = getDuplicatedAlterations();
+            if (data.length() == 0) {
+                sendText(generateInfo(DUP_ALTERATION, ValidationStatus.IS_COMPLETE, new JSONArray()));
+            } else {
+                sendText(generateInfo(DUP_ALTERATION, ValidationStatus.IS_ERROR, data));
+            }
+        } catch (ApiException e) {
+            data = new JSONArray();
+            data.put(ValidationUtils.getErrorMessage("API ERROR", e.getMessage()));
+            sendText(generateInfo(DUP_ALTERATION, ValidationStatus.IS_ERROR, data));
         }
     }
 
@@ -281,6 +293,20 @@ public class CurationValidationApiController {
                 }
             }
         }
+        return data;
+    }
+
+    public JSONArray getDuplicatedAlterations() throws ApiException {
+        JSONArray data = new JSONArray();
+
+        for (Alteration alteration : AlterationUtils.getAllAlterations()) {
+            List<Evidence> evidences = EvidenceUtils.getAlterationEvidences(Collections.singletonList(alteration));
+            List<Evidence> evidencesWithoutVus = evidences.stream().filter(evidence -> !EvidenceType.VUS.equals(evidence.getEvidenceType())).collect(Collectors.toList());
+            if (evidences.size() != evidencesWithoutVus.size() && evidencesWithoutVus.size() > 0) {
+                data.put(ValidationUtils.getErrorMessage(ValidationUtils.getTarget(alteration.getGene().getHugoSymbol(), alteration.getAlteration()), "The alteration is in both mutation and VUS lists."));
+            }
+        }
+
         return data;
     }
 
