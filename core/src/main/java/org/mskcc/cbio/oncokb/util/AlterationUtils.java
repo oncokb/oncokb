@@ -693,10 +693,11 @@ public final class AlterationUtils {
         return alterations;
     }
 
-    public static Set<Alteration> getVUS(Alteration alteration) {
+    public static Set<Alteration> getVUS(Gene gene) {
         Set<Alteration> result = new HashSet<>();
-        Gene gene = alteration.getGene();
-        result = CacheUtils.getVUS(gene.getEntrezGeneId());
+        if (gene != null) {
+            result = CacheUtils.getVUS(gene.getEntrezGeneId());
+        }
         return result;
     }
 
@@ -704,9 +705,17 @@ public final class AlterationUtils {
         List<Alteration> result = new ArrayList<>();
 
         for (Alteration alteration : alterations) {
-            Set<Alteration> VUS = AlterationUtils.getVUS(alteration);
+            Set<Alteration> VUS = AlterationUtils.getVUS(alteration.getGene());
             if (!VUS.contains(alteration)) {
                 result.add(alteration);
+            } else {
+                // We should also add alteration when other evidence exists.
+                // This is to add alteration when it's in both mutation list and VUS list.
+                // When it's a VUS, alteration will only have one evidence(VUS).
+                List<Evidence> alterationEvidences = EvidenceUtils.getAlterationEvidences(Collections.singletonList(alteration)).stream().filter(evidence -> !EvidenceType.VUS.equals(evidence.getEvidenceType())).collect(Collectors.toList());
+                if (alterationEvidences.size() > 0) {
+                    result.add(alteration);
+                }
             }
         }
 

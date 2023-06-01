@@ -552,7 +552,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
     }
 
     private boolean addVUSMutation(Alteration alteration, boolean alterationIsCurated){
-        return !alterationIsCurated || AlterationUtils.getVUS(alteration).contains(alteration);
+        return !alterationIsCurated || AlterationUtils.getVUS(alteration.getGene()).contains(alteration);
     }
 
     private LinkedHashSet<Alteration> oncogeneTruncMuts(Alteration alteration, LinkedHashSet<Alteration> relevantAlts) {
