@@ -60,7 +60,7 @@ public class TrialsApiController {
         if(specialTumorType != null) {
             List<Trial> trials = ClinicalTrialsUtils.getTrialsForSpecialCancerType(specialTumorType);
             if (treatment != null) {
-                trials = ClinicalTrialsUtils.getTrialByTreatment(trials,treatment);
+                trials = ClinicalTrialsUtils.getTrialsByTreatment(trials,treatment);
             }
             return new ResponseEntity<List<Trial>>(trials, status);
         } else {
@@ -78,7 +78,7 @@ public class TrialsApiController {
                 trials.addAll(ClinicalTrialsUtils.getTrialsByCancerType(oncotreeMapping, trialsMapping, cancerType.toLowerCase()));
             }
             if (treatment != null) {
-                trials = ClinicalTrialsUtils.getTrialByTreatment(trials,treatment);
+                trials = ClinicalTrialsUtils.getTrialsByTreatment(trials,treatment);
             }
             return new ResponseEntity<List<Trial>>(trials, status);
         }

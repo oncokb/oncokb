@@ -47,7 +47,7 @@ public class ClinicalTrialsUtils {
             }
         }
         if (treatment != null) {
-            trials = getTrialByTreatment(trials, treatment);
+            trials = getTrialsByTreatment(trials, treatment);
         }
         return new ArrayList<>(trials);
     }
@@ -123,7 +123,7 @@ public class ClinicalTrialsUtils {
         return tumor;
     }
 
-    public static List<Trial> getTrialByTreatment(List<Trial> trials, String treatment) {
+    public static List<Trial> getTrialsByTreatment(List<Trial> trials, String treatment) {
         List<Trial> res = new ArrayList<>();
         Set<String> drugsNames = Arrays.stream(treatment.split(",|\\+")).map(item -> item.trim().toLowerCase()).collect(Collectors.toSet());
         res = getTrialsByDrugName(trials, drugsNames);

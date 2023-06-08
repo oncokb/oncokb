@@ -2,11 +2,6 @@ package org.mskcc.cbio.oncokb.model.clinicalTrialsMatching;
 
 import java.util.List;
 
-/**
- * Created by Yifu Yao on 2020-09-08
- */
-
-
 public class Trial {
     private String briefTitle;
     private String currentTrialStatus;
