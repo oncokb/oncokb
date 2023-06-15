@@ -4,6 +4,7 @@ package org.mskcc.cbio.oncokb.model;
 import org.mskcc.cbio.oncokb.apiModels.TumorType;
 
 import io.swagger.annotations.ApiModelProperty;
+import org.mskcc.cbio.oncokb.model.clinicalTrialsMatching.Trial;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -40,6 +41,7 @@ public class IndicatorQueryTreatment implements java.io.Serializable {
 
     @ApiModelProperty(value = "Treatment description. Defaulted to \"\"")
     private String description = "";
+    private Set<Trial> trials = new HashSet<>(0);
 
     public IndicatorQueryTreatment() {
     }
@@ -122,6 +124,14 @@ public class IndicatorQueryTreatment implements java.io.Serializable {
 
     public void setAbstracts(Set<ArticleAbstract> abstracts) {
         this.abstracts = abstracts;
+    }
+
+    public Set<Trial> getTrials() {
+        return this.trials;
+    }
+
+    public void setTrials(Set<Trial> trials) {
+        this.trials = trials;
     }
 
     @Override

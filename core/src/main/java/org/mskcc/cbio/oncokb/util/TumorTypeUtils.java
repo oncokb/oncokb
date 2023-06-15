@@ -9,7 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.Tumor;
+import org.mskcc.cbio.oncokb.model.clinicalTrialsMatching.Tumor;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;

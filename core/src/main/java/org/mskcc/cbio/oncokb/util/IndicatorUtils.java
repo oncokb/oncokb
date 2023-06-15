@@ -9,6 +9,7 @@ import org.mskcc.cbio.oncokb.apiModels.Implication;
 import org.mskcc.cbio.oncokb.apiModels.MutationEffectResp;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.TumorType;
+import org.mskcc.cbio.oncokb.model.clinicalTrialsMatching.Trial;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -355,7 +356,7 @@ public class IndicatorUtils {
                     treatmentEvidences = filteredEvis;
                 }
                 if (!treatmentEvidences.isEmpty()) {
-                    List<IndicatorQueryTreatment> treatments = getIndicatorQueryTreatments(treatmentEvidences, query.getHugoSymbol(), StringUtils.isEmpty(query.getTumorType()) ? false : true);
+                    List<IndicatorQueryTreatment> treatments = getIndicatorQueryTreatments(treatmentEvidences, query.getHugoSymbol(), StringUtils.isEmpty(query.getTumorType()) ? false : true, relevantUpwardTumorTypes);
 
                     // Make sure the treatment in KIT is always sorted.
                     if (gene.getHugoSymbol().equals("KIT")) {
@@ -757,7 +758,7 @@ public class IndicatorUtils {
         return date;
     }
 
-    private static List<IndicatorQueryTreatment> getIndicatorQueryTreatments(Set<Evidence> evidences, String queryHugoSymbol, Boolean filterSameTreatment) {
+    private static List<IndicatorQueryTreatment> getIndicatorQueryTreatments(Set<Evidence> evidences, String queryHugoSymbol, Boolean filterSameTreatment, List<TumorType> relevantCancerTypes) {
         List<IndicatorQueryTreatment> treatments = new ArrayList<>();
         if (evidences != null) {
             Map<LevelOfEvidence, Set<Evidence>> evidenceSetMap = EvidenceUtils.separateEvidencesByLevel(evidences);
@@ -828,6 +829,44 @@ public class IndicatorUtils {
                                     indicatorQueryTreatment.setLevelExcludedCancerTypes(excludedCancerTypes);
                                 }
                                 indicatorQueryTreatment.setDescription(CplUtils.annotateGene(descriptionMap.get(treatment), queryHugoSymbol));
+
+                                List<List<Trial>> trialByDrug = new ArrayList<>();
+                                for (Drug drug : treatment.getDrugs()) {
+                                    String drugName = drug.getDrugName();
+                                    try {
+                                        List<Trial> trialsByTumorType = new ArrayList<>();
+                                        for (TumorType tumor : relevantCancerTypes) {
+                                            List<Trial> trials = ClinicalTrialsUtils.getTrials(drugName, tumor);
+                                            trialsByTumorType.addAll(trials);
+                                        }
+                                            trialByDrug.add(trialsByTumorType);
+                                    } catch (Exception e) {
+                                        System.out.println(e.getMessage());
+                                        System.out.println("Trials could not be added successfully to IndicatorQueryTreatment.");
+                                    }
+                                }
+                                List<Trial> trials = new ArrayList<>();
+                                if (!trialByDrug.isEmpty()) {
+                                    trials = trialByDrug.get(0);
+                                    for (List<Trial> t : trialByDrug) {
+                                        trials.retainAll(t);
+                                    }
+                                }
+
+                                Set<String> nctIdSet = new HashSet<>();
+                                trials = trials.stream()
+                                    .filter(t -> nctIdSet.add(t.getNctId()))
+                                    .collect(Collectors.toList());
+
+                                Collections.sort(trials,Comparator.comparing(Trial::getCurrentTrialStatus, Comparator.nullsLast(Comparator.reverseOrder()))
+                                            .thenComparing(Trial::getPhase, Comparator.nullsLast(Comparator.reverseOrder()))
+                                            .thenComparing(Trial::getNctId)
+                                    );
+
+                                Set<Trial> trialsSet = new LinkedHashSet(trials);
+
+                                indicatorQueryTreatment.setTrials(trialsSet);
+
                                 treatments.add(indicatorQueryTreatment);
                             }
                         }
