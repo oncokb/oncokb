@@ -162,6 +162,9 @@ public class ClinicalTrialsUtils {
     public static List<Trial> getTrialsByCancerType(Map<String, Tumor>  oncotreeMapping, Map<String, Trial>  trialsMapping, String cancerType) {
         List<Trial> trials = new ArrayList<>();
 
+        if (cancerType != null && cancerType != "") {
+            return trials;
+        }
         Set<String> tumorCodesByMainType = new HashSet<>();
         List<TumorType> allOncoTreeSubtypes = ApplicationContextSingleton.getTumorTypeBo().getAllSubtypes();
         for (TumorType oncoTreeType : allOncoTreeSubtypes) {
