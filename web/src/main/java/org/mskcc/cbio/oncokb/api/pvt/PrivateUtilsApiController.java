@@ -2,6 +2,7 @@ package org.mskcc.cbio.oncokb.api.pvt;
 
 import com.mysql.jdbc.StringUtils;
 import io.swagger.annotations.ApiParam;
+import org.genome_nexus.client.TranscriptConsequenceSummary;
 import org.mskcc.cbio.oncokb.apiModels.*;
 import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotateMutationByGenomicChangeQuery;
 import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotateMutationByHGVSgQuery;
@@ -409,6 +410,14 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         EvidenceQueryRes response = responses.iterator().next();
 
         VariantAnnotation annotation = new VariantAnnotation(indicatorQueryResp);
+
+        // for any hgvsg variant, we need to check whether it is VUE
+        if(!StringUtils.isNullOrEmpty(hgvsg)) {
+            TranscriptConsequenceSummary transcriptConsequenceSummary = GenomeNexusUtils.getTranscriptConsequence(GNVariantAnnotationType.HGVS_G, hgvsg, matchedRG);
+            if (transcriptConsequenceSummary != null && transcriptConsequenceSummary.isIsVue() != null && transcriptConsequenceSummary.isIsVue()) {
+                annotation.setVUE(true);
+            }
+        }
 
         Set<Evidence> background = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Collections.singleton(EvidenceType.GENE_BACKGROUND));
         if (background.size() > 0) {
