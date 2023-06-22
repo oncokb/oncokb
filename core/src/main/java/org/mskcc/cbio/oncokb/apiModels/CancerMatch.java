@@ -10,36 +10,8 @@ import java.util.Objects;
 import java.util.Set;
 
 
-public class CancerMatch {
-    private Gene gene;
-    private Set<Alteration> alterations = new HashSet<>();
-    private LevelOfEvidence levelOfEvidence;
+public class CancerMatch extends LevelsOfEvidence {
     private TumorType cancer;
-    private Double weight = 0.0;
-
-    public Gene getGene() {
-        return gene;
-    }
-
-    public void setGene(Gene gene) {
-        this.gene = gene;
-    }
-
-    public Set<Alteration> getAlterations() {
-        return alterations;
-    }
-
-    public void setAlterations(Set<Alteration> alterations) {
-        this.alterations = alterations;
-    }
-
-    public LevelOfEvidence getLevelOfEvidence() {
-        return levelOfEvidence;
-    }
-
-    public void setLevelOfEvidence(LevelOfEvidence levelOfEvidence) {
-        this.levelOfEvidence = levelOfEvidence;
-    }
 
     public TumorType getCancer() {
         return cancer;
@@ -47,14 +19,6 @@ public class CancerMatch {
 
     public void setCancer(TumorType cancer) {
         this.cancer = cancer;
-    }
-
-    public Double getWeight() {
-        return weight;
-    }
-
-    public void setWeight(Double weight) {
-        this.weight = weight;
     }
 
     @Override

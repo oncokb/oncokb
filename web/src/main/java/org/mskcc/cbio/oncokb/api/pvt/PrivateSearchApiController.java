@@ -6,6 +6,7 @@ import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.apiModels.CancerMatch;
 import org.mskcc.cbio.oncokb.apiModels.DrugMatch;
+import org.mskcc.cbio.oncokb.apiModels.LevelsOfEvidence;
 import org.mskcc.cbio.oncokb.bo.OncokbTranscriptService;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.TumorType;
@@ -227,12 +228,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
              }
          }
 
-         // to dos left:
-         // once code works, make a Levels of Evidence base class and extend the class for drug and cancer
-         // DrugMatch would have drug and set of cancers added on
-         // CancerMatch would have cancer added on
-
-         TreeSet<CancerMatch> cancerMatches = new TreeSet<>(new CancerMatchComp());
+         TreeSet<CancerMatch> cancerMatches = new TreeSet<>(new LevelsOfEvidenceComp());
          for(Map.Entry<String, CancerMatch> entry : result.entrySet()) {
              cancerMatches.add(entry.getValue());
          }
@@ -245,9 +241,8 @@ public class PrivateSearchApiController implements PrivateSearchApi {
         TypeaheadSearchResp typeaheadSearchResp = new TypeaheadSearchResp();
         typeaheadSearchResp.setGene(cancerMatch.getGene());
         typeaheadSearchResp.setVariants(cancerMatch.getAlterations());
-        // I think we make a new function in TypeaheadSearchResp for setCancer, not a list of cancers
-        // typeaheadSearchResp.setDrug( );
-        // typeaheadSearchResp.setTumorTypes(cancerMatch.getCancer());
+
+        typeaheadSearchResp.setCancer(cancerMatch.getCancer());
 
         if (LevelUtils.isSensitiveLevel(cancerMatch.getLevelOfEvidence())) {
             typeaheadSearchResp.setHighestSensitiveLevel(cancerMatch.getLevelOfEvidence().getLevel());
@@ -264,8 +259,6 @@ public class PrivateSearchApiController implements PrivateSearchApi {
         return typeaheadSearchResp;
     }
 
-     // really could use same comparator for drug and cancer?
-
     private static String getCancerMatchKey(Gene gene, TumorType cancer, LevelOfEvidence level) {
         return gene.getHugoSymbol() + cancer.getSubtype() + level.getLevel();
     }
@@ -279,7 +272,6 @@ public class PrivateSearchApiController implements PrivateSearchApi {
             cancerMatch.setWeight(weight);
             map.put(key, cancerMatch);
         }
-        // why not just set alterations?
         map.get(key).getAlterations().addAll(alterations);
     }
 
@@ -465,7 +457,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
             }
         }
 
-        TreeSet<DrugMatch> drugMatches = new TreeSet<>(new DrugMatchComp());
+        TreeSet<DrugMatch> drugMatches = new TreeSet<>(new LevelsOfEvidenceComp());
 
         for(Map.Entry<String, DrugMatch> entry : result.entrySet()) {
             drugMatches.add(entry.getValue());
@@ -608,28 +600,14 @@ class VariantComp implements Comparator<TypeaheadSearchResp> {
     }
 }
 
-class DrugMatchComp implements Comparator<DrugMatch> {
+class LevelsOfEvidenceComp implements Comparator<LevelsOfEvidence> {
     @Override
-    public int compare(DrugMatch d1, DrugMatch d2) {
-        int result = d2.getWeight().compareTo(d1.getWeight()) ;
+    public int compare(LevelsOfEvidence o1, LevelsOfEvidence o2) {
+        int result = o2.getWeight().compareTo(o1.getWeight());
         if(result == 0) {
-            result = LevelUtils.compareLevel(d1.getLevelOfEvidence(), d2.getLevelOfEvidence());
+            result = LevelUtils.compareLevel(o1.getLevelOfEvidence(), o2.getLevelOfEvidence());
             if(result == 0) {
-                result = d1.getGene().getHugoSymbol().compareTo(d2.getGene().getHugoSymbol());
-            }
-        }
-        return result;
-    }
-}
-
-class CancerMatchComp implements Comparator<CancerMatch> {
-    @Override
-    public int compare(CancerMatch c1, CancerMatch c2) {
-        int result = c2.getWeight().compareTo(c1.getWeight());
-        if(result == 0) {
-            result = LevelUtils.compareLevel(c1.getLevelOfEvidence(), c2.getLevelOfEvidence());
-            if(result == 0) {
-                result = c1.getGene().getHugoSymbol().compareTo(c2.getGene().getHugoSymbol());
+                result = o1.getGene().getHugoSymbol().compareTo(o2.getGene().getHugoSymbol());
             }
         }
         return result;
