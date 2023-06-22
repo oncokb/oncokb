@@ -4,6 +4,7 @@ import io.swagger.annotations.ApiParam;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
+import org.mskcc.cbio.oncokb.apiModels.CancerMatch;
 import org.mskcc.cbio.oncokb.apiModels.DrugMatch;
 import org.mskcc.cbio.oncokb.bo.OncokbTranscriptService;
 import org.mskcc.cbio.oncokb.model.*;
@@ -86,7 +87,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
 
     @Override
     public ResponseEntity<LinkedHashSet<TypeaheadSearchResp>> searchTypeAheadGet(
-        @ApiParam(value = "The search query, it could be hugoSymbol, entrezGeneId or variant. At least two characters. Maximum two keywords are supported, separated by space", required = true) @RequestParam(value = "query") String query,
+        @ApiParam(value = "The search query, it could be hugoSymbol, entrezGeneId, variant, or cancer type. At least two characters. Maximum two keywords are supported, separated by space", required = true) @RequestParam(value = "query") String query,
         @ApiParam(value = "The limit of returned result.") @RequestParam(value = "limit", defaultValue = "5", required = false) Integer limit) {
         final int QUERY_MIN_LENGTH = 2;
         LinkedHashSet<TypeaheadSearchResp> result = new LinkedHashSet<>();
@@ -106,6 +107,9 @@ public class PrivateSearchApiController implements PrivateSearchApi {
                 // Blur search drug
                 result.addAll(findEvidencesWithDrugAssociated(keywords.get(0), false));
 
+                // Strict search cancer type
+                result.addAll(findMatchingCancerTypes(keywords.get(0), false));
+
                 // If the keyword contains dash and result is empty, then we should return both fusion genes
                 if (keywords.get(0).contains("-") && result.isEmpty()) {
                     for (String subKeyword : keywords.get(0).split("-")) {
@@ -113,7 +117,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
                     }
                 }
             } else {
-                // Assume one of the keyword is gene
+                // First, assume one of the keyword is gene
                 Map<String, Set<Gene>> map = new HashedMap();
                 for (String keyword : keywords) {
                     if (keyword.contains("-")) {
@@ -132,6 +136,9 @@ public class PrivateSearchApiController implements PrivateSearchApi {
                 // If there is no match, the key words could referring to a variant, try to do a blur variant search
                 String fullKeywords = StringUtils.join(keywords, " ");
                 result.addAll(convertVariant(AlterationUtils.lookupVariant(fullKeywords, false, AlterationUtils.getAllAlterations()), fullKeywords));
+
+                // Strict search for cancer type
+                result.addAll(findMatchingCancerTypes(fullKeywords, false));
 
                 // If there is no match in OncoKB database, still try to annotate variant
                 // Only when the oncogenicity is not empty
@@ -181,6 +188,101 @@ public class PrivateSearchApiController implements PrivateSearchApi {
         OncokbTranscriptService oncokbTranscriptService = new OncokbTranscriptService();
         return new ResponseEntity<>(getLimit(new LinkedHashSet<>(oncokbTranscriptService.findDrugs(query)), limit), HttpStatus.OK);
     }
+
+     private List<TypeaheadSearchResp> findMatchingCancerTypes(String query, Boolean exactMatch) {
+        // for now only finding exact matches
+         // got all evidences and level
+         System.out.println("This got to cancer type search ");
+        Set<Evidence> evidences = EvidenceUtils.getEvidenceByEvidenceTypesAndLevels(EvidenceTypeUtils.getTreatmentEvidenceTypes(), LevelUtils.getPublicLevels());
+        Map<String, CancerMatch> result = new HashMap<>();
+
+        query = query.toLowerCase();
+         System.out.println("This is the query: " + query);
+
+        // cancer type not found, return an empty list
+        if (ApplicationContextSingleton.getTumorTypeBo().getByName(query) == null){
+            System.out.println("Nothing found");
+            return Collections.emptyList();
+        }
+
+        // definitely a matching cancer type, now searching evidence for relevant ones
+
+         for (Evidence evidence : evidences) {
+//             boolean isMatch = false;
+             for (TumorType cancer : TumorTypeUtils.findEvidenceRelevantCancerTypes(evidence)){
+//                 if (isMatch){
+//                     break;
+//                 }
+
+                 String matchKey = getCancerMatchKey(evidence.getGene(), cancer, evidence.getLevelOfEvidence());
+                 System.out.println(cancer.getMainType() + "|" + cancer.getSubtype() + "|" + cancer.getCode());
+
+                 if (cancer.getMainType().toLowerCase().equals(query)
+                     || cancer.getSubtype().toLowerCase().equals(query)
+                     || cancer.getCode().toString().equals(query)){
+                     updateCancerMap(result, matchKey, evidence.getGene(), evidence.getAlterations(), cancer, evidence.getLevelOfEvidence(), 4.0);
+//                     isMatch = true;
+                     break;
+                 }
+             }
+         }
+
+         // to dos left:
+         // once code works, make a Levels of Evidence base class and extend the class for drug and cancer
+         // DrugMatch would have drug and set of cancers added on
+         // CancerMatch would have cancer added on
+
+         TreeSet<CancerMatch> cancerMatches = new TreeSet<>(new CancerMatchComp());
+         for(Map.Entry<String, CancerMatch> entry : result.entrySet()) {
+             cancerMatches.add(entry.getValue());
+         }
+
+         // conversion to desired list output
+         return cancerMatches.stream().map(cancerMatch -> newTypeaheadCancer(cancerMatch)).collect(Collectors.toList());
+     }
+
+    private static TypeaheadSearchResp newTypeaheadCancer(CancerMatch cancerMatch) {
+        TypeaheadSearchResp typeaheadSearchResp = new TypeaheadSearchResp();
+        typeaheadSearchResp.setGene(cancerMatch.getGene());
+        typeaheadSearchResp.setVariants(cancerMatch.getAlterations());
+        // I think we make a new function in TypeaheadSearchResp for setCancer, not a list of cancers
+        // typeaheadSearchResp.setDrug( );
+        // typeaheadSearchResp.setTumorTypes(cancerMatch.getCancer());
+
+        if (LevelUtils.isSensitiveLevel(cancerMatch.getLevelOfEvidence())) {
+            typeaheadSearchResp.setHighestSensitiveLevel(cancerMatch.getLevelOfEvidence().getLevel());
+        } else {
+            typeaheadSearchResp.setHighestResistanceLevel(cancerMatch.getLevelOfEvidence().getLevel());
+        }
+        typeaheadSearchResp.setQueryType(TypeaheadQueryType.CANCER);
+
+        if (cancerMatch.getAlterations().size() != 1) {
+            typeaheadSearchResp.setLink("/gene/" + cancerMatch.getGene().getHugoSymbol());
+        } else {
+            typeaheadSearchResp.setLink("/gene/" + cancerMatch.getGene().getHugoSymbol() + "/" + cancerMatch.getAlterations().iterator().next().getAlteration());
+        }
+        return typeaheadSearchResp;
+    }
+
+     // really could use same comparator for drug and cancer?
+
+    private static String getCancerMatchKey(Gene gene, TumorType cancer, LevelOfEvidence level) {
+        return gene.getHugoSymbol() + cancer.getSubtype() + level.getLevel();
+    }
+
+    private static void updateCancerMap(Map<String, CancerMatch> map, String key, Gene gene, Set<Alteration> alterations, TumorType cancer, LevelOfEvidence level, Double weight ) {
+        if(!map.containsKey(key)) {
+            CancerMatch cancerMatch = new CancerMatch();
+            cancerMatch.setGene(gene);
+            cancerMatch.setLevelOfEvidence(level);
+            cancerMatch.setCancer(cancer);
+            cancerMatch.setWeight(weight);
+            map.put(key, cancerMatch);
+        }
+        // why not just set alterations?
+        map.get(key).getAlterations().addAll(alterations);
+    }
+
 
     private LinkedHashSet<TypeaheadSearchResp> getMatch(Map<String, Set<Gene>> map, List<String> keywords, Boolean exactMatch) {
         LinkedHashSet<TypeaheadSearchResp> result = new LinkedHashSet<>();
@@ -364,9 +466,11 @@ public class PrivateSearchApiController implements PrivateSearchApi {
         }
 
         TreeSet<DrugMatch> drugMatches = new TreeSet<>(new DrugMatchComp());
+
         for(Map.Entry<String, DrugMatch> entry : result.entrySet()) {
             drugMatches.add(entry.getValue());
         }
+
         return drugMatches.stream().map(drugMatch -> newTypeaheadDrug(drugMatch)).collect(Collectors.toList());
     }
 
@@ -512,6 +616,20 @@ class DrugMatchComp implements Comparator<DrugMatch> {
             result = LevelUtils.compareLevel(d1.getLevelOfEvidence(), d2.getLevelOfEvidence());
             if(result == 0) {
                 result = d1.getGene().getHugoSymbol().compareTo(d2.getGene().getHugoSymbol());
+            }
+        }
+        return result;
+    }
+}
+
+class CancerMatchComp implements Comparator<CancerMatch> {
+    @Override
+    public int compare(CancerMatch c1, CancerMatch c2) {
+        int result = c2.getWeight().compareTo(c1.getWeight());
+        if(result == 0) {
+            result = LevelUtils.compareLevel(c1.getLevelOfEvidence(), c2.getLevelOfEvidence());
+            if(result == 0) {
+                result = c1.getGene().getHugoSymbol().compareTo(c2.getGene().getHugoSymbol());
             }
         }
         return result;
