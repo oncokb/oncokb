@@ -10,6 +10,8 @@ import java.util.List;
  */
 public class VariantAnnotation extends IndicatorQueryResp {
     String background;
+
+    Boolean VUE = false;
     List<VariantAnnotationTumorType> tumorTypes = new ArrayList<>();
 
     public VariantAnnotation() {
@@ -49,6 +51,14 @@ public class VariantAnnotation extends IndicatorQueryResp {
 
     public void setBackground(String background) {
         this.background = background;
+    }
+
+    public Boolean getVUE() {
+        return VUE;
+    }
+
+    public void setVUE(Boolean VUE) {
+        this.VUE = VUE;
     }
 
     public List<VariantAnnotationTumorType> getTumorTypes() {

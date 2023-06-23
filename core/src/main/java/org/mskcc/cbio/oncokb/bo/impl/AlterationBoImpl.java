@@ -309,7 +309,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         Boolean addTruncatingMutations = false;
         Boolean addDeletion = false;
 
-        // Alteration should always has consequence attached.
+        // Alteration should always have consequence attached.
         if (alteration.getConsequence() == null) {
             AlterationUtils.annotateAlteration(alteration, alteration.getAlteration());
         }

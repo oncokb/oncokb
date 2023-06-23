@@ -150,7 +150,7 @@
         <dependency>
             <groupId>com.github.genome-nexus</groupId>
             <artifactId>genome-nexus-java-api-client</artifactId>
-            <version>0709b8232b</version>
+            <version>7cbbeb94fd</version>
         </dependency>
         <dependency>
             <groupId>com.github.genome-nexus.genome-nexus</groupId>
