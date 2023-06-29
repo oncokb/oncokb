@@ -309,7 +309,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         Boolean addTruncatingMutations = false;
         Boolean addDeletion = false;
 
-        // Alteration should always has consequence attached.
+        // Alteration should always have consequence attached.
         if (alteration.getConsequence() == null) {
             AlterationUtils.annotateAlteration(alteration, alteration.getAlteration());
         }
@@ -552,7 +552,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
     }
 
     private boolean addVUSMutation(Alteration alteration, boolean alterationIsCurated){
-        return !alterationIsCurated || AlterationUtils.getVUS(alteration).contains(alteration);
+        return !alterationIsCurated || AlterationUtils.getVUS(alteration.getGene()).contains(alteration);
     }
 
     private LinkedHashSet<Alteration> oncogeneTruncMuts(Alteration alteration, LinkedHashSet<Alteration> relevantAlts) {

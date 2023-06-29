@@ -4,9 +4,9 @@
     <parent>
         <groupId>org.mskcc.cbio.oncokb</groupId>
         <artifactId>master</artifactId>
-        <version>3.12.11</version>
+        <version>3.12.12</version>
     </parent>
-    <version>3.12.11</version>
+    <version>3.12.12</version>
     <artifactId>core</artifactId>
     <packaging>jar</packaging>
     <name>OncoKB Core</name>
@@ -150,7 +150,7 @@
         <dependency>
             <groupId>com.github.genome-nexus</groupId>
             <artifactId>genome-nexus-java-api-client</artifactId>
-            <version>0709b8232b</version>
+            <version>7cbbeb94fd</version>
         </dependency>
         <dependency>
             <groupId>com.github.genome-nexus.genome-nexus</groupId>
