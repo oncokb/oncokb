@@ -181,6 +181,7 @@ public interface PrivateUtilsApi {
         , @ApiParam(value = "Reference genome, either GRCh37 or GRCh38. The default is GRCh37", required = false, defaultValue = "GRCh37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") String referenceGenome
         , @ApiParam(value = "Alteration") @RequestParam(value = "alteration", required = false) String alteration
         , @ApiParam(value = "HGVS genomic format. Example: 7:g.140453136A>T") @RequestParam(value = "hgvsg", required = false) String hgvsg
+        , @ApiParam(value = "Genomic change format. Example: 7,140453136,140453136,A,T") @RequestParam(value = "genomicChange", required = false) String genomicChange
         , @ApiParam(value = "OncoTree tumor type name/main type/code") @RequestParam(value = "tumorType", required = false) String tumorType
     ) throws ApiException, org.genome_nexus.ApiException;
 
