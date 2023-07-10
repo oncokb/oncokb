@@ -13,7 +13,7 @@ import java.util.Set;
 /**
  * Created by Hongxin Zhang on 2019-04-23.
  */
-public class DrugMatch extends LevelsOfEvidence{
+public class DrugMatch extends LevelsOfEvidenceMatch{
 
      private Drug drug;
      private Set<TumorType> tumorTypes = new HashSet<>();

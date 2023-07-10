@@ -5,15 +5,15 @@ import org.mskcc.cbio.oncokb.model.TumorType;
 import java.util.Objects;
 
 
-public class CancerTypeMatch extends LevelsOfEvidence {
-    private TumorType cancer;
+public class CancerTypeMatch extends LevelsOfEvidenceMatch {
+    private TumorType cancerType;
 
-    public TumorType getCancer() {
-        return cancer;
+    public TumorType getCancerType() {
+        return cancerType;
     }
 
-    public void setCancer(TumorType cancer) {
-        this.cancer = cancer;
+    public void setCancer(TumorType cancerType) {
+        this.cancerType = cancerType;
     }
 
     @Override
@@ -25,11 +25,11 @@ public class CancerTypeMatch extends LevelsOfEvidence {
             Objects.equals(getGene(), cancerTypeMatch.getGene()) &&
             Objects.equals(getAlterations(), cancerTypeMatch.getAlterations()) &&
             getLevelOfEvidence() == cancerTypeMatch.getLevelOfEvidence() &&
-            Objects.equals(getCancer(), cancerTypeMatch.getCancer());
+            Objects.equals(getCancerType(), cancerTypeMatch.getCancerType());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getGene(), getAlterations(), getLevelOfEvidence(), getCancer(), getWeight());
+        return Objects.hash(getGene(), getAlterations(), getLevelOfEvidence(), getCancerType(), getWeight());
     }
 }

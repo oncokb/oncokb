@@ -1,16 +1,13 @@
 package org.mskcc.cbio.oncokb.apiModels;
 
 import org.mskcc.cbio.oncokb.model.Alteration;
-import org.mskcc.cbio.oncokb.model.Drug;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
-import org.mskcc.cbio.oncokb.model.TumorType;
 
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
-public class LevelsOfEvidence {
+public class LevelsOfEvidenceMatch {
     private Gene gene;
     private Set<Alteration> alterations = new HashSet<>();
     private LevelOfEvidence levelOfEvidence;
