@@ -11,7 +11,6 @@ public class TypeaheadSearchResp {
     private Set<Alteration> variants;
     private Set<TumorType> tumorTypes;
     private Drug drug;
-    private TumorType cancerType;
     private String oncogenicity;
     private String highestSensitiveLevel;
     private String highestResistanceLevel;
@@ -51,13 +50,6 @@ public class TypeaheadSearchResp {
 
     public void setDrug(Drug drug) {
         this.drug = drug;
-    }
-    public TumorType getCancer() {
-        return cancerType;
-    }
-
-    public void setCancer(TumorType cancerType) {
-        this.cancerType = cancerType;
     }
 
     public String getOncogenicity() {

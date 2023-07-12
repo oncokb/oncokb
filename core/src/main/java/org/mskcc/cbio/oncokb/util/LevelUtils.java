@@ -26,12 +26,12 @@ public class LevelUtils {
 
     // Levels related to therapy
 
-    private static final List<LevelOfEvidence> THERAPEUTIC_SENSITIVE_LEVELS = Collections.unmodifiableList(
+    public static final List<LevelOfEvidence> THERAPEUTIC_SENSITIVE_LEVELS = Collections.unmodifiableList(
         Arrays.asList(LevelOfEvidence.LEVEL_4, LevelOfEvidence.LEVEL_3B, LevelOfEvidence.LEVEL_3A,
             LevelOfEvidence.LEVEL_2, LevelOfEvidence.LEVEL_1)
     );
 
-    private static final List<LevelOfEvidence> THERAPEUTIC_RESISTANCE_LEVELS = Collections.unmodifiableList(
+    public static final List<LevelOfEvidence> THERAPEUTIC_RESISTANCE_LEVELS = Collections.unmodifiableList(
         Arrays.asList(LevelOfEvidence.LEVEL_R2, LevelOfEvidence.LEVEL_R1)
     );
 
@@ -51,17 +51,17 @@ public class LevelUtils {
     );
 
     // Levels related to prognostic implications
-    private static final List<LevelOfEvidence> PROGNOSTIC_LEVELS = Collections.unmodifiableList(
+    public static final List<LevelOfEvidence> PROGNOSTIC_LEVELS = Collections.unmodifiableList(
         Arrays.asList(LevelOfEvidence.LEVEL_Px3, LevelOfEvidence.LEVEL_Px2, LevelOfEvidence.LEVEL_Px1)
     );
 
     // Levels related to diagnostic implications
-    private static final List<LevelOfEvidence> DIAGNOSTIC_LEVELS = Collections.unmodifiableList(
+    public static final List<LevelOfEvidence> DIAGNOSTIC_LEVELS = Collections.unmodifiableList(
         Arrays.asList(LevelOfEvidence.LEVEL_Dx3, LevelOfEvidence.LEVEL_Dx2, LevelOfEvidence.LEVEL_Dx1)
     );
 
     // FDA Levels of Evidence
-    private static final List<LevelOfEvidence> FDA_LEVELS = Collections.unmodifiableList(
+    public static final List<LevelOfEvidence> FDA_LEVELS = Collections.unmodifiableList(
         Arrays.asList(LevelOfEvidence.LEVEL_Fda3, LevelOfEvidence.LEVEL_Fda2, LevelOfEvidence.LEVEL_Fda1)
     );
 

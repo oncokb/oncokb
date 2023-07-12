@@ -21,6 +21,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
+import static org.mskcc.cbio.oncokb.util.LevelUtils.*;
 
 /**
  * Created by Hongxin on 10/28/16.
@@ -234,7 +235,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
                      updateCancerMap(result, matchKey, evidence.getGene(), evidence.getAlterations(), currMatchedCancer, evidence.getLevelOfEvidence(), 4.0);
                  }
              }
-             matchKey = currMatchedCancer.getSubtype();
+             matchKey = TumorTypeUtils.getTumorTypeName(currMatchedCancer);
              updateCancerMap(result, matchKey, null, null, currMatchedCancer, null, 2.0);
          }
 
@@ -252,7 +253,8 @@ public class PrivateSearchApiController implements PrivateSearchApi {
         typeaheadSearchResp.setGene(cancerMatch.getGene());
         typeaheadSearchResp.setVariants(cancerMatch.getAlterations());
 
-        typeaheadSearchResp.setCancer(cancerMatch.getCancerType());
+        Set<TumorType> curr_tumor = new HashSet<>(Collections.singleton(cancerMatch.getCancerType()));
+        typeaheadSearchResp.setTumorTypes(curr_tumor);
 
         if (cancerMatch.getLevelOfEvidence() != null){
             if (LevelUtils.isSensitiveLevel(cancerMatch.getLevelOfEvidence())) {
@@ -274,7 +276,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
     }
 
     private static String getCancerMatchKey(Gene gene, TumorType cancer, LevelOfEvidence level) {
-        return gene.getHugoSymbol() + cancer.getSubtype() + level.getLevel();
+        return gene.getHugoSymbol() + TumorTypeUtils.getTumorTypeName(cancer) + level.getLevel();
     }
 
     private static void updateCancerMap(Map<String, CancerTypeMatch> map, String key, Gene gene, Set<Alteration> alterations, TumorType cancer, LevelOfEvidence level, Double weight ) {
@@ -637,14 +639,19 @@ class CancerTypeMatchComp implements Comparator<CancerTypeMatch> {
         double weightForNoEvidenceFound = 2.0;
 
         if(result == 0 && o1.getWeight() != weightForNoEvidenceFound && o2.getWeight() != weightForNoEvidenceFound) {
-            result = LevelUtils.compareLevel(o1.getLevelOfEvidence(), o2.getLevelOfEvidence());
+            List<LevelOfEvidence> txLevels = new ArrayList<>();
+            txLevels.addAll(THERAPEUTIC_RESISTANCE_LEVELS);
+            txLevels.addAll(THERAPEUTIC_SENSITIVE_LEVELS);
+
+            result = LevelUtils.compareLevel(o1.getLevelOfEvidence(), o2.getLevelOfEvidence(), txLevels);
+
             if(result == 0) {
                 result = o1.getGene().getHugoSymbol().compareTo(o2.getGene().getHugoSymbol());
             }
         }
 
         if(result == 0) {
-            result = o1.getCancerType().getSubtype().compareTo(o2.getCancerType().getSubtype());
+            result = TumorTypeUtils.getTumorTypeName(o1.getCancerType()).compareTo(TumorTypeUtils.getTumorTypeName(o2.getCancerType()));
         }
 
         return result;
