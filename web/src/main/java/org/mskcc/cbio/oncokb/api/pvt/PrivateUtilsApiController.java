@@ -363,6 +363,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         , @ApiParam(value = "Reference genome, either GRCh37 or GRCh38. The default is GRCh37", defaultValue = "GRCh37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") String referenceGenome
         , @ApiParam(value = "Alteration") @RequestParam(value = "alteration", required = false) String alteration
         , @ApiParam(value = "HGVS genomic format. Example: 7:g.140453136A>T") @RequestParam(value = "hgvsg", required = false) String hgvsg
+        , @ApiParam(value = "Genomic change format. Example: 7,140453136,140453136,A,T") @RequestParam(value = "genomicChange", required = false) String genomicChange
         , @ApiParam(value = "OncoTree tumor type name/main type/code") @RequestParam(value = "tumorType", required = false) String tumorType) throws ApiException, org.genome_nexus.ApiException {
 
 
@@ -377,7 +378,18 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
         }
-        if (StringUtils.isNullOrEmpty(hgvsg)) {
+        if (!StringUtils.isNullOrEmpty(hgvsg) || !StringUtils.isNullOrEmpty(genomicChange)) {
+            String genomicQuery = StringUtils.isNullOrEmpty(hgvsg) ? genomicChange : hgvsg;
+            GNVariantAnnotationType type = StringUtils.isNullOrEmpty(hgvsg) ? GNVariantAnnotationType.GENOMIC_LOCATION : GNVariantAnnotationType.HGVS_G;
+            Alteration alterationModel;
+            if (!this.cacheFetcher.genomicLocationShouldBeAnnotated(type, genomicQuery, matchedRG, this.cacheFetcher.getAllTranscriptGenes())) {
+                alterationModel = new Alteration();
+            } else {
+                alterationModel = this.cacheFetcher.getAlterationFromGenomeNexus(type, matchedRG, genomicQuery);
+            }
+            query = QueryUtils.getQueryFromAlteration(matchedRG, tumorType, alterationModel, hgvsg);
+            gene = GeneUtils.getGeneByEntrezId(query.getEntrezGeneId());
+        } else {
             gene = GeneUtils.getGene(entrezGeneId, hugoSymbol);
             Alteration alterationModel = AlterationUtils.findAlteration(gene, matchedRG, alteration);
             if (alterationModel == null) {
@@ -393,15 +405,6 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
                 }
             }
             query = new Query(alterationModel, matchedRG);
-        } else {
-            Alteration alterationModel;
-            if (!this.cacheFetcher.genomicLocationShouldBeAnnotated(GNVariantAnnotationType.HGVS_G, hgvsg, matchedRG, this.cacheFetcher.getAllTranscriptGenes())) {
-                alterationModel = new Alteration();
-            } else {
-                alterationModel = this.cacheFetcher.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, matchedRG, hgvsg);
-            }
-            query = QueryUtils.getQueryFromAlteration(matchedRG, tumorType, alterationModel, hgvsg);
-            gene = GeneUtils.getGeneByEntrezId(query.getEntrezGeneId());
         }
         query.setTumorType(tumorType);
         List<EvidenceQueryRes> responses = EvidenceUtils.processRequest(Collections.singletonList(query), new HashSet<>(EvidenceTypeUtils.getAllEvidenceTypes()), LevelUtils.getPublicLevels(), false);
