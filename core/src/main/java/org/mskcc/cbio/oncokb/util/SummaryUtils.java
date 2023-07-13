@@ -298,7 +298,9 @@ public class SummaryUtils {
             // VUS alternative alleles are not accounted into oncogenic summary calculation
             if (alternativeAllelesWithoutVUS.size() > 0) {
                 sb.append(alleleSummary(query.getReferenceGenome(), alteration, query.getHugoSymbol()));
-                return sb.toString();
+                if (StringUtils.isNotEmpty(sb.toString().trim())) {
+                    return sb.toString();
+                }
             }
 
             // Get oncogenic info from rest of relevant alterations except AA
@@ -474,10 +476,6 @@ public class SummaryUtils {
     public static String alleleSummary(ReferenceGenome referenceGenome, Alteration alteration, String queryHugoSymbol) {
         StringBuilder sb = new StringBuilder();
 
-        String altStr = getGeneMutationNameInVariantSummary(alteration.getGene(), referenceGenome, queryHugoSymbol, alteration.getAlteration());
-
-        sb.append("The " + altStr + " has not been functionally or clinically validated.");
-
         Set<Alteration> alleles = new HashSet<>(AlterationUtils.getAlleleAlterations(referenceGenome, alteration));
 
         Map<String, Object> map = geAlterationsWithHighestOncogenicity(new HashSet<>(alleles));
@@ -485,6 +483,8 @@ public class SummaryUtils {
         Set<Alteration> highestAlts = (Set<Alteration>) map.get("alterations");
 
         if (highestOncogenicity != null && (highestOncogenicity.equals(Oncogenicity.YES) || highestOncogenicity.equals(Oncogenicity.LIKELY))) {
+            String altStr = getGeneMutationNameInVariantSummary(alteration.getGene(), referenceGenome, queryHugoSymbol, alteration.getAlteration());
+            sb.append("The " + altStr + " has not been functionally or clinically validated.");
 
             sb.append(" However, ");
             sb.append(alteration.getGene().getHugoSymbol() + " " + allelesToStr(highestAlts));
