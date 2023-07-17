@@ -30,7 +30,8 @@ public final class AlterationUtils {
 
     // We do not intend to do comprehensive checking, but only eliminate some basic errors.
     // GenomeNexus will evaluate it further
-    public static Pattern HGVSG_FORMAT = Pattern.compile("(chr)?[\\dxy]+:g\\.\\d+.*", Pattern.CASE_INSENSITIVE);
+    public static Pattern HGVSG_FORMAT = Pattern.compile("((grch37|grch38):)?((chr)?[\\dxy]+:g\\.\\d+.*)", Pattern.CASE_INSENSITIVE);
+    public static Pattern GENOMIC_CHANGE_FORMAT = Pattern.compile("((grch37|grch38):)?([\\dxy]+,\\d+,\\d+,.*)", Pattern.CASE_INSENSITIVE);
 
 
     private AlterationUtils() {
@@ -54,6 +55,14 @@ public final class AlterationUtils {
             return false;
         }
         return HGVSG_FORMAT.matcher(hgvsg).matches();
+    }
+
+    public static boolean isValidGenomicChange(String query) {
+        query = query == null ? null : query.trim();
+        if (StringUtils.isEmpty(query)) {
+            return false;
+        }
+        return GENOMIC_CHANGE_FORMAT.matcher(query).matches();
     }
 
     public static boolean isRangeInframeAlteration(Alteration alteration) {
@@ -624,8 +633,10 @@ public final class AlterationUtils {
                     alteration.setGene(gene);
                 }
 
-                if (transcriptConsequenceSummary.getHgvspShort() != null) {
-                    alteration.setAlteration(transcriptConsequenceSummary.getHgvspShort());
+                if (StringUtils.isNotEmpty(transcriptConsequenceSummary.getHgvspShort())) {
+                    String hgvspShort = transcriptConsequenceSummary.getHgvspShort().trim().replace("p.", "");
+                    alteration.setAlteration(hgvspShort);
+                    alteration.setName(hgvspShort);
                 }
                 if (transcriptConsequenceSummary.getProteinPosition() != null) {
                     if (transcriptConsequenceSummary.getProteinPosition().getStart() != null) {
