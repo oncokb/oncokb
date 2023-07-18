@@ -308,10 +308,6 @@ public class PrivateSearchApiController implements PrivateSearchApi {
         return result;
     }
 
-    private TypeaheadSearchResp convertAnnotation(GNVariantAnnotationType type, Alteration alteration, IndicatorQueryResp queryResp, String keyword) {
-        return convertAnnotation(type, alteration, queryResp, keyword);
-    }
-
     private static TypeaheadSearchResp newTypeaheadDrug(DrugMatch drugMatch) {
         TypeaheadSearchResp typeaheadSearchResp = new TypeaheadSearchResp();
         typeaheadSearchResp.setGene(drugMatch.getGene());
