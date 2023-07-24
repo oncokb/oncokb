@@ -97,7 +97,8 @@ public class EvidenceUtils {
 
     public static Set<Evidence> getEvidenceByEvidenceTypesAndLevels(Set<EvidenceType> types, Set<LevelOfEvidence> levels) {
         List<Evidence> evidences = new ArrayList<>();
-        for (Evidence evidence : CacheUtils.getAllEvidences()) {
+        Set<Evidence> cachedEvidences = CacheUtils.getAllEvidences();
+        for (Evidence evidence : cachedEvidences) {
             if (types != null && types.size() > 0 && !types.contains(evidence.getEvidenceType())) {
                 continue;
             }
