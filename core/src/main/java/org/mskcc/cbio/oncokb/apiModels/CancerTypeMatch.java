@@ -12,8 +12,7 @@ import java.util.Objects;
 
 public class CancerTypeMatch extends LevelsOfEvidenceMatch {
     private TumorType cancerType;
-
-    private Map<LevelOfEvidence, Set<Alteration>> alterationsByLevel;
+    private Map<LevelOfEvidence, Set<Alteration>> alterationsByLevel = new TreeMap<>();
 
     public TumorType getCancerType() {
         return cancerType;
@@ -32,7 +31,6 @@ public class CancerTypeMatch extends LevelsOfEvidenceMatch {
     }
 
     public LevelOfEvidence findHighestLevel(List<LevelOfEvidence> txLevels) {
-        // Map<LevelOfEvidence, Set<Alteration>> alterationsByLevel = cancerTypeMatch.getAlterationsByLevel();
         if (alterationsByLevel != null) {
             LevelOfEvidence highestLevel = null;
             for (int i = txLevels.size() - 1; i >= 0; --i){

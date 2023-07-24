@@ -2,9 +2,12 @@
 
 package org.mskcc.cbio.oncokb.model;
 
+import org.mskcc.cbio.oncokb.apiModels.LevelsOfEvidenceMatch;
+
 import java.awt.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.List;
+import static org.mskcc.cbio.oncokb.util.LevelUtils.*;
 
 /**
  *

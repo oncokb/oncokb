@@ -291,7 +291,12 @@ public class PrivateSearchApiController implements PrivateSearchApi {
             CancerTypeMatch cancerMatch = new CancerTypeMatch();
             cancerMatch.setCancerType(cancer);
             cancerMatch.setWeight(weight);
-            cancerMatch.setAlterationsByLevel(new HashMap<>());
+
+            List<LevelOfEvidence> txLevels = new ArrayList<>();
+            txLevels.addAll(THERAPEUTIC_RESISTANCE_LEVELS);
+            txLevels.addAll(THERAPEUTIC_SENSITIVE_LEVELS);
+            cancerMatch.setAlterationsByLevel(new TreeMap<>(new LevelOfEvidenceComp(txLevels)));
+
             map.put(key, cancerMatch);
         }
         if (alterations != null){
@@ -486,7 +491,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
             }
         }
 
-        TreeSet<DrugMatch> drugMatches = new TreeSet<>(new LevelsOfEvidenceComp());
+        TreeSet<DrugMatch> drugMatches = new TreeSet<>(new LevelsOfEvidenceMatchComp());
 
         for(Map.Entry<String, DrugMatch> entry : result.entrySet()) {
             drugMatches.add(entry.getValue());
@@ -629,7 +634,7 @@ class VariantComp implements Comparator<TypeaheadSearchResp> {
     }
 }
 
-class LevelsOfEvidenceComp implements Comparator<LevelsOfEvidenceMatch> {
+class LevelsOfEvidenceMatchComp implements Comparator<LevelsOfEvidenceMatch> {
     @Override
     public int compare(LevelsOfEvidenceMatch o1, LevelsOfEvidenceMatch o2) {
         int result = o2.getWeight().compareTo(o1.getWeight());
@@ -665,6 +670,18 @@ class CancerTypeMatchComp implements Comparator<CancerTypeMatch> {
         }
 
         return result;
+    }
+}
+class LevelOfEvidenceComp implements Comparator<LevelOfEvidence> {
+    private final List<LevelOfEvidence> customLevels;
+    public LevelOfEvidenceComp(List<LevelOfEvidence> levels) {
+        this.customLevels = levels;
+    }
+
+    @Override
+    public int compare(LevelOfEvidence o1, LevelOfEvidence o2) {
+        // returning the negative since the customLevels is constructed with the largest values towards the beginning
+        return -1 * LevelUtils.compareLevel(o1, o2, customLevels);
     }
 }
 
