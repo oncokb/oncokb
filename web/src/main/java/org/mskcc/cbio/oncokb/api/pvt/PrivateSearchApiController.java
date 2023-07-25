@@ -680,8 +680,7 @@ class LevelOfEvidenceComp implements Comparator<LevelOfEvidence> {
 
     @Override
     public int compare(LevelOfEvidence o1, LevelOfEvidence o2) {
-        // returning the negative since the customLevels is constructed with the largest values towards the beginning
-        return -1 * LevelUtils.compareLevel(o1, o2, customLevels);
+        return LevelUtils.compareLevel(o1, o2, customLevels);
     }
 }
 
