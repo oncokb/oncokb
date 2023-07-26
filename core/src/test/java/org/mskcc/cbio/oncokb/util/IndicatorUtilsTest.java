@@ -35,13 +35,13 @@ public class IndicatorUtilsTest {
 
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "CD74-CD74", null, "structural_variant", StructuralVariantType.DELETION, "Pancreatic Adenocarcinoma", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
-        assertEquals("Gene should not exist, but it does.", false, indicatorQueryResp.getGeneExist());
+        assertEquals("Gene should exist.", true, indicatorQueryResp.getGeneExist());
         assertEquals("The oncogenicity is not unknown, but it should.", Oncogenicity.UNKNOWN.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertTrue("There is treatment(s) in the response, but it should no have any.", indicatorQueryResp.getTreatments().size() == 0);
 
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "CD74-CD74", null, "structural_variant", StructuralVariantType.DELETION, "Pancreatic Adenocarcinoma", "fusion", null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
-        assertEquals("Gene should not exist, but it does.", false, indicatorQueryResp.getGeneExist());
+        assertEquals("Gene should exist.", true, indicatorQueryResp.getGeneExist());
         assertEquals("The oncogenicity is not unknown, but it should.", Oncogenicity.UNKNOWN.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertTrue("There is treatment(s) in the response, but it should no have any.", indicatorQueryResp.getTreatments().size() == 0);
 
