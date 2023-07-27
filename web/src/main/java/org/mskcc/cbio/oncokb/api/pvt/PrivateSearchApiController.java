@@ -6,19 +6,25 @@ import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.apiModels.DrugMatch;
 import org.mskcc.cbio.oncokb.bo.OncokbTranscriptService;
+import org.mskcc.cbio.oncokb.cache.CacheFetcher;
+import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.TumorType;
 import org.mskcc.cbio.oncokb.util.*;
 import org.oncokb.oncokb_transcript.ApiException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.*;
+import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
 import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
+import static org.mskcc.cbio.oncokb.util.AlterationUtils.GENOMIC_CHANGE_FORMAT;
+import static org.mskcc.cbio.oncokb.util.AlterationUtils.HGVSG_FORMAT;
 
 /**
  * Created by Hongxin on 10/28/16.
@@ -26,6 +32,9 @@ import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
 @Controller
 public class PrivateSearchApiController implements PrivateSearchApi {
     private Integer DEFAULT_RETURN_LIMIT = 5;
+
+    @Autowired
+    CacheFetcher cacheFetcher;
 
     @Override
     public ResponseEntity<Set<BiologicalVariant>> searchVariantsBiologicalGet(
@@ -94,65 +103,103 @@ public class PrivateSearchApiController implements PrivateSearchApi {
             limit = DEFAULT_RETURN_LIMIT;
         }
         if (query != null && query.length() >= QUERY_MIN_LENGTH) {
-            List<String> keywords = Arrays.asList(query.trim().split("\\s+"));
+            // genomic queries will not have space in the query
+            String trimmedQuery = query.trim().replaceAll(" ", "");
+            if (AlterationUtils.isValidHgvsg(trimmedQuery) || AlterationUtils.isValidGenomicChange(trimmedQuery)) {
+                GNVariantAnnotationType type = null;
 
-            if (keywords.size() == 1) {
-                // Blur search gene
-                result.addAll(convertGene(GeneUtils.searchGene(keywords.get(0), false), keywords.get(0)));
-
-                // Blur search variant
-                result.addAll(convertVariant(AlterationUtils.lookupVariant(keywords.get(0), false, AlterationUtils.getAllAlterations()), keywords.get(0)));
-
-                // Blur search drug
-                result.addAll(findEvidencesWithDrugAssociated(keywords.get(0), false));
-
-                // If the keyword contains dash and result is empty, then we should return both fusion genes
-                if (keywords.get(0).contains("-") && result.isEmpty()) {
-                    for (String subKeyword : keywords.get(0).split("-")) {
-                        result.addAll(convertGene(GeneUtils.searchGene(subKeyword, false), subKeyword));
+                if (AlterationUtils.isValidHgvsg(trimmedQuery)) {
+                    type = GNVariantAnnotationType.HGVS_G;
+                } else if (AlterationUtils.isValidGenomicChange(trimmedQuery)) {
+                    type = GNVariantAnnotationType.GENOMIC_LOCATION;
+                }
+                if (type != null) {
+                    Alteration alterationModel;
+                    String refGenomeStr = "";
+                    ReferenceGenome referenceGenome = ReferenceGenome.GRCh37;
+                    Matcher rgm = (GNVariantAnnotationType.HGVS_G.equals(type) ? HGVSG_FORMAT : GENOMIC_CHANGE_FORMAT).matcher(trimmedQuery);
+                    if (rgm.find()) {
+                        refGenomeStr = rgm.group(2);
+                        trimmedQuery = rgm.group(3);
+                    }
+                    if (StringUtils.isNotEmpty(refGenomeStr)) {
+                        ReferenceGenome matchedReferenceGenome = MainUtils.searchEnum(ReferenceGenome.class, refGenomeStr);
+                        if (matchedReferenceGenome != null) {
+                            referenceGenome = matchedReferenceGenome;
+                        }
+                    }
+                    try {
+                        alterationModel = this.cacheFetcher.getAlterationFromGenomeNexus(type, referenceGenome, trimmedQuery);
+                        if (alterationModel.getGene() != null) {
+                            Query annotationQuery = QueryUtils.getQueryFromAlteration(referenceGenome, "", alterationModel, HGVSG_FORMAT.equals(type) ? trimmedQuery : "");
+                            IndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuery(annotationQuery, null, false, null);
+                            result.add(newTypeaheadAnnotation(trimmedQuery, type, referenceGenome, alterationModel, indicatorQueryResp));
+                        }
+                    } catch (org.genome_nexus.ApiException e) {
+                        throw new RuntimeException(e);
                     }
                 }
             } else {
-                // Assume one of the keyword is gene
-                Map<String, Set<Gene>> map = new HashedMap();
-                for (String keyword : keywords) {
-                    if (keyword.contains("-")) {
-                        Set<Gene> subGenes = new HashSet<>();
-                        for (String subKeyword : keyword.split("-")) {
-                            subGenes.addAll(GeneUtils.searchGene(subKeyword, false));
+                List<String> keywords = Arrays.asList(query.trim().split("\\s+"));
+
+                if (keywords.size() == 1) {
+                    // Blur search gene
+                    result.addAll(convertGene(GeneUtils.searchGene(keywords.get(0), false), keywords.get(0)));
+
+                    // Blur search variant
+                    result.addAll(convertVariant(AlterationUtils.lookupVariant(keywords.get(0), false, AlterationUtils.getAllAlterations()), keywords.get(0)));
+
+                    // Blur search drug
+                    result.addAll(findEvidencesWithDrugAssociated(keywords.get(0), false));
+
+                    // If the keyword contains dash and result is empty, then we should return both fusion genes
+                    if (keywords.get(0).contains("-") && result.isEmpty()) {
+                        for (String subKeyword : keywords.get(0).split("-")) {
+                            result.addAll(convertGene(GeneUtils.searchGene(subKeyword, false), subKeyword));
                         }
-                        map.put(keyword, subGenes);
-                    } else {
-                        map.put(keyword, GeneUtils.searchGene(keyword, false));
                     }
-                }
+                } else {
+                    // Assume one of the keyword is gene
+                    Map<String, Set<Gene>> map = new HashedMap();
+                    for (String keyword : keywords) {
+                        if (keyword.contains("-")) {
+                            Set<Gene> subGenes = new HashSet<>();
+                            for (String subKeyword : keyword.split("-")) {
+                                subGenes.addAll(GeneUtils.searchGene(subKeyword, false));
+                            }
+                            map.put(keyword, subGenes);
+                        } else {
+                            map.put(keyword, GeneUtils.searchGene(keyword, false));
+                        }
+                    }
 
-                result.addAll(getMatch(map, keywords, false));
+                    result.addAll(getMatch(map, keywords, false));
 
-                // If there is no match, the key words could referring to a variant, try to do a blur variant search
-                String fullKeywords = StringUtils.join(keywords, " ");
-                result.addAll(convertVariant(AlterationUtils.lookupVariant(fullKeywords, false, AlterationUtils.getAllAlterations()), fullKeywords));
+                    // If there is no match, the key words could referring to a variant, try to do a blur variant search
+                    String fullKeywords = StringUtils.join(keywords, " ");
+                    result.addAll(convertVariant(AlterationUtils.lookupVariant(fullKeywords, false, AlterationUtils.getAllAlterations()), fullKeywords));
 
-                // If there is no match in OncoKB database, still try to annotate variant
-                // Only when the oncogenicity is not empty
-                if (result.size() == 0) {
-                    for (Map.Entry<String, Set<Gene>> entry : map.entrySet()) {
-                        if (entry.getValue().size() > 0) {
-                            for (Gene gene : entry.getValue()) {
-                                for (String keyword : keywords) {
-                                    if (!keyword.equals(entry.getKey())) {
-                                        Alteration alteration =
-                                            AlterationUtils.getAlteration(gene.getHugoSymbol(), keyword, null, null, null, null, null);
-                                        TypeaheadSearchResp typeaheadSearchResp = newTypeaheadVariant(alteration);
-                                        typeaheadSearchResp.setVariantExist(false);
-                                        result.add(typeaheadSearchResp);
-                                        if (typeaheadSearchResp.getOncogenicity() == null
-                                            || typeaheadSearchResp.getOncogenicity().isEmpty()) {
-                                            String annotation = "Please make sure your query is valid.";
-                                            if (typeaheadSearchResp.getAnnotation() != null) {
-                                                annotation = typeaheadSearchResp.getAnnotation() + " " + annotation;
+                    // If there is no match in OncoKB database, still try to annotate variant
+                    // Only when the oncogenicity is not empty
+                    if (result.size() == 0) {
+                        for (Map.Entry<String, Set<Gene>> entry : map.entrySet()) {
+                            if (entry.getValue().size() > 0) {
+                                for (Gene gene : entry.getValue()) {
+                                    for (String keyword : keywords) {
+                                        if (!keyword.equals(entry.getKey())) {
+                                            Alteration alteration =
+                                                AlterationUtils.getAlteration(gene.getHugoSymbol(), keyword, null, null, null, null, null);
+                                            TypeaheadSearchResp typeaheadSearchResp = newTypeaheadVariant(alteration);
+                                            typeaheadSearchResp.setVariantExist(false);
+                                            result.add(typeaheadSearchResp);
+                                            if (typeaheadSearchResp.getOncogenicity() == null
+                                                || typeaheadSearchResp.getOncogenicity().isEmpty()) {
+                                                String annotation = "Please make sure your query is valid.";
+                                                if (typeaheadSearchResp.getAnnotation() != null) {
+                                                    annotation = typeaheadSearchResp.getAnnotation() + " " + annotation;
+                                                }
+                                                typeaheadSearchResp.setAnnotation(annotation);
                                             }
-                                            typeaheadSearchResp.setAnnotation(annotation);
                                         }
                                     }
                                 }
@@ -287,8 +334,8 @@ public class PrivateSearchApiController implements PrivateSearchApi {
         return gene.getHugoSymbol() + drug.getDrugName() + level.getLevel();
     }
 
-    private static void updateMap( Map<String, DrugMatch> map, String key, Gene gene, Set<Alteration> alterations, Drug drug, LevelOfEvidence level, Collection<TumorType> tumorTypes, Double weight ) {
-        if(!map.containsKey(key)) {
+    private static void updateMap(Map<String, DrugMatch> map, String key, Gene gene, Set<Alteration> alterations, Drug drug, LevelOfEvidence level, Collection<TumorType> tumorTypes, Double weight) {
+        if (!map.containsKey(key)) {
             DrugMatch drugMatch = new DrugMatch();
             drugMatch.setGene(gene);
             drugMatch.setLevelOfEvidence(level);
@@ -299,6 +346,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
         map.get(key).getAlterations().addAll(alterations);
         map.get(key).getTumorTypes().addAll(tumorTypes);
     }
+
     private static List<TypeaheadSearchResp> findEvidencesWithDrugAssociated(String query, Boolean exactMatch) {
         Set<Evidence> evidences = EvidenceUtils.getEvidenceByEvidenceTypesAndLevels(EvidenceTypeUtils.getTreatmentEvidenceTypes(), LevelUtils.getPublicLevels());
         Map<String, DrugMatch> result = new HashMap<>();
@@ -335,7 +383,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
                             }
                         }
                     }
-                    if(!exactMatch) {
+                    if (!exactMatch) {
                         String lowerCaseDrugName = drug.getDrugName().toLowerCase();
                         if (lowerCaseDrugName.startsWith(query)) {
                             updateMap(result, matchKey, evidence.getGene(), evidence.getAlterations(), drug, evidence.getLevelOfEvidence(), evidence.getCancerTypes(), 2.0);
@@ -347,7 +395,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
                             for (String synonym : drug.getSynonyms()) {
                                 String lower = synonym.toLowerCase();
 
-                                if(lower.startsWith(query)) {
+                                if (lower.startsWith(query)) {
                                     updateMap(result, matchKey, evidence.getGene(), evidence.getAlterations(), drug, evidence.getLevelOfEvidence(), evidence.getCancerTypes(), 1.0);
                                     isMatch = true;
                                     break;
@@ -364,7 +412,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
         }
 
         TreeSet<DrugMatch> drugMatches = new TreeSet<>(new DrugMatchComp());
-        for(Map.Entry<String, DrugMatch> entry : result.entrySet()) {
+        for (Map.Entry<String, DrugMatch> entry : result.entrySet()) {
             drugMatches.add(entry.getValue());
         }
         return drugMatches.stream().map(drugMatch -> newTypeaheadDrug(drugMatch)).collect(Collectors.toList());
@@ -386,7 +434,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
         IndicatorQueryResp resp = IndicatorUtils.processQuery(query, null, false, null);
         typeaheadSearchResp.setOncogenicity(resp.getOncogenic());
         typeaheadSearchResp.setVUS(resp.getVUS());
-        typeaheadSearchResp.setAnnotation(resp.getVariantSummary());
+        typeaheadSearchResp.setAnnotation(resp.getVariantSummary() + " Click here to see more annotation details.");
 
         if (resp.getHighestSensitiveLevel() != null) {
             typeaheadSearchResp.setHighestSensitiveLevel(resp.getHighestSensitiveLevel().getLevel());
@@ -402,6 +450,35 @@ public class PrivateSearchApiController implements PrivateSearchApi {
         typeaheadSearchResp.setQueryType(TypeaheadQueryType.VARIANT);
 
         String link = "/gene/" + alteration.getGene().getHugoSymbol() + "/" + alteration.getAlteration();
+        if (referenceGenome != DEFAULT_REFERENCE_GENOME) {
+            link += "?refGenome=" + referenceGenome;
+        }
+        typeaheadSearchResp.setLink(link);
+        return typeaheadSearchResp;
+    }
+
+    private TypeaheadSearchResp newTypeaheadAnnotation(String query, GNVariantAnnotationType type, ReferenceGenome referenceGenome, Alteration alteration, IndicatorQueryResp queryResp) {
+        TypeaheadSearchResp typeaheadSearchResp = new TypeaheadSearchResp();
+        typeaheadSearchResp.setGene(alteration.getGene());
+        typeaheadSearchResp.setVariants(Collections.singleton(alteration));
+        typeaheadSearchResp.setVariantExist(true);
+
+        typeaheadSearchResp.setOncogenicity(queryResp.getOncogenic());
+        typeaheadSearchResp.setVUS(queryResp.getVUS());
+        typeaheadSearchResp.setAnnotation(queryResp.getVariantSummary() + " Click here to see more annotation details.");
+
+        if (queryResp.getHighestSensitiveLevel() != null) {
+            typeaheadSearchResp.setHighestSensitiveLevel(queryResp.getHighestSensitiveLevel().getLevel());
+        }
+        if (queryResp.getHighestResistanceLevel() != null) {
+            typeaheadSearchResp.setHighestResistanceLevel(queryResp.getHighestResistanceLevel().getLevel());
+        }
+
+        typeaheadSearchResp.setOncogenicity(queryResp.getOncogenic());
+
+        typeaheadSearchResp.setQueryType(TypeaheadQueryType.GENOMIC);
+
+        String link = "/" + (GNVariantAnnotationType.HGVS_G.equals(type) ? "hgvsg" : "genomic-change") + "/" + query;
         if (referenceGenome != DEFAULT_REFERENCE_GENOME) {
             link += "?refGenome=" + referenceGenome;
         }
@@ -507,10 +584,10 @@ class VariantComp implements Comparator<TypeaheadSearchResp> {
 class DrugMatchComp implements Comparator<DrugMatch> {
     @Override
     public int compare(DrugMatch d1, DrugMatch d2) {
-        int result = d2.getWeight().compareTo(d1.getWeight()) ;
-        if(result == 0) {
+        int result = d2.getWeight().compareTo(d1.getWeight());
+        if (result == 0) {
             result = LevelUtils.compareLevel(d1.getLevelOfEvidence(), d2.getLevelOfEvidence());
-            if(result == 0) {
+            if (result == 0) {
                 result = d1.getGene().getHugoSymbol().compareTo(d2.getGene().getHugoSymbol());
             }
         }
