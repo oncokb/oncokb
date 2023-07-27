@@ -4,7 +4,9 @@ import io.swagger.annotations.ApiParam;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
+import org.mskcc.cbio.oncokb.apiModels.CancerTypeMatch;
 import org.mskcc.cbio.oncokb.apiModels.DrugMatch;
+import org.mskcc.cbio.oncokb.apiModels.LevelsOfEvidenceMatch;
 import org.mskcc.cbio.oncokb.bo.OncokbTranscriptService;
 import org.mskcc.cbio.oncokb.cache.CacheFetcher;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
@@ -25,6 +27,7 @@ import java.util.stream.Collectors;
 import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
 import static org.mskcc.cbio.oncokb.util.AlterationUtils.GENOMIC_CHANGE_FORMAT;
 import static org.mskcc.cbio.oncokb.util.AlterationUtils.HGVSG_FORMAT;
+import static org.mskcc.cbio.oncokb.util.LevelUtils.*;
 
 /**
  * Created by Hongxin on 10/28/16.
@@ -95,7 +98,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
 
     @Override
     public ResponseEntity<LinkedHashSet<TypeaheadSearchResp>> searchTypeAheadGet(
-        @ApiParam(value = "The search query, it could be hugoSymbol, entrezGeneId or variant. At least two characters. Maximum two keywords are supported, separated by space", required = true) @RequestParam(value = "query") String query,
+        @ApiParam(value = "The search query, it could be hugoSymbol, entrezGeneId, variant, or cancer type. At least two characters. Maximum two keywords are supported, separated by space", required = true) @RequestParam(value = "query") String query,
         @ApiParam(value = "The limit of returned result.") @RequestParam(value = "limit", defaultValue = "5", required = false) Integer limit) {
         final int QUERY_MIN_LENGTH = 2;
         LinkedHashSet<TypeaheadSearchResp> result = new LinkedHashSet<>();
@@ -152,6 +155,9 @@ public class PrivateSearchApiController implements PrivateSearchApi {
                     // Blur search drug
                     result.addAll(findEvidencesWithDrugAssociated(keywords.get(0), false));
 
+                    // Blur search cancer type
+                    result.addAll(findMatchingCancerTypes(keywords.get(0), false));
+
                     // If the keyword contains dash and result is empty, then we should return both fusion genes
                     if (keywords.get(0).contains("-") && result.isEmpty()) {
                         for (String subKeyword : keywords.get(0).split("-")) {
@@ -178,6 +184,9 @@ public class PrivateSearchApiController implements PrivateSearchApi {
                     // If there is no match, the key words could referring to a variant, try to do a blur variant search
                     String fullKeywords = StringUtils.join(keywords, " ");
                     result.addAll(convertVariant(AlterationUtils.lookupVariant(fullKeywords, false, AlterationUtils.getAllAlterations()), fullKeywords));
+
+                    // Blur search for cancer type
+                    result.addAll(findMatchingCancerTypes(fullKeywords, false));
 
                     // If there is no match in OncoKB database, still try to annotate variant
                     // Only when the oncogenicity is not empty
@@ -227,6 +236,122 @@ public class PrivateSearchApiController implements PrivateSearchApi {
         }
         OncokbTranscriptService oncokbTranscriptService = new OncokbTranscriptService();
         return new ResponseEntity<>(getLimit(new LinkedHashSet<>(oncokbTranscriptService.findDrugs(query)), limit), HttpStatus.OK);
+    }
+
+     private List<TypeaheadSearchResp> findMatchingCancerTypes(String query, Boolean exactMatch) {
+         // got all evidences and level
+         Set<Evidence> evidences = EvidenceUtils.getEvidenceByEvidenceTypesAndLevels(EvidenceTypeUtils.getTreatmentEvidenceTypes(), LevelUtils.getPublicLevels());
+         Map<String, CancerTypeMatch> result = new HashMap<>();
+
+         query = query.toLowerCase();
+
+         ArrayList<TumorType> matchedTumorTypes = new ArrayList<>();
+
+         if (exactMatch){
+             matchedTumorTypes.add(ApplicationContextSingleton.getTumorTypeBo().getByName(query));
+         } else {
+             for (Map.Entry<String, TumorType> currSubtype : CacheUtils.getLowercaseSubtypeTumorTypeMap().entrySet()) {
+                 if(currSubtype.getKey().startsWith(query) || currSubtype.getKey().contains(query)){
+                     matchedTumorTypes.add(currSubtype.getValue());
+                 }
+             }
+
+             for (Map.Entry<String, TumorType> currMainType : CacheUtils.getMainTypeTumorTypeMap().entrySet()) {
+                 if(currMainType.getKey().toLowerCase().startsWith(query) || currMainType.getKey().toLowerCase().contains(query)){
+                     matchedTumorTypes.add(currMainType.getValue());
+                 }
+             }
+         }
+
+        // cancer type not found, return an empty list
+         if (matchedTumorTypes.isEmpty()){
+             return Collections.emptyList();
+         }
+
+         // definitely a matching cancer type, now searching evidence for relevant ones
+         for (TumorType currMatchedCancer : matchedTumorTypes){
+             String matchKey = TumorTypeUtils.getTumorTypeName(currMatchedCancer).toLowerCase();
+
+             for (Evidence evidence : evidences) {
+                 // exact match found
+                 if (TumorTypeUtils.findEvidenceRelevantCancerTypes(evidence).contains(currMatchedCancer)){
+                     if (matchKey.startsWith(query)){
+                         updateCancerMap(result, matchKey, evidence.getAlterations(), currMatchedCancer, evidence.getLevelOfEvidence(), 4.0);
+                     } else {
+                         updateCancerMap(result, matchKey, evidence.getAlterations(), currMatchedCancer, evidence.getLevelOfEvidence(), 3.5);
+                     }
+                 }
+             }
+             if(matchKey.startsWith(query)){
+                 updateCancerMap(result, matchKey, null, currMatchedCancer, null, 2.0);
+             } else {
+                 updateCancerMap(result, matchKey, null, currMatchedCancer, null, 1.0);
+             }
+
+         }
+
+         TreeSet<CancerTypeMatch> cancerMatches = new TreeSet<>(new CancerTypeMatchComp());
+         for(Map.Entry<String, CancerTypeMatch> entry : result.entrySet()) {
+             cancerMatches.add(entry.getValue());
+         }
+
+         // conversion to desired list output
+         return cancerMatches.stream().map(cancerMatch -> newTypeaheadCancer(cancerMatch)).collect(Collectors.toList());
+     }
+
+    private static TypeaheadSearchResp newTypeaheadCancer(CancerTypeMatch cancerMatch) {
+        TypeaheadSearchResp typeaheadSearchResp = new TypeaheadSearchResp();
+        typeaheadSearchResp.setAlterationsByLevel(cancerMatch.getAlterationsByLevel());
+
+        Set<TumorType> curr_tumor = new HashSet<>(Collections.singleton(cancerMatch.getCancerType()));
+        typeaheadSearchResp.setTumorTypes(curr_tumor);
+
+        List<LevelOfEvidence> txLevels = new ArrayList<>();
+        txLevels.addAll(THERAPEUTIC_RESISTANCE_LEVELS);
+        txLevels.addAll(THERAPEUTIC_SENSITIVE_LEVELS);
+
+        if (cancerMatch.getAlterationsByLevel() != null && cancerMatch.findHighestLevel(txLevels) != null){
+            LevelOfEvidence highestLevel = cancerMatch.findHighestLevel(txLevels);
+
+            if (LevelUtils.isSensitiveLevel(highestLevel)){
+                typeaheadSearchResp.setHighestSensitiveLevel(highestLevel.getLevel());
+            } else {
+                typeaheadSearchResp.setHighestResistanceLevel(highestLevel.getLevel());
+            }
+
+            typeaheadSearchResp.setLink("actionableGenes#sections=Tx&tumorType=" + cancerMatch.getCancerType().getCode());
+        } else {
+            typeaheadSearchResp.setLink("");
+        }
+
+        typeaheadSearchResp.setQueryType(TypeaheadQueryType.CANCER_TYPE);
+
+        return typeaheadSearchResp;
+    }
+
+    private static void updateCancerMap(Map<String, CancerTypeMatch> map, String key, Set<Alteration> alterations, TumorType cancer, LevelOfEvidence level, Double weight ) {
+        // gene, alterations, level of evidence can be null
+        if(!map.containsKey(key)) {
+            CancerTypeMatch cancerMatch = new CancerTypeMatch();
+            cancerMatch.setCancerType(cancer);
+            cancerMatch.setWeight(weight);
+
+            List<LevelOfEvidence> txLevels = new ArrayList<>();
+            txLevels.addAll(THERAPEUTIC_RESISTANCE_LEVELS);
+            txLevels.addAll(THERAPEUTIC_SENSITIVE_LEVELS);
+            cancerMatch.setAlterationsByLevel(new TreeMap<>(new LevelOfEvidenceComp(txLevels)));
+
+            map.put(key, cancerMatch);
+        }
+        if (alterations != null){
+            Set<Alteration> alterationsForLevel = map.get(key).getAlterationsByLevel().get(level);
+            if (alterationsForLevel == null) {
+                alterationsForLevel = new HashSet<>();
+                map.get(key).getAlterationsByLevel().put(level, alterationsForLevel);
+            }
+
+            alterationsForLevel.addAll(alterations);
+        }
     }
 
     private LinkedHashSet<TypeaheadSearchResp> getMatch(Map<String, Set<Gene>> map, List<String> keywords, Boolean exactMatch) {
@@ -411,10 +536,11 @@ public class PrivateSearchApiController implements PrivateSearchApi {
             }
         }
 
-        TreeSet<DrugMatch> drugMatches = new TreeSet<>(new DrugMatchComp());
+        TreeSet<DrugMatch> drugMatches = new TreeSet<>(new LevelsOfEvidenceMatchComp());
         for (Map.Entry<String, DrugMatch> entry : result.entrySet()) {
             drugMatches.add(entry.getValue());
         }
+
         return drugMatches.stream().map(drugMatch -> newTypeaheadDrug(drugMatch)).collect(Collectors.toList());
     }
 
@@ -559,7 +685,7 @@ class VariantComp implements Comparator<TypeaheadSearchResp> {
                 // Compare highest sensitive level
                 result = LevelUtils.compareLevel(LevelOfEvidence.getByLevel(e1.getHighestSensitiveLevel()), LevelOfEvidence.getByLevel(e2.getHighestSensitiveLevel()));
                 if (result == 0) {
-                    // Compare highest resistance level
+                    // Compare which is the highest resistance level
                     result = LevelUtils.compareLevel(LevelOfEvidence.getByLevel(e1.getHighestResistanceLevel()), LevelOfEvidence.getByLevel(e2.getHighestResistanceLevel()));
                     if (result == 0) {
                         result = name1.compareTo(name2);
@@ -581,16 +707,53 @@ class VariantComp implements Comparator<TypeaheadSearchResp> {
     }
 }
 
-class DrugMatchComp implements Comparator<DrugMatch> {
+class LevelsOfEvidenceMatchComp implements Comparator<LevelsOfEvidenceMatch> {
     @Override
-    public int compare(DrugMatch d1, DrugMatch d2) {
-        int result = d2.getWeight().compareTo(d1.getWeight());
+    public int compare(LevelsOfEvidenceMatch o1, LevelsOfEvidenceMatch o2) {
+        int result = o2.getWeight().compareTo(o1.getWeight());
         if (result == 0) {
-            result = LevelUtils.compareLevel(d1.getLevelOfEvidence(), d2.getLevelOfEvidence());
-            if (result == 0) {
-                result = d1.getGene().getHugoSymbol().compareTo(d2.getGene().getHugoSymbol());
+            result = LevelUtils.compareLevel(o1.getLevelOfEvidence(), o2.getLevelOfEvidence());
+            if(result == 0) {
+                result = o1.getGene().getHugoSymbol().compareTo(o2.getGene().getHugoSymbol());
             }
         }
         return result;
     }
 }
+
+class CancerTypeMatchComp implements Comparator<CancerTypeMatch> {
+    @Override
+    public int compare(CancerTypeMatch o1, CancerTypeMatch o2) {
+        int result = o2.getWeight().compareTo(o1.getWeight());
+        double weightForNoEvidenceFound = 2.0;
+
+        if(result == 0 && o1.getWeight() > weightForNoEvidenceFound && o2.getWeight() > weightForNoEvidenceFound) {
+            List<LevelOfEvidence> txLevels = new ArrayList<>();
+            txLevels.addAll(THERAPEUTIC_RESISTANCE_LEVELS);
+            txLevels.addAll(THERAPEUTIC_SENSITIVE_LEVELS);
+
+            LevelOfEvidence o1HighestLevelOfEvidence = o1.findHighestLevel(txLevels);
+            LevelOfEvidence o2HighestLevelOfEvidence = o2.findHighestLevel(txLevels);
+
+            result = LevelUtils.compareLevel(o1HighestLevelOfEvidence, o2HighestLevelOfEvidence, txLevels);
+        }
+
+        if(result == 0) {
+            result = TumorTypeUtils.getTumorTypeName(o1.getCancerType()).compareTo(TumorTypeUtils.getTumorTypeName(o2.getCancerType()));
+        }
+
+        return result;
+    }
+}
+class LevelOfEvidenceComp implements Comparator<LevelOfEvidence> {
+    private final List<LevelOfEvidence> customLevels;
+    public LevelOfEvidenceComp(List<LevelOfEvidence> levels) {
+        this.customLevels = levels;
+    }
+
+    @Override
+    public int compare(LevelOfEvidence o1, LevelOfEvidence o2) {
+        return LevelUtils.compareLevel(o1, o2, customLevels);
+    }
+}
+
