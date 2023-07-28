@@ -1,5 +1,6 @@
 package org.mskcc.cbio.oncokb.util;
 
+import jdk.nashorn.internal.runtime.regexp.joni.Regex;
 import org.mskcc.cbio.oncokb.apiModels.ActionableGene;
 import org.mskcc.cbio.oncokb.apiModels.AnnotatedVariant;
 import org.mskcc.cbio.oncokb.apiModels.Citations;
@@ -15,6 +16,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by Hongxin Zhang on 4/5/16.
@@ -732,5 +735,31 @@ public class MainUtils {
             return "";
         }
         return text.replaceAll("\\d", "");
+    }
+
+    public static boolean altNameShouldConvertToLowerCase(Alteration alteration) {
+        if (!Objects.equals(alteration.getName(), alteration.getAlteration())) {
+            return true;
+        } else {
+            return (alteration.getProteinStart() == null || alteration.getProteinStart() == -1) && !isEGFRTruncatingVariants(alteration.getAlteration());
+        }
+    }
+
+    public static String toLowerCaseExceptAllCaps(String text) {
+        Pattern pattern = Pattern.compile("\\w*[a-z]\\w*");
+        Matcher matcher = pattern.matcher(text);
+        StringBuilder sb = new StringBuilder();
+        int currentIndex = 0;
+        while (matcher.find()) {
+            sb.append(text, currentIndex, matcher.start());
+            sb.append(text.substring(matcher.start(), matcher.end()).toLowerCase());
+            currentIndex = matcher.end();
+        }
+        if (currentIndex != text.length() - 1) {
+            sb.append(text.substring(currentIndex));
+        } else if (sb.length() != text.length()) {
+            sb.append(text);
+        }
+        return sb.toString();
     }
 }

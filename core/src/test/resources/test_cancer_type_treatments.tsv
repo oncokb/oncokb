@@ -78,8 +78,8 @@ BTK	C481Y	Chronic Lymphocytic Leukemia/Small Lymphocytic Lymphoma	R2: Ibrutinib;
 BTK	T316A	Chronic Lymphocytic Leukemia/Small Lymphocytic Lymphoma	R2: Ibrutinib;
 
 # Test Heme
-FLT3	Internal Tandem Duplication	AML	1: Gilteritinib; 1: Midostaurin+High Dose Chemotherapy; 3A: Sorafenib; 3A: Crenolanib; 3A: Quizartinib;
-FLT3	Internal Tandem Duplication	APLPMLRARA	1: Gilteritinib; 1: Midostaurin+High Dose Chemotherapy; 3A: Sorafenib; 3A: Crenolanib; 3A: Quizartinib;
+FLT3	Internal Tandem Duplication	AML	1: Gilteritinib; 1: Quizartinib; 1: Midostaurin+High Dose Chemotherapy; 3A: Sorafenib; 3A: Crenolanib;
+FLT3	Internal Tandem Duplication	APLPMLRARA	1: Gilteritinib; 1: Quizartinib; 1: Midostaurin+High Dose Chemotherapy; 3A: Sorafenib; 3A: Crenolanib;
 FLT3	Internal Tandem Duplication	Colorectal Cancer
 SF3B1	K700E	AML	4: H3B-8800;
 SF3B1	K700E	AMLNOS	4: H3B-8800;

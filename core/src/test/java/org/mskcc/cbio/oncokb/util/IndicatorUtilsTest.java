@@ -33,17 +33,17 @@ public class IndicatorUtilsTest {
         assertEquals("The oncogenicity is not unknown, but it should.", Oncogenicity.UNKNOWN.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertTrue("There is treatment(s) in the response, but it should no have any.", indicatorQueryResp.getTreatments().size() == 0);
 
-        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "CD74-CD74", null, "structural_variant", StructuralVariantType.DELETION, "Pancreatic Adenocarcinoma", null, null, null, null);
+        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "CCT8L2-CCT8L2", null, "structural_variant", StructuralVariantType.DELETION, "Pancreatic Adenocarcinoma", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
         assertEquals("Gene should not exist, but it does.", false, indicatorQueryResp.getGeneExist());
         assertEquals("The oncogenicity is not unknown, but it should.", Oncogenicity.UNKNOWN.getOncogenic(), indicatorQueryResp.getOncogenic());
-        assertTrue("There is treatment(s) in the response, but it should no have any.", indicatorQueryResp.getTreatments().size() == 0);
+        assertTrue("There is treatment(s) in the response, but it should not have any.", indicatorQueryResp.getTreatments().size() == 0);
 
-        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "CD74-CD74", null, "structural_variant", StructuralVariantType.DELETION, "Pancreatic Adenocarcinoma", "fusion", null, null, null);
+        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "CCT8L2-CCT8L2", null, "structural_variant", StructuralVariantType.DELETION, "Pancreatic Adenocarcinoma", "fusion", null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
         assertEquals("Gene should not exist, but it does.", false, indicatorQueryResp.getGeneExist());
         assertEquals("The oncogenicity is not unknown, but it should.", Oncogenicity.UNKNOWN.getOncogenic(), indicatorQueryResp.getOncogenic());
-        assertTrue("There is treatment(s) in the response, but it should no have any.", indicatorQueryResp.getTreatments().size() == 0);
+        assertTrue("There is treatment(s) in the response, but it should not have any.", indicatorQueryResp.getTreatments().size() == 0);
 
         // The last update should be a date even if we don't have any annotation for the gene/varaint
         SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
@@ -279,32 +279,32 @@ public class IndicatorUtilsTest {
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "EGFR", "CTD", null, null, "NSCLC", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
         assertEquals("The Oncogenicity is not oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
-        assertEquals("The variant summary is not expected.", "The EGFR C-terminal domain (CTD) alteration is known to be oncogenic.", indicatorQueryResp.getVariantSummary());
+        assertEquals("The variant summary is not expected.", "The EGFR C-terminal domain (CTD) is known to be oncogenic.", indicatorQueryResp.getVariantSummary());
 
         // Check EGFR KDD
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "EGFR", "KDD", null, null, "NSCLC", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
         assertEquals("The Oncogenicity is not oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
-        assertEquals("The variant summary is not expected.", "The EGFR kinase domain duplication (KDD) alteration is known to be oncogenic.", indicatorQueryResp.getVariantSummary());
+        assertEquals("The variant summary is not expected.", "The EGFR kinase domain duplication (KDD) is known to be oncogenic.", indicatorQueryResp.getVariantSummary());
         assertEquals("The highest sensitive level should be 1", LevelOfEvidence.LEVEL_3A, indicatorQueryResp.getHighestSensitiveLevel());
 
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "EGFR", "KDD", "structural_variant", StructuralVariantType.DELETION, "NSCLC", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
         assertEquals("The Oncogenicity is not oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
-        assertEquals("The variant summary is not expected.", "The EGFR kinase domain duplication (KDD) alteration is known to be oncogenic.", indicatorQueryResp.getVariantSummary());
+        assertEquals("The variant summary is not expected.", "The EGFR kinase domain duplication (KDD) is known to be oncogenic.", indicatorQueryResp.getVariantSummary());
         assertEquals("The highest sensitive level should be 1", LevelOfEvidence.LEVEL_3A, indicatorQueryResp.getHighestSensitiveLevel());
 
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "EGFR", "kinase domain duplication", null, null, "NSCLC", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null);
         assertEquals("The Oncogenicity is not oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
-        assertEquals("The variant summary is not expected.", "The EGFR kinase domain duplication alteration is known to be oncogenic.", indicatorQueryResp.getVariantSummary());
+        assertEquals("The variant summary is not expected.", "The EGFR kinase domain duplication is known to be oncogenic.", indicatorQueryResp.getVariantSummary());
         assertEquals("The highest sensitive level should be 1", LevelOfEvidence.LEVEL_3A, indicatorQueryResp.getHighestSensitiveLevel());
 
         // Check FLT3 ITD
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "FLT3", "ITD", null, null, "AML", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null);
         assertEquals("The Oncogenicity is not oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
-        assertEquals("The variant summary is not expected.", "The FLT3 internal tandem duplication (ITD) alteration is known to be oncogenic.", indicatorQueryResp.getVariantSummary());
+        assertEquals("The variant summary is not expected.", "The FLT3 internal tandem duplication (ITD) is known to be oncogenic.", indicatorQueryResp.getVariantSummary());
         assertEquals("The highest sensitive level should be 1", LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
         assertTrue("There should be level 1 treatment in the list", treatmentsContainLevel(indicatorQueryResp.getTreatments(), LevelOfEvidence.LEVEL_1));
         assertTrue("There should be level 3A treatment in the list", treatmentsContainLevel(indicatorQueryResp.getTreatments(), LevelOfEvidence.LEVEL_3A));
