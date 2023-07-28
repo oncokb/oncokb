@@ -238,82 +238,131 @@ public class PrivateSearchApiController implements PrivateSearchApi {
         return new ResponseEntity<>(getLimit(new LinkedHashSet<>(oncokbTranscriptService.findDrugs(query)), limit), HttpStatus.OK);
     }
 
-     private List<TypeaheadSearchResp> findMatchingCancerTypes(String query, Boolean exactMatch) {
-         // got all evidences and level
-         Set<Evidence> evidences = EvidenceUtils.getEvidenceByEvidenceTypesAndLevels(EvidenceTypeUtils.getTreatmentEvidenceTypes(), LevelUtils.getPublicLevels());
-         Map<String, CancerTypeMatch> result = new HashMap<>();
+    private List<TypeaheadSearchResp> findMatchingCancerTypes(String query, Boolean exactMatch) {
+        // got all evidences and level
+        Set<Evidence> evidences = EvidenceUtils.getEvidenceByEvidenceTypesAndLevels(EvidenceTypeUtils.getTreatmentEvidenceTypes(), LevelUtils.getPublicLevels());
+        Map<String, CancerTypeMatch> result = new HashMap<>();
 
-         query = query.toLowerCase();
+        query = query.toLowerCase();
 
-         ArrayList<TumorType> matchedTumorTypes = new ArrayList<>();
+        ArrayList<TumorType> matchedTumorTypes = new ArrayList<>();
 
-         if (exactMatch){
-             matchedTumorTypes.add(ApplicationContextSingleton.getTumorTypeBo().getByName(query));
-         } else {
-             for (Map.Entry<String, TumorType> currSubtype : CacheUtils.getLowercaseSubtypeTumorTypeMap().entrySet()) {
-                 if(currSubtype.getKey().startsWith(query) || currSubtype.getKey().contains(query)){
-                     matchedTumorTypes.add(currSubtype.getValue());
-                 }
-             }
+        if (exactMatch) {
+            matchedTumorTypes.add(ApplicationContextSingleton.getTumorTypeBo().getByName(query));
+        } else {
+            for (Map.Entry<String, TumorType> currSubtype : CacheUtils.getLowercaseSubtypeTumorTypeMap().entrySet()) {
+                if (currSubtype.getKey().startsWith(query) || currSubtype.getKey().contains(query)) {
+                    matchedTumorTypes.add(currSubtype.getValue());
+                }
+            }
 
-             for (Map.Entry<String, TumorType> currMainType : CacheUtils.getMainTypeTumorTypeMap().entrySet()) {
-                 if(currMainType.getKey().toLowerCase().startsWith(query) || currMainType.getKey().toLowerCase().contains(query)){
-                     matchedTumorTypes.add(currMainType.getValue());
-                 }
-             }
-         }
+            for (Map.Entry<String, TumorType> currMainType : CacheUtils.getMainTypeTumorTypeMap().entrySet()) {
+                if (currMainType.getKey().toLowerCase().startsWith(query) || currMainType.getKey().toLowerCase().contains(query)) {
+                    matchedTumorTypes.add(currMainType.getValue());
+                }
+            }
+        }
 
         // cancer type not found, return an empty list
-         if (matchedTumorTypes.isEmpty()){
-             return Collections.emptyList();
-         }
+        if (matchedTumorTypes.isEmpty()) {
+            return Collections.emptyList();
+        }
 
-         // definitely a matching cancer type, now searching evidence for relevant ones
-         for (TumorType currMatchedCancer : matchedTumorTypes){
-             String matchKey = TumorTypeUtils.getTumorTypeName(currMatchedCancer).toLowerCase();
+        // definitely a matching cancer type, now searching evidence for relevant ones
+        for (TumorType currMatchedCancer : matchedTumorTypes) {
+            String matchKey = TumorTypeUtils.getTumorTypeName(currMatchedCancer).toLowerCase();
 
-             for (Evidence evidence : evidences) {
-                 // exact match found
-                 if (TumorTypeUtils.findEvidenceRelevantCancerTypes(evidence).contains(currMatchedCancer)){
-                     if (matchKey.startsWith(query)){
-                         updateCancerMap(result, matchKey, evidence.getAlterations(), currMatchedCancer, evidence.getLevelOfEvidence(), 4.0);
-                     } else {
-                         updateCancerMap(result, matchKey, evidence.getAlterations(), currMatchedCancer, evidence.getLevelOfEvidence(), 3.5);
-                     }
-                 }
-             }
-             if(matchKey.startsWith(query)){
-                 updateCancerMap(result, matchKey, null, currMatchedCancer, null, 2.0);
-             } else {
-                 updateCancerMap(result, matchKey, null, currMatchedCancer, null, 1.0);
-             }
+            for (Evidence evidence : evidences) {
+                // exact match found
+                if (TumorTypeUtils.findEvidenceRelevantCancerTypes(evidence).contains(currMatchedCancer)) {
+                    updateCancerMap(
+                        result, matchKey, evidence.getAlterations(),
+                        currMatchedCancer, evidence.getLevelOfEvidence(),
+                        matchKey.startsWith(query) ? 4.0 : 3.5
+                    );
+                }
+            }
+            updateCancerMap(
+                result, matchKey, null, currMatchedCancer, null,
+                matchKey.startsWith(query) ? 2.0 : 1.0
+            );
+        }
 
-         }
+        TreeSet<CancerTypeMatch> cancerMatches = new TreeSet<>(new CancerTypeMatchComp());
+        for (Map.Entry<String, CancerTypeMatch> entry : result.entrySet()) {
+            cancerMatches.add(entry.getValue());
+        }
 
-         TreeSet<CancerTypeMatch> cancerMatches = new TreeSet<>(new CancerTypeMatchComp());
-         for(Map.Entry<String, CancerTypeMatch> entry : result.entrySet()) {
-             cancerMatches.add(entry.getValue());
-         }
+        // conversion to desired list output
+        return cancerMatches.stream().map(cancerMatch -> newTypeaheadCancer(cancerMatch)).collect(Collectors.toList());
+    }
 
-         // conversion to desired list output
-         return cancerMatches.stream().map(cancerMatch -> newTypeaheadCancer(cancerMatch)).collect(Collectors.toList());
-     }
+    // we do not show parenthesis if it's in alteration name.
+    private static String getGeneStrInAnnotation(Gene gene, String altAnnotation) {
+        altAnnotation = altAnnotation.replaceAll("\\(", "");
+        altAnnotation = altAnnotation.replaceAll("\\)", "");
+        return gene.getHugoSymbol() + " (" + altAnnotation + ")";
+    }
+
+    private static String getCancerTypeSearchAnnotation(Set<Alteration> alterations, String cancerType) {
+        // group alterations by gene
+        Map<Gene, Set<Alteration>> geneGroupedAlts = new HashMap<>();
+        for (Alteration alteration : alterations) {
+            if (!geneGroupedAlts.containsKey(alteration.getGene())) {
+                geneGroupedAlts.put(alteration.getGene(), new HashSet<>());
+            }
+            geneGroupedAlts.get(alteration.getGene()).add(alteration);
+        }
+
+        // calculate occurrence based on number of portal alterations
+        List<GeneCount> geneCounts = new ArrayList<>();
+        Map<Gene, String> alterationAnnotation = new HashMap<>();
+        for (Map.Entry<Gene, Set<Alteration>> entry : geneGroupedAlts.entrySet()) {
+            Gene gene = entry.getKey();
+            int totalAltCount = entry.getValue()
+                .stream()
+                .map(alteration -> (int) alteration.getPortalAlterations().stream().filter(pa -> pa.getCancerType().equalsIgnoreCase(cancerType)).count())
+                .reduce(0, Integer::sum);
+            GeneCount geneCount = new GeneCount();
+            geneCount.setGene(gene);
+            geneCount.setCount(totalAltCount);
+            geneCounts.add(geneCount);
+
+            // calculate occurrence based on number of portal alterations
+            List<AlterationCount> alterationCounts = entry.getValue().stream().map(alteration -> {
+                AlterationCount ac = new AlterationCount();
+                ac.setAlteration(alteration);
+                ac.setCount((int) alteration.getPortalAlterations().stream().filter(pa -> pa.getCancerType().equalsIgnoreCase(cancerType)).count());
+                return ac;
+            }).collect(Collectors.toList());
+            alterationCounts = alterationCounts.stream().sorted(Comparator.comparing(AlterationCount::getCount).reversed()).collect(Collectors.toList());
+
+            alterationAnnotation.put(gene, alterationCounts.size() > 3 ? StringUtils.join(alterationCounts.subList(0, 1).stream().map(ac -> ac.getAlteration().getName()).collect(Collectors.toList()), ", ") + " and " + (alterationCounts.size() - 1) + " other alterations" : StringUtils.join(alterationCounts.stream().map(ac -> ac.getAlteration().getName()).collect(Collectors.toList()), ", "));
+        }
+
+        geneCounts = geneCounts.stream().sorted(Comparator.comparing(GeneCount::getCount).reversed()).collect(Collectors.toList());
+        return geneCounts.size() > 3 ? StringUtils.join(geneCounts.subList(0, 3).stream().map(geneCount -> getGeneStrInAnnotation(geneCount.getGene(), alterationAnnotation.get(geneCount.getGene()))).collect(Collectors.toList()), ", ") + " and more" : StringUtils.join(geneCounts.stream().map(geneCount -> getGeneStrInAnnotation(geneCount.getGene(), alterationAnnotation.get(geneCount.getGene()))).collect(Collectors.toList()), ", ");
+    }
 
     private static TypeaheadSearchResp newTypeaheadCancer(CancerTypeMatch cancerMatch) {
         TypeaheadSearchResp typeaheadSearchResp = new TypeaheadSearchResp();
-        typeaheadSearchResp.setAlterationsByLevel(cancerMatch.getAlterationsByLevel());
+        typeaheadSearchResp.setAnnotationByLevel(
+            cancerMatch.getAlterationsByLevel()
+                .entrySet().stream().collect(
+                    Collectors.toMap(Map.Entry::getKey, entry -> getCancerTypeSearchAnnotation(entry.getValue(), cancerMatch.getCancerType().getMainType()))
+                ));
 
-        Set<TumorType> curr_tumor = new HashSet<>(Collections.singleton(cancerMatch.getCancerType()));
-        typeaheadSearchResp.setTumorTypes(curr_tumor);
+        Set<TumorType> currCancerType = new HashSet<>(Collections.singleton(cancerMatch.getCancerType()));
+        typeaheadSearchResp.setTumorTypes(currCancerType);
 
         List<LevelOfEvidence> txLevels = new ArrayList<>();
         txLevels.addAll(THERAPEUTIC_RESISTANCE_LEVELS);
         txLevels.addAll(THERAPEUTIC_SENSITIVE_LEVELS);
 
-        if (cancerMatch.getAlterationsByLevel() != null && cancerMatch.findHighestLevel(txLevels) != null){
+        if (cancerMatch.getAlterationsByLevel() != null && cancerMatch.findHighestLevel(txLevels) != null) {
             LevelOfEvidence highestLevel = cancerMatch.findHighestLevel(txLevels);
 
-            if (LevelUtils.isSensitiveLevel(highestLevel)){
+            if (LevelUtils.isSensitiveLevel(highestLevel)) {
                 typeaheadSearchResp.setHighestSensitiveLevel(highestLevel.getLevel());
             } else {
                 typeaheadSearchResp.setHighestResistanceLevel(highestLevel.getLevel());
@@ -329,9 +378,9 @@ public class PrivateSearchApiController implements PrivateSearchApi {
         return typeaheadSearchResp;
     }
 
-    private static void updateCancerMap(Map<String, CancerTypeMatch> map, String key, Set<Alteration> alterations, TumorType cancer, LevelOfEvidence level, Double weight ) {
+    private static void updateCancerMap(Map<String, CancerTypeMatch> map, String key, Set<Alteration> alterations, TumorType cancer, LevelOfEvidence level, Double weight) {
         // gene, alterations, level of evidence can be null
-        if(!map.containsKey(key)) {
+        if (!map.containsKey(key)) {
             CancerTypeMatch cancerMatch = new CancerTypeMatch();
             cancerMatch.setCancerType(cancer);
             cancerMatch.setWeight(weight);
@@ -343,7 +392,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
 
             map.put(key, cancerMatch);
         }
-        if (alterations != null){
+        if (alterations != null) {
             Set<Alteration> alterationsForLevel = map.get(key).getAlterationsByLevel().get(level);
             if (alterationsForLevel == null) {
                 alterationsForLevel = new HashSet<>();
@@ -713,7 +762,7 @@ class LevelsOfEvidenceMatchComp implements Comparator<LevelsOfEvidenceMatch> {
         int result = o2.getWeight().compareTo(o1.getWeight());
         if (result == 0) {
             result = LevelUtils.compareLevel(o1.getLevelOfEvidence(), o2.getLevelOfEvidence());
-            if(result == 0) {
+            if (result == 0) {
                 result = o1.getGene().getHugoSymbol().compareTo(o2.getGene().getHugoSymbol());
             }
         }
@@ -727,7 +776,7 @@ class CancerTypeMatchComp implements Comparator<CancerTypeMatch> {
         int result = o2.getWeight().compareTo(o1.getWeight());
         double weightForNoEvidenceFound = 2.0;
 
-        if(result == 0 && o1.getWeight() > weightForNoEvidenceFound && o2.getWeight() > weightForNoEvidenceFound) {
+        if (result == 0 && o1.getWeight() > weightForNoEvidenceFound && o2.getWeight() > weightForNoEvidenceFound) {
             List<LevelOfEvidence> txLevels = new ArrayList<>();
             txLevels.addAll(THERAPEUTIC_RESISTANCE_LEVELS);
             txLevels.addAll(THERAPEUTIC_SENSITIVE_LEVELS);
@@ -738,15 +787,17 @@ class CancerTypeMatchComp implements Comparator<CancerTypeMatch> {
             result = LevelUtils.compareLevel(o1HighestLevelOfEvidence, o2HighestLevelOfEvidence, txLevels);
         }
 
-        if(result == 0) {
+        if (result == 0) {
             result = TumorTypeUtils.getTumorTypeName(o1.getCancerType()).compareTo(TumorTypeUtils.getTumorTypeName(o2.getCancerType()));
         }
 
         return result;
     }
 }
+
 class LevelOfEvidenceComp implements Comparator<LevelOfEvidence> {
     private final List<LevelOfEvidence> customLevels;
+
     public LevelOfEvidenceComp(List<LevelOfEvidence> levels) {
         this.customLevels = levels;
     }
@@ -757,3 +808,44 @@ class LevelOfEvidenceComp implements Comparator<LevelOfEvidence> {
     }
 }
 
+class GeneCount {
+    Gene gene;
+    int count;
+
+    public Gene getGene() {
+        return gene;
+    }
+
+    public void setGene(Gene gene) {
+        this.gene = gene;
+    }
+
+    public int getCount() {
+        return count;
+    }
+
+    public void setCount(int count) {
+        this.count = count;
+    }
+}
+
+class AlterationCount {
+    Alteration alteration;
+    int count;
+
+    public Alteration getAlteration() {
+        return alteration;
+    }
+
+    public void setAlteration(Alteration alteration) {
+        this.alteration = alteration;
+    }
+
+    public int getCount() {
+        return count;
+    }
+
+    public void setCount(int count) {
+        this.count = count;
+    }
+}

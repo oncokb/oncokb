@@ -20,7 +20,7 @@ public class TypeaheadSearchResp {
     private String annotation;
     private TypeaheadQueryType queryType;
     private String link;
-    private Map<LevelOfEvidence, Set<Alteration>> alterationsByLevel;
+    private Map<LevelOfEvidence, String> annotationByLevel;
 
     public Gene getGene() {
         return gene;
@@ -118,12 +118,12 @@ public class TypeaheadSearchResp {
         isVUS = VUS;
     }
 
-    public Map<LevelOfEvidence, Set<Alteration>> getAlterationsByLevel() {
-        return alterationsByLevel;
+    public Map<LevelOfEvidence, String> getAnnotationByLevel() {
+        return annotationByLevel;
     }
 
-    public void setAlterationsByLevel(Map<LevelOfEvidence, Set<Alteration>> alterationsByLevel) {
-        this.alterationsByLevel = alterationsByLevel;
+    public void setAnnotationByLevel(Map<LevelOfEvidence, String> annotationByLevel) {
+        this.annotationByLevel = annotationByLevel;
     }
 
     @Override
