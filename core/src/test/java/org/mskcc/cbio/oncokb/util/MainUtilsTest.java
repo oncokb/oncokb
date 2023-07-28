@@ -4,6 +4,7 @@ import junit.framework.TestCase;
 import org.mskcc.cbio.oncokb.model.MutationEffect;
 
 import static org.mskcc.cbio.oncokb.util.MainUtils.replaceLast;
+import static org.mskcc.cbio.oncokb.util.MainUtils.toLowerCaseExceptAllCaps;
 
 /**
  * Created by Hongxin Zhang on 3/1/18.
@@ -63,5 +64,24 @@ public class MainUtilsTest extends TestCase {
         assertEquals("A,B", replaceLast("AandB", "and", ","));
         assertEquals("A,B,", replaceLast("A,Band", "and", ","));
         assertEquals("A,B,D", replaceLast("A,BandD", "and", ","));
+    }
+
+    public void testToLowerCaseExceptAllCaps() {
+        assertEquals("test", toLowerCaseExceptAllCaps("test"));
+        assertEquals("test", toLowerCaseExceptAllCaps("Test"));
+        assertEquals("test", toLowerCaseExceptAllCaps("TesT"));
+        assertEquals("TEST", toLowerCaseExceptAllCaps("TEST"));
+        assertEquals("TEST-A", toLowerCaseExceptAllCaps("TEST-A"));
+        assertEquals("test-A", toLowerCaseExceptAllCaps("Test-A"));
+        assertEquals("test_a", toLowerCaseExceptAllCaps("Test_A"));
+        assertEquals("test A", toLowerCaseExceptAllCaps("TesT A"));
+        assertEquals("TEST A", toLowerCaseExceptAllCaps("TEST A"));
+        assertEquals("", toLowerCaseExceptAllCaps(""));
+        assertEquals("_", toLowerCaseExceptAllCaps("_"));
+        assertEquals("1", toLowerCaseExceptAllCaps("1"));
+        assertEquals("-", toLowerCaseExceptAllCaps("-"));
+        assertEquals("t", toLowerCaseExceptAllCaps("t"));
+        assertEquals("T", toLowerCaseExceptAllCaps("T"));
+        assertEquals("?", toLowerCaseExceptAllCaps("?"));
     }
 }

@@ -9,9 +9,12 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static org.mskcc.cbio.oncokb.Constants.IN_FRAME_DELETION;
 import static org.mskcc.cbio.oncokb.Constants.IN_FRAME_INSERTION;
+import static org.mskcc.cbio.oncokb.util.MainUtils.altNameShouldConvertToLowerCase;
+import static org.mskcc.cbio.oncokb.util.MainUtils.toLowerCaseExceptAllCaps;
 
 /**
  * Created by Hongxin on 8/10/15.
@@ -20,6 +23,7 @@ public class SummaryUtils {
     public static final String TERT_PROMOTER_MUTATION_SUMMARY = "Select hotspot mutations in the TERT promoter have been shown to be oncogenic.";
     public static final String TERT_PROMOTER_NO_THERAPY_TUMOR_TYPE_SUMMARY = "There are no FDA-approved or NCCN-compendium listed treatments specifically for patients with TERT promoter mutations in [[tumor type]].";
     public static final String ONCOGENIC_MUTATIONS_DEFAULT_SUMMARY = "\"Oncogenic Mutations\" includes all variants annotated as oncogenic and likely oncogenic.";
+    public static final List<String> specialAlterations = Arrays.asList("mutation", "alteration", "insertion", "deletion", "duplication", "fusion", "deletion", "amplification");
 
     public static Map<String, Object> tumorTypeSummary(EvidenceType evidenceType, Gene gene, Query query, Alteration exactMatchedAlt, List<Alteration> alterations, TumorType matchedTumorType, List<TumorType> relevantTumorTypes) {
         Map<String, Object> tumorTypeSummary = newTumorTypeSummary();
@@ -278,7 +282,7 @@ public class SummaryUtils {
 
         isHotspot = HotspotUtils.isHotspot(alteration);
 
-        if(AlterationUtils.isPositionedAlteration(alteration)) {
+        if (AlterationUtils.isPositionedAlteration(alteration)) {
             return positionalVariantSummary(alteration, query, isHotspot);
         }
 
@@ -378,8 +382,7 @@ public class SummaryUtils {
         String altName = getGeneMutationNameInVariantSummary(alteration.getGene(), query.getReferenceGenome(), query.getHugoSymbol(), queryAlteration);
         Boolean appendThe = appendThe(queryAlteration);
         Boolean isPlural = false;
-
-        if (queryAlteration.toLowerCase().contains("fusions") || queryAlteration.toLowerCase().endsWith("mutations")) {
+        if (specialAlterations.stream().anyMatch(sa -> altName.toLowerCase().contains(sa.toLowerCase() + "s"))) {
             isPlural = true;
         }
         if (oncogenicity != null) {
@@ -537,6 +540,7 @@ public class SummaryUtils {
     public static String hotspotSummary(Alteration alteration, Query query, Boolean usePronoun) {
         return hotspotSummary(alteration, query, usePronoun, false);
     }
+
     public static String hotspotSummary(Alteration alteration, Query query, Boolean usePronoun, boolean isPositionalVariant) {
         StringBuilder sb = new StringBuilder();
         if (usePronoun == null) {
@@ -735,32 +739,32 @@ public class SummaryUtils {
             || StringUtils.containsIgnoreCase(queryAlteration, "ins")
             || StringUtils.containsIgnoreCase(queryAlteration, "splice")
             || MainUtils.isEGFRTruncatingVariants(queryAlteration)
-            ) {
+        ) {
             if (NamingUtils.hasAbbreviation(queryAlteration)) {
-                sb.append(queryHugoSymbol + " " + NamingUtils.getFullName(queryAlteration) + " (" + queryAlteration + ")");
+                sb.append(queryHugoSymbol).append(" ").append(NamingUtils.getFullName(queryAlteration)).append(" (").append(queryAlteration).append(")");
             } else {
-                sb.append(queryHugoSymbol + " " + queryAlteration);
-            }
-            if (!queryAlteration.endsWith("alteration")) {
-                sb.append(" alteration");
+                String mappedAltName = altNameShouldConvertToLowerCase(alteration) ? toLowerCaseExceptAllCaps(alteration.getName()) : alteration.getName();
+                sb.append(queryHugoSymbol).append(" ").append(mappedAltName);
+                String lman = ((mappedAltName.endsWith("s") && mappedAltName.length() > 2) ? mappedAltName.substring(0, mappedAltName.length() - 1) : mappedAltName).toLowerCase();
+                List<String> matchedSpecialAlterations = specialAlterations.stream().filter(lman::contains).collect(Collectors.toList());
+                if (matchedSpecialAlterations.size() == 0) {
+                    sb.append(" alteration");
+                }
             }
         } else {
-            if (queryAlteration.contains(gene.getHugoSymbol()) || queryAlteration.contains(queryHugoSymbol)) {
-                sb.append(queryAlteration);
-            } else if (NamingUtils.hasAbbreviation(queryAlteration)) {
-                sb.append(queryHugoSymbol + " " + NamingUtils.getFullName(queryAlteration) + " (" + queryAlteration + ") alteration");
+            if (NamingUtils.hasAbbreviation(queryAlteration)) {
+                sb.append(queryHugoSymbol).append(" ").append(NamingUtils.getFullName(queryAlteration)).append(" (").append(queryAlteration).append(")");
             } else {
-                sb.append(queryHugoSymbol + " " + queryAlteration);
-            }
-            String finalStr = sb.toString();
-            if (!finalStr.endsWith("mutation")
-                && !finalStr.endsWith("mutations")
-                && !finalStr.endsWith("alteration")
-                && !finalStr.endsWith("fusion")
-                && !finalStr.endsWith("deletion")
-                && !finalStr.endsWith("amplification")
-                ) {
-                sb.append(" mutation");
+                String mappedAltName = altNameShouldConvertToLowerCase(alteration) ? toLowerCaseExceptAllCaps(alteration.getName()) : alteration.getName();
+                if (mappedAltName.contains(gene.getHugoSymbol()) || mappedAltName.contains(queryHugoSymbol)) {
+                    sb.append(mappedAltName);
+                } else {
+                    sb.append(queryHugoSymbol).append(" ").append(mappedAltName);
+                }
+                String finalStr = sb.toString();
+                if (specialAlterations.stream().noneMatch(sa -> finalStr.toLowerCase().contains(sa))) {
+                    sb.append(" mutation");
+                }
             }
         }
         return sb.toString();
@@ -807,7 +811,7 @@ public class SummaryUtils {
                 || StringUtils.containsIgnoreCase(queryAlteration, "splice")
                 || NamingUtils.hasAbbreviation(queryAlteration)
                 || MainUtils.isEGFRTruncatingVariants(queryAlteration)
-                ) {
+            ) {
                 sb.append(queryAlteration + " altered");
             } else if (!queryAlteration.endsWith("mutation")) {
                 sb.append(queryAlteration + " mutant");
