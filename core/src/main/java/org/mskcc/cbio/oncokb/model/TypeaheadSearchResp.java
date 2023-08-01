@@ -1,5 +1,6 @@
 package org.mskcc.cbio.oncokb.model;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -19,6 +20,7 @@ public class TypeaheadSearchResp {
     private String annotation;
     private TypeaheadQueryType queryType;
     private String link;
+    private Map<LevelOfEvidence, String> annotationByLevel;
 
     public Gene getGene() {
         return gene;
@@ -114,6 +116,14 @@ public class TypeaheadSearchResp {
 
     public void setVUS(Boolean VUS) {
         isVUS = VUS;
+    }
+
+    public Map<LevelOfEvidence, String> getAnnotationByLevel() {
+        return annotationByLevel;
+    }
+
+    public void setAnnotationByLevel(Map<LevelOfEvidence, String> annotationByLevel) {
+        this.annotationByLevel = annotationByLevel;
     }
 
     @Override
