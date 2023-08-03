@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.mskcc.cbio.oncokb.Constants.*;
+import static org.mskcc.cbio.oncokb.model.StructuralAlteration.TRUNCATING_MUTATIONS;
 import static org.mskcc.cbio.oncokb.util.MainUtils.isOncogenic;
 
 /**
@@ -807,6 +808,10 @@ public final class AlterationUtils {
             }
         }
         return isLikelyInferredAlt;
+    }
+
+    public static Boolean isTruncatingMutations(String alteration) {
+        return TRUNCATING_MUTATIONS.getVariant().toLowerCase().equals(alteration.toLowerCase());
     }
 
     public static Set<Alteration> getEvidencesAlterations(Set<Evidence> evidences) {

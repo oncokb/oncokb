@@ -121,11 +121,15 @@ public class FusionUtils {
     }
 
     public static Boolean isFusion(String variant) {
-        Boolean flag = false;
-        if (variant != null && (Pattern.matches(FUSION_REGEX, variant) || Pattern.matches(FUSION_ALT_REGEX, variant))) {
-            flag = true;
+        if (!StringUtils.isNullOrEmpty(variant)) {
+            if (variant.toLowerCase().equals("fusion") || variant.toLowerCase().equals("fusions")) {
+                return true;
+            }
+            if ((Pattern.matches(FUSION_REGEX, variant) || Pattern.matches(FUSION_ALT_REGEX, variant))) {
+                return true;
+            }
         }
-        return flag;
+        return false;
     }
 
     public static String getRevertFusionName(String fusionName) {

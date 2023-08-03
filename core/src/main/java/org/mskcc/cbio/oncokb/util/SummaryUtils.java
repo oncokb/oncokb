@@ -4,7 +4,9 @@ import org.apache.commons.collections.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.TumorType;
+import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.Tumor;
 
+import java.sql.Ref;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -13,8 +15,10 @@ import java.util.stream.Collectors;
 
 import static org.mskcc.cbio.oncokb.Constants.IN_FRAME_DELETION;
 import static org.mskcc.cbio.oncokb.Constants.IN_FRAME_INSERTION;
+import static org.mskcc.cbio.oncokb.model.StructuralAlteration.TRUNCATING_MUTATIONS;
 import static org.mskcc.cbio.oncokb.util.MainUtils.altNameShouldConvertToLowerCase;
 import static org.mskcc.cbio.oncokb.util.MainUtils.toLowerCaseExceptAllCaps;
+import static org.mskcc.cbio.oncokb.util.MainUtils.manuallyAssignedTruncatingMutation;
 
 /**
  * Created by Hongxin on 8/10/15.
@@ -198,9 +202,21 @@ public class SummaryUtils {
         return description.replace("[[gene]]", hugoSymbol);
     }
 
-    public static String unknownOncogenicSummary(Gene gene, ReferenceGenome referenceGenome, Query query) {
-        String str = gene == null ? "variant" : getGeneMutationNameInVariantSummary(gene, referenceGenome, query.getHugoSymbol(), query.getAlteration());
-        return "The biologic significance of the " + str + " is unknown.";
+    public static String enrichDescription(String description, Gene gene, ReferenceGenome referenceGenome, Query query, TumorType matchedTumorType) {
+        if (StringUtils.isEmpty(description)) {
+            return "";
+        }
+        return replaceSpecialCharacterInTumorTypeSummary(description, gene, referenceGenome, query, matchedTumorType);
+    }
+
+    public static String unknownOncogenicSummary(Gene gene, ReferenceGenome referenceGenome, Query query, Alteration alteration) {
+        StringBuilder sb = new StringBuilder();
+        if (addPrefixArticleToMutation(AlterationUtils.isPositionedAlteration(alteration), alteration.getAlteration())) {
+            sb.append("The ");
+        }
+        sb.append(gene == null ? "variant" : getGeneMutationNameInVariantSummary(gene, referenceGenome, query.getHugoSymbol(), query.getAlteration()));
+        sb.append(" has not specifically been reviewed by the OncoKB team, and therefore its biological significance is unknown.");
+        return sb.toString();
     }
 
     public static String synonymousSummary() {
@@ -219,7 +235,8 @@ public class SummaryUtils {
 
         Oncogenicity oncogenic = null;
 
-        Boolean isHotspot = false;
+        boolean isHotspot = false;
+        boolean isVus = false;
         String queryAlteration = query.getAlteration();
         Alteration alteration = null;
 
@@ -281,13 +298,14 @@ public class SummaryUtils {
         }
 
         isHotspot = HotspotUtils.isHotspot(alteration);
+        isVus = MainUtils.isVUS(alteration);
 
         if (AlterationUtils.isPositionedAlteration(alteration)) {
             return positionalVariantSummary(alteration, query, isHotspot);
         }
 
         if (isHotspot) {
-            if (alteration != null && MainUtils.isVUS(alteration)) {
+            if (alteration != null && isVus) {
                 return vusAndHotspotSummary(alteration, query, isHotspot);
             } else {
                 return hotspotSummary(alteration, query, false);
@@ -301,7 +319,7 @@ public class SummaryUtils {
 
             // VUS alternative alleles are not accounted into oncogenic summary calculation
             if (alternativeAllelesWithoutVUS.size() > 0) {
-                sb.append(alleleSummary(query.getReferenceGenome(), alteration, query.getHugoSymbol()));
+                sb.append(alleleSummary(query.getReferenceGenome(), alteration, query.getHugoSymbol(), isVus));
                 if (StringUtils.isNotEmpty(sb.toString().trim())) {
                     return sb.toString();
                 }
@@ -309,29 +327,25 @@ public class SummaryUtils {
 
             // Get oncogenic info from rest of relevant alterations except AA
             alterations.removeAll(alternativeAlleles);
-            Set<Oncogenicity> oncogenicities = new HashSet<>();
+            List<Evidence> oncogenicityEvidences = new ArrayList<>();
             for (Alteration a : alterations) {
-                List<Evidence> oncogenicEvidences = EvidenceUtils.getEvidence(Collections.singletonList(a), Collections.singleton(EvidenceType.ONCOGENIC), null);
-                if (oncogenicEvidences != null && oncogenicEvidences.size() > 0) {
-                    Evidence evidence = oncogenicEvidences.iterator().next();
-                    if (evidence != null) {
-                        oncogenicities.add(Oncogenicity.getByEvidence(evidence));
-                    }
+                List<Evidence> altOncogenicEvidences = EvidenceUtils.getEvidence(Collections.singletonList(a), Collections.singleton(EvidenceType.ONCOGENIC), null);
+                if (altOncogenicEvidences != null && altOncogenicEvidences.size() > 0) {
+                    oncogenicityEvidences.addAll(altOncogenicEvidences);
                 }
             }
 
-            // Rank oncogenicities from relevant variants
-            Oncogenicity tmpOncogenicity = MainUtils.findHighestOncogenicity(oncogenicities);
-            if (tmpOncogenicity != null) {
-                oncogenic = tmpOncogenicity;
-            }
-        }
-
-        if (query.getAlteration().toLowerCase().contains("truncating mutation")) {
-            if (gene.getOncogene()) {
-                return query.getHugoSymbol() + " is considered an oncogene and truncating mutations in oncogenes are typically nonfunctional.";
-            } else if (!gene.getTSG() && oncogenic == null) {
-                return "It is unknown whether a truncating mutation in " + query.getHugoSymbol() + " is oncogenic.";
+            Evidence evidence = MainUtils.findHighestOncogenicityEvidence(oncogenicityEvidences);
+            if (evidence != null) {
+                Optional<Alteration> relevantAltOpt = evidence.getAlterations().stream().filter(alt -> alterations.contains(alt)).findFirst();
+                if (relevantAltOpt.isPresent()) {
+                    Alteration relevantAlt = relevantAltOpt.get();
+                    // we only want to use umbrella term summary for Truncating Mutations for now
+                    if (AlterationUtils.isTruncatingMutations(relevantAlt.getName()) && !manuallyAssignedTruncatingMutation(query)) {
+                        return variantSummaryForTruncatingMutation(queryAlteration, alteration, Oncogenicity.getByEvidence(evidence));
+                    }
+                }
+                oncogenic = Oncogenicity.getByEvidence(evidence);
             }
         }
 
@@ -343,18 +357,27 @@ public class SummaryUtils {
             return getVUSOncogenicSummary(query.getReferenceGenome(), alteration, query);
         }
 
-        String summary = unknownOncogenicSummary(gene, query.getReferenceGenome(), query);
+        if (query.getAlteration().toLowerCase().contains("truncating mutation") || (alteration.getConsequence() != null && alteration.getConsequence().getIsGenerallyTruncating())) {
+            if (gene.getOncogene()) {
+                return query.getHugoSymbol() + " is considered an oncogene and truncating mutations in oncogenes are typically nonfunctional.";
+            } else if (!gene.getTSG() && oncogenic == null) {
+                return "It is unknown whether a truncating mutation in " + query.getHugoSymbol() + " is oncogenic.";
+            }
+        }
+
+        String summary = unknownOncogenicSummary(gene, query.getReferenceGenome(), query, alteration);
         summary = summary.replace("[[gene]]", query.getHugoSymbol());
         return summary;
     }
 
-    private static String getVUSOncogenicSummary(ReferenceGenome referenceGenome, Alteration alteration, Query query) {
+    /**
+     * Get the curated date that is associated with the variant of significance.
+     *
+     * @param alteration Variant of significance.
+     * @return last edit in format MM/dd/YYY (01/01/2020). If VUS does not have a date, null is returned
+     */
+    private static String getVusDate(Alteration alteration) {
         List<Evidence> evidences = EvidenceUtils.getEvidence(Collections.singletonList(alteration), Collections.singleton(EvidenceType.VUS), null);
-        StringBuilder sb = new StringBuilder();
-        sb.append("The biologic significance of the ");
-        sb.append(getGeneMutationNameInVariantSummary(alteration.getGene(), referenceGenome, query.getHugoSymbol(), alteration.getAlteration()));
-        sb.append(" is unknown");
-
         Date lastEdit = null;
         for (Evidence evidence : evidences) {
             if (evidence.getLastEdit() == null) {
@@ -368,12 +391,33 @@ public class SummaryUtils {
         }
         if (lastEdit != null) {
             SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
-            sb.append(" (last reviewed ");
-            sb.append(sdf.format(lastEdit));
+            return sdf.format(lastEdit);
+        }
+        return null;
+    }
+
+    private static String getVUSOncogenicSummary(ReferenceGenome referenceGenome, Alteration alteration, Query query) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getVUSSummary(alteration, getGeneMutationNameInVariantSummary(alteration.getGene(), referenceGenome, query.getHugoSymbol(), alteration.getAlteration()), false));
+        sb.append(" and therefore its biological significance is unknown.");
+        return sb.toString();
+    }
+
+    private static String getVUSSummary(Alteration vus, String altStr, boolean fullSentence) {
+        StringBuilder sb = new StringBuilder();
+        String lastEdit = getVusDate(vus);
+        sb.append("There is no available functional data about the " + altStr);
+        if (lastEdit != null) {
+            sb.append(" (last reviewed on ");
+            sb.append(lastEdit);
             sb.append(")");
         }
-        sb.append(".");
-        return StringUtils.capitalize(sb.toString());
+        if (fullSentence) {
+            sb.append(".");
+        } else {
+            sb.append(",");
+        }
+        return sb.toString();
     }
 
     private static String getOncogenicSummaryFromOncogenicity(Oncogenicity oncogenicity, Alteration alteration, Query query) {
@@ -386,7 +430,7 @@ public class SummaryUtils {
             isPlural = true;
         }
         if (oncogenicity != null) {
-            if (query.getAlteration().toLowerCase().contains("truncating mutation") && query.getSvType() != null) {
+            if (manuallyAssignedTruncatingMutation(query)) {
                 return "This " + alteration.getGene().getHugoSymbol() + " " + query.getSvType().name().toLowerCase() + " may be a truncating alteration and is " + getOncogenicSubTextFromOncogenicity(oncogenicity) + ".";
             }
 
@@ -476,28 +520,141 @@ public class SummaryUtils {
         return summary;
     }
 
-    public static String alleleSummary(ReferenceGenome referenceGenome, Alteration alteration, String queryHugoSymbol) {
+    public static String variantSummaryForTruncatingMutation(String altQuery, Alteration alteration, Oncogenicity oncogenicity) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(alteration.getGene().getHugoSymbol());
+        sb.append(" ");
+        sb.append(altQuery);
+        sb.append(" is a truncating mutation");
+        if (alteration.getGene().getTSG()) {
+            if (alteration.getGene().getOncogene()) {
+                sb.append("; truncating mutations in this gene are considered ");
+            } else {
+                sb.append(" in a tumor suppressor gene");
+                sb.append(", and therefore is ");
+            }
+        } else {
+            sb.append(alteration.getGene().getHugoSymbol());
+            sb.append(", and therefore is ");
+        }
+        sb.append(oncogenicity.getOncogenic().toLowerCase());
+        sb.append(".");
+        return sb.toString();
+    }
+
+    public static String joinStringsInSentence(List<String> strings) {
+        if (strings == null || strings.isEmpty()) return "";
+        if (strings.size() == 1) return strings.get(0);
+        if (strings.size() == 2) return StringUtils.join(strings, " and ");
+        String sentence = "";
+        sentence = StringUtils.join(strings.subList(0, strings.size() - 1), ", ");
+        sentence = sentence + StringUtils.join(strings.subList(strings.size() - 1, strings.size()), ", and ");
+        return sentence;
+    }
+
+    public static String alleleSummaryWithOncogenicities(String hugoSymbol, Oncogenicity oncogenicity, Set<Alteration> alterations) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(hugoSymbol);
+        sb.append(" ");
+        sb.append(allelesToStr(alterations));
+        if (Oncogenicity.RESISTANCE.equals(oncogenicity)) {
+            sb.append((alterations.size() > 1 ? " have" : " has"));
+        } else {
+            sb.append((alterations.size() > 1 ? " are" : " is"));
+        }
+        switch (oncogenicity) {
+            case YES:
+                sb.append(" known to be oncogenic");
+                break;
+            case RESISTANCE:
+                sb.append(" been found in the context of resistance");
+                break;
+            default:
+                sb.append(" " + oncogenicity.getOncogenic().toLowerCase());
+                break;
+        }
+        return sb.toString();
+    }
+
+    public static Oncogenicity getRefAlleleOncogenicityBasedOnAltAlleles(List<Oncogenicity> oncogenicities) {
+        if (oncogenicities.size() == 0) {
+            return Oncogenicity.UNKNOWN;
+        } else if (oncogenicities.size() == 1) {
+            if (Arrays.asList(Oncogenicity.YES, Oncogenicity.LIKELY).contains(oncogenicities.get(0))) {
+                return Oncogenicity.LIKELY;
+            } else {
+                return Oncogenicity.UNKNOWN;
+            }
+        } else {
+            if (oncogenicities.stream().anyMatch(oncogenicity -> Arrays.asList(Oncogenicity.YES, Oncogenicity.LIKELY).contains(oncogenicity))) {
+                return Oncogenicity.LIKELY;
+            } else {
+                return Oncogenicity.UNKNOWN;
+            }
+        }
+    }
+
+    public static String alleleSummary(ReferenceGenome referenceGenome, Alteration alteration, String queryHugoSymbol, boolean isVus) {
         StringBuilder sb = new StringBuilder();
 
         Set<Alteration> alleles = new HashSet<>(AlterationUtils.getAlleleAlterations(referenceGenome, alteration));
 
-        Map<String, Object> map = geAlterationsWithHighestOncogenicity(new HashSet<>(alleles));
-        Oncogenicity highestOncogenicity = (Oncogenicity) map.get("oncogenicity");
-        Set<Alteration> highestAlts = (Set<Alteration>) map.get("alterations");
+        Map<Oncogenicity, Set<Alteration>> map = geAlterationsWithHighestOncogenicity(new HashSet<>(alleles));
+        List<Oncogenicity> allowedOncogenicity = Arrays.asList(Oncogenicity.YES, Oncogenicity.LIKELY, Oncogenicity.LIKELY_NEUTRAL, Oncogenicity.RESISTANCE);
+        List<Oncogenicity> allelesOncogenicities = allowedOncogenicity
+            .stream()
+            .filter(oncogenicity -> map.containsKey(oncogenicity))
+            .collect(Collectors.toList());
+        boolean hasOncogenic = allelesOncogenicities
+            .stream()
+            .filter(oncogenicity -> Arrays.asList(Oncogenicity.YES, Oncogenicity.LIKELY).contains(oncogenicity))
+            .count() > 0;
+        List<String> oncogenicitySentences = allelesOncogenicities
+            .stream()
+            .map(oncogenicity -> alleleSummaryWithOncogenicities(alteration.getGene().getHugoSymbol(), oncogenicity, map.get(oncogenicity)))
+            .collect(Collectors.toList());
 
-        if (highestOncogenicity != null && (highestOncogenicity.equals(Oncogenicity.YES) || highestOncogenicity.equals(Oncogenicity.LIKELY))) {
+        if (oncogenicitySentences.size() > 0) {
             String altStr = getGeneMutationNameInVariantSummary(alteration.getGene(), referenceGenome, queryHugoSymbol, alteration.getAlteration());
-            sb.append("The " + altStr + " has not been functionally or clinically validated.");
-
-            sb.append(" However, ");
-            sb.append(alteration.getGene().getHugoSymbol() + " " + allelesToStr(highestAlts));
-            sb.append((highestAlts.size() > 1 ? " are" : " is"));
-            if (highestOncogenicity.equals(Oncogenicity.YES)) {
-                sb.append(" known to be " + highestOncogenicity.getOncogenic().toLowerCase());
-            } else {
-                sb.append(" " + highestOncogenicity.getOncogenic().toLowerCase());
+            Oncogenicity referredOncogenicity = getRefAlleleOncogenicityBasedOnAltAlleles(allelesOncogenicities);
+            if (referredOncogenicity == null) {
+                referredOncogenicity = Oncogenicity.UNKNOWN;
             }
-            sb.append(", and therefore " + alteration.getGene().getHugoSymbol() + " " + alteration.getAlteration() + " is considered likely oncogenic.");
+            if (isVus) {
+                sb.append(getVUSSummary(alteration, altStr, true));
+            } else {
+                sb.append("The " + altStr + " has not specifically been reviewed by the OncoKB team.");
+            }
+
+            boolean isHoweverCondition = (hasOncogenic || allelesOncogenicities.size() > 1) && referredOncogenicity != Oncogenicity.UNKNOWN;
+            if (isHoweverCondition) {
+                sb.append(" However, ");
+            } else {
+                sb.append(" While ");
+            }
+            sb.append(joinStringsInSentence(oncogenicitySentences));
+            if (oncogenicitySentences.size() == 1) {
+                sb.append(",");
+                if (hasOncogenic && isHoweverCondition) {
+                    sb.append(" and therefore");
+                } else {
+                    sb.append(" the oncogenic effect of");
+                }
+            } else {
+                if (isHoweverCondition) {
+                    sb.append("; therefore");
+                }
+                if (!hasOncogenic) {
+                    sb.append(", the oncogenic effect of");
+                }
+            }
+            sb.append(" ");
+            sb.append(alteration.getGene().getHugoSymbol() + " " + alteration.getAlteration() + " is ");
+            if (hasOncogenic) {
+                sb.append("considered ");
+            }
+            sb.append(getRefAlleleOncogenicityBasedOnAltAlleles(allelesOncogenicities).getOncogenic().toLowerCase());
+            sb.append(".");
         }
 
         return sb.toString();
@@ -541,6 +698,13 @@ public class SummaryUtils {
         return hotspotSummary(alteration, query, usePronoun, false);
     }
 
+    private static boolean addPrefixArticleToMutation(boolean isPositionalVariant, String alteration) {
+        return StringUtils.isNotEmpty(alteration) &&
+            !isPositionalVariant &&
+            !AlterationUtils.isGeneralAlterations(alteration) &&
+            !alteration.toLowerCase().equals("truncating mutation");
+    }
+
     public static String hotspotSummary(Alteration alteration, Query query, Boolean usePronoun, boolean isPositionalVariant) {
         StringBuilder sb = new StringBuilder();
         if (usePronoun == null) {
@@ -555,7 +719,7 @@ public class SummaryUtils {
         if (usePronoun) {
             sb.append("It");
         } else {
-            if (!isPositionalVariant) {
+            if (addPrefixArticleToMutation(isPositionalVariant, alteration.getAlteration())) {
                 sb.append("The ");
             }
             sb.append(altName);
@@ -572,7 +736,8 @@ public class SummaryUtils {
 
     private static String vusAndHotspotSummary(Alteration alteration, Query query, Boolean isHotspot) {
         StringBuilder sb = new StringBuilder();
-        sb.append(getVUSOncogenicSummary(query.getReferenceGenome(), alteration, query));
+        String altStr = getGeneMutationNameInVariantSummary(alteration.getGene(), query.getReferenceGenome(), query.getHugoSymbol(), alteration.getAlteration());
+        sb.append(getVUSSummary(alteration, altStr, true));
 
         if (isHotspot) {
             sb.append(" However, it has been identified as a statistically significant hotspot and is likely to be oncogenic.");
@@ -620,7 +785,7 @@ public class SummaryUtils {
         }
     }
 
-    private static String allelesToStr(Set<Alteration> alterations) {
+    public static String allelesToStr(Set<Alteration> alterations) {
         List<String> alterationNames = new ArrayList<>();
         Map<Integer, Set<Alteration>> locationBasedAlts = new HashMap<>();
         Set<Alteration> specialAlts = new HashSet<>();
@@ -647,7 +812,7 @@ public class SummaryUtils {
         return MainUtils.listToString(alterationNames);
     }
 
-    private static Map<String, Object> geAlterationsWithHighestOncogenicity(Set<Alteration> alleles) {
+    private static Map<Oncogenicity, Set<Alteration>> geAlterationsWithHighestOncogenicity(Set<Alteration> alleles) {
         Map<Oncogenicity, Set<Alteration>> oncoCate = new HashMap<>();
 
         // Get oncogenicity info in alleles
@@ -668,12 +833,7 @@ public class SummaryUtils {
                 oncoCate.get(oncogenicity).add(alt);
             }
         }
-
-        Oncogenicity oncogenicity = MainUtils.findHighestOncogenicity(oncoCate.keySet());
-        Map<String, Object> result = new HashMap<>();
-        result.put("oncogenicity", oncogenicity);
-        result.put("alterations", oncoCate != null ? oncoCate.get(oncogenicity) : new HashSet<>());
-        return result;
+        return oncoCate;
     }
 
     private static Boolean appendThe(String queryAlteration) {
@@ -726,6 +886,8 @@ public class SummaryUtils {
         } else if (StringUtils.equalsIgnoreCase(queryAlteration, "loss")) {
             queryAlteration = "deletion (loss)";
             sb.append(queryHugoSymbol + " " + queryAlteration);
+        } else if (StringUtils.equalsIgnoreCase(queryAlteration, "fusion") || StringUtils.equalsIgnoreCase(queryAlteration, "fusions")) {
+            sb.append(queryHugoSymbol + " " + queryAlteration.toLowerCase());
         } else if (StringUtils.containsIgnoreCase(queryAlteration, "fusion")) {
             queryAlteration = queryAlteration.replace("Fusion", "fusion");
             sb.append(queryAlteration);
@@ -825,10 +987,18 @@ public class SummaryUtils {
         String alterationName = getGeneMutationNameInVariantSummary(gene, referenceGenome, query.getHugoSymbol(), query.getAlteration());
         String tumorTypeName = convertTumorTypeNameInSummary(matchedTumorType == null ? query.getTumorType() : (StringUtils.isEmpty(matchedTumorType.getSubtype()) ? matchedTumorType.getMainType() : matchedTumorType.getSubtype()));
 
-        String variantStr = altName + " " + tumorTypeName;
-        if (query.getAlteration().contains("deletion")) {
-            variantStr = tumorTypeName + " harboring a " + altName;
+        if (tumorTypeName == null)
+            tumorTypeName = "";
+
+        String variantStr = altName;
+        if (StringUtils.isNotEmpty(tumorTypeName)) {
+            if (query.getAlteration().contains("deletion")) {
+                variantStr = tumorTypeName + " harboring a " + altName;
+            } else {
+                variantStr += " " + tumorTypeName;
+            }
         }
+
         summary = summary.replace("[[variant]]", variantStr);
         summary = summary.replace("[[gene]] [[mutation]] [[[mutation]]]", alterationName);
 
@@ -863,8 +1033,10 @@ public class SummaryUtils {
         // In case of miss typed
         summary = summary.replace("[[mutation]] [[mutation]]", query.getAlteration());
         summary = summary.replace("[[mutation]]", query.getAlteration());
-        summary = summary.replace("[[tumorType]]", tumorTypeName);
-        summary = summary.replace("[[tumor type]]", tumorTypeName);
+        if (StringUtils.isNotEmpty(tumorTypeName)) {
+            summary = summary.replace("[[tumorType]]", tumorTypeName);
+            summary = summary.replace("[[tumor type]]", tumorTypeName);
+        }
         summary = summary.replace("[[fusion name]]", altName);
         summary = summary.replace("[[fusion name]]", altName);
         return summary.trim().replaceAll("\\s+", " ");
