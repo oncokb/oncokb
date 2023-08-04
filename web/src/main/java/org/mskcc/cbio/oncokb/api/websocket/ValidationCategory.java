@@ -9,6 +9,7 @@ public enum ValidationCategory {
     MISSING_BIOLOGICAL_ALTERATION_INFO(ValidationType.TEST, "Whether biological alteration missing information"),
     MISSING_GENE_INFO(ValidationType.TEST, "Whether gene missing summary or background"),
     INCORRECT_EVIDENCE_DESCRIPTION_FORMAT(ValidationType.TEST, "Whether evidence description has wrong format content"),
+    OUTDATED_INFO_EVIDENCE_DESCRIPTION(ValidationType.TEST, "Whether evidence description has outdated content"),
     INCORRECT_ALTERATION_NAME_FORMAT(ValidationType.TEST, "Whether alteration is named appropriately"),
     OUTDATED_HUGO_SYMBOLS(ValidationType.TEST, "Whether all genes are using the latest hugo symbol"),
     MISMATCH_REF_AA(ValidationType.TEST, "Whether all variants have matched reference amino acid on the position curated"),
