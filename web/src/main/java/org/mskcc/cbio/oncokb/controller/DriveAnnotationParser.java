@@ -51,15 +51,7 @@ public class DriveAnnotationParser {
             if (vus != null) {
                 jsonArray = new JSONArray(vus);
             }
-            Gene persistenceGene = parseGene(jsonObj, releaseGene, jsonArray);
-
-            if (releaseGene && persistenceGene != null) {
-                this.oncokbTranscriptService.updateTranscriptUsage(
-                    persistenceGene,
-                    persistenceGene.getGrch37Isoform(),
-                    persistenceGene.getGrch38Isoform()
-                );
-            }
+            parseGene(jsonObj, releaseGene, jsonArray);
         }
     }
 
