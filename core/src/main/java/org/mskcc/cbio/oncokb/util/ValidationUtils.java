@@ -8,6 +8,7 @@ import com.mysql.jdbc.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mskcc.cbio.oncokb.bo.ArticleBo;
+import org.mskcc.cbio.oncokb.bo.DrugBo;
 import org.mskcc.cbio.oncokb.model.*;
 
 import java.io.IOException;
@@ -17,7 +18,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.mskcc.cbio.oncokb.util.FusionUtils.FUSION_ALTERNATIVE_SEPARATOR;
-import static org.mskcc.cbio.oncokb.util.FusionUtils.FUSION_SEPARATOR;
 
 public class ValidationUtils {
 
@@ -131,6 +131,42 @@ public class ValidationUtils {
                 }
             }
         }
+        return data;
+    }
+
+    public static JSONArray checkEvidenceDescriptionHasOutdatedInfo() {
+        // the goal is to find whether the description includes outdated info
+        //
+        // Check one: drugs that in the production but no longer included in the latest data
+        JSONArray data = new JSONArray();
+
+        DrugBo drugBo = ApplicationContextSingleton.getDrugBo();
+        Set<Drug> drugsWithEviAssoc = new HashSet<>();
+        CacheUtils.getAllEvidences().forEach(evidence -> evidence.getTreatments().forEach(treatment -> drugsWithEviAssoc.addAll(treatment.getDrugs())));
+
+        List<Drug> allDrugs = drugBo.findAll();
+        Set<Drug> drugsWithoutEviAssoc = allDrugs.stream().filter(drug -> !drugsWithEviAssoc.contains(drug)).collect(Collectors.toSet());
+
+        Set<String> drugNameWithSynonyms = new HashSet<>();
+        for (Drug drug : drugsWithoutEviAssoc) {
+            drugNameWithSynonyms.addAll(drug.getSynonyms());
+            drugNameWithSynonyms.add(drug.getDrugName());
+        }
+        Set<EvidenceType> evidenceTypesToCheck = new HashSet<>();
+        evidenceTypesToCheck.add(EvidenceType.MUTATION_EFFECT);
+        evidenceTypesToCheck.add(EvidenceType.TUMOR_TYPE_SUMMARY);
+        evidenceTypesToCheck.addAll(EvidenceTypeUtils.getTreatmentEvidenceTypes());
+
+        Set<String> finalDrugNameWithSynonyms = drugNameWithSynonyms.stream().map(String::toLowerCase).collect(Collectors.toSet());
+        CacheUtils.getAllEvidences().stream().filter(evidence -> evidenceTypesToCheck.contains(evidence.getEvidenceType())).forEach(evidence -> {
+            if (!StringUtils.isNullOrEmpty(evidence.getDescription())) {
+                finalDrugNameWithSynonyms.forEach(name -> {
+                    if (evidence.getDescription().toLowerCase().contains(name)) {
+                        data.put(getErrorMessage(getTarget(evidence.getGene().getHugoSymbol(), evidence.getEvidenceType(), getEvidenceAlterationsName(evidence), TumorTypeUtils.getEvidenceTumorTypesName(evidence), TreatmentUtils.getTreatmentName(evidence.getTreatments())), "The drug " + name + " does not have any association in the system, but still in the description"));
+                    }
+                });
+            }
+        });
         return data;
     }
 

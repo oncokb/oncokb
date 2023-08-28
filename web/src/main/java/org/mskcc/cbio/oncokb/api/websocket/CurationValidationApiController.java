@@ -41,6 +41,8 @@ public class CurationValidationApiController {
 
         validateEvidenceDescriptionInfo();
 
+        validateEvidenceDescriptionHasOutdatedInfo();
+
         validateAlterationName();
 
         validateDuplicatedAlteration();
@@ -127,6 +129,17 @@ public class CurationValidationApiController {
             sendText(generateInfo(INCORRECT_EVIDENCE_DESCRIPTION_FORMAT, ValidationStatus.IS_COMPLETE, new JSONArray()));
         } else {
             sendText(generateInfo(INCORRECT_EVIDENCE_DESCRIPTION_FORMAT, ValidationStatus.IS_ERROR, data));
+        }
+    }
+
+    private void validateEvidenceDescriptionHasOutdatedInfo() {
+        sendText(generateInfo(OUTDATED_INFO_EVIDENCE_DESCRIPTION, ValidationStatus.IS_PENDING, new JSONArray()));
+
+        JSONArray data = ValidationUtils.checkEvidenceDescriptionHasOutdatedInfo();
+        if (data.length() == 0) {
+            sendText(generateInfo(OUTDATED_INFO_EVIDENCE_DESCRIPTION, ValidationStatus.IS_COMPLETE, new JSONArray()));
+        } else {
+            sendText(generateInfo(OUTDATED_INFO_EVIDENCE_DESCRIPTION, ValidationStatus.IS_ERROR, data));
         }
     }
 

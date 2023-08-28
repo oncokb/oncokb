@@ -149,6 +149,9 @@ public class AnnotationsApiController {
         HttpStatus status = HttpStatus.OK;
         IndicatorQueryResp indicatorQueryResp = null;
 
+        if (StringUtils.isEmpty(genomicLocation)) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
         ReferenceGenome matchedRG = null;
         if (!StringUtils.isEmpty(referenceGenome)) {
             matchedRG = MainUtils.searchEnum(ReferenceGenome.class, referenceGenome);
@@ -293,6 +296,9 @@ public class AnnotationsApiController {
         if (entrezGeneId != null && hugoSymbol != null && !GeneUtils.isSameGene(entrezGeneId, hugoSymbol)) {
             status = HttpStatus.BAD_REQUEST;
         } else {
+            if (copyNameAlterationType == null) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
             ReferenceGenome matchedRG = null;
             if (!StringUtils.isEmpty(referenceGenome)) {
                 matchedRG = MainUtils.searchEnum(ReferenceGenome.class, referenceGenome);
@@ -395,6 +401,9 @@ public class AnnotationsApiController {
         HttpStatus status = HttpStatus.OK;
         IndicatorQueryResp indicatorQueryResp = null;
 
+        if (structuralVariantType == null || isFunctionalFusion == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
         if ((entrezGeneIdA != null && hugoSymbolA != null && !GeneUtils.isSameGene(entrezGeneIdA, hugoSymbolA)) || (entrezGeneIdB != null && hugoSymbolB != null && !GeneUtils.isSameGene(entrezGeneIdB, hugoSymbolB))) {
             status = HttpStatus.BAD_REQUEST;
         } else {
