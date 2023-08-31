@@ -37,6 +37,10 @@ public class FusionUtilsTest extends TestCase {
     }
 
     public void testIsFusion() {
+        assertTrue(isFusion("fusion"));
+        assertTrue(isFusion("Fusion"));
+        assertTrue(isFusion("fusions"));
+        assertTrue(isFusion("Fusions"));
         assertTrue(isFusion("A-B fusion"));
         assertTrue(isFusion("A-B fusion "));
         assertTrue(isFusion("A-B  fusion "));
