@@ -1,0 +1,38 @@
+#
+# See https://docs.google.com/document/d/1nITPjJ2UVOAdz1jjB61DUed85eOpjLHUC0BzQM8x8Jc/edit for test designs
+#
+# Gene\tVariant\tExpected Variant Summary
+
+## Table 9.3: Leading Sentences
+PIK3CB	A1048T	Likely Gain-of-function	We do not have a mutation effect description for PIK3CB A1048T, however, the mutation effect description for PIK3CB A1048V is: The PIK3CB A1048V mutation is located in the kinase domain of the protein. This mutation has been found in intestinal cancer (PMID: 28481359). Expression of this mutation in a kidney epithelial cell line demonstrated that it was activating as measured by increased in vivo xenograft tumor formation compared to wildtype (PMID: 27147599).
+AKT2	R170L	Likely Gain-of-function	We do not have a mutation effect description for AKT2 R170L, however, the mutation effect description for AKT2 R170W is: The AKT2 R170W is located in the kinase domain of the protein. This mutation has been found in endometrial and stomach cancer (PMID: 24071849). Expression of this mutation in a colorectal cancer cell line demonstrated that it is activating as measured by increased protein and pathway activation compared to wildtype (PMID: 25551293).
+BRAF	R509Q	Likely Loss-of-function	We do not have a mutation effect description for BRAF R509Q, however, the mutation effect description for BRAF R509H is: The BRAF R509H mutation is located in the kinase domain in exon 13 of the protein. This mutation lies along the dimer interface of the protein. Expression of this mutation in 293H cells demonstrated that it is inactivating, as shown by decreased protein dimerization and decreased downstream cell signaling (PMID: 20179705).
+AKT2	D324Y	Unknown
+ERBB2	E717V	Likely Gain-of-function	We do not have a mutation effect description for ERBB2 E717V, however, we have mutation effect descriptions for ERBB2 E717D/K.
+
+## Table 9.2b: Assigning an Oncogenic Effect and Creating Variant Summaries for Alternate Alleles When There is >1 Curated Reference Alleles with different oncogenic effect
+KLF5	E419G	Likely Gain-of-function	We do not have a mutation effect description for KLF5 E419G, however, we have mutation effect descriptions for KLF5 E419K/Q.
+RET	C634F	Likely Gain-of-function	We do not have a mutation effect description for RET C634F, however, we have mutation effect descriptions for RET C634G/R/S/W/Y.
+ERBB2	A644S	Likely Gain-of-function	We do not have a mutation effect description for ERBB2 A644S, however, we have mutation effect descriptions for ERBB2 A644F/V.
+BRCA1	M1628F	Unknown
+PIK3CA	G451K	Likely Gain-of-function	We do not have a mutation effect description for PIK3CA G451K, however, we have mutation effect descriptions for PIK3CA G451R/V.
+BRCA1	M1652L	Unknown
+ALK	G1269E	Likely Gain-of-function	We do not have a mutation effect description for ALK G1269E, however, we have mutation effect descriptions for ALK G1269A/S.
+EGFR	D761K	Likely Gain-of-function	We do not have a mutation effect description for EGFR D761K, however, we have mutation effect descriptions for EGFR D761N/Y.
+SMO	E518V	Unknown
+ERBB2	E719A	Unknown
+
+## Table 9.3: Leading Sentences, mainly test unknown mutation but fall under umbrella terms(Truncating Mutations, Fusion)
+### Truncating mutation in oncogene
+BRAF	T100*	Unknown
+### Truncating mutation in TSG
+BRCA1	T100*	Likely Loss-of-function	The mutation effect description for truncating mutations in BRCA1 is: Truncating mutations in BRCA1 can lead to varying C-terminally truncated proteins that results in aberrant protein folding, contributing to loss of BRCA1 protein function. Human breast cancer cell lines that contain a truncating mutation in BRCA1 display elevated levels of aneuploidy and impaired DNA damage response. In addition, truncating mutations have been shown to induce aberrant protein localization, which may impact the interaction of important binding partners (PMID: 20608970). Mouse models of BRCA1 truncating mutations develop cancer, including mammary carcinomas, lymphomas and ovarian carcinomas (PMID: 11358863, 12483515, 12947386).
+### Truncating mutations in TSG that not curated
+PPP2R2A	T100*	Unknown
+### Truncating mutation in both
+GATA3	T100*	Likely Loss-of-function	The mutation effect description for truncating mutations in GATA3 is: Truncating mutations in the GATA3 gene result in loss of GATA3 protein expression which while sufficient to enable tumor dedifferentiation and dissemination, is not associated with tumor development. This data indicates that GATA3 may not be a bona fide tumor suppressor, but rather comprises a crucial differentiation factor in cancer development (PMID: 18242514). Expression of truncating GATA3 mutations in breast cancer cell lines led to increased protein stability and impaired interaction with chromatin and DNA binding (PMID: 24758297, 26637396). Additionally, GATA3 truncating mutations in breast cancer resulted in reduced GATA3 transactivating activity with abnormalities in cellular invasiveness (PMID: 23426732), and displayed sensitivity to inhibitors of the histone methyltransferases G6A/GLP, upregulated in many cancer types (PMID: 27588951) .
+### Truncating mutation in neither
+GATA1	T100*	Unknown
+
+### Fusions
+ALK	Test-ALK fusion	Likely Gain-of-function	The mutation effect description for functional fusions in ALK is: Fusions of ALK are common and arise from chromosomal translocations that generally fuse the promotor and N-terminal portion of a partner gene with the C-terminal portion of ALK, including the kinase domain. ALK fusions are most common in lung cancer (PMID: 22235099). Various ALK fusions in which the promoter of the fusion partner drives expression of the ALK gene have been reported and biologically characterized, including EML4-ALK, (PMID: 17625570) and NPM-ALK (PMID: 8122112), which are activating and oncogenic. ALK fusions are generally sensitive to small molecule ALK inhibitors, though resistance is often accrued through missense mutations of the fusion protein (PMID:24675041).

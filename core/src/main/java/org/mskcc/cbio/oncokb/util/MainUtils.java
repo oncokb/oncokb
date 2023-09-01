@@ -206,6 +206,28 @@ public class MainUtils {
         }
         return index == -1 ? null : PRIORITIZED_ONCOGENICITY.get(index);
     }
+    public static Evidence findHighestOncogenicityEvidence(List<Evidence> oncogenicitySet) {
+        Integer index = -1;
+
+        if (oncogenicitySet.size() == 0) {
+            return null;
+        }
+        oncogenicitySet.sort((e1, e2) -> compareOncogenicity(Oncogenicity.getByEvidence(e1), Oncogenicity.getByEvidence(e2), true));
+        for (Evidence evidence : oncogenicitySet) {
+            if (EvidenceType.ONCOGENIC.equals(evidence.getEvidenceType())) {
+                Oncogenicity oncogenicity = Oncogenicity.getByEvidence(evidence);
+                Integer oncogenicIndex = PRIORITIZED_ONCOGENICITY.indexOf(oncogenicity);
+                if (index < oncogenicIndex) {
+                    index = oncogenicIndex;
+                }
+            }
+        }
+        return oncogenicitySet.get(0);
+    }
+
+    public static boolean manuallyAssignedTruncatingMutation(Query query) {
+        return query.getAlteration().toLowerCase().contains("truncating mutation") && query.getSvType() != null;
+    }
 
     public static Integer compareOncogenicity(Oncogenicity o1, Oncogenicity o2, Boolean asc) {
         if (asc == null) {

@@ -15,6 +15,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.mskcc.cbio.oncokb.util.LevelUtils.getTherapeuticLevelsWithPriorityLIstIterator;
+import static org.mskcc.cbio.oncokb.util.SummaryUtils.allelesToStr;
 
 /**
  * Created by hongxinzhang on 4/5/16.
@@ -267,9 +268,8 @@ public class IndicatorUtils {
                     if (indicatorQuery.getMutationEffect() == null && indicatorQueryMutationEffect.getMutationEffect() != null) {
                         MutationEffectResp mutationEffectResp = new MutationEffectResp();
                         mutationEffectResp.setKnownEffect(indicatorQueryMutationEffect.getMutationEffect().getMutationEffect());
-                        if (indicatorQueryMutationEffect.getMutationEffectEvidence() != null) {
-                            String hugoSymbol = StringUtils.isEmpty(query.getHugoSymbol()) ? gene.getHugoSymbol() : query.getHugoSymbol();
-                            mutationEffectResp.setDescription(SummaryUtils.enrichDescription(indicatorQueryMutationEffect.getMutationEffectEvidence().getDescription(), hugoSymbol));
+                        if (indicatorQueryMutationEffect.getMutationEffectEvidence() != null && StringUtils.isNotEmpty(indicatorQueryMutationEffect.getMutationEffectEvidence().getDescription())) {
+                            mutationEffectResp.setDescription(SummaryUtils.enrichDescription(indicatorQueryMutationEffect.getMutationEffectEvidence().getDescription(), gene, alteration.getReferenceGenomes().iterator().next(), query, matchedTumorType));
                             mutationEffectResp.setCitations(MainUtils.getCitationsByEvidence(indicatorQueryMutationEffect.getMutationEffectEvidence()));
                         }
                         indicatorQuery.setMutationEffect(mutationEffectResp);
@@ -630,18 +630,31 @@ public class IndicatorUtils {
             boolean isPositionalVariant = AlterationUtils.isPositionedAlteration(alteration);
             // Find mutation effect from alternative alleles
             if (alternativeAllele.size() > 0 && !isPositionalVariant) {
+                List<Evidence> alternativeAlleleEvis= EvidenceUtils.getEvidence(
+                    new ArrayList<>(alternativeAllele)
+                    , Collections.singleton(EvidenceType.MUTATION_EFFECT)
+                    , null
+                );
                 indicatorQueryMutationEffect =
                     MainUtils.setToAlternativeAlleleMutationEffect(
-                        MainUtils.findHighestMutationEffectByEvidence(
-                            new HashSet<>(
-                                EvidenceUtils.getEvidence(
-                                    new ArrayList<>(alternativeAllele)
-                                    , Collections.singleton(EvidenceType.MUTATION_EFFECT)
-                                    , null
-                                )
-                            )
-                        )
+                        MainUtils.findHighestMutationEffectByEvidence(new HashSet<>(alternativeAlleleEvis))
                     );
+                if (indicatorQueryMutationEffect.getMutationEffect() != null && !indicatorQueryMutationEffect.getMutationEffect().equals(MutationEffect.INCONCLUSIVE) && !indicatorQueryMutationEffect.getMutationEffect().equals(MutationEffect.UNKNOWN)) {
+                    Set<Alteration> evisAlts = new HashSet<>();
+                    alternativeAlleleEvis.forEach(evidence -> evisAlts.addAll(evidence.getAlterations()));
+                    Set<Alteration> alternativeAlleleWithMutationEffects = Sets.intersection(evisAlts, new HashSet<>(alternativeAllele));
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("We do not have a mutation effect description for [[gene]] [[mutation]], however, ");
+                    if (alternativeAlleleWithMutationEffects.size() > 1) {
+                        sb.append("we have mutation effect descriptions for [[gene]] " + allelesToStr(new HashSet<>(alternativeAllele)) + ".");
+                    } else {
+                        sb.append("the mutation effect description for [[gene]] " + alternativeAlleleWithMutationEffects.iterator().next().getName() + " is: ");
+                        sb.append(indicatorQueryMutationEffect.getMutationEffectEvidence().getDescription());
+                    }
+                    Evidence evidence = new Evidence(indicatorQueryMutationEffect.getMutationEffectEvidence(), indicatorQueryMutationEffect.getMutationEffectEvidence().getId());
+                    evidence.setDescription(sb.toString());
+                    indicatorQueryMutationEffect.setMutationEffectEvidence(evidence);
+                }
             }
 
             // If there is no mutation effect info available for this variant, find mutation effect from relevant variants
@@ -650,9 +663,27 @@ public class IndicatorUtils {
                 List<Alteration> listToBeRemoved = new ArrayList<>(alternativeAllele);
                 listToBeRemoved.add(alteration);
 
-                indicatorQueryMutationEffect = MainUtils.findHighestMutationEffectByEvidence(
-                    new HashSet<>(EvidenceUtils.getEvidence(AlterationUtils.removeAlterationsFromList(relevantAlterations, listToBeRemoved), Collections.singleton(EvidenceType.MUTATION_EFFECT), null))
-                );
+                for(Alteration relevantAlt : AlterationUtils.removeAlterationsFromList(relevantAlterations, listToBeRemoved)){
+                    indicatorQueryMutationEffect = MainUtils.findHighestMutationEffectByEvidence(
+                        new HashSet<>(EvidenceUtils.getEvidence(Collections.singletonList(relevantAlt), Collections.singleton(EvidenceType.MUTATION_EFFECT), null))
+                    );
+                    if (indicatorQueryMutationEffect.getMutationEffect() != null && !indicatorQueryMutationEffect.getMutationEffect().equals(MutationEffect.INCONCLUSIVE) && !indicatorQueryMutationEffect.getMutationEffect().equals(MutationEffect.UNKNOWN)) {
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("The mutation effect description for ");
+                        if (AlterationUtils.isTruncatingMutations((relevantAlt.getName()))) {
+                            sb.append("truncating mutations");
+                        } else if (FusionUtils.isFusion(relevantAlt.getName())) {
+                            sb.append("functional fusions");
+                        } else {
+                            sb.append(relevantAlt.getName());
+                        }
+                        sb.append(" in [[gene]] is: " + indicatorQueryMutationEffect.getMutationEffectEvidence().getDescription());
+                        Evidence evidence = new Evidence(indicatorQueryMutationEffect.getMutationEffectEvidence(), indicatorQueryMutationEffect.getMutationEffectEvidence().getId());
+                        evidence.setDescription(sb.toString());
+                        indicatorQueryMutationEffect.setMutationEffectEvidence(evidence);
+                        break;
+                    }
+                }
             }
 
         }
