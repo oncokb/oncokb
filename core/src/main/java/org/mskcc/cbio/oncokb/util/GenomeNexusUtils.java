@@ -21,6 +21,8 @@ import org.springframework.web.client.RestTemplate;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.mskcc.cbio.oncokb.util.VariantConsequenceUtils.consequenceResolver;
+
 /**
  * Created by Hongxin on 6/26/17.
  */
@@ -233,19 +235,6 @@ public class GenomeNexusUtils {
         return variantAnnotation;
     }
 
-    public static VariantConsequence getTranscriptConsequenceSummaryTerm(String consequenceTerms) {
-        if (StringUtils.isEmpty(consequenceTerms)) {
-            return null;
-        }
-        List<VariantConsequence> terms = Arrays.asList(consequenceTerms.split(",")).stream().map(consequence -> VariantConsequenceUtils.findVariantConsequenceByTerm(consequence.trim())).filter(Objects::nonNull).collect(Collectors.toList());
-        // if we cannot find the matched variant consequence using the mostSevereConsequence, we should use the one from the consequence term list
-        if (terms.size() > 0) {
-            return terms.iterator().next();
-        } else {
-            return null;
-        }
-    }
-
     private static TranscriptConsequenceSummary getConsequence(VariantAnnotation variantAnnotation, ReferenceGenome referenceGenome) {
         List<TranscriptConsequenceSummary> summaries = new ArrayList<>();
 
@@ -288,7 +277,7 @@ public class GenomeNexusUtils {
 
         // Only return one consequence term
         if (summary != null) {
-            VariantConsequence consequence = getTranscriptConsequenceSummaryTerm(summary.getConsequenceTerms());
+            VariantConsequence consequence = consequenceResolver(summary.getConsequenceTerms(), summary.getVariantClassification());
             if (consequence == null && StringUtils.isNotEmpty(summary.getVariantClassification())) {
                 consequence = VariantConsequenceUtils.findVariantConsequenceByTerm(summary.getVariantClassification());
             }

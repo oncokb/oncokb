@@ -146,31 +146,4 @@ public class GenomeNexusUtilsTest extends TestCase {
         assertEquals("Picked transcript gene symbol is not expected, but it should.", "TERT", consequence.getHugoGeneSymbol());
         assertEquals("Consequence is not expected, but it should.", "upstream_gene_variant", consequence.getConsequenceTerms());
     }
-
-    public void testGetTranscriptConsequenceSummaryTerm() {
-        // we do not have a mapping for test. We should default to the one that we do. In this case, intron_variant
-        String consequenceTerms = "test,intron_variant";
-        VariantConsequence variantConsequence = GenomeNexusUtils.getTranscriptConsequenceSummaryTerm(consequenceTerms);
-        assertEquals("intron_variant", variantConsequence.getTerm());
-
-        consequenceTerms = "splice_region_variant,intron_variant,test";
-        variantConsequence = GenomeNexusUtils.getTranscriptConsequenceSummaryTerm(consequenceTerms);
-        assertEquals("splice_region_variant", variantConsequence.getTerm());
-
-        consequenceTerms = "intron_variant";
-        variantConsequence = GenomeNexusUtils.getTranscriptConsequenceSummaryTerm(consequenceTerms);
-        assertEquals("intron_variant", variantConsequence.getTerm());
-
-        consequenceTerms = "test";
-        variantConsequence = GenomeNexusUtils.getTranscriptConsequenceSummaryTerm(consequenceTerms);
-        assertNull(variantConsequence);
-
-        consequenceTerms = "intron_variant , intron_variant";
-        variantConsequence = GenomeNexusUtils.getTranscriptConsequenceSummaryTerm(consequenceTerms);
-        assertEquals("intron_variant", variantConsequence.getTerm());
-
-        consequenceTerms = null;
-        variantConsequence = GenomeNexusUtils.getTranscriptConsequenceSummaryTerm(consequenceTerms);
-        assertNull(variantConsequence);
-    }
 }
