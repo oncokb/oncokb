@@ -107,12 +107,9 @@ public class VariantConsequenceUtils {
         if (consequenceTerms == null) {
             consequenceTerms = "";
         }
-        if (variantClass == null) {
-            variantClass = "";
-        }
 
         VariantConsequence consequence = findVariantConsequenceByTerm(consequenceTerms.contains(",") ? pickConsequenceTerm(consequenceTerms) : consequenceTerms);
-        VariantConsequence variantClassConsequence = variantClass == null ? null : findVariantConsequenceByTerm(variantClass);
+        VariantConsequence variantClassConsequence = StringUtils.isEmpty(variantClass) ? null : findVariantConsequenceByTerm(variantClass);
 
         if (consequence == null) {
             if (variantClassConsequence != null) {
@@ -121,7 +118,7 @@ public class VariantConsequenceUtils {
                 return null;
             }
         } else {
-            if (variantClassConsequence != null && variantClassConsequence != consequence) {
+            if (variantClassConsequence != null && !variantClassConsequence.equals(consequence)) {
                 // we should compare the granularity of the consequence for splice site
                 if (SPLICE_SITE_VARIANTS.contains(consequence) && SPLICE_SITE_VARIANTS.contains(variantClassConsequence)) {
                     return SPLICE_SITE_VARIANTS.indexOf(consequence) < SPLICE_SITE_VARIANTS.indexOf(variantClassConsequence) ? consequence : variantClassConsequence;
