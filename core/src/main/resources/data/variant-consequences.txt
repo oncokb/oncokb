@@ -1,4 +1,4 @@
-# From: https://useast.ensembl.org/info/genome/variation/prediction/predicted_data.html Date: 09/08/2017
+# From: https://useast.ensembl.org/info/genome/variation/prediction/predicted_data.html Date: 09/08/2023
 #term	generally_truncating	description
 transcript_ablation	yes	A feature ablation whereby the deleted region includes a transcript feature
 splice_donor_variant	yes	A splice variant that changes the 2 base region at the 5' end of an intron
