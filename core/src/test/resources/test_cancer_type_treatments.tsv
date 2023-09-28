@@ -205,4 +205,4 @@ ARAF	S214C	Langerhans Cell Histiocytosis	2: Cobimetinib; 2: Trametinib; 3A: Sora
 
 
 # Check resistance mutation
-ALK	G1202R	NSCLC	1: Lorlatinib; R2: Alectinib;
+ALK	G1202R	NSCLC	R2: Alectinib;

@@ -14,7 +14,7 @@ ERBB2	E717V	Likely Oncogenic	There is no available functional data about the ERB
 KLF5	E419G	Likely Oncogenic	There is no available functional data about the KLF5 E419G mutation (last reviewed on 10/15/2019). However, KLF5 E419Q is known to be oncogenic and KLF5 E419K is likely oncogenic; therefore KLF5 E419G is considered likely oncogenic.
 RET	C634F	Likely Oncogenic	There is no available functional data about the RET C634F mutation (last reviewed on 03/02/2017). However, RET C634R is known to be oncogenic and RET C634S/W/Y are likely oncogenic; therefore RET C634F is considered likely oncogenic.
 ERBB2	A644S	Likely Oncogenic	There is no available functional data about the ERBB2 A644S mutation (last reviewed on 06/23/2023). However, ERBB2 A644F is likely oncogenic and ERBB2 A644V is likely neutral; therefore ERBB2 A644S is considered likely oncogenic.
-BRCA1	M1628F	Likely Oncogenic	The BRCA1 M1628F mutation has not specifically been reviewed by the OncoKB team. However, BRCA1 M1628V is likely oncogenic and BRCA1 M1628T is likely neutral; therefore BRCA1 M1628F is considered likely oncogenic.
+BRCA1	M1628F	Unknown	The BRCA1 M1628F mutation has not specifically been reviewed by the OncoKB team. While BRCA1 M1628T/V are likely neutral, the oncogenic effect of BRCA1 M1628F is unknown.
 PIK3CA	G451K	Likely Oncogenic	There is no available functional data about the PIK3CA G451K mutation (last reviewed on 08/04/2017). However, PIK3CA G451R is likely oncogenic, and therefore PIK3CA G451K is considered likely oncogenic.
 BRCA1	M1652L	Likely Oncogenic	The BRCA1 M1652L mutation has not specifically been reviewed by the OncoKB team. However, BRCA1 M1652K is likely oncogenic and BRCA1 M1652I is likely neutral; therefore BRCA1 M1652L is considered likely oncogenic.
 ALK	G1269E	Likely Oncogenic	There is no available functional data about the ALK G1269E mutation (last reviewed on 03/22/2023). However, ALK G1269A is likely oncogenic and ALK G1269S has been found in the context of resistance; therefore ALK G1269E is considered likely oncogenic.
@@ -30,7 +30,7 @@ BRCA1	T100*	Likely Oncogenic	The BRCA1 T100* is a truncating mutation in a tumor
 ### Truncating mutations in TSG that are not curated
 PPP2R2A	T100*	Unknown	The PPP2R2A T100* mutation has not specifically been reviewed by the OncoKB team, and therefore its biological significance is unknown.
 ### Truncating mutation in both
-GATA3	T100*	Likely Oncogenic	The GATA3 T100* is a truncating mutation; truncating mutations in this gene are considered likely oncogenic.
+GATA3	T100*	Likely Oncogenic	The GATA3 T100* mutation is likely oncogenic.
 ### Truncating mutation in neither
 GATA1	T100*	Unknown	It is unknown whether a truncating mutation in GATA1 is oncogenic.
 
@@ -42,6 +42,6 @@ BRCA1	Test-BRCA1 fusion	Likely Oncogenic	The Test-BRCA1 fusion leads to truncati
 ### Fusion in TSG that Truncating Mutations is not curated
 PPP2R2A	Test-PPP2R2A fusion	Unknown	The Test-PPP2R2A fusion has not specifically been reviewed by the OncoKB team, and therefore its biological significance is unknown.
 ### Fusion in both
-GATA3	Test-GATA3 fusion	Likely Oncogenic	The Test-GATA3 fusion leads to truncation of the GATA3 tumor suppressor gene and is considered likely oncogenic.
+GATA3	Test-GATA3 fusion	Unknown	The Test-GATA3 fusion has not specifically been reviewed by the OncoKB team, and therefore its biological significance is unknown.
 ### Fusion in neither
 GATA1	Test-GATA1 fusion	Unknown	The Test-GATA1 fusion has not specifically been reviewed by the OncoKB team, and therefore its biological significance is unknown.
