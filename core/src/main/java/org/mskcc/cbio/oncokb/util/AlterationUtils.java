@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import static org.mskcc.cbio.oncokb.Constants.*;
 import static org.mskcc.cbio.oncokb.model.StructuralAlteration.TRUNCATING_MUTATIONS;
 import static org.mskcc.cbio.oncokb.util.MainUtils.isOncogenic;
+import static org.mskcc.cbio.oncokb.util.VariantConsequenceUtils.TOO_BROAD_CONSEQUENCES;
 
 /**
  * @author jgao, Hongxin Zhang
@@ -488,6 +489,10 @@ public final class AlterationUtils {
             }
             // if alteration is a positional vairant and the consequence is manually assigned to others than NA, we should change it
             if (isPositionedAlteration(alteration) && alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm(MISSENSE_VARIANT))) {
+                alteration.setConsequence(variantConsequence);
+            }
+            // if the consequence provided by the user is too broad, we ignore and use the interpreted variant consequence
+            if (TOO_BROAD_CONSEQUENCES.contains(alteration.getConsequence().getTerm())) {
                 alteration.setConsequence(variantConsequence);
             }
         }

@@ -1,5 +1,4 @@
-# From: https://useast.ensembl.org/info/genome/variation/prediction/predicted_data.html Date: 04/27/2017
-# protein_altering_variant is excluded. It can not fit in `is_generally_truncating` column
+# From: https://useast.ensembl.org/info/genome/variation/prediction/predicted_data.html Date: 09/08/2023
 #term	generally_truncating	description
 transcript_ablation	yes	A feature ablation whereby the deleted region includes a transcript feature
 splice_donor_variant	yes	A splice variant that changes the 2 base region at the 5' end of an intron
@@ -7,7 +6,7 @@ splice_acceptor_variant	yes	A splice variant that changes the 2 base region at t
 stop_gained	yes	A sequence variant whereby at least one base of a codon is changed, resulting in a premature stop codon, leading to a shortened transcript
 frameshift_variant	yes	A sequence variant which causes a disruption of the translational reading frame, because the number of nucleotides inserted or deleted is not a multiple of three
 stop_lost	yes	A sequence variant where at least one base of the terminator codon (stop) is changed, resulting in an elongated transcript
-start_lost	yes	A codon variant that changes at least one base of the canonical start codo
+start_lost	yes	A codon variant that changes at least one base of the canonical start codon
 transcript_amplification	no	A feature amplification of a region containing a transcript
 inframe_insertion	no	An inframe non synonymous variant that inserts bases into in the coding sequence
 inframe_deletion	no	An inframe non synonymous variant that deletes bases from the coding sequence
@@ -38,3 +37,10 @@ intergenic_variant	no	A sequence variant located in the intergenic region, betwe
 fusion	yes	Fusion
 non_truncating_variant	no	A change in the DNA that does not truncate or shorten the protein
 any	no	any variant
+coding_transcript_variant	no	A transcript variant of a protein coding gene
+protein_altering_variant	no	A sequence_variant which is predicted to change the protein encoded in the coding sequence
+sequence_variant	no	A sequence_variant is a non exact copy of a sequence_feature or genome exhibiting one or more sequence_alteration
+splice_donor_5th_base_variant	yes	A sequence variant that causes a change at the 5th base pair after the start of the intron in the orientation of the transcript
+splice_donor_region_variant	yes	A sequence variant that falls in the region between the 3rd and 6th base after splice junction (5' end of intron)
+splice_polypyrimidine_tract_variant	yes	A sequence variant that falls in the polypyrimidine tract at 3' end of intron between 17 and 3 bases from the end (acceptor -3 to acceptor -17)
+start_retained_variant	no	A sequence variant where at least one base in the start codon is changed, but the start remains

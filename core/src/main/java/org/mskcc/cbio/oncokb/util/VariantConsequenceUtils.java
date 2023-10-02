@@ -1,11 +1,11 @@
 package org.mskcc.cbio.oncokb.util;
 
+import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.model.VariantConsequence;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.mskcc.cbio.oncokb.Constants.*;
 
@@ -16,6 +16,7 @@ public class VariantConsequenceUtils {
 
     private static final String VARIANT_CONSEQUENCE_FILE_PATH = "/data/variant-consequences.txt";
     private static Map<String, VariantConsequence> VariantConsequencesMap = null;
+    public static final List<String> TOO_BROAD_CONSEQUENCES = Arrays.asList(new String[]{PROTEIN_ALTERING_VARIANT});
     private static final Map<String, String> TCGAMapping = new HashMap<String, String>() {{
         put("3'flank", "downstream_gene_variant");
         put("3'utr", "3_prime_UTR_variant");
@@ -94,6 +95,43 @@ public class VariantConsequenceUtils {
         }
     }
 
+    public static VariantConsequence consequenceResolver(String consequenceTerms) {
+        return consequenceResolver(consequenceTerms, null);
+    }
+
+    // The goal is to reserve the details of the consequence if possible, but when consequence conflicts with variant class, we need to decide which one to use
+    public static VariantConsequence consequenceResolver(String consequenceTerms, String variantClass) {
+        if (StringUtils.isEmpty(consequenceTerms) && StringUtils.isEmpty(variantClass)) {
+            return null;
+        }
+        if (consequenceTerms == null) {
+            consequenceTerms = "";
+        }
+
+        VariantConsequence consequence = findVariantConsequenceByTerm(consequenceTerms.contains(",") ? pickConsequenceTerm(consequenceTerms) : consequenceTerms);
+        VariantConsequence variantClassConsequence = StringUtils.isEmpty(variantClass) ? null : findVariantConsequenceByTerm(variantClass);
+
+        if (consequence == null) {
+            if (variantClassConsequence != null) {
+                return variantClassConsequence;
+            } else {
+                return null;
+            }
+        } else {
+            if (variantClassConsequence != null && !variantClassConsequence.equals(consequence)) {
+                // we should compare the granularity of the consequence for splice site
+                if (SPLICE_SITE_VARIANTS.contains(consequence) && SPLICE_SITE_VARIANTS.contains(variantClassConsequence)) {
+                    return SPLICE_SITE_VARIANTS.indexOf(consequence) < SPLICE_SITE_VARIANTS.indexOf(variantClassConsequence) ? consequence : variantClassConsequence;
+                } else {
+                    return variantClassConsequence;
+                }
+            } else {
+                // Replace generic terms with empty string
+                return TOO_BROAD_CONSEQUENCES.contains(consequence.getTerm()) ? null : consequence;
+            }
+        }
+    }
+
     public static VariantConsequence findVariantConsequenceByTerm(String searchTerm) {
         VariantConsequence variantConsequence = findVariantConsequenceBySoTerm(searchTerm);
         if (variantConsequence == null) {
@@ -119,6 +157,19 @@ public class VariantConsequenceUtils {
                 matchStr = TCGAMapping.get(term);
             }
             return findVariantConsequenceBySoTerm(matchStr);
+        }
+    }
+
+    public static String pickConsequenceTerm(String consequenceTerms) {
+        if (StringUtils.isEmpty(consequenceTerms)) {
+            return "";
+        }
+        List<String> terms = Arrays.asList(consequenceTerms.split(",")).stream().map(consequence -> consequence.trim()).filter(StringUtils::isNotEmpty).collect(Collectors.toList());
+        // if we cannot find the matched variant consequence using the mostSevereConsequence, we should use the one from the consequence term list
+        if (terms.size() > 0) {
+            return terms.iterator().next();
+        } else {
+            return "";
         }
     }
 

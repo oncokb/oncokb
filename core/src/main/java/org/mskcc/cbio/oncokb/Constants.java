@@ -7,6 +7,7 @@ import org.mskcc.cbio.oncokb.util.VariantConsequenceUtils;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -20,6 +21,7 @@ public final class Constants {
     public static final String IN_FRAME_INSERTION = "inframe_insertion";
     public static final String FIVE_UTR = "5_prime_UTR_variant";
     public static final String UPSTREAM_GENE = "upstream_gene_variant";
+    public static final String PROTEIN_ALTERING_VARIANT = "protein_altering_variant";
 
     public static final String PUBLIC_API_VERSION = "v1.4.0";
     public static final String PRIVATE_API_VERSION = "v1.4.1";
@@ -34,7 +36,7 @@ public final class Constants {
 
     public static final ReferenceGenome DEFAULT_REFERENCE_GENOME = ReferenceGenome.GRCh37;
 
-    public static final Set<VariantConsequence> SPLICE_SITE_VARIANTS = Arrays.asList("splice_acceptor_variant", "splice_donor_variant", "splice_region_variant").stream().map(term -> VariantConsequenceUtils.findVariantConsequenceByTerm(term)).collect(Collectors.toSet());
+    public static final List<VariantConsequence> SPLICE_SITE_VARIANTS = Arrays.asList("splice_acceptor_variant", "splice_donor_variant", "splice_region_variant").stream().map(term -> VariantConsequenceUtils.findVariantConsequenceByTerm(term)).collect(Collectors.toList());
 
     private Constants() {
     }

@@ -522,20 +522,28 @@ public class SummaryUtils {
 
     public static String variantSummaryForTruncatingMutation(String altQuery, Alteration alteration, Oncogenicity oncogenicity) {
         StringBuilder sb = new StringBuilder();
-        sb.append(alteration.getGene().getHugoSymbol());
-        sb.append(" ");
+        String hugoSymbol = alteration.getGene().getHugoSymbol();
+        sb.append("The ");
+        if (!altQuery.contains(hugoSymbol)) {
+            sb.append(hugoSymbol);
+            sb.append(" ");
+        }
         sb.append(altQuery);
-        sb.append(" is a truncating mutation");
-        if (alteration.getGene().getTSG()) {
-            if (alteration.getGene().getOncogene()) {
-                sb.append("; truncating mutations in this gene are considered ");
+        if (altQuery.toLowerCase().contains("fusion")) {
+            sb.append(" leads to truncation of the " + hugoSymbol + " tumor suppressor gene and is considered ");
+        } else {
+            sb.append(" is a truncating mutation");
+            if (alteration.getGene().getTSG()) {
+                if (alteration.getGene().getOncogene()) {
+                    sb.append("; truncating mutations in this gene are considered ");
+                } else {
+                    sb.append(" in a tumor suppressor gene");
+                    sb.append(", and therefore is ");
+                }
             } else {
-                sb.append(" in a tumor suppressor gene");
+                sb.append(hugoSymbol);
                 sb.append(", and therefore is ");
             }
-        } else {
-            sb.append(alteration.getGene().getHugoSymbol());
-            sb.append(", and therefore is ");
         }
         sb.append(oncogenicity.getOncogenic().toLowerCase());
         sb.append(".");
