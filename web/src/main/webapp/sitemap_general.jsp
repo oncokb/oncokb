@@ -29,7 +29,7 @@
             <priority>1.0</priority>
         </url>
         <url>
-            <loc>${serverRoot}/actionableGenes</loc>
+            <loc>${serverRoot}/actionable-genes</loc>
             <changefreq>weekly</changefreq>
             <priority>0.9</priority>
         </url>
@@ -44,7 +44,12 @@
             <priority>0.7</priority>
         </url>
         <url>
-            <loc>${serverRoot}/cancerGenes</loc>
+            <loc>${serverRoot}/cancer-genes</loc>
+            <changefreq>weekly</changefreq>
+            <priority>0.6</priority>
+        </url>
+        <url>
+            <loc>${serverRoot}/precision-oncology-therapies</loc>
             <changefreq>weekly</changefreq>
             <priority>0.6</priority>
         </url>
