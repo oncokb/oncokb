@@ -368,7 +368,14 @@ public class PrivateSearchApiController implements PrivateSearchApi {
                 typeaheadSearchResp.setHighestResistanceLevel(highestLevel.getLevel());
             }
 
-            typeaheadSearchResp.setLink("actionableGenes#sections=Tx&tumorType=" + cancerMatch.getCancerType().getCode());
+            String cancerType = cancerMatch.getCancerType().getCode();
+            if (StringUtils.isEmpty(cancerType)) {
+                cancerType = cancerMatch.getCancerType().getSubtype();
+            }
+            if (StringUtils.isEmpty(cancerType)) {
+                cancerType = cancerMatch.getCancerType().getMainType();
+            }
+            typeaheadSearchResp.setLink("actionable-genes#sections=Tx&cancerType=" + cancerType);
         } else {
             typeaheadSearchResp.setLink("");
         }
