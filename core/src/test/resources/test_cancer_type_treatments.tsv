@@ -139,10 +139,12 @@ SF3B1	R625G	Breast Cancer
 
 # Sotorasib should only work for KRAS G12C, not alternative allele
 # the following tests should be enabled when the liquid propagation is in production also the AGM-510 treatment is in place
-KRAS	G12C	Breast Cancer	3B: Adagrasib; 3B: Sotorasib; 3B: Adagrasib+Cetuximab; 4: RMC-6236; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
+KRAS	G12C	Breast Cancer	3B: Adagrasib+Cetuximab; 3B: Sotorasib; 3B: Adagrasib; 3B: Adagrasib+Panitumumab; 3B: Sotorasib+Cetuximab; 3B: Sotorasib+Panitumumab; 4: RMC-6236; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
 KRAS	G12D	Breast Cancer	4: MRTX-1133; 4: RMC-6236; 4: Trametinib; 4: ASP3082; 4: Cobimetinib; 4: Binimetinib;
-KRAS	G12C	NSCLC	1: Sotorasib; 1: Adagrasib; 3B: Adagrasib+Cetuximab; 4: RMC-6236; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
+KRAS	G12C	NSCLC	1: Sotorasib; 1: Adagrasib; 3B: Adagrasib+Cetuximab; 3B: Adagrasib+Panitumumab; 3B: Sotorasib+Cetuximab; 3B: Sotorasib+Panitumumab; 4: RMC-6236; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
 KRAS	G12D	NSCLC	4: MRTX-1133; 4: RMC-6236; 4: Trametinib; 4: ASP3082; 4: Cobimetinib; 4: Binimetinib;
+KRAS	G12C	Colorectal Cancer	R1: Cetuximab; R1: Panitumumab; R1: Tucatinib+Trastuzumab; 2: Adagrasib+Cetuximab; 2: Adagrasib+Panitumumab; 2: Sotorasib+Cetuximab; 2: Sotorasib+Panitumumab; 3B: Sotorasib; 3B: Adagrasib; 4: RMC-6236; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
+KRAS	G12D	Colorectal Cancer	R1: Cetuximab; R1: Panitumumab; R1: Tucatinib+Trastuzumab; 4: MRTX-1133; 4: RMC-6236; 4: Trametinib; 4: ASP3082; 4: Cobimetinib; 4: Binimetinib;
 KRAS	G12C	AML
 KRAS	G12D	AML
 KRAS	G12C	Leukemia
@@ -152,7 +154,7 @@ BRAF	V600K	Anaplastic Thyroid Cancer	3B: Dabrafenib+Trametinib; 3B: Vemurafenib+
 BRAF	V600E	Melanoma	1: Dabrafenib; 1: Dabrafenib+Trametinib; 1: Vemurafenib+Atezolizumab+Cobimetinib; 1: Trametinib; 1: Vemurafenib; 1: Vemurafenib+Cobimetinib; 1: Encorafenib+Binimetinib; 3B: Encorafenib+Cetuximab; 3B: Selumetinib; 3B: Encorafenib+Panitumumab;
 BRAF	V600K	Melanoma	1: Dabrafenib+Trametinib; 1: Vemurafenib+Atezolizumab+Cobimetinib; 1: Trametinib; 1: Vemurafenib+Cobimetinib; 1: Encorafenib+Binimetinib;
 BRAF	V600G	Melanoma	1: Vemurafenib+Atezolizumab+Cobimetinib; 2: Encorafenib+Binimetinib; 2: Dabrafenib+Trametinib; 2: Vemurafenib+Cobimetinib;
-BRAF	V600E	NSCLC	1: Dabrafenib+Trametinib; 3B: Dabrafenib; 3B: Encorafenib+Cetuximab; 3B: Selumetinib; 3B: Vemurafenib+Atezolizumab+Cobimetinib; 3B: Encorafenib+Panitumumab; 3B: Trametinib; 3B: Vemurafenib; 3B: Vemurafenib+Cobimetinib; 3B: Encorafenib+Binimetinib;
+BRAF	V600E	NSCLC	1: Dabrafenib+Trametinib; 1: Encorafenib+Binimetinib; 3B: Dabrafenib; 3B: Encorafenib+Cetuximab; 3B: Selumetinib; 3B: Vemurafenib+Atezolizumab+Cobimetinib; 3B: Encorafenib+Panitumumab; 3B: Trametinib; 3B: Vemurafenib; 3B: Vemurafenib+Cobimetinib;
 BRAF	V600K	NSCLC	3B: Dabrafenib+Trametinib; 3B: Vemurafenib+Atezolizumab+Cobimetinib; 3B: Trametinib; 3B: Vemurafenib+Cobimetinib; 3B: Encorafenib+Binimetinib;
 BRAF	V600G	NSCLC	3B: Encorafenib+Binimetinib; 3B: Vemurafenib+Atezolizumab+Cobimetinib; 3B: Dabrafenib+Trametinib; 3B: Vemurafenib+Cobimetinib;
 BRAF	V600K	NSCLC	3B: Dabrafenib+Trametinib; 3B: Vemurafenib+Atezolizumab+Cobimetinib; 3B: Trametinib; 3B: Vemurafenib+Cobimetinib; 3B: Encorafenib+Binimetinib;
@@ -182,8 +184,8 @@ EGFR	L861R	NSCLC
 EGFR	L861M	NSCLC
 EGFR	G724S	NSCLC	R2: Osimertinib;
 EGFR	G724S	MEL
-KRAS	G12C	NSCLC	1: Sotorasib; 1: Adagrasib; 3B: Adagrasib+Cetuximab; 4: RMC-6236; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
-KRAS	G12C	Melanoma	3B: Adagrasib; 3B: Sotorasib; 3B: Adagrasib+Cetuximab; 4: RMC-6236; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
+KRAS	G12C	NSCLC	1: Sotorasib; 1: Adagrasib; 3B: Adagrasib+Cetuximab; 3B: Adagrasib+Panitumumab; 3B: Sotorasib+Cetuximab; 3B: Sotorasib+Panitumumab; 4: RMC-6236; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
+KRAS	G12C	Melanoma	3B: Adagrasib+Cetuximab; 3B: Sotorasib; 3B: Adagrasib; 3B: Adagrasib+Panitumumab; 3B: Sotorasib+Cetuximab; 3B: Sotorasib+Panitumumab; 4: RMC-6236; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
 KRAS	G12A	NSCLC	4: RMC-6236; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
 KRAS	G12A	Melanoma	4: RMC-6236; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
 KRAS	G12C	Histiocytosis	3A: Cobimetinib; 3A: Trametinib;
