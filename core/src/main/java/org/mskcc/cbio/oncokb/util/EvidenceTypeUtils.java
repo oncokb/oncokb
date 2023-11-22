@@ -14,16 +14,33 @@ public class EvidenceTypeUtils {
     public static Set<EvidenceType> getGeneEvidenceTypes() {
         Set<EvidenceType> evidenceTypes = new HashSet<>();
         evidenceTypes.add(EvidenceType.GENE_SUMMARY);
+        evidenceTypes.add(EvidenceType.GERMLINE_GENE_SUMMARY);
         evidenceTypes.add(EvidenceType.GENE_BACKGROUND);
         return evidenceTypes;
     }
 
     public static Set<EvidenceType> getMutationEvidenceTypes() {
         Set<EvidenceType> evidenceTypes = new HashSet<>();
-        evidenceTypes.add(EvidenceType.ONCOGENIC);
-        evidenceTypes.add(EvidenceType.MUTATION_EFFECT);
+        evidenceTypes.addAll(getSomaticMutationEvidenceTypes());
+        evidenceTypes.addAll(getGermlineMutationEvidenceTypes());
         evidenceTypes.add(EvidenceType.VUS);
         evidenceTypes.add(EvidenceType.MUTATION_SUMMARY);
+        return evidenceTypes;
+    }
+
+    public static Set<EvidenceType> getSomaticMutationEvidenceTypes() {
+        Set<EvidenceType> evidenceTypes = new HashSet<>();
+        evidenceTypes.add(EvidenceType.ONCOGENIC);
+        evidenceTypes.add(EvidenceType.MUTATION_EFFECT);
+        return evidenceTypes;
+    }
+
+    public static Set<EvidenceType> getGermlineMutationEvidenceTypes() {
+        Set<EvidenceType> evidenceTypes = new HashSet<>();
+        evidenceTypes.add(EvidenceType.PATHOGENIC);
+        evidenceTypes.add(EvidenceType.GERMLINE_PENETRANCE);
+        evidenceTypes.add(EvidenceType.GERMLINE_CANCER_RISK);
+        evidenceTypes.add(EvidenceType.GERMLINE_INHERITANCE_MECHANISM);
         return evidenceTypes;
     }
 

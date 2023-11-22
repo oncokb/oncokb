@@ -12,6 +12,7 @@ import java.util.Set;
  */
 public class AnnotationQuery implements java.io.Serializable{
     private String id; //Optional, This id is passed from request. The identifier used to distinguish the query
+    private Boolean isGermline = false;
     private ReferenceGenome referenceGenome = ReferenceGenome.GRCh37;
     private String tumorType;
     private Set<EvidenceType> evidenceTypes = new HashSet<>();
@@ -22,6 +23,14 @@ public class AnnotationQuery implements java.io.Serializable{
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public Boolean isGermline() {
+        return isGermline;
+    }
+
+    public void setGermline(Boolean germline) {
+        isGermline = germline;
     }
 
     public ReferenceGenome getReferenceGenome() {

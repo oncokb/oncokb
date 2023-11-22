@@ -168,7 +168,7 @@ public class IndicatorUtils {
                 Query tmpQuery = new Query(query.getId(), query.getReferenceGenome(), tmpGene.getEntrezGeneId(),
                     tmpGene.getHugoSymbol(), query.getAlteration(), null, query.getSvType(),
                     query.getTumorType(), query.getConsequence(), query.getProteinStart(),
-                    query.getProteinEnd(), query.getHgvs());
+                    query.getProteinEnd(), query.getHgvs(), query.isGermline());
                 result.add(IndicatorUtils.processQuery(tmpQuery, levels, highestLevelOnly, evidenceTypes));
             }
             return result.iterator().next();
@@ -185,9 +185,8 @@ public class IndicatorUtils {
             indicatorQuery.setGeneExist(gene.getEntrezGeneId() > 0);
 
             // Gene summary
-
-            if (evidenceTypes.contains(EvidenceType.GENE_SUMMARY)) {
-                indicatorQuery.setGeneSummary(SummaryUtils.geneSummary(gene, query.getHugoSymbol()));
+            if (evidenceTypes.contains(EvidenceType.GENE_SUMMARY) || evidenceTypes.contains(EvidenceType.GERMLINE_GENE_SUMMARY)) {
+                indicatorQuery.setGeneSummary(SummaryUtils.geneSummary(gene, query.getHugoSymbol(), query.isGermline()));
                 allQueryRelatedEvidences.addAll(EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Collections.singleton(EvidenceType.GENE_SUMMARY)));
             }
 
@@ -244,7 +243,7 @@ public class IndicatorUtils {
             Set<Evidence> treatmentEvidences = new HashSet<>();
 
             if (nonVUSRelevantAlts.size() > 0) {
-                if (hasOncogenicEvidence) {
+                if (hasOncogenicEvidence && !query.isGermline()) {
                     IndicatorQueryOncogenicity indicatorQueryOncogenicity = getOncogenicity(matchedAlt, alleles, nonVUSRelevantAlts);
 
                     if (indicatorQueryOncogenicity.getOncogenicityEvidence() != null) {
@@ -257,7 +256,7 @@ public class IndicatorUtils {
                     }
                 }
 
-                if (hasMutationEffectEvidence) {
+                if (hasMutationEffectEvidence && !query.isGermline()) {
                     IndicatorQueryMutationEffect indicatorQueryMutationEffect = getMutationEffect(matchedAlt, alleles, nonVUSRelevantAlts);
 
                     if (indicatorQueryMutationEffect.getMutationEffectEvidence() != null) {
@@ -274,6 +273,11 @@ public class IndicatorUtils {
                         }
                         indicatorQuery.setMutationEffect(mutationEffectResp);
                     }
+                }
+
+                // Add germline info
+                if(query.isGermline()){
+                    indicatorQuery.setGermline(getGermlineVariantInfo(matchedAlt));
                 }
 
                 if (hasTreatmentEvidence) {
@@ -481,7 +485,7 @@ public class IndicatorUtils {
             Query tmpQuery = new Query(null, originalQuery.getReferenceGenome(), alteration.getGene().getEntrezGeneId(),
                 alteration.getGene().getHugoSymbol(), alteration.getAlteration(), null, null,
                 originalQuery.getTumorType(), alteration.getConsequence().getTerm(), alteration.getProteinStart(),
-                alteration.getProteinEnd(), null);
+                alteration.getProteinEnd(), null, originalQuery.isGermline());
 
             // Add oncogenicity
             IndicatorQueryOncogenicity indicatorQueryOncogenicity = getOncogenicity(alteration, new ArrayList<>(), new ArrayList<>());
@@ -498,6 +502,53 @@ public class IndicatorUtils {
         }
         // when the oncogenicity is the same, then the therapeutic info will be the same as well.
         return groupedOncogenicities.get(highestOncogenicity).get(0);
+    }
+
+    private static void sortGermlineEvidenceByAlterationSize(List<Evidence> evidences){
+        evidences.sort(new Comparator<Evidence>() {
+            @Override
+            public int compare(Evidence o1, Evidence o2) {
+                return o1.getAlterations().size() - o2.getAlterations().size();
+            }
+        });
+    }
+
+    private static GermlineVariant getGermlineVariantInfo(Alteration matchedAlt) {
+        GermlineVariant germlineVariant = new GermlineVariant();
+
+        // Get pathogenic info
+        List<Evidence> pathogenicEvis = EvidenceUtils.getEvidence(Collections.singletonList(matchedAlt), Collections.singleton(EvidenceType.PATHOGENIC), null);
+        if (pathogenicEvis.size() > 0) {
+            sortGermlineEvidenceByAlterationSize(pathogenicEvis);
+            Evidence pathogenicEvi = pathogenicEvis.iterator().next();
+            germlineVariant.setPathogenic(pathogenicEvi.getKnownEffect());
+            germlineVariant.setDescription(pathogenicEvi.getDescription());
+        }
+
+        // Get penetrance info
+        List<Evidence> penetranceEvis = EvidenceUtils.getEvidence(Collections.singletonList(matchedAlt), Collections.singleton(EvidenceType.GERMLINE_PENETRANCE), null);
+        if (penetranceEvis.size() > 0) {
+            sortGermlineEvidenceByAlterationSize(penetranceEvis);
+            Evidence penetranceEvi = penetranceEvis.iterator().next();
+            germlineVariant.setPenetrance(penetranceEvi.getKnownEffect());
+        }
+
+        // Get cancer risk info
+        List<Evidence> cancerRiskEvis = EvidenceUtils.getEvidence(Collections.singletonList(matchedAlt), Collections.singleton(EvidenceType.GERMLINE_CANCER_RISK), null);
+        if (cancerRiskEvis.size() > 0) {
+            sortGermlineEvidenceByAlterationSize(cancerRiskEvis);
+            Evidence cancerRiskEvi = cancerRiskEvis.iterator().next();
+            germlineVariant.setCancerRisk(cancerRiskEvi.getDescription());
+        }
+
+        // Get cancer risk info
+        List<Evidence> inheritanceMechanismEvis = EvidenceUtils.getEvidence(Collections.singletonList(matchedAlt), Collections.singleton(EvidenceType.GERMLINE_INHERITANCE_MECHANISM), null);
+        if (inheritanceMechanismEvis.size() > 0) {
+            sortGermlineEvidenceByAlterationSize(inheritanceMechanismEvis);
+            Evidence inheritanceMechanismEvi = inheritanceMechanismEvis.iterator().next();
+            germlineVariant.setInheritanceMechanism(inheritanceMechanismEvi.getKnownEffect());
+        }
+        return germlineVariant;
     }
 
     private static Set<Implication> getImplicationsFromEvidence(Evidence evidence, String queryHugoSymbol) {

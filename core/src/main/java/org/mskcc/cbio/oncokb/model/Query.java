@@ -31,6 +31,7 @@ public class Query implements java.io.Serializable {
     private Integer proteinStart;
     private Integer proteinEnd;
     private String hgvs;
+    private boolean isGermline = false;
 
     public Query() {
     }
@@ -97,7 +98,8 @@ public class Query implements java.io.Serializable {
 
     public Query(String id, ReferenceGenome referenceGenome, Integer entrezGeneId, String hugoSymbol,
                  String alteration, String alterationType, StructuralVariantType svType,
-                 String tumorType, String consequence, Integer proteinStart, Integer proteinEnd, String hgvs) {
+                 String tumorType, String consequence, Integer proteinStart, Integer proteinEnd, String hgvs,
+                 Boolean isGermline) {
         this.id = id;
         this.referenceGenome = referenceGenome == null ? DEFAULT_REFERENCE_GENOME : referenceGenome;
         if (hugoSymbol != null && !hugoSymbol.isEmpty()) {
@@ -112,6 +114,7 @@ public class Query implements java.io.Serializable {
         this.proteinStart = proteinStart;
         this.proteinEnd = proteinEnd;
         this.setHgvs(hgvs);
+        this.isGermline = isGermline == null ? false : isGermline;
     }
 
     public String getId() {
@@ -214,6 +217,14 @@ public class Query implements java.io.Serializable {
 
     public void setHgvs(String hgvs) {
         this.hgvs = hgvs;
+    }
+
+    public boolean isGermline() {
+        return isGermline;
+    }
+
+    public void setGermline(boolean germline) {
+        isGermline = germline;
     }
 
     public void enrich() {

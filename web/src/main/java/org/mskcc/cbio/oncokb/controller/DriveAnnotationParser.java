@@ -301,16 +301,100 @@ public class DriveAnnotationParser {
         }
     }
 
+    private void saveEffectDescriptionEvidence(Gene gene, Set<Alteration> alterations, EvidenceType evidenceType, String knownEffect, String description) {
+        Evidence evidence = new Evidence();
+        evidence.setEvidenceType(evidenceType);
+        evidence.setAlterations(alterations);
+        evidence.setGene(gene);
+        if (StringUtils.isNotEmpty(description)) {
+            evidence.setDescription(description);
+            setDocuments(description, evidence);
+        }
+        evidence.setKnownEffect(knownEffect);
+        EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+        evidenceBo.save(evidence);
+    }
+
+    private String getJsonStringVal(JSONObject object, String key) {
+        return object.has(key) ? (object.getString(key).trim().isEmpty() ? null : object.getString(key).trim()) : null;
+    }
+
+    private void parseGermline(JSONObject germlineObj, Gene gene, Set<Alteration> alterations) {
+        // Save pathogenicity
+        Pathogenicity pathogenic = getPathogenicity(germlineObj);
+        String description = getJsonStringVal(germlineObj, "description");
+        if (pathogenic != null || description != null) {
+            saveEffectDescriptionEvidence(gene, alterations, EvidenceType.PATHOGENIC, pathogenic.getPathogenic(), description);
+        }
+
+        // Save germline variant penetrance
+        String germlinePenetrance = getJsonStringVal(germlineObj, "penetrance");
+        if (StringUtils.isNotEmpty(germlinePenetrance)) {
+            saveEffectDescriptionEvidence(gene, alterations, EvidenceType.GERMLINE_PENETRANCE, germlinePenetrance, null);
+        }
+
+        // Save germline mechanism of inheritance
+        String inheritanceMechanism = getJsonStringVal(germlineObj, "inheritanceMechanism");
+        if (StringUtils.isNotEmpty(inheritanceMechanism)) {
+            saveEffectDescriptionEvidence(gene, alterations, EvidenceType.GERMLINE_INHERITANCE_MECHANISM, inheritanceMechanism, null);
+        }
+
+        // Save germline cancer risk
+        String cancerRisk = getJsonStringVal(germlineObj, "cancerRisk");
+        if (StringUtils.isNotEmpty(cancerRisk)) {
+            saveEffectDescriptionEvidence(gene, alterations, EvidenceType.GERMLINE_CANCER_RISK, null, cancerRisk);
+        }
+    }
+
+    private Set<Alteration> getAlterations(Gene gene, String mutationStr, JSONArray alterationList) {
+        AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
+        AlterationType type = AlterationType.MUTATION;
+        List<Alteration> mutations = new ArrayList<>();
+        // Use alteration list over mutation string
+        if (alterationList != null) {
+            List<String> mutationStrs = new ArrayList<>();
+            for (int i = 0; i < alterationList.length(); i++) {
+                JSONObject alteration = alterationList.getJSONObject(i);
+                if (alteration.has("cDna") && StringUtils.isNotEmpty(alteration.getString("cDna"))) {
+                    mutationStrs.add(alteration.getString("cDna"));
+                }
+                if (alteration.has("proteinChange") && StringUtils.isNotEmpty(alteration.getString("proteinChange"))) {
+                    mutationStrs.add(alteration.getString("proteinChange"));
+                }
+            }
+            mutations = AlterationUtils.parseMutationString(StringUtils.join(mutationStrs, ","), ",");
+        } else {
+            mutations = AlterationUtils.parseMutationString(mutationStr, ",");
+        }
+
+        Set<Alteration> alterations = new HashSet<>();
+        for (Alteration mutation : mutations) {
+            Alteration alteration = alterationBo.findAlteration(gene, type, mutation.getAlteration());
+            if (alteration == null) {
+                alteration = new Alteration();
+                alteration.setGene(gene);
+                alteration.setAlterationType(type);
+                alteration.setAlteration(mutation.getAlteration());
+                alteration.setName(mutation.getName());
+                alteration.setReferenceGenomes(mutation.getReferenceGenomes());
+                AlterationUtils.annotateAlteration(alteration, mutation.getAlteration());
+                alterationBo.save(alteration);
+            } else if (!alteration.getReferenceGenomes().equals(mutation.getReferenceGenomes())) {
+                alteration.setReferenceGenomes(mutation.getReferenceGenomes());
+                alterationBo.save(alteration);
+            }
+            alterations.add(alteration);
+        }
+        return alterations;
+    }
+
     private void parseMutation(Gene gene, JSONObject mutationObj, Integer nestLevel) throws Exception {
         String mutationStr = mutationObj.has("name") ? mutationObj.getString("name").trim() : null;
+        JSONArray alterationsObj = mutationObj.has("alterations") ? mutationObj.getJSONArray("alterations") : null;
 
-        if (mutationStr != null && !mutationStr.isEmpty() && !mutationStr.contains("?")) {
+        if (StringUtils.isNotEmpty(mutationStr) || alterationsObj != null) {
             System.out.println(spaceStrByNestLevel(nestLevel) + "Mutation: " + mutationStr);
 
-            AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
-            AlterationType type = AlterationType.MUTATION; //TODO: cna and fusion
-
-            Set<Alteration> alterations = new HashSet<>();
 
             JSONObject mutationEffect = mutationObj.has("mutation_effect") ? mutationObj.getJSONObject("mutation_effect") : null;
 
@@ -327,25 +411,10 @@ public class DriveAnnotationParser {
 //            addDateToLastReviewSetFromLong(lastReviewDatesEffect, mutationEffect, "effect");
             String effect_uuid = getUUID(mutationEffect, "effect");
 
-            List<Alteration> mutations = AlterationUtils.parseMutationString(mutationStr, ",");
-            for (Alteration mutation : mutations) {
-                Alteration alteration = alterationBo.findAlteration(gene, type, mutation.getAlteration());
-                if (alteration == null) {
-                    alteration = new Alteration();
-                    alteration.setGene(gene);
-                    alteration.setAlterationType(type);
-                    alteration.setAlteration(mutation.getAlteration());
-                    alteration.setName(mutation.getName());
-                    alteration.setReferenceGenomes(mutation.getReferenceGenomes());
-                    AlterationUtils.annotateAlteration(alteration, mutation.getAlteration());
-                    alterationBo.save(alteration);
-                } else if (!alteration.getReferenceGenomes().equals(mutation.getReferenceGenomes())) {
-                    alteration.setReferenceGenomes(mutation.getReferenceGenomes());
-                    alterationBo.save(alteration);
-                }
-                alterations.add(alteration);
+            Set<Alteration> alterations = getAlterations(gene, mutationStr, alterationsObj);
+            alterations.forEach(alteration -> {
                 setOncogenic(gene, alteration, oncogenic, oncogenic_uuid, oncogenic_lastEdit);
-            }
+            });
 
             // mutation effect
             String effectDesc = mutationEffect.has("description") ?
@@ -385,6 +454,10 @@ public class DriveAnnotationParser {
 
                 EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
                 evidenceBo.save(evidence);
+            }
+
+            if (mutationEffect.has("germline")) {
+                parseGermline(mutationEffect.getJSONObject("germline"), gene, alterations);
             }
 
             // cancers
@@ -427,7 +500,7 @@ public class DriveAnnotationParser {
                 } else {
                     tumorTypes.add(matchedTumorType);
                 }
-            } else if(mainType != null){
+            } else if (mainType != null) {
                 TumorType matchedTumorType = ApplicationContextSingleton.getTumorTypeBo().getByMainType(mainType);
                 if (matchedTumorType == null) {
                     throw new Exception("The tumor main type does not exist: " + mainType);
@@ -468,12 +541,54 @@ public class DriveAnnotationParser {
         return oncogenic;
     }
 
+    protected Pathogenicity getPathogenicityByString(String pathogenicStr) {
+        Pathogenicity pathogenic = null;
+        if (pathogenicStr != null) {
+            pathogenicStr = pathogenicStr.toLowerCase();
+            switch (pathogenicStr) {
+                case "yes":
+                    pathogenic = Pathogenicity.YES;
+                    break;
+                case "pathogenic":
+                    pathogenic = Pathogenicity.YES;
+                    break;
+                case "likely":
+                    pathogenic = Pathogenicity.LIKELY;
+                    break;
+                case "likely pathogenic":
+                    pathogenic = Pathogenicity.LIKELY;
+                    break;
+                case "unknown":
+                    pathogenic = Pathogenicity.UNKNOWN;
+                    break;
+                case "likely benign":
+                    pathogenic = Pathogenicity.LIKELY_BENIGN;
+                    break;
+                case "benign":
+                    pathogenic = Pathogenicity.BENIGN;
+                    break;
+                default:
+                    break;
+            }
+        }
+        return pathogenic;
+    }
+
     private Oncogenicity getOncogenicity(JSONObject mutationEffect) throws JSONException {
         Oncogenicity oncogenic = null;
         if (mutationEffect.has("oncogenic") && !mutationEffect.getString("oncogenic").isEmpty()) {
             oncogenic = getOncogenicityByString(mutationEffect.getString("oncogenic"));
         }
         return oncogenic;
+    }
+
+    private Pathogenicity getPathogenicity(JSONObject germline) throws JSONException {
+        Pathogenicity pathogenic = null;
+        String PATHOGENICITY_KEY = "pathogenic";
+        if (germline.has(PATHOGENICITY_KEY) && !germline.getString(PATHOGENICITY_KEY).isEmpty()) {
+            pathogenic = getPathogenicityByString(germline.getString(PATHOGENICITY_KEY));
+        }
+        return pathogenic;
     }
 
     private void setOncogenic(Gene gene, Alteration alteration, Oncogenicity oncogenic, String uuid, Date lastEdit) {
@@ -627,7 +742,7 @@ public class DriveAnnotationParser {
     }
 
     private void parseTherapeuticImplications(Gene gene, Set<Alteration> alterations, List<TumorType> tumorTypes, List<TumorType> excludedCancerTypes, List<TumorType> relevantCancerTypes, JSONObject implicationObj,
-                                                     EvidenceType evidenceType, String knownEffectOfEvidence, Integer nestLevel) throws Exception {
+                                              EvidenceType evidenceType, String knownEffectOfEvidence, Integer nestLevel) throws Exception {
         System.out.println(spaceStrByNestLevel(nestLevel) + evidenceType);
 
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
