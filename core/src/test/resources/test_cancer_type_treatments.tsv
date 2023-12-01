@@ -129,8 +129,8 @@ MAP2K1	K57N	Erdheim-Chester Disease	2: Cobimetinib; 2: Trametinib;
 MAP2K1	K57N	Lung Adenocarcinoma	3A: Trametinib; 3A: Cobimetinib;
 MAP2K1	K57N	Glioblastoma	3B: Trametinib; 3B: Cobimetinib;
 #MAP2K1	K57N	Diffuse Large B-Cell Lymphoma, NOS
-PIK3CA	E545K	Breast Cancer	1: Alpelisib+Fulvestrant; 4: RLY-2608; 4: RLY-2608+Fulvestrant;
-PIK3CA	E545K	Ovarian Cancer	3B: Alpelisib+Fulvestrant; 4: RLY-2608;
+PIK3CA	E545K	Breast Cancer	1: Alpelisib+Fulvestrant; 1: Capivasertib+Fulvestrant; 4: RLY-2608; 4: RLY-2608+Fulvestrant;
+PIK3CA	E545K	Ovarian Cancer	3B: Alpelisib+Fulvestrant; 3B: Capivasertib+Fulvestrant; 4: RLY-2608;
 #PIK3CA	E545K	Acute Myeloid Leukemia
 NRAS	G12C	Breast Cancer	3B: Binimetinib;
 #NRAS	G12C	Chronic Myelogenous Leukemia
@@ -164,9 +164,9 @@ BRAF	V600E	HCL	2: Vemurafenib;
 BRAF	V600K	Pilocytic Astrocytoma   3B: Dabrafenib+Trametinib; 3B: Trametinib; 3B: Vemurafenib+Cobimetinib; 3B: Encorafenib+Binimetinib;
 BRAF	V600E	Pilocytic Astrocytoma	1: Dabrafenib+Trametinib; 2: Selumetinib; 2: Vemurafenib+Cobimetinib; 3B: Dabrafenib; 3B: Encorafenib+Cetuximab; 3B: Vemurafenib+Atezolizumab+Cobimetinib; 3B: Encorafenib+Panitumumab; 3B: Trametinib; 3B: Vemurafenib; 3B: Encorafenib+Binimetinib;
 BRAF	V600K	HCL
-AKT1	E17K	Breast Cancer	3A: AZD5363;
-AKT1	E17K	NSCLC	3B: AZD5363;
-AKT1	E17G	Breast Cancer
+AKT1	E17K	Breast Cancer   1: Capivasertib+Fulvestrant; 3B: Capivasertib;
+AKT1	E17K	NSCLC   3B: Capivasertib; 3B: Capivasertib+Fulvestrant;
+AKT1	E17G	Breast Cancer   1: Capivasertib+Fulvestrant;
 FGFR3	Y373C	Bladder Cancer	1: Erdafitinib; 4: AZD4547;
 FGFR3	Y373G	Bladder Cancer	4: Erdafitinib; 4: AZD4547;
 EGFR	A750P	NSCLC

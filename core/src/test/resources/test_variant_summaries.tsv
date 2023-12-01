@@ -28,7 +28,7 @@ BRAF	T100*	Unknown	BRAF is considered an oncogene and truncating mutations in on
 ### Truncating mutation in TSG
 BRCA1	T100*	Likely Oncogenic	The BRCA1 T100* is a truncating mutation in a tumor suppressor gene, and therefore is likely oncogenic.
 ### Truncating mutations in TSG that are not curated
-PPP2R2A	T100*	Unknown	The PPP2R2A T100* mutation has not specifically been reviewed by the OncoKB team, and therefore its biological significance is unknown.
+PPP2R2A	T100*	Likely Oncogenic	The PPP2R2A T100* is a truncating mutation in a tumor suppressor gene, and therefore is likely oncogenic.
 ### Truncating mutation in both
 PTPN1	T100*	Likely Oncogenic	The PTPN1 T100* is a truncating mutation; truncating mutations in this gene are considered likely oncogenic.
 ### Truncating mutation in neither
@@ -40,7 +40,7 @@ ALK	Test-ALK fusion	Likely Oncogenic	The Test-ALK fusion is likely oncogenic.
 ### Fusion in TSG
 BRCA1	Test-BRCA1 fusion	Likely Oncogenic	The Test-BRCA1 fusion leads to truncation of the BRCA1 tumor suppressor gene and is considered likely oncogenic.
 ### Fusion in TSG that Truncating Mutations is not curated
-PPP2R2A	Test-PPP2R2A fusion	Unknown	The Test-PPP2R2A fusion has not specifically been reviewed by the OncoKB team, and therefore its biological significance is unknown.
+PPP2R2A	Test-PPP2R2A fusion	Likely Oncogenic	The Test-PPP2R2A fusion leads to truncation of the PPP2R2A tumor suppressor gene and is considered likely oncogenic.
 ### Fusion in both
 PTPN1	Test-PTPN1 fusion	Likely Oncogenic	The Test-PTPN1 fusion leads to truncation of the PTPN1 tumor suppressor gene and is considered likely oncogenic.
 ### Fusion in neither
