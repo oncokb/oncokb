@@ -153,13 +153,7 @@ public class GenomeNexusUtils {
         preAnnotatedVariantInfo.setReferenceGenome(referenceGenome);
 
         VariantAnnotation annotation = null;
-        try {
-            annotation = getVariantAnnotation(type, query, referenceGenome);
-        } catch (ApiException e){
-            // If there is an ApiException thrown by GN because it cannot annotate the variant, then we still
-            // want to finish annotating the rest of the annotations in the POST request.
-            e.printStackTrace();
-        }
+        annotation = getVariantAnnotation(type, query, referenceGenome);
 
         if (annotation != null) {
             // Use original query for HGVSg/Genomic Location.
