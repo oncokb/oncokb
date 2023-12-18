@@ -7,20 +7,20 @@
 PIK3CB	A1048T	Likely Gain-of-function	We do not have a mutation effect description for PIK3CB A1048T, however, the mutation effect description for PIK3CB A1048V is: The PIK3CB A1048V mutation is located in the kinase domain of the protein. This mutation has been found in intestinal cancer (PMID: 28481359). Expression of this mutation in a kidney epithelial cell line demonstrated that it was activating as measured by increased in vivo xenograft tumor formation compared to wildtype (PMID: 27147599).
 AKT2	R170L	Likely Gain-of-function	We do not have a mutation effect description for AKT2 R170L, however, the mutation effect description for AKT2 R170W is: The AKT2 R170W is located in the kinase domain of the protein. This mutation has been found in endometrial and stomach cancer (PMID: 24071849). Expression of this mutation in a colorectal cancer cell line demonstrated that it is activating as measured by increased protein and pathway activation compared to wildtype (PMID: 25551293).
 BRAF	R509Q	Likely Loss-of-function	We do not have a mutation effect description for BRAF R509Q, however, the mutation effect description for BRAF R509H is: The BRAF R509H mutation is located in the kinase domain in exon 13 of the protein. This mutation lies along the dimer interface of the protein. Expression of this mutation in 293H cells demonstrated that it is inactivating, as shown by decreased protein dimerization and decreased downstream cell signaling (PMID: 20179705).
-AKT2	D324Y	Unknown
-ERBB2	E717V	Likely Gain-of-function	We do not have a mutation effect description for ERBB2 E717V, however, we have mutation effect descriptions for ERBB2 E717D/K.
+AKT2	D324Y	Unknown	We do not have a mutation effect description for AKT2 D324Y, however, the mutation effect description for AKT2 D324N is: The AKT2 D324N mutation is located in the kinase domain of the protein. While this mutation has not been functionally characterized, it is paralogous to AKT1 D323N, which is likely oncogenic and a statistically significant hotspot (PMID: 26619011).
+ERBB2	E717V	Unknown	We do not have a mutation effect description for ERBB2 E717V, however, we have mutation effect descriptions for ERBB2 E717D/K.
 
 ## Table 9.2b: Assigning an Oncogenic Effect and Creating Variant Summaries for Alternate Alleles When There is >1 Curated Reference Alleles with different oncogenic effect
 KLF5	E419G	Likely Gain-of-function	We do not have a mutation effect description for KLF5 E419G, however, we have mutation effect descriptions for KLF5 E419K/Q.
 RET	C634F	Likely Gain-of-function	We do not have a mutation effect description for RET C634F, however, we have mutation effect descriptions for RET C634G/R/S/W/Y.
-ERBB2	A644S	Likely Gain-of-function	We do not have a mutation effect description for ERBB2 A644S, however, we have mutation effect descriptions for ERBB2 A644F/V.
-BRCA1	M1628F	Unknown
-PIK3CA	G451K	Likely Gain-of-function	We do not have a mutation effect description for PIK3CA G451K, however, we have mutation effect descriptions for PIK3CA G451R/V.
-BRCA1	M1652L	Unknown
-ALK	G1269E	Likely Gain-of-function	We do not have a mutation effect description for ALK G1269E, however, we have mutation effect descriptions for ALK G1269A/S.
+ERBB2	A644S	Unknown	We do not have a mutation effect description for ERBB2 A644S, however, we have mutation effect descriptions for ERBB2 A644F/V.
+BRCA1	M1628F	Unknown	We do not have a mutation effect description for BRCA1 M1628F, however, we have mutation effect descriptions for BRCA1 M1628T/V.
+PIK3CA	G451K	Unknown	We do not have a mutation effect description for PIK3CA G451K, however, we have mutation effect descriptions for PIK3CA G451R/V.
+BRCA1	M1652L	Unknown	We do not have a mutation effect description for BRCA1 M1652L, however, we have mutation effect descriptions for BRCA1 M1652I/K/T.
+ALK	G1269E	Unknown	We do not have a mutation effect description for ALK G1269E, however, we have mutation effect descriptions for ALK G1269A/S.
 EGFR	D761K	Likely Gain-of-function	We do not have a mutation effect description for EGFR D761K, however, we have mutation effect descriptions for EGFR D761N/Y.
-SMO	E518V	Unknown
-ERBB2	E719A	Unknown
+SMO	E518V	Unknown	We do not have a mutation effect description for SMO E518V, however, we have mutation effect descriptions for SMO E518A/K.
+ERBB2	E719A	Unknown	We do not have a mutation effect description for ERBB2 E719A, however, we have mutation effect descriptions for ERBB2 E719G/K.
 
 ## Table 9.3: Leading Sentences, mainly test unknown mutation but fall under umbrella terms(Truncating Mutations, Fusion)
 ### Truncating mutation in oncogene

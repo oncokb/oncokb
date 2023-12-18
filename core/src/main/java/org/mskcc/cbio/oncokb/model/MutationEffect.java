@@ -5,6 +5,8 @@
  */
 package org.mskcc.cbio.oncokb.model;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,7 +35,7 @@ public enum MutationEffect {
     public String getMutationEffect() {
         return mutation_effect;
     }
-    
+
     private static final Map<String, MutationEffect> map = new HashMap<String, MutationEffect>();
     static {
         for (MutationEffect mutationEffect : MutationEffect.values()) {
@@ -42,6 +44,9 @@ public enum MutationEffect {
     }
 
     public static MutationEffect getByName(String name) {
+        if (StringUtils.isEmpty(name)) {
+            return null;
+        }
         return map.get(name);
     }
 }

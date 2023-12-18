@@ -11,37 +11,31 @@ import static org.mskcc.cbio.oncokb.util.MainUtils.toLowerCaseExceptAllCaps;
  */
 public class MainUtilsTest extends TestCase {
     public void testSetToAlternativeAlleleMutationEffect() throws Exception {
-        IndicatorQueryMutationEffect indicatorQueryMutationEffect = new IndicatorQueryMutationEffect();
+        MutationEffect mutationEffect = null;
 
         // Neutral
-        indicatorQueryMutationEffect.setMutationEffect(null);
-        indicatorQueryMutationEffect = MainUtils.setToAlternativeAlleleMutationEffect(indicatorQueryMutationEffect);
-        assertEquals("The null should be returned.", null, indicatorQueryMutationEffect.getMutationEffect());
+        mutationEffect = MainUtils.setToAlternativeAlleleMutationEffect(null);
+        assertEquals("The null should be returned.", null, mutationEffect);
 
         // Neutral
-        indicatorQueryMutationEffect.setMutationEffect(MutationEffect.NEUTRAL);
-        indicatorQueryMutationEffect = MainUtils.setToAlternativeAlleleMutationEffect(indicatorQueryMutationEffect);
-        assertEquals("The neutral should not be propagated.", null, indicatorQueryMutationEffect.getMutationEffect());
+        mutationEffect = MainUtils.setToAlternativeAlleleMutationEffect(MutationEffect.NEUTRAL);
+        assertEquals("The neutral should not be propagated.", null, mutationEffect);
 
         // Likely Neutral
-        indicatorQueryMutationEffect.setMutationEffect(MutationEffect.LIKELY_NEUTRAL);
-        indicatorQueryMutationEffect = MainUtils.setToAlternativeAlleleMutationEffect(indicatorQueryMutationEffect);
-        assertEquals("The likely neutral should not be propagated.", null, indicatorQueryMutationEffect.getMutationEffect());
+        mutationEffect = MainUtils.setToAlternativeAlleleMutationEffect(MutationEffect.LIKELY_NEUTRAL);
+        assertEquals("The likely neutral should not be propagated.", null, mutationEffect);
 
         // Inconclusive
-        indicatorQueryMutationEffect.setMutationEffect(MutationEffect.INCONCLUSIVE);
-        indicatorQueryMutationEffect = MainUtils.setToAlternativeAlleleMutationEffect(indicatorQueryMutationEffect);
-        assertEquals("The inconclusive should not be propagated.", null, indicatorQueryMutationEffect.getMutationEffect());
+        mutationEffect = MainUtils.setToAlternativeAlleleMutationEffect(MutationEffect.INCONCLUSIVE);
+        assertEquals("The inconclusive should not be propagated.", null, mutationEffect);
 
         // Gain-of-function
-        indicatorQueryMutationEffect.setMutationEffect(MutationEffect.GAIN_OF_FUNCTION);
-        indicatorQueryMutationEffect = MainUtils.setToAlternativeAlleleMutationEffect(indicatorQueryMutationEffect);
-        assertEquals("The Gain-of-function should be propagated to likely gain-of-function.", MutationEffect.LIKELY_GAIN_OF_FUNCTION, indicatorQueryMutationEffect.getMutationEffect());
+        mutationEffect = MainUtils.setToAlternativeAlleleMutationEffect(MutationEffect.GAIN_OF_FUNCTION);
+        assertEquals("The Gain-of-function should be propagated to likely gain-of-function.", MutationEffect.LIKELY_GAIN_OF_FUNCTION, mutationEffect);
 
         // Likely Gain-of-function
-        indicatorQueryMutationEffect.setMutationEffect(MutationEffect.LIKELY_GAIN_OF_FUNCTION);
-        indicatorQueryMutationEffect = MainUtils.setToAlternativeAlleleMutationEffect(indicatorQueryMutationEffect);
-        assertEquals("The Likely Gain-of-function should be propagated to likely gain-of-function.", MutationEffect.LIKELY_GAIN_OF_FUNCTION, indicatorQueryMutationEffect.getMutationEffect());
+        mutationEffect = MainUtils.setToAlternativeAlleleMutationEffect(MutationEffect.LIKELY_GAIN_OF_FUNCTION);
+        assertEquals("The Likely Gain-of-function should be propagated to likely gain-of-function.", MutationEffect.LIKELY_GAIN_OF_FUNCTION, mutationEffect);
 
     }
 
