@@ -674,7 +674,7 @@ public class SummaryUtils {
         sb.append(gene.getHugoSymbol());
         sb.append(" ");
         sb.append(query.getAlteration());
-        sb.append(" is a known resistance mutation.");
+        sb.append(" has been found in the context of resistance to a targeted therapy(s).");
         return sb.toString();
     }
 
