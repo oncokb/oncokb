@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 import static org.mskcc.cbio.oncokb.util.LevelUtils.getTherapeuticLevelsWithPriorityLIstIterator;
 import static org.mskcc.cbio.oncokb.util.SummaryUtils.allelesToStr;
+import static org.mskcc.cbio.oncokb.util.SummaryUtils.getVUSSummary;
 
 /**
  * Created by hongxinzhang on 4/5/16.
@@ -617,16 +618,22 @@ public class IndicatorUtils {
         return new IndicatorQueryOncogenicity(oncogenicity, oncogenicityEvidence);
     }
 
-    private static String getMutationEffectDescriptionForUnknownAltButWithAA(Set<Evidence> evidences, Set<Alteration> alternativeAllele, String alternativeAlleleDescription) {
+    private static String getMutationEffectDescriptionForUnknownAltButWithAA(Alteration alteration, Set<Evidence> evidences, Set<Alteration> alternativeAllele, String alternativeAlleleDescription) {
         StringBuilder sb = new StringBuilder("");
-        sb.append("We do not have a mutation effect description for [[gene]] [[mutation]], however, ");
+        boolean isVus = MainUtils.isVUS(alteration);
+        if (isVus) {
+            sb.append(getVUSSummary(alteration, "[[gene]] [[mutation]]", true));
+        } else {
+            sb.append("The [[gene]] [[mutation]] [[[mutation]]] has not specifically been reviewed by the OncoKB team.");
+        }
+        sb.append(" However, ");
         Set<Alteration> evisAlts = new HashSet<>();
         evidences.forEach(evidence -> evisAlts.addAll(evidence.getAlterations()));
         Set<Alteration> intersectedAlts = Sets.intersection(evisAlts, new HashSet<>(alternativeAllele));
         if (intersectedAlts.size() > 1) {
             sb.append("we have mutation effect descriptions for [[gene]] " + allelesToStr(new HashSet<>(alternativeAllele)) + ".");
         } else {
-            sb.append("the mutation effect description for [[gene]] " + evisAlts.iterator().next().getName() + " is: ");
+            sb.append("the mutation effect description for [[gene]] " + evisAlts.iterator().next().getName() + ", an alternate allele of [[gene]] [[mutation]], " + " is: ");
             sb.append(alternativeAlleleDescription);
         }
         return sb.toString();
@@ -653,7 +660,7 @@ public class IndicatorUtils {
                     indicatorQueryMutationEffect.setMutationEffectEvidence(evidenceToUse);
                     indicatorQueryMutationEffect.setMutationEffect(MainUtils.setToAlternativeAlleleMutationEffect(MutationEffect.getByName(evidenceToUse.getKnownEffect())));
 
-                    sb.append(getMutationEffectDescriptionForUnknownAltButWithAA(evidences, new HashSet<>(alternativeAllele), indicatorQueryMutationEffect.getMutationEffectEvidence().getDescription()));
+                    sb.append(getMutationEffectDescriptionForUnknownAltButWithAA(alteration, evidences, new HashSet<>(alternativeAllele), indicatorQueryMutationEffect.getMutationEffectEvidence().getDescription()));
 
                     Evidence evidence = new Evidence(indicatorQueryMutationEffect.getMutationEffectEvidence(), indicatorQueryMutationEffect.getMutationEffectEvidence().getId());
                     evidence.setDescription(sb.toString());
@@ -696,7 +703,7 @@ public class IndicatorUtils {
             // add information if alternative allele has mutation effect
             if (alternativeAlleleEvis.size() > 0) {
                 StringBuilder sb = new StringBuilder();
-                sb.append(getMutationEffectDescriptionForUnknownAltButWithAA(alternativeAlleleEvis, new HashSet<>(alternativeAllele), alternativeAlleleEvis.iterator().next().getDescription()));
+                sb.append(getMutationEffectDescriptionForUnknownAltButWithAA(alteration, alternativeAlleleEvis, new HashSet<>(alternativeAllele), alternativeAlleleEvis.iterator().next().getDescription()));
                 Evidence evidence = new Evidence();
                 evidence.setKnownEffect(MutationEffect.UNKNOWN.getMutationEffect());
                 evidence.setDescription(sb.toString());
