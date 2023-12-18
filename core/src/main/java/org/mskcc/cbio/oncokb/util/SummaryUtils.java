@@ -575,7 +575,7 @@ public class SummaryUtils {
                 sb.append(" known to be oncogenic");
                 break;
             case RESISTANCE:
-                sb.append(" been found in the context of resistance");
+                sb.append(" been found in the context of resistance to a targeted therapy(s)");
                 break;
             default:
                 sb.append(" " + oncogenicity.getOncogenic().toLowerCase());
