@@ -272,6 +272,18 @@ public class LevelUtils {
         return new ArrayList<>(THERAPEUTIC_LEVELS_WITH_PRIORITY);
     }
 
+    public static List<LevelOfEvidence> getIndexedDiagnosticLevels() {
+        return new ArrayList<>(DIAGNOSTIC_LEVELS);
+    }
+
+    public static List<LevelOfEvidence> getIndexedPrognosticLevels() {
+        return new ArrayList<>(PROGNOSTIC_LEVELS);
+    }
+
+        public static List<LevelOfEvidence> getIndexedFdaLevels() {
+        return new ArrayList<>(FDA_LEVELS);
+    }
+
     public static Set<LevelOfEvidence> getPrognosticLevels() {
         return new HashSet<>(CollectionUtils.intersection(PUBLIC_LEVELS, PROGNOSTIC_LEVELS));
     }

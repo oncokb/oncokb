@@ -1145,7 +1145,7 @@ public final class AlterationUtils {
         return null;
     }
 
-    public static List<Alteration> lookupVariant(String query, Boolean exactMatch, List<Alteration> alterations) {
+    public static List<Alteration> lookupVariant(String query, Boolean exactMatch, Boolean omitExclusion, List<Alteration> alterations) {
         List<Alteration> alterationList = new ArrayList<>();
         // Only support columns(alteration/name) blur search.
         query = query.toLowerCase().trim();
@@ -1172,7 +1172,7 @@ public final class AlterationUtils {
             String fullName = NamingUtils.getFullName(query);
             if (fullName != null) {
                 for (Alteration alteration : alterations) {
-                    if (isMatch(exactMatch, fullName, alteration.getName())) {
+                    if (isMatch(exactMatch, omitExclusion, fullName, alteration.getName())) {
                         alterationList.add(alteration);
                     }
                 }
@@ -1181,8 +1181,11 @@ public final class AlterationUtils {
         return alterationList;
     }
 
-    private static Boolean isMatch(Boolean exactMatch, String query, String string) {
+    private static Boolean isMatch(Boolean exactMatch, Boolean omitExclusion, String query, String string) {
         if (string != null) {
+            if (omitExclusion) {
+                string = AlterationUtils.removeExclusionCriteria(string);
+            }
             if (exactMatch) {
                 if (StringUtils.containsIgnoreCase(string, query)) {
                     return true;

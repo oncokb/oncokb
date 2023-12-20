@@ -8,7 +8,6 @@ import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.ArticleBo;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.TumorType;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.util.*;
@@ -181,7 +180,7 @@ public class EvidenceUtils {
 
         if (query.getGene() != null) {
             genes.add(query.getGene());
-            if (query.getExactMatchedAlteration() == null && query.getAlterations().isEmpty() && query.getAlleles().isEmpty()) {
+            if ((query.getExactMatchedAlteration() != null && query.getExactMatchedAlteration().getAlteration().length() == 0) && query.getAlterations().isEmpty() && query.getAlleles().isEmpty()) {
                 alterations.addAll(AlterationUtils.getAllAlterations(referenceGenome, query.getGene()));
             } else {
                 if (query.getAlterations() != null) {
@@ -365,6 +364,8 @@ public class EvidenceUtils {
                 if (evidence.getGene().equals(evidenceQuery.getGene())) {
                     //Add all gene specific evidences
                     if (evidence.getAlterations().isEmpty()) {
+                        filtered.add(evidence);
+                    } else if (evidenceQuery.getExactMatchedAlteration() != null && StringUtils.isEmpty(evidenceQuery.getExactMatchedAlteration().getAlteration())) {
                         filtered.add(evidence);
                     } else {
                         boolean hasjointed = !Collections.disjoint(evidence.getAlterations(), evidenceQuery.getAlterations());
