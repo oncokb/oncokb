@@ -403,7 +403,7 @@ public class SummaryUtils {
         return sb.toString();
     }
 
-    private static String getVUSSummary(Alteration vus, String altStr, boolean fullSentence) {
+    public static String getVUSSummary(Alteration vus, String altStr, boolean fullSentence) {
         StringBuilder sb = new StringBuilder();
         String lastEdit = getVusDate(vus);
         sb.append("There is no available functional data about the " + altStr);
