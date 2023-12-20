@@ -622,7 +622,7 @@ public class IndicatorUtils {
         StringBuilder sb = new StringBuilder("");
         boolean isVus = MainUtils.isVUS(alteration);
         if (isVus) {
-            sb.append(getVUSSummary(alteration, "[[gene]] [[mutation]]", true));
+            sb.append(getVUSSummary(alteration, "[[gene]] [[mutation]] [[[mutation]]]", true));
         } else {
             sb.append("The [[gene]] [[mutation]] [[[mutation]]] has not specifically been reviewed by the OncoKB team.");
         }
