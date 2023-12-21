@@ -403,7 +403,7 @@ public class SummaryUtils {
         return sb.toString();
     }
 
-    private static String getVUSSummary(Alteration vus, String altStr, boolean fullSentence) {
+    public static String getVUSSummary(Alteration vus, String altStr, boolean fullSentence) {
         StringBuilder sb = new StringBuilder();
         String lastEdit = getVusDate(vus);
         sb.append("There is no available functional data about the " + altStr);
@@ -575,7 +575,7 @@ public class SummaryUtils {
                 sb.append(" known to be oncogenic");
                 break;
             case RESISTANCE:
-                sb.append(" been found in the context of resistance");
+                sb.append(" been found in the context of resistance to a targeted therapy(s)");
                 break;
             default:
                 sb.append(" " + oncogenicity.getOncogenic().toLowerCase());
@@ -674,7 +674,7 @@ public class SummaryUtils {
         sb.append(gene.getHugoSymbol());
         sb.append(" ");
         sb.append(query.getAlteration());
-        sb.append(" is a known resistance mutation.");
+        sb.append(" has been found in the context of resistance to a targeted therapy(s).");
         return sb.toString();
     }
 

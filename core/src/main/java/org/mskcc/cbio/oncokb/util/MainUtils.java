@@ -1,12 +1,10 @@
 package org.mskcc.cbio.oncokb.util;
 
-import jdk.nashorn.internal.runtime.regexp.joni.Regex;
 import org.mskcc.cbio.oncokb.apiModels.ActionableGene;
 import org.mskcc.cbio.oncokb.apiModels.AnnotatedVariant;
 import org.mskcc.cbio.oncokb.apiModels.Citations;
 import org.mskcc.cbio.oncokb.apiModels.CuratedGene;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.TumorType;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -31,18 +29,18 @@ public class MainUtils {
             Oncogenicity.RESISTANCE,
             Oncogenicity.LIKELY,
             Oncogenicity.YES
-            )
+        )
     );
     private static final List<MutationEffect> PRIORITIZED_MUTATION_EFFECTS = Collections.unmodifiableList(
         Arrays.asList(MutationEffect.GAIN_OF_FUNCTION,
             MutationEffect.LIKELY_GAIN_OF_FUNCTION,
-            MutationEffect.INCONCLUSIVE,
-            MutationEffect.LIKELY_NEUTRAL,
-            MutationEffect.NEUTRAL,
             MutationEffect.LIKELY_SWITCH_OF_FUNCTION,
             MutationEffect.SWITCH_OF_FUNCTION,
             MutationEffect.LIKELY_LOSS_OF_FUNCTION,
             MutationEffect.LOSS_OF_FUNCTION,
+            MutationEffect.INCONCLUSIVE,
+            MutationEffect.LIKELY_NEUTRAL,
+            MutationEffect.NEUTRAL,
             MutationEffect.UNKNOWN
         )
     );
@@ -180,17 +178,53 @@ public class MainUtils {
         return indicatorQueryMutationEffect;
     }
 
-    public static IndicatorQueryMutationEffect setToAlternativeAlleleMutationEffect(IndicatorQueryMutationEffect indicatorQueryMutationEffect) {
-        if (indicatorQueryMutationEffect != null && indicatorQueryMutationEffect.getMutationEffect() != null) {
-            MutationEffect mutationEffect = indicatorQueryMutationEffect.getMutationEffect();
-            MutationEffect likeME = MutationEffect.getByName("Likely " + mutationEffect.getMutationEffect().replaceAll("(?i)likely", "").trim());
+    public static Set<Evidence> getMutationEffectFromAlternativeAlleles(Set<Evidence> evidences) {
+        final int DEFAULT_INDEX = 100;
+        int index = DEFAULT_INDEX;
+        Map<MutationEffect, Set<Evidence>> meMap = new HashMap<>();
+        for (Evidence evidence : evidences) {
+            MutationEffect mutationEffect = MutationEffect.getByName(evidence.getKnownEffect());
+            if (mutationEffect == null) {
+                continue;
+            }
+            MutationEffect likelyMutationEffect = getLikelyMutationEffect(mutationEffect);
+            if (likelyMutationEffect != null) {
+                mutationEffect = likelyMutationEffect;
+            }
+            if (!meMap.containsKey(mutationEffect)) {
+                meMap.put(mutationEffect, new HashSet<>());
+            }
+            meMap.get(mutationEffect).add(evidence);
+            int _index = PRIORITIZED_MUTATION_EFFECTS.indexOf(mutationEffect);
+            if (_index >= 0 && _index < index) {
+                index = _index;
+            }
+        }
+        Set<MutationEffect> typesOfMutationEffect = meMap.keySet();
+        typesOfMutationEffect.remove(MutationEffect.UNKNOWN);
+        if (typesOfMutationEffect.size() > 1) {
+            return new HashSet<>();
+        }
+        return index == DEFAULT_INDEX ? new HashSet<>() : meMap.get(PRIORITIZED_MUTATION_EFFECTS.get(index));
+    }
+
+    private static MutationEffect getLikelyMutationEffect(MutationEffect mutationEffect) {
+        if (mutationEffect == null) {
+            return null;
+        }
+        return MutationEffect.getByName("Likely " + mutationEffect.getMutationEffect().replaceAll("(?i)likely", "").trim());
+    }
+
+    public static MutationEffect setToAlternativeAlleleMutationEffect(MutationEffect mutationEffect) {
+        if (mutationEffect != null) {
+            MutationEffect likeME = getLikelyMutationEffect(mutationEffect);
 
             // likeME will be null if mutation effect without related likely mutation effect.
             if (likeME == null || likeME.equals(MutationEffect.LIKELY_NEUTRAL))
-                return new IndicatorQueryMutationEffect();
-            indicatorQueryMutationEffect.setMutationEffect(likeME);
+                return null;
+            return likeME;
         }
-        return indicatorQueryMutationEffect;
+        return null;
     }
 
     public static Oncogenicity findHighestOncogenicity(Set<Oncogenicity> oncogenicitySet) {
@@ -206,6 +240,7 @@ public class MainUtils {
         }
         return index == -1 ? null : PRIORITIZED_ONCOGENICITY.get(index);
     }
+
     public static Evidence findHighestOncogenicityEvidence(List<Evidence> oncogenicitySet) {
         Integer index = -1;
 
@@ -646,6 +681,9 @@ public class MainUtils {
 
     public static Citations getCitationsByEvidence(Evidence evidence) {
         Citations citations = new Citations();
+        if (evidence.getArticles() == null) {
+            return citations;
+        }
         for (Article article : evidence.getArticles()) {
             if (article.getPmid() != null) {
                 citations.getPmids().add(article.getPmid());
@@ -718,7 +756,7 @@ public class MainUtils {
         });
     }
 
-    public static void sortCuratedGenes(List<CuratedGene> genes){
+    public static void sortCuratedGenes(List<CuratedGene> genes) {
         Collections.sort(genes, new Comparator<CuratedGene>() {
             @Override
             public int compare(CuratedGene g1, CuratedGene g2) {
@@ -729,7 +767,7 @@ public class MainUtils {
 
     public static String replaceLast(String text, String regex, String replacement) {
         // the code is from https://stackoverflow.com/a/2282998
-        return text.replaceFirst("(?s)"+regex+"(?!.*?"+regex+")", replacement);
+        return text.replaceFirst("(?s)" + regex + "(?!.*?" + regex + ")", replacement);
     }
 
     public static boolean rangesIntersect(Integer start1, Integer end1, Integer start2, Integer end2) {
