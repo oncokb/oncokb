@@ -1071,8 +1071,15 @@ public final class AlterationUtils {
         if (alteration != null && alteration.getConsequence() != null && alteration.getConsequence().getTerm().equals(MISSENSE_VARIANT)) {
             // check for positional variant when the consequence is forced to be missense variant
             boolean isMissensePositionalVariant = StringUtils.isEmpty(alteration.getVariantResidues()) && alteration.getProteinStart() != null && alteration.getProteinEnd() != null && alteration.getProteinStart().equals(alteration.getProteinEnd());
-            List<Alteration> alternativeAlleles = alterationBo.findRelevantOverlapAlterations(alteration.getGene(), referenceGenome, alteration.getConsequence(), alteration.getProteinStart(), alteration.getProteinEnd(), alteration.getAlteration(), relevantAlterations);
-            for (Alteration allele : alternativeAlleles) {
+            List<Alteration> overlapAlterations = alterationBo.findRelevantOverlapAlterations(alteration.getGene(), referenceGenome, alteration.getConsequence(), alteration.getProteinStart(), alteration.getProteinEnd(), alteration.getAlteration(), relevantAlterations);
+            for (Alteration allele : overlapAlterations) {
+//                if (allele.equals(alteration)) {
+//                    continue;
+//                }
+                // range missense mutations is not alternative allele
+                if(allele.getAlteration().endsWith("mis")){
+                    continue;
+                }
                 // remove all alleles if the alteration variant residue is empty
                 if (isMissensePositionalVariant && !StringUtils.isEmpty(allele.getVariantResidues())) {
                     relevantAlterations.remove(allele);
