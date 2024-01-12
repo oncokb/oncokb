@@ -526,7 +526,7 @@ public class IndicatorUtils {
         }
 
         // Get penetrance info
-        List<Evidence> penetranceEvis = EvidenceUtils.getEvidence(Collections.singletonList(matchedAlt), Collections.singleton(EvidenceType.GERMLINE_PENETRANCE), null);
+        List<Evidence> penetranceEvis = EvidenceUtils.getEvidence(Collections.singletonList(matchedAlt), Collections.singleton(EvidenceType.GERMLINE_VARIANT_PENETRANCE), null);
         if (penetranceEvis.size() > 0) {
             sortGermlineEvidenceByAlterationSize(penetranceEvis);
             Evidence penetranceEvi = penetranceEvis.iterator().next();
@@ -541,7 +541,7 @@ public class IndicatorUtils {
             germlineVariant.setCancerRisk(cancerRiskEvi.getDescription());
         }
 
-        // Get cancer risk info
+        // Get inheritance mechanism info
         List<Evidence> inheritanceMechanismEvis = EvidenceUtils.getEvidence(Collections.singletonList(matchedAlt), Collections.singleton(EvidenceType.GERMLINE_INHERITANCE_MECHANISM), null);
         if (inheritanceMechanismEvis.size() > 0) {
             sortGermlineEvidenceByAlterationSize(inheritanceMechanismEvis);

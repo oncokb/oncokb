@@ -330,7 +330,7 @@ public class DriveAnnotationParser {
         // Save germline variant penetrance
         String germlinePenetrance = getJsonStringVal(germlineObj, "penetrance");
         if (StringUtils.isNotEmpty(germlinePenetrance)) {
-            saveEffectDescriptionEvidence(gene, alterations, EvidenceType.GERMLINE_PENETRANCE, germlinePenetrance, null);
+            saveEffectDescriptionEvidence(gene, alterations, EvidenceType.GERMLINE_VARIANT_PENETRANCE, germlinePenetrance, null);
         }
 
         // Save germline mechanism of inheritance

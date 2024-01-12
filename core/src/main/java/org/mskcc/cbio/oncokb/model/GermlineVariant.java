@@ -3,7 +3,7 @@ package org.mskcc.cbio.oncokb.model;
 import java.util.List;
 
 public class GermlineVariant {
-    List<String> genomicIdentifiers;
+    List<String> genomicIndicators;
     String penetrance;
     String pathogenic;
     String inheritanceMechanism;
@@ -11,12 +11,12 @@ public class GermlineVariant {
     String description;
     String clinVarId;
 
-    public List<String> getGenomicIdentifiers() {
-        return genomicIdentifiers;
+    public List<String> getGenomicIndicators() {
+        return genomicIndicators;
     }
 
-    public void setGenomicIdentifiers(List<String> genomicIdentifiers) {
-        this.genomicIdentifiers = genomicIdentifiers;
+    public void setGenomicIndicators(List<String> genomicIndicators) {
+        this.genomicIndicators = genomicIndicators;
     }
 
     public String getPenetrance() {

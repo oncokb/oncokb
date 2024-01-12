@@ -38,7 +38,7 @@ public class EvidenceTypeUtils {
     public static Set<EvidenceType> getGermlineMutationEvidenceTypes() {
         Set<EvidenceType> evidenceTypes = new HashSet<>();
         evidenceTypes.add(EvidenceType.PATHOGENIC);
-        evidenceTypes.add(EvidenceType.GERMLINE_PENETRANCE);
+        evidenceTypes.add(EvidenceType.GERMLINE_VARIANT_PENETRANCE);
         evidenceTypes.add(EvidenceType.GERMLINE_CANCER_RISK);
         evidenceTypes.add(EvidenceType.GERMLINE_INHERITANCE_MECHANISM);
         return evidenceTypes;
