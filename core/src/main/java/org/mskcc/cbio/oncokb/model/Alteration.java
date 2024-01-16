@@ -235,9 +235,7 @@ public class Alteration implements java.io.Serializable {
         if (getId() != null && that.getId() != null) {
             return Objects.equals(getId(), that.getId());
         }
-        return Objects.equals(getId(), that.getId()) &&
-            Objects.equals(getUuid(), that.getUuid()) &&
-            Objects.equals(getGene(), that.getGene()) &&
+        return Objects.equals(getGene(), that.getGene()) &&
             getAlterationType() == that.getAlterationType() &&
             Objects.equals(getConsequence(), that.getConsequence()) &&
             Objects.equals(getAlteration(), that.getAlteration()) &&
