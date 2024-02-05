@@ -1231,6 +1231,9 @@ public final class AlterationUtils {
     }
 
     public static List<Alteration> getRelevantAlterations(ReferenceGenome referenceGenome, Alteration alteration) {
+        if (alteration == null) {
+            return new ArrayList<>();
+        }
         Gene gene = alteration.getGene();
         return getRelevantAlterations(referenceGenome, alteration, getAllAlterations(referenceGenome, gene));
     }
