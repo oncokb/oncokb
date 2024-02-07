@@ -956,7 +956,7 @@ public class SummaryUtils {
                 queryAlteration = queryHugoSymbol + " fusion";
             }
             queryAlteration = queryAlteration.replace("Fusion", "fusion");
-            sb.append(queryAlteration + " positive");
+            sb.append(queryAlteration + "-positive");
         } else if (StringUtils.equalsIgnoreCase(queryAlteration, "gain")
             || StringUtils.equalsIgnoreCase(queryAlteration, "amplification")) {
             queryAlteration = queryHugoSymbol + "-amplified";
