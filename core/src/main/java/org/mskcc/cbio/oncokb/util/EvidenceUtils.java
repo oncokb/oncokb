@@ -389,6 +389,13 @@ public class EvidenceUtils {
                                 if (hasjointed || com.mysql.jdbc.StringUtils.isNullOrEmpty(evidenceQuery.getQuery().getTumorType())) {
                                     filtered.add(evidence);
                                 } else if (tumorForm != null) {
+                                    // if the cancer type is specifically excluded, it should not even be propagated
+                                    if (evidence.getExcludedCancerTypes().size() > 0) {
+                                        hasjointed = !Collections.disjoint(evidence.getExcludedCancerTypes(), evidenceQuery.getOncoTreeTypes());
+                                        if (hasjointed) {
+                                            continue;
+                                        }
+                                    }
                                     if (evidence.getLevelOfEvidence() != null) {
                                         Evidence propagatedLevel = getPropagateEvidence(evidenceQuery.getLevelOfEvidences(), evidence, tumorForm);
                                         if (propagatedLevel != null) {
@@ -905,7 +912,12 @@ public class EvidenceUtils {
                     }
                 }
                 query.setLevelOfEvidences(levelOfEvidences == null ? null : new ArrayList<>(levelOfEvidences));
-                Set<Evidence> relevantEvidences = getEvidence(requestQuery.getReferenceGenome(), query, evidenceTypes, levelOfEvidences);
+                Set<Evidence> relevantEvidences = new HashSet<>();
+                if (query.getExactMatchedAlteration() != null) {
+                    relevantEvidences = getRelevantEvidences(query.getQuery(), query.getExactMatchedAlteration(), evidenceTypes, levelOfEvidences, AlterationUtils.getRelevantAlterations(requestQuery.getReferenceGenome(), query.getExactMatchedAlteration()), query.getAlleles());
+                } else {
+                    relevantEvidences = getEvidence(requestQuery.getReferenceGenome(), query, evidenceTypes, levelOfEvidences);
+                }
                 query = assignEvidence(relevantEvidences,
                     Collections.singletonList(query), highestLevelOnly).iterator().next();
 

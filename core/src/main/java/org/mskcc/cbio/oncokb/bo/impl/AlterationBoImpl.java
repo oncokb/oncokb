@@ -494,11 +494,25 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             }
         }
 
+        // Remove all relevant alterations if the current alteration has excluding clause
+        if (AlterationUtils.hasExclusionCriteria(matchedAlt == null ? alteration.getAlteration() : matchedAlt.getAlteration())) {
+            Set<String> altsShouldBeExcluded = AlterationUtils.getExclusionAlterations(matchedAlt == null ? alteration.getAlteration() : matchedAlt.getAlteration()).stream().map(alt -> alt.getAlteration()).collect(Collectors.toSet());
+            Set<Alteration> exclusionAlts = new HashSet<>();
+            alterations.stream()
+                    .forEach(alt -> {
+                        boolean altShouldBeExcluded = altsShouldBeExcluded.contains(alt.getAlteration()) || altsShouldBeExcluded.contains(alt.getName());
+                        if (altShouldBeExcluded) {
+                            exclusionAlts.add(alt);
+                        }
+                    });
+            alterations.removeAll(exclusionAlts);
+        }
+
         // Remove all relevant alterations that potentially excluding the current alteration
         Set<Alteration> exclusionAlts = new HashSet<>();
         Set<Alteration> relevantAlterationsWithoutAlternativeAlleles = alterations.stream().collect(Collectors.toSet());
 
-        // when no matched alteration found in the database, we shuold include the `alteration` in the list to calculate the name
+        // when no matched alteration found in the database, we should include the `alteration` in the list to calculate the name
         if (matchedAlt == null) {
             relevantAlterationsWithoutAlternativeAlleles.add(alteration);
         }

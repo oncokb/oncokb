@@ -168,7 +168,7 @@ AKT1	E17K	Breast Cancer   1: Capivasertib+Fulvestrant; 3B: Capivasertib;
 AKT1	E17K	NSCLC   3B: Capivasertib; 3B: Capivasertib+Fulvestrant;
 AKT1	E17G	Breast Cancer   1: Capivasertib+Fulvestrant;
 FGFR3	Y373C	Bladder Cancer	1: Erdafitinib; 4: AZD4547;
-FGFR3	Y373G	Bladder Cancer	4: Erdafitinib; 4: AZD4547;
+FGFR3	Y373G	Bladder Cancer	2: Erdafitinib; 4: AZD4547;
 EGFR	A750P	NSCLC
 EGFR	A750G	NSCLC
 MTOR	E2014K	Bladder Cancer	3A: Everolimus; 4: Temsirolimus;
@@ -192,7 +192,7 @@ KRAS	G12C	Histiocytosis	3A: Cobimetinib; 3A: Trametinib;
 KRAS	G12A	Histiocytosis	3A: Cobimetinib; 3A: Trametinib;
 IDH1	R132H	AML	1: Ivosidenib; 1: Olutasidenib;
 IDH1	R132G	AML	1: Ivosidenib; 1: Olutasidenib;
-FGFR2	FGFR2-BICC1 Fusion	Cholangiocarcinoma	1: Pemigatinib; 1: Futibatinib; 3A: RLY-4008; 3B: Erdafitinib; 4: AZD4547;
+FGFR2	FGFR2-BICC1 Fusion	Cholangiocarcinoma	1: Pemigatinib; 1: Futibatinib; 3A: RLY-4008; 4: Erdafitinib; 4: AZD4547;
 ERBB2	Amplification	Breast Cancer	1: Trastuzumab; 1: Trastuzumab+Chemotherapy; 1: Ado-Trastuzumab Emtansine; 1: Lapatinib+Capecitabine; 1: Lapatinib+Letrozole; 1: Trastuzumab+Pertuzumab+Chemotherapy; 1: Neratinib; 1: Neratinib+Capecitabine; 1: Trastuzumab+Tucatinib+Capecitabine; 1: Trastuzumab Deruxtecan; 1: Margetuximab+Chemotherapy; 3B: Trastuzumab+Carboplatin-Taxol Regimen; 3B: Trastuzumab+Pertuzumab; 3B: Lapatinib+Trastuzumab; 3B: Pembrolizumab+Trastuzumab+Chemotherapy; 3B: Tucatinib+Trastuzumab;
 ERBB2	Amplification	Colorectal Cancer	1: Tucatinib+Trastuzumab; 2: Trastuzumab+Pertuzumab; 2: Lapatinib+Trastuzumab; 2: Trastuzumab Deruxtecan; 3B: Trastuzumab; 3B: Trastuzumab+Carboplatin-Taxol Regimen; 3B: Trastuzumab+Chemotherapy; 3B: Ado-Trastuzumab Emtansine; 3B: Pembrolizumab+Trastuzumab+Chemotherapy; 3B: Lapatinib+Capecitabine; 3B: Lapatinib+Letrozole; 3B: Trastuzumab+Tucatinib+Capecitabine; 3B: Margetuximab+Chemotherapy;
 RET	KIF5B-RET Fusion	NSCLC	1: Selpercatinib; 1: Pralsetinib; 2: Cabozantinib; 3A: Vandetanib;
