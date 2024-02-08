@@ -379,7 +379,7 @@ public class IndicatorUtils {
             }
 
             // Mutation summary
-            if (evidenceTypes.contains(EvidenceType.MUTATION_SUMMARY)) {
+            if (evidenceTypes.contains(EvidenceType.MUTATION_SUMMARY) && StringUtils.isNotEmpty(matchedAlt.getAlteration())) {
                 indicatorQuery.setVariantSummary(SummaryUtils.variantSummary(gene, matchedAlt,
                     new ArrayList<>(relevantAlterations), query));
             }
