@@ -108,7 +108,10 @@ public final class AlterationUtils {
     }
 
     private static Matcher getExclusionCriteriaMatcher(String proteinChange) {
-        Pattern exclusionPatter = Pattern.compile("(.*)\\{\\s*(exclude|excluding)(.*)\\}", Pattern.CASE_INSENSITIVE);
+        if (proteinChange == null) {
+            proteinChange = "";
+        }
+        Pattern exclusionPatter = Pattern.compile("(.*)[\\{\\(]\\s*(exclude|excluding)(.*)[\\}\\)](.*)?", Pattern.CASE_INSENSITIVE);
         Matcher exclusionMatch = exclusionPatter.matcher(proteinChange);
         return exclusionMatch;
     }
@@ -1152,12 +1155,13 @@ public final class AlterationUtils {
             return alterationList;
         query = query.trim().toLowerCase();
         for (Alteration alteration : alterations) {
-            if (isMatch(exactMatch, query, alteration.getAlteration())) {
+            // since we are doing string search, we should remove the exclusion clause to prevent the clause been matched
+            if (isMatch(exactMatch, query, removeExclusionCriteria(alteration.getAlteration()))) {
                 alterationList.add(alteration);
                 continue;
             }
 
-            if (isMatch(exactMatch, query, alteration.getName())) {
+            if (isMatch(exactMatch, query, removeExclusionCriteria(alteration.getName()))) {
                 alterationList.add(alteration);
                 continue;
             }
