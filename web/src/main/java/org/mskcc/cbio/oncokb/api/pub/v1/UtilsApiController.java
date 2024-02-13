@@ -67,6 +67,7 @@ public class UtilsApiController implements UtilsApi {
         header.add("Mutation Effect");
         header.add("PMIDs for Mutation Effect");
         header.add("Abstracts for Mutation Effect");
+        header.add("Mutation Effect Description");
         sb.append(MainUtils.listToString(header, separator));
         sb.append(newLine);
 
@@ -85,6 +86,7 @@ public class UtilsApiController implements UtilsApi {
             row.add(annotatedVariant.getMutationEffect());
             row.add(annotatedVariant.getMutationEffectPmids());
             row.add(annotatedVariant.getMutationEffectAbstracts());
+            row.add(annotatedVariant.getDescription());
             sb.append(MainUtils.listToString(row, separator));
             sb.append(newLine);
         }
@@ -122,7 +124,9 @@ public class UtilsApiController implements UtilsApi {
                     biologicalVariant.getOncogenic(),
                     biologicalVariant.getMutationEffect(),
                     MainUtils.listToString(new ArrayList<>(biologicalVariant.getMutationEffectPmids()), ", ", true),
-                    MainUtils.listToString(abstracts, "; ", true)));
+                    MainUtils.listToString(abstracts, "; ", true),
+                    biologicalVariant.getMutationEffectDescription()
+                ));
             }
         }
 
@@ -166,6 +170,7 @@ public class UtilsApiController implements UtilsApi {
         header.add("Drugs(s)");
         header.add("PMIDs for drug");
         header.add("Abstracts for drug");
+        header.add("Drug Description");
         sb.append(MainUtils.listToString(header, separator));
         sb.append(newLine);
 
@@ -185,6 +190,7 @@ public class UtilsApiController implements UtilsApi {
             row.add(actionableGene.getDrugs());
             row.add(actionableGene.getPmids());
             row.add(actionableGene.getAbstracts());
+            row.add(actionableGene.getDescription());
             sb.append(MainUtils.listToString(row, separator));
             sb.append(newLine);
         }
@@ -224,8 +230,9 @@ public class UtilsApiController implements UtilsApi {
                         clinicalVariant.getLevel(),
                         MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrug()), ", ", true),
                         MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrugPmids()), ", ", true),
-                        MainUtils.listToString(abstracts, "; ", true))
-                    );
+                        MainUtils.listToString(abstracts, "; ", true),
+                        clinicalVariant.getDrugDescription()
+                    ));
                 } else {
                     for (TumorType tumorType : clinicalVariant.getCancerTypes()) {
                         actionableGenes.add(new ActionableGene(
@@ -240,7 +247,8 @@ public class UtilsApiController implements UtilsApi {
                             clinicalVariant.getLevel(),
                             MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrug()), ", ", true),
                             MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrugPmids()), ", ", true),
-                            MainUtils.listToString(abstracts, "; ", true))
+                            MainUtils.listToString(abstracts, "; ", true),
+                            clinicalVariant.getDrugDescription())
                         );
                     }
                 }

@@ -19,6 +19,7 @@ public class AnnotatedVariant {
     String mutationEffect;
     String mutationEffectPmids;
     String mutationEffectAbstracts;
+    String description;
 
     public String getGrch37Isoform() {
         return grch37Isoform;
@@ -120,11 +121,19 @@ public class AnnotatedVariant {
         return mutationEffectAbstracts;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public void setMutationEffectAbstracts(String mutationEffectAbstracts) {
         this.mutationEffectAbstracts = mutationEffectAbstracts;
     }
 
-    public AnnotatedVariant(String grch37Isoform, String grch37RefSeq, String grch38Isoform, String grch38RefSeq, Integer entrezGeneId, String gene, String referenceGenome, String variant, String proteinChange, String oncogenicity, String mutationEffect, String mutationEffectPmids, String mutationEffectAbstracts) {
+    public AnnotatedVariant(String grch37Isoform, String grch37RefSeq, String grch38Isoform, String grch38RefSeq, Integer entrezGeneId, String gene, String referenceGenome, String variant, String proteinChange, String oncogenicity, String mutationEffect, String mutationEffectPmids, String mutationEffectAbstracts, String description) {
         this.grch37Isoform = grch37Isoform;
         this.grch37RefSeq = grch37RefSeq;
         this.grch38Isoform = grch38Isoform;
@@ -138,5 +147,6 @@ public class AnnotatedVariant {
         this.mutationEffect = mutationEffect;
         this.mutationEffectPmids = mutationEffectPmids;
         this.mutationEffectAbstracts = mutationEffectAbstracts;
+        this.description = description;
     }
 }
