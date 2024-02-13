@@ -2,6 +2,7 @@ package org.mskcc.cbio.oncokb.api.pub.v1;
 
 import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
+import org.mskcc.cbio.oncokb.apiModels.DrugMatch;
 import org.mskcc.cbio.oncokb.apiModels.annotation.*;
 import org.mskcc.cbio.oncokb.cache.CacheFetcher;
 import org.mskcc.cbio.oncokb.config.annotation.PremiumPublicApi;
@@ -542,13 +543,13 @@ public class AnnotationsApiController {
                 // Blur search gene
                 result.addAll(findActionableGenesByGeneSearch(keywords.get(0)));
 
-                // // Blur search variant
+                // Blur search variant
                 result.addAll(findActionableGenesByAlterationSearch(keywords.get(0)));
 
-                // // // Blur search cancer type
-                result.addAll(findActionalGenesByCancerType(keywords.get(0)));
+                // Blur search cancer type
+                result.addAll(findActionableGenesByCancerType(keywords.get(0)));
 
-                // // If the keyword contains dash and result is empty, then we should return both fusion genes
+                // If the keyword contains dash and result is empty, then we should return both fusion genes
                 if (keywords.get(0).contains("-") && result.isEmpty()) {
                     for (String subKeyword : keywords.get(0).split("-")) {
                         result.addAll(findActionableGenesByGeneSearch(subKeyword));
@@ -593,7 +594,7 @@ public class AnnotationsApiController {
                 result.addAll(findActionableGenesByAlterationSearch(fullKeywords));
 
                 // // // Blur search for multi-word cancer type
-                result.addAll(findActionalGenesByCancerType(fullKeywords));
+                result.addAll(findActionableGenesByCancerType(fullKeywords));
             }
         }
 
@@ -638,7 +639,7 @@ public class AnnotationsApiController {
         return result;
     }
 
-    private LinkedHashSet<AnnotationSearchResult> findActionalGenesByCancerType(String query) {
+    private LinkedHashSet<AnnotationSearchResult> findActionableGenesByCancerType(String query) {
 
         Set<Evidence> allImplicationEvidences = EvidenceUtils.getEvidenceByEvidenceTypesAndLevels(EvidenceTypeUtils.getImplicationEvidenceTypes(), LevelUtils.getPublicLevels());
 
@@ -665,12 +666,17 @@ public class AnnotationsApiController {
         Set<SearchObject> searchObjects = new HashSet<>();
         for (TumorType tumorType : tumorTypeMatches) {
             for (Evidence evidence : allImplicationEvidences) {
+                if (evidence.getGene().getHugoSymbol().equals("NTRK3")) {
+                    Boolean t = true;
+                }
                 if (TumorTypeUtils.findEvidenceRelevantCancerTypes(evidence).contains(tumorType)) {
+                    for (Alteration alteration: evidence.getAlterations()) {
                         SearchObject searchObject = new SearchObject();
                         searchObject.setGene(evidence.getGene());
-                        searchObject.setAlteration(evidence.getAlterations().iterator().next());
+                        searchObject.setAlteration(alteration);
                         searchObject.setTumorType(tumorType);
                         searchObjects.add(searchObject);
+                    }
                 }
             }
         }
@@ -680,10 +686,10 @@ public class AnnotationsApiController {
             indicatorQuery.setEntrezGeneId(searchObject.getGene().getEntrezGeneId());
             indicatorQuery.setHugoSymbol(searchObject.getGene().getHugoSymbol());
             indicatorQuery.setAlteration(searchObject.getAlteration().getName());
-            if (searchObject.getTumorType().getMainType().toLowerCase().contains(query)) {
-                indicatorQuery.setTumorType(searchObject.getTumorType().getMainType());
-            } else {
+            if (StringUtils.isNotEmpty(searchObject.getTumorType().getSubtype()) && searchObject.getTumorType().getSubtype().toLowerCase().contains(query)) {
                 indicatorQuery.setTumorType(searchObject.getTumorType().getSubtype());
+            } else {
+                indicatorQuery.setTumorType(searchObject.getTumorType().getMainType());
             }
             AnnotationSearchResult annotationSearchResult = new AnnotationSearchResult();
             annotationSearchResult.setQueryType(AnnotationSearchQueryType.CANCER_TYPE);
@@ -693,8 +699,6 @@ public class AnnotationsApiController {
 
         return result;
     }
-
-
 
     private IndicatorQueryResp getIndicatorQueryFromGenomicLocation(
         ReferenceGenome referenceGenome,
@@ -807,6 +811,9 @@ class AnnotationSearchResultComp implements Comparator<AnnotationSearchResult> {
             if (a1.getQueryType().equals(AnnotationSearchQueryType.CANCER_TYPE)) {
                 name1 = i1.getQuery().getTumorType().toLowerCase();
                 name2 = i2.getQuery().getTumorType().toLowerCase();
+                if (name1.contains("acral") || name2.contains("acral")) {
+                    Boolean t = true;
+                }
             }
         }
         Integer index1 = name1.indexOf(this.keyword);
@@ -853,8 +860,18 @@ class AnnotationSearchResultComp implements Comparator<AnnotationSearchResult> {
                         }
                         result = MainUtils.compareOncogenicity(o1, o2, true);
                         if (result == 0) {
+                            // Compare alteration name
+                            if (i1 == null || StringUtils.isNotEmpty(i1.getQuery().getAlteration())) {
+                                return 1;
+                            }
+                            if (i2 == null || StringUtils.isNotEmpty(i2.getQuery().getAlteration())) {
+                                return -1;
+                            }
+                            name1 = i1.getQuery().getAlteration().toLowerCase();
+                            name2 = i2.getQuery().getAlteration().toLowerCase();
                             result = name1.compareTo(name2);
                             if (result == 0) {
+                                // Compare gene name
                                 result = i1.getQuery().getHugoSymbol().compareTo(i2.getQuery().getHugoSymbol());
                             }
                         }
