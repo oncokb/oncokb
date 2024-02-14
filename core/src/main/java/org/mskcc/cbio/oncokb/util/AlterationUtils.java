@@ -1172,7 +1172,7 @@ public final class AlterationUtils {
             String fullName = NamingUtils.getFullName(query);
             if (fullName != null) {
                 for (Alteration alteration : alterations) {
-                    if (isMatch(exactMatch, omitExclusion, fullName, alteration.getName())) {
+                    if (isMatch(exactMatch, fullName, alteration.getName())) {
                         alterationList.add(alteration);
                     }
                 }
@@ -1181,11 +1181,8 @@ public final class AlterationUtils {
         return alterationList;
     }
 
-    private static Boolean isMatch(Boolean exactMatch, Boolean omitExclusion, String query, String string) {
+    private static Boolean isMatch(Boolean exactMatch, String query, String string) {
         if (string != null) {
-            if (omitExclusion) {
-                string = AlterationUtils.removeExclusionCriteria(string);
-            }
             if (exactMatch) {
                 if (StringUtils.containsIgnoreCase(string, query)) {
                     return true;
