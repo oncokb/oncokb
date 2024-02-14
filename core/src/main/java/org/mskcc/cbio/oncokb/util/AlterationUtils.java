@@ -1145,7 +1145,7 @@ public final class AlterationUtils {
         return null;
     }
 
-    public static List<Alteration> lookupVariant(String query, Boolean exactMatch, List<Alteration> alterations) {
+    public static List<Alteration> lookupVariant(String query, Boolean exactMatch, Boolean omitExclusion, List<Alteration> alterations) {
         List<Alteration> alterationList = new ArrayList<>();
         // Only support columns(alteration/name) blur search.
         query = query.toLowerCase().trim();

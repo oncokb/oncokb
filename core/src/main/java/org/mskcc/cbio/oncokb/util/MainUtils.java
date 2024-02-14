@@ -45,6 +45,15 @@ public class MainUtils {
         )
     );
 
+    private static final List<AnnotationSearchQueryType> PRIORITIZED_QUERY_TYPES = Collections.unmodifiableList(
+        Arrays.asList(
+            AnnotationSearchQueryType.GENE,
+            AnnotationSearchQueryType.VARIANT,
+            AnnotationSearchQueryType.CANCER_TYPE,
+            AnnotationSearchQueryType.DRUG
+        )
+    );
+
     public static Oncogenicity getCuratedAlterationOncogenicity(Alteration alteration) {
         List<Evidence> selfAltOncogenicEvis = EvidenceUtils.getEvidence(Collections.singletonList(alteration),
             Collections.singleton(EvidenceType.ONCOGENIC), null);
@@ -821,5 +830,33 @@ public class MainUtils {
             sb.append(text);
         }
         return sb.toString();
+    }
+
+    public static <T> LinkedHashSet<T> getLimit(LinkedHashSet<T> result, Integer limit) {
+        final Integer DEFAULT_RETURN_LIMIT = 5;
+        if (limit == null)
+            limit = DEFAULT_RETURN_LIMIT;
+        Integer count = 0;
+        LinkedHashSet<T> firstFew = new LinkedHashSet<>();
+        Iterator<T> itr = result.iterator();
+        while (itr.hasNext() && count < limit) {
+            firstFew.add(itr.next());
+            count++;
+        }
+        return firstFew;
+    }
+
+    public static Integer compareAnnotationSearchQueryType(AnnotationSearchQueryType q1, AnnotationSearchQueryType q2, Boolean asc) {
+        if (asc == null) {
+            asc = true;
+        }
+        if (q1 == null) {
+            if (q2 == null)
+                return 0;
+            return asc ? 1 : -1;
+        }
+        if (q2 == null)
+            return asc ? -1 : 1;
+        return (PRIORITIZED_QUERY_TYPES.indexOf(q2) - PRIORITIZED_QUERY_TYPES.indexOf(q1)) * (asc ? 1 : -1);
     }
 }

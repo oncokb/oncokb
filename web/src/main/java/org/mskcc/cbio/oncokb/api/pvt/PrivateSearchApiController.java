@@ -11,7 +11,6 @@ import org.mskcc.cbio.oncokb.bo.OncokbTranscriptService;
 import org.mskcc.cbio.oncokb.cache.CacheFetcher;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.TumorType;
 import org.mskcc.cbio.oncokb.util.*;
 import org.oncokb.oncokb_transcript.ApiException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.*;
 import java.util.regex.Matcher;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
@@ -150,7 +150,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
                     result.addAll(convertGene(GeneUtils.searchGene(keywords.get(0), false), keywords.get(0)));
 
                     // Blur search variant
-                    result.addAll(convertVariant(AlterationUtils.lookupVariant(keywords.get(0), false, AlterationUtils.getAllAlterations()), keywords.get(0)));
+                    result.addAll(convertVariant(AlterationUtils.lookupVariant(keywords.get(0), false, false, AlterationUtils.getAllAlterations()), keywords.get(0)));
 
                     // Blur search drug
                     result.addAll(findEvidencesWithDrugAssociated(keywords.get(0), false));
@@ -183,7 +183,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
 
                     // If there is no match, the key words could referring to a variant, try to do a blur variant search
                     String fullKeywords = StringUtils.join(keywords, " ");
-                    result.addAll(convertVariant(AlterationUtils.lookupVariant(fullKeywords, false, AlterationUtils.getAllAlterations()), fullKeywords));
+                    result.addAll(convertVariant(AlterationUtils.lookupVariant(fullKeywords, false, false, AlterationUtils.getAllAlterations()), fullKeywords));
 
                     // Blur search for cancer type
                     result.addAll(findMatchingCancerTypes(fullKeywords, false));
@@ -223,7 +223,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
             typeaheadSearchResp.setQueryType(TypeaheadQueryType.TEXT);
             result.add(typeaheadSearchResp);
         }
-        return new ResponseEntity<>(getLimit(result, limit), HttpStatus.OK);
+        return new ResponseEntity<>(MainUtils.getLimit(result, limit), HttpStatus.OK);
     }
 
     @Override
@@ -235,7 +235,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
             limit = DEFAULT_RETURN_LIMIT;
         }
         OncokbTranscriptService oncokbTranscriptService = new OncokbTranscriptService();
-        return new ResponseEntity<>(getLimit(new LinkedHashSet<>(oncokbTranscriptService.findDrugs(query)), limit), HttpStatus.OK);
+        return new ResponseEntity<>(MainUtils.getLimit(new LinkedHashSet<>(oncokbTranscriptService.findDrugs(query)), limit), HttpStatus.OK);
     }
 
     private List<TypeaheadSearchResp> findMatchingCancerTypes(String query, Boolean exactMatch) {
@@ -428,7 +428,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
                         Set<Alteration> keywordsMatches = null;
                         for (String keyword : keywords) {
                             if (!keyword.equals(entry.getKey())) {
-                                List<Alteration> matches = AlterationUtils.lookupVariant(keyword, exactMatch, alterations);
+                                List<Alteration> matches = AlterationUtils.lookupVariant(keyword, exactMatch, false, alterations);
                                 if (matches != null) {
                                     if (keywordsMatches == null) {
                                         keywordsMatches = new HashSet<>();
@@ -447,7 +447,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
                     } else {
                         for (String keyword : keywords) {
                             if (!keyword.equals(entry.getKey()))
-                                result.addAll(convertVariant(AlterationUtils.lookupVariant(keyword, exactMatch, alterations), keyword));
+                                result.addAll(convertVariant(AlterationUtils.lookupVariant(keyword, exactMatch, false, alterations), keyword));
                         }
                     }
                 }
@@ -666,19 +666,6 @@ public class PrivateSearchApiController implements PrivateSearchApi {
         }
         typeaheadSearchResp.setLink(link);
         return typeaheadSearchResp;
-    }
-
-    private <T> LinkedHashSet<T> getLimit(LinkedHashSet<T> result, Integer limit) {
-        if (limit == null)
-            limit = DEFAULT_RETURN_LIMIT;
-        Integer count = 0;
-        LinkedHashSet<T> firstFew = new LinkedHashSet<>();
-        Iterator<T> itr = result.iterator();
-        while (itr.hasNext() && count < limit) {
-            firstFew.add(itr.next());
-            count++;
-        }
-        return firstFew;
     }
 }
 
