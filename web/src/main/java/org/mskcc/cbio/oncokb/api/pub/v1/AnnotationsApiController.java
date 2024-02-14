@@ -579,7 +579,11 @@ public class AnnotationsApiController {
                         Query indicatorQuery = new Query();
                         indicatorQuery.setEntrezGeneId(gene.getEntrezGeneId());
                         indicatorQuery.setHugoSymbol(gene.getHugoSymbol());
-                        indicatorQuery.setAlteration(alteration.getAlteration());
+                        if (alteration.getName().toLowerCase().contains(alterationKeywords.toLowerCase())) {
+                            indicatorQuery.setAlteration(alteration.getName());
+                        } else {
+                            indicatorQuery.setAlteration((alteration.getAlteration()));
+                        }
                         AnnotationSearchResult annotationSearchResult = new AnnotationSearchResult();
                         annotationSearchResult.setQueryType(AnnotationSearchQueryType.VARIANT);
                         annotationSearchResult.setIndicatorQueryResp(IndicatorUtils.processQuery(indicatorQuery, null, null, null));
@@ -666,9 +670,6 @@ public class AnnotationsApiController {
         Set<SearchObject> searchObjects = new HashSet<>();
         for (TumorType tumorType : tumorTypeMatches) {
             for (Evidence evidence : allImplicationEvidences) {
-                if (evidence.getGene().getHugoSymbol().equals("NTRK3")) {
-                    Boolean t = true;
-                }
                 if (TumorTypeUtils.findEvidenceRelevantCancerTypes(evidence).contains(tumorType)) {
                     for (Alteration alteration: evidence.getAlterations()) {
                         SearchObject searchObject = new SearchObject();
@@ -811,9 +812,6 @@ class AnnotationSearchResultComp implements Comparator<AnnotationSearchResult> {
             if (a1.getQueryType().equals(AnnotationSearchQueryType.CANCER_TYPE)) {
                 name1 = i1.getQuery().getTumorType().toLowerCase();
                 name2 = i2.getQuery().getTumorType().toLowerCase();
-                if (name1.contains("acral") || name2.contains("acral")) {
-                    Boolean t = true;
-                }
             }
         }
         Integer index1 = name1.indexOf(this.keyword);
