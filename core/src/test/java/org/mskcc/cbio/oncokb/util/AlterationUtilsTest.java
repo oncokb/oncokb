@@ -472,4 +472,20 @@ public class AlterationUtilsTest extends TestCase {
         assertEquals("A1B,B1C[test1,test2]", AlterationUtils.trimComment("A1B(test1,test2),B1C[test1,test2]"));
         assertEquals("A1B,B1C[test1,test2],C1D", AlterationUtils.trimComment("A1B(test1,test2),B1C[test1,test2],C1D(test1,test2)"));
     }
+
+    public void testHasExclusionCriteria(){
+        assertFalse(AlterationUtils.hasExclusionCriteria(null));
+        assertFalse(AlterationUtils.hasExclusionCriteria(""));
+        assertFalse(AlterationUtils.hasExclusionCriteria("BRAF"));
+        assertFalse(AlterationUtils.hasExclusionCriteria("V600E"));
+
+        assertTrue(AlterationUtils.hasExclusionCriteria("V600 {excluding V600E}"));
+        assertTrue(AlterationUtils.hasExclusionCriteria("V600 {exclude V600E}"));
+        assertTrue(AlterationUtils.hasExclusionCriteria("V600 (excluding V600E)"));
+        assertTrue(AlterationUtils.hasExclusionCriteria("V600 (exclude V600E)"));
+
+        assertTrue(AlterationUtils.hasExclusionCriteria("V600{excluding V600E}"));
+        assertTrue(AlterationUtils.hasExclusionCriteria("V600{excluding V600E} "));
+        assertTrue(AlterationUtils.hasExclusionCriteria("V600{excluding  V600E}"));
+    }
 }

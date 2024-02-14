@@ -22,7 +22,6 @@ public class ClinicalVariant {
     private Set<String> drug = new HashSet<>();
     private Set<String> drugPmids = new HashSet<>();
     private Set<ArticleAbstract> drugAbstracts = new HashSet<>();
-
     private String drugDescription = "";
 
 

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -107,7 +108,7 @@ public class VariantsApiController implements VariantsApi {
                             alterationSet.addAll(allAlterations);
                         } else {
                             AlterationBo alterationBo = new ApplicationContextSingleton().getAlterationBo();
-                            List<Alteration> alterations = AlterationUtils.lookupVariant(query.getVariant(), true, allAlterations);
+                            List<Alteration> alterations = AlterationUtils.lookupVariant(query.getVariant(), true, false, allAlterations);
 
                             // If this variant is not annotated
                             if (alterations == null || alterations.isEmpty()) {
@@ -138,7 +139,7 @@ public class VariantsApiController implements VariantsApi {
                         alterationSet.addAll(AlterationUtils.getAlterationsByKnownEffectInGene(gene, AlterationUtils.getInferredAlterationsKnownEffect(query.getVariant()), false));
                     }
                 } else {
-                    alterationList = AlterationUtils.lookupVariant(query.getVariant(), false, AlterationUtils.getAllAlterations());
+                    alterationList = AlterationUtils.lookupVariant(query.getVariant(), false, false, AlterationUtils.getAllAlterations());
                 }
             }
         }
