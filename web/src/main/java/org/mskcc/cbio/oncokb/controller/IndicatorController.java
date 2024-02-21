@@ -48,7 +48,7 @@ public class IndicatorController {
         @RequestParam(value = "fields", required = false) String fields,
         @RequestParam(value = "hgvs", required = false) String hgvs,
         @RequestParam(value = "germline", required = false) Boolean germline,
-        @RequestParam(value = "alleleState", required = true) String alleleState
+        @RequestParam(value = "alleleState", required = false) String alleleState
     ) {
         Query query = new Query(id, referenceGenome, entrezGeneId, hugoSymbol, alteration, alterationType, svType, tumorType, consequence, proteinStart, proteinEnd, hgvs, germline, alleleState);
         Set<LevelOfEvidence> levelOfEvidences = levels == null ? null : LevelUtils.parseStringLevelOfEvidences(levels);

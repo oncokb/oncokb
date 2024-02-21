@@ -1,15 +1,18 @@
 package org.mskcc.cbio.oncokb.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class GermlineVariant {
-    List<String> genomicIndicators;
-    String penetrance;
-    String pathogenic;
-    String inheritanceMechanism;
-    String cancerRisk;
-    String description;
-    String clinVarId;
+    List<String> genomicIndicators = new ArrayList<>();
+    String penetrance = "";
+    String penetranceDescription = "";
+    String pathogenic = "";
+    String description = "";
+    String inheritanceMechanism = "";
+    String inheritanceMechanismDescription = "";
+    String cancerRisk = "";
+    String clinVarId = "";
 
     public List<String> getGenomicIndicators() {
         return genomicIndicators;
@@ -65,5 +68,21 @@ public class GermlineVariant {
 
     public void setClinVarId(String clinVarId) {
         this.clinVarId = clinVarId;
+    }
+
+    public String getPenetranceDescription() {
+        return penetranceDescription;
+    }
+
+    public void setPenetranceDescription(String penetranceDescription) {
+        this.penetranceDescription = penetranceDescription;
+    }
+
+    public String getInheritanceMechanismDescription() {
+        return inheritanceMechanismDescription;
+    }
+
+    public void setInheritanceMechanismDescription(String inheritanceMechanismDescription) {
+        this.inheritanceMechanismDescription = inheritanceMechanismDescription;
     }
 }

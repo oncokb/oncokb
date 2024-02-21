@@ -524,7 +524,7 @@ public class IndicatorUtils {
             sortGermlineEvidenceByAlterationSize(pathogenicEvis);
             Evidence pathogenicEvi = pathogenicEvis.iterator().next();
             germlineVariant.setPathogenic(pathogenicEvi.getKnownEffect());
-            germlineVariant.setDescription(pathogenicEvi.getDescription());
+            germlineVariant.setDescription(StringUtils.isEmpty(pathogenicEvi.getDescription()) ? "" : pathogenicEvi.getDescription());
         }
 
         // Get penetrance info
@@ -533,17 +533,18 @@ public class IndicatorUtils {
             sortGermlineEvidenceByAlterationSize(penetranceEvis);
             Evidence penetranceEvi = penetranceEvis.iterator().next();
             germlineVariant.setPenetrance(penetranceEvi.getKnownEffect());
+            germlineVariant.setPenetranceDescription(StringUtils.isEmpty(penetranceEvi.getDescription()) ? "" : penetranceEvi.getDescription());
         }
 
         // Get cancer risk info
         List<Evidence> cancerRiskEvis = EvidenceUtils.getEvidence(Collections.singletonList(matchedAlt), Collections.singleton(EvidenceType.GERMLINE_CANCER_RISK), null);
+        cancerRiskEvis.sort(Comparator.comparing(Evidence::getKnownEffect));
+
         if (cancerRiskEvis.size() > 0) {
             if (StringUtils.isNotEmpty(alleleState)) {
                 cancerRiskEvis = cancerRiskEvis.stream().filter(evidence -> alleleState.toLowerCase().equals(evidence.getKnownEffect().toLowerCase())).collect(Collectors.toList());
             }
-            sortGermlineEvidenceByAlterationSize(cancerRiskEvis);
-            Evidence cancerRiskEvi = cancerRiskEvis.iterator().next();
-            germlineVariant.setCancerRisk(cancerRiskEvi.getDescription());
+            germlineVariant.setCancerRisk(cancerRiskEvis.stream().map(evidence -> StringUtils.capitalize(evidence.getKnownEffect()) + " " + matchedAlt.getGene().getHugoSymbol() + " mutation carriers: " + evidence.getDescription()).collect(Collectors.joining("\n\n")));
         }
 
         // Get inheritance mechanism info
@@ -552,6 +553,7 @@ public class IndicatorUtils {
             sortGermlineEvidenceByAlterationSize(inheritanceMechanismEvis);
             Evidence inheritanceMechanismEvi = inheritanceMechanismEvis.iterator().next();
             germlineVariant.setInheritanceMechanism(inheritanceMechanismEvi.getKnownEffect());
+            germlineVariant.setInheritanceMechanismDescription(StringUtils.isEmpty(inheritanceMechanismEvi.getDescription()) ? "" : inheritanceMechanismEvi.getDescription());
         }
 
         // Get genomic indicator

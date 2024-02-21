@@ -50,8 +50,8 @@ public class AnnotationsApiController {
         , @ApiParam(value = "Consequence. Exacmple: missense_variant", allowableValues = "feature_truncation, frameshift_variant, inframe_deletion, inframe_insertion, start_lost, missense_variant, splice_region_variant, stop_gained, synonymous_variant, intron_variant") @RequestParam(value = "consequence", required = false) String consequence
         , @ApiParam(value = "Protein Start. Example: 600") @RequestParam(value = "proteinStart", required = false) Integer proteinStart
         , @ApiParam(value = "Protein End. Example: 600") @RequestParam(value = "proteinEnd", required = false) Integer proteinEnd
-        , @ApiParam(value = "Whether is germline variant", required = false) @RequestParam(value = "isGermline", defaultValue = "FALSE", required = true) Boolean isGermline
-        , @ApiParam(value = "Germline variant allele state(monoallelic vs biallelic)", required = false) @RequestParam(value = "alleleState", required = true) String alleleState
+        , @ApiParam(value = "Whether is germline variant", required = false) @RequestParam(value = "isGermline", defaultValue = "FALSE", required = false) Boolean isGermline
+        , @ApiParam(value = "Germline variant allele state(monoallelic vs biallelic)", required = false) @RequestParam(value = "alleleState", required = false) String alleleState
         , @ApiParam(value = "OncoTree(http://oncotree.info) tumor type name. The field supports OncoTree Code, OncoTree Name and OncoTree Main type. Example: Melanoma") @RequestParam(value = "tumorType", required = false) String tumorType
         , @ApiParam(value = EVIDENCE_TYPES_DESCRIPTION) @RequestParam(value = "evidenceType", required = false) String evidenceTypes
     ) {
@@ -149,8 +149,8 @@ public class AnnotationsApiController {
     public ResponseEntity<IndicatorQueryResp> annotateMutationsByGenomicChangeGet(
         @ApiParam(value = "Genomic location. Example: 7,140453136,140453136,A,T", required = true) @RequestParam(value = "genomicLocation", required = true) String genomicLocation
         , @ApiParam(value = "Reference genome, either GRCh37 or GRCh38. The default is GRCh37", required = false, defaultValue = "GRCh37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") String referenceGenome
-        , @ApiParam(value = "Whether is germline variant", required = false) @RequestParam(value = "isGermline", defaultValue = "FALSE", required = true) Boolean isGermline
-        , @ApiParam(value = "Germline variant allele state(monoallelic vs biallelic)", required = false) @RequestParam(value = "alleleState", required = true) String alleleState
+        , @ApiParam(value = "Whether is germline variant", required = false) @RequestParam(value = "germline", defaultValue = "FALSE", required = false) Boolean germline
+        , @ApiParam(value = "Germline variant allele state(monoallelic vs biallelic)", required = false) @RequestParam(value = "alleleState", required = false) String alleleState
         , @ApiParam(value = "OncoTree(http://oncotree.info) tumor type name. The field supports OncoTree Code, OncoTree Name and OncoTree Main type. Example: Melanoma") @RequestParam(value = "tumorType", required = false) String tumorType
         , @ApiParam(value = EVIDENCE_TYPES_DESCRIPTION) @RequestParam(value = "evidenceType", required = false) String evidenceTypes
     ) throws ApiException, org.genome_nexus.ApiException {
@@ -167,7 +167,7 @@ public class AnnotationsApiController {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
         }
-        indicatorQueryResp = this.getIndicatorQueryFromGenomicLocation(matchedRG, genomicLocation, tumorType, isGermline, alleleState, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")), cacheFetcher.getAllTranscriptGenes());
+        indicatorQueryResp = this.getIndicatorQueryFromGenomicLocation(matchedRG, genomicLocation, tumorType, germline, alleleState, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")), cacheFetcher.getAllTranscriptGenes());
         return new ResponseEntity<>(indicatorQueryResp, status);
     }
 
@@ -214,8 +214,8 @@ public class AnnotationsApiController {
         @ApiParam(value = "HGVS genomic format. Example: 7:g.140453136A>T", required = true) @RequestParam(value = "hgvsg", required = true) String hgvsg
         , @ApiParam(value = "Reference genome, either GRCh37 or GRCh38. The default is GRCh37", required = false, defaultValue = "GRCh37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") String referenceGenome
         , @ApiParam(value = "OncoTree(http://oncotree.info) tumor type name. The field supports OncoTree Code, OncoTree Name and OncoTree Main type. Example: Melanoma") @RequestParam(value = "tumorType", required = false) String tumorType
-        , @ApiParam(value = "Whether is germline variant", required = false) @RequestParam(value = "isGermline", defaultValue = "FALSE", required = true) Boolean isGermline
-        , @ApiParam(value = "Germline variant allele state(monoallelic vs biallelic)", required = false) @RequestParam(value = "alleleState", required = true) String alleleState
+        , @ApiParam(value = "Whether is germline variant", required = false) @RequestParam(value = "germline", defaultValue = "FALSE", required = false) Boolean germline
+        , @ApiParam(value = "Germline variant allele state(monoallelic vs biallelic)", required = false) @RequestParam(value = "alleleState", required = false) String alleleState
         , @ApiParam(value = EVIDENCE_TYPES_DESCRIPTION) @RequestParam(value = "evidenceType", required = false) String evidenceTypes
     ) throws ApiException, org.genome_nexus.ApiException {
         HttpStatus status = HttpStatus.OK;
@@ -240,7 +240,7 @@ public class AnnotationsApiController {
                 matchedRG,
                 hgvsg,
                 tumorType,
-                isGermline,
+                germline,
                 alleleState,
                 new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")),
                 cacheFetcher.getAllTranscriptGenes()
@@ -302,8 +302,8 @@ public class AnnotationsApiController {
         , @ApiParam(value = "Copy number alteration type", required = true) @RequestParam(value = "copyNameAlterationType", required = true) CopyNumberAlterationType copyNameAlterationType
         , @ApiParam(value = "Reference genome, either GRCh37 or GRCh38. The default is GRCh37", required = false, defaultValue = "GRCh37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") String referenceGenome
         , @ApiParam(value = "OncoTree(http://oncotree.info) tumor type name. The field supports OncoTree Code, OncoTree Name and OncoTree Main type. Example: Melanoma") @RequestParam(value = "tumorType", required = false) String tumorType
-        , @ApiParam(value = "Whether is germline variant", required = false) @RequestParam(value = "isGermline", defaultValue = "FALSE", required = true) Boolean isGermline
-        , @ApiParam(value = "Germline variant allele state(monoallelic vs biallelic)", required = false) @RequestParam(value = "alleleState", required = true) String alleleState
+        , @ApiParam(value = "Whether is germline variant", required = false) @RequestParam(value = "germline", defaultValue = "FALSE", required = false) Boolean germline
+        , @ApiParam(value = "Germline variant allele state(monoallelic vs biallelic)", required = false) @RequestParam(value = "alleleState", required = false) String alleleState
         , @ApiParam(value = EVIDENCE_TYPES_DESCRIPTION) @RequestParam(value = "evidenceType", required = false) String evidenceTypes
     ) {
         HttpStatus status = HttpStatus.OK;
@@ -334,7 +334,7 @@ public class AnnotationsApiController {
                 null,
                 null,
                 null,
-                isGermline,
+                germline,
                 alleleState,
                 null,
                 false,
@@ -412,8 +412,8 @@ public class AnnotationsApiController {
         , @ApiParam(value = "The entrez gene ID B. (Higher priority than hugoSymbolB) Example: 613") @RequestParam(value = "entrezGeneIdB", required = false) Integer entrezGeneIdB
         , @ApiParam(value = "Structural variant type", required = true) @RequestParam(value = "structuralVariantType", required = true) StructuralVariantType structuralVariantType
         , @ApiParam(value = "Whether is functional fusion", required = true) @RequestParam(value = "isFunctionalFusion", defaultValue = "FALSE", required = true) Boolean isFunctionalFusion
-        , @ApiParam(value = "Whether is germline variant", required = false) @RequestParam(value = "isGermline", defaultValue = "FALSE", required = true) Boolean isGermline
-        , @ApiParam(value = "Germline variant allele state(monoallelic vs biallelic)", required = false) @RequestParam(value = "alleleState", required = true) String alleleState
+        , @ApiParam(value = "Whether is germline variant", required = false) @RequestParam(value = "germline", defaultValue = "FALSE", required = false) Boolean germline
+        , @ApiParam(value = "Germline variant allele state(monoallelic vs biallelic)", required = false) @RequestParam(value = "alleleState", required = false) String alleleState
         , @ApiParam(value = "Reference genome, either GRCh37 or GRCh38. The default is GRCh37", required = false, defaultValue = "GRCh37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") String referenceGenome
         , @ApiParam(value = "OncoTree(http://oncotree.info) tumor type name. The field supports OncoTree Code, OncoTree Name and OncoTree Main type. Example: Melanoma") @RequestParam(value = "tumorType", required = false) String tumorType
         , @ApiParam(value = EVIDENCE_TYPES_DESCRIPTION) @RequestParam(value = "evidenceType", required = false) String evidenceTypes
@@ -462,7 +462,7 @@ public class AnnotationsApiController {
             String fusionName = FusionUtils.getFusionName(geneA, geneB);
             indicatorQueryResp = this.cacheFetcher.processQuery(
                 matchedRG, null, fusionName, null, AlterationType.STRUCTURAL_VARIANT.name(), tumorType, isFunctionalFusion ? "fusion" : null, null, null, structuralVariantType, null,
-                isGermline, alleleState, null, false, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
+                germline, alleleState, null, false, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
         }
         return new ResponseEntity<>(indicatorQueryResp, status);
     }
