@@ -319,6 +319,35 @@ public class DriveAnnotationParser {
         return object.has(key) ? (object.getString(key).trim().isEmpty() ? null : object.getString(key).trim()) : null;
     }
 
+    private void parseGenomicIndicator(JSONArray genomicIndicators, Gene gene, Set<Alteration> alterations) {
+        for (int i = 0; i < genomicIndicators.length(); i++) {
+            JSONObject genomicIndicator = genomicIndicators.getJSONObject(i);
+
+            if (genomicIndicator.has("indicator")) {
+                Evidence evidence = new Evidence();
+                evidence.setEvidenceType(EvidenceType.GERMLINE_VARIANT_GENOMIC_INDICATOR);
+                evidence.setAlterations(alterations);
+                evidence.setGene(gene);
+                evidence.setDescription(genomicIndicator.getString("indicator"));
+
+                String knownEffect = "biallelic,monoallelic";
+                if (genomicIndicator.has("alleleStates")) {
+                    JSONArray alleleStatesArray = genomicIndicator.getJSONArray("alleleStates");
+                    List<String> alleleStates = new ArrayList<>();
+                    for (int j = 0; j < alleleStatesArray.length(); j++) {
+                        alleleStates.add(alleleStatesArray.getString(j));
+                    }
+                    knownEffect = alleleStates.stream().collect(Collectors.joining());
+                }
+                evidence.setKnownEffect(knownEffect);
+
+
+                EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+                evidenceBo.save(evidence);
+            }
+        }
+    }
+
     private void parseGermline(JSONObject germlineObj, Gene gene, Set<Alteration> alterations) {
         // Save pathogenicity
         Pathogenicity pathogenic = getPathogenicity(germlineObj);
@@ -330,19 +359,24 @@ public class DriveAnnotationParser {
         // Save germline variant penetrance
         String germlinePenetrance = getJsonStringVal(germlineObj, "penetrance");
         if (StringUtils.isNotEmpty(germlinePenetrance)) {
-            saveEffectDescriptionEvidence(gene, alterations, EvidenceType.GERMLINE_VARIANT_PENETRANCE, germlinePenetrance, null);
+            saveEffectDescriptionEvidence(gene, alterations, EvidenceType.GERMLINE_VARIANT_PENETRANCE, germlinePenetrance, getJsonStringVal(germlineObj, "penetranceDescription"));
         }
 
         // Save germline mechanism of inheritance
         String inheritanceMechanism = getJsonStringVal(germlineObj, "inheritanceMechanism");
         if (StringUtils.isNotEmpty(inheritanceMechanism)) {
-            saveEffectDescriptionEvidence(gene, alterations, EvidenceType.GERMLINE_INHERITANCE_MECHANISM, inheritanceMechanism, null);
+            saveEffectDescriptionEvidence(gene, alterations, EvidenceType.GERMLINE_INHERITANCE_MECHANISM, inheritanceMechanism, getJsonStringVal(germlineObj, "inheritanceMechanismDescription"));
         }
 
         // Save germline cancer risk
-        String cancerRisk = getJsonStringVal(germlineObj, "cancerRisk");
-        if (StringUtils.isNotEmpty(cancerRisk)) {
-            saveEffectDescriptionEvidence(gene, alterations, EvidenceType.GERMLINE_CANCER_RISK, null, cancerRisk);
+        if (germlineObj.has("cancerRisk")) {
+            JSONObject cancerRisk = germlineObj.getJSONObject("cancerRisk");
+            String[] cancerRiskKeys = new String[]{"biallelic", "monoallelic", "mosaic"};
+            for (String cancerRiskKey : cancerRiskKeys) {
+                if (cancerRisk.has(cancerRiskKey) && StringUtils.isNotEmpty(cancerRisk.getString(cancerRiskKey))) {
+                    saveEffectDescriptionEvidence(gene, alterations, EvidenceType.GERMLINE_CANCER_RISK, cancerRiskKey, getJsonStringVal(cancerRisk, cancerRiskKey));
+                }
+            }
         }
     }
 
@@ -355,11 +389,8 @@ public class DriveAnnotationParser {
             List<String> mutationStrs = new ArrayList<>();
             for (int i = 0; i < alterationList.length(); i++) {
                 JSONObject alteration = alterationList.getJSONObject(i);
-                if (alteration.has("cDna") && StringUtils.isNotEmpty(alteration.getString("cDna"))) {
-                    mutationStrs.add(alteration.getString("cDna"));
-                }
-                if (alteration.has("proteinChange") && StringUtils.isNotEmpty(alteration.getString("proteinChange"))) {
-                    mutationStrs.add(alteration.getString("proteinChange"));
+                if (alteration.has("alteration") && StringUtils.isNotEmpty(alteration.getString("alteration"))) {
+                    mutationStrs.add(alteration.getString("alteration"));
                 }
             }
             mutations = AlterationUtils.parseMutationString(StringUtils.join(mutationStrs, ","), ",");
@@ -458,6 +489,11 @@ public class DriveAnnotationParser {
 
             if (mutationEffect.has("germline")) {
                 parseGermline(mutationEffect.getJSONObject("germline"), gene, alterations);
+            }
+
+            // save genomic indicators
+            if (mutationObj.has("germline_genomic_indicators")) {
+                parseGenomicIndicator(mutationObj.getJSONArray("germline_genomic_indicators"), gene, alterations);
             }
 
             // cancers

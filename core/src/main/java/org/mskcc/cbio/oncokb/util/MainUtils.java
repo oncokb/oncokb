@@ -1,5 +1,6 @@
 package org.mskcc.cbio.oncokb.util;
 
+import java.nio.file.Path;
 import jdk.nashorn.internal.runtime.regexp.joni.Regex;
 import org.mskcc.cbio.oncokb.apiModels.ActionableGene;
 import org.mskcc.cbio.oncokb.apiModels.AnnotatedVariant;
@@ -33,6 +34,15 @@ public class MainUtils {
             Oncogenicity.YES
             )
     );
+    private static final List<Pathogenicity> PRIORITIZED_PATHOGENICITY = Collections.unmodifiableList(
+            Arrays.asList(
+                    Pathogenicity.BENIGN,
+                    Pathogenicity.LIKELY_BENIGN,
+                    Pathogenicity.UNKNOWN,
+                    Pathogenicity.LIKELY,
+                    Pathogenicity.YES
+            )
+    );
     private static final List<MutationEffect> PRIORITIZED_MUTATION_EFFECTS = Collections.unmodifiableList(
         Arrays.asList(MutationEffect.GAIN_OF_FUNCTION,
             MutationEffect.LIKELY_GAIN_OF_FUNCTION,
@@ -59,100 +69,20 @@ public class MainUtils {
         return null;
     }
 
-    public static boolean isEGFRTruncatingVariants(String alteration) {
-        return alteration == null ? false : (alteration.trim().matches("^v(II|III|IV(a|b|c)|V)?$"));
+    public static Pathogenicity getCuratedAlterationPathogenicity(Alteration alteration) {
+        List<Evidence> selfAltOncogenicEvis = EvidenceUtils.getEvidence(Collections.singletonList(alteration),
+                Collections.singleton(EvidenceType.PATHOGENIC), null);
+        if (selfAltOncogenicEvis != null) {
+            Evidence highestPathogenicEvidenceByEvidence = MainUtils.findHighestPathogenicEvidenceByEvidences(new HashSet<>(selfAltOncogenicEvis));
+            if (highestPathogenicEvidenceByEvidence != null) {
+                return Pathogenicity.getByEffect(highestPathogenicEvidenceByEvidence.getKnownEffect());
+            }
+        }
+        return null;
     }
 
-    public static Map<String, Object> GetRequestQueries(
-        String entrezGeneId, String hugoSymbol, ReferenceGenome referenceGenome, String alteration, String tumorType,
-        String evidenceType, String consequence, String proteinStart, String proteinEnd,
-        String levels) {
-
-        Map<String, Object> requestQueries = new HashMap<>();
-
-        List<Query> queries = new ArrayList<>();
-        List<EvidenceType> evidenceTypes = new ArrayList<>();
-        List<LevelOfEvidence> levelOfEvidences = new ArrayList<>();
-        String[] genes = {};
-
-        if (entrezGeneId != null) {
-            for (String id : entrezGeneId.trim().split("\\s*,\\s*")) {
-                Query requestQuery = new Query();
-                requestQuery.setEntrezGeneId(Integer.parseInt(id));
-                queries.add(requestQuery);
-            }
-        } else if (hugoSymbol != null) {
-            for (String symbol : hugoSymbol.trim().split("\\s*,\\s*")) {
-                Query requestQuery = new Query();
-                if (symbol.equals(SpecialStrings.OTHERBIOMARKERS)) {
-                    requestQuery.setHugoSymbol(symbol);
-                } else {
-                    requestQuery.setHugoSymbol(symbol.toUpperCase());
-                }
-                queries.add(requestQuery);
-            }
-        }
-
-        if (evidenceType != null) {
-            for (String type : evidenceType.trim().split("\\s*,\\s*")) {
-                try {
-                    EvidenceType et = EvidenceType.valueOf(type);
-                    evidenceTypes.add(et);
-                } catch (Exception e) {
-                    // nothing needs to be done
-                }
-            }
-        } else {
-            evidenceTypes = EvidenceTypeUtils.getAllEvidenceTypes();
-        }
-
-        if (alteration != null) {
-            String[] alts = alteration.trim().split("\\s*,\\s*");
-            if (queries.size() == alts.length) {
-                String[] consequences = consequence == null ? new String[0] : consequence.trim().split("\\s*,\\s*");
-                String[] proteinStarts = proteinStart == null ? new String[0] : proteinStart.trim().split("\\s*,\\s*");
-                String[] proteinEnds = proteinEnd == null ? new String[0] : proteinEnd.trim().split("\\s*,\\s*");
-
-                for (int i = 0; i < queries.size(); i++) {
-                    queries.get(i).setAlteration(alts[i]);
-                    queries.get(i).setConsequence(consequences.length == alts.length ? consequences[i] : null);
-                    queries.get(i).setProteinStart(proteinStarts.length == alts.length ? Integer.valueOf(proteinStarts[i]) : null);
-                    queries.get(i).setProteinEnd(proteinEnds.length == alts.length ? Integer.valueOf(proteinEnds[i]) : null);
-                }
-            } else {
-                return null;
-            }
-        }
-
-        String[] tumorTypes = tumorType == null ? new String[0] : tumorType.trim().split("\\s*,\\s*");
-        if (tumorTypes.length > 0) {
-            if (tumorTypes.length == 1) {
-                for (int i = 0; i < queries.size(); i++) {
-                    queries.get(i).setTumorType(tumorTypes[0]);
-                }
-            } else if (queries.size() == tumorTypes.length) {
-                for (int i = 0; i < queries.size(); i++) {
-                    queries.get(i).setTumorType(tumorTypes[i]);
-                }
-            }
-        }
-
-        if (levels != null) {
-            String[] levelStrs = levels.trim().split("\\s*,\\s*");
-            for (int i = 0; i < levelStrs.length; i++) {
-                LevelOfEvidence level = LevelOfEvidence.getByName(levelStrs[i]);
-                if (level != null) {
-                    levelOfEvidences.add(level);
-                }
-            }
-        } else {
-            levelOfEvidences = null;
-        }
-
-        requestQueries.put("queries", queries);
-        requestQueries.put("evidenceTypes", evidenceTypes);
-        requestQueries.put("levels", levelOfEvidences);
-        return requestQueries;
+    public static boolean isEGFRTruncatingVariants(String alteration) {
+        return alteration == null ? false : (alteration.trim().matches("^v(II|III|IV(a|b|c)|V)?$"));
     }
 
     public static MutationEffect findHighestMutationEffect(Set<MutationEffect> mutationEffect) {
@@ -206,6 +136,21 @@ public class MainUtils {
         }
         return index == -1 ? null : PRIORITIZED_ONCOGENICITY.get(index);
     }
+
+    public static Pathogenicity findHighestPathogenicity(Set<Pathogenicity> pathogenicitySet) {
+        Integer index = -1;
+
+        for (Pathogenicity datum : pathogenicitySet) {
+            if (datum != null) {
+                Integer pathogenicIndex = PRIORITIZED_PATHOGENICITY.indexOf(datum);
+                if (index < pathogenicIndex) {
+                    index = pathogenicIndex;
+                }
+            }
+        }
+        return index == -1 ? null : PRIORITIZED_PATHOGENICITY.get(index);
+    }
+
     public static Evidence findHighestOncogenicityEvidence(List<Evidence> oncogenicitySet) {
         Integer index = -1;
 
@@ -257,6 +202,20 @@ public class MainUtils {
         return findHighestOncogenicity(oncogenicitySet);
     }
 
+    public static Pathogenicity findHighestPathogenicByEvidences(Set<Evidence> evidences) {
+        Set<Pathogenicity> pathogenicitySet = new HashSet<>();
+
+        if (evidences != null) {
+            for (Evidence evidence : evidences) {
+                if (evidence.getKnownEffect() != null) {
+                    pathogenicitySet.add(Pathogenicity.getByEffect(evidence.getKnownEffect()));
+                }
+            }
+        }
+
+        return findHighestPathogenicity(pathogenicitySet);
+    }
+
     public static Evidence findHighestOncogenicEvidenceByEvidences(Set<Evidence> evidences) {
         Oncogenicity oncogenicity = findHighestOncogenicByEvidences(evidences);
         Evidence evidencePicked = null;
@@ -264,6 +223,26 @@ public class MainUtils {
         if (oncogenicity != null) {
             for (Evidence evidence : evidences) {
                 if (evidence.getKnownEffect().equals(oncogenicity.getOncogenic())) {
+                    if (evidencePicked == null) {
+                        evidencePicked = evidence;
+                    } else if (evidencePicked.getLastEdit() == null) {
+                        evidencePicked = evidence;
+                    } else if (evidence.getLastEdit() != null && evidence.getLastEdit().after(evidencePicked.getLastEdit())) {
+                        evidencePicked = evidence;
+                    }
+                }
+            }
+        }
+        return evidencePicked;
+    }
+
+    public static Evidence findHighestPathogenicEvidenceByEvidences(Set<Evidence> evidences) {
+        Pathogenicity pathogenicity = findHighestPathogenicByEvidences(evidences);
+        Evidence evidencePicked = null;
+
+        if (pathogenicity != null) {
+            for (Evidence evidence : evidences) {
+                if (evidence.getKnownEffect().equals(pathogenicity.getPathogenic())) {
                     if (evidencePicked == null) {
                         evidencePicked = evidence;
                     } else if (evidencePicked.getLastEdit() == null) {
@@ -430,6 +409,10 @@ public class MainUtils {
 
     public static boolean isOncogenic(Oncogenicity oncogenicity) {
         return oncogenicity != null && (oncogenicity.equals(Oncogenicity.YES) || oncogenicity.equals(Oncogenicity.LIKELY) || oncogenicity.equals(Oncogenicity.RESISTANCE));
+    }
+
+    public static boolean isPathogenic(Pathogenicity pathogenicity) {
+        return pathogenicity != null && (pathogenicity.equals(Pathogenicity.YES) || pathogenicity.equals(Pathogenicity.LIKELY));
     }
 
     public static Set<BiologicalVariant> getBiologicalVariants(Gene gene) {

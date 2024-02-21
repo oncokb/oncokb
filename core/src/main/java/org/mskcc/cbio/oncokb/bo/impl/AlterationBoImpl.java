@@ -464,6 +464,13 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             }
         }
 
+        if (addPathogenicVariants(alteration, new ArrayList<>(alterations))) {
+            List<Alteration> pathogenicVariants = findPathogenicVariants(fullAlterations);
+            if (!pathogenicVariants.isEmpty()) {
+                alterations.addAll(pathogenicVariants);
+            }
+        }
+
         // Looking for general biological effect variants. Gain-of-function mutations, Loss-of-function mutations etc.
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
         List<Evidence> mutationEffectEvs = evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.MUTATION_EFFECT));
@@ -547,6 +554,15 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
             if (MainUtils.isOncogenic(indicatorQueryOncogenicity.getOncogenicity())) {
                 add = true;
             }
+        }
+        return add;
+    }
+
+    private boolean addPathogenicVariants(Alteration exactAlt, List<Alteration> relevantAlterations) {
+        boolean add = false;
+        IndicatorQueryPathogenicity indicatorQueryPathogenicity = IndicatorUtils.getPathogenicity(exactAlt, relevantAlterations);
+        if (MainUtils.isPathogenic(indicatorQueryPathogenicity.getPathogenicity())) {
+            add = true;
         }
         return add;
     }

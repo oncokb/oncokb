@@ -219,7 +219,7 @@ public class EvidenceUtils {
 
         // Get all gene related evidences
         Map<Gene, Set<Evidence>> mappedEvidences =
-            EvidenceUtils.getEvidenceByGenesAndEvidenceTypes(genes, Sets.intersection(EvidenceTypeUtils.getGeneEvidenceTypes(), evidenceTypes));
+            EvidenceUtils.getEvidenceByGenesAndEvidenceTypes(genes, Sets.intersection(EvidenceTypeUtils.getGeneEvidenceTypes(query.getQuery().isGermline()), evidenceTypes));
         for (Map.Entry<Gene, Set<Evidence>> cursor : mappedEvidences.entrySet()) {
             evidences.addAll(cursor.getValue());
         }
@@ -230,7 +230,7 @@ public class EvidenceUtils {
         }
         // Get all mutation related evidences
 
-        Set<EvidenceType> common = Sets.intersection(EvidenceTypeUtils.getMutationEvidenceTypes(), evidenceTypes);
+        Set<EvidenceType> common = Sets.intersection(EvidenceTypeUtils.getMutationEvidenceTypes(query.getQuery().isGermline()), evidenceTypes);
         if (common.size() > 0) {
             evidences.addAll(getEvidence(new ArrayList<>(alterations), common, null));
         }
@@ -819,14 +819,6 @@ public class EvidenceUtils {
                                                         Set<LevelOfEvidence> levelOfEvidences, Boolean highestLevelOnly) {
         List<EvidenceQueryRes> evidenceQueries = new ArrayList<>();
 
-        if (evidenceTypes == null) {
-            if (levelOfEvidences == null) {
-                evidenceTypes = new HashSet<>(EvidenceTypeUtils.getAllEvidenceTypes());
-            } else {
-                evidenceTypes = new HashSet<>(EvidenceTypeUtils.getTreatmentEvidenceTypes());
-            }
-        }
-
         levelOfEvidences = levelOfEvidences == null ? levelOfEvidences :
             new HashSet<>(CollectionUtils.intersection(levelOfEvidences, LevelUtils.getPublicLevels()));
 
@@ -860,6 +852,10 @@ public class EvidenceUtils {
                 EvidenceQueryRes query = new EvidenceQueryRes();
 
                 requestQuery.enrich();
+
+                if (evidenceTypes == null) {
+                    evidenceTypes = new HashSet<>(EvidenceTypeUtils.getAllEvidenceTypes(requestQuery.isGermline()));
+                }
 
                 query.setQuery(requestQuery);
 

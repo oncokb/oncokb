@@ -232,13 +232,14 @@ public class CacheFetcher {
                                            StructuralVariantType svType,
                                            String hgvs,
                                            Boolean isGermline,
+                                           String alleleState,
                                            Set<LevelOfEvidence> levels,
                                            Boolean highestLevelOnly,
                                            Set<EvidenceType> evidenceTypes) {
         if (referenceGenome == null) {
             referenceGenome = DEFAULT_REFERENCE_GENOME;
         }
-        Query query = new Query(null, referenceGenome, entrezGeneId, hugoSymbol, alteration, alterationType, svType, tumorType, consequence, proteinStart, proteinEnd, hgvs, isGermline);
+        Query query = new Query(null, referenceGenome, entrezGeneId, hugoSymbol, alteration, alterationType, svType, tumorType, consequence, proteinStart, proteinEnd, hgvs, isGermline, alleleState);
         return IndicatorUtils.processQuery(
             query, levels, highestLevelOnly,
             evidenceTypes
