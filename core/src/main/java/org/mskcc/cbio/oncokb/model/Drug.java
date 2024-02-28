@@ -56,9 +56,11 @@ public class Drug implements java.io.Serializable {
     @Enumerated(EnumType.STRING)
     private DrugTableItemType type = DrugTableItemType.DRUG;
 
+    @JsonIgnore
     @Column(length = 40)
     private String uuid;
 
+    @JsonIgnore
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "drug_synonym", joinColumns = @JoinColumn(name = "drug_id", nullable = false))
     @Column(length = 1000, name = "synonym")
