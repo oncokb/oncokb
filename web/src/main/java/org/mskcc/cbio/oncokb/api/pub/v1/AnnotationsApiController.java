@@ -83,7 +83,8 @@ public class AnnotationsApiController {
                 null,
                 null,
                 false,
-                new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ","))
+                new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")),
+                false
             );
         }
         return new ResponseEntity<>(indicatorQueryResp, status);
@@ -123,7 +124,8 @@ public class AnnotationsApiController {
                     null,
                     null,
                     false,
-                    query.getEvidenceTypes()
+                    query.getEvidenceTypes(),
+                    false
                 );
                 resp.getQuery().setId(query.getId());
                 result.add(resp);
@@ -322,7 +324,8 @@ public class AnnotationsApiController {
                 null,
                 null,
                 false,
-                new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
+                new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")),
+                false);
         }
         return new ResponseEntity<>(indicatorQueryResp, status);
     }
@@ -371,7 +374,7 @@ public class AnnotationsApiController {
                     StringUtils.capitalize(query.getCopyNameAlterationType().name().toLowerCase()),
                     null,
                     query.getTumorType(), null, null, null, null,
-                    null, null, false, query.getEvidenceTypes());
+                    null, null, false, query.getEvidenceTypes(), false);
                 resp.getQuery().setId(query.getId());
                 result.add(resp);
             }
@@ -444,7 +447,7 @@ public class AnnotationsApiController {
             String fusionName = FusionUtils.getFusionName(geneA, geneB);
             indicatorQueryResp = this.cacheFetcher.processQuery(
                 matchedRG, null, fusionName, null, AlterationType.STRUCTURAL_VARIANT.name(), tumorType, isFunctionalFusion ? "fusion" : null, null, null, structuralVariantType, null,
-                null, false, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
+                null, false, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")), false);
         }
         return new ResponseEntity<>(indicatorQueryResp, status);
     }
@@ -511,7 +514,7 @@ public class AnnotationsApiController {
 
                 IndicatorQueryResp resp = this.cacheFetcher.processQuery(
                     query.getReferenceGenome(),  null, fusionName, null, AlterationType.STRUCTURAL_VARIANT.name(), query.getTumorType(), query.getFunctionalFusion() ? "fusion" : "", null, null, query.getStructuralVariantType(), null,
-                    null, false, query.getEvidenceTypes());
+                    null, false, query.getEvidenceTypes(), false);
                 resp.getQuery().setId(query.getId());
                 result.add(resp);
             }
@@ -586,7 +589,7 @@ public class AnnotationsApiController {
                         }
                         AnnotationSearchResult annotationSearchResult = new AnnotationSearchResult();
                         annotationSearchResult.setQueryType(AnnotationSearchQueryType.VARIANT);
-                        annotationSearchResult.setIndicatorQueryResp(IndicatorUtils.processQuery(indicatorQuery, null, null, null));
+                        annotationSearchResult.setIndicatorQueryResp(IndicatorUtils.processQuery(indicatorQuery, null, null, null, false));
                         if (annotationSearchResult.getIndicatorQueryResp().getVariantExist()) {
                             result.add(annotationSearchResult);
                         }
@@ -617,7 +620,7 @@ public class AnnotationsApiController {
             query.setHugoSymbol(gene.getHugoSymbol());
             AnnotationSearchResult annotationSearchResult = new AnnotationSearchResult();
             annotationSearchResult.setQueryType(AnnotationSearchQueryType.GENE);
-            annotationSearchResult.setIndicatorQueryResp(IndicatorUtils.processQuery(query, null, null, null));
+            annotationSearchResult.setIndicatorQueryResp(IndicatorUtils.processQuery(query, null, null, null, true));
             result.add(annotationSearchResult);
         }
         return result;
@@ -637,7 +640,7 @@ public class AnnotationsApiController {
             indicatorQuery.setHugoSymbol(alteration.getGene().getHugoSymbol());
             AnnotationSearchResult annotationSearchResult = new AnnotationSearchResult();
             annotationSearchResult.setQueryType(AnnotationSearchQueryType.VARIANT);
-            annotationSearchResult.setIndicatorQueryResp(IndicatorUtils.processQuery(indicatorQuery, null, null, null));
+            annotationSearchResult.setIndicatorQueryResp(IndicatorUtils.processQuery(indicatorQuery, null, null, null, false));
             result.add(annotationSearchResult);
         }
         return result;
@@ -694,7 +697,7 @@ public class AnnotationsApiController {
             }
             AnnotationSearchResult annotationSearchResult = new AnnotationSearchResult();
             annotationSearchResult.setQueryType(AnnotationSearchQueryType.CANCER_TYPE);
-            annotationSearchResult.setIndicatorQueryResp(IndicatorUtils.processQuery(indicatorQuery, null, null, null));
+            annotationSearchResult.setIndicatorQueryResp(IndicatorUtils.processQuery(indicatorQuery, null, null, null, false));
             result.add(annotationSearchResult);
         }
 
@@ -729,7 +732,8 @@ public class AnnotationsApiController {
             null,
             null,
             false,
-            evidenceTypes
+            evidenceTypes,
+                false
         );
     }
 
@@ -761,8 +765,9 @@ public class AnnotationsApiController {
             null,
             query.getHgvs(),
             null,
-            false,
-            evidenceTypes
+                false,
+                evidenceTypes,
+                false
         );
     }
 

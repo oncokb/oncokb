@@ -135,7 +135,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
                         alterationModel = this.cacheFetcher.getAlterationFromGenomeNexus(type, referenceGenome, trimmedQuery);
                         if (alterationModel.getGene() != null) {
                             Query annotationQuery = QueryUtils.getQueryFromAlteration(referenceGenome, "", alterationModel, HGVSG_FORMAT.equals(type) ? trimmedQuery : "");
-                            IndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuery(annotationQuery, null, false, null);
+                            IndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuery(annotationQuery, null, false, null, true);
                             result.add(newTypeaheadAnnotation(trimmedQuery, type, referenceGenome, alterationModel, indicatorQueryResp));
                         }
                     } catch (org.genome_nexus.ApiException e) {
@@ -613,7 +613,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
         query.setAlteration(alteration.getAlteration());
         query.setReferenceGenome(alteration.getReferenceGenomes().iterator().next());
 
-        IndicatorQueryResp resp = IndicatorUtils.processQuery(query, null, false, null);
+        IndicatorQueryResp resp = IndicatorUtils.processQuery(query, null, false, null, false);
         typeaheadSearchResp.setOncogenicity(resp.getOncogenic());
         typeaheadSearchResp.setVUS(resp.getVUS());
         typeaheadSearchResp.setAnnotation(resp.getVariantSummary() + " Click here to see more annotation details.");

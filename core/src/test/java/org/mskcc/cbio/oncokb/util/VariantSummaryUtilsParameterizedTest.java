@@ -38,7 +38,7 @@ public class VariantSummaryUtilsParameterizedTest {
         query.setHugoSymbol(gene);
         query.setAlteration(variant);
 
-        IndicatorQueryResp resp = IndicatorUtils.processQuery(query, null, false, null);
+        IndicatorQueryResp resp = IndicatorUtils.processQuery(query, null, false, null, false);
         String _query = gene + " " + variant;
         String _oncogenicity = resp.getOncogenic();
         String _variantSummary = resp.getVariantSummary();
