@@ -44,7 +44,7 @@ public class AnnotationsApiController {
     @RequestMapping(value = "/annotate/mutations/byProteinChange",
         produces = {"application/json"},
         method = RequestMethod.GET)
-    public ResponseEntity<IndicatorQueryResp> annotateMutationsByProteinChangeGet(
+    public ResponseEntity<Object> annotateMutationsByProteinChangeGet(
         @ApiParam(value = "The gene symbol used in Human Genome Organisation. Example: BRAF") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
         , @ApiParam(value = "The entrez gene ID. (Higher priority than hugoSymbol). Example: 673") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
         , @ApiParam(value = "Protein Change. Example: V600E") @RequestParam(value = "alteration", required = false) String proteinChange
@@ -55,38 +55,35 @@ public class AnnotationsApiController {
         , @ApiParam(value = "OncoTree(http://oncotree.info) tumor type name. The field supports OncoTree Code, OncoTree Name and OncoTree Main type. Example: Melanoma") @RequestParam(value = "tumorType", required = false) String tumorType
         , @ApiParam(value = EVIDENCE_TYPES_DESCRIPTION) @RequestParam(value = "evidenceType", required = false) String evidenceTypes
     ) {
-        HttpStatus status = HttpStatus.OK;
-        IndicatorQueryResp indicatorQueryResp = null;
-
         if (entrezGeneId != null && hugoSymbol != null && !GeneUtils.isSameGene(entrezGeneId, hugoSymbol)) {
-            status = HttpStatus.BAD_REQUEST;
-        } else {
-            ReferenceGenome matchedRG = null;
-            if (!StringUtils.isEmpty(referenceGenome)) {
-                matchedRG = MainUtils.searchEnum(ReferenceGenome.class, referenceGenome);
-                if (matchedRG == null) {
-                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-                }
-            }
-            Query query = new Query(null, matchedRG, entrezGeneId, hugoSymbol, proteinChange, null, null, tumorType, consequence, proteinStart, proteinEnd, null);
-            indicatorQueryResp = this.cacheFetcher.processQuery(
-                query.getReferenceGenome(),
-                query.getEntrezGeneId(),
-                query.getHugoSymbol(),
-                query.getAlteration(),
-                null,
-                query.getTumorType(),
-                query.getConsequence(),
-                query.getProteinStart(),
-                query.getProteinEnd(),
-                null,
-                null,
-                null,
-                false,
-                new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ","))
-            );
+            return new ResponseEntity<>("The provided hugo symbol and entrez gene ID do not match.", HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>(indicatorQueryResp, status);
+
+        ReferenceGenome matchedRG = null;
+        if (!StringUtils.isEmpty(referenceGenome)) {
+            matchedRG = MainUtils.searchEnum(ReferenceGenome.class, referenceGenome);
+            if (matchedRG == null) {
+                return new ResponseEntity<>( "The provided reference genome is not valid.", HttpStatus.BAD_REQUEST);
+            }
+        }
+        Query query = new Query(null, matchedRG, entrezGeneId, hugoSymbol, proteinChange, null, null, tumorType, consequence, proteinStart, proteinEnd, null);
+        IndicatorQueryResp indicatorQueryResp = this.cacheFetcher.processQuery(
+            query.getReferenceGenome(),
+            query.getEntrezGeneId(),
+            query.getHugoSymbol(),
+            query.getAlteration(),
+            null,
+            query.getTumorType(),
+            query.getConsequence(),
+            query.getProteinStart(),
+            query.getProteinEnd(),
+            null,
+            null,
+            null,
+            false,
+            new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ","))
+        );
+        return new ResponseEntity<>(indicatorQueryResp, HttpStatus.OK);
     }
 
     @PublicApi
@@ -99,37 +96,37 @@ public class AnnotationsApiController {
         consumes = {"application/json"},
         produces = {"application/json"},
         method = RequestMethod.POST)
-    public ResponseEntity<List<IndicatorQueryResp>> annotateMutationsByProteinChangePost(
+    public ResponseEntity<Object> annotateMutationsByProteinChangePost(
         @ApiParam(value = "List of queries. Please see swagger.json for request body format.", required = true) @RequestBody() List<AnnotateMutationByProteinChangeQuery> body
     ) {
-        HttpStatus status = HttpStatus.OK;
+        if (body == null) {
+            return new ResponseEntity<>("Please provide a request body.", HttpStatus.BAD_REQUEST);
+        }
+
         List<IndicatorQueryResp> result = new ArrayList<>();
 
-        if (body == null) {
-            status = HttpStatus.BAD_REQUEST;
-        } else {
-            for (AnnotateMutationByProteinChangeQuery query : body) {
-                IndicatorQueryResp resp = this.cacheFetcher.processQuery(
-                    query.getReferenceGenome(),
-                    query.getGene() == null ? null : query.getGene().getEntrezGeneId(),
-                    query.getGene() == null ? null : query.getGene().getHugoSymbol(),
-                    query.getAlteration(),
-                    null,
-                    query.getTumorType(),
-                    query.getConsequence(),
-                    query.getProteinStart(),
-                    query.getProteinEnd(),
-                    null,
-                    null,
-                    null,
-                    false,
-                    query.getEvidenceTypes()
-                );
-                resp.getQuery().setId(query.getId());
-                result.add(resp);
-            }
+        for (AnnotateMutationByProteinChangeQuery query : body) {
+            IndicatorQueryResp resp = this.cacheFetcher.processQuery(
+                query.getReferenceGenome(),
+                query.getGene() == null ? null : query.getGene().getEntrezGeneId(),
+                query.getGene() == null ? null : query.getGene().getHugoSymbol(),
+                query.getAlteration(),
+                null,
+                query.getTumorType(),
+                query.getConsequence(),
+                query.getProteinStart(),
+                query.getProteinEnd(),
+                null,
+                null,
+                null,
+                false,
+                query.getEvidenceTypes()
+            );
+            resp.getQuery().setId(query.getId());
+            result.add(resp);
         }
-        return new ResponseEntity<>(result, status);
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     // Annotate mutations by genomic change
@@ -142,27 +139,24 @@ public class AnnotationsApiController {
     @RequestMapping(value = "/annotate/mutations/byGenomicChange",
         produces = {"application/json"},
         method = RequestMethod.GET)
-    public ResponseEntity<IndicatorQueryResp> annotateMutationsByGenomicChangeGet(
+    public ResponseEntity<Object> annotateMutationsByGenomicChangeGet(
         @ApiParam(value = "Genomic location. Example: 7,140453136,140453136,A,T", required = true) @RequestParam(value = "genomicLocation", required = true) String genomicLocation
         , @ApiParam(value = "Reference genome, either GRCh37 or GRCh38. The default is GRCh37", required = false, defaultValue = "GRCh37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") String referenceGenome
         , @ApiParam(value = "OncoTree(http://oncotree.info) tumor type name. The field supports OncoTree Code, OncoTree Name and OncoTree Main type. Example: Melanoma") @RequestParam(value = "tumorType", required = false) String tumorType
         , @ApiParam(value = EVIDENCE_TYPES_DESCRIPTION) @RequestParam(value = "evidenceType", required = false) String evidenceTypes
     ) throws ApiException, org.genome_nexus.ApiException {
-        HttpStatus status = HttpStatus.OK;
-        IndicatorQueryResp indicatorQueryResp = null;
-
         if (StringUtils.isEmpty(genomicLocation)) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Please provide a valid genomic location.", HttpStatus.BAD_REQUEST);
         }
         ReferenceGenome matchedRG = null;
         if (!StringUtils.isEmpty(referenceGenome)) {
             matchedRG = MainUtils.searchEnum(ReferenceGenome.class, referenceGenome);
             if (matchedRG == null) {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>("Please provide a valid reference genome.", HttpStatus.BAD_REQUEST);
             }
         }
-        indicatorQueryResp = this.getIndicatorQueryFromGenomicLocation(matchedRG, genomicLocation, tumorType, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")), cacheFetcher.getAllTranscriptGenes());
-        return new ResponseEntity<>(indicatorQueryResp, status);
+        IndicatorQueryResp indicatorQueryResp = this.getIndicatorQueryFromGenomicLocation(matchedRG, genomicLocation, tumorType, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")), cacheFetcher.getAllTranscriptGenes());
+        return new ResponseEntity<>(indicatorQueryResp, HttpStatus.OK);
     }
 
     @PublicApi
@@ -175,23 +169,24 @@ public class AnnotationsApiController {
         consumes = {"application/json"},
         produces = {"application/json"},
         method = RequestMethod.POST)
-    public ResponseEntity<List<IndicatorQueryResp>> annotateMutationsByGenomicChangePost(
+    public ResponseEntity<Object> annotateMutationsByGenomicChangePost(
         @ApiParam(value = "List of queries. Please see swagger.json for request body format.", required = true) @RequestBody() List<AnnotateMutationByGenomicChangeQuery> body
     ) throws ApiException, org.genome_nexus.ApiException {
-        HttpStatus status = HttpStatus.OK;
-        List<IndicatorQueryResp> result = new ArrayList<>();
+
 
         if (body == null) {
-            status = HttpStatus.BAD_REQUEST;
-        } else {
-            Set<org.oncokb.oncokb_transcript.client.Gene> allTranscriptGenes = cacheFetcher.getAllTranscriptGenes();
-            for (AnnotateMutationByGenomicChangeQuery query : body) {
-                IndicatorQueryResp resp = this.getIndicatorQueryFromGenomicLocation(query.getReferenceGenome(), query.getGenomicLocation(), query.getTumorType(), query.getEvidenceTypes(), allTranscriptGenes);
-                resp.getQuery().setId(query.getId());
-                result.add(resp);
-            }
+            return new ResponseEntity<>("Please provide a request body.", HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>(result, status);
+        List<IndicatorQueryResp> result = new ArrayList<>();
+
+        Set<org.oncokb.oncokb_transcript.client.Gene> allTranscriptGenes = cacheFetcher.getAllTranscriptGenes();
+        for (AnnotateMutationByGenomicChangeQuery query : body) {
+            IndicatorQueryResp resp = this.getIndicatorQueryFromGenomicLocation(query.getReferenceGenome(), query.getGenomicLocation(), query.getTumorType(), query.getEvidenceTypes(), allTranscriptGenes);
+            resp.getQuery().setId(query.getId());
+            result.add(resp);
+        }
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     // Annotate mutations by HGVSg
@@ -204,39 +199,39 @@ public class AnnotationsApiController {
     @RequestMapping(value = "/annotate/mutations/byHGVSg",
         produces = {"application/json"},
         method = RequestMethod.GET)
-    public ResponseEntity<IndicatorQueryResp> annotateMutationsByHGVSgGet(
+    public ResponseEntity<Object> annotateMutationsByHGVSgGet(
         @ApiParam(value = "HGVS genomic format. Example: 7:g.140453136A>T", required = true) @RequestParam(value = "hgvsg", required = true) String hgvsg
         , @ApiParam(value = "Reference genome, either GRCh37 or GRCh38. The default is GRCh37", required = false, defaultValue = "GRCh37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") String referenceGenome
         , @ApiParam(value = "OncoTree(http://oncotree.info) tumor type name. The field supports OncoTree Code, OncoTree Name and OncoTree Main type. Example: Melanoma") @RequestParam(value = "tumorType", required = false) String tumorType
         , @ApiParam(value = EVIDENCE_TYPES_DESCRIPTION) @RequestParam(value = "evidenceType", required = false) String evidenceTypes
     ) throws ApiException, org.genome_nexus.ApiException {
-        HttpStatus status = HttpStatus.OK;
-        IndicatorQueryResp indicatorQueryResp = null;
+        ResponseEntity<Object> badRequestMessage = new ResponseEntity<>("Please provide a valid HGVS genomic format.", HttpStatus.BAD_REQUEST);
 
         if (StringUtils.isEmpty(hgvsg)) {
-            status = HttpStatus.BAD_REQUEST;
-        } else {
-            ReferenceGenome matchedRG = null;
-            if (!StringUtils.isEmpty(referenceGenome)) {
-                matchedRG = MainUtils.searchEnum(ReferenceGenome.class, referenceGenome);
-                if (matchedRG == null) {
-                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-                }
-            }
-
-            if (!AlterationUtils.isValidHgvsg(hgvsg)) {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
-
-            indicatorQueryResp = this.getIndicatorQueryFromHGVSg(
-                matchedRG,
-                hgvsg,
-                tumorType,
-                new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")),
-                cacheFetcher.getAllTranscriptGenes()
-            );
+            return badRequestMessage;
         }
-        return new ResponseEntity<>(indicatorQueryResp, status);
+
+        ReferenceGenome matchedRG = null;
+        if (!StringUtils.isEmpty(referenceGenome)) {
+            matchedRG = MainUtils.searchEnum(ReferenceGenome.class, referenceGenome);
+            if (matchedRG == null) {
+                return badRequestMessage;
+            }
+        }
+
+        if (!AlterationUtils.isValidHgvsg(hgvsg)) {
+            return badRequestMessage;
+        }
+
+        IndicatorQueryResp indicatorQueryResp = this.getIndicatorQueryFromHGVSg(
+            matchedRG,
+            hgvsg,
+            tumorType,
+            new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")),
+            cacheFetcher.getAllTranscriptGenes()
+        );
+
+        return new ResponseEntity<>(indicatorQueryResp, HttpStatus.OK);
     }
 
     @PublicApi
@@ -249,29 +244,28 @@ public class AnnotationsApiController {
         consumes = {"application/json"},
         produces = {"application/json"},
         method = RequestMethod.POST)
-    public ResponseEntity<List<IndicatorQueryResp>> annotateMutationsByHGVSgPost(
+    public ResponseEntity<Object> annotateMutationsByHGVSgPost(
         @ApiParam(value = "List of queries. Please see swagger.json for request body format.", required = true) @RequestBody() List<AnnotateMutationByHGVSgQuery> body
     ) throws ApiException, org.genome_nexus.ApiException {
-        HttpStatus status = HttpStatus.OK;
-        List<IndicatorQueryResp> result = new ArrayList<>();
-
         if (body == null) {
-            status = HttpStatus.BAD_REQUEST;
-        } else {
-            Set<org.oncokb.oncokb_transcript.client.Gene> allTranscriptGenes = cacheFetcher.getAllTranscriptGenes();
-            for (AnnotateMutationByHGVSgQuery query : body) {
-                IndicatorQueryResp resp = this.getIndicatorQueryFromHGVSg(
-                    query.getReferenceGenome(),
-                    query.getHgvsg(),
-                    query.getTumorType(),
-                    query.getEvidenceTypes(),
-                    allTranscriptGenes
-                );
-                resp.getQuery().setId(query.getId());
-                result.add(resp);
-            }
+            return new ResponseEntity<>("Please provide a request body.", HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>(result, status);
+
+        List<IndicatorQueryResp> result = new ArrayList<>();
+        Set<org.oncokb.oncokb_transcript.client.Gene> allTranscriptGenes = cacheFetcher.getAllTranscriptGenes();
+        for (AnnotateMutationByHGVSgQuery query : body) {
+            IndicatorQueryResp resp = this.getIndicatorQueryFromHGVSg(
+                query.getReferenceGenome(),
+                query.getHgvsg(),
+                query.getTumorType(),
+                query.getEvidenceTypes(),
+                allTranscriptGenes
+            );
+            resp.getQuery().setId(query.getId());
+            result.add(resp);
+        }
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     // Annotate copy number alterations
@@ -284,7 +278,7 @@ public class AnnotationsApiController {
     @RequestMapping(value = "/annotate/copyNumberAlterations",
         produces = {"application/json"},
         method = RequestMethod.GET)
-    public ResponseEntity<IndicatorQueryResp> annotateCopyNumberAlterationsGet(
+    public ResponseEntity<Object> annotateCopyNumberAlterationsGet(
         @ApiParam(value = "The gene symbol used in Human Genome Organisation. Example: BRAF") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
         , @ApiParam(value = "The entrez gene ID. (Higher priority than hugoSymbol). Example: 673") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
         , @ApiParam(value = "Copy number alteration type", required = true) @RequestParam(value = "copyNameAlterationType", required = true) CopyNumberAlterationType copyNameAlterationType
@@ -292,39 +286,38 @@ public class AnnotationsApiController {
         , @ApiParam(value = "OncoTree(http://oncotree.info) tumor type name. The field supports OncoTree Code, OncoTree Name and OncoTree Main type. Example: Melanoma") @RequestParam(value = "tumorType", required = false) String tumorType
         , @ApiParam(value = EVIDENCE_TYPES_DESCRIPTION) @RequestParam(value = "evidenceType", required = false) String evidenceTypes
     ) {
-        HttpStatus status = HttpStatus.OK;
-        IndicatorQueryResp indicatorQueryResp = null;
-
         if (entrezGeneId != null && hugoSymbol != null && !GeneUtils.isSameGene(entrezGeneId, hugoSymbol)) {
-            status = HttpStatus.BAD_REQUEST;
-        } else {
-            if (copyNameAlterationType == null) {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
-            ReferenceGenome matchedRG = null;
-            if (!StringUtils.isEmpty(referenceGenome)) {
-                matchedRG = MainUtils.searchEnum(ReferenceGenome.class, referenceGenome);
-                if (matchedRG == null) {
-                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-                }
-            }
-            indicatorQueryResp = this.cacheFetcher.processQuery(
-                matchedRG,
-                entrezGeneId,
-                hugoSymbol,
-                StringUtils.capitalize(copyNameAlterationType.name().toLowerCase()),
-                null,
-                tumorType,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                false,
-                new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
+            return new ResponseEntity<>("The provided hugo symbol and entrez gene ID do not match.", HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>(indicatorQueryResp, status);
+
+        if (copyNameAlterationType == null) {
+            return new ResponseEntity<>("Please provide a valid copy number alteration type.", HttpStatus.BAD_REQUEST);
+        }
+
+        ReferenceGenome matchedRG = null;
+        if (!StringUtils.isEmpty(referenceGenome)) {
+            matchedRG = MainUtils.searchEnum(ReferenceGenome.class, referenceGenome);
+            if (matchedRG == null) {
+                return new ResponseEntity<>("Please provide a valid reference genome.", HttpStatus.BAD_REQUEST);
+            }
+        }
+
+        IndicatorQueryResp indicatorQueryResp = this.cacheFetcher.processQuery(
+            matchedRG,
+            entrezGeneId,
+            hugoSymbol,
+            StringUtils.capitalize(copyNameAlterationType.name().toLowerCase()),
+            null,
+            tumorType,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            false,
+            new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
+        return new ResponseEntity<>(indicatorQueryResp, HttpStatus.OK);
     }
 
     @PublicApi
@@ -337,46 +330,45 @@ public class AnnotationsApiController {
         consumes = {"application/json"},
         produces = {"application/json"},
         method = RequestMethod.POST)
-    public ResponseEntity<List<IndicatorQueryResp>> annotateCopyNumberAlterationsPost(
+    public ResponseEntity<Object> annotateCopyNumberAlterationsPost(
         @ApiParam(value = "List of queries. Please see swagger.json for request body format.", required = true) @RequestBody() List<AnnotateCopyNumberAlterationQuery> body
     ) {
-        HttpStatus status = HttpStatus.OK;
-        List<IndicatorQueryResp> result = new ArrayList<>();
 
         if (body == null) {
-            status = HttpStatus.BAD_REQUEST;
-        } else {
-
-            for (AnnotateCopyNumberAlterationQuery query : body) {
-                Gene gene = new Gene();
-                if (query.getGene() != null) {
-                    try {
-                        gene = this.cacheFetcher.findGeneBySymbol(
-                            query.getGene().getEntrezGeneId() != null ?
-                                query.getGene().getEntrezGeneId().toString() :
-                                query.getGene().getHugoSymbol()
-                        );
-                        if (gene == null) {
-                            gene = new Gene();
-                            gene.setEntrezGeneId(query.getGene().getEntrezGeneId());
-                            gene.setHugoSymbol(query.getGene().getHugoSymbol());
-                        }
-                    } catch (ApiException e) {
-                    }
-                }
-                IndicatorQueryResp resp = this.cacheFetcher.processQuery(
-                    query.getReferenceGenome(),
-                    gene.getEntrezGeneId(),
-                    gene.getHugoSymbol(),
-                    StringUtils.capitalize(query.getCopyNameAlterationType().name().toLowerCase()),
-                    null,
-                    query.getTumorType(), null, null, null, null,
-                    null, null, false, query.getEvidenceTypes());
-                resp.getQuery().setId(query.getId());
-                result.add(resp);
-            }
+            return new ResponseEntity<>("Please provide a request body.", HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>(result, status);
+
+        List<IndicatorQueryResp> result = new ArrayList<>();
+        for (AnnotateCopyNumberAlterationQuery query : body) {
+            Gene gene = new Gene();
+            if (query.getGene() != null) {
+                try {
+                    gene = this.cacheFetcher.findGeneBySymbol(
+                        query.getGene().getEntrezGeneId() != null ?
+                            query.getGene().getEntrezGeneId().toString() :
+                            query.getGene().getHugoSymbol()
+                    );
+                    if (gene == null) {
+                        gene = new Gene();
+                        gene.setEntrezGeneId(query.getGene().getEntrezGeneId());
+                        gene.setHugoSymbol(query.getGene().getHugoSymbol());
+                    }
+                } catch (ApiException e) {
+                }
+            }
+            IndicatorQueryResp resp = this.cacheFetcher.processQuery(
+                query.getReferenceGenome(),
+                gene.getEntrezGeneId(),
+                gene.getHugoSymbol(),
+                StringUtils.capitalize(query.getCopyNameAlterationType().name().toLowerCase()),
+                null,
+                query.getTumorType(), null, null, null, null,
+                null, null, false, query.getEvidenceTypes());
+            resp.getQuery().setId(query.getId());
+            result.add(resp);
+        }
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     // Annotate structural variants
@@ -389,7 +381,7 @@ public class AnnotationsApiController {
     @RequestMapping(value = "/annotate/structuralVariants",
         produces = {"application/json"},
         method = RequestMethod.GET)
-    public ResponseEntity<IndicatorQueryResp> annotateStructuralVariantsGet(
+    public ResponseEntity<Object> annotateStructuralVariantsGet(
         @ApiParam(value = "The gene symbol A used in Human Genome Organisation. Example: ABL1") @RequestParam(value = "hugoSymbolA", required = false) String hugoSymbolA
         , @ApiParam(value = "The entrez gene ID A. (Higher priority than hugoSymbolA) Example: 25") @RequestParam(value = "entrezGeneIdA", required = false) Integer entrezGeneIdA
         , @ApiParam(value = "The gene symbol B used in Human Genome Organisation.Example: BCR ") @RequestParam(value = "hugoSymbolB", required = false) String hugoSymbolB
@@ -400,53 +392,55 @@ public class AnnotationsApiController {
         , @ApiParam(value = "OncoTree(http://oncotree.info) tumor type name. The field supports OncoTree Code, OncoTree Name and OncoTree Main type. Example: Melanoma") @RequestParam(value = "tumorType", required = false) String tumorType
         , @ApiParam(value = EVIDENCE_TYPES_DESCRIPTION) @RequestParam(value = "evidenceType", required = false) String evidenceTypes
     ) {
-        HttpStatus status = HttpStatus.OK;
-        IndicatorQueryResp indicatorQueryResp = null;
-
         if (structuralVariantType == null || isFunctionalFusion == null) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Please provide a valid structural variant type and a isFunctionalFusion flag.", HttpStatus.BAD_REQUEST);
         }
-        if ((entrezGeneIdA != null && hugoSymbolA != null && !GeneUtils.isSameGene(entrezGeneIdA, hugoSymbolA)) || (entrezGeneIdB != null && hugoSymbolB != null && !GeneUtils.isSameGene(entrezGeneIdB, hugoSymbolB))) {
-            status = HttpStatus.BAD_REQUEST;
-        } else {
-            Gene geneA = new Gene();
-            try {
-                geneA = this.cacheFetcher.findGeneBySymbol(entrezGeneIdA == null ? hugoSymbolA : entrezGeneIdA.toString());
-                if (geneA == null) {
-                    geneA = new Gene();
-                }
-            } catch (ApiException e) {
-            }
-            if (geneA.getEntrezGeneId() == null && StringUtils.isEmpty(geneA.getHugoSymbol())) {
-                geneA.setEntrezGeneId(entrezGeneIdA);
-                geneA.setHugoSymbol(hugoSymbolA == null ? "" : hugoSymbolA);
-            }
-            Gene geneB = new Gene();
-            try {
-                geneB = this.cacheFetcher.findGeneBySymbol(entrezGeneIdB == null ? hugoSymbolB : entrezGeneIdB.toString());
-                if (geneB == null) {
-                    geneB = new Gene();
-                }
-            } catch (ApiException e) {
-            }
-            if (geneB.getEntrezGeneId() == null && StringUtils.isEmpty(geneB.getHugoSymbol())) {
-                geneB.setEntrezGeneId(entrezGeneIdB);
-                geneB.setHugoSymbol(hugoSymbolB == null ? "" : hugoSymbolB);
-            }
 
-            ReferenceGenome matchedRG = null;
-            if (!StringUtils.isEmpty(referenceGenome)) {
-                matchedRG = MainUtils.searchEnum(ReferenceGenome.class, referenceGenome);
-                if (matchedRG == null) {
-                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-                }
-            }
-            String fusionName = FusionUtils.getFusionName(geneA, geneB);
-            indicatorQueryResp = this.cacheFetcher.processQuery(
-                matchedRG, null, fusionName, null, AlterationType.STRUCTURAL_VARIANT.name(), tumorType, isFunctionalFusion ? "fusion" : null, null, null, structuralVariantType, null,
-                null, false, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
+        if (entrezGeneIdA != null && hugoSymbolA != null && !GeneUtils.isSameGene(entrezGeneIdA, hugoSymbolA)) {
+            return new ResponseEntity<>("The provided hugo symbol A and entrez gene ID A do not match.", HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>(indicatorQueryResp, status);
+
+        if (entrezGeneIdB != null && hugoSymbolB != null && !GeneUtils.isSameGene(entrezGeneIdB, hugoSymbolB)) {
+            return new ResponseEntity<>("The provided hugo symbol B and entrez gene ID B do not match.", HttpStatus.BAD_REQUEST);
+        }
+
+        Gene geneA = new Gene();
+        try {
+            geneA = this.cacheFetcher.findGeneBySymbol(entrezGeneIdA == null ? hugoSymbolA : entrezGeneIdA.toString());
+            if (geneA == null) {
+                geneA = new Gene();
+            }
+        } catch (ApiException e) {
+        }
+        if (geneA.getEntrezGeneId() == null && StringUtils.isEmpty(geneA.getHugoSymbol())) {
+            geneA.setEntrezGeneId(entrezGeneIdA);
+            geneA.setHugoSymbol(hugoSymbolA == null ? "" : hugoSymbolA);
+        }
+        Gene geneB = new Gene();
+        try {
+            geneB = this.cacheFetcher.findGeneBySymbol(entrezGeneIdB == null ? hugoSymbolB : entrezGeneIdB.toString());
+            if (geneB == null) {
+                geneB = new Gene();
+            }
+        } catch (ApiException e) {
+        }
+        if (geneB.getEntrezGeneId() == null && StringUtils.isEmpty(geneB.getHugoSymbol())) {
+            geneB.setEntrezGeneId(entrezGeneIdB);
+            geneB.setHugoSymbol(hugoSymbolB == null ? "" : hugoSymbolB);
+        }
+
+        ReferenceGenome matchedRG = null;
+        if (!StringUtils.isEmpty(referenceGenome)) {
+            matchedRG = MainUtils.searchEnum(ReferenceGenome.class, referenceGenome);
+            if (matchedRG == null) {
+                return new ResponseEntity<>("Please provide a valid reference genome.", HttpStatus.BAD_REQUEST);
+            }
+        }
+        String fusionName = FusionUtils.getFusionName(geneA, geneB);
+        IndicatorQueryResp indicatorQueryResp = this.cacheFetcher.processQuery(
+            matchedRG, null, fusionName, null, AlterationType.STRUCTURAL_VARIANT.name(), tumorType, isFunctionalFusion ? "fusion" : null, null, null, structuralVariantType, null,
+            null, false, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
+        return new ResponseEntity<>(indicatorQueryResp, HttpStatus.OK);
     }
 
     @PublicApi
@@ -459,64 +453,65 @@ public class AnnotationsApiController {
         consumes = {"application/json"},
         produces = {"application/json"},
         method = RequestMethod.POST)
-    public ResponseEntity<List<IndicatorQueryResp>> annotateStructuralVariantsPost(
+    public ResponseEntity<Object> annotateStructuralVariantsPost(
         @ApiParam(value = "List of queries. Please see swagger.json for request body format.", required = true) @RequestBody(required = true) List<AnnotateStructuralVariantQuery> body
     ) {
-        HttpStatus status = HttpStatus.OK;
-        List<IndicatorQueryResp> result = new ArrayList<>();
 
         if (body == null) {
-            status = HttpStatus.BAD_REQUEST;
-        } else {
-            for (AnnotateStructuralVariantQuery query : body) {
-                Gene geneA = new Gene();
-                if (query.getGeneA() != null) {
-                    try {
-                        geneA = this.cacheFetcher.findGeneBySymbol(
-                            query.getGeneA().getEntrezGeneId() != null ?
-                                query.getGeneA().getEntrezGeneId().toString() :
-                                query.getGeneA().getHugoSymbol()
-                        );
-                        if (geneA == null) {
-                            geneA = new Gene();
-                        }
-                    } catch (ApiException e) {
-                    }
-                }
-                if (StringUtils.isEmpty(geneA.getHugoSymbol()) && geneA.getEntrezGeneId() == null && query.getGeneA() != null) {
-                    geneA.setHugoSymbol(query.getGeneA().getHugoSymbol() == null ? "" : query.getGeneA().getHugoSymbol());
-                    geneA.setEntrezGeneId(query.getGeneA().getEntrezGeneId());
-                }
-
-                Gene geneB = new Gene();
-                if (query.getGeneB() != null) {
-                    try {
-                        geneB = this.cacheFetcher.findGeneBySymbol(
-                            query.getGeneB().getEntrezGeneId() != null ?
-                                query.getGeneB().getEntrezGeneId().toString() :
-                                query.getGeneB().getHugoSymbol()
-                        );
-                        if (geneB == null) {
-                            geneB = new Gene();
-                        }
-                    } catch (ApiException e) {
-                    }
-                }
-                if (StringUtils.isEmpty(geneB.getHugoSymbol()) && geneB.getEntrezGeneId() == null && query.getGeneB() != null) {
-                    geneB.setHugoSymbol(query.getGeneB().getHugoSymbol() == null ? "" : query.getGeneB().getHugoSymbol());
-                    geneB.setEntrezGeneId(query.getGeneB().getEntrezGeneId());
-                }
-
-                String fusionName = FusionUtils.getFusionName(geneA, geneB);
-
-                IndicatorQueryResp resp = this.cacheFetcher.processQuery(
-                    query.getReferenceGenome(),  null, fusionName, null, AlterationType.STRUCTURAL_VARIANT.name(), query.getTumorType(), query.getFunctionalFusion() ? "fusion" : "", null, null, query.getStructuralVariantType(), null,
-                    null, false, query.getEvidenceTypes());
-                resp.getQuery().setId(query.getId());
-                result.add(resp);
-            }
+            return new ResponseEntity<>("Please provide a request body.", HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>(result, status);
+
+        List<IndicatorQueryResp> result = new ArrayList<>();
+
+        for (AnnotateStructuralVariantQuery query : body) {
+            Gene geneA = new Gene();
+            if (query.getGeneA() != null) {
+                try {
+                    geneA = this.cacheFetcher.findGeneBySymbol(
+                        query.getGeneA().getEntrezGeneId() != null ?
+                            query.getGeneA().getEntrezGeneId().toString() :
+                            query.getGeneA().getHugoSymbol()
+                    );
+                    if (geneA == null) {
+                        geneA = new Gene();
+                    }
+                } catch (ApiException e) {
+                }
+            }
+            if (StringUtils.isEmpty(geneA.getHugoSymbol()) && geneA.getEntrezGeneId() == null && query.getGeneA() != null) {
+                geneA.setHugoSymbol(query.getGeneA().getHugoSymbol() == null ? "" : query.getGeneA().getHugoSymbol());
+                geneA.setEntrezGeneId(query.getGeneA().getEntrezGeneId());
+            }
+
+            Gene geneB = new Gene();
+            if (query.getGeneB() != null) {
+                try {
+                    geneB = this.cacheFetcher.findGeneBySymbol(
+                        query.getGeneB().getEntrezGeneId() != null ?
+                            query.getGeneB().getEntrezGeneId().toString() :
+                            query.getGeneB().getHugoSymbol()
+                    );
+                    if (geneB == null) {
+                        geneB = new Gene();
+                    }
+                } catch (ApiException e) {
+                }
+            }
+            if (StringUtils.isEmpty(geneB.getHugoSymbol()) && geneB.getEntrezGeneId() == null && query.getGeneB() != null) {
+                geneB.setHugoSymbol(query.getGeneB().getHugoSymbol() == null ? "" : query.getGeneB().getHugoSymbol());
+                geneB.setEntrezGeneId(query.getGeneB().getEntrezGeneId());
+            }
+
+            String fusionName = FusionUtils.getFusionName(geneA, geneB);
+
+            IndicatorQueryResp resp = this.cacheFetcher.processQuery(
+                query.getReferenceGenome(),  null, fusionName, null, AlterationType.STRUCTURAL_VARIANT.name(), query.getTumorType(), query.getFunctionalFusion() ? "fusion" : "", null, null, query.getStructuralVariantType(), null,
+                null, false, query.getEvidenceTypes());
+            resp.getQuery().setId(query.getId());
+            result.add(resp);
+        }
+
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @PremiumPublicApi
@@ -604,7 +599,7 @@ public class AnnotationsApiController {
 
         LinkedHashSet<AnnotationSearchResult> orderedResult = new LinkedHashSet<>();
         orderedResult.addAll(result);
-        
+
         return new ResponseEntity<>(MainUtils.getLimit(orderedResult, limit), HttpStatus.OK);
     }
 
