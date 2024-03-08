@@ -112,6 +112,13 @@ public class AnnotationSearchUtils {
         if (exactMatch) {
             matchedTumorTypes.add(ApplicationContextSingleton.getTumorTypeBo().getByName(query));
         } else {
+            for (Map.Entry<String, TumorType> currSubtype : CacheUtils.getCodedTumorTypeMap().entrySet()) {
+                String code = query.toUpperCase();
+                if (currSubtype.getKey().equals(code)) {
+                    matchedTumorTypes.add(currSubtype.getValue());
+                }
+            }
+
             for (Map.Entry<String, TumorType> currSubtype : CacheUtils.getLowercaseSubtypeTumorTypeMap().entrySet()) {
                 if (currSubtype.getKey().startsWith(query) || currSubtype.getKey().contains(query)) {
                     matchedTumorTypes.add(currSubtype.getValue());

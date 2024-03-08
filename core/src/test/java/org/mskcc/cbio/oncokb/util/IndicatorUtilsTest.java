@@ -800,6 +800,7 @@ public class IndicatorUtilsTest {
         /// geneQueryOnly is true, should return clinical implications info under the gene
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null, true);
         assertTrue("The geneExist in the response is not true, but it should be.", indicatorQueryResp.getGeneExist() == true);
+        assertTrue("The variantSummary is not empty, but it should be.", StringUtils.isEmpty(indicatorQueryResp.getVariantSummary()));
         assertEquals("The oncogenicity is not unknown, but it should.", Oncogenicity.UNKNOWN.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertTrue("There isn't treatment in the response, but it should.", indicatorQueryResp.getTreatments().size() > 0);
         assertTrue("There isn't diagnostic implication in the response, but it should.", indicatorQueryResp.getDiagnosticImplications().size() > 0);
@@ -807,6 +808,7 @@ public class IndicatorUtilsTest {
         /// geneQueryOnly is false, shouldn't return clinical implications info under the gene
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null, false);
         assertTrue("The geneExist in the response is not true, but it should be.", indicatorQueryResp.getGeneExist() == true);
+        assertTrue("The variantSummary is not empty, but it should be.", StringUtils.isEmpty(indicatorQueryResp.getVariantSummary()));
         assertEquals("The oncogenicity is not unknown, but it should.", Oncogenicity.UNKNOWN.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertTrue("There is treatment in the response, but it should not be.", indicatorQueryResp.getTreatments().size() == 0);
         assertTrue("There is diagnostic in the response, but it should not be.", indicatorQueryResp.getDiagnosticImplications().size() == 0);
@@ -817,6 +819,7 @@ public class IndicatorUtilsTest {
         /// geneQueryOnly is true, should return clinical implications info under the gene
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null, true);
         assertTrue("The geneExist in the response is not true, but it should be.", indicatorQueryResp.getGeneExist() == true);
+        assertTrue("The variantSummary is not empty, but it should be.", StringUtils.isEmpty(indicatorQueryResp.getVariantSummary()));
         assertEquals("The oncogenicity is not unknown, but it should.", Oncogenicity.UNKNOWN.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertTrue("There isn't treatment in the response, but it should.", indicatorQueryResp.getTreatments().size() > 0);
         assertTrue("There isn't diagnostic in the response, but it should.", indicatorQueryResp.getDiagnosticImplications().size() > 0);
@@ -824,6 +827,7 @@ public class IndicatorUtilsTest {
         /// geneQueryOnly is false, shouldn't return clinical implications info under the gene
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null, false);
         assertTrue("The geneExist in the response is not true, but it should be.", indicatorQueryResp.getGeneExist() == true);
+        assertTrue("The variantSummary is not empty, but it should be.", StringUtils.isEmpty(indicatorQueryResp.getVariantSummary()));
         assertEquals("The oncogenicity is not unknown, but it should.", Oncogenicity.UNKNOWN.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertTrue("There is treatment in the response, but it should not be.", indicatorQueryResp.getTreatments().size() == 0);
         assertTrue("There is diagnostic in the response, but it should not be.", indicatorQueryResp.getDiagnosticImplications().size() == 0);
