@@ -857,6 +857,6 @@ public class MainUtils {
         }
         if (q2 == null)
             return asc ? -1 : 1;
-        return (PRIORITIZED_QUERY_TYPES.indexOf(q2) - PRIORITIZED_QUERY_TYPES.indexOf(q1)) * (asc ? 1 : -1);
+        return (PRIORITIZED_QUERY_TYPES.indexOf(q1) - PRIORITIZED_QUERY_TYPES.indexOf(q2)) * (asc ? 1 : -1);
     }
 }

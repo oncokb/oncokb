@@ -822,6 +822,8 @@ class AnnotationSearchResultComp implements Comparator<AnnotationSearchResult> {
                 name1 = i1.getQuery().getTumorType().toLowerCase();
                 name2 = i2.getQuery().getTumorType().toLowerCase();
             }
+        } else {
+            return result;
         }
         Integer index1 = name1.indexOf(this.keyword);
         Integer index2 = name2.indexOf(this.keyword);
