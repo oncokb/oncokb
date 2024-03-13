@@ -31,6 +31,15 @@ public class AnnotationSearchUtilsTest extends TestCase {
         // This is a variant search, the cancer type search result should not be available
         assertTrue(respSet.stream().filter(resp -> TypeaheadQueryType.CANCER_TYPE.equals(resp.getQueryType())).count() == 0);
 
+        // test fusion query
+        respSet = searchNonHgvsAnnotation("BCR-ABL1");
+        // This is a variant search, there should not be any gene query search result
+        assertTrue(respSet.stream().filter(resp -> TypeaheadQueryType.GENE.equals(resp.getQueryType())).count() > 0);
+        // This is a variant search, variant search result should be available
+        assertTrue(respSet.stream().filter(resp -> TypeaheadQueryType.VARIANT.equals(resp.getQueryType())).count() > 0);
+        // This is a variant search, the cancer type search result should not be available
+        assertTrue(respSet.stream().filter(resp -> TypeaheadQueryType.CANCER_TYPE.equals(resp.getQueryType())).count() > 0);
+
         // test cancer type query
         respSet = searchNonHgvsAnnotation("NSCLC");
         // This is a cancer type search, there should not be any gene query search result
@@ -68,6 +77,15 @@ public class AnnotationSearchUtilsTest extends TestCase {
         assertTrue(respSet.stream().filter(resp -> AnnotationSearchQueryType.VARIANT.equals(resp.getQueryType())).count() > 0);
         // This is a variant search, the cancer type search result should not be available
         assertTrue(respSet.stream().filter(resp -> AnnotationSearchQueryType.CANCER_TYPE.equals(resp.getQueryType())).count() == 0);
+
+        // test fusion query
+        respSet = annotationSearch("BCR-ABL1");
+        // This is a variant search, there should not be any gene query search result
+        assertTrue(respSet.stream().filter(resp -> AnnotationSearchQueryType.GENE.equals(resp.getQueryType())).count() > 0);
+        // This is a variant search, variant search result should be available
+        assertTrue(respSet.stream().filter(resp -> AnnotationSearchQueryType.VARIANT.equals(resp.getQueryType())).count() > 0);
+        // This is a variant search, the cancer type search result should not be available
+        assertTrue(respSet.stream().filter(resp -> AnnotationSearchQueryType.CANCER_TYPE.equals(resp.getQueryType())).count() > 0);
 
         // test cancer type query
         respSet = annotationSearch("NSCLC");
