@@ -48,7 +48,7 @@ public class DiagnosticParameterizedTest {
         query.setHugoSymbol(gene);
         query.setTumorType(tumorType);
 
-        IndicatorQueryResp resp = IndicatorUtils.processQuery(query, null, false, null);
+        IndicatorQueryResp resp = IndicatorUtils.processQuery(query, null, false, null, false);
         String _query = gene + " " + variant + " " + tumorType;
         String _diagnosticSummary = resp.getDiagnosticSummary();
         LevelOfEvidence theHighestDiagnosticImplicationLevel = resp.getHighestDiagnosticImplicationLevel();

@@ -75,7 +75,7 @@ public class EvidencesApiController implements EvidencesApi {
         List<EvidenceQueryRes> evidenceQueries = EvidenceUtils.processRequest(
             Collections.singletonList(tmpQuery),
             evidenceTypes == null ? null : Arrays.stream(evidenceTypes.split(",")).map(evidence -> EvidenceType.valueOf(evidence.trim())).collect(Collectors.toSet()),
-            levels == null ? null : Arrays.stream(levels.split(",")).map(level -> LevelOfEvidence.getByName(level.trim())).collect(Collectors.toSet()), highestLevelOnly);
+            levels == null ? null : Arrays.stream(levels.split(",")).map(level -> LevelOfEvidence.getByName(level.trim())).collect(Collectors.toSet()), highestLevelOnly, false);
 
         if (evidenceQueries != null) {
             for (EvidenceQueryRes query : evidenceQueries) {
@@ -107,7 +107,7 @@ public class EvidencesApiController implements EvidencesApi {
             }
 
             result = EvidenceUtils.processRequest(requestQueries, evidenceTypes,
-                body.getLevels(), body.getHighestLevelOnly());
+                body.getLevels(), body.getHighestLevelOnly(), false);
         }
 
         return ResponseEntity.ok().body(JsonResultFactory.getEvidenceQueryRes(result, fields));
