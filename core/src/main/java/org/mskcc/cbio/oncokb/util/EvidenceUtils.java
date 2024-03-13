@@ -57,7 +57,7 @@ public class EvidenceUtils {
 
     public static Set<Evidence> getRelevantEvidences(
         Query query, Alteration matchedAlt,
-        Set<EvidenceType> evidenceTypes, Set<LevelOfEvidence> levelOfEvidences, List<Alteration> relevantAlterations, List<Alteration> alternativeAlleles) {
+        Set<EvidenceType> evidenceTypes, Set<LevelOfEvidence> levelOfEvidences, List<Alteration> relevantAlterations, List<Alteration> alternativeAlleles, Boolean geneQueryOnly) {
         if (query == null) {
             return new HashSet<>();
         }
@@ -88,7 +88,7 @@ public class EvidenceUtils {
 
             relevantEvidences = getEvidence(query.getReferenceGenome(), evidenceQueryRes, evidenceTypes, levelOfEvidences);
 
-            return filterEvidence(relevantEvidences, evidenceQueryRes);
+            return filterEvidence(relevantEvidences, evidenceQueryRes, geneQueryOnly);
         } else {
             return new HashSet<>();
         }
@@ -346,7 +346,7 @@ public class EvidenceUtils {
         return tmpEvidences;
     }
 
-    private static Set<Evidence> filterEvidence(Set<Evidence> evidences, EvidenceQueryRes evidenceQuery) {
+    private static Set<Evidence> filterEvidence(Set<Evidence> evidences, EvidenceQueryRes evidenceQuery, Boolean geneQueryOnly) {
         Set<Evidence> filtered = new HashSet<>();
 
         // Logic step 1, liquid therapies will not be propagated to solid
@@ -365,7 +365,7 @@ public class EvidenceUtils {
                     //Add all gene specific evidences
                     if (evidence.getAlterations().isEmpty()) {
                         filtered.add(evidence);
-                    } else if (evidenceQuery.getExactMatchedAlteration() != null && StringUtils.isEmpty(evidenceQuery.getExactMatchedAlteration().getAlteration())) {
+                    } else if (evidenceQuery.getExactMatchedAlteration() != null && StringUtils.isEmpty(evidenceQuery.getExactMatchedAlteration().getAlteration()) && geneQueryOnly) {
                         filtered.add(evidence);
                     } else {
                         boolean hasjointed = !Collections.disjoint(evidence.getAlterations(), evidenceQuery.getAlterations());
@@ -824,7 +824,7 @@ public class EvidenceUtils {
 
     // Temporary move evidence process methods here in order to share the code between new APIs and legacies
     public static List<EvidenceQueryRes> processRequest(List<Query> requestQueries, Set<EvidenceType> evidenceTypes,
-                                                        Set<LevelOfEvidence> levelOfEvidences, Boolean highestLevelOnly) {
+                                                        Set<LevelOfEvidence> levelOfEvidences, Boolean highestLevelOnly, Boolean geneQueryOnly) {
         List<EvidenceQueryRes> evidenceQueries = new ArrayList<>();
 
         if (evidenceTypes == null) {
@@ -915,7 +915,7 @@ public class EvidenceUtils {
                 query.setLevelOfEvidences(levelOfEvidences == null ? null : new ArrayList<>(levelOfEvidences));
                 Set<Evidence> relevantEvidences = new HashSet<>();
                 if (query.getExactMatchedAlteration() != null) {
-                    relevantEvidences = getRelevantEvidences(query.getQuery(), query.getExactMatchedAlteration(), evidenceTypes, levelOfEvidences, AlterationUtils.getRelevantAlterations(requestQuery.getReferenceGenome(), query.getExactMatchedAlteration()), query.getAlleles());
+                    relevantEvidences = getRelevantEvidences(query.getQuery(), query.getExactMatchedAlteration(), evidenceTypes, levelOfEvidences, AlterationUtils.getRelevantAlterations(requestQuery.getReferenceGenome(), query.getExactMatchedAlteration()), query.getAlleles(), geneQueryOnly);
                 } else {
                     relevantEvidences = getEvidence(requestQuery.getReferenceGenome(), query, evidenceTypes, levelOfEvidences);
                 }

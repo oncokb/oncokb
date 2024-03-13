@@ -266,39 +266,39 @@ public class EvidenceUtilsTest extends TestCase {
     public void testProcessRequest() {
         // Test with levels only
         Query query = new Query();
-        List<EvidenceQueryRes> responses = EvidenceUtils.processRequest(Collections.singletonList(query), null, Collections.singleton(LevelOfEvidence.LEVEL_1), true);
+        List<EvidenceQueryRes> responses = EvidenceUtils.processRequest(Collections.singletonList(query), null, Collections.singleton(LevelOfEvidence.LEVEL_1), true, false);
         processRequestSuite(responses);
         assertTrue("There should be evidence returned", responses.get(0).getEvidences().stream().filter(evidence -> evidence.getLevelOfEvidence() != null && evidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_1)).findAny().isPresent());
         assertTrue("The response should only return the level 1 evidences", responses.get(0).getEvidences().stream().filter(evidence -> evidence.getLevelOfEvidence() != null && evidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_1)).count() == responses.get(0).getEvidences().size());
 
         // Test with gene evidence only
         query = new Query();
-        responses = EvidenceUtils.processRequest(Collections.singletonList(query), Collections.singleton(EvidenceType.GENE_SUMMARY), null, true);
+        responses = EvidenceUtils.processRequest(Collections.singletonList(query), Collections.singleton(EvidenceType.GENE_SUMMARY), null, true, false);
         processRequestSuite(responses);
         assertTrue("The response should only return the level 1 evidences", responses.get(0).getEvidences().stream().filter(evidence -> evidence.getEvidenceType() != null && evidence.getEvidenceType().equals(EvidenceType.GENE_SUMMARY)).count() == responses.get(0).getEvidences().size());
 
         // Test with mutation evidence only
         query = new Query();
-        responses = EvidenceUtils.processRequest(Collections.singletonList(query), Collections.singleton(EvidenceType.MUTATION_EFFECT), null, true);
+        responses = EvidenceUtils.processRequest(Collections.singletonList(query), Collections.singleton(EvidenceType.MUTATION_EFFECT), null, true, false);
         processRequestSuite(responses);
         assertTrue("The response should only return the level 1 evidences", responses.get(0).getEvidences().stream().filter(evidence -> evidence.getEvidenceType() != null && evidence.getEvidenceType().equals(EvidenceType.MUTATION_EFFECT)).count() == responses.get(0).getEvidences().size());
 
         // Test with tumor type evidence only
         query = new Query();
-        responses = EvidenceUtils.processRequest(Collections.singletonList(query), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), null, true);
+        responses = EvidenceUtils.processRequest(Collections.singletonList(query), Collections.singleton(EvidenceType.TUMOR_TYPE_SUMMARY), null, true, false);
         processRequestSuite(responses);
         assertTrue("The response should only return the level 1 evidences", responses.get(0).getEvidences().stream().filter(evidence -> evidence.getEvidenceType() != null && evidence.getEvidenceType().equals(EvidenceType.TUMOR_TYPE_SUMMARY)).count() == responses.get(0).getEvidences().size());
 
         // Test with Tx evidence only
         query = new Query();
-        responses = EvidenceUtils.processRequest(Collections.singletonList(query), EvidenceTypeUtils.getSensitiveTreatmentEvidenceTypes(), null, true);
+        responses = EvidenceUtils.processRequest(Collections.singletonList(query), EvidenceTypeUtils.getSensitiveTreatmentEvidenceTypes(), null, true, false);
         processRequestSuite(responses);
         assertTrue("The response should only return the level 1 evidences", responses.get(0).getEvidences().stream().filter(evidence -> evidence.getEvidenceType() != null && EvidenceTypeUtils.getSensitiveTreatmentEvidenceTypes().contains(evidence.getEvidenceType())).count() == responses.get(0).getEvidences().size());
 
         // Test with gene only
         query = new Query();
         query.setHugoSymbol("BRAF");
-        responses = EvidenceUtils.processRequest(Collections.singletonList(query), null, null, true);
+        responses = EvidenceUtils.processRequest(Collections.singletonList(query), null, null, true, false);
         processRequestSuite(responses);
         assertTrue("The response should only contains BRAF evidences", responses.get(0).getEvidences().stream().filter(evidence -> evidence.getGene().getHugoSymbol().equals("BRAF")).count() == responses.get(0).getEvidences().size());
 
@@ -306,7 +306,7 @@ public class EvidenceUtilsTest extends TestCase {
         query = new Query();
         query.setHugoSymbol("BRAF");
         query.setAlteration("V600E");
-        responses = EvidenceUtils.processRequest(Collections.singletonList(query), null, null, true);
+        responses = EvidenceUtils.processRequest(Collections.singletonList(query), null, null, true, false);
         processRequestSuite(responses);
 
         // Test with tumor type only
@@ -314,7 +314,7 @@ public class EvidenceUtilsTest extends TestCase {
         query.setTumorType("MEL");
         List<TumorType> upward = TumorTypeUtils.findRelevantTumorTypes("MEL", false, RelevantTumorTypeDirection.UPWARD);
         List<TumorType> downward = TumorTypeUtils.findRelevantTumorTypes("MEL", false, RelevantTumorTypeDirection.DOWNWARD);
-        responses = EvidenceUtils.processRequest(Collections.singletonList(query), null, null, true);
+        responses = EvidenceUtils.processRequest(Collections.singletonList(query), null, null, true, false);
         assertTrue("The response should only tumor type relevant evidences", responses.get(0).getEvidences().stream().filter(evidence -> {
             if (evidence.getLevelOfEvidence() != null && evidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_Dx1)) {
                 return !Collections.disjoint(downward, evidence.getCancerTypes());

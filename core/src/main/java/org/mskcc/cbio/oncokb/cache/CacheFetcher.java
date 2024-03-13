@@ -233,14 +233,15 @@ public class CacheFetcher {
                                            String hgvs,
                                            Set<LevelOfEvidence> levels,
                                            Boolean highestLevelOnly,
-                                           Set<EvidenceType> evidenceTypes) {
+                                           Set<EvidenceType> evidenceTypes,
+                                           Boolean geneQueryOnly) {
         if (referenceGenome == null) {
             referenceGenome = DEFAULT_REFERENCE_GENOME;
         }
         Query query = new Query(null, referenceGenome, entrezGeneId, hugoSymbol, alteration, alterationType, svType, tumorType, consequence, proteinStart, proteinEnd, hgvs);
         return IndicatorUtils.processQuery(
             query, levels, highestLevelOnly,
-            evidenceTypes
+            evidenceTypes, geneQueryOnly
         );
     }
 

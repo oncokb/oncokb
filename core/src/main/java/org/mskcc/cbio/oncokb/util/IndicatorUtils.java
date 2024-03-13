@@ -25,7 +25,7 @@ import static org.mskcc.cbio.oncokb.util.SummaryUtils.getVUSSummary;
 public class IndicatorUtils {
     public static IndicatorQueryResp processQuery(Query query,
                                                   Set<LevelOfEvidence> levels, Boolean highestLevelOnly,
-                                                  Set<EvidenceType> evidenceTypes) {
+                                                  Set<EvidenceType> evidenceTypes, Boolean geneQueryOnly) {
         highestLevelOnly = highestLevelOnly == null ? false : highestLevelOnly;
 
         levels = levels == null ? LevelUtils.getPublicLevels() :
@@ -171,7 +171,7 @@ public class IndicatorUtils {
                     tmpGene.getHugoSymbol(), query.getAlteration(), null, query.getSvType(),
                     query.getTumorType(), query.getConsequence(), query.getProteinStart(),
                     query.getProteinEnd(), query.getHgvs());
-                result.add(IndicatorUtils.processQuery(tmpQuery, levels, highestLevelOnly, evidenceTypes));
+                result.add(IndicatorUtils.processQuery(tmpQuery, levels, highestLevelOnly, evidenceTypes, geneQueryOnly));
             }
             return result.iterator().next();
         }
@@ -283,11 +283,11 @@ public class IndicatorUtils {
             if (hasTreatmentEvidence) {
                 if (StringUtils.isEmpty(query.getTumorType())) {
                     treatmentEvidences = EvidenceUtils.getRelevantEvidences(query, matchedAlt,
-                        selectedTreatmentEvidence, levels, relevantAlterationsWithoutAlternativeAlleles, alleles);
+                        selectedTreatmentEvidence, levels, relevantAlterationsWithoutAlternativeAlleles, alleles, geneQueryOnly);
                 } else {
                     treatmentEvidences = EvidenceUtils.keepHighestLevelForSameTreatments(
                         EvidenceUtils.getRelevantEvidences(query, matchedAlt,
-                            selectedTreatmentEvidence, levels, relevantAlterationsWithoutAlternativeAlleles, alleles), query.getReferenceGenome(), matchedAlt);
+                            selectedTreatmentEvidence, levels, relevantAlterationsWithoutAlternativeAlleles, alleles, geneQueryOnly), query.getReferenceGenome(), matchedAlt);
                 }
             }
 
@@ -297,7 +297,7 @@ public class IndicatorUtils {
                 levelOfEvidences.add(LevelOfEvidence.LEVEL_Dx1);
                 levelOfEvidences.add(LevelOfEvidence.LEVEL_Dx2);
                 levelOfEvidences.add(LevelOfEvidence.LEVEL_Dx3);
-                implications.addAll(getImplications(gene, matchedAlt, alleles, relevantAlterationsWithoutAlternativeAlleles, EvidenceType.DIAGNOSTIC_IMPLICATION, matchedTumorType, StringUtils.isEmpty(query.getTumorType()) ? null : relevantUpwardTumorTypes, query.getHugoSymbol(), levelOfEvidences));
+                implications.addAll(getImplications(gene, matchedAlt, alleles, relevantAlterationsWithoutAlternativeAlleles, EvidenceType.DIAGNOSTIC_IMPLICATION, matchedTumorType, StringUtils.isEmpty(query.getTumorType()) ? null : relevantUpwardTumorTypes, query.getHugoSymbol(), levelOfEvidences, geneQueryOnly));
                 indicatorQuery.setDiagnosticImplications(implications);
                 if (indicatorQuery.getDiagnosticImplications().size() > 0) {
                     indicatorQuery.setHighestDiagnosticImplicationLevel(LevelUtils.getHighestDiagnosticImplicationLevel(indicatorQuery.getDiagnosticImplications().stream().map(implication -> implication.getLevelOfEvidence()).collect(Collectors.toSet())));
@@ -305,7 +305,7 @@ public class IndicatorUtils {
             }
 
             if (gene != null && hasPrognosticImplicationEvidence) {
-                indicatorQuery.setPrognosticImplications(getImplications(gene, matchedAlt, alleles, relevantAlterationsWithoutAlternativeAlleles, EvidenceType.PROGNOSTIC_IMPLICATION, matchedTumorType, StringUtils.isEmpty(query.getTumorType()) ? null : relevantUpwardTumorTypes, query.getHugoSymbol(), null));
+                indicatorQuery.setPrognosticImplications(getImplications(gene, matchedAlt, alleles, relevantAlterationsWithoutAlternativeAlleles, EvidenceType.PROGNOSTIC_IMPLICATION, matchedTumorType, StringUtils.isEmpty(query.getTumorType()) ? null : relevantUpwardTumorTypes, query.getHugoSymbol(), null, geneQueryOnly));
                 if (indicatorQuery.getPrognosticImplications().size() > 0) {
                     indicatorQuery.setHighestPrognosticImplicationLevel(LevelUtils.getHighestPrognosticImplicationLevel(indicatorQuery.getPrognosticImplications().stream().map(implication -> implication.getLevelOfEvidence()).collect(Collectors.toSet())));
                 }
@@ -536,7 +536,7 @@ public class IndicatorUtils {
         return implications;
     }
 
-    private static List<Implication> getImplications(Gene gene, Alteration matchedAlt, List<Alteration> alternativeAlleles, List<Alteration> relevantAlterations, EvidenceType evidenceType, TumorType matchedTumorType, List<TumorType> tumorTypes, String queryHugoSymbol, Set<LevelOfEvidence> levelOfEvidences) {
+    private static List<Implication> getImplications(Gene gene, Alteration matchedAlt, List<Alteration> alternativeAlleles, List<Alteration> relevantAlterations, EvidenceType evidenceType, TumorType matchedTumorType, List<TumorType> tumorTypes, String queryHugoSymbol, Set<LevelOfEvidence> levelOfEvidences, Boolean geneQueryOnly) {
         List<Implication> implications = new ArrayList<>();
 
         if (matchedAlt != null && !StringUtils.isEmpty(matchedAlt.getAlteration())) {
@@ -555,7 +555,7 @@ public class IndicatorUtils {
                     implications.addAll(getImplicationFromEvidence(altEvis, queryHugoSymbol));
                 }
             }
-        } else {
+        } else if (geneQueryOnly){
             Set<Evidence> geneEvisSet = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Stream.of(evidenceType).collect(Collectors.toSet()));
             List<Evidence> geneEvis = new ArrayList<>();
             geneEvis.addAll(geneEvisSet);

@@ -1,10 +1,10 @@
 package org.mskcc.cbio.oncokb.util;
 
-import junit.framework.TestCase;
-import org.mskcc.cbio.oncokb.model.MutationEffect;
+import static org.mskcc.cbio.oncokb.util.MainUtils.*;
 
-import static org.mskcc.cbio.oncokb.util.MainUtils.replaceLast;
-import static org.mskcc.cbio.oncokb.util.MainUtils.toLowerCaseExceptAllCaps;
+import junit.framework.TestCase;
+import org.mskcc.cbio.oncokb.model.AnnotationSearchQueryType;
+import org.mskcc.cbio.oncokb.model.MutationEffect;
 
 /**
  * Created by Hongxin Zhang on 3/1/18.
@@ -77,5 +77,18 @@ public class MainUtilsTest extends TestCase {
         assertEquals("t", toLowerCaseExceptAllCaps("t"));
         assertEquals("T", toLowerCaseExceptAllCaps("T"));
         assertEquals("?", toLowerCaseExceptAllCaps("?"));
+    }
+
+    public void testCompareAnnotationSearchQueryType() {
+        assertTrue(compareAnnotationSearchQueryType(AnnotationSearchQueryType.GENE, AnnotationSearchQueryType.VARIANT, true) < 0);
+        assertTrue(compareAnnotationSearchQueryType(AnnotationSearchQueryType.GENE, AnnotationSearchQueryType.CANCER_TYPE, true) < 0);
+        assertTrue(compareAnnotationSearchQueryType(AnnotationSearchQueryType.GENE, AnnotationSearchQueryType.DRUG, true) < 0);
+        assertTrue(compareAnnotationSearchQueryType(AnnotationSearchQueryType.VARIANT, AnnotationSearchQueryType.CANCER_TYPE, true) < 0);
+        assertTrue(compareAnnotationSearchQueryType(AnnotationSearchQueryType.GENE, null, true) < 0);
+        assertTrue(compareAnnotationSearchQueryType(null, AnnotationSearchQueryType.GENE, true) > 0);
+        assertTrue(compareAnnotationSearchQueryType(AnnotationSearchQueryType.GENE, AnnotationSearchQueryType.GENE, true) == 0);
+        assertTrue(compareAnnotationSearchQueryType(null, null, true) == 0);
+        assertTrue(compareAnnotationSearchQueryType(AnnotationSearchQueryType.VARIANT, AnnotationSearchQueryType.GENE, true) > 0);
+        assertTrue(compareAnnotationSearchQueryType(AnnotationSearchQueryType.VARIANT, AnnotationSearchQueryType.GENE, false) < 0);
     }
 }
