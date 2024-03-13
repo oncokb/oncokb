@@ -33,11 +33,11 @@ public class AnnotationSearchUtilsTest extends TestCase {
 
         // test fusion query
         respSet = searchNonHgvsAnnotation("BCR-ABL1");
-        // This is a variant search, there should not be any gene query search result
+        // This query contains gene names
         assertTrue(respSet.stream().filter(resp -> TypeaheadQueryType.GENE.equals(resp.getQueryType())).count() > 0);
-        // This is a variant search, variant search result should be available
+        // This query is included in fusion name that we curated
         assertTrue(respSet.stream().filter(resp -> TypeaheadQueryType.VARIANT.equals(resp.getQueryType())).count() > 0);
-        // This is a variant search, the cancer type search result should not be available
+        // This query is included in cancer type
         assertTrue(respSet.stream().filter(resp -> TypeaheadQueryType.CANCER_TYPE.equals(resp.getQueryType())).count() > 0);
 
         // test cancer type query
@@ -80,11 +80,11 @@ public class AnnotationSearchUtilsTest extends TestCase {
 
         // test fusion query
         respSet = annotationSearch("BCR-ABL1");
-        // This is a variant search, there should not be any gene query search result
+        // This query contains gene names
         assertTrue(respSet.stream().filter(resp -> AnnotationSearchQueryType.GENE.equals(resp.getQueryType())).count() > 0);
-        // This is a variant search, variant search result should be available
+        // This query is included in fusion name that we curated
         assertTrue(respSet.stream().filter(resp -> AnnotationSearchQueryType.VARIANT.equals(resp.getQueryType())).count() > 0);
-        // This is a variant search, the cancer type search result should not be available
+        // This query is included in cancer type
         assertTrue(respSet.stream().filter(resp -> AnnotationSearchQueryType.CANCER_TYPE.equals(resp.getQueryType())).count() > 0);
 
         // test cancer type query
