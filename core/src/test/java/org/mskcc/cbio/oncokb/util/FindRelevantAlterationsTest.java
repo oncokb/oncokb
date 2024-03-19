@@ -105,11 +105,11 @@ public class FindRelevantAlterationsTest {
 //                {"MAP2K1", "N109_R113del", null, "N109_R113del, I99_R113del"},
 
                 // Range missense variant
-                {"PDGFRA", "D842I", null, "D842I, D842Y, D842_I843delinsIM, 814_852mis, Oncogenic Mutations"},
+                {"PDGFRA", "D842I", null, "D842I, D842H, D842N, D842Y, D842_I843delinsIM, 814_852mis, Oncogenic Mutations"},
 
                 // D842V should not be mapped as alternative allele
-                {"PDGFRA", "D842I", null, "D842I, D842Y, D842_I843delinsIM, 814_852mis, Oncogenic Mutations"},
-                {"PDGFRA", "D842V", null, "D842V, D842I, D842Y, D842_I843delinsIM, 814_852mis, Oncogenic Mutations"},
+                {"PDGFRA", "D842I", null, "D842I, D842H, D842N, D842Y, D842_I843delinsIM, 814_852mis, Oncogenic Mutations"},
+                {"PDGFRA", "D842V", null, "D842V, D842H, D842I, D842N, D842Y, D842_I843delinsIM, 814_852mis, Oncogenic Mutations"},
 
                 // Check whether the overlapped variants(with the same consequence) will be mapped
                 {"MAP2K1", "E41_F53del", null, "E41_F53del, E41_L54del, L42_K57del, E51_Q58del, F53_Q58del, F53_Q58delinsL, Oncogenic Mutations"},
