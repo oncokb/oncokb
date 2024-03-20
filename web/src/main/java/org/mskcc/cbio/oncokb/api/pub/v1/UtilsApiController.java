@@ -4,6 +4,7 @@ import io.swagger.annotations.ApiParam;
 import org.mskcc.cbio.oncokb.apiModels.ActionableGene;
 import org.mskcc.cbio.oncokb.apiModels.AnnotatedVariant;
 import org.mskcc.cbio.oncokb.apiModels.CuratedGene;
+import org.mskcc.cbio.oncokb.apiModels.VariantOfUnknownSignificance;
 import org.mskcc.cbio.oncokb.apiModels.download.FileName;
 import org.mskcc.cbio.oncokb.apiModels.download.FileExtension;
 import org.mskcc.cbio.oncokb.cache.CacheFetcher;
@@ -93,6 +94,35 @@ public class UtilsApiController implements UtilsApi {
         return new ResponseEntity<>(sb.toString(), HttpStatus.OK);
     }
 
+    @Override
+    public ResponseEntity<List<VariantOfUnknownSignificance>> utilsAllVariantsOfUnknownSignificanceGet() {
+        return new ResponseEntity<>(getAllVus(), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<String> utilsAllVariantsOfUnknownSignificanceTxtGet() {
+        String separator = "\t";
+        String newLine = "\n";
+
+        StringBuilder sb = new StringBuilder();
+        List<String> header = new ArrayList<>();
+        header.add("Entrez Gene ID");
+        header.add("Hugo Symbol");
+        header.add("Alteration");
+        sb.append(MainUtils.listToString(header, separator));
+        sb.append(newLine);
+
+        for (VariantOfUnknownSignificance vus : getAllVus()) {
+            List<String> row = new ArrayList<>();
+            row.add(String.valueOf(vus.getEntrezGeneId()));
+            row.add(vus.getGene());
+            row.add(vus.getVariant());
+            sb.append(MainUtils.listToString(row, separator));
+            sb.append(newLine);
+        }
+        return new ResponseEntity<>(sb.toString(), HttpStatus.OK);
+    }
+
     private List<AnnotatedVariant> getAllAnnotatedVariants() {
         List<AnnotatedVariant> annotatedVariantList = new ArrayList<>();
         Set<Gene> genes = CacheUtils.getAllGenes();
@@ -133,6 +163,29 @@ public class UtilsApiController implements UtilsApi {
         annotatedVariantList.addAll(annotatedVariants);
         MainUtils.sortAnnotatedVariants(annotatedVariantList);
         return annotatedVariantList;
+    }
+
+    private List<VariantOfUnknownSignificance> getAllVus() {
+        List<VariantOfUnknownSignificance> allVus = new ArrayList<>();
+        Set<Gene> genes = CacheUtils.getAllGenes();
+        Map<Gene, Set<Alteration>> map = new HashMap<>();
+
+        for (Gene gene : genes) {
+            map.put(gene, CacheUtils.getVUS(gene.getEntrezGeneId()));
+        }
+
+        for (Map.Entry<Gene, Set<Alteration>> entry : map.entrySet()) {
+            Gene gene = entry.getKey();
+            for (Alteration alteration : entry.getValue()) {
+                allVus.add(new VariantOfUnknownSignificance(
+                        gene.getEntrezGeneId(),
+                        gene.getHugoSymbol(),
+                        alteration.getAlteration()
+                ));
+            }
+        }
+        MainUtils.sortVusVariants(allVus);
+        return allVus;
     }
 
     @Override
