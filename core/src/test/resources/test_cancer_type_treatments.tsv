@@ -50,11 +50,11 @@ PDGFRA	D842I	GIST	1: Avapritinib; 2: Imatinib; 2: Sunitinib; 2: Regorafenib; 2: 
 PDGFRA	D842I	Thymic Tumor	3B: Avapritinib; 3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Ripretinib;
 PDGFRA	D842V	GIST	R1: Imatinib; 1: Avapritinib; 2: Dasatinib; 2: Sunitinib; 2: Regorafenib; 2: Ripretinib;
 PDGFRA	D842V	Thymic Tumor	3B: Avapritinib; 3B: Dasatinib; 3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Ripretinib;
-EGFR	A763_Y764insFQEA	NSCLC	1: Amivantamab; 1: Mobocertinib; 2: Erlotinib; 3A: Poziotinib; 3A: CLN-081; 4: Afatinib;
+EGFR	A763_Y764insFQEA	NSCLC	1: Amivantamab; 1: Mobocertinib; 1: Amivantamab+Chemotherapy; 2: Erlotinib; 3A: Poziotinib; 3A: CLN-081; 4: Afatinib;
 # this one overlaps with A763_Y764insFQEA, but the rule only applies to exact match, so R1 will be used
-EGFR	Y764_D770dup	NSCLC	R1: Erlotinib; R1: Gefitinib; R1: Afatinib; 1: Amivantamab; 1: Mobocertinib; 3A: Poziotinib; 3A: CLN-081;
+EGFR	Y764_D770dup	NSCLC	R1: Erlotinib; R1: Gefitinib; R1: Afatinib; 1: Amivantamab; 1: Mobocertinib; 1: Amivantamab+Chemotherapy; 3A: Poziotinib; 3A: CLN-081;
 # this one does not overlap with A763_Y764insFQEA, so R1 for sure
-EGFR	N771delinsSTH	Lung Adenocarcinoma	R1: Erlotinib; R1: Gefitinib; R1: Afatinib; 1: Amivantamab; 1: Mobocertinib; 3A: Poziotinib; 3A: CLN-081;
+EGFR	N771delinsSTH	Lung Adenocarcinoma	R1: Erlotinib; R1: Gefitinib; R1: Afatinib; 1: Amivantamab; 1: Mobocertinib; 1: Amivantamab+Chemotherapy; 3A: Poziotinib; 3A: CLN-081;
 
 # test cases cover the resistance treatment should overwrite sensitive from alternative allele
 ABL1	T315I	Chronic Myelogenous Leukemia	R1: Imatinib; R1: Dasatinib; R1: Nilotinib; R1: Bosutinib; 1: Ponatinib; 1: Asciminib;
@@ -182,8 +182,8 @@ BRAF	L597M	NSCLC	3B: Trametinib; 4: PLX8394;
 EGFR	L861Q	NSCLC	1: Afatinib; 2: Osimertinib; 3A: Patritumab Deruxtecan;
 EGFR	L861R	NSCLC
 EGFR	L861M	NSCLC
-EGFR	G724S	NSCLC	R2: Osimertinib;
-EGFR	G724S	MEL
+EGFR	G724S	NSCLC	3A: Afatinib; R2: Osimertinib;
+EGFR	G724S	MEL	3B: Afatinib;
 KRAS	G12C	NSCLC	1: Sotorasib; 1: Adagrasib; 3B: Adagrasib+Cetuximab; 3B: Adagrasib+Panitumumab; 3B: Sotorasib+Cetuximab; 3B: Sotorasib+Panitumumab; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
 KRAS	G12C	Melanoma	3B: Adagrasib+Cetuximab; 3B: Sotorasib; 3B: Adagrasib; 3B: Adagrasib+Panitumumab; 3B: Sotorasib+Cetuximab; 3B: Sotorasib+Panitumumab; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
 KRAS	G12A	NSCLC	3A: RMC-6236; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
