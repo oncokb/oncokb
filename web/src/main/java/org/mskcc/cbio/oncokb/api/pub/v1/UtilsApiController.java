@@ -65,9 +65,9 @@ public class UtilsApiController implements UtilsApi {
         header.add("Protein Change");
         header.add("Oncogenicity");
         header.add("Mutation Effect");
-        header.add("PMIDs for Mutation Effect");
-        header.add("Abstracts for Mutation Effect");
-        header.add("Mutation Effect Description");
+        header.add("PMIDs");
+        header.add("Abstracts");
+        header.add("Description");
         sb.append(MainUtils.listToString(header, separator));
         sb.append(newLine);
 
@@ -168,9 +168,9 @@ public class UtilsApiController implements UtilsApi {
         header.add("Cancer Type");
         header.add("Level");
         header.add("Drugs(s)");
-        header.add("PMIDs for drug");
-        header.add("Abstracts for drug");
-        header.add("Drug Description");
+        header.add("PMIDs");
+        header.add("Abstracts");
+        header.add("Description");
         sb.append(MainUtils.listToString(header, separator));
         sb.append(newLine);
 
