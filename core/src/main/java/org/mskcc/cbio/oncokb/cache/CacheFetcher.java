@@ -80,7 +80,7 @@ public class CacheFetcher {
             row.add(cancerGene.getGrch37Isoform());
             row.add(cancerGene.getGrch37RefSeq());
             row.add(cancerGene.getGrch38Isoform());
-            row.add(cancerGene.getGrch37RefSeq());
+            row.add(cancerGene.getGrch38RefSeq());
             row.add(getStringByBoolean(cancerGene.getOncogene()));
             row.add(getStringByBoolean(cancerGene.getTSG()));
             row.add(String.valueOf(cancerGene.getOccurrenceCount()));
