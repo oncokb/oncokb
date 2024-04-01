@@ -569,14 +569,14 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     }
 
     @Override
-    public ResponseEntity<String> utilDataReadmeGet(
+    public ResponseEntity<?> utilDataReadmeGet(
         @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
     ) {
         return getDataDownloadResponseEntity(version, FileName.README, FileExtension.MARK_DOWN);
     }
 
     @Override
-    public ResponseEntity<byte[]> utilDataSqlDumpGet(
+    public ResponseEntity<?> utilDataSqlDumpGet(
         @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
     ) {
         return getDataDownloadResponseEntity(version, getOncoKBSqlDumpFileName(version), FileExtension.GZ);

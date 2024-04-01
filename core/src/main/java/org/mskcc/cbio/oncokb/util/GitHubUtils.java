@@ -44,7 +44,7 @@ public class GitHubUtils {
             contents = repo.getDirectoryContent("/RELEASE/" + version);
         } catch (Exception e) {
             // in this case, is the directory is not available.
-            throw new HttpClientErrorException(HttpStatus.NOT_FOUND);
+            throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "The version " + version + " is not available.");
         }
 
         Optional<GHContent> matchedContent = contents.stream().filter(content -> content.getName().equals(fileName)).findFirst();
@@ -53,7 +53,7 @@ public class GitHubUtils {
             GHBlob ghBlob = repo.getBlob(sha);
             return ghBlob;
         } else {
-            throw new HttpClientErrorException(HttpStatus.NOT_FOUND);
+            throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "The file " + fileName + " is not available in version " + version + ".");
         }
     }
 

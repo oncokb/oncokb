@@ -3,7 +3,6 @@ package org.mskcc.cbio.oncokb.api.pub.v1;
 import io.swagger.annotations.ApiParam;
 import org.mskcc.cbio.oncokb.apiModels.ActionableGene;
 import org.mskcc.cbio.oncokb.apiModels.AnnotatedVariant;
-import org.mskcc.cbio.oncokb.apiModels.CuratedGene;
 import org.mskcc.cbio.oncokb.apiModels.download.FileName;
 import org.mskcc.cbio.oncokb.apiModels.download.FileExtension;
 import org.mskcc.cbio.oncokb.cache.CacheFetcher;
@@ -33,7 +32,7 @@ public class UtilsApiController implements UtilsApi {
     CacheFetcher cacheFetcher;
 
     @Override
-    public ResponseEntity<List<AnnotatedVariant>> utilsAllAnnotatedVariantsGet(
+    public ResponseEntity<?> utilsAllAnnotatedVariantsGet(
         @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
     ) {
         if (version != null) {
@@ -43,7 +42,7 @@ public class UtilsApiController implements UtilsApi {
     }
 
     @Override
-    public ResponseEntity<String> utilsAllAnnotatedVariantsTxtGet(
+    public ResponseEntity<?> utilsAllAnnotatedVariantsTxtGet(
         @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
     ) {
         if (version != null) {
@@ -136,7 +135,7 @@ public class UtilsApiController implements UtilsApi {
     }
 
     @Override
-    public ResponseEntity<List<ActionableGene>> utilsAllActionableVariantsGet(
+    public ResponseEntity<?> utilsAllActionableVariantsGet(
         @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
     ) {
         if (version != null) {
@@ -146,7 +145,7 @@ public class UtilsApiController implements UtilsApi {
     }
 
     @Override
-    public ResponseEntity<String> utilsAllActionableVariantsTxtGet(
+    public ResponseEntity<?> utilsAllActionableVariantsTxtGet(
         @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
     ) {
         if (version != null) {
@@ -261,7 +260,7 @@ public class UtilsApiController implements UtilsApi {
     }
 
     @Override
-    public ResponseEntity<List<CancerGene>> utilsCancerGeneListGet(
+    public ResponseEntity<?> utilsCancerGeneListGet(
         @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
     ) throws ApiException, IOException {
         if (version != null) {
@@ -272,7 +271,7 @@ public class UtilsApiController implements UtilsApi {
     }
 
     @Override
-    public ResponseEntity<String> utilsCancerGeneListTxtGet(
+    public ResponseEntity<?> utilsCancerGeneListTxtGet(
         @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
     ) throws ApiException, IOException {
         if (version != null) {
@@ -283,7 +282,7 @@ public class UtilsApiController implements UtilsApi {
 
 
     @Override
-    public ResponseEntity<List<CuratedGene>> utilsAllCuratedGenesGet(
+    public ResponseEntity<?> utilsAllCuratedGenesGet(
         @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
         , @ApiParam(value = INCLUDE_EVIDENCE, defaultValue = "TRUE") @RequestParam(value = "includeEvidence", required = false, defaultValue = "TRUE") Boolean includeEvidence
     ) {
@@ -294,7 +293,7 @@ public class UtilsApiController implements UtilsApi {
     }
 
     @Override
-    public ResponseEntity<String> utilsAllCuratedGenesTxtGet(
+    public ResponseEntity<?> utilsAllCuratedGenesTxtGet(
         @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
         , @ApiParam(value = INCLUDE_EVIDENCE, defaultValue = "TRUE") @RequestParam(value = "includeEvidence", required = false, defaultValue = "TRUE") Boolean includeEvidence
     ) {

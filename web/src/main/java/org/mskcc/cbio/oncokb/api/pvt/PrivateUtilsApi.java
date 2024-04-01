@@ -250,14 +250,14 @@ public interface PrivateUtilsApi {
     @RequestMapping(value = "/utils/data/readme",
         produces = TEXT_PLAIN_VALUE,
         method = RequestMethod.GET)
-    ResponseEntity<String> utilDataReadmeGet(
+    ResponseEntity<?> utilDataReadmeGet(
         @ApiParam(value = "version", required = true) @RequestParam(value = "version") String version
     );
 
     @RequestMapping(value = "/utils/data/sqlDump",
         produces = {"application/gz"},
         method = RequestMethod.GET)
-    ResponseEntity<byte[]> utilDataSqlDumpGet(
+    ResponseEntity<?> utilDataSqlDumpGet(
         @ApiParam(value = "version", required = true) @RequestParam(value = "version") String version
     );
 

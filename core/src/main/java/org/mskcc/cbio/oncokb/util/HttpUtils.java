@@ -105,26 +105,26 @@ public class HttpUtils {
     }
 
 
-    public static <T> ResponseEntity<T> getDataDownloadResponseEntity(String version, FileName fileName, FileExtension fileExtension) {
+    public static ResponseEntity<?> getDataDownloadResponseEntity(String version, FileName fileName, FileExtension fileExtension) {
         return getDataDownloadResponseEntity(version, fileName.getName() + fileExtension.getExtension(), fileExtension);
     }
 
-    public static <T> ResponseEntity<T> getDataDownloadResponseEntity(String version, String fileName, FileExtension fileExtension) {
+    public static ResponseEntity<?> getDataDownloadResponseEntity(String version, String fileName, FileExtension fileExtension) {
         try {
             if (fileExtension.equals(FileExtension.JSON)) {
-                return new ResponseEntity<>((T) JsonUtils.jsonToArray(GitHubUtils.getOncoKBData(version, fileName)), HttpStatus.OK);
+                return new ResponseEntity<>(JsonUtils.jsonToArray(GitHubUtils.getOncoKBData(version, fileName)), HttpStatus.OK);
             } else if (fileExtension.equals(FileExtension.GZ)) {
                 HttpHeaders headers = new HttpHeaders();
                 headers.add("Content-Disposition", "attachment; filename=" + fileName);
-                return (ResponseEntity<T>) ResponseEntity.ok()
+                return ResponseEntity.ok()
                     .headers(headers)
                     .contentType(new MediaType("application", "gz"))
                     .body(GitHubUtils.getOncoKBDataInBytes(version, fileName));
             } else {
-                return new ResponseEntity<>((T) GitHubUtils.getOncoKBData(version, fileName), HttpStatus.OK);
+                return new ResponseEntity<>(GitHubUtils.getOncoKBData(version, fileName), HttpStatus.OK);
             }
         } catch (HttpClientErrorException exception) {
-            return new ResponseEntity<>(null, exception.getStatusCode());
+            return new ResponseEntity<>(exception.getMessage(), exception.getStatusCode());
         } catch (IOException exception) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (NoPropertyException exception) {
