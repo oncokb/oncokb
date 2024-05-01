@@ -4,6 +4,7 @@ import io.swagger.annotations.*;
 import org.mskcc.cbio.oncokb.apiModels.ActionableGene;
 import org.mskcc.cbio.oncokb.apiModels.AnnotatedVariant;
 import org.mskcc.cbio.oncokb.apiModels.CuratedGene;
+import org.mskcc.cbio.oncokb.apiModels.VariantOfUnknownSignificance;
 import org.mskcc.cbio.oncokb.config.annotation.PremiumPublicApi;
 import org.mskcc.cbio.oncokb.config.annotation.PublicApi;
 import org.mskcc.cbio.oncokb.model.CancerGene;
@@ -53,6 +54,29 @@ public interface UtilsApi {
     ResponseEntity<String> utilsAllAnnotatedVariantsTxtGet(
         @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
     );
+
+    @PremiumPublicApi
+    @ApiOperation(value = "", notes = "Get All Variants of Unknown Significance.", response = VariantOfUnknownSignificance.class, responseContainer = "List", tags = {"Variants"})
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK", response = VariantOfUnknownSignificance.class, responseContainer = "List"),
+        @ApiResponse(code = 404, message = "Not Found"),
+        @ApiResponse(code = 503, message = "Service Unavailable")
+    })
+    @RequestMapping(value = "/utils/allVariantsOfUnknownSignificance", produces = {"application/json"},
+        method = RequestMethod.GET)
+    ResponseEntity<List<VariantOfUnknownSignificance>> utilsAllVariantsOfUnknownSignificanceGet();
+
+    @PremiumPublicApi
+    @ApiOperation(value = "", notes = "Get All Variants of Unknown Significance in text file.", tags = {"Variants"})
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK"),
+        @ApiResponse(code = 404, message = "Not Found"),
+        @ApiResponse(code = 503, message = "Service Unavailable")
+    })
+    @RequestMapping(value = "/utils/allVariantsOfUnknownSignificance.txt",
+        produces = TEXT_PLAIN_VALUE,
+        method = RequestMethod.GET)
+    ResponseEntity<String> utilsAllVariantsOfUnknownSignificanceTxtGet();
 
     @PremiumPublicApi
     @ApiOperation(value = "", notes = "Get All Actionable Variants.", response = ActionableGene.class, responseContainer = "List", tags = {"Variants"})
