@@ -1,9 +1,6 @@
 package org.mskcc.cbio.oncokb.util;
 
-import org.mskcc.cbio.oncokb.apiModels.ActionableGene;
-import org.mskcc.cbio.oncokb.apiModels.AnnotatedVariant;
-import org.mskcc.cbio.oncokb.apiModels.Citations;
-import org.mskcc.cbio.oncokb.apiModels.CuratedGene;
+import org.mskcc.cbio.oncokb.apiModels.*;
 import org.mskcc.cbio.oncokb.model.*;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -735,6 +732,10 @@ public class MainUtils {
                 return result;
             }
         });
+    }
+
+    public static void sortVusVariants(List<VariantOfUnknownSignificance> variants) {
+        Collections.sort(variants, Comparator.comparing(VariantOfUnknownSignificance::getGene).thenComparing(VariantOfUnknownSignificance::getVariant));
     }
 
     public static void sortActionableVariants(List<ActionableGene> variants) {
