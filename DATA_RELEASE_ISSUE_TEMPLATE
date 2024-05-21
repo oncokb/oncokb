@@ -1,25 +1,38 @@
-Prepare for data v*.* release
+## Prepare for data v*.* release
 
-- [ ] Generate database
-- [ ] Run mvn test to make sure all tests pass, update tests accordingly
-- [ ] Generate database dumps by running https://github.com/knowledgesystems/oncokb-deployment/blob/master/oncokb-data-release/release.sh
-- [ ] Check all newly added genes have ensembl gene id, transcript id for both GRCh37 and GRCh38
-- [ ] Update News
-- [ ] Update release note
-- [ ] Update oncokb-annotator tests
-- [ ] Update oncokb_summary image and update the index.html in oncokb-public for the tags <meta name="twitter:image"> and <meta property="og:image">
-- [ ] Update public site
-    - [ ] Update database
-    - [ ] Update website using latest image
-- [ ] Update EU public site
-    - [ ] Update database
-    - [ ] Update website using latest image
-- [ ] Update MSK public site
-    - [ ] Update database
-    - [ ] Update website using latest image
-- [ ] Update demo site
-    - [ ] Update database
-    - [ ] Update website using latest image
-- [ ] Update trimmed public site
-    - [ ] Update database
-    - [ ] Update website using latest image
+### Beta Setup
+
+-   [ ] Generate database [README](https://github.com/knowledgesystems/oncokb-deployment/blob/master/oncokb-data-release/README.md#prepare-the-full-database)
+-   [ ] Run mvn test to make sure all tests pass, update tests accordingly
+-   [ ] Generate database dumps by following instructions [HERE](https://github.com/knowledgesystems/oncokb-deployment/blob/master/oncokb-data-release/README.md#prepare-the-public-database)
+-   [ ] Check all newly added genes have ensembl gene id, transcript id for both GRCh37 and GRCh38
+-   [ ] Update News
+-   [ ] Update oncokb_summary image and update the index.html in oncokb-public for the tags `<meta name="twitter:image">` and `<meta property="og:image">`
+
+### Release and Deployment
+
+Checklist for deployment after curation team approves beta
+
+-   [ ] Update oncokb-annotator tests by running this [script](https://github.com/knowledgesystems/oncokb-deployment/blob/master/oncokb-data-release/update_annotation.sh)
+-   [ ] Push data to private [oncokb-data repo](https://github.com/knowledgesystems/oncokb-data) and public [oncokb-datahub repo](https://github.com/oncokb/oncokb-datahub)
+-   [ ] Update release note
+-   [ ] Update public site (https://www.oncokb.org)
+    -   [ ] Update oncokb-transcript database and restart
+    -   [ ] Update database
+    -   [ ] Update [oncokb-core](https://github.com/knowledgesystems/knowledgesystems-k8s-deployment/blob/master/oncokb/oncokb-prod/oncokb_core.yaml) image
+    -   [ ] Update [oncokb-public](https://github.com/knowledgesystems/knowledgesystems-k8s-deployment/blob/master/oncokb/oncokb-prod/oncokb_public.yaml) image
+-   [ ] Update demo site (https://demo.oncokb.org/)
+    -   [ ] Update database
+    -   [ ] Update [oncokb-core-demo](https://github.com/knowledgesystems/knowledgesystems-k8s-deployment/blob/master/oncokb/oncokb-prod/oncokb_core_demo.yaml) image
+-   [ ] Update trimmed public site (https://public.api.oncokb.org)
+    -   [ ] Update database
+    -   [ ] Update [oncokb-core-public](https://github.com/knowledgesystems/knowledgesystems-k8s-deployment/blob/master/oncokb/oncokb-prod/oncokb_core_public.yaml)
+-   [ ] Update MSK Prod site (https://www.oncokb.aws.mskcc.org)
+    -   [ ] Generate versioned database (`oncokb_core_v4_15`)
+    -   [ ] Update `-Djdbc.url` with latest versioned database in both [oncokb-core](https://github.com/knowledgesystems/knowledgesystems-k8s-deployment/blob/master/oncokb/oncokb-msk/prod/oncokb_core.yaml) and [oncokb-core-cbx](https://github.com/knowledgesystems/knowledgesystems-k8s-deployment/blob/master/oncokb/oncokb-msk/prod/oncokb_core_cbx.yaml)
+    -   [ ] Update [oncokb-public](https://github.com/knowledgesystems/knowledgesystems-k8s-deployment/blob/master/oncokb/oncokb-msk/prod/oncokb_public.yaml) image
+-   [ ] Update EU public site (https://eucentral.oncokb.org)
+    -   [ ] Update oncokb-transcript database and restart
+    -   [ ] Update database
+    -   [ ] Update [oncokb-core](https://github.com/knowledgesystems/knowledgesystems-k8s-deployment/blob/master/oncokb/oncokb-eu/oncokb_core.yaml) image
+    -   [ ] Update [oncokb-public](https://github.com/knowledgesystems/knowledgesystems-k8s-deployment/blob/master/oncokb/oncokb-eu/oncokb_public.yaml) image
