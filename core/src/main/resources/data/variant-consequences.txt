@@ -5,7 +5,7 @@ splice_donor_variant	yes	A splice variant that changes the 2 base region at the 
 splice_acceptor_variant	yes	A splice variant that changes the 2 base region at the 3' end of an intron
 stop_gained	yes	A sequence variant whereby at least one base of a codon is changed, resulting in a premature stop codon, leading to a shortened transcript
 frameshift_variant	yes	A sequence variant which causes a disruption of the translational reading frame, because the number of nucleotides inserted or deleted is not a multiple of three
-stop_lost	yes	A sequence variant where at least one base of the terminator codon (stop) is changed, resulting in an elongated transcript
+stop_lost	no	A sequence variant where at least one base of the terminator codon (stop) is changed, resulting in an elongated transcript
 start_lost	yes	A codon variant that changes at least one base of the canonical start codon
 transcript_amplification	no	A feature amplification of a region containing a transcript
 inframe_insertion	no	An inframe non synonymous variant that inserts bases into in the coding sequence
