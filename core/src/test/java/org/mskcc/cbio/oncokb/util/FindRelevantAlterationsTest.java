@@ -69,13 +69,16 @@ public class FindRelevantAlterationsTest {
 
                 // General truncating consequence should be associated with Truncating Mutations
                 // Check splice
-                // TP53 Oncogenic Mutations does not have any information we are ready to relase
+                // TP53 Oncogenic Mutations does not have any information we are ready to release
                 {"TP53", "X33_splice", null, "X33_splice, Truncating Mutations, Oncogenic Mutations"},
                 {"MET", "X1010_splice", null, "X1010_splice, 963_1010splice, 981_1028splice, Oncogenic Mutations"},
                 {"MET", "X1010splice", null, "X1010_splice, 963_1010splice, 981_1028splice, Oncogenic Mutations"},
 
                 // Check stop_gained
                 {"MAP2K4", "R304*", null, "R304*, Truncating Mutations"},
+
+                // Check stop_lost, especially it should not be associated with truncating mutation
+                {"MLH1", "*757Kext*36", null, "*757Kext*36"},
 
                 // Check inframe-insertion, inframe-deletion
                 {"EGFR", "Y764_D770dup", null, "Y764_D770dup, 762_823ins, A767_V769dup, S768_D770dup, A767_S768insASV, S768_V769insSVD, S768_V769insVAS, V769_D770insASV, V769_D770insGVV, D770delinsGTH, D770delinsGY, A763_Y764insFQEA, D770_N771insD, D770_N771insG, D770_N771insGF, D770_N771insGL, D770_N771insNPG, D770_N771insSVD, D770_N771insVDSVDNP, D770_N771insY, D770_P772dup, Oncogenic Mutations, 762_823ins {excluding A763_Y764insFQEA}"},
