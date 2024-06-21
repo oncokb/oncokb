@@ -173,6 +173,7 @@ public abstract class CustomRedisCache extends AbstractValueAdaptingCache {
     @Override
     @SuppressWarnings("unchecked")
     public <T> T get(Object key, Callable<T> valueLoader) {
+        // see https://docs.spring.io/spring-framework/docs/4.3.9.RELEASE/spring-framework-reference/html/cache.html#cache-annotations-cacheable-synchronized
         LOG.warn("Sync method was enabled for cacheable. We do not currently support synchronized caching, so this is most likely a mistake.");
 
 		ValueWrapper storeValue = get(key);
