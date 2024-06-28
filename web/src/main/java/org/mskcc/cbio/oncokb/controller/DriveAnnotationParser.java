@@ -710,8 +710,13 @@ public class DriveAnnotationParser {
 
                 List<Drug> drugs = new ArrayList<>();
                 for (int k = 0; k < drugsArray.length(); k++) {
-                    JSONObject drugObject = drugsArray.getJSONObject(k);
-
+                    JSONObject drugObject = null;
+                    try {
+                        drugObject = drugsArray.getJSONObject(k);
+                    } catch(Exception e) {
+                        System.out.println("error");
+                    }
+                    
                     String ncitCode = drugObject.has("ncitCode") ? drugObject.getString("ncitCode").trim() : null;
                     if (ncitCode != null && ncitCode.isEmpty()) {
                         ncitCode = null;
@@ -960,7 +965,7 @@ public class DriveAnnotationParser {
         Set<Article> docs = new HashSet<>();
         ArticleBo articleBo = ApplicationContextSingleton.getArticleBo();
         Pattern pmidPattern = Pattern.compile("PMIDs?:?\\s*([\\d,\\s*]+)", Pattern.CASE_INSENSITIVE);
-        Pattern abstractPattern = Pattern.compile("\\(?\\s*Abstract\\s*:(.*(?:\\([^()]*\\).*?)*);?\\s*\\)", Pattern.CASE_INSENSITIVE);
+        Pattern abstractPattern = Pattern.compile("\\(?\\s*Abstract\\s*:([^\\)]*);?\\s*\\)?", Pattern.CASE_INSENSITIVE);
         Pattern abItemPattern = Pattern.compile("(.*?)\\.\\s*(http.*)", Pattern.CASE_INSENSITIVE);
         Matcher m = pmidPattern.matcher(str);
         int start = 0;
@@ -1003,7 +1008,11 @@ public class DriveAnnotationParser {
                         doc = new Article();
                         doc.setAbstractContent(abContent);
                         doc.setLink(abLink);
-                        articleBo.save(doc);
+                        try{
+                            articleBo.save(doc);
+                        } catch (Exception e) {
+                            System.out.println("error");
+                        }
                     }
                     docs.add(doc);
                 }
