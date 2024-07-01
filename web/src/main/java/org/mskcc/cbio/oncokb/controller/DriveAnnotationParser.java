@@ -710,13 +710,8 @@ public class DriveAnnotationParser {
 
                 List<Drug> drugs = new ArrayList<>();
                 for (int k = 0; k < drugsArray.length(); k++) {
-                    JSONObject drugObject = null;
-                    try {
-                        drugObject = drugsArray.getJSONObject(k);
-                    } catch(Exception e) {
-                        System.out.println("error");
-                    }
-                    
+                    JSONObject drugObject = drugsArray.getJSONObject(k);
+
                     String ncitCode = drugObject.has("ncitCode") ? drugObject.getString("ncitCode").trim() : null;
                     if (ncitCode != null && ncitCode.isEmpty()) {
                         ncitCode = null;
@@ -1008,11 +1003,7 @@ public class DriveAnnotationParser {
                         doc = new Article();
                         doc.setAbstractContent(abContent);
                         doc.setLink(abLink);
-                        try{
-                            articleBo.save(doc);
-                        } catch (Exception e) {
-                            System.out.println("error");
-                        }
+                        articleBo.save(doc);
                     }
                     docs.add(doc);
                 }
