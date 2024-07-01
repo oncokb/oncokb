@@ -5,19 +5,17 @@
 package org.mskcc.cbio.oncokb.controller;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.mskcc.cbio.oncokb.bo.*;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.Tumor;
 import org.mskcc.cbio.oncokb.util.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import javafx.util.Pair;
 
 import java.io.IOException;
 import java.util.*;
@@ -610,8 +608,6 @@ public class DriveAnnotationParser {
 
     private void parseTherapeuticImplications(Gene gene, Set<Alteration> alterations, List<TumorType> tumorTypes, List<TumorType> excludedCancerTypes, List<TumorType> relevantCancerTypes, JSONObject implicationObj,
                                                      Integer nestLevel) throws Exception {
-        // System.out.println(spaceStrByNestLevel(nestLevel) + evidenceType);
-
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
 
 //         if (implicationObj.has("description") && !implicationObj.getString("description").trim().isEmpty()) {
@@ -672,14 +668,23 @@ public class DriveAnnotationParser {
             addDateToLastEditSetFromObject(lastEditDates, drugObj, "name");
 //            addDateToLastReviewSetFromLong(lastReviewDates, drugObj, "name");
 
-            Pair<EvidenceType, String> evidenceTypeAndKnownEffect =  getEvidenceTypeAndKnownEffectFromDrugObj(drugObj);
+            ImmutablePair<EvidenceType, String> evidenceTypeAndKnownEffect =  getEvidenceTypeAndKnownEffectFromDrugObj(drugObj);
+            EvidenceType evidenceType = evidenceTypeAndKnownEffect.getLeft();
+            String knownEffect = evidenceTypeAndKnownEffect.getRight();
+            if (evidenceType == null) {
+                System.err.println(spaceStrByNestLevel(nestLevel + 1) + "Could not get evidence type" + drugObj.toString());
+                continue;
+            }
+            if (knownEffect == null) {
+                System.err.println(spaceStrByNestLevel(nestLevel + 1) + "Could not get known effect" + drugObj.toString());
+            }
 
             Evidence evidence = new Evidence();
-            evidence.setEvidenceType(evidenceTypeAndKnownEffect.getKey());
+            evidence.setEvidenceType(evidenceType);
             evidence.setAlterations(alterations);
             evidence.setGene(gene);
             evidence.setCancerTypes(new HashSet<>(tumorTypes));
-            evidence.setKnownEffect(evidenceTypeAndKnownEffect.getValue());
+            evidence.setKnownEffect(knownEffect);
             evidence.setUuid(getUUID(drugObj, "name"));
 
             // approved indications
@@ -1027,9 +1032,10 @@ public class DriveAnnotationParser {
         return Collections.max(dates);
     }
 
-    private Pair<EvidenceType, String> getEvidenceTypeAndKnownEffectFromDrugObj(JSONObject drugObj) {
+    private ImmutablePair<EvidenceType, String> getEvidenceTypeAndKnownEffectFromDrugObj(JSONObject drugObj) {
+        ImmutablePair<EvidenceType, String> emptyPair = new ImmutablePair<EvidenceType, String>(null, null);
         if(!drugObj.has("level") || drugObj.getString("level").trim().isEmpty()) {
-            return null;
+            return emptyPair;
         }
         String level = drugObj.getString("level").trim();
         LevelOfEvidence levelOfEvidence = LevelOfEvidence.getByLevel(level.toUpperCase());
@@ -1042,15 +1048,16 @@ public class DriveAnnotationParser {
         } else if (LevelOfEvidence.LEVEL_R1.equals(levelOfEvidence)) {
             evidenceType = EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE;
             type = "Resistant";
-        }
-        if (LevelOfEvidence.LEVEL_3A.equals(levelOfEvidence) || LevelOfEvidence.LEVEL_4.equals(levelOfEvidence)) {
+        } else if (LevelOfEvidence.LEVEL_3A.equals(levelOfEvidence) || LevelOfEvidence.LEVEL_4.equals(levelOfEvidence)) {
             evidenceType = EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY;
             type = "Sensitive";
         } else if (LevelOfEvidence.LEVEL_R2.equals(levelOfEvidence)) {
             evidenceType = EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE;
             type = "Resistant";
+        } else {
+            return emptyPair;
         }
 
-        return new Pair<EvidenceType, String>(evidenceType, type);
+        return new ImmutablePair<EvidenceType, String>(evidenceType, type);
     }
 }
