@@ -9,6 +9,7 @@ import org.springframework.cache.support.AbstractValueAdaptingCache;
 import org.springframework.cache.support.SimpleValueWrapper;
 
 import java.io.*;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -167,5 +168,26 @@ public abstract class CustomRedisCache extends AbstractValueAdaptingCache {
     @Override
     protected Cache.ValueWrapper toValueWrapper(Object storeValue) {
         return (storeValue != null ? new SimpleValueWrapper(storeValue) : null);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> T get(Object key, Callable<T> valueLoader) {
+        // see https://docs.spring.io/spring-framework/docs/4.3.9.RELEASE/spring-framework-reference/html/cache.html#cache-annotations-cacheable-synchronized
+        LOG.warn("Sync method was enabled for cacheable. We do not currently support synchronized caching, so this is most likely a mistake.");
+
+		ValueWrapper storeValue = get(key);
+		if (storeValue != null) {
+			return (T) storeValue.get();
+		}
+
+		T value;
+        try {
+            value = valueLoader.call();
+        } catch (Throwable ex) {
+            throw new ValueRetrievalException(key, valueLoader, ex);
+        }
+        put(key, value);
+        return value;
     }
 }
