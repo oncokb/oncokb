@@ -10,8 +10,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.mskcc.cbio.oncokb.bo.*;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.TumorType;
-import org.mskcc.cbio.oncokb.bo.OncokbTranscriptService;
 import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.Tumor;
 import org.mskcc.cbio.oncokb.util.*;
 import org.springframework.stereotype.Controller;

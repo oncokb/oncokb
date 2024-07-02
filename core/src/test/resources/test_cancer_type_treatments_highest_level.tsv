@@ -1,7 +1,7 @@
 KIT	N505I	Gastrointestinal Stromal Tumor	1: Imatinib; 1: Sunitinib; 1: Regorafenib; 1: Ripretinib;
 BRAF	V600E	Anaplastic Thyroid Cancer	1: Dabrafenib+Trametinib;
 BRAF	V600E	Histiocytosis	3A: Vemurafenib; 3A: Dabrafenib;
-BRAF	G464A	Anaplastic Thyroid Cancer	4: PLX8394;
+BRAF	G464A	Anaplastic Thyroid Cancer	4: Plixorafenib;
 BRAF	G464A	Histiocytosis	3A: Cobimetinib; 3A: Trametinib;
 AKT1	E17K	Breast Cancer	1: Capivasertib+Fulvestrant;
 AKT1	E17K	NSCLC	3B: Capivasertib; 3B: Capivasertib+Fulvestrant;
