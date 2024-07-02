@@ -610,45 +610,6 @@ public class DriveAnnotationParser {
                                                      Integer nestLevel) throws Exception {
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
 
-//         if (implicationObj.has("description") && !implicationObj.getString("description").trim().isEmpty()) {
-//             // general description
-//             System.out.println(spaceStrByNestLevel(nestLevel + 1) + "Has General Description.");
-//             Date lastEdit = getLastEdit(implicationObj, "description");
-// //            Date lastReview = getLastReview(implicationObj, "description");
-//             Evidence evidence = new Evidence();
-//             evidence.setEvidenceType(evidenceType);
-//             evidence.setAlterations(alterations);
-//             evidence.setGene(gene);
-//             evidence.setCancerTypes(new HashSet<>(tumorTypes));
-//             evidence.setKnownEffect(knownEffectOfEvidence);
-//             evidence.setUuid(getUUID(implicationObj, "description"));
-//             evidence.setLastEdit(lastEdit);
-// //            evidence.setLastReview(lastReview);
-//             if (lastEdit != null) {
-//                 System.out.println(spaceStrByNestLevel(nestLevel + 1) +
-//                     "Last update on: " + MainUtils.getTimeByDate(lastEdit));
-//             }
-// //            if (lastReview != null) {
-// //                System.out.println(spaceStrByNestLevel(nestLevel + 1) +
-// //                    "Last review on: " + MainUtils.getTimeByDate(lastReview));
-// //            }
-//             String desc = implicationObj.getString("description");
-//             evidence.setDescription(desc);
-//             setDocuments(desc, evidence);
-
-//             if (excludedCancerTypes != null) {
-//                 evidence.setExcludedCancerTypes(new HashSet<>(excludedCancerTypes));
-//             }
-
-//             if (implicationObj.has("relevantCancerTypes")) {
-//                 evidence.setRelevantCancerTypes(new HashSet<>(getTumorTypes(implicationObj.getJSONArray("relevantCancerTypes"))));
-//             } else if (relevantCancerTypes != null) {
-//                 evidence.setRelevantCancerTypes(new HashSet<>(relevantCancerTypes));
-//             }
-
-//             evidenceBo.save(evidence);
-//         }
-
         // specific evidence
         DrugBo drugBo = ApplicationContextSingleton.getDrugBo();
         JSONArray treatmentsArray = implicationObj.has("treatments") ? implicationObj.getJSONArray("treatments") : new JSONArray();
