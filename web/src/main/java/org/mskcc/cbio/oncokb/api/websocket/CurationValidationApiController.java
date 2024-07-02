@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
 import static org.mskcc.cbio.oncokb.api.websocket.ValidationCategory.*;
 import static org.mskcc.cbio.oncokb.model.StructuralAlteration.TRUNCATING_MUTATIONS;
 
@@ -24,6 +25,7 @@ import static org.mskcc.cbio.oncokb.model.StructuralAlteration.TRUNCATING_MUTATI
 
 @ServerEndpoint(value = "/api/websocket/curation/validation")
 public class CurationValidationApiController {
+
     private Session session;
 
     @OnOpen
@@ -50,6 +52,8 @@ public class CurationValidationApiController {
         validateTruncatingMutationsUnderTSG();
 
         validateMismatchedRefAA();
+
+        validateVariantActionabilityAndOncogenicity();
 
         compareActionableGenes();
 
@@ -237,6 +241,24 @@ public class CurationValidationApiController {
         }
     }
 
+    private void validateVariantActionabilityAndOncogenicity() throws IOException {
+        sendText(generateInfo(VARIANT_ACTIONABILITY_AND_ONCOGENICITY, ValidationStatus.IS_PENDING, new JSONArray()));
+
+        JSONArray data = null;
+        try {
+            data = getActionableVariantsNotOncogenic();
+            if (data.length() == 0) {
+                sendText(generateInfo(VARIANT_ACTIONABILITY_AND_ONCOGENICITY, ValidationStatus.IS_COMPLETE, new JSONArray()));
+            } else {
+                sendText(generateInfo(VARIANT_ACTIONABILITY_AND_ONCOGENICITY, ValidationStatus.IS_ERROR, data));
+            }
+        } catch (ApiException e) {
+            data = new JSONArray();
+            data.put(ValidationUtils.getErrorMessage("API ERROR", e.getMessage()));
+            sendText(generateInfo(VARIANT_ACTIONABILITY_AND_ONCOGENICITY, ValidationStatus.IS_ERROR, data));
+        }
+    }
+
     private void compareActionableGenes() {
         sendText(generateInfo(ACTIONABLE_INFO, ValidationStatus.IS_PENDING, new JSONArray()));
 
@@ -338,6 +360,42 @@ public class CurationValidationApiController {
             }
         }
 
+        return data;
+    }
+
+    public JSONArray getActionableVariantsNotOncogenic() throws ApiException {
+        JSONArray data = new JSONArray();
+        List<Alteration> alterations = AlterationUtils.getAllAlterations();
+        List<String> allowedOncogenicities = new ArrayList<>(Arrays.asList(Oncogenicity.YES.getOncogenic(), Oncogenicity.LIKELY.getOncogenic(), Oncogenicity.RESISTANCE.getOncogenic()));
+        for (Alteration alteration : alterations) {
+            Query query = new Query(
+                null,
+                DEFAULT_REFERENCE_GENOME,
+                alteration.getGene().getEntrezGeneId(),
+                alteration.getGene().getHugoSymbol(),
+                alteration.getAlteration(),
+                null,
+                null,
+                null,
+                null,
+                alteration.getProteinStart(),
+                alteration.getProteinEnd(),
+                null);
+            IndicatorQueryResp response = IndicatorUtils.processQuery(query, null, true,null, false);
+            if (!allowedOncogenicities.contains(response.getOncogenic())) {
+                if (response.getHighestSensitiveLevel() != null || response.getHighestResistanceLevel() != null) {
+                    String hugoSymbol = alteration.getGene().getHugoSymbol();
+                    StringBuilder messageBuilder = new StringBuilder();
+                    messageBuilder.append(hugoSymbol);
+                    messageBuilder.append(" ");
+                    messageBuilder.append(alteration.getAlteration());
+                    messageBuilder.append(" is ");
+                    messageBuilder.append(response.getOncogenic());
+                    messageBuilder.append(", but is actionable.");
+                    data.put(ValidationUtils.getErrorMessage(ValidationUtils.getTarget(hugoSymbol, alteration.getAlteration()), messageBuilder.toString()));
+                }
+            }
+        }
         return data;
     }
 
