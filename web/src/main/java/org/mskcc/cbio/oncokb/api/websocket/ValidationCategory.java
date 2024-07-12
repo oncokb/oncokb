@@ -15,6 +15,7 @@ public enum ValidationCategory {
     MISMATCH_REF_AA(ValidationType.TEST, "Whether all variants have matched reference amino acid on the position curated"),
     DUP_ALTERATION(ValidationType.TEST, "Whether the same variant exists in both mutation list and VUS list"),
     TRUNCATING_MUTATIONS_NOT_UNDER_TSG(ValidationType.TEST, "Whether all genes are tumor suppressor genes if Truncating Mutations curated under the gene"),
+    VARIANT_ACTIONABILITY_AND_ONCOGENICITY(ValidationType.TEST, "Whether any actionable variants are not oncogenic, likely oncogenic or resistant")
     ;
 
     ValidationCategory(ValidationType type, String name) {
