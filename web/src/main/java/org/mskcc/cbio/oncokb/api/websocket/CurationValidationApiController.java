@@ -1,6 +1,6 @@
 package org.mskcc.cbio.oncokb.api.websocket;
 
-import com.mysql.jdbc.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mskcc.cbio.oncokb.bo.OncokbTranscriptService;
@@ -306,13 +306,13 @@ public class CurationValidationApiController {
                     } else if (ref.equals(ReferenceGenome.GRCh38)) {
                         sequence = getGeneSequenceFromPool(allGrch38Sequences, alteration.getGene().getGrch38Isoform());
                     }
-                    if (!StringUtils.isNullOrEmpty(sequence)) {
+                    if (!StringUtils.isEmpty(sequence)) {
                         referenceGenome = ref;
                         break;
                     }
                 }
                 String altTargetName = alteration.getName() + " / " + (MainUtils.isVUS(alteration) ? "VUS" : "CURATED");
-                if (StringUtils.isNullOrEmpty(sequence)) {
+                if (StringUtils.isEmpty(sequence)) {
                     data.put(ValidationUtils.getErrorMessage(ValidationUtils.getTarget(alteration.getGene().getHugoSymbol(), altTargetName), "No sequence available for " + alteration.getGene().getHugoSymbol()));
                 } else if (referenceGenome != null) {
                     if (sequence.length() < alteration.getProteinStart()) {
@@ -381,18 +381,33 @@ public class CurationValidationApiController {
                 alteration.getProteinStart(),
                 alteration.getProteinEnd(),
                 null);
-            IndicatorQueryResp response = IndicatorUtils.processQuery(query, null, true,null, false);
+            IndicatorQueryResp response = IndicatorUtils.processQuery(query, null, false,null, false);
             if (!allowedOncogenicities.contains(response.getOncogenic())) {
                 if (response.getHighestSensitiveLevel() != null || response.getHighestResistanceLevel() != null) {
                     String hugoSymbol = alteration.getGene().getHugoSymbol();
-                    StringBuilder messageBuilder = new StringBuilder();
-                    messageBuilder.append(hugoSymbol);
-                    messageBuilder.append(" ");
-                    messageBuilder.append(alteration.getAlteration());
-                    messageBuilder.append(" is ");
-                    messageBuilder.append(response.getOncogenic());
-                    messageBuilder.append(", but is actionable.");
-                    data.put(ValidationUtils.getErrorMessage(ValidationUtils.getTarget(hugoSymbol, alteration.getAlteration()), messageBuilder.toString()));
+                    List<IndicatorQueryTreatment> treatments = response.getTreatments();
+                    for (IndicatorQueryTreatment treatment: treatments) {
+                        for (String altString: treatment.getAlterations()) {
+                            TumorType tumorTypeModel = new TumorType(treatment.getLevelAssociatedCancerType());
+                            Set<TumorType> excludedTumorTypeModels =  treatment.getLevelExcludedCancerTypes().stream().map(excludedTT -> {
+                                return new TumorType(excludedTT);
+                            }).collect(Collectors.toSet());
+                            String tumorName = TumorTypeUtils.getTumorTypesNameWithExclusion(Collections.singleton(tumorTypeModel), excludedTumorTypeModels);
+                            
+                            StringBuilder errorMessage = new StringBuilder();
+                            errorMessage.append("Is ");
+                            errorMessage.append(response.getOncogenic());
+                            errorMessage.append(", but has ");
+                            errorMessage.append(treatment.getLevel().toString());
+                            errorMessage.append(" treatment: ");
+                            List<String> drugList = treatment.getDrugs().stream().map(drug -> {
+                                return drug.getDrugName();
+                            }).collect(Collectors.toList());
+                            errorMessage.append(StringUtils.join(drugList, " + "));
+
+                            data.put(ValidationUtils.getErrorMessage(ValidationUtils.getTarget(hugoSymbol, altString, tumorName), errorMessage.toString()));
+                        }
+                    }
                 }
             }
         }
@@ -400,7 +415,7 @@ public class CurationValidationApiController {
     }
 
     private String getGeneSequenceFromPool(List<Sequence> allSequences, String geneIsoform) {
-        if (StringUtils.isNullOrEmpty(geneIsoform)) {
+        if (StringUtils.isEmpty(geneIsoform)) {
             return null;
         }
         Sequence matchedSeq = allSequences.stream().filter(sequence -> sequence.getTranscript().getEnsemblTranscriptId().equals(geneIsoform)).findAny().orElse(null);
