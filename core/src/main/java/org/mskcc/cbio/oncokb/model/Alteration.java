@@ -151,7 +151,7 @@ public class Alteration implements java.io.Serializable {
 
 
     public void setAlteration(String alteration) {
-        this.alteration = AminoAcidConverterUtils.resolveHgvspShortFromHgvsp(alteration);;
+        this.alteration = alteration;
     }
 
     public String getName() {
