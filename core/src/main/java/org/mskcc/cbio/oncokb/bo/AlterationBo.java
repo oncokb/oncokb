@@ -40,7 +40,6 @@ public interface AlterationBo extends GenericBo<Alteration> {
      */
     Alteration findAlterationFromDao(Gene gene, AlterationType alterationType, ReferenceGenome referenceGenome, String alteration, String name);
 
-    Alteration findExactlyMatchedAlteration(ReferenceGenome referenceGenome, Alteration alteration, List<Alteration> fullAlterations);
     /**
      * @param gene
      * @param consequence
@@ -49,15 +48,6 @@ public interface AlterationBo extends GenericBo<Alteration> {
      * @return
      */
     List<Alteration> findRelevantOverlapAlterations(Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end, String proteinChange, List<Alteration> alterations);
-
-    /**
-     * @param gene
-     * @param consequence
-     * @param start
-     * @param end
-     * @return
-     */
-    List<Alteration> findMutationsByConsequenceAndPosition(Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end, String referenceResidue, List<Alteration> alterations, Boolean onSamePosition);
 
     /**
      * @param alteration
