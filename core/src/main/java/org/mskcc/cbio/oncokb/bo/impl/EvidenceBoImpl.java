@@ -82,6 +82,10 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
             }
         }
 
+        // Sort evidences based on number of alterations associated.
+        // Evidence with fewer alterations associated is put to the front
+        evidences.sort(Comparator.comparingInt(o -> o.getAlterations().size()));
+
         // Now all evidences left are relevant to the matchedTumorType or tumorTypes.
         // We need to rank the evidences based on cancer type relevancy
         List<TumorType> relevantMatchedTumorTypes = new ArrayList<>();
@@ -95,18 +99,17 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
             relevantMatchedTumorTypes = tumorTypes;
         }
 
-        List<Evidence> sortedEvidences = new ArrayList<>();
+        Set<Evidence> sortedEvidences = new LinkedHashSet<>();
         for (TumorType tumorType : relevantMatchedTumorTypes) {
             for (int i = 0; i < evidences.size(); i++) {
                 Evidence evidence = evidences.get(i);
                 if (evidence.getCancerTypes().contains(tumorType)) {
                     sortedEvidences.add(evidence);
-                    evidences.remove(evidence);
                 }
             }
         }
         sortedEvidences.addAll(evidences);
-        return sortedEvidences;
+        return sortedEvidences.stream().collect(Collectors.toList());
     }
 
     @Override
