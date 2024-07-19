@@ -4,7 +4,6 @@ package org.mskcc.cbio.oncokb.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.apiModels.annotation.*;
-import org.mskcc.cbio.oncokb.util.AminoAcidConverterUtils;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
 import org.mskcc.cbio.oncokb.util.QueryUtils;
 
@@ -155,7 +154,7 @@ public class Query implements java.io.Serializable {
         if (alteration != null) {
             alteration = alteration.replace("p.", "");
         }
-        this.alteration = AminoAcidConverterUtils.resolveHgvspShortFromHgvsp(alteration);;
+        this.alteration = alteration;
     }
 
     public String getAlterationType() {
