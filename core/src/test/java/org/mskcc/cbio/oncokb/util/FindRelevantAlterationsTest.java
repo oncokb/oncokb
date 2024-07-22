@@ -86,6 +86,12 @@ public class FindRelevantAlterationsTest {
                 {"EGFR", "E746_A750del", null, "E746_A750del, E746_A750delinsQ, E746_T751delinsA, E746_T751delinsL, E746_T751delinsVA, K745_A750del, E746_S752delinsA, E746_S752delinsI, E746_S752delinsV, 729_761del, L747_A750del, L747_A750delinsP, L747_T751del, L747_T751delinsP, L747_S752del, L747_P753del, L747_P753delinsS, L747_K754delinsATSPE, L747_E749del, A750_E758del, A750_E758delinsP, Oncogenic Mutations"},
                 {"EGFR", "E746_A750delinsQ", null, "E746_A750delinsQ, E746_A750del, E746_T751delinsA, E746_T751delinsL, E746_T751delinsVA, K745_A750del, E746_S752delinsA, E746_S752delinsI, E746_S752delinsV, 729_761del, L747_A750del, L747_A750delinsP, L747_T751del, L747_T751delinsP, L747_S752del, L747_P753del, L747_P753delinsS, L747_K754delinsATSPE, L747_E749del, A750_E758del, A750_E758delinsP, Oncogenic Mutations"},
 
+                // Check frame shift
+                // G659fs*41 is curated as likely neutral. We do not do further relevant alts match if alt is not oncogenic
+                {"RNF43", "G659Vfs*41", null, "G659fs*41"},
+                // G700fs*41 is not curated, but we have general Truncating Mutations curated
+                {"RNF43", "G700fs*41", null, "Truncating Mutations"},
+
                 // EGFR exon deletion
                 {"EGFR", "vIII", null, "vIII, Oncogenic Mutations"},
                 {"EGFR", "CTD", null, "C-terminal domain, Oncogenic Mutations"},

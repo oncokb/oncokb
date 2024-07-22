@@ -30,99 +30,6 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         return alterations;
     }
 
-    public Alteration findExactlyMatchedAlteration(ReferenceGenome referenceGenome, Alteration alteration, List<Alteration> fullAlterations) {
-        Alteration matchedByAlteration = findAlteration(referenceGenome, alteration.getAlteration(), fullAlterations);
-        if (matchedByAlteration != null) {
-            if (matchedByAlteration.getConsequence() == null
-                || alteration.getConsequence() == null
-                || matchedByAlteration.getConsequence().getTerm().equalsIgnoreCase("NA")
-                || alteration.getConsequence().getTerm().equalsIgnoreCase("NA")
-            ) {
-                return matchedByAlteration;
-            }
-            // We also want to do a consequence check, if the consequence has been specified, then it should be respected
-            if (consequenceRelated(alteration.getConsequence(), matchedByAlteration.getConsequence())) {
-                return matchedByAlteration;
-            } else {
-                return null;
-            }
-        } else {
-            // For in-frame deletion, we should also look for variant with/out trailing amino acids
-            VariantConsequence inframeDeletionConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm(IN_FRAME_DELETION);
-            if (inframeDeletionConsequence.equals(alteration.getConsequence()) && !alteration.getAlteration().contains("delins")) {
-                List<Alteration> matches = findMutationsByConsequenceAndPosition(alteration.getGene(), referenceGenome, inframeDeletionConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), alteration.getAlteration(), fullAlterations, false).stream().filter(alt -> !alt.getAlteration().contains("delins")).collect(Collectors.toList());
-                if (matches.size() > 0) {
-                    return matches.iterator().next();
-                }
-            }
-
-            // check missense mutations that ignore reference allele.
-            VariantConsequence missenseConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm(MISSENSE_VARIANT);
-            if (missenseConsequence.equals(alteration.getConsequence())) {
-                Optional<Alteration> match = fullAlterations.stream().filter(alt ->
-                    alt.getReferenceGenomes().contains(referenceGenome) &&
-                        missenseConsequence.equals(alt.getConsequence()) &&
-                        alteration.getProteinStart().equals(alt.getProteinStart()) &&
-                        alteration.getProteinEnd().equals(alt.getProteinEnd()) &&
-                        (StringUtils.isNullOrEmpty(alteration.getRefResidues()) || alteration.getRefResidues().equals(alt.getRefResidues())) &&
-                        (StringUtils.isNullOrEmpty(alteration.getVariantResidues()) || alteration.getVariantResidues().equals(alt.getVariantResidues()))
-                ).findAny();
-                if (match.isPresent()) {
-                    return match.get();
-                }
-            }
-        }
-
-        return null;
-    }
-
-    private Alteration findAlteration(ReferenceGenome referenceGenome, String alteration, List<Alteration> fullAlterations) {
-        if (alteration == null) {
-            return null;
-        }
-        // Implement the data access logic
-        for (int i = 0; i < fullAlterations.size(); i++) {
-            Alteration alt = fullAlterations.get(i);
-            if (alt.getAlteration() != null && alt.getAlteration().equalsIgnoreCase(alteration)) {
-                if (referenceGenome == null) {
-                    return alt;
-                } else if (alt.getReferenceGenomes().contains(referenceGenome)) {
-                    return alt;
-                }
-            }
-        }
-        for (int i = 0; i < fullAlterations.size(); i++) {
-            Alteration alt = fullAlterations.get(i);
-            if (alt.getAlteration() != null && alt.getName().equalsIgnoreCase(alteration)) {
-                if (referenceGenome == null) {
-                    return alt;
-                } else if (alt.getReferenceGenomes().contains(referenceGenome)) {
-                    return alt;
-                }
-            }
-        }
-
-        if (NamingUtils.hasAbbreviation(alteration)) {
-            return findAlteration(referenceGenome, NamingUtils.getFullName(alteration), fullAlterations);
-        }
-        return null;
-    }
-
-    private Alteration findAlteration(ReferenceGenome referenceGenome, String alteration, String name, List<Alteration> fullAlterations) {
-        if (alteration == null) {
-            return null;
-        }
-        for (Alteration alt : fullAlterations) {
-            if (alt.getAlteration() != null && alt.getAlteration().equalsIgnoreCase(alteration) && alt.getName().equalsIgnoreCase(name)) {
-                if (referenceGenome == null) {
-                    return alt;
-                } else if (alt.getReferenceGenomes().contains(referenceGenome)) {
-                    return alt;
-                }
-            }
-        }
-        return null;
-    }
 
     @Override
     public Alteration findAlteration(Gene gene, AlterationType alterationType, String alteration) {
@@ -131,12 +38,12 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
 
     @Override
     public Alteration findAlteration(Gene gene, AlterationType alterationType, ReferenceGenome referenceGenome, String alteration) {
-        return findAlteration(referenceGenome, alteration, CacheUtils.getAlterations(gene.getEntrezGeneId(), referenceGenome));
+        return AlterationUtils.findAlteration(referenceGenome, alteration, CacheUtils.getAlterations(gene.getEntrezGeneId(), referenceGenome));
     }
 
     @Override
     public Alteration findAlteration(Gene gene, AlterationType alterationType, ReferenceGenome referenceGenome, String alteration, String name) {
-        return findAlteration(referenceGenome, alteration, name, CacheUtils.getAlterations(gene.getEntrezGeneId(), referenceGenome));
+        return AlterationUtils.findAlteration(referenceGenome, alteration, name, CacheUtils.getAlterations(gene.getEntrezGeneId(), referenceGenome));
     }
 
     @Override
@@ -164,37 +71,6 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         List<Alteration> resultList = new ArrayList<>(result);
         AlterationUtils.sortAlterationsByTheRange(resultList, start, end);
         return resultList;
-    }
-
-    @Override
-    public List<Alteration> findMutationsByConsequenceAndPosition(Gene gene, ReferenceGenome referenceGenome, VariantConsequence consequence, int start, int end, String referenceResidue, List<Alteration> alterations, Boolean onSamePosition) {
-        Set<Alteration> result = new HashSet<>();
-
-        if (alterations != null && alterations.size() > 0) {
-            for (int i = 0; i < alterations.size(); i++) {
-                Alteration alteration = alterations.get(i);
-                if (alteration.getGene().equals(gene) && alteration.getConsequence() != null
-                    && consequenceRelated(alteration.getConsequence(), consequence)
-                    && alteration.getProteinStart() != null
-                    && alteration.getProteinEnd() != null
-                    && (referenceGenome == null || alteration.getReferenceGenomes().contains(referenceGenome))
-                    && alteration.getProteinStart() >= start
-                    && alteration.getProteinStart() <= end
-                    && (alteration.getRefResidues() == null || referenceResidue == null || referenceResidue.equals(alteration.getRefResidues()))) {
-                    if (!onSamePosition || alteration.getProteinStart().equals(alteration.getProteinEnd())) {
-                        result.add(alteration);
-                    }
-                }
-            }
-        } else {
-            Collection<Alteration> queryResult;
-            queryResult = CacheUtils.findMutationsByConsequenceAndPositionOnSamePosition(gene, referenceGenome, consequence, start, end, referenceResidue);
-            if (queryResult != null) {
-                result.addAll(queryResult);
-            }
-        }
-
-        return new ArrayList<>(result);
     }
 
     /**
@@ -340,14 +216,14 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
 
 
         if (addEGFRCTD(alteration)) {
-            Alteration alt = findAlteration(referenceGenome, "CTD", fullAlterations);
+            Alteration alt = AlterationUtils.findAlteration(referenceGenome, "CTD", fullAlterations);
             if (alt != null) {
                 alterations.add(alt);
             }
         }
 
         if (alteration.getGene().getHugoSymbol().equals("EGFR") && alteration.getAlteration().equals("CTD")) {
-            Alteration alt = findAlteration(referenceGenome, "CTD", fullAlterations);
+            Alteration alt = AlterationUtils.findAlteration(referenceGenome, "CTD", fullAlterations);
             if (alt != null && !alterations.contains(alt)) {
                 alterations.add(alt);
             }
@@ -443,7 +319,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         }
 
         if (addDeletion) {
-            Alteration deletion = findAlteration(referenceGenome, "Deletion", fullAlterations);
+            Alteration deletion = AlterationUtils.findAlteration(referenceGenome, "Deletion", fullAlterations);
             if (deletion != null) {
                 alterations.add(deletion);
 
@@ -481,14 +357,14 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         }
 
         for (String effect : effects) {
-            Alteration alt = findAlteration(referenceGenome, effect + " mutations", fullAlterations);
+            Alteration alt = AlterationUtils.findAlteration(referenceGenome, effect + " mutations", fullAlterations);
             if (alt != null) {
                 alterations.add(alt);
             }
         }
 
         if (!addOncogenicMutations(alteration, alternativeAlleles, new ArrayList<>(alterations)) && addVUSMutation(alteration, matchedAlt != null)) {
-            Alteration VUSMutation = findAlteration(referenceGenome, InferredMutation.VUS.getVariant(), fullAlterations);
+            Alteration VUSMutation = AlterationUtils.findAlteration(referenceGenome, InferredMutation.VUS.getVariant(), fullAlterations);
             if (VUSMutation != null) {
                 alterations.add(VUSMutation);
             }

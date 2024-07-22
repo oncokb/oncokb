@@ -202,7 +202,7 @@ public class IndicatorUtils {
             List<TumorType> relevantUpwardTumorTypes = new ArrayList<>();
             List<TumorType> relevantDownwardTumorTypes = new ArrayList<>();
 
-            Alteration matchedAlt = ApplicationContextSingleton.getAlterationBo().findExactlyMatchedAlteration(query.getReferenceGenome(), alteration, AlterationUtils.getAllAlterations(query.getReferenceGenome(), gene));
+            Alteration matchedAlt = AlterationUtils.findExactlyMatchedAlteration(query.getReferenceGenome(), alteration, AlterationUtils.getAllAlterations(query.getReferenceGenome(), gene));
 
             if (matchedAlt == null && isStructuralVariantEvent) {
                 matchedAlt = AlterationUtils.getRevertFusions(query.getReferenceGenome(), alteration);

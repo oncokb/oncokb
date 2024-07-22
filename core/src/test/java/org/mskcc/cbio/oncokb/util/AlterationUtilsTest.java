@@ -2,6 +2,7 @@ package org.mskcc.cbio.oncokb.util;
 
 import junit.framework.TestCase;
 import org.mskcc.cbio.oncokb.model.Alteration;
+import org.mskcc.cbio.oncokb.model.FrameshiftVariant;
 import org.mskcc.cbio.oncokb.model.Gene;
 
 import java.util.ArrayList;
@@ -473,7 +474,7 @@ public class AlterationUtilsTest extends TestCase {
         assertEquals("A1B,B1C[test1,test2],C1D", AlterationUtils.trimComment("A1B(test1,test2),B1C[test1,test2],C1D(test1,test2)"));
     }
 
-    public void testHasExclusionCriteria(){
+    public void testHasExclusionCriteria() {
         assertFalse(AlterationUtils.hasExclusionCriteria(null));
         assertFalse(AlterationUtils.hasExclusionCriteria(""));
         assertFalse(AlterationUtils.hasExclusionCriteria("BRAF"));
@@ -487,5 +488,68 @@ public class AlterationUtilsTest extends TestCase {
         assertTrue(AlterationUtils.hasExclusionCriteria("V600{excluding V600E}"));
         assertTrue(AlterationUtils.hasExclusionCriteria("V600{excluding V600E} "));
         assertTrue(AlterationUtils.hasExclusionCriteria("V600{excluding  V600E}"));
+    }
+
+    public void testParseFrameshiftVariant() {
+        assertNull(AlterationUtils.parseFrameshiftVariant(""));
+        assertNull(AlterationUtils.parseFrameshiftVariant(null));
+        assertNull(AlterationUtils.parseFrameshiftVariant("600"));
+        assertNull(AlterationUtils.parseFrameshiftVariant("V600E"));
+        assertNull(AlterationUtils.parseFrameshiftVariant("E17*"));
+        suiteNotNullFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("N105Efs*4"), "N", 105, 105, "E", "4");
+        suiteNotNullFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("N105Efs*"), "N", 105, 105, "E", "");
+        suiteNotNullFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("N105Efs*?"), "N", 105, 105, "E", "?");
+        suiteNotNullFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("105fs*4"), "", 105, 105, "", "4");
+        suiteNotNullFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("N105fs*4"), "N", 105, 105, "", "4");
+        suiteNotNullFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("105Efs*4"), "", 105, 105, "E", "4");
+        suiteNotNullFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("N105Efs"), "N", 105, 105, "E", "");
+        suiteNotNullFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("N105Efs*?"), "N", 105, 105, "E", "?");
+        suiteNotNullFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("EED153fs"), "EED", 153, 153, "", "");
+    }
+
+    private void suiteNotNullFrameshiftVariant(FrameshiftVariant variant, String expectedRef, Integer expectedStart, Integer expectedEnd, String expectedVar, String expectedExtension) {
+        assertEquals(expectedRef, variant.getRefResidues());
+        assertEquals(expectedStart, variant.getProteinStart());
+        assertEquals(expectedEnd, variant.getProteinEnd());
+        assertEquals(expectedVar, variant.getVariantResidues());
+        assertEquals(expectedExtension, variant.getExtension());
+    }
+
+    public void testIsSameFrameshiftVariant() {
+        // not equal when variant alleles are different
+        assertFalse(AlterationUtils.isSameFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("N105Efs*4"), AlterationUtils.parseFrameshiftVariant("N105Tfs*4")));
+        assertFalse(AlterationUtils.isSameFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("N105Tfs*4"), AlterationUtils.parseFrameshiftVariant("N105Efs*4")));
+
+        // not equal when new frame does not have a stop codon
+        assertFalse(AlterationUtils.isSameFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("N105Efs*4"), AlterationUtils.parseFrameshiftVariant("N105fs*?")));
+        assertFalse(AlterationUtils.isSameFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("N105fs*?"), AlterationUtils.parseFrameshiftVariant("N105Efs*4")));
+
+        // not equal when extension are different
+        assertFalse(AlterationUtils.isSameFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("N105Efs*4"), AlterationUtils.parseFrameshiftVariant("N105Efs*5")));
+        assertFalse(AlterationUtils.isSameFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("N105Efs*5"), AlterationUtils.parseFrameshiftVariant("N105Efs*4")));
+
+        // not equal when reference alleles are different
+        assertFalse(AlterationUtils.isSameFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("N105Efs*4"), AlterationUtils.parseFrameshiftVariant("A105Efs*4")));
+        assertFalse(AlterationUtils.isSameFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("A105Efs*4"), AlterationUtils.parseFrameshiftVariant("N105Efs*4")));
+
+        // not equal when protein start are different
+        assertFalse(AlterationUtils.isSameFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("N305Efs*4"), AlterationUtils.parseFrameshiftVariant("N306Efs*4")));
+        assertFalse(AlterationUtils.isSameFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("N306Efs*4"), AlterationUtils.parseFrameshiftVariant("N305Efs*4")));
+
+        // equal when protein start are the same() -128~127 are cached Integer. We require to use .equal to compare. https://stackoverflow.com/questions/30840071/why-comparison-of-two-integer-using-sometimes-works-and-sometimes-not
+        assertTrue(AlterationUtils.isSameFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("N305Efs*4"), AlterationUtils.parseFrameshiftVariant("N305Efs*4")));
+
+        // equal when one of reference alleles is missing
+        assertTrue(AlterationUtils.isSameFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("N105Efs*4"), AlterationUtils.parseFrameshiftVariant("105Efs*4")));
+        assertTrue(AlterationUtils.isSameFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("105Efs*4"), AlterationUtils.parseFrameshiftVariant("N105Efs*4")));
+
+        // equal when one of reference and variant alleles are missing
+        assertTrue(AlterationUtils.isSameFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("N105Efs*4"), AlterationUtils.parseFrameshiftVariant("105fs*4")));
+        assertTrue(AlterationUtils.isSameFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("105Efs*4"), AlterationUtils.parseFrameshiftVariant("N105fs*4")));
+
+        // equal when one of the variant alleles is missing
+        assertTrue(AlterationUtils.isSameFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("N105Efs*4"), AlterationUtils.parseFrameshiftVariant("N105fs*4")));
+        assertTrue(AlterationUtils.isSameFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("N105fs*4"), AlterationUtils.parseFrameshiftVariant("N105Efs*4")));
+
     }
 }

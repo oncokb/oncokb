@@ -3,6 +3,7 @@ package org.mskcc.cbio.oncokb.util;
 import junit.framework.TestCase;
 import org.mskcc.cbio.oncokb.model.VariantConsequence;
 
+import static org.mskcc.cbio.oncokb.Constants.FRAMESHIFT_VARIANT;
 import static org.mskcc.cbio.oncokb.Constants.PROTEIN_ALTERING_VARIANT;
 import static org.mskcc.cbio.oncokb.util.VariantConsequenceUtils.consequenceResolver;
 
@@ -29,7 +30,7 @@ public class VariantConsequenceUtilsTest extends TestCase {
 
         // Test real cases
         assertConsequenceResolver(consequenceResolver("coding_sequence_variant,5_prime_UTR_variant", "In_Frame_Del"), "inframe_deletion");
-        assertConsequenceResolver(consequenceResolver("coding_sequence_variant,5_prime_UTR_variant", "Frame_Shift_Del"), "frameshift_variant");
+        assertConsequenceResolver(consequenceResolver("coding_sequence_variant,5_prime_UTR_variant", "Frame_Shift_Del"), FRAMESHIFT_VARIANT);
         assertConsequenceResolver(consequenceResolver("", "In_Frame_Del"), "inframe_deletion");
         assertConsequenceResolver(consequenceResolver(PROTEIN_ALTERING_VARIANT, "In_Frame_Del"), "inframe_deletion");
 
