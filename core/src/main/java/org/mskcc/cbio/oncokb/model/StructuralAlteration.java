@@ -9,13 +9,13 @@ public enum StructuralAlteration implements OncoKBVariant {
     AMPLIFICATION("Amplification"),
     DELETION("Deletion");
 
-    private final String mutation;
+    private final String variant;
 
-    StructuralAlteration(String mutation) {
-        this.mutation = mutation;
+    StructuralAlteration(String variant) {
+        this.variant = variant;
     }
 
     public String getVariant() {
-        return mutation;
+        return variant;
     }
 }

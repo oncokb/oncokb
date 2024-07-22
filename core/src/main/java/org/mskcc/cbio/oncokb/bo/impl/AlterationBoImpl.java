@@ -329,8 +329,13 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         }
 
         if (addTruncatingMutations) {
-            VariantConsequence truncatingVariantConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm("feature_truncation");
-            alterations.addAll(findRelevantOverlapAlterations(alteration.getGene(), referenceGenome, truncatingVariantConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), alteration.getAlteration(), fullAlterations));
+            // for frameshift alteration on stop codon, we should not map overlapped alts including Truncating Mutations
+            boolean stopCodonFsAlt = alteration.getConsequence() != null && FRAMESHIFT_VARIANT.equals(alteration.getConsequence().getTerm()) && "*".equals(alteration.getRefResidues());
+
+            if (!stopCodonFsAlt) {
+                VariantConsequence truncatingVariantConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm("feature_truncation");
+                alterations.addAll(findRelevantOverlapAlterations(alteration.getGene(), referenceGenome, truncatingVariantConsequence, alteration.getProteinStart(), alteration.getProteinEnd(), alteration.getAlteration(), fullAlterations));
+            }
         }
 
         if (addOncogenicMutations(alteration, alternativeAlleles, new ArrayList<>(alterations))) {

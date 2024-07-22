@@ -741,7 +741,7 @@ public final class AlterationUtils {
     }
 
     public static Alteration getTruncatingMutations(Gene gene) {
-        return findAlteration(gene, null, "Truncating Mutations");
+        return findAlteration(gene, null, TRUNCATING_MUTATIONS.getVariant());
     }
 
     public static Set<Alteration> findVUSFromEvidences(Set<Evidence> evidences) {
