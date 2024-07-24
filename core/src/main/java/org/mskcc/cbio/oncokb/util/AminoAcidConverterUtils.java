@@ -14,8 +14,8 @@ public class AminoAcidConverterUtils {
 
     public static String resolveHgvspShortFromHgvsp(String hgvsp)
     {
-        if (hgvsp == null) {
-            return null;
+        if (hgvsp == null || !hgvsp.matches(".*\\d.*")) {
+            return hgvsp;
         }
 
         String hgvspShort = hgvsp;
