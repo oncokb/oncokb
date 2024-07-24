@@ -505,6 +505,8 @@ public class AlterationUtilsTest extends TestCase {
         suiteNotNullFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("N105Efs"), "N", 105, 105, "E", "");
         suiteNotNullFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("N105Efs*?"), "N", 105, 105, "E", "?");
         suiteNotNullFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("EED153fs"), "EED", 153, 153, "", "");
+        suiteNotNullFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("*1069Ffs*5"), "*", 1069, 1069, "F", "5");
+        suiteNotNullFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("*1069Ffs*?"), "*", 1069, 1069, "F", "?");
     }
 
     private void suiteNotNullFrameshiftVariant(FrameshiftVariant variant, String expectedRef, Integer expectedStart, Integer expectedEnd, String expectedVar, String expectedExtension) {

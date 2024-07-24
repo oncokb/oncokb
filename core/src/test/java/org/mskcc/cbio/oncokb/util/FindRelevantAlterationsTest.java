@@ -91,6 +91,9 @@ public class FindRelevantAlterationsTest {
                 {"RNF43", "G659Vfs*41", null, "G659fs*41"},
                 // G700fs*41 is not curated, but we have general Truncating Mutations curated
                 {"RNF43", "G700fs*41", null, "Truncating Mutations"},
+                // if the frame shift variant happens on stop codon, it's extension rather truncating
+                {"RNF43", "*700fs*41", null, ""},
+                {"RNF43", "*700fs*?", null, ""},
 
                 // EGFR exon deletion
                 {"EGFR", "vIII", null, "vIII, Oncogenic Mutations"},
