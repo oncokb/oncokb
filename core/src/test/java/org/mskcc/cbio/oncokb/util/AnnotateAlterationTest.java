@@ -59,9 +59,9 @@ public class AnnotateAlterationTest {
                 {"Truncating Mutations", Integer.toString(AlterationPositionBoundary.START.getValue()), Integer.toString(AlterationPositionBoundary.END.getValue()), Integer.toString(AlterationPositionBoundary.START.getValue()), Integer.toString(AlterationPositionBoundary.END.getValue()), null, null, "feature_truncation"},
 
                 // frameshift event
-                {"N457Mfs*22", "457", "457", "457", "457", "N", null, "frameshift_variant"},
-                {"*1069Ffs*5", "1069", "1069", "1069", "1069", "*", null, "frameshift_variant"},
-                {"I327Rfs*", "327", "327", "327", "327", "I", null, "frameshift_variant"},
+                {"N457Mfs*22", "457", "457", "457", "457", "N", null, FRAMESHIFT_VARIANT},
+                {"*1069Ffs*5", "1069", "1069", "1069", "1069", "*", null, FRAMESHIFT_VARIANT},
+                {"I327Rfs*", "327", "327", "327", "327", "I", null, FRAMESHIFT_VARIANT},
 
                 // inframe event
                 {"T417_D419delinsI", "417", "419", "417", "419", null, null, IN_FRAME_DELETION},
