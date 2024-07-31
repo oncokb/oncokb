@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
-import org.mskcc.cbio.oncokb.util.AminoAcidConverterUtils;
 
 import javax.persistence.*;
 import java.util.*;
