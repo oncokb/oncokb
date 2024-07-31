@@ -248,8 +248,20 @@ public class IndicatorUtilsTest {
         assertEquals("The highest resistance level of BRAF R462I should be null.", null, indicatorQueryResp.getHighestResistanceLevel());
         assertEquals("The tumor type summary does not match.", "There are no FDA-approved or NCCN-compendium listed treatments specifically for patients with BRAF R462I mutant gastrointestinal stromal tumors.", indicatorQueryResp.getTumorTypeSummary());
 
+        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "BRAF", "Arg462Ile", null, null, "Gastrointestinal Stromal Tumor", null, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null, false);
+        assertEquals("The Oncogenicity is not likely neutral, but it should be.", Oncogenicity.LIKELY_NEUTRAL.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The highest sensitive level of BRAF R462I should be null.", null, indicatorQueryResp.getHighestSensitiveLevel());
+        assertEquals("The highest resistance level of BRAF R462I should be null.", null, indicatorQueryResp.getHighestResistanceLevel());
+        assertEquals("The tumor type summary does not match.", "There are no FDA-approved or NCCN-compendium listed treatments specifically for patients with BRAF R462I mutant gastrointestinal stromal tumors.", indicatorQueryResp.getTumorTypeSummary());
+
         // Likely Neutral oncogenicity should not be propagated to alternative allele
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "AKT1", "P42I", null, null, "Anaplastic Astrocytoma", null, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null, false);
+        assertEquals("The Oncogenicity is not unknown, but it should be.", Oncogenicity.UNKNOWN.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The mutation effect is not unknown, but it should be.", MutationEffect.UNKNOWN.getMutationEffect(), indicatorQueryResp.getMutationEffect().getKnownEffect());
+
+        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "AKT1", "Pro42Ile", null, null, "Anaplastic Astrocytoma", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null, false);
         assertEquals("The Oncogenicity is not unknown, but it should be.", Oncogenicity.UNKNOWN.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The mutation effect is not unknown, but it should be.", MutationEffect.UNKNOWN.getMutationEffect(), indicatorQueryResp.getMutationEffect().getKnownEffect());
@@ -430,6 +442,14 @@ public class IndicatorUtilsTest {
         assertEquals("The highest resistance level should be R1",
                 LevelOfEvidence.LEVEL_R2, indicatorQueryResp.getHighestResistanceLevel());
 
+        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "EGFR", "Cys797Ser", null, null, "Lung Adenocarcinoma", null, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null, false);
+        assertEquals("The oncogenicity should be 'Resistance'", Oncogenicity.RESISTANCE.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The highest sensitive level should be 4",
+            null, indicatorQueryResp.getHighestSensitiveLevel());
+        assertEquals("The highest resistance level should be R1",
+            LevelOfEvidence.LEVEL_R2, indicatorQueryResp.getHighestResistanceLevel());
+
         // The oncogenic mutations should not be mapped to Resistance mutation. So the summary from OM should not apply here.
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "KIT", "D820E", null, null, "AMLRUNX1RUNX1T1", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null, false);
@@ -437,8 +457,20 @@ public class IndicatorUtilsTest {
         assertEquals("The tumor type summary is not expected.",
                 "There are no FDA-approved or NCCN-compendium listed treatments specifically for patients with KIT D820E mutant AML with t(8;21)(q22;q22.1);RUNX1-RUNX1T1.", indicatorQueryResp.getTumorTypeSummary());
 
+        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "KIT", "Asp820Glu", null, null, "AMLRUNX1RUNX1T1", null, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null, false);
+        assertEquals("The oncogenicity should be 'Resistance'", Oncogenicity.RESISTANCE.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The tumor type summary is not expected.",
+            "There are no FDA-approved or NCCN-compendium listed treatments specifically for patients with KIT D820E mutant AML with t(8;21)(q22;q22.1);RUNX1-RUNX1T1.", indicatorQueryResp.getTumorTypeSummary());
+
+
         // The oncogenic mutations should not be mapped to Resistance mutation. So the summary from OM should not apply here.
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "BRAF", "V600E", null, null, "MEL", null, null, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null, false);
+        assertTrue("The data version should not be empty.", StringUtils.isNotEmpty(indicatorQueryResp.getDataVersion()));
+        assertEquals("The data version is not expected.", MainUtils.getDataVersion(), indicatorQueryResp.getDataVersion());
+
+        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "BRAF", "Val600Glu", null, null, "MEL", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null, false);
         assertTrue("The data version should not be empty.", StringUtils.isNotEmpty(indicatorQueryResp.getDataVersion()));
         assertEquals("The data version is not expected.", MainUtils.getDataVersion(), indicatorQueryResp.getDataVersion());
@@ -463,6 +495,14 @@ public class IndicatorUtilsTest {
         resp1 = IndicatorUtils.processQuery(query1, null, false, null, false);
         resp2 = IndicatorUtils.processQuery(query2, null, false, null, false);
         assertTrue("The oncogenicities are not the same, but they should.", resp1.getOncogenic().equals(resp2.getOncogenic()));
+        assertTrue("The treatments are not the same, but they should.", resp1.getTreatments().equals(resp2.getTreatments()));
+
+        // Match three-letter amino acid code with one-letter amino acid code
+        query1 = new Query("BRAF", "Val600Glu", null);
+        query2 = new Query("BRAF", "V600E", null);
+        resp1 = IndicatorUtils.processQuery(query1, null, false, null, false);
+        resp2 = IndicatorUtils.processQuery(query2, null, false, null, false);
+        assertTrue("The oncogenicities are not the same, but they should be.", resp1.getOncogenic().equals(resp2.getOncogenic()));
         assertTrue("The treatments are not the same, but they should.", resp1.getTreatments().equals(resp2.getTreatments()));
 
 
