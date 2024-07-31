@@ -4,9 +4,9 @@
     <parent>
         <groupId>org.mskcc.cbio.oncokb</groupId>
         <artifactId>master</artifactId>
-        <version>3.19.0</version>
+        <version>3.20.0</version>
     </parent>
-    <version>3.19.0</version>
+    <version>3.20.0</version>
     <artifactId>core</artifactId>
     <packaging>jar</packaging>
     <name>OncoKB Core</name>
