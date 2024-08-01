@@ -176,7 +176,7 @@ public class EvidenceUtils {
         if (query.getOncoTreeTypes() != null) {
             upwardTumorTypes.addAll(query.getOncoTreeTypes());
         }
-        downwardTumorTypes.addAll(TumorTypeUtils.findRelevantTumorTypes(query.getQuery().getTumorType(),null, DOWNWARD));
+        downwardTumorTypes.addAll(TumorTypeUtils.findRelevantTumorTypes(query.getQuery().getTumorType(), null, DOWNWARD));
 
         if (query.getGene() != null) {
             genes.add(query.getGene());
@@ -945,7 +945,17 @@ public class EvidenceUtils {
                 if (!StringUtils.isEmpty(requestQuery.getHugoSymbol()) || query.getGene() != null) {
                     String hugoSymbol = StringUtils.isEmpty(requestQuery.getHugoSymbol()) ? query.getGene().getHugoSymbol() : requestQuery.getHugoSymbol();
                     for (Evidence evidence : updatedEvidences) {
-                        evidence.setDescription(SummaryUtils.enrichDescription(evidence.getDescription(), hugoSymbol));
+                        evidence.setDescription(
+                            CplUtils.annotate(
+                                evidence.getDescription(),
+                                hugoSymbol,
+                                evidence.getAlterations().stream().map(alteration -> alteration.getName()).collect(joining(", ")),
+                                TumorTypeUtils.getTumorTypesNameWithExclusion(evidence.getCancerTypes(), evidence.getExcludedCancerTypes()),
+                                null,
+                                evidence.getGene(),
+                                null
+                            )
+                        );
                     }
                 }
                 query.setEvidences(new ArrayList<>(StringUtils.isEmpty(query.getQuery().getTumorType()) ? updatedEvidences : keepHighestLevelForSameTreatments(updatedEvidences, requestQuery.getReferenceGenome(), query.getExactMatchedAlteration())));

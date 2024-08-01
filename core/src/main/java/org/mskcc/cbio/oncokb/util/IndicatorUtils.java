@@ -271,7 +271,15 @@ public class IndicatorUtils {
                         MutationEffectResp mutationEffectResp = new MutationEffectResp();
                         mutationEffectResp.setKnownEffect(indicatorQueryMutationEffect.getMutationEffect().getMutationEffect());
                         if (indicatorQueryMutationEffect.getMutationEffectEvidence() != null && StringUtils.isNotEmpty(indicatorQueryMutationEffect.getMutationEffectEvidence().getDescription())) {
-                            mutationEffectResp.setDescription(SummaryUtils.enrichDescription(indicatorQueryMutationEffect.getMutationEffectEvidence().getDescription(), gene, alteration.getReferenceGenomes().iterator().next(), query, matchedTumorType));
+                            mutationEffectResp.setDescription(CplUtils.annotate(
+                                indicatorQueryMutationEffect.getMutationEffectEvidence().getDescription(),
+                                query.getHugoSymbol(),
+                                query.getAlteration(),
+                                query.getTumorType(),
+                                query.getReferenceGenome(),
+                                gene,
+                                matchedTumorType
+                            ));
                             mutationEffectResp.setCitations(MainUtils.getCitationsByEvidence(indicatorQueryMutationEffect.getMutationEffectEvidence()));
                         }
                         indicatorQuery.setMutationEffect(mutationEffectResp);
@@ -514,7 +522,7 @@ public class IndicatorUtils {
             String hugoSymbol = StringUtils.isEmpty(queryHugoSymbol) ? evidence.getGene().getHugoSymbol() : queryHugoSymbol;
             implication.setPmids(citations.getPmids());
             implication.setAbstracts(citations.getAbstracts());
-            implication.setDescription(SummaryUtils.enrichDescription(evidence.getDescription(), hugoSymbol));
+            implication.setDescription(CplUtils.annotateGene(evidence.getDescription(), hugoSymbol));
             return implication;
         }).collect(Collectors.toSet());
     }
@@ -795,7 +803,7 @@ public class IndicatorUtils {
                                 List<TumorType> relevantTumorTypes = TumorTypeUtils.findRelevantTumorTypes(TumorTypeUtils.getTumorTypeName(tumorType), StringUtils.isEmpty(tumorType.getSubtype()), RelevantTumorTypeDirection.DOWNWARD);
                                 IndicatorQueryTreatment indicatorQueryTreatment = new IndicatorQueryTreatment();
                                 indicatorQueryTreatment.setDrugs(treatment.getDrugs());
-                                indicatorQueryTreatment.setApprovedIndications(treatment.getApprovedIndications().stream().map(indication -> SummaryUtils.enrichDescription(indication, hugoSymbol)).collect(Collectors.toSet()));
+                                indicatorQueryTreatment.setApprovedIndications(treatment.getApprovedIndications().stream().map(indication -> CplUtils.annotateGene(indication, hugoSymbol)).collect(Collectors.toSet()));
                                 indicatorQueryTreatment.setLevel(level);
                                 indicatorQueryTreatment.setFdaLevel(LevelUtils.getHighestFdaLevel(fdaLevelMap.get(treatment)));
                                 indicatorQueryTreatment.setPmids(pmidsMap.get(treatment));
@@ -806,7 +814,7 @@ public class IndicatorUtils {
                                     Set<org.mskcc.cbio.oncokb.apiModels.TumorType> excludedCancerTypes = evidence.getExcludedCancerTypes().stream().filter(ect -> relevantTumorTypes.contains(ect)).map(ect -> new org.mskcc.cbio.oncokb.apiModels.TumorType(ect)).collect(Collectors.toSet());
                                     indicatorQueryTreatment.setLevelExcludedCancerTypes(excludedCancerTypes);
                                 }
-                                indicatorQueryTreatment.setDescription(SummaryUtils.enrichDescription(descriptionMap.get(treatment), queryHugoSymbol));
+                                indicatorQueryTreatment.setDescription(CplUtils.annotateGene(descriptionMap.get(treatment), queryHugoSymbol));
                                 treatments.add(indicatorQueryTreatment);
                             }
                         }
