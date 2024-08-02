@@ -155,7 +155,15 @@ public class UtilsApiController implements UtilsApi {
                     biologicalVariant.getMutationEffect(),
                     MainUtils.listToString(new ArrayList<>(biologicalVariant.getMutationEffectPmids()), ", ", true),
                     MainUtils.listToString(abstracts, "; ", true),
-                    biologicalVariant.getMutationEffectDescription()
+                    CplUtils.annotate(
+                        biologicalVariant.getMutationEffectDescription(),
+                        gene.getHugoSymbol(),
+                        biologicalVariant.getVariant().getName(),
+                        null,
+                        null,
+                        gene,
+                        null
+                    )
                 ));
             }
         }
@@ -270,6 +278,7 @@ public class UtilsApiController implements UtilsApi {
                 }
 
                 if (clinicalVariant.getExcludedCancerTypes().size() > 0) {
+                    String cancerTypeName = TumorTypeUtils.getTumorTypesNameWithExclusion(clinicalVariant.getCancerTypes(), clinicalVariant.getExcludedCancerTypes());
                     // for any clinical variant that has cancer type excluded, we no longer list the cancer types separately
                     actionableGenes.add(new ActionableGene(
                         gene.getGrch37Isoform(), gene.getGrch37RefSeq(),
@@ -279,12 +288,20 @@ public class UtilsApiController implements UtilsApi {
                         clinicalVariant.getVariant().getReferenceGenomes().stream().map(referenceGenome -> referenceGenome.name()).collect(Collectors.joining(", ")),
                         clinicalVariant.getVariant().getName(),
                         clinicalVariant.getVariant().getAlteration(),
-                        TumorTypeUtils.getTumorTypesNameWithExclusion(clinicalVariant.getCancerTypes(), clinicalVariant.getExcludedCancerTypes()),
+                        cancerTypeName,
                         clinicalVariant.getLevel(),
                         MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrug()), ", ", true),
                         MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrugPmids()), ", ", true),
                         MainUtils.listToString(abstracts, "; ", true),
-                        clinicalVariant.getDrugDescription()
+                        CplUtils.annotate(
+                            clinicalVariant.getDrugDescription(),
+                            gene.getHugoSymbol(),
+                            clinicalVariant.getVariant().getName(),
+                            cancerTypeName,
+                            null,
+                            gene,
+                            null
+                        )
                     ));
                 } else {
                     for (TumorType tumorType : clinicalVariant.getCancerTypes()) {
@@ -301,8 +318,16 @@ public class UtilsApiController implements UtilsApi {
                             MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrug()), ", ", true),
                             MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrugPmids()), ", ", true),
                             MainUtils.listToString(abstracts, "; ", true),
-                            clinicalVariant.getDrugDescription())
-                        );
+                            CplUtils.annotate(
+                                clinicalVariant.getDrugDescription(),
+                                gene.getHugoSymbol(),
+                                clinicalVariant.getVariant().getName(),
+                                TumorTypeUtils.getTumorTypeName(tumorType),
+                                null,
+                                gene,
+                                tumorType
+                            )
+                        ));
                     }
                 }
             }
