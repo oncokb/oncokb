@@ -424,7 +424,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
 
         Set<Evidence> background = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Collections.singleton(EvidenceType.GENE_BACKGROUND));
         if (background.size() > 0) {
-            annotation.setBackground(SummaryUtils.enrichDescription(background.iterator().next().getDescription(), gene.getHugoSymbol()));
+            annotation.setBackground(CplUtils.annotateGene(background.iterator().next().getDescription(), gene.getHugoSymbol()));
         }
 
         for (TumorType uniqueTumorType : response.getEvidences().stream().filter(evidence -> !evidence.getCancerTypes().isEmpty()).map(evidence -> evidence.getCancerTypes()).flatMap(Collection::stream).collect(Collectors.toSet())) {
