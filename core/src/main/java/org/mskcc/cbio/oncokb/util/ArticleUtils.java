@@ -10,7 +10,7 @@ import org.mskcc.cbio.oncokb.model.Article;
 public class ArticleUtils {
     public static LinkedHashSet<Article> getAbstractFromText(String text) {
         LinkedHashSet<Article> articles = new LinkedHashSet<>();
-        if (text == null) return articles;
+        if (StringUtils.isEmpty(text)) return articles;
         Pattern abstractPattern = Pattern.compile("abstract:?([^\\)]*?)(\\bhttps?:\\/\\/[\\w-.]+(\\S*)?\\b)", Pattern.CASE_INSENSITIVE);
         Matcher abstractMatch = abstractPattern.matcher(text);
         int start = 0;
