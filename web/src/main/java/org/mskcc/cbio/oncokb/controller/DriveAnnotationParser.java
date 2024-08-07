@@ -23,6 +23,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static org.mskcc.cbio.oncokb.util.ArticleUtils.getAbstractFromText;
+import static org.mskcc.cbio.oncokb.util.ArticleUtils.getPmidsFromText;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 /**
@@ -423,7 +425,7 @@ public class DriveAnnotationParser {
                 } else {
                     tumorTypes.add(matchedTumorType);
                 }
-            } else if(mainType != null){
+            } else if (mainType != null) {
                 TumorType matchedTumorType = ApplicationContextSingleton.getTumorTypeBo().getByMainType(mainType);
                 if (matchedTumorType == null) {
                     throw new Exception("The tumor main type does not exist: " + mainType);
@@ -607,7 +609,7 @@ public class DriveAnnotationParser {
     }
 
     private void parseTherapeuticImplications(Gene gene, Set<Alteration> alterations, List<TumorType> tumorTypes, List<TumorType> excludedCancerTypes, List<TumorType> relevantCancerTypes, JSONObject implicationObj,
-                                                     Integer nestLevel) throws Exception {
+                                              Integer nestLevel) throws Exception {
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
 
         // specific evidence
@@ -629,7 +631,7 @@ public class DriveAnnotationParser {
             addDateToLastEditSetFromObject(lastEditDates, drugObj, "name");
 //            addDateToLastReviewSetFromLong(lastReviewDates, drugObj, "name");
 
-            ImmutablePair<EvidenceType, String> evidenceTypeAndKnownEffect =  getEvidenceTypeAndKnownEffectFromDrugObj(drugObj);
+            ImmutablePair<EvidenceType, String> evidenceTypeAndKnownEffect = getEvidenceTypeAndKnownEffectFromDrugObj(drugObj);
             EvidenceType evidenceType = evidenceTypeAndKnownEffect.getLeft();
             String knownEffect = evidenceTypeAndKnownEffect.getRight();
             if (evidenceType == null) {
@@ -913,61 +915,33 @@ public class DriveAnnotationParser {
         if (str == null) return;
         Set<Article> docs = new HashSet<>();
         ArticleBo articleBo = ApplicationContextSingleton.getArticleBo();
-        Pattern pmidPattern = Pattern.compile("PMIDs?:?\\s*([\\d,\\s*]+)", Pattern.CASE_INSENSITIVE);
-        Pattern abstractPattern = Pattern.compile("\\(?\\s*Abstract\\s*:([^\\)]*);?\\s*\\)?", Pattern.CASE_INSENSITIVE);
-        Pattern abItemPattern = Pattern.compile("(.*?)\\.\\s*(http.*)", Pattern.CASE_INSENSITIVE);
-        Matcher m = pmidPattern.matcher(str);
-        int start = 0;
+
         Set<String> pmidToSearch = new HashSet<>();
-        while (m.find(start)) {
-            String pmids = m.group(1).trim();
-            for (String pmid : pmids.split(", *(PMID:)? *")) {
-                Article doc = articleBo.findArticleByPmid(pmid);
-                if (doc == null) {
-                    pmidToSearch.add(pmid);
-                }
-                if (doc != null) {
-                    docs.add(doc);
-                }
+        getPmidsFromText(evidence.getDescription()).forEach(pmid -> {
+            Article doc = articleBo.findArticleByPmid(pmid);
+            if (doc != null) {
+                docs.add(doc);
+            } else {
+                pmidToSearch.add(pmid);
             }
-            start = m.end();
-        }
+        });
 
         if (!pmidToSearch.isEmpty()) {
             for (Article article : NcbiEUtils.readPubmedArticles(pmidToSearch)) {
-                docs.add(article);
                 articleBo.save(article);
+                docs.add(article);
             }
         }
 
-        Matcher abstractMatch = abstractPattern.matcher(str);
-        start = 0;
-        String abstracts = "", abContent = "", abLink = "";
-        while (abstractMatch.find(start)) {
-            abstracts = abstractMatch.group(1).trim();
-            for (String abs : abstracts.split(";")) {
-                Matcher abItems = abItemPattern.matcher(abs);
-                if (abItems.find()) {
-                    abContent = abItems.group(1).trim();
-                    abLink = abItems.group(2).trim();
-                }
-                if (!abContent.isEmpty()) {
-                    Article doc = articleBo.findArticleByAbstract(abContent);
-                    if (doc == null) {
-                        doc = new Article();
-                        doc.setAbstractContent(abContent);
-                        doc.setLink(abLink);
-                        articleBo.save(doc);
-                    }
-                    docs.add(doc);
-                }
-                abContent = "";
-                abLink = "";
-
+        getAbstractFromText(evidence.getDescription()).stream().forEach(article -> {
+            Article dbArticle = articleBo.findArticleByAbstract(article.getAbstractContent());
+            if (dbArticle == null) {
+                articleBo.save(article);
+                docs.add(article);
+            } else {
+                docs.add(dbArticle);
             }
-            start = abstractMatch.end();
-
-        }
+        });
 
         evidence.addArticles(docs);
     }
@@ -997,7 +971,7 @@ public class DriveAnnotationParser {
 
     private ImmutablePair<EvidenceType, String> getEvidenceTypeAndKnownEffectFromDrugObj(JSONObject drugObj) {
         ImmutablePair<EvidenceType, String> emptyPair = new ImmutablePair<EvidenceType, String>(null, null);
-        if(!drugObj.has("level") || drugObj.getString("level").trim().isEmpty()) {
+        if (!drugObj.has("level") || drugObj.getString("level").trim().isEmpty()) {
             return emptyPair;
         }
         String level = drugObj.getString("level").trim();
