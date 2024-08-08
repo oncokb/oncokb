@@ -4,7 +4,6 @@ import static org.mskcc.cbio.oncokb.util.AnnotationSearchUtils.annotationSearch;
 
 import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
-import org.mskcc.cbio.oncokb.apiModels.DrugMatch;
 import org.mskcc.cbio.oncokb.apiModels.annotation.*;
 import org.mskcc.cbio.oncokb.cache.CacheFetcher;
 import org.mskcc.cbio.oncokb.config.annotation.PremiumPublicApi;
@@ -21,9 +20,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.mskcc.cbio.oncokb.controller.advice.ApiHttpErrorException;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Created by Hongxin Zhang on 2019-03-25.
@@ -56,20 +55,13 @@ public class AnnotationsApiController {
         , @ApiParam(value = "Protein End. Example: 600") @RequestParam(value = "proteinEnd", required = false) Integer proteinEnd
         , @ApiParam(value = "OncoTree(http://oncotree.info) tumor type name. The field supports OncoTree Code, OncoTree Name and OncoTree Main type. Example: Melanoma") @RequestParam(value = "tumorType", required = false) String tumorType
         , @ApiParam(value = EVIDENCE_TYPES_DESCRIPTION) @RequestParam(value = "evidenceType", required = false) String evidenceTypes
-    ) {
-        HttpStatus status = HttpStatus.OK;
+    ) throws ApiHttpErrorException {
         IndicatorQueryResp indicatorQueryResp = null;
 
         if (entrezGeneId != null && hugoSymbol != null && !GeneUtils.isSameGene(entrezGeneId, hugoSymbol)) {
-            status = HttpStatus.BAD_REQUEST;
+            throw new ApiHttpErrorException("entrezGeneId \"" + entrezGeneId + "\"" + " and hugoSymbol \"" + hugoSymbol +"\" are not the same gene.", HttpStatus.BAD_REQUEST);
         } else {
-            ReferenceGenome matchedRG = null;
-            if (!StringUtils.isEmpty(referenceGenome)) {
-                matchedRG = MainUtils.searchEnum(ReferenceGenome.class, referenceGenome);
-                if (matchedRG == null) {
-                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-                }
-            }
+            ReferenceGenome matchedRG = resolveMatchedRG(referenceGenome);
             Query query = new Query(null, matchedRG, entrezGeneId, hugoSymbol, proteinChange, null, null, tumorType, consequence, proteinStart, proteinEnd, null);
             indicatorQueryResp = this.cacheFetcher.processQuery(
                 query.getReferenceGenome(),
@@ -89,7 +81,8 @@ public class AnnotationsApiController {
                 false
             );
         }
-        return new ResponseEntity<>(indicatorQueryResp, status);
+
+        return new ResponseEntity<>(indicatorQueryResp, HttpStatus.OK);
     }
 
     @PublicApi
@@ -104,12 +97,11 @@ public class AnnotationsApiController {
         method = RequestMethod.POST)
     public ResponseEntity<List<IndicatorQueryResp>> annotateMutationsByProteinChangePost(
         @ApiParam(value = "List of queries. Please see swagger.json for request body format.", required = true) @RequestBody() List<AnnotateMutationByProteinChangeQuery> body
-    ) {
-        HttpStatus status = HttpStatus.OK;
+    ) throws ApiHttpErrorException {
         List<IndicatorQueryResp> result = new ArrayList<>();
 
         if (body == null) {
-            status = HttpStatus.BAD_REQUEST;
+            throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         } else {
             for (AnnotateMutationByProteinChangeQuery query : body) {
                 IndicatorQueryResp resp = this.cacheFetcher.processQuery(
@@ -133,7 +125,7 @@ public class AnnotationsApiController {
                 result.add(resp);
             }
         }
-        return new ResponseEntity<>(result, status);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     // Annotate mutations by genomic change
@@ -151,22 +143,26 @@ public class AnnotationsApiController {
         , @ApiParam(value = "Reference genome, either GRCh37 or GRCh38. The default is GRCh37", required = false, defaultValue = "GRCh37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") String referenceGenome
         , @ApiParam(value = "OncoTree(http://oncotree.info) tumor type name. The field supports OncoTree Code, OncoTree Name and OncoTree Main type. Example: Melanoma") @RequestParam(value = "tumorType", required = false) String tumorType
         , @ApiParam(value = EVIDENCE_TYPES_DESCRIPTION) @RequestParam(value = "evidenceType", required = false) String evidenceTypes
-    ) throws ApiException, org.genome_nexus.ApiException {
-        HttpStatus status = HttpStatus.OK;
+    ) throws ApiException, org.genome_nexus.ApiException, ApiHttpErrorException {
         IndicatorQueryResp indicatorQueryResp = null;
 
         if (StringUtils.isEmpty(genomicLocation)) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            throw new ApiHttpErrorException("genomicLocation is missing.", HttpStatus.BAD_REQUEST);
         }
+        ReferenceGenome matchedRG = resolveMatchedRG(referenceGenome);
+        indicatorQueryResp = this.getIndicatorQueryFromGenomicLocation(matchedRG, genomicLocation, tumorType, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")), cacheFetcher.getAllTranscriptGenes());
+        return new ResponseEntity<>(indicatorQueryResp, HttpStatus.OK);
+    }
+
+    private ReferenceGenome resolveMatchedRG(String referenceGenome) throws ApiHttpErrorException {
         ReferenceGenome matchedRG = null;
         if (!StringUtils.isEmpty(referenceGenome)) {
             matchedRG = MainUtils.searchEnum(ReferenceGenome.class, referenceGenome);
             if (matchedRG == null) {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                throw new ApiHttpErrorException("referenceGenome \"" + referenceGenome + "\" is an invalid Reference Genome value.", HttpStatus.BAD_REQUEST);
             }
         }
-        indicatorQueryResp = this.getIndicatorQueryFromGenomicLocation(matchedRG, genomicLocation, tumorType, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")), cacheFetcher.getAllTranscriptGenes());
-        return new ResponseEntity<>(indicatorQueryResp, status);
+        return matchedRG;
     }
 
     @PublicApi
@@ -181,12 +177,11 @@ public class AnnotationsApiController {
         method = RequestMethod.POST)
     public ResponseEntity<List<IndicatorQueryResp>> annotateMutationsByGenomicChangePost(
         @ApiParam(value = "List of queries. Please see swagger.json for request body format.", required = true) @RequestBody() List<AnnotateMutationByGenomicChangeQuery> body
-    ) throws ApiException, org.genome_nexus.ApiException {
-        HttpStatus status = HttpStatus.OK;
+    ) throws ApiException, org.genome_nexus.ApiException, ApiHttpErrorException {
         List<IndicatorQueryResp> result = new ArrayList<>();
 
         if (body == null) {
-            status = HttpStatus.BAD_REQUEST;
+            throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         } else {
             Set<org.oncokb.oncokb_transcript.client.Gene> allTranscriptGenes = cacheFetcher.getAllTranscriptGenes();
             for (AnnotateMutationByGenomicChangeQuery query : body) {
@@ -195,7 +190,7 @@ public class AnnotationsApiController {
                 result.add(resp);
             }
         }
-        return new ResponseEntity<>(result, status);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     // Annotate mutations by HGVSg
@@ -213,23 +208,16 @@ public class AnnotationsApiController {
         , @ApiParam(value = "Reference genome, either GRCh37 or GRCh38. The default is GRCh37", required = false, defaultValue = "GRCh37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") String referenceGenome
         , @ApiParam(value = "OncoTree(http://oncotree.info) tumor type name. The field supports OncoTree Code, OncoTree Name and OncoTree Main type. Example: Melanoma") @RequestParam(value = "tumorType", required = false) String tumorType
         , @ApiParam(value = EVIDENCE_TYPES_DESCRIPTION) @RequestParam(value = "evidenceType", required = false) String evidenceTypes
-    ) throws ApiException, org.genome_nexus.ApiException {
-        HttpStatus status = HttpStatus.OK;
+    ) throws ApiException, org.genome_nexus.ApiException, ApiHttpErrorException {
         IndicatorQueryResp indicatorQueryResp = null;
 
         if (StringUtils.isEmpty(hgvsg)) {
-            status = HttpStatus.BAD_REQUEST;
+            throw new ApiHttpErrorException("hgvsg is missing.", HttpStatus.BAD_REQUEST);
         } else {
-            ReferenceGenome matchedRG = null;
-            if (!StringUtils.isEmpty(referenceGenome)) {
-                matchedRG = MainUtils.searchEnum(ReferenceGenome.class, referenceGenome);
-                if (matchedRG == null) {
-                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-                }
-            }
+            ReferenceGenome matchedRG = resolveMatchedRG(referenceGenome);
 
             if (!AlterationUtils.isValidHgvsg(hgvsg)) {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                throw new ApiHttpErrorException("hgvsg is invalid.", HttpStatus.BAD_REQUEST);
             }
 
             indicatorQueryResp = this.getIndicatorQueryFromHGVSg(
@@ -240,7 +228,7 @@ public class AnnotationsApiController {
                 cacheFetcher.getAllTranscriptGenes()
             );
         }
-        return new ResponseEntity<>(indicatorQueryResp, status);
+        return new ResponseEntity<>(indicatorQueryResp, HttpStatus.OK);
     }
 
     @PublicApi
@@ -255,12 +243,11 @@ public class AnnotationsApiController {
         method = RequestMethod.POST)
     public ResponseEntity<List<IndicatorQueryResp>> annotateMutationsByHGVSgPost(
         @ApiParam(value = "List of queries. Please see swagger.json for request body format.", required = true) @RequestBody() List<AnnotateMutationByHGVSgQuery> body
-    ) throws ApiException, org.genome_nexus.ApiException {
-        HttpStatus status = HttpStatus.OK;
+    ) throws ApiException, org.genome_nexus.ApiException, ApiHttpErrorException {
         List<IndicatorQueryResp> result = new ArrayList<>();
 
         if (body == null) {
-            status = HttpStatus.BAD_REQUEST;
+            throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         } else {
             Set<org.oncokb.oncokb_transcript.client.Gene> allTranscriptGenes = cacheFetcher.getAllTranscriptGenes();
             for (AnnotateMutationByHGVSgQuery query : body) {
@@ -275,7 +262,7 @@ public class AnnotationsApiController {
                 result.add(resp);
             }
         }
-        return new ResponseEntity<>(result, status);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     // Annotate copy number alterations
@@ -295,23 +282,16 @@ public class AnnotationsApiController {
         , @ApiParam(value = "Reference genome, either GRCh37 or GRCh38. The default is GRCh37", required = false, defaultValue = "GRCh37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") String referenceGenome
         , @ApiParam(value = "OncoTree(http://oncotree.info) tumor type name. The field supports OncoTree Code, OncoTree Name and OncoTree Main type. Example: Melanoma") @RequestParam(value = "tumorType", required = false) String tumorType
         , @ApiParam(value = EVIDENCE_TYPES_DESCRIPTION) @RequestParam(value = "evidenceType", required = false) String evidenceTypes
-    ) {
-        HttpStatus status = HttpStatus.OK;
+    ) throws ApiHttpErrorException {
         IndicatorQueryResp indicatorQueryResp = null;
 
         if (entrezGeneId != null && hugoSymbol != null && !GeneUtils.isSameGene(entrezGeneId, hugoSymbol)) {
-            status = HttpStatus.BAD_REQUEST;
+            throw new ApiHttpErrorException("entrezGeneId \"" + entrezGeneId + "\"" + " and hugoSymbol \"" + hugoSymbol +"\" are not the same gene.", HttpStatus.BAD_REQUEST);
         } else {
             if (copyNameAlterationType == null) {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                throw new ApiHttpErrorException("copyNameAlterationType is missing.", HttpStatus.BAD_REQUEST);
             }
-            ReferenceGenome matchedRG = null;
-            if (!StringUtils.isEmpty(referenceGenome)) {
-                matchedRG = MainUtils.searchEnum(ReferenceGenome.class, referenceGenome);
-                if (matchedRG == null) {
-                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-                }
-            }
+            ReferenceGenome matchedRG = resolveMatchedRG(referenceGenome);
             indicatorQueryResp = this.cacheFetcher.processQuery(
                 matchedRG,
                 entrezGeneId,
@@ -329,7 +309,7 @@ public class AnnotationsApiController {
                 new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")),
                 false);
         }
-        return new ResponseEntity<>(indicatorQueryResp, status);
+        return new ResponseEntity<>(indicatorQueryResp, HttpStatus.OK);
     }
 
     @PublicApi
@@ -344,12 +324,11 @@ public class AnnotationsApiController {
         method = RequestMethod.POST)
     public ResponseEntity<List<IndicatorQueryResp>> annotateCopyNumberAlterationsPost(
         @ApiParam(value = "List of queries. Please see swagger.json for request body format.", required = true) @RequestBody() List<AnnotateCopyNumberAlterationQuery> body
-    ) {
-        HttpStatus status = HttpStatus.OK;
+    ) throws ApiHttpErrorException {
         List<IndicatorQueryResp> result = new ArrayList<>();
 
         if (body == null) {
-            status = HttpStatus.BAD_REQUEST;
+            throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         } else {
 
             for (AnnotateCopyNumberAlterationQuery query : body) {
@@ -381,7 +360,7 @@ public class AnnotationsApiController {
                 result.add(resp);
             }
         }
-        return new ResponseEntity<>(result, status);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     // Annotate structural variants
@@ -404,15 +383,18 @@ public class AnnotationsApiController {
         , @ApiParam(value = "Reference genome, either GRCh37 or GRCh38. The default is GRCh37", required = false, defaultValue = "GRCh37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") String referenceGenome
         , @ApiParam(value = "OncoTree(http://oncotree.info) tumor type name. The field supports OncoTree Code, OncoTree Name and OncoTree Main type. Example: Melanoma") @RequestParam(value = "tumorType", required = false) String tumorType
         , @ApiParam(value = EVIDENCE_TYPES_DESCRIPTION) @RequestParam(value = "evidenceType", required = false) String evidenceTypes
-    ) {
-        HttpStatus status = HttpStatus.OK;
+    ) throws ApiHttpErrorException {
         IndicatorQueryResp indicatorQueryResp = null;
 
-        if (structuralVariantType == null || isFunctionalFusion == null) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        if (structuralVariantType == null) {
+            throw new ApiHttpErrorException("structuralVariantType is missing.", HttpStatus.BAD_REQUEST);
+        } else if  (isFunctionalFusion == null) {
+            throw new ApiHttpErrorException("isFunctionalFusion is missing.", HttpStatus.BAD_REQUEST);
         }
-        if ((entrezGeneIdA != null && hugoSymbolA != null && !GeneUtils.isSameGene(entrezGeneIdA, hugoSymbolA)) || (entrezGeneIdB != null && hugoSymbolB != null && !GeneUtils.isSameGene(entrezGeneIdB, hugoSymbolB))) {
-            status = HttpStatus.BAD_REQUEST;
+        if (entrezGeneIdA != null && hugoSymbolA != null && !GeneUtils.isSameGene(entrezGeneIdA, hugoSymbolA)) {
+            throw new ApiHttpErrorException("entrezGeneIdA \"" + entrezGeneIdA + "\"" + " and hugoSymbolA \"" + hugoSymbolA +"\" are not the same gene.", HttpStatus.BAD_REQUEST);
+        } else if (entrezGeneIdB != null && hugoSymbolB != null && !GeneUtils.isSameGene(entrezGeneIdB, hugoSymbolB)) {
+            throw new ApiHttpErrorException("entrezGeneIdB \"" + entrezGeneIdB + "\"" + " and hugoSymbolB \"" + hugoSymbolB +"\" are not the same gene.", HttpStatus.BAD_REQUEST);
         } else {
             Gene geneA = new Gene();
             try {
@@ -439,19 +421,14 @@ public class AnnotationsApiController {
                 geneB.setHugoSymbol(hugoSymbolB == null ? "" : hugoSymbolB);
             }
 
-            ReferenceGenome matchedRG = null;
-            if (!StringUtils.isEmpty(referenceGenome)) {
-                matchedRG = MainUtils.searchEnum(ReferenceGenome.class, referenceGenome);
-                if (matchedRG == null) {
-                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-                }
-            }
+            ReferenceGenome matchedRG = resolveMatchedRG(referenceGenome);
+
             String fusionName = FusionUtils.getFusionName(geneA, geneB);
             indicatorQueryResp = this.cacheFetcher.processQuery(
                 matchedRG, null, fusionName, null, AlterationType.STRUCTURAL_VARIANT.name(), tumorType, isFunctionalFusion ? "fusion" : null, null, null, structuralVariantType, null,
                 null, false, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")), false);
         }
-        return new ResponseEntity<>(indicatorQueryResp, status);
+        return new ResponseEntity<>(indicatorQueryResp, HttpStatus.OK);
     }
 
     @PublicApi
@@ -466,12 +443,11 @@ public class AnnotationsApiController {
         method = RequestMethod.POST)
     public ResponseEntity<List<IndicatorQueryResp>> annotateStructuralVariantsPost(
         @ApiParam(value = "List of queries. Please see swagger.json for request body format.", required = true) @RequestBody(required = true) List<AnnotateStructuralVariantQuery> body
-    ) {
-        HttpStatus status = HttpStatus.OK;
+    ) throws ApiHttpErrorException {
         List<IndicatorQueryResp> result = new ArrayList<>();
 
         if (body == null) {
-            status = HttpStatus.BAD_REQUEST;
+            throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         } else {
             for (AnnotateStructuralVariantQuery query : body) {
                 Gene geneA = new Gene();
@@ -521,7 +497,7 @@ public class AnnotationsApiController {
                 result.add(resp);
             }
         }
-        return new ResponseEntity<>(result, status);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @PremiumPublicApi
@@ -547,7 +523,7 @@ public class AnnotationsApiController {
 
         LinkedHashSet<AnnotationSearchResult> orderedResult = new LinkedHashSet<>();
         orderedResult.addAll(result);
-        
+
         return new ResponseEntity<>(MainUtils.getLimit(orderedResult, limit), HttpStatus.OK);
     }
 
