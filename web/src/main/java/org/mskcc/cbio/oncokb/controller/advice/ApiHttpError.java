@@ -15,8 +15,8 @@ public class ApiHttpError {
         this.setPath(path);
         this.setTitle(status.toString());
         this.setStatus(status.value());
-        this.setDetail(status.value() + " " + status.name());
-        this.setMessage(message);
+        this.setDetail(status.value() + " " + status.name() + " " + message);
+        this.setMessage("error.http." + status.value());
     }
 
     public String getType() {
