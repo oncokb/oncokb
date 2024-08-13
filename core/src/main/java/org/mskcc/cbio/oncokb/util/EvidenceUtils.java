@@ -532,15 +532,15 @@ public class EvidenceUtils {
         return result;
     }
 
-    public static Set<String> getDrugs(Set<Evidence> evidences) {
-        Set<String> result = new HashSet<>();
+    public static LinkedHashSet<String> getDrugs(Set<Evidence> evidences) {
+        LinkedHashSet<String> result = new LinkedHashSet<>();
 
         for (Evidence evidence : evidences) {
-            for (Treatment treatment : evidence.getTreatments()) {
-                Set<String> drugsInTreatment = new HashSet<>();
-                for (Drug drug : treatment.getDrugs()) {
-                    if (drug.getDrugName() != null) {
-                        drugsInTreatment.add(drug.getDrugName());
+            for (Treatment treatment : evidence.getTreatments().stream().sorted(Comparator.comparingInt(Treatment::getPriority)).collect(toList())) {
+                LinkedHashSet<String> drugsInTreatment = new LinkedHashSet<>();
+                for (TreatmentDrug treatmentDrug : treatment.getTreatmentDrugs().stream().sorted(Comparator.comparingInt(TreatmentDrug::getPriority)).collect(toList())) {
+                    if (treatmentDrug.getDrug() != null && treatmentDrug.getDrug().getDrugName() != null) {
+                        drugsInTreatment.add(treatmentDrug.getDrug().getDrugName());
                     }
                 }
                 result.add(StringUtils.join(drugsInTreatment, " + "));
