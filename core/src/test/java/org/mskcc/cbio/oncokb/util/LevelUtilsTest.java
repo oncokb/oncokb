@@ -13,6 +13,7 @@ public class LevelUtilsTest extends TestCase {
         assertTrue(LevelUtils.compareLevel(null, LevelOfEvidence.LEVEL_1) > 0);
         assertTrue(LevelUtils.compareLevel(LevelOfEvidence.LEVEL_1, LevelOfEvidence.LEVEL_1) == 0);
         assertTrue(LevelUtils.compareLevel(LevelOfEvidence.LEVEL_1, LevelOfEvidence.LEVEL_3B) < 0);
+        assertTrue(LevelUtils.compareLevel(LevelOfEvidence.LEVEL_3B, LevelOfEvidence.LEVEL_4) < 0);
         assertTrue(LevelUtils.compareLevel(LevelOfEvidence.LEVEL_1, LevelOfEvidence.LEVEL_R2) < 0);
         assertTrue(LevelUtils.compareLevel(LevelOfEvidence.LEVEL_R1, LevelOfEvidence.LEVEL_3B) < 0);
         assertTrue(LevelUtils.compareLevel(LevelOfEvidence.LEVEL_R1, LevelOfEvidence.LEVEL_1) < 0);
