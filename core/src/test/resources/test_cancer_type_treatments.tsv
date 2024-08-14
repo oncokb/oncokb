@@ -81,9 +81,9 @@ BTK	T316A	Chronic Lymphocytic Leukemia/Small Lymphocytic Lymphoma	R2: Ibrutinib;
 FLT3	Internal Tandem Duplication	AML	1: Gilteritinib; 1: Quizartinib; 1: Midostaurin+High Dose Chemotherapy; 3A: Sorafenib; 3A: Crenolanib;
 FLT3	Internal Tandem Duplication	APLPMLRARA	1: Gilteritinib; 1: Quizartinib; 1: Midostaurin+High Dose Chemotherapy; 3A: Sorafenib; 3A: Crenolanib;
 FLT3	Internal Tandem Duplication	Colorectal Cancer
-SF3B1	K700E	AML	4: H3B-8800;
-SF3B1	K700E	AMLNOS	4: H3B-8800;
-SF3B1	K700E	APLPMLRARA	4: H3B-8800;
+SF3B1	K700E	AML	4: Emavusertib;
+SF3B1	K700E	AMLNOS	4: Emavusertib;
+SF3B1	K700E	APLPMLRARA	4: Emavusertib;
 SF3B1	K700E	Colorectal Cancer
 DNMT3A	P904L	AML
 DNMT3A	P904L	APLPMLRARA
@@ -121,30 +121,30 @@ ABL1	BCR-ABL1 Fusion	Chronic Myelogenous Leukemia	1: Imatinib; 1: Nilotinib; 1: 
 ABL1	BCR-ABL1 Fusion	Acute Myeloid Leukemia
 IDH1	R132H	Acute Myeloid Leukemia	1: Ivosidenib; 1: Olutasidenib;
 IDH1	R132H	Glioblastoma	3A: Ivosidenib; 3B: Vorasidenib;
-IDH1	R132H	B-Lymphoblastic Leukemia/Lymphoma	3B: Ivosidenib;
+IDH1	R132H	B-Lymphoblastic Leukemia/Lymphoma
 IDH1	R132H	Therapy-Related Acute Myeloid Leukemia	1: Ivosidenib; 1: Olutasidenib;
 IDH2	R172K	Acute Myeloid Leukemia	1: Enasidenib;
-IDH2	R172K	Melanoma	3B: Enasidenib; 3B: Vorasidenib;
+IDH2	R172K	Melanoma	3B: Vorasidenib;
 MAP2K1	K57N	Erdheim-Chester Disease	2: Cobimetinib; 2: Trametinib;
 MAP2K1	K57N	Lung Adenocarcinoma	3A: Trametinib; 3A: Cobimetinib;
 MAP2K1	K57N	Glioblastoma	3B: Trametinib; 3B: Cobimetinib;
 #MAP2K1	K57N	Diffuse Large B-Cell Lymphoma, NOS
-PIK3CA	E545K	Breast Cancer	1: Alpelisib+Fulvestrant; 1: Capivasertib+Fulvestrant; 4: RLY-2608; 4: RLY-2608+Fulvestrant;
-PIK3CA	E545K	Ovarian Cancer	3B: Alpelisib+Fulvestrant; 3B: Capivasertib+Fulvestrant; 4: RLY-2608;
+PIK3CA	E545K	Breast Cancer	1: Alpelisib+Fulvestrant; 1: Capivasertib+Fulvestrant; 3A: Inavolisib+Palbociclib+Fulvestrant; 4: RLY-2608; 4: RLY-2608+Fulvestrant;
+PIK3CA	E545K	Ovarian Cancer	3B: Alpelisib+Fulvestrant; 3B: Inavolisib+Palbociclib+Fulvestrant; 3B: Capivasertib+Fulvestrant; 4: RLY-2608;
 #PIK3CA	E545K	Acute Myeloid Leukemia
 NRAS	G12C	Breast Cancer	3B: Binimetinib;
 #NRAS	G12C	Chronic Myelogenous Leukemia
-SF3B1	R625G	Chronic Myelomonocytic Leukemia	4: H3B-8800;
+SF3B1	R625G	Chronic Myelomonocytic Leukemia	4: Ceralasertib;
 SF3B1	R625G	Breast Cancer
 
 # Sotorasib should only work for KRAS G12C, not alternative allele
 # the following tests should be enabled when the liquid propagation is in production also the AGM-510 treatment is in place
 KRAS	G12C	Breast Cancer	3B: Adagrasib+Cetuximab; 3B: Adagrasib+Panitumumab; 3B: Sotorasib; 3B: Adagrasib; 3B: Sotorasib+Cetuximab; 3B: Sotorasib+Panitumumab; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
-KRAS	G12D	Breast Cancer	3B: RMC-6236; 4: MRTX-1133; 4: Trametinib; 4: ASP3082; 4: Cobimetinib; 4: Binimetinib;
+KRAS	G12D	Breast Cancer	4: MRTX-1133; 4: RMC-6236; 4: Trametinib; 4: ASP3082; 4: Cobimetinib; 4: Binimetinib;
 KRAS	G12C	NSCLC	1: Sotorasib; 1: Adagrasib; 3B: Adagrasib+Cetuximab; 3B: Adagrasib+Panitumumab; 3B: Sotorasib+Cetuximab; 3B: Sotorasib+Panitumumab; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
 KRAS	G12D	NSCLC	3A: RMC-6236; 4: MRTX-1133; 4: Trametinib; 4: ASP3082; 4: Cobimetinib; 4: Binimetinib;
 KRAS	G12C	Colorectal Cancer	R1: Cetuximab; R1: Panitumumab; R1: Tucatinib+Trastuzumab; 1: Adagrasib+Cetuximab; 2: Adagrasib+Panitumumab; 2: Sotorasib+Cetuximab; 2: Sotorasib+Panitumumab; 3B: Sotorasib; 3B: Adagrasib; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
-KRAS	G12D	Colorectal Cancer	R1: Cetuximab; R1: Panitumumab; R1: Tucatinib+Trastuzumab; 3B: RMC-6236; 4: MRTX-1133; 4: Trametinib; 4: ASP3082; 4: Cobimetinib; 4: Binimetinib;
+KRAS	G12D	Colorectal Cancer	R1: Cetuximab; R1: Panitumumab; R1: Tucatinib+Trastuzumab; 4: MRTX-1133; 4: RMC-6236; 4: Trametinib; 4: ASP3082; 4: Cobimetinib; 4: Binimetinib;
 KRAS	G12C	AML
 KRAS	G12D	AML
 KRAS	G12C	Leukemia
@@ -186,7 +186,7 @@ EGFR	G724S	MEL	3B: Afatinib;
 KRAS	G12C	NSCLC	1: Sotorasib; 1: Adagrasib; 3B: Adagrasib+Cetuximab; 3B: Adagrasib+Panitumumab; 3B: Sotorasib+Cetuximab; 3B: Sotorasib+Panitumumab; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
 KRAS	G12C	Melanoma	3B: Adagrasib+Cetuximab; 3B: Adagrasib+Panitumumab; 3B: Sotorasib; 3B: Adagrasib; 3B: Sotorasib+Cetuximab; 3B: Sotorasib+Panitumumab; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
 KRAS	G12A	NSCLC	3A: RMC-6236; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
-KRAS	G12A	Melanoma	3B: RMC-6236; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
+KRAS	G12A	Melanoma	4: RMC-6236; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
 KRAS	G12C	Histiocytosis	3A: Cobimetinib; 3A: Trametinib;
 KRAS	G12A	Histiocytosis	3A: Cobimetinib; 3A: Trametinib;
 IDH1	R132H	AML	1: Ivosidenib; 1: Olutasidenib;
