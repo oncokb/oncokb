@@ -403,7 +403,7 @@ public class DriveAnnotationParser {
                     }
 
                     List<TumorType> relevantCancerTypes = getRelevantCancerTypesIfExistsFromJsonObject(cancers.getJSONObject(i), tumorTypes, excludedCancerTypes, null);
-                    
+
                     parseCancer(gene, alterations, cancers.getJSONObject(i), tumorTypes, excludedCancerTypes, relevantCancerTypes, nestLevel + 1);
                 }
             }
@@ -1002,13 +1002,13 @@ public class DriveAnnotationParser {
         RelevantTumorTypeDirection direction = level != null && LevelOfEvidence.LEVEL_Dx1.equals(level) ? RelevantTumorTypeDirection.UPWARD : RelevantTumorTypeDirection.DOWNWARD;
 
         Set<TumorType> queriedTumorTypes = tumorTypes.stream().map(tt -> {
-            return TumorTypeUtils.findRelevantTumorTypes(TumorTypeUtils.getTumorTypeName(tt), StringUtils.isEmpty(tt.getSubtype()), direction);
+            return TumorTypeUtils.findRelevantTumorTypes(TumorTypeUtils.getTumorTypeName(tt), StringUtils.isEmpty(tt.getSubtype()), direction, false);
         })
         .flatMap(Collection::stream)
         .collect(Collectors.toSet());
 
         Set<TumorType> queriedExcludedTumorTypes = excludedTumorTypes.stream().map(ett -> {
-            return TumorTypeUtils.findRelevantTumorTypes(TumorTypeUtils.getTumorTypeName(ett), StringUtils.isEmpty(ett.getSubtype()), direction);
+            return TumorTypeUtils.findRelevantTumorTypes(TumorTypeUtils.getTumorTypeName(ett), StringUtils.isEmpty(ett.getSubtype()), direction, false);
         })
         .flatMap(Collection::stream)
         .collect(Collectors.toSet());
