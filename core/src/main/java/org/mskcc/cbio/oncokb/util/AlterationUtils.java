@@ -35,6 +35,8 @@ public final class AlterationUtils {
     public static Pattern HGVSG_FORMAT = Pattern.compile("((grch37|grch38):)?((chr)?[\\dxy]+:g\\.\\d+.*)", Pattern.CASE_INSENSITIVE);
     public static Pattern GENOMIC_CHANGE_FORMAT = Pattern.compile("((grch37|grch38):)?([\\dxy]+,\\d+,\\d+,.*)", Pattern.CASE_INSENSITIVE);
 
+    private static String EXCLUSION_SEPERATOR_REGEX = "\\s*;\\s*";
+
 
     private AlterationUtils() {
         throw new AssertionError();
@@ -186,15 +188,15 @@ public final class AlterationUtils {
                     int right = displayName.indexOf("}");
                     if (left > 0 && right > 0) {
                         String exclusion = displayName.substring(left + 1, right);
-                        String separatorRegex = "\\s*;\\s*";
-                        exclusion = MainUtils.replaceLast(exclusion, separatorRegex, " and ");
-                        exclusion = exclusion.replaceAll(separatorRegex, ", ");
+                        exclusion = MainUtils.replaceLast(exclusion, EXCLUSION_SEPERATOR_REGEX, " and ");
+                        exclusion = exclusion.replaceAll(EXCLUSION_SEPERATOR_REGEX, ", ");
 
                         displayName = displayName.substring(0, left) + "(" + exclusion + ")" + displayName.substring(right + 1);
                     }
                 }
             }
             proteinChange = trimComment(proteinChange);
+            proteinChange = proteinChange.replaceAll(EXCLUSION_SEPERATOR_REGEX, "; ");
 
             Matcher m = p.matcher(proteinChange);
             if (m.find()) {
