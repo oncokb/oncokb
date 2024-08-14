@@ -121,20 +121,43 @@ public class SummaryUtils {
                 });
             }
 
-            // Base on the priority of relevant alterations
+            // group the relevant alterations by removing exclusion
+            // when alteration has exclusion criteria and however is included in relevantAlterations,
+            // that means the alteration in query is not excluded, therefore the relevant alteration should be
+            // treated as the same to the one without exclusion criteria
+            // for instance, Oncogenic Mutations and Oncogenic Mutations {excluding V600K}
+            // when alteration in query is V600E, both relevant alterations are the same
+            // it matters here is that we need to find the specific cancer type first then other tumor type summary
+
+            LinkedHashSet<String> uniqRelevantAlts = new LinkedHashSet<>();
+            Map<String, LinkedHashSet<Alteration>> groupedRelevantAlterations = new HashMap<>();
             for (Alteration alt : relevantAlterations) {
-                tumorTypeSummary = getRelevantTumorTypeSummaryByAlt(evidenceType, alt, matchedTumorType, relevantTumorTypes);
-                if (tumorTypeSummary != null) {
-                    break;
+                String uniqRelevantAlt = AlterationUtils.removeExclusionCriteria(alt.getAlteration());
+                uniqRelevantAlts.add(uniqRelevantAlt);
+                groupedRelevantAlterations.putIfAbsent(uniqRelevantAlt, new LinkedHashSet<>());
+                groupedRelevantAlterations.get(uniqRelevantAlt).add(alt);
+            }
+
+            // Base on the priority of relevant alterations
+            for (String uniqRelevantAlt : uniqRelevantAlts) {
+                for (Alteration alt : groupedRelevantAlterations.get(uniqRelevantAlt)) {
+                    tumorTypeSummary = getRelevantTumorTypeSummaryByAlt(evidenceType, alt, matchedTumorType, relevantTumorTypes);
+                    if (tumorTypeSummary != null) {
+                        break;
+                    }
                 }
                 if (tumorTypeSummary != null) {
                     break;
                 }
 
-                // Get Other Tumor Types summary
-
-                for (TumorType tumorType : relevantTumorTypes) {
-                    tumorTypeSummary = getOtherTumorTypeSummaryByAlt(evidenceType, alt, Collections.singleton(tumorType));
+                for (Alteration alt : groupedRelevantAlterations.get(uniqRelevantAlt)) {
+                    // Get Other Tumor Types summary
+                    for (TumorType tumorType : relevantTumorTypes) {
+                        tumorTypeSummary = getOtherTumorTypeSummaryByAlt(evidenceType, alt, Collections.singleton(tumorType));
+                        if (tumorTypeSummary != null) {
+                            break;
+                        }
+                    }
                     if (tumorTypeSummary != null) {
                         break;
                     }
@@ -144,7 +167,6 @@ public class SummaryUtils {
                 }
             }
         }
-//        }
 
         if (tumorTypeSummary == null) {
             tumorTypeSummary = newTumorTypeSummary();
@@ -877,7 +899,7 @@ public class SummaryUtils {
         }
         Alteration alteration = AlterationUtils.findAlteration(gene, referenceGenome, queryAlteration);
         if (alteration == null) {
-            alteration = AlterationUtils.getAlteration(gene == null ? null: gene.getHugoSymbol(), queryAlteration, null, null, null, null, referenceGenome);
+            alteration = AlterationUtils.getAlteration(gene == null ? null : gene.getHugoSymbol(), queryAlteration, null, null, null, null, referenceGenome);
             AlterationUtils.annotateAlteration(alteration, queryAlteration);
         }
         if (AlterationUtils.isGeneralAlterations(queryAlteration, true)) {
@@ -983,7 +1005,6 @@ public class SummaryUtils {
         }
         return sb.toString();
     }
-
 
 
     public static String convertTumorTypeNameInSummary(String tumorType) {
