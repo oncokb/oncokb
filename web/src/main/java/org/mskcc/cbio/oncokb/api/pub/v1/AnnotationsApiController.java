@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.mskcc.cbio.oncokb.controller.advice.ApiHttpError;
 import org.mskcc.cbio.oncokb.controller.advice.ApiHttpErrorException;
 
 import java.util.*;
@@ -41,7 +42,7 @@ public class AnnotationsApiController {
     @ApiOperation(value = "", notes = "Annotate mutation by protein change.", response = IndicatorQueryResp.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = IndicatorQueryResp.class),
-        @ApiResponse(code = 400, message = "Error, error message will be given.", response = String.class)})
+        @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiHttpError.class)})
     @RequestMapping(value = "/annotate/mutations/byProteinChange",
         produces = {"application/json"},
         method = RequestMethod.GET)
@@ -90,7 +91,7 @@ public class AnnotationsApiController {
     @ApiOperation(value = "", notes = "Annotate mutations by protein change.", response = IndicatorQueryResp.class, responseContainer = "List")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = IndicatorQueryResp.class, responseContainer = "List"),
-        @ApiResponse(code = 400, message = "Error, error message will be given.", response = String.class)})
+        @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiHttpError.class)})
     @RequestMapping(value = "/annotate/mutations/byProteinChange",
         consumes = {"application/json"},
         produces = {"application/json"},
@@ -134,7 +135,7 @@ public class AnnotationsApiController {
     @ApiOperation(value = "", notes = "Annotate mutation by genomic change.", response = IndicatorQueryResp.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = IndicatorQueryResp.class),
-        @ApiResponse(code = 400, message = "Error, error message will be given.", response = String.class)})
+        @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiHttpError.class)})
     @RequestMapping(value = "/annotate/mutations/byGenomicChange",
         produces = {"application/json"},
         method = RequestMethod.GET)
@@ -170,7 +171,7 @@ public class AnnotationsApiController {
     @ApiOperation(value = "", notes = "Annotate mutations by genomic change.", response = IndicatorQueryResp.class, responseContainer = "List")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = IndicatorQueryResp.class, responseContainer = "List"),
-        @ApiResponse(code = 400, message = "Error, error message will be given.", response = String.class)})
+        @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiHttpError.class)})
     @RequestMapping(value = "/annotate/mutations/byGenomicChange",
         consumes = {"application/json"},
         produces = {"application/json"},
@@ -199,7 +200,7 @@ public class AnnotationsApiController {
     @ApiOperation(value = "", notes = "Annotate mutation by HGVSg.", response = IndicatorQueryResp.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = IndicatorQueryResp.class),
-        @ApiResponse(code = 400, message = "Error, error message will be given.", response = String.class)})
+        @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiHttpError.class)})
     @RequestMapping(value = "/annotate/mutations/byHGVSg",
         produces = {"application/json"},
         method = RequestMethod.GET)
@@ -236,7 +237,7 @@ public class AnnotationsApiController {
     @ApiOperation(value = "", notes = "Annotate mutations by genomic change.", response = IndicatorQueryResp.class, responseContainer = "List")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = IndicatorQueryResp.class, responseContainer = "List"),
-        @ApiResponse(code = 400, message = "Error, error message will be given.", response = String.class)})
+        @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiHttpError.class)})
     @RequestMapping(value = "/annotate/mutations/byHGVSg",
         consumes = {"application/json"},
         produces = {"application/json"},
@@ -271,7 +272,7 @@ public class AnnotationsApiController {
     @ApiOperation(value = "", notes = "Annotate copy number alteration.", response = IndicatorQueryResp.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = IndicatorQueryResp.class),
-        @ApiResponse(code = 400, message = "Error, error message will be given.", response = String.class)})
+        @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiHttpError.class)})
     @RequestMapping(value = "/annotate/copyNumberAlterations",
         produces = {"application/json"},
         method = RequestMethod.GET)
@@ -317,7 +318,7 @@ public class AnnotationsApiController {
     @ApiOperation(value = "", notes = "Annotate copy number alterations.", response = IndicatorQueryResp.class, responseContainer = "List")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = IndicatorQueryResp.class, responseContainer = "List"),
-        @ApiResponse(code = 400, message = "Error, error message will be given.", response = String.class)})
+        @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiHttpError.class)})
     @RequestMapping(value = "/annotate/copyNumberAlterations",
         consumes = {"application/json"},
         produces = {"application/json"},
@@ -369,7 +370,7 @@ public class AnnotationsApiController {
     @ApiOperation(value = "", notes = "Annotate structural variant.", response = IndicatorQueryResp.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = IndicatorQueryResp.class),
-        @ApiResponse(code = 400, message = "Error, error message will be given.", response = String.class)})
+        @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiHttpError.class)})
     @RequestMapping(value = "/annotate/structuralVariants",
         produces = {"application/json"},
         method = RequestMethod.GET)
@@ -436,7 +437,7 @@ public class AnnotationsApiController {
     @ApiOperation(value = "", notes = "Annotate structural variants.", response = IndicatorQueryResp.class, responseContainer = "List")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = IndicatorQueryResp.class, responseContainer = "List"),
-        @ApiResponse(code = 400, message = "Error, error message will be given.", response = String.class)})
+        @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiHttpError.class)})
     @RequestMapping(value = "/annotate/structuralVariants",
         consumes = {"application/json"},
         produces = {"application/json"},

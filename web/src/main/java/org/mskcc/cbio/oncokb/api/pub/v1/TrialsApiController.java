@@ -20,6 +20,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.mskcc.cbio.oncokb.config.annotation.PremiumPublicApi;
+import org.mskcc.cbio.oncokb.controller.advice.ApiHttpError;
+import org.mskcc.cbio.oncokb.controller.advice.ApiHttpErrorException;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -52,13 +54,12 @@ public class TrialsApiController {
     @PremiumPublicApi
     @ApiOperation("Return a list of trials using OncoTree Code and/or treatment")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "OK", responseContainer = "List"),
-        @ApiResponse(code = 400, message = "Error", response = String.class)})
+        @ApiResponse(code = 400, message = "Error", response = ApiHttpError.class)})
     @RequestMapping(value = "/trials", produces = {"application/json"}, method = RequestMethod.GET)
     public ResponseEntity<List<Trial>> trialsMatchingGet(
         @ApiParam(value = "", required = true) @RequestParam(value = "", required = true) String oncoTreeCode,
         @ApiParam(value = "", required = false) @RequestParam(value = "", required = false) String treatment)
         throws IOException, ParseException {
-        HttpStatus status = HttpStatus.OK;
 
         AWSCredentials credentials = new BasicAWSCredentials(s3AccessKey, s3SecretKey);
         AmazonS3 s3client = AmazonS3ClientBuilder.standard()
@@ -73,28 +74,28 @@ public class TrialsApiController {
         if (jsonObject.containsKey(oncoTreeCode)) {
             tumor = getTumor(jsonObject, oncoTreeCode);
             if (treatment == null) {
-                return new ResponseEntity<List<Trial>>(tumor.getTrials(), status);
+                return new ResponseEntity<List<Trial>>(tumor.getTrials(), HttpStatus.OK);
             }
 
             List<Trial> trial = getTrialByTreatment(tumor.getTrials(), treatment);
-            return new ResponseEntity<List<Trial>>(trial, status);
+            return new ResponseEntity<List<Trial>>(trial, HttpStatus.OK);
         }
-        return new ResponseEntity<List<Trial>>(new ArrayList<>(), status);
+        return new ResponseEntity<List<Trial>>(new ArrayList<>(), HttpStatus.OK);
     }
 
     @PremiumPublicApi
     @ApiOperation("Return a list of trials using cancer types")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "OK", responseContainer = "Map"),
-        @ApiResponse(code = 400, message = "Error", response = String.class)})
+        @ApiResponse(code = 400, message = "Error", response = ApiHttpError.class),
+        @ApiResponse(code = 404, message = "Error", responseContainer = "Map")})
     @RequestMapping(value = "/trials/cancerTypes", produces = {"application/json"}, method = RequestMethod.POST)
     public ResponseEntity<Map<String, List<Trial>>> trialsGetByCancerTypes(
         @ApiParam(value = "", required = true) @RequestBody() CancerTypesQuery body)
-        throws UnsupportedEncodingException, IOException, ParseException {
-        HttpStatus status = HttpStatus.OK;
+        throws UnsupportedEncodingException, IOException, ParseException, ApiHttpErrorException {
         Map<String, List<Trial>> result = new HashMap<>();
 
         if (body == null) {
-            status = HttpStatus.BAD_REQUEST;
+            throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         } else {
             AWSCredentials credentials = new BasicAWSCredentials(s3AccessKey, s3SecretKey);
             AmazonS3 s3client = AmazonS3ClientBuilder.standard()
@@ -121,7 +122,7 @@ public class TrialsApiController {
                     }
                 }
                 result.put(SpecialTumorType.ALL_TUMORS.getTumorType(), trials);
-                return new ResponseEntity<>(result, status);
+                return new ResponseEntity<>(result, HttpStatus.OK);
             }
 
             for (String cancerType : cancerTypes) {
@@ -144,11 +145,10 @@ public class TrialsApiController {
             }
 
             if (result.isEmpty()) {
-                status = HttpStatus.NOT_FOUND;
-                return new ResponseEntity<>(result, status);
+                return new ResponseEntity<>(result, HttpStatus.NOT_FOUND);
             }
         }
-        return new ResponseEntity<>(result, status);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     private Tumor getTumor(JSONObject jsonObject, String oncoTreeCode) {
