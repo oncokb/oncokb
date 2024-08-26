@@ -1,17 +1,18 @@
 package org.mskcc.cbio.oncokb.apiModels.annotation;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class AnnotateSampleQuery implements java.io.Serializable {
-    private List<AnnotateStructuralVariantQuery> structuralVariants;
-    private List<AnnotateCopyNumberAlterationQuery> copyNumberAlterations;
-    private MutationsQuery mutations;
+    private List<AnnotateStructuralVariantQuery> structuralVariants = new ArrayList<>();
+    private List<AnnotateCopyNumberAlterationQuery> copyNumberAlterations = new ArrayList<>();
+    private MutationsQuery mutations = new MutationsQuery();
 
     public static class MutationsQuery {
-        private List<AnnotateMutationByGenomicChangeQuery> genomicChange;
-        private List cDnaChange;
-        private List<AnnotateMutationByProteinChangeQuery> proteinChange;
-        private List<AnnotateMutationByHGVSgQuery> hgvsg;
+        private List<AnnotateMutationByGenomicChangeQuery> genomicChange = new ArrayList<>();
+        private List cDnaChange = new ArrayList<>();
+        private List<AnnotateMutationByProteinChangeQuery> proteinChange = new ArrayList<>();
+        private List<AnnotateMutationByHGVSgQuery> hgvsg = new ArrayList<>();
 
         public List<AnnotateMutationByGenomicChangeQuery> getGenomicChange() {
             return genomicChange;

@@ -10,6 +10,7 @@ import org.mskcc.cbio.oncokb.config.annotation.PremiumPublicApi;
 import org.mskcc.cbio.oncokb.config.annotation.PublicApi;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.model.*;
+import org.mskcc.cbio.oncokb.model.epic.GenomicData;
 import org.mskcc.cbio.oncokb.util.*;
 import org.oncokb.oncokb_transcript.ApiException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import com.amazonaws.services.devicefarm.model.Sample;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -461,40 +464,38 @@ public class AnnotationsApiController {
         if (body == null) {
             status = HttpStatus.BAD_REQUEST;
         } else {
-            List<IndicatorQueryResp> structuralVariants = new ArrayList<>();
-            List<IndicatorQueryResp> copyNumberAlterations = new ArrayList<>();
-            List<IndicatorQueryResp> genomicChange = new ArrayList<>();
-            List<IndicatorQueryResp> cDnaChange = new ArrayList<>();
-            List<IndicatorQueryResp> proteinChange = new ArrayList<>();
-            List<IndicatorQueryResp> hgvsg = new ArrayList<>();
-
-            if (body.getStructuralVariants() != null) {
-                structuralVariants = annotateStrucutralVariants(body.getStructuralVariants());
-            }
-            if (body.getCopyNumberAlterations() != null) {
-                copyNumberAlterations = annotateCopyNumberAlterations(body.getCopyNumberAlterations());
-            }
-            if (body.getMutations() != null) {
-                if (body.getMutations().getGenomicChange() != null) {
-                    genomicChange = annotateMutationsByGenomicChange(body.getMutations().getGenomicChange());
-                }
-                if (body.getMutations().getProteinChange() != null) {
-                    proteinChange = annotateMutationsByProteinChange(body.getMutations().getProteinChange());
-                }
-                if (body.getMutations().getHgvsg() != null) {
-                    hgvsg = annotateMutationsByHGVS(body.getMutations().getHgvsg());
-                }
-            }
-          
-            response.setStructuralVariants(structuralVariants);
-            response.setCopyNumberAlterations(copyNumberAlterations);
-            response.setMutations(Stream.of(genomicChange, cDnaChange, proteinChange, hgvsg)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList())
-            );
+            response = annotateSample(body);
         }
 
         return new ResponseEntity<SampleQueryResp>(response, status);
+    }
+
+    @PublicApi
+    @PremiumPublicApi
+    @ApiOperation(value = "", notes = "Annotate epic genomic data.", response = SampleQueryResp.class, responseContainer = "List")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK", response = SampleQueryResp.class, responseContainer = "List"),
+        @ApiResponse(code = 400, message = "Error, error message will be given.", response = String.class)})
+    @RequestMapping(value = "/annotate/epic",
+        consumes = {"application/json"},
+        produces = {"application/json"},
+        method = RequestMethod.POST)
+    public ResponseEntity<List<SampleQueryResp>> annotateEpicPost(
+        @ApiParam(value = "Epic genomic data in FHIR format", required = true) @RequestBody(required = true) GenomicData body
+    ) throws ApiException, org.genome_nexus.ApiException {
+        ArrayList<SampleQueryResp> response = new ArrayList<>();
+        HttpStatus status = HttpStatus.OK;
+
+        if (body == null) {
+            status = HttpStatus.BAD_REQUEST;
+        } else {
+            List<AnnotateSampleQuery> samples = body.getSamples();
+            for (AnnotateSampleQuery sample : samples) {
+                response.add(annotateSample(sample));
+            }
+        }
+
+        return new ResponseEntity<List<SampleQueryResp>>(response, status);
     }
 
     @PremiumPublicApi
@@ -576,6 +577,43 @@ public class AnnotationsApiController {
         }
 
         return result;
+    }
+
+    private SampleQueryResp annotateSample(AnnotateSampleQuery sample) throws ApiException, org.genome_nexus.ApiException {
+        SampleQueryResp annotatedSample = new SampleQueryResp();
+
+        List<IndicatorQueryResp> structuralVariants = new ArrayList<>();
+        List<IndicatorQueryResp> copyNumberAlterations = new ArrayList<>();
+        List<IndicatorQueryResp> genomicChange = new ArrayList<>();
+        List<IndicatorQueryResp> cDnaChange = new ArrayList<>();
+        List<IndicatorQueryResp> proteinChange = new ArrayList<>();
+        List<IndicatorQueryResp> hgvsg = new ArrayList<>();
+
+        if (sample.getStructuralVariants() != null) {
+            structuralVariants = annotateStrucutralVariants(sample.getStructuralVariants());
+        }
+        if (sample.getCopyNumberAlterations() != null) {
+            copyNumberAlterations = annotateCopyNumberAlterations(sample.getCopyNumberAlterations());
+        }
+        if (sample.getMutations() != null) {
+            if (sample.getMutations().getGenomicChange() != null) {
+                genomicChange = annotateMutationsByGenomicChange(sample.getMutations().getGenomicChange());
+            }
+            if (sample.getMutations().getProteinChange() != null) {
+                proteinChange = annotateMutationsByProteinChange(sample.getMutations().getProteinChange());
+            }
+            if (sample.getMutations().getHgvsg() != null) {
+                hgvsg = annotateMutationsByHGVS(sample.getMutations().getHgvsg());
+            }
+        }
+        
+        annotatedSample.setStructuralVariants(structuralVariants);
+        annotatedSample.setCopyNumberAlterations(copyNumberAlterations);
+        annotatedSample.setMutations(Stream.of(genomicChange, cDnaChange, proteinChange, hgvsg)
+            .flatMap(Collection::stream)
+            .collect(Collectors.toList())
+        );
+        return annotatedSample;
     }
 
     private List<IndicatorQueryResp> annotateCopyNumberAlterations(List<AnnotateCopyNumberAlterationQuery> copyNumberAlterations) {
