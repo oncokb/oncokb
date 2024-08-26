@@ -10,7 +10,7 @@ public class ApiHttpErrorExceptionHandler {
     @ExceptionHandler(ApiHttpErrorException.class)
     public final ResponseEntity<ApiHttpError> handleException(ApiHttpErrorException ex, WebRequest request) {
         String path = request.getDescription(false).replaceFirst("uri=", "");
-        ApiHttpError error = new ApiHttpError(path, ex.getHttpStats(), ex.getMessage());
-        return new ResponseEntity<>(error, ex.getHttpStats());
+        ApiHttpError error = new ApiHttpError(path, ex.getHttpStatus(), ex.getMessage());
+        return new ResponseEntity<>(error, ex.getHttpStatus());
     }
 }

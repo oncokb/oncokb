@@ -11,11 +11,12 @@ public class ApiHttpError {
     private String message;
 
     public ApiHttpError(String path, HttpStatus status, String message) {
-        this.setType("https://www.oncokb.org/problem/problem-with-message");
+        // TODO: add problem endpoint
+        // this.setType("https://www.oncokb.org/problem/problem-with-message");
         this.setPath(path);
         this.setTitle(status.toString());
         this.setStatus(status.value());
-        this.setDetail(status.value() + " " + status.name() + " " + message);
+        this.setDetail(message);
         this.setMessage("error.http." + status.value());
     }
 

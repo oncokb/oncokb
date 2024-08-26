@@ -5,14 +5,14 @@ import org.springframework.http.HttpStatus;
 
 public class ApiHttpErrorException extends Exception {
 
-    private HttpStatus httpStats;
+    private HttpStatus httpStatus;
 
-    public HttpStatus getHttpStats() {
-        return httpStats;
+    public HttpStatus getHttpStatus() {
+        return httpStatus;
     }
 
-    public ApiHttpErrorException(String message, HttpStatus httpStats) {
+    public ApiHttpErrorException(String message, HttpStatus httpStatus) {
         super(message);
-        this.httpStats = httpStats;
+        this.httpStatus = httpStatus;
     }
 }
