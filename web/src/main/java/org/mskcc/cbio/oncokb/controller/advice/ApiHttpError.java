@@ -54,7 +54,7 @@ public class ApiHttpError {
     * Gets the title of the error, typically representing the status text.
     *
     * @return The title of the error.
-     */
+    */
     public String getTitle() {
         return title;
     }
@@ -63,7 +63,7 @@ public class ApiHttpError {
     * Sets the title of the error.
     *
     * @param title The title of the error.
-     */
+    */
     public void setTitle(String title) {
         this.title = title;
     }
@@ -72,7 +72,7 @@ public class ApiHttpError {
     * Gets the HTTP status code of the error.
     *
     * @return The HTTP status code.
-     */
+    */
     public int getStatus() {
         return status;
     }
@@ -81,7 +81,7 @@ public class ApiHttpError {
     * Sets the HTTP status code of the error.
     *
     * @param status The HTTP status code.
-     */
+    */
     public void setStatus(int status) {
         this.status = status;
     }
@@ -90,7 +90,7 @@ public class ApiHttpError {
     * Gets the detailed description of the error.
     *
     * @return The detail of the error.
-     */
+    */
     public String getDetail() {
         return detail;
     }
@@ -99,7 +99,7 @@ public class ApiHttpError {
     * Sets the detailed description of the error.
     *
     * @param detail The detail of the error.
-     */
+    */
     public void setDetail(String detail) {
         this.detail = detail;
     }
@@ -108,7 +108,7 @@ public class ApiHttpError {
     * Gets the request path that caused the error.
     *
     * @return The request path.
-     */
+    */
     public String getPath() {
         return path;
     }
@@ -117,7 +117,7 @@ public class ApiHttpError {
     * Sets the request path that caused the error.
     *
     * @param path The request path.
-     */
+    */
     public void setPath(String path) {
         this.path = path;
     }
@@ -126,7 +126,7 @@ public class ApiHttpError {
     * Gets the error message, typically used for localization.
     *
     * @return The error message.
-     */
+    */
     public String getMessage() {
         return message;
     }
@@ -135,7 +135,7 @@ public class ApiHttpError {
     * Sets the error message.
     *
     * @param message The error message.
-     */
+    */
     public void setMessage(String message) {
         this.message = message;
     }
