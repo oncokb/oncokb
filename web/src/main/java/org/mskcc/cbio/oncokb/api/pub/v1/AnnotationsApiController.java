@@ -14,6 +14,9 @@ import org.mskcc.cbio.oncokb.model.epic.GenomicData;
 import org.mskcc.cbio.oncokb.util.*;
 import org.oncokb.oncokb_transcript.ApiException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -21,8 +24,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import com.amazonaws.services.devicefarm.model.Sample;
+import org.springframework.web.client.RestTemplate;
+import com.google.gson.Gson;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -479,23 +482,35 @@ public class AnnotationsApiController {
     @RequestMapping(value = "/annotate/epic",
         consumes = {"application/json"},
         produces = {"application/json"},
-        method = RequestMethod.POST)
-    public ResponseEntity<List<SampleQueryResp>> annotateEpicPost(
-        @ApiParam(value = "Epic genomic data in FHIR format", required = true) @RequestBody(required = true) GenomicData body
+        method = RequestMethod.GET)
+    public ResponseEntity<List<SampleQueryResp>> annotateEpicGet(
+        @RequestParam String iss, @RequestParam String accessToken, @RequestParam String patientId
     ) throws ApiException, org.genome_nexus.ApiException {
-        ArrayList<SampleQueryResp> response = new ArrayList<>();
-        HttpStatus status = HttpStatus.OK;
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
 
-        if (body == null) {
-            status = HttpStatus.BAD_REQUEST;
-        } else {
-            List<AnnotateSampleQuery> samples = body.getSamples();
-            for (AnnotateSampleQuery sample : samples) {
-                response.add(annotateSample(sample));
-            }
+        headers.set("Authorization", "Bearer " + accessToken);
+        HttpEntity<Object> request = new HttpEntity<>(headers);
+        String uri =
+            iss +
+            "/" +
+            "Observation?patient=" +
+            patientId +
+            "&subject=" +
+            patientId +
+            "&category=genomics";
+        HttpEntity<String> epicResponse = restTemplate.exchange(uri, HttpMethod.GET, request, String.class);
+
+        Gson gson = new Gson();
+        GenomicData genomicData = gson.fromJson(epicResponse.getBody(), GenomicData.class);
+
+        List<SampleQueryResp> response = new ArrayList<>();
+        List<AnnotateSampleQuery> samples = genomicData.getSamples();
+        for (AnnotateSampleQuery sample : samples) {
+            response.add(annotateSample(sample));
         }
 
-        return new ResponseEntity<List<SampleQueryResp>>(response, status);
+        return new ResponseEntity<List<SampleQueryResp>>(response, HttpStatus.OK);
     }
 
     @PremiumPublicApi
