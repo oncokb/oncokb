@@ -9,7 +9,6 @@ import org.springframework.http.HttpStatus;
 * Example JSON representation:
 * <pre>
 * {
-*   "type": "https://www.oncokb.org/problem/problem-with-message",
 *   "title": "Method Not Allowed",
 *   "status": 405,
 *   "detail": "Request method 'POST' is not supported",
