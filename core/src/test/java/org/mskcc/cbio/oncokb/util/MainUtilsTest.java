@@ -61,22 +61,26 @@ public class MainUtilsTest extends TestCase {
     }
 
     public void testToLowerCaseExceptAllCaps() {
-        assertEquals("test", toLowerCaseExceptAllCaps("test"));
-        assertEquals("test", toLowerCaseExceptAllCaps("Test"));
-        assertEquals("test", toLowerCaseExceptAllCaps("TesT"));
-        assertEquals("TEST", toLowerCaseExceptAllCaps("TEST"));
-        assertEquals("TEST-A", toLowerCaseExceptAllCaps("TEST-A"));
-        assertEquals("test-A", toLowerCaseExceptAllCaps("Test-A"));
-        assertEquals("test_a", toLowerCaseExceptAllCaps("Test_A"));
-        assertEquals("test A", toLowerCaseExceptAllCaps("TesT A"));
-        assertEquals("TEST A", toLowerCaseExceptAllCaps("TEST A"));
-        assertEquals("", toLowerCaseExceptAllCaps(""));
-        assertEquals("_", toLowerCaseExceptAllCaps("_"));
-        assertEquals("1", toLowerCaseExceptAllCaps("1"));
-        assertEquals("-", toLowerCaseExceptAllCaps("-"));
-        assertEquals("t", toLowerCaseExceptAllCaps("t"));
-        assertEquals("T", toLowerCaseExceptAllCaps("T"));
-        assertEquals("?", toLowerCaseExceptAllCaps("?"));
+        assertEquals("test", lowerCaseAlterationName("test"));
+        assertEquals("test", lowerCaseAlterationName("Test"));
+        assertEquals("test", lowerCaseAlterationName("TesT"));
+        assertEquals("TEST", lowerCaseAlterationName("TEST"));
+        assertEquals("TEST-A", lowerCaseAlterationName("TEST-A"));
+        assertEquals("test-A", lowerCaseAlterationName("Test-A"));
+        assertEquals("test_a", lowerCaseAlterationName("Test_A"));
+        assertEquals("test A", lowerCaseAlterationName("TesT A"));
+        assertEquals("TEST A", lowerCaseAlterationName("TEST A"));
+        assertEquals("TEst", lowerCaseAlterationName("TEst"));
+        assertEquals("TEst-test", lowerCaseAlterationName("TEst-tEst"));
+        assertEquals("teST", lowerCaseAlterationName("teST"));
+        assertEquals("test", lowerCaseAlterationName("tesT"));
+        assertEquals("", lowerCaseAlterationName(""));
+        assertEquals("_", lowerCaseAlterationName("_"));
+        assertEquals("1", lowerCaseAlterationName("1"));
+        assertEquals("-", lowerCaseAlterationName("-"));
+        assertEquals("t", lowerCaseAlterationName("t"));
+        assertEquals("T", lowerCaseAlterationName("T"));
+        assertEquals("?", lowerCaseAlterationName("?"));
     }
 
     public void testCompareAnnotationSearchQueryType() {

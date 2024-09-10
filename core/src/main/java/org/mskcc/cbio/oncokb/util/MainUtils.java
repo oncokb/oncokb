@@ -815,20 +815,20 @@ public class MainUtils {
         }
     }
 
-    public static String toLowerCaseExceptAllCaps(String text) {
-        Pattern pattern = Pattern.compile("\\w*[a-z]\\w*");
+    public static String lowerCaseAlterationName(String text) {
+        Pattern pattern = Pattern.compile("[A-Z]{2,}|\\b[A-Z]+\\b");
         Matcher matcher = pattern.matcher(text);
         StringBuilder sb = new StringBuilder();
         int currentIndex = 0;
         while (matcher.find()) {
-            sb.append(text, currentIndex, matcher.start());
-            sb.append(text.substring(matcher.start(), matcher.end()).toLowerCase());
+            sb.append(text.substring(currentIndex, matcher.start()).toLowerCase());
+            sb.append(text.substring(matcher.start(), matcher.end()));
             currentIndex = matcher.end();
         }
         if (currentIndex != text.length() - 1) {
-            sb.append(text.substring(currentIndex));
+            sb.append(text.substring(currentIndex).toLowerCase());
         } else if (sb.length() != text.length()) {
-            sb.append(text);
+            sb.append(text.toLowerCase());
         }
         return sb.toString();
     }
