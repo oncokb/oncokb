@@ -455,11 +455,11 @@ public class SummaryUtils {
         StringBuilder sb = new StringBuilder();
         String queryAlteration = query.getAlteration();
         String altName = getGeneMutationNameInVariantSummary(alteration.getGene(), query.getReferenceGenome(), query.getHugoSymbol(), queryAlteration);
-        Boolean appendThe = appendThe(queryAlteration);
         Boolean isPlural = false;
         if (specialAlterations.stream().anyMatch(sa -> altName.toLowerCase().contains(sa.toLowerCase() + "s"))) {
             isPlural = true;
         }
+        Boolean appendThe = appendThe(queryAlteration, isPlural);
         if (oncogenicity != null) {
             if (manuallyAssignedTruncatingMutation(query)) {
                 return "This " + alteration.getGene().getHugoSymbol() + " " + query.getSvType().name().toLowerCase() + " may be a truncating alteration and is " + getOncogenicSubTextFromOncogenicity(oncogenicity) + ".";
@@ -875,14 +875,14 @@ public class SummaryUtils {
         return oncoCate;
     }
 
-    private static Boolean appendThe(String queryAlteration) {
+    private static Boolean appendThe(String queryAlteration, boolean isPlural) {
         Boolean appendThe = true;
 
         if (queryAlteration.toLowerCase().contains("deletion")
             || queryAlteration.toLowerCase().contains("amplification")
             || queryAlteration.toLowerCase().matches("gain")
             || queryAlteration.toLowerCase().matches("loss")
-            || queryAlteration.toLowerCase().contains("fusions")) {
+            || isPlural) {
             appendThe = false;
         }
         return appendThe;
