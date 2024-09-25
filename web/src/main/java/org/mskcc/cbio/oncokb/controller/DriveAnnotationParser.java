@@ -305,6 +305,7 @@ public class DriveAnnotationParser {
         String mutationStr = mutationObj.has("name") ? mutationObj.getString("name").trim() : null;
 
         if (mutationStr != null && !mutationStr.isEmpty() && !mutationStr.contains("?")) {
+            EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
             System.out.println(spaceStrByNestLevel(nestLevel) + "Mutation: " + mutationStr);
 
             AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
@@ -369,21 +370,25 @@ public class DriveAnnotationParser {
                     evidence.setDescription(effectDesc);
                     setDocuments(effectDesc, evidence);
                 }
-
-//                if ((additionalME != null && !additionalME.trim().isEmpty())) {
-//                    evidence.setAdditionalInfo(additionalME);
-//                }
-
                 evidence.setKnownEffect(effect);
                 evidence.setUuid(effect_uuid);
 
                 Date effect_lastEdit = getMostRecentDate(lastEditDatesEffect);
                 evidence.setLastEdit(effect_lastEdit);
+                evidenceBo.save(evidence);
+            }
 
-//                Date effect_lastReview = getMostRecentDate(lastReviewDatesEffect);
-//                evidence.setLastReview(effect_lastReview);
-
-                EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+            // add mutation summary
+            String mutationSummary = mutationObj.has("summary") ? mutationObj.getString("summary") : "";
+            if (StringUtils.isNotEmpty(mutationSummary)) {
+                Evidence evidence = new Evidence();
+                evidence.setEvidenceType(EvidenceType.MUTATION_SUMMARY);
+                evidence.setAlterations(alterations);
+                evidence.setGene(gene);
+                evidence.setDescription(mutationSummary);
+                setDocuments(mutationSummary, evidence);
+                evidence.setUuid(getUUID(mutationObj, "summary"));
+                evidence.setLastEdit(getLastEdit(mutationObj, "summary"));
                 evidenceBo.save(evidence);
             }
 
@@ -578,7 +583,7 @@ public class DriveAnnotationParser {
             alterations,
             tumorTypes,
             excludedCancerTypes,
-            cancerObj.has("diagnostic") ? diagnosticRCT: relevantCancerTypes,
+            cancerObj.has("diagnostic") ? diagnosticRCT : relevantCancerTypes,
             EvidenceType.DIAGNOSTIC_SUMMARY,
             nestLevel,
             diagnosticEvidence == null ? null : diagnosticEvidence.getLevelOfEvidence()
@@ -1002,16 +1007,16 @@ public class DriveAnnotationParser {
         RelevantTumorTypeDirection direction = level != null && LevelOfEvidence.LEVEL_Dx1.equals(level) ? RelevantTumorTypeDirection.UPWARD : RelevantTumorTypeDirection.DOWNWARD;
 
         Set<TumorType> queriedTumorTypes = tumorTypes.stream().map(tt -> {
-            return TumorTypeUtils.findRelevantTumorTypes(TumorTypeUtils.getTumorTypeName(tt), StringUtils.isEmpty(tt.getSubtype()), direction, false);
-        })
-        .flatMap(Collection::stream)
-        .collect(Collectors.toSet());
+                return TumorTypeUtils.findRelevantTumorTypes(TumorTypeUtils.getTumorTypeName(tt), StringUtils.isEmpty(tt.getSubtype()), direction, false);
+            })
+            .flatMap(Collection::stream)
+            .collect(Collectors.toSet());
 
         Set<TumorType> queriedExcludedTumorTypes = excludedTumorTypes.stream().map(ett -> {
-            return TumorTypeUtils.findRelevantTumorTypes(TumorTypeUtils.getTumorTypeName(ett), StringUtils.isEmpty(ett.getSubtype()), direction, false);
-        })
-        .flatMap(Collection::stream)
-        .collect(Collectors.toSet());
+                return TumorTypeUtils.findRelevantTumorTypes(TumorTypeUtils.getTumorTypeName(ett), StringUtils.isEmpty(ett.getSubtype()), direction, false);
+            })
+            .flatMap(Collection::stream)
+            .collect(Collectors.toSet());
 
         queriedTumorTypes.removeAll(queriedExcludedTumorTypes);
         queriedTumorTypes.removeAll(excludedRelevantCancerTypes);

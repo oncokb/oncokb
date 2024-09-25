@@ -45,3 +45,7 @@ PPP2R2A	Test-PPP2R2A fusion	Likely Oncogenic	The Test-PPP2R2A fusion leads to tr
 PTPN1	Test-PTPN1 fusion	Likely Oncogenic	The Test-PTPN1 fusion leads to truncation of the PTPN1 tumor suppressor gene and is considered likely oncogenic.
 ### Fusion in neither
 GATA1	Test-GATA1 fusion	Unknown	The Test-GATA1 fusion has not specifically been reviewed by the OncoKB team, and therefore its biological significance is unknown.
+
+### Plural mutation
+TP53	DNA binding domain deletions	Likely Oncogenic	TP53 DNA binding domain deletions are likely oncogenic.
+MED12	Exon 1 mutations	Oncogenic	MED12 exon 1 mutations are known to be oncogenic.

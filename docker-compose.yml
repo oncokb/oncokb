@@ -4,7 +4,7 @@ services:
   # oncokb requires that a MySQL server is started and has the the oncokb data imported into the database.
   # Reach out to contact@oncokb.org to get access to the data dump
   oncokb:
-    image: oncokb/oncokb:3.18.2
+    image: oncokb/oncokb:3.20.3
     ports:
       - "8080:8080"
     environment:

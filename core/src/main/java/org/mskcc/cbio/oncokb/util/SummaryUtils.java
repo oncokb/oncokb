@@ -4,9 +4,7 @@ import org.apache.commons.collections.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.TumorType;
-import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.Tumor;
 
-import java.sql.Ref;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -15,9 +13,8 @@ import java.util.stream.Collectors;
 
 import static org.mskcc.cbio.oncokb.Constants.IN_FRAME_DELETION;
 import static org.mskcc.cbio.oncokb.Constants.IN_FRAME_INSERTION;
-import static org.mskcc.cbio.oncokb.model.StructuralAlteration.TRUNCATING_MUTATIONS;
 import static org.mskcc.cbio.oncokb.util.MainUtils.altNameShouldConvertToLowerCase;
-import static org.mskcc.cbio.oncokb.util.MainUtils.toLowerCaseExceptAllCaps;
+import static org.mskcc.cbio.oncokb.util.MainUtils.lowerCaseAlterationName;
 import static org.mskcc.cbio.oncokb.util.MainUtils.manuallyAssignedTruncatingMutation;
 
 /**
@@ -455,11 +452,11 @@ public class SummaryUtils {
         StringBuilder sb = new StringBuilder();
         String queryAlteration = query.getAlteration();
         String altName = getGeneMutationNameInVariantSummary(alteration.getGene(), query.getReferenceGenome(), query.getHugoSymbol(), queryAlteration);
-        Boolean appendThe = appendThe(queryAlteration);
         Boolean isPlural = false;
         if (specialAlterations.stream().anyMatch(sa -> altName.toLowerCase().contains(sa.toLowerCase() + "s"))) {
             isPlural = true;
         }
+        Boolean appendThe = appendThe(queryAlteration, isPlural);
         if (oncogenicity != null) {
             if (manuallyAssignedTruncatingMutation(query)) {
                 return "This " + alteration.getGene().getHugoSymbol() + " " + query.getSvType().name().toLowerCase() + " may be a truncating alteration and is " + getOncogenicSubTextFromOncogenicity(oncogenicity) + ".";
@@ -875,14 +872,14 @@ public class SummaryUtils {
         return oncoCate;
     }
 
-    private static Boolean appendThe(String queryAlteration) {
+    private static Boolean appendThe(String queryAlteration, boolean isPlural) {
         Boolean appendThe = true;
 
         if (queryAlteration.toLowerCase().contains("deletion")
             || queryAlteration.toLowerCase().contains("amplification")
             || queryAlteration.toLowerCase().matches("gain")
             || queryAlteration.toLowerCase().matches("loss")
-            || queryAlteration.toLowerCase().contains("fusions")) {
+            || isPlural) {
             appendThe = false;
         }
         return appendThe;
@@ -944,7 +941,7 @@ public class SummaryUtils {
             if (NamingUtils.hasAbbreviation(queryAlteration)) {
                 sb.append(queryHugoSymbol).append(" ").append(NamingUtils.getFullName(queryAlteration)).append(" (").append(queryAlteration).append(")");
             } else {
-                String mappedAltName = altNameShouldConvertToLowerCase(alteration) ? toLowerCaseExceptAllCaps(alteration.getName()) : alteration.getName();
+                String mappedAltName = altNameShouldConvertToLowerCase(alteration) ? lowerCaseAlterationName(alteration.getName()) : alteration.getName();
                 sb.append(queryHugoSymbol).append(" ").append(mappedAltName);
                 String lman = ((mappedAltName.endsWith("s") && mappedAltName.length() > 2) ? mappedAltName.substring(0, mappedAltName.length() - 1) : mappedAltName).toLowerCase();
                 List<String> matchedSpecialAlterations = specialAlterations.stream().filter(lman::contains).collect(Collectors.toList());
@@ -956,7 +953,7 @@ public class SummaryUtils {
             if (NamingUtils.hasAbbreviation(queryAlteration)) {
                 sb.append(queryHugoSymbol).append(" ").append(NamingUtils.getFullName(queryAlteration)).append(" (").append(queryAlteration).append(")");
             } else {
-                String mappedAltName = altNameShouldConvertToLowerCase(alteration) ? toLowerCaseExceptAllCaps(alteration.getName()) : alteration.getName();
+                String mappedAltName = altNameShouldConvertToLowerCase(alteration) ? lowerCaseAlterationName(alteration.getName()) : alteration.getName();
                 if ((gene != null && mappedAltName.contains(gene.getHugoSymbol())) || mappedAltName.contains(queryHugoSymbol)) {
                     sb.append(mappedAltName);
                 } else {

@@ -13,6 +13,8 @@ import org.mskcc.cbio.oncokb.apiModels.TranscriptResult;
 import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotateMutationByGenomicChangeQuery;
 import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotateMutationByHGVSgQuery;
 import org.mskcc.cbio.oncokb.cache.CacheFetcher;
+import org.mskcc.cbio.oncokb.controller.advice.ApiHttpError;
+import org.mskcc.cbio.oncokb.controller.advice.ApiHttpErrorException;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.model.ReferenceGenome;
 import org.mskcc.cbio.oncokb.model.genomeNexusPreAnnotations.GenomeNexusAnnotatedVariantInfo;
@@ -65,74 +67,71 @@ public class PrivateGenomeNexusController {
     @ApiOperation(value = "", notes = "Fetch Genome Nexus variant info by HGVSg", response = GenomeNexusAnnotatedVariantInfo.class, responseContainer = "List")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = GenomeNexusAnnotatedVariantInfo.class, responseContainer = "List"),
-        @ApiResponse(code = 400, message = "Error, error message will be given.", response = String.class)})
+        @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiHttpError.class)})
     @RequestMapping(value = "/fetchGnVariants/byHGVSg",
         consumes = {"application/json"},
         produces = {"application/json"},
         method = RequestMethod.POST)
     public ResponseEntity<List<GenomeNexusAnnotatedVariantInfo>> fetchGenomeNexusVariantInfoByHGVSgPost(
         @ApiParam(value = "List of queries. Please see swagger.json for request body format.", required = true) @RequestBody() List<AnnotateMutationByHGVSgQuery> body
-    ) throws ApiException, org.genome_nexus.ApiException {
-        HttpStatus status = HttpStatus.OK;
+    ) throws ApiException, org.genome_nexus.ApiException, ApiHttpErrorException {
         List<GenomeNexusAnnotatedVariantInfo> result = new ArrayList<>();
 
         if (body == null) {
-            status = HttpStatus.BAD_REQUEST;
+            throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         } else {
             for (AnnotateMutationByHGVSgQuery query : body) {
                 GenomeNexusAnnotatedVariantInfo resp = GenomeNexusUtils.getAnnotatedVariantFromGenomeNexus(GNVariantAnnotationType.HGVS_G, query.getHgvsg(), query.getReferenceGenome());
                 result.add(resp);
             }
         }
-        return new ResponseEntity<>(result, status);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @ApiOperation(value = "", notes = "Fetch Genome Nexus variant info by genomic change", response = GenomeNexusAnnotatedVariantInfo.class, responseContainer = "List")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = GenomeNexusAnnotatedVariantInfo.class, responseContainer = "List"),
-        @ApiResponse(code = 400, message = "Error, error message will be given.", response = String.class)})
+        @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiHttpError.class)})
     @RequestMapping(value = "/fetchGnVariants/byGenomicChange",
         consumes = {"application/json"},
         produces = {"application/json"},
         method = RequestMethod.POST)
     public ResponseEntity<List<GenomeNexusAnnotatedVariantInfo>> fetchGenomeNexusVariantInfoByGenomicChangePost(
         @ApiParam(value = "List of queries. Please see swagger.json for request body format.", required = true) @RequestBody() List<AnnotateMutationByGenomicChangeQuery> body
-    ) throws ApiException, org.genome_nexus.ApiException {
-        HttpStatus status = HttpStatus.OK;
+    ) throws ApiException, org.genome_nexus.ApiException, ApiHttpErrorException {
         List<GenomeNexusAnnotatedVariantInfo> result = new ArrayList<>();
 
         if (body == null) {
-            status = HttpStatus.BAD_REQUEST;
+            throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         } else {
             for (AnnotateMutationByGenomicChangeQuery query : body) {
                 GenomeNexusAnnotatedVariantInfo resp = GenomeNexusUtils.getAnnotatedVariantFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, query.getGenomicLocation(), query.getReferenceGenome());
                 result.add(resp);
             }
         }
-        return new ResponseEntity<>(result, status);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @ApiOperation(value = "", notes = "cache Genome Nexus variant info")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK"),
-        @ApiResponse(code = 400, message = "Error, error message will be given.", response = String.class)})
+        @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiHttpError.class)})
     @RequestMapping(value = "/cacheGnVariantInfo",
         consumes = {"application/json"},
         produces = {"application/json"},
         method = RequestMethod.POST)
     public ResponseEntity<Void> cacheGenomeNexusVariantInfoPost(
         @ApiParam(value = "List of queries. Please see swagger.json for request body format.", required = true) @RequestBody() List<GenomeNexusAnnotatedVariantInfo> body
-    ) throws ApiException, org.genome_nexus.ApiException, IllegalStateException {
-        HttpStatus status = HttpStatus.OK;
+    ) throws ApiException, org.genome_nexus.ApiException, IllegalStateException, ApiHttpErrorException {
 
         if (body == null) {
-            status = HttpStatus.BAD_REQUEST;
+            throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         } else {
             for (GenomeNexusAnnotatedVariantInfo query : body) {
                 cacheFetcher.cacheAlterationFromGenomeNexus(query);
             }
         }
-        return new ResponseEntity<>(status);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 }
