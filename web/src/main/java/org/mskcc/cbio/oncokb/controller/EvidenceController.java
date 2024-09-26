@@ -138,7 +138,9 @@ public class EvidenceController {
     @RequestMapping(value = "/legacy-api/vus/update/{hugoSymbol}", method = RequestMethod.POST)
     public
     @ResponseBody
-    synchronized ResponseEntity updateVUS(@ApiParam(value = "hugoSymbol", required = true) @PathVariable("hugoSymbol") String hugoSymbol,
+    synchronized ResponseEntity updateVUS(
+        @ApiParam(value = "germline", required = true) @PathVariable("germline") Boolean germline,
+        @ApiParam(value = "hugoSymbol", required = true) @PathVariable("hugoSymbol") String hugoSymbol,
                                           @RequestBody String vus) throws JSONException, IOException {
 
         HttpStatus status = HttpStatus.OK;
@@ -150,7 +152,7 @@ public class EvidenceController {
                     Collections.singleton(EvidenceType.VUS), null);
                 deleteEvidencesAndAlts(evidences);
                 DriveAnnotationParser driveAnnotationParser = new DriveAnnotationParser();
-                driveAnnotationParser.parseVUS(gene, new JSONArray(vus), 1);
+                driveAnnotationParser.parseVUS(germline, gene, new JSONArray(vus), 1);
                 updateCacheBasedOnGenes(Collections.singleton(gene));
             }
         }

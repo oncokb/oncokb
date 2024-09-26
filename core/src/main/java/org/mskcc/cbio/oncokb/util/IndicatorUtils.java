@@ -1,7 +1,6 @@
 package org.mskcc.cbio.oncokb.util;
 
 import com.google.common.collect.Sets;
-import java.nio.file.Path;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
@@ -186,7 +185,7 @@ public class IndicatorUtils {
             indicatorQuery.setGeneExist(gene.getEntrezGeneId() > 0);
 
             // Gene summary
-            if (evidenceTypes.contains(EvidenceType.GENE_SUMMARY) || evidenceTypes.contains(EvidenceType.GERMLINE_GENE_SUMMARY)) {
+            if (evidenceTypes.contains(EvidenceType.GENE_SUMMARY) || evidenceTypes.contains(EvidenceType.GENE_SUMMARY)) {
                 indicatorQuery.setGeneSummary(SummaryUtils.geneSummary(gene, query.getHugoSymbol(), query.isGermline()));
                 allQueryRelatedEvidences.addAll(EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Collections.singleton(EvidenceType.GENE_SUMMARY)));
             }
@@ -528,7 +527,7 @@ public class IndicatorUtils {
         }
 
         // Get penetrance info
-        List<Evidence> penetranceEvis = EvidenceUtils.getEvidence(Collections.singletonList(matchedAlt), Collections.singleton(EvidenceType.GERMLINE_VARIANT_PENETRANCE), null);
+        List<Evidence> penetranceEvis = EvidenceUtils.getEvidence(Collections.singletonList(matchedAlt), Collections.singleton(EvidenceType.VARIANT_PENETRANCE), null);
         if (penetranceEvis.size() > 0) {
             sortGermlineEvidenceByAlterationSize(penetranceEvis);
             Evidence penetranceEvi = penetranceEvis.iterator().next();
@@ -537,7 +536,7 @@ public class IndicatorUtils {
         }
 
         // Get cancer risk info
-        List<Evidence> cancerRiskEvis = EvidenceUtils.getEvidence(Collections.singletonList(matchedAlt), Collections.singleton(EvidenceType.GERMLINE_CANCER_RISK), null);
+        List<Evidence> cancerRiskEvis = EvidenceUtils.getEvidence(Collections.singletonList(matchedAlt), Collections.singleton(EvidenceType.VARIANT_CANCER_RISK), null);
         cancerRiskEvis.sort(Comparator.comparing(Evidence::getKnownEffect));
 
         if (cancerRiskEvis.size() > 0) {
@@ -548,7 +547,7 @@ public class IndicatorUtils {
         }
 
         // Get inheritance mechanism info
-        List<Evidence> inheritanceMechanismEvis = EvidenceUtils.getEvidence(Collections.singletonList(matchedAlt), Collections.singleton(EvidenceType.GERMLINE_INHERITANCE_MECHANISM), null);
+        List<Evidence> inheritanceMechanismEvis = EvidenceUtils.getEvidence(Collections.singletonList(matchedAlt), Collections.singleton(EvidenceType.VARIANT_INHERITANCE_MECHANISM), null);
         if (inheritanceMechanismEvis.size() > 0) {
             sortGermlineEvidenceByAlterationSize(inheritanceMechanismEvis);
             Evidence inheritanceMechanismEvi = inheritanceMechanismEvis.iterator().next();
@@ -560,7 +559,7 @@ public class IndicatorUtils {
         List<Alteration> alts = new ArrayList<>();
         alts.add(matchedAlt);
         alts.addAll(relevantAlterations);
-        List<Evidence> genomicIndicatorEvis = EvidenceUtils.getEvidence(alts, Collections.singleton(EvidenceType.GERMLINE_VARIANT_GENOMIC_INDICATOR), null);
+        List<Evidence> genomicIndicatorEvis = EvidenceUtils.getEvidence(alts, Collections.singleton(EvidenceType.GENOMIC_INDICATOR), null);
         if (StringUtils.isNotEmpty(alleleState)) {
             genomicIndicatorEvis = genomicIndicatorEvis.stream().filter(evidence -> evidence.getKnownEffect().toLowerCase().contains(alleleState)).collect(Collectors.toList());
         }
