@@ -54,8 +54,8 @@ public class DriveAnnotationParser {
 
     private static String ALLELE_STATES_BIALLELIC = "biallelic";
     private static String ALLELE_STATES_MONOALLELIC = "monoallelic";
-    private static String ALLELE_STATES_MOSAIC= "mosaic";
-    private static String[] ALLELE_STATE_CHECKS = new String[] {ALLELE_STATES_BIALLELIC, ALLELE_STATES_MONOALLELIC, ALLELE_STATES_MOSAIC};
+    private static String ALLELE_STATES_MOSAIC = "mosaic";
+    private static String[] ALLELE_STATE_CHECKS = new String[]{ALLELE_STATES_BIALLELIC, ALLELE_STATES_MONOALLELIC, ALLELE_STATES_MOSAIC};
 
     public void parseVUS(Boolean germline, Gene gene, JSONArray vus, Integer nestLevel) throws JSONException {
         System.out.println(spaceStrByNestLevel(nestLevel) + "Variants of unknown significance");
@@ -210,7 +210,7 @@ public class DriveAnnotationParser {
                     for (Alteration alteration : alterations) {
                         alterationBo.delete(alteration);
                     }
-                    Map<String, Pair<String, Set<Alteration>>> curationMutationsMap = curationMutations(geneInfo);
+                    Map<String, Pair<String, Set<Alteration>>> curationMutationsMap = curationMutations(gene, geneInfo);
                     Set<Alteration> allAlterations = new HashSet<>();
                     for (Map.Entry<String, Pair<String, Set<Alteration>>> entry : curationMutationsMap.entrySet()) {
                         allAlterations.addAll(entry.getValue().getSecond());
@@ -231,12 +231,12 @@ public class DriveAnnotationParser {
                     }
 
                     String GENE_INHERITANCE_MECHANISM_KEY = "inheritanceMechanism";
-                    if(geneInfo.has(GENE_INHERITANCE_MECHANISM_KEY)) {
+                    if (geneInfo.has(GENE_INHERITANCE_MECHANISM_KEY)) {
                         parseInheritanceMechanism(gene, geneInfo.getString(GENE_INHERITANCE_MECHANISM_KEY), null);
                     }
 
                     String GENE_PENETRANCE_KEY = "penetrance";
-                    if(geneInfo.has(GENE_PENETRANCE_KEY)) {
+                    if (geneInfo.has(GENE_PENETRANCE_KEY)) {
                         parsePenetrance(gene, geneInfo.getString(GENE_PENETRANCE_KEY), null);
                     }
 
@@ -258,9 +258,10 @@ public class DriveAnnotationParser {
         return null;
     }
 
-    private Map<String, Pair<String, Set<Alteration>>> curationMutations(JSONObject gene) {
+    private Map<String, Pair<String, Set<Alteration>>> curationMutations(Gene gene, JSONObject geneJsonObject) {
         Map<String, Pair<String, Set<Alteration>>> map = new HashMap<>();
-        JSONArray mutations = gene.has("mutations") ? gene.getJSONArray("mutations") : null;
+        JSONArray mutations = geneJsonObject.has("mutations") ? geneJsonObject.getJSONArray("mutations") : null;
+        AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
 
         for (int i = 0; i < mutations.length(); i++) {
             JSONObject mutation = mutations.getJSONObject(i);
@@ -282,7 +283,27 @@ public class DriveAnnotationParser {
                 } else {
                     alterations = AlterationUtils.parseMutationString(mutationStr, ",");
                 }
-                map.put(mutationUuid, new Pair<>(mutationStr, new HashSet<>(alterations)));
+
+                Set<Alteration> savedAlts = new HashSet<>();
+                for (Alteration alt : alterations) {
+                    Alteration alteration = alterationBo.findAlteration(gene, AlterationType.MUTATION, alt.getAlteration());
+                    if (alteration == null) {
+                        alteration = new Alteration();
+                        alteration.setGene(gene);
+                        alteration.setAlterationType(AlterationType.MUTATION);
+                        alteration.setAlteration(alt.getAlteration());
+                        alteration.setName(alt.getName());
+                        alteration.setReferenceGenomes(alt.getReferenceGenomes());
+                        AlterationUtils.annotateAlteration(alteration, alt.getAlteration());
+                        alterationBo.save(alteration);
+                    } else if (!alteration.getReferenceGenomes().equals(alt.getReferenceGenomes())) {
+                        alteration.setReferenceGenomes(alt.getReferenceGenomes());
+                        alterationBo.save(alteration);
+                    }
+                    savedAlts.add(alteration);
+                }
+
+                map.put(mutationUuid, new Pair<>(mutationStr, savedAlts));
             }
         }
         return map;
@@ -351,18 +372,20 @@ public class DriveAnnotationParser {
     }
 
     private void saveEffectDescriptionEvidence(Boolean germline, Gene gene, Set<Alteration> alterations, EvidenceType evidenceType, String knownEffect, String description) {
-        Evidence evidence = new Evidence();
-        evidence.setEvidenceType(evidenceType);
-        evidence.setAlterations(alterations);
-        evidence.setGene(gene);
-        if (StringUtils.isNotEmpty(description)) {
-            evidence.setDescription(description);
-            setDocuments(description, evidence);
+        if (StringUtils.isNotEmpty(knownEffect) || StringUtils.isNotEmpty(description)) {
+            Evidence evidence = new Evidence();
+            evidence.setEvidenceType(evidenceType);
+            evidence.setAlterations(alterations);
+            evidence.setGene(gene);
+            if (StringUtils.isNotEmpty(description)) {
+                evidence.setDescription(description);
+                setDocuments(description, evidence);
+            }
+            evidence.setKnownEffect(knownEffect);
+            evidence.setForGermline(germline);
+            EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+            evidenceBo.save(evidence);
         }
-        evidence.setKnownEffect(knownEffect);
-        evidence.setForGermline(germline);
-        EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
-        evidenceBo.save(evidence);
     }
 
     private String getJsonStringVal(JSONObject object, String key) {
@@ -370,35 +393,41 @@ public class DriveAnnotationParser {
     }
 
     private void parseInheritanceMechanism(Gene gene, String inheritanceMechanism, Set<Alteration> alterations) {
-        Evidence evidence = new Evidence();
-        evidence.setKnownEffect(inheritanceMechanism);
-        evidence.setGene(gene);
-        if (alterations == null || alterations.isEmpty()) {
-            evidence.setEvidenceType(EvidenceType.GENE_INHERITANCE_MECHANISM);
-        } else {
-            evidence.setAlterations(alterations);
-            evidence.setEvidenceType(EvidenceType.VARIANT_INHERITANCE_MECHANISM);
+        if (StringUtils.isNotEmpty(inheritanceMechanism)) {
+            Evidence evidence = new Evidence();
+            evidence.setKnownEffect(inheritanceMechanism);
+            evidence.setGene(gene);
+            evidence.setForGermline(true);
+            if (alterations == null || alterations.isEmpty()) {
+                evidence.setEvidenceType(EvidenceType.GENE_INHERITANCE_MECHANISM);
+            } else {
+                evidence.setAlterations(alterations);
+                evidence.setEvidenceType(EvidenceType.VARIANT_INHERITANCE_MECHANISM);
+            }
+            ApplicationContextSingleton.getEvidenceBo().save(evidence);
         }
-        ApplicationContextSingleton.getEvidenceBo().save(evidence);
     }
 
     private void parsePenetrance(Gene gene, String penetrance, Set<Alteration> alterations) {
-        Evidence evidence = new Evidence();
-        evidence.setKnownEffect(penetrance);
-        evidence.setGene(gene);
-        if (alterations == null || alterations.isEmpty()) {
-            evidence.setEvidenceType(EvidenceType.GENE_PENETRANCE);
-        } else {
-            evidence.setAlterations(alterations);
-            evidence.setEvidenceType(EvidenceType.VARIANT_PENETRANCE);
+        if (StringUtils.isNotEmpty(penetrance)) {
+            Evidence evidence = new Evidence();
+            evidence.setKnownEffect(penetrance);
+            evidence.setGene(gene);
+            evidence.setForGermline(true);
+            if (alterations == null || alterations.isEmpty()) {
+                evidence.setEvidenceType(EvidenceType.GENE_PENETRANCE);
+            } else {
+                evidence.setAlterations(alterations);
+                evidence.setEvidenceType(EvidenceType.VARIANT_PENETRANCE);
+            }
+            ApplicationContextSingleton.getEvidenceBo().save(evidence);
         }
-        ApplicationContextSingleton.getEvidenceBo().save(evidence);
     }
 
     private void parseGenomicIndicator(JSONArray genomicIndicators, Gene gene, Set<Alteration> fullAlterations) {
         String ASSO_VARS_KEY = "associationVariants";
         String DESC_KEY = "description";
-        String ALLELE_STATES_KEY = "allele_states";
+        String ALLELE_STATES_KEY = "allele_state";
 
         for (int i = 0; i < genomicIndicators.length(); i++) {
             JSONObject genomicIndicator = genomicIndicators.getJSONObject(i);
@@ -418,8 +447,8 @@ public class DriveAnnotationParser {
 
             if (genomicIndicator.has(ALLELE_STATES_KEY)) {
                 JSONObject alleleStatesObject = genomicIndicator.getJSONObject(ALLELE_STATES_KEY);
-                for(String alleleStateCheck : ALLELE_STATE_CHECKS) {
-                    if(alleleStatesObject.has(alleleStateCheck)) {
+                for (String alleleStateCheck : ALLELE_STATE_CHECKS) {
+                    if (alleleStatesObject.has(alleleStateCheck)) {
                         saveGenomicIndicatorAlleleState(gene, associatedAlterations, alleleStateCheck);
                     }
                 }
@@ -428,17 +457,17 @@ public class DriveAnnotationParser {
     }
 
     private void saveGenomicIndicatorAlleleState(Gene gene, Set<Alteration> alterations, String alleleState) {
-        Evidence evidence = new Evidence();
-        evidence.setGene(gene);
-        evidence.setAlterations(alterations);
-        evidence.setEvidenceType(EvidenceType.GENOMIC_INDICATOR_ALLELE_STATE);
-        evidence.setKnownEffect(alleleState);
-        ApplicationContextSingleton.getEvidenceBo().save(evidence);
+        if (StringUtils.isNotEmpty(alleleState)) {
+            Evidence evidence = new Evidence();
+            evidence.setGene(gene);
+            evidence.setAlterations(alterations);
+            evidence.setEvidenceType(EvidenceType.GENOMIC_INDICATOR_ALLELE_STATE);
+            evidence.setKnownEffect(alleleState);
+            ApplicationContextSingleton.getEvidenceBo().save(evidence);
+        }
     }
 
     private Set<Alteration> getAlterationsFromAssociatedVariants(Gene gene, JSONArray associatedVariants, Set<Alteration> alterations) {
-        AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
-        AlterationType type = AlterationType.MUTATION;
         Set<Alteration> mappedAlterations = new HashSet<>();
 
         for (int i = 0; i < associatedVariants.length(); i++) {
@@ -459,11 +488,11 @@ public class DriveAnnotationParser {
             } else {
                 Alteration alteration = new Alteration();
                 alteration.setGene(gene);
-                alteration.setAlterationType(type);
+                alteration.setAlterationType(AlterationType.MUTATION);
                 alteration.setAlteration(name);
                 alteration.setName(name);
                 AlterationUtils.annotateAlteration(alteration, name);
-                alterationBo.save(alteration);
+                ApplicationContextSingleton.getAlterationBo().save(alteration);
                 mappedAlterations.add(alteration);
             }
         }
@@ -472,9 +501,9 @@ public class DriveAnnotationParser {
 
     private void parseMutation(Boolean germline, Gene gene, JSONObject mutationObj, Integer nestLevel, Map<String, Pair<String, Set<Alteration>>> curationMutationsMap) throws Exception {
         String mutationStrUuid = mutationObj.getString("name_uuid").trim();
-        String MUTATION_CANCER_RISK_KEY="mutation_specific_cancer_risk";
-        String MUTATION_INHERITANCE_MECHANISM_KEY="mutation_specific_inheritance_mechanism";
-        String MUTATION_PENETRANCE_KEY="mutation_specific_penetrance";
+        String MUTATION_CANCER_RISK_KEY = "mutation_specific_cancer_risk";
+        String MUTATION_INHERITANCE_MECHANISM_KEY = "mutation_specific_inheritance_mechanism";
+        String MUTATION_PENETRANCE_KEY = "mutation_specific_penetrance";
 
         if (StringUtils.isNotEmpty(mutationStrUuid)) {
             Pair<String, Set<Alteration>> mutationPair = curationMutationsMap.get(mutationStrUuid);
@@ -540,7 +569,7 @@ public class DriveAnnotationParser {
 
             // Save germline mechanism of inheritance
             if (mutationObj.has(MUTATION_INHERITANCE_MECHANISM_KEY)) {
-             JSONObject mutationInheritanceMechanism = mutationObj.getJSONObject(MUTATION_INHERITANCE_MECHANISM_KEY);
+                JSONObject mutationInheritanceMechanism = mutationObj.getJSONObject(MUTATION_INHERITANCE_MECHANISM_KEY);
                 saveEffectDescriptionEvidence(Boolean.TRUE, gene, alterations, EvidenceType.VARIANT_INHERITANCE_MECHANISM, getJsonStringVal(mutationInheritanceMechanism, "inheritanceMechanism"), getJsonStringVal(mutationInheritanceMechanism, "description"));
             }
 
