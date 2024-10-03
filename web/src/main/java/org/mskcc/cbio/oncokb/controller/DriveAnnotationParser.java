@@ -263,47 +263,49 @@ public class DriveAnnotationParser {
         JSONArray mutations = geneJsonObject.has("mutations") ? geneJsonObject.getJSONArray("mutations") : null;
         AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
 
-        for (int i = 0; i < mutations.length(); i++) {
-            JSONObject mutation = mutations.getJSONObject(i);
-            String mutationStr = mutation.has("name") ? mutation.getString("name").trim() : null;
-            String mutationUuid = mutation.has("name_uuid") ? mutation.getString("name_uuid").trim() : null;
-            JSONArray alterationsObj = mutation.has("alterations") ? mutation.getJSONArray("alterations") : null;
+        if(mutations != null) {
+            for (int i = 0; i < mutations.length(); i++) {
+                JSONObject mutation = mutations.getJSONObject(i);
+                String mutationStr = mutation.has("name") ? mutation.getString("name").trim() : null;
+                String mutationUuid = mutation.has("name_uuid") ? mutation.getString("name_uuid").trim() : null;
+                JSONArray alterationsObj = mutation.has("alterations") ? mutation.getJSONArray("alterations") : null;
 
-            if (mutationUuid != null && (mutationStr != null || alterationsObj != null)) {
-                List<Alteration> alterations;
-                if (alterationsObj != null) {
-                    List<String> mutationStrs = new ArrayList<>();
-                    for (int j = 0; j < alterationsObj.length(); j++) {
-                        JSONObject alteration = alterationsObj.getJSONObject(j);
-                        if (alteration.has("alteration") && StringUtils.isNotEmpty(alteration.getString("alteration"))) {
-                            mutationStrs.add(alteration.getString("alteration"));
+                if (mutationUuid != null && (mutationStr != null || alterationsObj != null)) {
+                    List<Alteration> alterations;
+                    if (alterationsObj != null) {
+                        List<String> mutationStrs = new ArrayList<>();
+                        for (int j = 0; j < alterationsObj.length(); j++) {
+                            JSONObject alteration = alterationsObj.getJSONObject(j);
+                            if (alteration.has("alteration") && StringUtils.isNotEmpty(alteration.getString("alteration"))) {
+                                mutationStrs.add(alteration.getString("alteration"));
+                            }
                         }
+                        alterations = AlterationUtils.parseMutationString(StringUtils.join(mutationStrs, ","), ",");
+                    } else {
+                        alterations = AlterationUtils.parseMutationString(mutationStr, ",");
                     }
-                    alterations = AlterationUtils.parseMutationString(StringUtils.join(mutationStrs, ","), ",");
-                } else {
-                    alterations = AlterationUtils.parseMutationString(mutationStr, ",");
-                }
 
-                Set<Alteration> savedAlts = new HashSet<>();
-                for (Alteration alt : alterations) {
-                    Alteration alteration = alterationBo.findAlteration(gene, AlterationType.MUTATION, alt.getAlteration());
-                    if (alteration == null) {
-                        alteration = new Alteration();
-                        alteration.setGene(gene);
-                        alteration.setAlterationType(AlterationType.MUTATION);
-                        alteration.setAlteration(alt.getAlteration());
-                        alteration.setName(alt.getName());
-                        alteration.setReferenceGenomes(alt.getReferenceGenomes());
-                        AlterationUtils.annotateAlteration(alteration, alt.getAlteration());
-                        alterationBo.save(alteration);
-                    } else if (!alteration.getReferenceGenomes().equals(alt.getReferenceGenomes())) {
-                        alteration.setReferenceGenomes(alt.getReferenceGenomes());
-                        alterationBo.save(alteration);
+                    Set<Alteration> savedAlts = new HashSet<>();
+                    for (Alteration alt : alterations) {
+                        Alteration alteration = alterationBo.findAlteration(gene, AlterationType.MUTATION, alt.getAlteration());
+                        if (alteration == null) {
+                            alteration = new Alteration();
+                            alteration.setGene(gene);
+                            alteration.setAlterationType(AlterationType.MUTATION);
+                            alteration.setAlteration(alt.getAlteration());
+                            alteration.setName(alt.getName());
+                            alteration.setReferenceGenomes(alt.getReferenceGenomes());
+                            AlterationUtils.annotateAlteration(alteration, alt.getAlteration());
+                            alterationBo.save(alteration);
+                        } else if (!alteration.getReferenceGenomes().equals(alt.getReferenceGenomes())) {
+                            alteration.setReferenceGenomes(alt.getReferenceGenomes());
+                            alterationBo.save(alteration);
+                        }
+                        savedAlts.add(alteration);
                     }
-                    savedAlts.add(alteration);
-                }
 
-                map.put(mutationUuid, new Pair<>(mutationStr, savedAlts));
+                    map.put(mutationUuid, new Pair<>(mutationStr, savedAlts));
+                }
             }
         }
         return map;
