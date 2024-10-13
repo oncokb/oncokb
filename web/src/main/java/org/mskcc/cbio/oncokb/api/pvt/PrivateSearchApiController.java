@@ -12,6 +12,7 @@ import org.mskcc.cbio.oncokb.cache.CacheFetcher;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.TumorType;
+import org.mskcc.cbio.oncokb.model.BiologicalVariant;
 import org.mskcc.cbio.oncokb.util.*;
 import org.oncokb.oncokb_transcript.ApiException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,13 +43,15 @@ public class PrivateSearchApiController implements PrivateSearchApi {
     @Override
     public ResponseEntity<Set<BiologicalVariant>> searchVariantsBiologicalGet(
         @ApiParam(value = "") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
+        ,@ApiParam(value = "false") @RequestParam(value = "germline", required = false) Boolean germline
     ) {
         Set<BiologicalVariant> variants = new HashSet<>();
         HttpStatus status = HttpStatus.OK;
+        if(germline == null) germline = false;
 
         if (hugoSymbol != null) {
             Gene gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
-            variants = MainUtils.getBiologicalVariants(gene);
+            variants = MainUtils.getBiologicalVariants(gene, germline);
         }
         return new ResponseEntity<>(variants, status);
     }
@@ -56,13 +59,15 @@ public class PrivateSearchApiController implements PrivateSearchApi {
     @Override
     public ResponseEntity<Set<ClinicalVariant>> searchVariantsClinicalGet(
         @ApiParam(value = "") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
+        ,@ApiParam(value = "false") @RequestParam(value = "germline", required = false) Boolean germline
     ) {
         HttpStatus status = HttpStatus.OK;
         Set<ClinicalVariant> variants = new HashSet<>();
+        if(germline == null) germline = false;
 
         if (hugoSymbol != null) {
             Gene gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
-            variants = MainUtils.getClinicalVariants(gene);
+            variants = MainUtils.getClinicalVariants(gene, germline);
         }
         return new ResponseEntity<>(variants, status);
     }
@@ -70,16 +75,18 @@ public class PrivateSearchApiController implements PrivateSearchApi {
     @Override
     public ResponseEntity<Set<Treatment>> searchTreatmentsGet(
         @ApiParam(value = "The search query, it could be hugoSymbol or entrezGeneId.", required = true) @RequestParam(value = "gene", required = false) String queryGene
-        , @ApiParam(value = "The level of evidence.", defaultValue = "false") @RequestParam(value = "level", required = false) String queryLevel) {
+        , @ApiParam(value = "The level of evidence.", defaultValue = "false") @RequestParam(value = "level", required = false) String queryLevel
+        ,@ApiParam(value = "false") @RequestParam(value = "germline", required = false) Boolean germline) {
         HttpStatus status = HttpStatus.OK;
         Gene gene = GeneUtils.getGene(queryGene);
         Set<Treatment> treatments = new HashSet<>();
+        if(germline == null) germline = false;
 
         if (gene == null && queryLevel == null) {
             status = HttpStatus.BAD_REQUEST;
         } else {
             if (queryLevel == null) {
-                treatments = TreatmentUtils.getTreatmentsByGene(gene);
+                treatments = TreatmentUtils.getTreatmentsByGene(gene, germline);
             } else {
                 LevelOfEvidence level = LevelOfEvidence.getByLevel(queryLevel);
                 if (level == null) {
@@ -87,9 +94,9 @@ public class PrivateSearchApiController implements PrivateSearchApi {
                 } else if (!LevelUtils.getPublicLevels().contains(level)) {
                     status = HttpStatus.BAD_REQUEST;
                 } else if (gene == null) {
-                    treatments = TreatmentUtils.getTreatmentsByLevels(Collections.singleton(level));
+                    treatments = TreatmentUtils.getTreatmentsByLevels(Collections.singleton(level), germline);
                 } else {
-                    treatments = TreatmentUtils.getTreatmentsByGeneAndLevels(gene, Collections.singleton(level));
+                    treatments = TreatmentUtils.getTreatmentsByGeneAndLevels(gene, Collections.singleton(level), germline);
                 }
             }
         }

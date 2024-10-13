@@ -21,6 +21,9 @@ public class BiologicalVariant {
     private String oncogenic = null;
     private Set<String> oncogenicPmids = new HashSet<>();
     private Set<ArticleAbstract> oncogenicAbstracts = new HashSet<>();
+    private String pathogenic = null;
+    private Set<String> pathogenicPmids = new HashSet<>();
+    private Set<ArticleAbstract> pathogenicAbstracts = new HashSet<>();
 
 
     /**
@@ -114,6 +117,30 @@ public class BiologicalVariant {
         this.oncogenicAbstracts = oncogenicAbstracts;
     }
 
+    public String getPathogenic() {
+        return pathogenic;
+    }
+
+    public void setPathogenic(String pathogenic) {
+        this.pathogenic = pathogenic;
+    }
+
+    public Set<String> getPathogenicPmids() {
+        return pathogenicPmids;
+    }
+
+    public void setPathogenicPmids(Set<String> pathogenicPmids) {
+        this.pathogenicPmids = pathogenicPmids;
+    }
+
+    public Set<ArticleAbstract> getPathogenicAbstracts() {
+        return pathogenicAbstracts;
+    }
+
+    public void setPathogenicAbstracts(Set<ArticleAbstract> pathogenicAbstracts) {
+        this.pathogenicAbstracts = pathogenicAbstracts;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -135,6 +162,11 @@ public class BiologicalVariant {
             return false;
         if (oncogenicAbstracts != null ? !oncogenicAbstracts.equals(that.oncogenicAbstracts) : that.oncogenicAbstracts != null)
             return false;
+        if (pathogenic != null ? !pathogenic.equals(that.pathogenic) : that.pathogenic != null) return false;
+        if (pathogenicPmids != null ? !pathogenicPmids.equals(that.oncogenicPmids) : that.pathogenicPmids != null)
+            return false;
+        if (pathogenicAbstracts != null ? !pathogenicAbstracts.equals(that.pathogenicAbstracts) : that.pathogenicAbstracts != null)
+            return false;
 
         return true;
     }
@@ -150,6 +182,9 @@ public class BiologicalVariant {
             ", oncogenic='" + oncogenic + '\'' +
             ", oncogenicPmids=" + oncogenicPmids +
             ", oncogenicAbstracts=" + oncogenicAbstracts +
+            ", pathogenic='" + pathogenic + '\'' +
+            ", pathogenicPmids=" + pathogenicPmids +
+            ", pathogenicAbstracts=" + pathogenicAbstracts +
             '}';
     }
 }

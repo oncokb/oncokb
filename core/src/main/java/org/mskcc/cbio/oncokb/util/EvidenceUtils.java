@@ -479,7 +479,7 @@ public class EvidenceUtils {
 
     public static Oncogenicity getOncogenicityFromEvidence(Set<Evidence> evidences) {
         Set<Oncogenicity> result = new HashSet<>();
-
+        if (evidences == null) return null;
         for (Evidence evidence : evidences) {
             if (evidence.getKnownEffect() != null) {
                 result.add(Oncogenicity.getByEvidence(evidence));
@@ -488,6 +488,24 @@ public class EvidenceUtils {
 
         if (result.size() > 1) {
             return MainUtils.findHighestOncogenicity(result);
+        } else if (result.size() == 1) {
+            return result.iterator().next();
+        } else {
+            return null;
+        }
+    }
+
+    public static Pathogenicity getPathogenicityFromEvidence(Set<Evidence> evidences) {
+        Set<Pathogenicity> result = new HashSet<>();
+        if (evidences == null) return null;
+        for (Evidence evidence : evidences) {
+            if (evidence.getKnownEffect() != null) {
+                result.add(Pathogenicity.getByEvidence(evidence));
+            }
+        }
+
+        if (result.size() > 1) {
+            return MainUtils.findHighestPathogenicity(result);
         } else if (result.size() == 1) {
             return result.iterator().next();
         } else {

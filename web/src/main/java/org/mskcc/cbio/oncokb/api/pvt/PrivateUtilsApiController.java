@@ -122,7 +122,8 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             Set<Evidence> evidences = CacheUtils.getAllEvidences();
             Set<TumorType> treatmentTumorTypes = new HashSet<>();
             for (Evidence evidence : evidences) {
-                if (evidence.getLevelOfEvidence() != null && !evidence.getCancerTypes().isEmpty()) {
+                if (evidence.getLevelOfEvidence() != null && !evidence.getCancerTypes().isEmpty()
+                    && !evidence.getForGermline()) {
                     treatmentTumorTypes.addAll(evidence.getCancerTypes());
                 }
             }
