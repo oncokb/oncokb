@@ -237,10 +237,10 @@ public class CacheFetcher {
         return this.oncokbTranscriptService.findGeneBySymbol(symbol);
     }
 
-    // @Cacheable(
-    //     cacheResolver = "generalCacheResolver",
-    //     keyGenerator = "concatKeyGenerator"
-    // )
+    @Cacheable(
+        cacheResolver = "generalCacheResolver",
+        keyGenerator = "concatKeyGenerator"
+    )
     public IndicatorQueryResp processQuery(ReferenceGenome referenceGenome,
                                            Integer entrezGeneId,
                                            String hugoSymbol,
@@ -266,8 +266,8 @@ public class CacheFetcher {
         );
     }
 
-    // @Cacheable(cacheResolver = "generalCacheResolver",
-    //     keyGenerator = "concatKeyGenerator")
+    @Cacheable(cacheResolver = "generalCacheResolver",
+        keyGenerator = "concatKeyGenerator")
     public Alteration getAlterationFromGenomeNexus(GNVariantAnnotationType gnVariantAnnotationType, ReferenceGenome referenceGenome, String genomicLocation) throws org.genome_nexus.ApiException {
         return AlterationUtils.getAlterationFromGenomeNexus(gnVariantAnnotationType, referenceGenome, genomicLocation);
     }
