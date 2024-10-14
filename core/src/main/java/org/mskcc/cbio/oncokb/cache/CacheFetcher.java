@@ -103,6 +103,27 @@ public class CacheFetcher {
         return oncokbTranscriptService.findTranscriptGenesBySymbols(CacheUtils.getAllGenes().stream().filter(gene -> gene.getEntrezGeneId() > 0).map(gene -> gene.getEntrezGeneId().toString()).collect(Collectors.toList()));
     }
 
+    @Cacheable(cacheResolver = "generalCacheResolver", keyGenerator = "concatKeyGenerator")
+    public Map<String, Set<EnsemblGene>> getCanonicalEnsemblGenesByChromosome(ReferenceGenome referenceGenome) throws ApiException {
+        Map<String, Set<EnsemblGene>> chromosomeEnsemblGenesMap = new HashMap<>();
+        Set<org.oncokb.oncokb_transcript.client.Gene> allTranscriptGenes = getAllTranscriptGenes();
+        for (org.oncokb.oncokb_transcript.client.Gene gene : allTranscriptGenes) {
+            for (EnsemblGene ensemblGene : gene.getEnsemblGenes()) {
+                if (!ensemblGene.getCanonical() || !ensemblGene.getReferenceGenome().equals(referenceGenome.name())) {
+                    continue;
+                }
+                String chromosome = ensemblGene.getChromosome();
+
+                if (!chromosomeEnsemblGenesMap.containsKey(chromosome)) {
+                    chromosomeEnsemblGenesMap.put(chromosome, new HashSet<>());
+                }
+
+                chromosomeEnsemblGenesMap.get(chromosome).add(ensemblGene);
+            }
+        }
+        return chromosomeEnsemblGenesMap;
+    }
+
     private List<CancerGene> getCancerGeneList() throws ApiException, IOException {
         List<CancerGene> cancerGenes = CancerGeneUtils.getCancerGeneList();
         List<String> hugos = cancerGenes.stream().map(CancerGene::getHugoSymbol).collect(Collectors.toList());
@@ -216,10 +237,10 @@ public class CacheFetcher {
         return this.oncokbTranscriptService.findGeneBySymbol(symbol);
     }
 
-    @Cacheable(
-        cacheResolver = "generalCacheResolver",
-        keyGenerator = "concatKeyGenerator"
-    )
+    // @Cacheable(
+    //     cacheResolver = "generalCacheResolver",
+    //     keyGenerator = "concatKeyGenerator"
+    // )
     public IndicatorQueryResp processQuery(ReferenceGenome referenceGenome,
                                            Integer entrezGeneId,
                                            String hugoSymbol,
@@ -245,8 +266,8 @@ public class CacheFetcher {
         );
     }
 
-    @Cacheable(cacheResolver = "generalCacheResolver",
-        keyGenerator = "concatKeyGenerator")
+    // @Cacheable(cacheResolver = "generalCacheResolver",
+    //     keyGenerator = "concatKeyGenerator")
     public Alteration getAlterationFromGenomeNexus(GNVariantAnnotationType gnVariantAnnotationType, ReferenceGenome referenceGenome, String genomicLocation) throws org.genome_nexus.ApiException {
         return AlterationUtils.getAlterationFromGenomeNexus(gnVariantAnnotationType, referenceGenome, genomicLocation);
     }
@@ -300,7 +321,7 @@ public class CacheFetcher {
         return oncokbTranscriptService.findEnsemblTranscriptsByIds(ids, referenceGenome);
     }
 
-    public boolean genomicLocationShouldBeAnnotated(GNVariantAnnotationType gnVariantAnnotationType, String query, ReferenceGenome referenceGenome, Set<org.oncokb.oncokb_transcript.client.Gene> allTranscriptsGenes) throws ApiException {
+    public boolean genomicLocationShouldBeAnnotated(GNVariantAnnotationType gnVariantAnnotationType, String query, ReferenceGenome referenceGenome,Map<String, Set<EnsemblGene>> chromosomeCanonicalEnsembleGeneMap) throws ApiException {
         if (StringUtils.isEmpty(query)) {
             return false;
         }else{
@@ -312,7 +333,7 @@ public class CacheFetcher {
             }
         }
         // when the transcript info is not available, we should always annotate the genomic location
-        if (allTranscriptsGenes == null || allTranscriptsGenes.isEmpty()) {
+        if (chromosomeCanonicalEnsembleGeneMap == null || chromosomeCanonicalEnsembleGeneMap.isEmpty()) {
             return true;
         }
         GenomicLocation gl = null;
@@ -321,7 +342,7 @@ public class CacheFetcher {
                 gl = notationConverter.parseGenomicLocation(query);
             } else if (gnVariantAnnotationType.equals(GNVariantAnnotationType.HGVS_G)) {
                 query = notationConverter.hgvsNormalizer(query);
-                gl = notationConverter.hgvsgToGenomicLocation(query);
+                gl = MainUtils.parseChromosomeAndRangeFromHGVSg(query);
             }
             if (gl == null) {
                 return false;
@@ -335,15 +356,16 @@ public class CacheFetcher {
             }
         }
         GenomicLocation finalGl = gl;
+
+        if (chromosomeCanonicalEnsembleGeneMap.containsKey(finalGl.getChromosome())){
+            return chromosomeCanonicalEnsembleGeneMap.get(finalGl.getChromosome()).stream().anyMatch(ensemblGene -> withinBuffer(ensemblGene, finalGl));
+        }
+
+        return false;
+    }
+
+    private Boolean withinBuffer(EnsemblGene ensemblGene, GenomicLocation genomicLocation) {
         int bpBuffer = 10000; // add some buffer on determine which genomic change should be annotated. We use the gene range from oncokb-transcript but that does not include gene regulatory sequence. Before having proper range, we use a buffer range instead.
-        Boolean shouldBeAnnotated = allTranscriptsGenes.stream().anyMatch(gene -> {
-            Set<EnsemblGene> ensemblGenes = gene.getEnsemblGenes().stream().filter(ensemblGene -> ensemblGene.getCanonical() && ensemblGene.getReferenceGenome().equals(referenceGenome.name())).collect(Collectors.toSet());
-            if (ensemblGenes.size() > 0) {
-                return ensemblGenes.stream().anyMatch(ensemblGene -> finalGl.getChromosome().equals(ensemblGene.getChromosome()) && rangesIntersect(ensemblGene.getStart() > bpBuffer ? (ensemblGene.getStart() - bpBuffer) : 0, ensemblGene.getEnd() + bpBuffer, finalGl.getStart(), finalGl.getEnd()));
-            } else {
-                return false;
-            }
-        });
-        return shouldBeAnnotated;
+        return rangesIntersect(ensemblGene.getStart() > bpBuffer ? (ensemblGene.getStart() - bpBuffer) : 0, ensemblGene.getEnd() + bpBuffer, genomicLocation.getStart(), genomicLocation.getEnd());
     }
 }
