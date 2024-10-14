@@ -151,7 +151,13 @@ public class AnnotationsApiController {
             throw new ApiHttpErrorException("genomicLocation is missing.", HttpStatus.BAD_REQUEST);
         }
         ReferenceGenome matchedRG = resolveMatchedRG(referenceGenome);
-        indicatorQueryResp = this.getIndicatorQueryFromGenomicLocation(matchedRG, genomicLocation, tumorType, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")), cacheFetcher.getAllTranscriptGenes());
+        indicatorQueryResp = this.getIndicatorQueryFromGenomicLocation(
+            matchedRG,
+            genomicLocation,
+            tumorType,
+            new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")),
+            this.cacheFetcher.getCanonicalEnsemblGenesByChromosome(matchedRG)
+        );
         return new ResponseEntity<>(indicatorQueryResp, HttpStatus.OK);
     }
 
@@ -184,9 +190,14 @@ public class AnnotationsApiController {
         if (body == null) {
             throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         } else {
-            Set<org.oncokb.oncokb_transcript.client.Gene> allTranscriptGenes = cacheFetcher.getAllTranscriptGenes();
+            Map<String, Set<org.oncokb.oncokb_transcript.client.EnsemblGene>> chromosomeEnsemblGenesGrch37 = this.cacheFetcher.getCanonicalEnsemblGenesByChromosome(ReferenceGenome.GRCh37);
+            Map<String, Set<org.oncokb.oncokb_transcript.client.EnsemblGene>> chromosomeEnsemblGenesGrch38 = this.cacheFetcher.getCanonicalEnsemblGenesByChromosome(ReferenceGenome.GRCh38);
             for (AnnotateMutationByGenomicChangeQuery query : body) {
-                IndicatorQueryResp resp = this.getIndicatorQueryFromGenomicLocation(query.getReferenceGenome(), query.getGenomicLocation(), query.getTumorType(), query.getEvidenceTypes(), allTranscriptGenes);
+                Map<String, Set<org.oncokb.oncokb_transcript.client.EnsemblGene>> selectedEnsemblGenesMap = chromosomeEnsemblGenesGrch37;
+                if (ReferenceGenome.GRCh38.equals(query.getReferenceGenome())) {
+                    selectedEnsemblGenesMap = chromosomeEnsemblGenesGrch38;
+                }
+                IndicatorQueryResp resp = this.getIndicatorQueryFromGenomicLocation(query.getReferenceGenome(), query.getGenomicLocation(), query.getTumorType(), query.getEvidenceTypes(), selectedEnsemblGenesMap);
                 resp.getQuery().setId(query.getId());
                 result.add(resp);
             }
@@ -226,7 +237,7 @@ public class AnnotationsApiController {
                 hgvsg,
                 tumorType,
                 new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")),
-                cacheFetcher.getAllTranscriptGenes()
+                this.cacheFetcher.getCanonicalEnsemblGenesByChromosome(matchedRG)
             );
         }
         return new ResponseEntity<>(indicatorQueryResp, HttpStatus.OK);
@@ -250,14 +261,19 @@ public class AnnotationsApiController {
         if (body == null) {
             throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         } else {
-            Set<org.oncokb.oncokb_transcript.client.Gene> allTranscriptGenes = cacheFetcher.getAllTranscriptGenes();
+            Map<String, Set<org.oncokb.oncokb_transcript.client.EnsemblGene>> chromosomeEnsemblGenesGrch37 = this.cacheFetcher.getCanonicalEnsemblGenesByChromosome(ReferenceGenome.GRCh37);
+            Map<String, Set<org.oncokb.oncokb_transcript.client.EnsemblGene>> chromosomeEnsemblGenesGrch38 = this.cacheFetcher.getCanonicalEnsemblGenesByChromosome(ReferenceGenome.GRCh38);
             for (AnnotateMutationByHGVSgQuery query : body) {
+                Map<String, Set<org.oncokb.oncokb_transcript.client.EnsemblGene>> selectedEnsemblGenesMap = chromosomeEnsemblGenesGrch37;
+                if (ReferenceGenome.GRCh38.equals(query.getReferenceGenome())) {
+                    selectedEnsemblGenesMap = chromosomeEnsemblGenesGrch38;
+                }
                 IndicatorQueryResp resp = this.getIndicatorQueryFromHGVSg(
                     query.getReferenceGenome(),
                     query.getHgvsg(),
                     query.getTumorType(),
                     query.getEvidenceTypes(),
-                    allTranscriptGenes
+                    selectedEnsemblGenesMap
                 );
                 resp.getQuery().setId(query.getId());
                 result.add(resp);
@@ -533,10 +549,10 @@ public class AnnotationsApiController {
         String genomicLocation,
         String tumorType,
         Set<EvidenceType> evidenceTypes,
-        Set<org.oncokb.oncokb_transcript.client.Gene> allTranscriptGenes
+        Map<String, Set<org.oncokb.oncokb_transcript.client.EnsemblGene>> chromsomeEnsemblGeneMap
     ) throws ApiException, org.genome_nexus.ApiException {
         Alteration alteration;
-        if (!this.cacheFetcher.genomicLocationShouldBeAnnotated(GNVariantAnnotationType.GENOMIC_LOCATION, genomicLocation, referenceGenome, allTranscriptGenes)) {
+        if (!this.cacheFetcher.genomicLocationShouldBeAnnotated(GNVariantAnnotationType.GENOMIC_LOCATION, genomicLocation, referenceGenome, chromsomeEnsemblGeneMap)) {
             alteration = new Alteration();
         } else {
             alteration = this.cacheFetcher.getAlterationFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, referenceGenome, genomicLocation);
@@ -566,10 +582,10 @@ public class AnnotationsApiController {
         String hgvsg,
         String tumorType,
         Set<EvidenceType> evidenceTypes,
-        Set<org.oncokb.oncokb_transcript.client.Gene> allTranscriptGenes
+        Map<String, Set<org.oncokb.oncokb_transcript.client.EnsemblGene>> chromosomeEnsemblGeneMap
     ) throws ApiException, org.genome_nexus.ApiException {
         Alteration alteration;
-        if (!this.cacheFetcher.genomicLocationShouldBeAnnotated(GNVariantAnnotationType.HGVS_G, hgvsg, referenceGenome, allTranscriptGenes)) {
+        if (!this.cacheFetcher.genomicLocationShouldBeAnnotated(GNVariantAnnotationType.HGVS_G, hgvsg, referenceGenome, chromosomeEnsemblGeneMap)) {
             alteration = new Alteration();
         } else {
             alteration = this.cacheFetcher.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, referenceGenome, hgvsg);

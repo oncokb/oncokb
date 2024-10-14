@@ -1,5 +1,6 @@
 package org.mskcc.cbio.oncokb.util;
 
+import org.cbioportal.genome_nexus.model.GenomicLocation;
 import org.mskcc.cbio.oncokb.apiModels.*;
 import org.mskcc.cbio.oncokb.model.*;
 import org.w3c.dom.Document;
@@ -859,5 +860,45 @@ public class MainUtils {
         if (q2 == null)
             return asc ? -1 : 1;
         return (PRIORITIZED_QUERY_TYPES.indexOf(q1) - PRIORITIZED_QUERY_TYPES.indexOf(q2)) * (asc ? 1 : -1);
+    }
+
+    public static int findDigitEndIndex(String str, int startIndex) {
+        int i = startIndex;
+        while (i < str.length() && Character.isDigit(str.charAt(i))) {
+            i++;
+        }
+        return i;
+    }
+
+    public static GenomicLocation parseChromosomeAndRangeFromHGVSg(String hgvsg) {
+        if (hgvsg == null) {
+            return null;
+        }
+        GenomicLocation location = new GenomicLocation();
+        int start, end;
+
+        // Step 1: Split by ":g."
+        String[] parts = hgvsg.split(":g\\.");
+        location.setChromosome(parts[0]);  // Chromosome is the part before ":g."
+        String coordinates = parts[1];  // This is the part after "g."
+
+        // Step 2: Handle the coordinates part
+        int underscoreIndex = coordinates.indexOf('_');
+
+        if (underscoreIndex != -1) {
+            // If there is an underscore, we have both start and end values
+            start = Integer.parseInt(coordinates.substring(0, underscoreIndex));
+            // Find where the digits after the underscore end (before any letters)
+            int endIndex = findDigitEndIndex(coordinates, underscoreIndex + 1);
+            end = Integer.parseInt(coordinates.substring(underscoreIndex + 1, endIndex));
+        } else {
+            // No underscore means start = end
+            int endIndex = findDigitEndIndex(coordinates, 0);
+            start = Integer.parseInt(coordinates.substring(0, endIndex));
+            end = start;
+        }
+        location.setStart(start);
+        location.setEnd(end);
+        return location;
     }
 }
