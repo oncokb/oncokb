@@ -199,16 +199,11 @@ public class DriveAnnotationParser {
                     geneBo.update(gene);
 
                     EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
-                    AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
                     List<Evidence> evidences = evidenceBo.findEvidencesByGene(Collections.singleton(gene));
-                    List<Alteration> alterations = alterationBo.findAlterationsByGene(Collections.singleton(gene));
 
                     for (Evidence evidence : evidences) {
-                        evidenceBo.delete(evidence);
-                    }
-
-                    for (Alteration alteration : alterations) {
-                        alterationBo.delete(alteration);
+                        if(evidence.getForGermline().equals(germline))
+                            evidenceBo.delete(evidence);
                     }
                     Map<String, Pair<String, Set<Alteration>>> curationMutationsMap = curationMutations(gene, geneInfo);
                     Set<Alteration> allAlterations = new HashSet<>();
