@@ -5,7 +5,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 
@@ -21,9 +20,13 @@ public class BiologicalVariant {
     private String oncogenic = null;
     private Set<String> oncogenicPmids = new HashSet<>();
     private Set<ArticleAbstract> oncogenicAbstracts = new HashSet<>();
+
     private String pathogenic = null;
     private Set<String> pathogenicPmids = new HashSet<>();
     private Set<ArticleAbstract> pathogenicAbstracts = new HashSet<>();
+    private String penetrance = null;
+    private String inheritanceMechanism = null;
+    private String cancerRisk = null;
 
 
     /**
@@ -141,6 +144,30 @@ public class BiologicalVariant {
         this.pathogenicAbstracts = pathogenicAbstracts;
     }
 
+    public String getPenetrance() {
+        return penetrance;
+    }
+
+    public void setPenetrance(String penetrance) {
+        this.penetrance = penetrance;
+    }
+
+    public String getInheritanceMechanism() {
+        return inheritanceMechanism;
+    }
+
+    public void setInheritanceMechanism(String inheritanceMechanism) {
+        this.inheritanceMechanism = inheritanceMechanism;
+    }
+
+    public String getCancerRisk() {
+        return cancerRisk;
+    }
+
+    public void setCancerRisk(String cancerRisk) {
+        this.cancerRisk = cancerRisk;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -167,6 +194,9 @@ public class BiologicalVariant {
             return false;
         if (pathogenicAbstracts != null ? !pathogenicAbstracts.equals(that.pathogenicAbstracts) : that.pathogenicAbstracts != null)
             return false;
+        if (penetrance != null ? !penetrance.equals(that.pathogenic) : that.penetrance != null) return false;
+        if (inheritanceMechanism != null ? !inheritanceMechanism.equals(that.inheritanceMechanism) : that.inheritanceMechanism != null) return false;
+        if (cancerRisk != null ? !cancerRisk.equals(that.cancerRisk) : that.cancerRisk != null) return false;
 
         return true;
     }
@@ -185,6 +215,9 @@ public class BiologicalVariant {
             ", pathogenic='" + pathogenic + '\'' +
             ", pathogenicPmids=" + pathogenicPmids +
             ", pathogenicAbstracts=" + pathogenicAbstracts +
+            ", penetrance=" + penetrance +
+            ", inheritanceMechanism=" + inheritanceMechanism +
+            ", cancerRisk=" + cancerRisk +
             '}';
     }
 }

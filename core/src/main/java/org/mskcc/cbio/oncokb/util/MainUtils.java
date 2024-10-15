@@ -423,6 +423,9 @@ public class MainUtils {
             }};
             if(germline) {
                 evidenceTypes.add(EvidenceType.PATHOGENIC);
+                evidenceTypes.add(EvidenceType.VARIANT_PENETRANCE);
+                evidenceTypes.add(EvidenceType.VARIANT_INHERITANCE_MECHANISM);
+                evidenceTypes.add(EvidenceType.VARIANT_CANCER_RISK);
             } else {
                 evidenceTypes.add(EvidenceType.ONCOGENIC);
             }
@@ -433,6 +436,9 @@ public class MainUtils {
                 map.put(EvidenceType.MUTATION_EFFECT, new HashSet<>());
                 if (germline) {
                     map.put(EvidenceType.PATHOGENIC, new HashSet<>());
+                    map.put(EvidenceType.VARIANT_PENETRANCE, new HashSet<>());
+                    map.put(EvidenceType.VARIANT_INHERITANCE_MECHANISM, new HashSet<>());
+                    map.put(EvidenceType.VARIANT_CANCER_RISK, new HashSet<>());
                 } else {
                     map.put(EvidenceType.ONCOGENIC, new HashSet<>());
                 }
@@ -470,8 +476,19 @@ public class MainUtils {
                     }
                     if (pathogenicity != null) {
                         variant.setPathogenic(pathogenicity.getPathogenic());
-                        variant.setPathogenicPmids(EvidenceUtils.getPmids(map.get(EvidenceType.PATHOGENIC)));
-                        variant.setPathogenicAbstracts(EvidenceUtils.getAbstracts(map.get(EvidenceType.PATHOGENIC)));
+                        Set<Evidence> pathogenicityEvidences = map.get(EvidenceType.PATHOGENIC);
+                        variant.setPathogenicPmids(EvidenceUtils.getPmids(pathogenicityEvidences));
+                        variant.setPathogenicAbstracts(EvidenceUtils.getAbstracts(pathogenicityEvidences));
+                        variant.setMutationEffectDescription(mutationEffectEvidences.iterator().next().getDescription());
+                        if (map.get(EvidenceType.VARIANT_PENETRANCE) != null && !map.get(EvidenceType.VARIANT_PENETRANCE).isEmpty()) {
+                            variant.setPenetrance(map.get(EvidenceType.VARIANT_PENETRANCE).iterator().next().getKnownEffect());
+                        }
+                        if (map.get(EvidenceType.VARIANT_INHERITANCE_MECHANISM) != null && !map.get(EvidenceType.VARIANT_INHERITANCE_MECHANISM).isEmpty()) {
+                            variant.setPenetrance(map.get(EvidenceType.VARIANT_INHERITANCE_MECHANISM).iterator().next().getKnownEffect());
+                        }
+                        if (map.get(EvidenceType.VARIANT_CANCER_RISK) != null && !map.get(EvidenceType.VARIANT_CANCER_RISK).isEmpty()) {
+                            variant.setPenetrance(map.get(EvidenceType.VARIANT_CANCER_RISK).iterator().next().getKnownEffect());
+                        }
                     }
                     if (mutationEffect != null) {
                         variant.setMutationEffect(mutationEffect.getMutationEffect());
