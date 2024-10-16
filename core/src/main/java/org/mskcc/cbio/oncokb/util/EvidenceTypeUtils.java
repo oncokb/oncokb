@@ -10,7 +10,7 @@ public class EvidenceTypeUtils {
     public static Set<EvidenceType> getGeneEvidenceTypes(Boolean germline) {
         Set<EvidenceType> evidenceTypes = new HashSet<>();
         if(Boolean.TRUE.equals(germline)) {
-            evidenceTypes.add(EvidenceType.GERMLINE_GENE_SUMMARY);
+            evidenceTypes.add(EvidenceType.GENE_SUMMARY);
         } else {
             evidenceTypes.add(EvidenceType.GENE_SUMMARY);
         }
@@ -40,10 +40,14 @@ public class EvidenceTypeUtils {
     public static Set<EvidenceType> getGermlineVariantEvidenceTypes() {
         Set<EvidenceType> evidenceTypes = new HashSet<>();
         evidenceTypes.add(EvidenceType.PATHOGENIC);
-        evidenceTypes.add(EvidenceType.GENE_GENOMIC_INDICATOR);
-        evidenceTypes.add(EvidenceType.GERMLINE_VARIANT_PENETRANCE);
-        evidenceTypes.add(EvidenceType.GERMLINE_CANCER_RISK);
-        evidenceTypes.add(EvidenceType.GERMLINE_INHERITANCE_MECHANISM);
+        evidenceTypes.add(EvidenceType.GENOMIC_INDICATOR);
+        evidenceTypes.add(EvidenceType.GENOMIC_INDICATOR_ALLELE_STATE);
+        evidenceTypes.add(EvidenceType.GENE_PENETRANCE);
+        evidenceTypes.add(EvidenceType.GENE_CANCER_RISK);
+        evidenceTypes.add(EvidenceType.GENE_INHERITANCE_MECHANISM);
+        evidenceTypes.add(EvidenceType.VARIANT_PENETRANCE);
+        evidenceTypes.add(EvidenceType.VARIANT_CANCER_RISK);
+        evidenceTypes.add(EvidenceType.VARIANT_INHERITANCE_MECHANISM);
         return evidenceTypes;
     }
 

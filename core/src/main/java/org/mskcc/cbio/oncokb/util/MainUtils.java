@@ -1,13 +1,11 @@
 package org.mskcc.cbio.oncokb.util;
 
-import java.nio.file.Path;
-import jdk.nashorn.internal.runtime.regexp.joni.Regex;
 import org.mskcc.cbio.oncokb.apiModels.ActionableGene;
 import org.mskcc.cbio.oncokb.apiModels.AnnotatedVariant;
 import org.mskcc.cbio.oncokb.apiModels.Citations;
 import org.mskcc.cbio.oncokb.apiModels.CuratedGene;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.TumorType;
+import org.mskcc.cbio.oncokb.model.BiologicalVariant;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -415,21 +413,35 @@ public class MainUtils {
         return pathogenicity != null && (pathogenicity.equals(Pathogenicity.YES) || pathogenicity.equals(Pathogenicity.LIKELY));
     }
 
-    public static Set<BiologicalVariant> getBiologicalVariants(Gene gene) {
+    public static Set<BiologicalVariant> getBiologicalVariants(Gene gene, boolean germline) {
         Set<BiologicalVariant> variants = new HashSet<>();
         if (gene != null) {
             List<Alteration> alterations = AlterationUtils.getAllAlterations(null, gene);
 
             Set<EvidenceType> evidenceTypes = new HashSet<EvidenceType>() {{
                 add(EvidenceType.MUTATION_EFFECT);
-                add(EvidenceType.ONCOGENIC);
             }};
+            if(germline) {
+                evidenceTypes.add(EvidenceType.PATHOGENIC);
+                evidenceTypes.add(EvidenceType.VARIANT_PENETRANCE);
+                evidenceTypes.add(EvidenceType.VARIANT_INHERITANCE_MECHANISM);
+                evidenceTypes.add(EvidenceType.VARIANT_CANCER_RISK);
+            } else {
+                evidenceTypes.add(EvidenceType.ONCOGENIC);
+            }
             Map<Alteration, Map<EvidenceType, Set<Evidence>>> evidences = new HashMap<>();
 
             for (Alteration alteration : alterations) {
                 Map<EvidenceType, Set<Evidence>> map = new HashMap<>();
-                map.put(EvidenceType.ONCOGENIC, new HashSet<Evidence>());
-                map.put(EvidenceType.MUTATION_EFFECT, new HashSet<Evidence>());
+                map.put(EvidenceType.MUTATION_EFFECT, new HashSet<>());
+                if (germline) {
+                    map.put(EvidenceType.PATHOGENIC, new HashSet<>());
+                    map.put(EvidenceType.VARIANT_PENETRANCE, new HashSet<>());
+                    map.put(EvidenceType.VARIANT_INHERITANCE_MECHANISM, new HashSet<>());
+                    map.put(EvidenceType.VARIANT_CANCER_RISK, new HashSet<>());
+                } else {
+                    map.put(EvidenceType.ONCOGENIC, new HashSet<>());
+                }
                 evidences.put(alteration, map);
             }
 
@@ -437,9 +449,11 @@ public class MainUtils {
                 EvidenceUtils.getEvidenceByGenesAndEvidenceTypes(Collections.singleton(gene), evidenceTypes);
 
             for (Evidence evidence : geneEvidences.get(gene)) {
-                for (Alteration alteration : evidence.getAlterations()) {
-                    if (evidences.containsKey(alteration)) {
-                        evidences.get(alteration).get(evidence.getEvidenceType()).add(evidence);
+                if (evidence.getForGermline().equals(germline)) {
+                    for (Alteration alteration : evidence.getAlterations()) {
+                        if (evidences.containsKey(alteration)) {
+                            evidences.get(alteration).get(evidence.getEvidenceType()).add(evidence);
+                        }
                     }
                 }
             }
@@ -451,13 +465,30 @@ public class MainUtils {
                 BiologicalVariant variant = new BiologicalVariant();
                 variant.setVariant(alteration);
                 Oncogenicity oncogenicity = EvidenceUtils.getOncogenicityFromEvidence(map.get(EvidenceType.ONCOGENIC));
+                Pathogenicity pathogenicity = EvidenceUtils.getPathogenicityFromEvidence(map.get(EvidenceType.PATHOGENIC));
                 Set<Evidence> mutationEffectEvidences = map.get(EvidenceType.MUTATION_EFFECT);
                 MutationEffect mutationEffect = EvidenceUtils.getMutationEffectFromEvidence(mutationEffectEvidences);
-                if (oncogenicity != null || mutationEffect != null) {
+                if (oncogenicity != null || mutationEffect != null || pathogenicity != null) {
                     if (oncogenicity != null) {
                         variant.setOncogenic(oncogenicity.getOncogenic());
                         variant.setOncogenicPmids(EvidenceUtils.getPmids(map.get(EvidenceType.ONCOGENIC)));
                         variant.setOncogenicAbstracts(EvidenceUtils.getAbstracts(map.get(EvidenceType.ONCOGENIC)));
+                    }
+                    if (pathogenicity != null) {
+                        variant.setPathogenic(pathogenicity.getPathogenic());
+                        Set<Evidence> pathogenicityEvidences = map.get(EvidenceType.PATHOGENIC);
+                        variant.setPathogenicPmids(EvidenceUtils.getPmids(pathogenicityEvidences));
+                        variant.setPathogenicAbstracts(EvidenceUtils.getAbstracts(pathogenicityEvidences));
+                        variant.setMutationEffectDescription(mutationEffectEvidences.iterator().next().getDescription());
+                        if (map.get(EvidenceType.VARIANT_PENETRANCE) != null && !map.get(EvidenceType.VARIANT_PENETRANCE).isEmpty()) {
+                            variant.setPenetrance(map.get(EvidenceType.VARIANT_PENETRANCE).iterator().next().getKnownEffect());
+                        }
+                        if (map.get(EvidenceType.VARIANT_INHERITANCE_MECHANISM) != null && !map.get(EvidenceType.VARIANT_INHERITANCE_MECHANISM).isEmpty()) {
+                            variant.setPenetrance(map.get(EvidenceType.VARIANT_INHERITANCE_MECHANISM).iterator().next().getKnownEffect());
+                        }
+                        if (map.get(EvidenceType.VARIANT_CANCER_RISK) != null && !map.get(EvidenceType.VARIANT_CANCER_RISK).isEmpty()) {
+                            variant.setPenetrance(map.get(EvidenceType.VARIANT_CANCER_RISK).iterator().next().getKnownEffect());
+                        }
                     }
                     if (mutationEffect != null) {
                         variant.setMutationEffect(mutationEffect.getMutationEffect());
@@ -499,7 +530,7 @@ public class MainUtils {
         return evidence;
     }
 
-    public static Set<ClinicalVariant> getClinicalVariants(Gene gene) {
+    public static Set<ClinicalVariant> getClinicalVariants(Gene gene, boolean germline) {
         Set<ClinicalVariant> variants = new HashSet<>();
         if (gene != null) {
             List<Alteration> alterations;
@@ -516,7 +547,7 @@ public class MainUtils {
                 EvidenceUtils.getEvidenceByGenesAndEvidenceTypes(Collections.singleton(gene), evidenceTypes);
 
             for (Evidence evidence : geneEvidences.get(gene)) {
-                if (!evidence.getCancerTypes().isEmpty()) {
+                if (!evidence.getCancerTypes().isEmpty() && evidence.getForGermline().equals(germline)) {
                     if (evidence.getGene().getHugoSymbol().equals("ESR1")) {
                         evidence = convertSpecialESR1Evidence(evidence);
                         for (Alteration alteration : evidence.getAlterations()) {

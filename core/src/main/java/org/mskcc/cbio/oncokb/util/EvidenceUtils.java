@@ -479,7 +479,7 @@ public class EvidenceUtils {
 
     public static Oncogenicity getOncogenicityFromEvidence(Set<Evidence> evidences) {
         Set<Oncogenicity> result = new HashSet<>();
-
+        if (evidences == null) return null;
         for (Evidence evidence : evidences) {
             if (evidence.getKnownEffect() != null) {
                 result.add(Oncogenicity.getByEvidence(evidence));
@@ -488,6 +488,24 @@ public class EvidenceUtils {
 
         if (result.size() > 1) {
             return MainUtils.findHighestOncogenicity(result);
+        } else if (result.size() == 1) {
+            return result.iterator().next();
+        } else {
+            return null;
+        }
+    }
+
+    public static Pathogenicity getPathogenicityFromEvidence(Set<Evidence> evidences) {
+        Set<Pathogenicity> result = new HashSet<>();
+        if (evidences == null) return null;
+        for (Evidence evidence : evidences) {
+            if (evidence.getKnownEffect() != null) {
+                result.add(Pathogenicity.getByEvidence(evidence));
+            }
+        }
+
+        if (result.size() > 1) {
+            return MainUtils.findHighestPathogenicity(result);
         } else if (result.size() == 1) {
             return result.iterator().next();
         } else {
@@ -903,7 +921,7 @@ public class EvidenceUtils {
                 query.setLevelOfEvidences(levelOfEvidences == null ? null : new ArrayList<>(levelOfEvidences));
                 Set<Evidence> relevantEvidences = getEvidence(requestQuery.getReferenceGenome(), query, evidenceTypes, levelOfEvidences);
                 query = assignEvidence(relevantEvidences,
-                    Collections.singletonList(query), highestLevelOnly).iterator().next();
+                    Collections.singletonList(query), highestLevelOnly, query.getQuery().isGermline()).iterator().next();
 
                 Set<Evidence> updatedEvidences = new HashSet<>();
                 final List<LevelOfEvidence> allowedLevels = query.getLevelOfEvidences();
@@ -940,9 +958,15 @@ public class EvidenceUtils {
     }
 
     private static List<EvidenceQueryRes> assignEvidence(Set<Evidence> evidences, List<EvidenceQueryRes> evidenceQueries,
-                                                         Boolean highestLevelOnly) {
+                                                         Boolean highestLevelOnly, Boolean germline) {
         for (EvidenceQueryRes query : evidenceQueries) {
-            Set<Evidence> filteredEvidences = new HashSet<>(evidences);
+            Set<Evidence> filteredEvidences = new HashSet<>();
+            if (germline == null) {
+                filteredEvidences = new HashSet<>(evidences);
+            } else {
+                filteredEvidences = evidences.stream().filter(evidence -> evidence.getForGermline().equals(germline)).collect(Collectors.toSet());
+            }
+
             if (highestLevelOnly) {
                 List<Evidence> filteredHighestEvidences = new ArrayList<>();
 
