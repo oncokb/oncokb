@@ -510,7 +510,7 @@ public class DriveAnnotationParser {
                 mappedAlterations.add(alteration);
             }
         }
-        return alterations;
+        return mappedAlterations;
     }
 
     private void parseMutation(Boolean germline, Gene gene, JSONObject mutationObj, Integer nestLevel, Map<String, Pair<String, Set<Alteration>>> curationMutationsMap) throws Exception {

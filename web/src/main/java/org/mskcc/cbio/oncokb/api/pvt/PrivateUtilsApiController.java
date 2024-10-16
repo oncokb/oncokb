@@ -381,6 +381,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
         }
+        if(germline == null) germline = false;
         if (!StringUtils.isNullOrEmpty(hgvsg) || !StringUtils.isNullOrEmpty(genomicChange)) {
             String genomicQuery = StringUtils.isNullOrEmpty(hgvsg) ? genomicChange : hgvsg;
             GNVariantAnnotationType type = StringUtils.isNullOrEmpty(hgvsg) ? GNVariantAnnotationType.GENOMIC_LOCATION : GNVariantAnnotationType.HGVS_G;
