@@ -3,10 +3,9 @@
 name: "Sprint Issues Rollover"
 
 on:
-  pull_request:
-  # schedule:
-  #     # Runs every Wednesday at 6pm EST
-  #     - cron: '0 22 * * 3'
+  schedule:
+    # Runs every Wednesday at 6pm EST
+    - cron: "0 22 * * 3"
 
 jobs:
   main:
@@ -19,6 +18,6 @@ jobs:
           number: 3 # The project number as you see it in the URL
           token: ${{secrets.PROJECT_PAT}} # Needs 'project' write perms
           iteration-field: Week
-          iteration: last
-          new-iteration: current
+          iteration: current
+          new-iteration: next
           excluded-statuses: ✅ Done
