@@ -17,7 +17,7 @@ jobs:
         with:
           owner: oncokb
           number: 3 # The project number as you see it in the URL
-          token: ${{ secrets.GITHUB_TOKEN }} # Needs 'project' write perms
+          token: ${{ secrets.PROJECT_PAT }} # Needs 'project' write perms
           iteration-field: Week
           iteration: last
           new-iteration: current
