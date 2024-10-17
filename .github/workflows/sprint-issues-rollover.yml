@@ -3,7 +3,7 @@
 name: "Sprint Issues Rollover"
 
 on:
-  workflow_dispatch:
+  pull_request:
   # schedule:
   #     # Runs every Wednesday at 6pm EST
   #     - cron: '0 22 * * 3'
