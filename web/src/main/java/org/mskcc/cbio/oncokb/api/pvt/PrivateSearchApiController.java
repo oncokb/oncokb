@@ -481,6 +481,17 @@ public class PrivateSearchApiController implements PrivateSearchApi {
                     typeaheadSearchResp.setHighestResistanceLevel(highestResistanceLevel == null ? "" : highestResistanceLevel.getLevel());
                 }
                 result.add(typeaheadSearchResp);
+
+                // include germline/somatic links
+                for (String geneticType : new String[]{"Somatic", "Germline"}) {
+                    typeaheadSearchResp = new TypeaheadSearchResp();
+                    typeaheadSearchResp.setGene(gene);
+                    typeaheadSearchResp.setVariantExist(false);
+                    typeaheadSearchResp.setLink("/gene/" + gene.getHugoSymbol() + "/" + geneticType.toLowerCase());
+                    typeaheadSearchResp.setQueryType(TypeaheadQueryType.GENE);
+                    typeaheadSearchResp.setAnnotation(geneticType);
+                    result.add(typeaheadSearchResp);
+                }
             }
         }
         return result;
