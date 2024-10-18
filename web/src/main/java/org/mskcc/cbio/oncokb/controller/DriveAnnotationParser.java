@@ -295,7 +295,7 @@ public class DriveAnnotationParser {
 
                     Set<Alteration> savedAlts = new HashSet<>();
                     for (Alteration alt : alterations) {
-                        Alteration alteration = alterationBo.findAlteration(gene, AlterationType.MUTATION, alt.getAlteration());
+                        Alteration alteration = alterationBo.findAlterationFromDao(gene, AlterationType.MUTATION, ReferenceGenome.GRCh37, alt.getAlteration(), alt.getName());
                         if (alteration == null) {
                             alteration = new Alteration();
                             alteration.setGene(gene);

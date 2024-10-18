@@ -479,7 +479,10 @@ public class MainUtils {
                         Set<Evidence> pathogenicityEvidences = map.get(EvidenceType.PATHOGENIC);
                         variant.setPathogenicPmids(EvidenceUtils.getPmids(pathogenicityEvidences));
                         variant.setPathogenicAbstracts(EvidenceUtils.getAbstracts(pathogenicityEvidences));
-                        variant.setMutationEffectDescription(mutationEffectEvidences.iterator().next().getDescription());
+
+                        if (mutationEffectEvidences != null && mutationEffectEvidences.size() > 0) {
+                            variant.setMutationEffectDescription(mutationEffectEvidences.iterator().next().getDescription());
+                        }
                         if (map.get(EvidenceType.VARIANT_PENETRANCE) != null && !map.get(EvidenceType.VARIANT_PENETRANCE).isEmpty()) {
                             variant.setPenetrance(map.get(EvidenceType.VARIANT_PENETRANCE).iterator().next().getKnownEffect());
                         }
