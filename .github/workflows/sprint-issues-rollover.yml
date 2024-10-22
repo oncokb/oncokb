@@ -17,7 +17,7 @@ jobs:
           owner: oncokb
           number: 3 # The project number as you see it in the URL
           token: ${{secrets.PROJECT_PAT}} # Needs 'project' write perms
-          iteration-field: Week
+          iteration-field: 2024 Week # https://github.com/blombard/move-to-next-iteration/issues/7
           iteration: current
           new-iteration: next
           excluded-statuses: ✅ Done
