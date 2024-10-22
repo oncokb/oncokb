@@ -55,7 +55,8 @@ public class DriveAnnotationParser {
     private static String ALLELE_STATES_BIALLELIC = "biallelic";
     private static String ALLELE_STATES_MONOALLELIC = "monoallelic";
     private static String ALLELE_STATES_MOSAIC = "mosaic";
-    private static String[] ALLELE_STATE_CHECKS = new String[]{ALLELE_STATES_BIALLELIC, ALLELE_STATES_MONOALLELIC, ALLELE_STATES_MOSAIC};
+    private static String ALLELE_STATES_CARRIER = "carrier";
+    private static String[] ALLELE_STATE_CHECKS = new String[]{ALLELE_STATES_BIALLELIC, ALLELE_STATES_MONOALLELIC, ALLELE_STATES_MOSAIC, ALLELE_STATES_CARRIER};
 
     public void parseVUS(Boolean germline, Gene gene, JSONArray vus, Integer nestLevel) throws JSONException {
         System.out.println(spaceStrByNestLevel(nestLevel) + "Variants of unknown significance");
@@ -453,30 +454,14 @@ public class DriveAnnotationParser {
             }
             evidence.setAlterations(associatedAlterations);
             evidence.setGene(gene);
-            evidence.setKnownEffect(genomicIndicator.getString("name"));
+            evidence.setName(genomicIndicator.getString("name"));
             evidence.setUuid(genomicIndicator.getString("name_uuid"));
             evidence.setDescription(genomicIndicator.has(DESC_KEY) ? genomicIndicator.getString(DESC_KEY) : "");
-            ApplicationContextSingleton.getEvidenceBo().save(evidence);
 
-//            if (genomicIndicator.has(ALLELE_STATES_KEY)) {
-//                JSONObject alleleStatesObject = genomicIndicator.getJSONObject(ALLELE_STATES_KEY);
-//                for (String alleleStateCheck : ALLELE_STATE_CHECKS) {
-//                    if (alleleStatesObject.has(alleleStateCheck)) {
-//                        saveGenomicIndicatorAlleleState(gene, associatedAlterations, alleleStateCheck);
-//                    }
-//                }
-//            }
-        }
-    }
-
-    private void saveGenomicIndicatorAlleleState(Gene gene, Set<Alteration> alterations, String alleleState) {
-        if (StringUtils.isNotEmpty(alleleState)) {
-            Evidence evidence = new Evidence();
-            evidence.setGene(gene);
-            evidence.setForGermline(true);
-            evidence.setAlterations(alterations);
-            evidence.setEvidenceType(EvidenceType.GENOMIC_INDICATOR_ALLELE_STATE);
-            evidence.setKnownEffect(alleleState);
+            if (genomicIndicator.has(ALLELE_STATES_KEY)) {
+                JSONObject alleleStatesObject = genomicIndicator.getJSONObject(ALLELE_STATES_KEY);
+                evidence.setKnownEffect(Arrays.stream(ALLELE_STATE_CHECKS).filter(alleleStatesObject::has).collect(Collectors.joining(",")));
+            }
             ApplicationContextSingleton.getEvidenceBo().save(evidence);
         }
     }
