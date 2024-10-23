@@ -280,16 +280,25 @@ public class DriveAnnotationParser {
                 JSONArray alterationsObj = mutation.has("alterations") ? mutation.getJSONArray("alterations") : null;
 
                 if (mutationUuid != null && (mutationStr != null || alterationsObj != null)) {
-                    List<Alteration> alterations;
+                    List<Alteration> alterations = new ArrayList<>();
                     if (alterationsObj != null) {
-                        List<String> mutationStrs = new ArrayList<>();
                         for (int j = 0; j < alterationsObj.length(); j++) {
                             JSONObject alteration = alterationsObj.getJSONObject(j);
                             if (alteration.has("alteration") && StringUtils.isNotEmpty(alteration.getString("alteration"))) {
-                                mutationStrs.add(alteration.getString("alteration"));
+                                List<Alteration> alts = AlterationUtils.parseMutationString(alteration.getString("alteration"), ",");
+                                if (alteration.has("proteinChange") && StringUtils.isNotEmpty(alteration.getString("proteinChange"))) {
+                                    String proteinChange = alteration.getString("proteinChange");
+                                    for (Alteration alt : alts) {
+                                        alt.setProteinChange(proteinChange);
+                                    }
+                                } else {
+                                    for (Alteration alt : alts) {
+                                        alt.setProteinChange("");
+                                    }
+                                }
+                                alterations.addAll(alts);
                             }
                         }
-                        alterations = AlterationUtils.parseMutationString(StringUtils.join(mutationStrs, ","), ",");
                     } else {
                         alterations = AlterationUtils.parseMutationString(mutationStr, ",");
                     }
@@ -302,6 +311,7 @@ public class DriveAnnotationParser {
                             alteration.setGene(gene);
                             alteration.setAlterationType(AlterationType.MUTATION);
                             alteration.setAlteration(alt.getAlteration());
+                            alteration.setProteinChange(alt.getProteinChange());
                             alteration.setName(alt.getName());
                             alteration.setReferenceGenomes(alt.getReferenceGenomes());
                             AlterationUtils.annotateAlteration(alteration, alt.getAlteration());
@@ -460,7 +470,7 @@ public class DriveAnnotationParser {
 
             if (genomicIndicator.has(ALLELE_STATES_KEY)) {
                 JSONObject alleleStatesObject = genomicIndicator.getJSONObject(ALLELE_STATES_KEY);
-                evidence.setKnownEffect(Arrays.stream(ALLELE_STATE_CHECKS).filter(alleleStatesObject::has).collect(Collectors.joining(",")));
+                evidence.setKnownEffect(Arrays.stream(ALLELE_STATE_CHECKS).filter(alleleState -> alleleStatesObject.has(alleleState) && StringUtils.isNotEmpty(alleleStatesObject.getString(alleleState))).collect(Collectors.joining(",")));
             }
             ApplicationContextSingleton.getEvidenceBo().save(evidence);
         }

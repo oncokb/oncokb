@@ -1120,7 +1120,7 @@ public class EvidenceUtils {
         Set<Gene> genes = new HashSet<>();
         List<Evidence> evidences = new ArrayList<>();
         for (Alteration alteration : alterations) {
-            genes.add(alteration.getGene());
+            if (alteration != null) genes.add(alteration.getGene());
         }
         if (genes.size() == 1) {
             evidences.addAll(CacheUtils.getEvidences(genes.iterator().next()));
