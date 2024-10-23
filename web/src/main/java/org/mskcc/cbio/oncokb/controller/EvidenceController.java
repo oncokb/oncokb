@@ -337,7 +337,7 @@ public class EvidenceController {
                 for (Alteration alteration : alterations) {
                     Evidence evidence = new Evidence(
                         uuid, evidenceType, new HashSet<>(), new HashSet<>(), new HashSet<>(), gene, Collections.singleton(alteration),
-                        description, additionalInfo, treatments, knownEffect, lastEdit, null,
+                        description, additionalInfo, treatments, knownEffect, null, lastEdit, null,
                         level, fdaLevel, solidPropagation, liquidPropagation, articles
                     );
                     initEvidence(evidence, new ArrayList<>(evidence.getTreatments()));
@@ -347,7 +347,7 @@ public class EvidenceController {
             } else if (!isCancerEvidence) {
                 Evidence evidence = new Evidence(
                     uuid, evidenceType, new HashSet<>(), new HashSet<>(), new HashSet<>(), gene, alterations,
-                    description, additionalInfo, treatments, knownEffect, lastEdit, null,
+                    description, additionalInfo, treatments, knownEffect, null, lastEdit, null,
                     level, fdaLevel, solidPropagation, liquidPropagation, articles
                 );
                 initEvidence(evidence, new ArrayList<>(evidence.getTreatments()));
@@ -356,7 +356,7 @@ public class EvidenceController {
             } else {
                 Evidence evidence = new Evidence(
                     uuid, evidenceType, cancerTypes, excludedCancerTypes, relevantCancerTypes, gene, alterations,
-                    description, additionalInfo, treatments, knownEffect, lastEdit, null,
+                    description, additionalInfo, treatments, knownEffect, null, lastEdit, null,
                     level, fdaLevel, solidPropagation, liquidPropagation, articles
                 );
                 initEvidence(evidence, new ArrayList<>(evidence.getTreatments()));
@@ -392,7 +392,7 @@ public class EvidenceController {
             // create a new evidence based on input passed in, and gene and alterations information from the current evidences
             Evidence evidence = new Evidence(
                 uuid, evidenceType, cancerTypes, excludedCancerTypes, relevantCancerTypes, gene, alterations,
-                description, additionalInfo, treatments, knownEffect, lastEdit, null,
+                description, additionalInfo, treatments, knownEffect, null, lastEdit, null,
                 level, fdaLevel, solidPropagation, liquidPropagation, articles
             );
 

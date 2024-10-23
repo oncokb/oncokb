@@ -41,7 +41,6 @@ public class EvidenceTypeUtils {
         Set<EvidenceType> evidenceTypes = new HashSet<>();
         evidenceTypes.add(EvidenceType.PATHOGENIC);
         evidenceTypes.add(EvidenceType.GENOMIC_INDICATOR);
-        evidenceTypes.add(EvidenceType.GENOMIC_INDICATOR_ALLELE_STATE);
         evidenceTypes.add(EvidenceType.GENE_PENETRANCE);
         evidenceTypes.add(EvidenceType.GENE_CANCER_RISK);
         evidenceTypes.add(EvidenceType.GENE_INHERITANCE_MECHANISM);
