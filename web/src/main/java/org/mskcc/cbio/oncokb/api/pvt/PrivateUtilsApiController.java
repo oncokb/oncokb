@@ -383,7 +383,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             String genomicQuery = StringUtils.isNullOrEmpty(hgvsg) ? genomicChange : hgvsg;
             GNVariantAnnotationType type = StringUtils.isNullOrEmpty(hgvsg) ? GNVariantAnnotationType.GENOMIC_LOCATION : GNVariantAnnotationType.HGVS_G;
             Alteration alterationModel;
-            if (!this.cacheFetcher.genomicLocationShouldBeAnnotated(type, genomicQuery, matchedRG, this.cacheFetcher.getAllTranscriptGenes())) {
+            if (!this.cacheFetcher.genomicLocationShouldBeAnnotated(type, genomicQuery, matchedRG, this.cacheFetcher.getCanonicalEnsemblGenesByChromosome(matchedRG))) {
                 alterationModel = new Alteration();
             } else {
                 alterationModel = this.cacheFetcher.getAlterationFromGenomeNexus(type, matchedRG, genomicQuery);
@@ -592,9 +592,14 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         if (body == null) {
             throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         } else {
-            Set<org.oncokb.oncokb_transcript.client.Gene> genes = this.cacheFetcher.getAllTranscriptGenes();
+            Map<String, Set<org.oncokb.oncokb_transcript.client.EnsemblGene>> chromosomeEnsemblGenesGrch37 = this.cacheFetcher.getCanonicalEnsemblGenesByChromosome(ReferenceGenome.GRCh37);
+            Map<String, Set<org.oncokb.oncokb_transcript.client.EnsemblGene>> chromosomeEnsemblGenesGrch38 = this.cacheFetcher.getCanonicalEnsemblGenesByChromosome(ReferenceGenome.GRCh38);
             for (AnnotateMutationByHGVSgQuery query : body) {
-                boolean shouldAnnotate = this.cacheFetcher.genomicLocationShouldBeAnnotated(GNVariantAnnotationType.HGVS_G, query.getHgvsg(), query.getReferenceGenome(), genes);
+                Map<String, Set<org.oncokb.oncokb_transcript.client.EnsemblGene>> selectedEnsemblGenesMap = chromosomeEnsemblGenesGrch37;
+                if (ReferenceGenome.GRCh38.equals(query.getReferenceGenome())) {
+                    selectedEnsemblGenesMap = chromosomeEnsemblGenesGrch38;
+                }
+                boolean shouldAnnotate = this.cacheFetcher.genomicLocationShouldBeAnnotated(GNVariantAnnotationType.HGVS_G, query.getHgvsg(), query.getReferenceGenome(),selectedEnsemblGenesMap);
                 result.add(new TranscriptCoverageFilterResult(query.getHgvsg(), shouldAnnotate));
             }
         }
@@ -610,9 +615,14 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         if (body == null) {
             throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         } else {
-            Set<org.oncokb.oncokb_transcript.client.Gene> genes = this.cacheFetcher.getAllTranscriptGenes();
+            Map<String, Set<org.oncokb.oncokb_transcript.client.EnsemblGene>> chromosomeEnsemblGenesGrch37 = this.cacheFetcher.getCanonicalEnsemblGenesByChromosome(ReferenceGenome.GRCh37);
+            Map<String, Set<org.oncokb.oncokb_transcript.client.EnsemblGene>> chromosomeEnsemblGenesGrch38 = this.cacheFetcher.getCanonicalEnsemblGenesByChromosome(ReferenceGenome.GRCh38);
             for (AnnotateMutationByGenomicChangeQuery query : body) {
-                boolean shouldAnnotate = this.cacheFetcher.genomicLocationShouldBeAnnotated(GNVariantAnnotationType.GENOMIC_LOCATION, query.getGenomicLocation(), query.getReferenceGenome(), genes);
+                Map<String, Set<org.oncokb.oncokb_transcript.client.EnsemblGene>> selectedEnsemblGenesMap = chromosomeEnsemblGenesGrch37;
+                if (ReferenceGenome.GRCh38.equals(query.getReferenceGenome())) {
+                    selectedEnsemblGenesMap = chromosomeEnsemblGenesGrch38;
+                }
+                boolean shouldAnnotate = this.cacheFetcher.genomicLocationShouldBeAnnotated(GNVariantAnnotationType.GENOMIC_LOCATION, query.getGenomicLocation(), query.getReferenceGenome(), selectedEnsemblGenesMap);
                 result.add(new TranscriptCoverageFilterResult(query.getGenomicLocation(), shouldAnnotate));
             }
         }
