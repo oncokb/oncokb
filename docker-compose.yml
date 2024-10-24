@@ -20,7 +20,7 @@ services:
         -Dgenome_nexus.grch38.url=http://gn-spring-boot-grch38:8888
     depends_on:
       - "oncokb-transcript"
-  
+
   # oncokb-transcript requires a MySQL server and oncokb-transcript data imported into the database.
   # Reach out to contact@oncokb.org to get access to the data dump
   oncokb-transcript:
@@ -64,7 +64,6 @@ services:
       - "6060:8080"
     volumes:
       - ${VEP_CACHE}:/opt/vep/.vep/
-  
 
   # Genome Nexus GRCh38
   gn-spring-boot-grch38:
