@@ -30,6 +30,11 @@ import static org.mskcc.cbio.oncokb.cache.Constants.REDIS_KEY_SEPARATOR;
 
 @Component
 public class CacheFetcher {
+    private static Map<ReferenceGenome, Map<String, Set<EnsemblGene>>> canonicalEnsemblGenesByChromosomeByReferenceGenome = new HashMap<ReferenceGenome, Map<String, Set<EnsemblGene>>>() {{
+        put(ReferenceGenome.GRCh37, new HashMap<>());
+        put(ReferenceGenome.GRCh38, new HashMap<>());
+    }};
+
     OncokbTranscriptService oncokbTranscriptService = new OncokbTranscriptService();
     NotationConverter notationConverter = new NotationConverter();
 
@@ -103,9 +108,13 @@ public class CacheFetcher {
         return oncokbTranscriptService.findTranscriptGenesBySymbols(CacheUtils.getAllGenes().stream().filter(gene -> gene.getEntrezGeneId() > 0).map(gene -> gene.getEntrezGeneId().toString()).collect(Collectors.toList()));
     }
 
-    @Cacheable(cacheResolver = "generalCacheResolver", keyGenerator = "concatKeyGenerator")
     public Map<String, Set<EnsemblGene>> getCanonicalEnsemblGenesByChromosome(ReferenceGenome referenceGenome) throws ApiException {
-        Map<String, Set<EnsemblGene>> chromosomeEnsemblGenesMap = new HashMap<>();
+        // Use cached data if available
+        Map<String, Set<EnsemblGene>> chromosomeEnsemblGenesMap = canonicalEnsemblGenesByChromosomeByReferenceGenome.get(referenceGenome);
+        if(!chromosomeEnsemblGenesMap.isEmpty()) {
+            return chromosomeEnsemblGenesMap;
+        }
+        // Reach out to transcript service
         Set<org.oncokb.oncokb_transcript.client.Gene> allTranscriptGenes = getAllTranscriptGenes();
         for (org.oncokb.oncokb_transcript.client.Gene gene : allTranscriptGenes) {
             for (EnsemblGene ensemblGene : gene.getEnsemblGenes()) {
@@ -121,6 +130,7 @@ public class CacheFetcher {
                 chromosomeEnsemblGenesMap.get(chromosome).add(ensemblGene);
             }
         }
+        canonicalEnsemblGenesByChromosomeByReferenceGenome.put(referenceGenome, chromosomeEnsemblGenesMap);
         return chromosomeEnsemblGenesMap;
     }
 
@@ -321,7 +331,7 @@ public class CacheFetcher {
         return oncokbTranscriptService.findEnsemblTranscriptsByIds(ids, referenceGenome);
     }
 
-    public boolean genomicLocationShouldBeAnnotated(GNVariantAnnotationType gnVariantAnnotationType, String query, ReferenceGenome referenceGenome,Map<String, Set<EnsemblGene>> chromosomeCanonicalEnsembleGeneMap) throws ApiException {
+    public boolean genomicLocationShouldBeAnnotated(GNVariantAnnotationType gnVariantAnnotationType, String query, ReferenceGenome referenceGenome) throws ApiException {
         if (StringUtils.isEmpty(query)) {
             return false;
         }else{
@@ -332,8 +342,9 @@ public class CacheFetcher {
                 return false;
             }
         }
+        Map<String, Set<EnsemblGene>> chromosomeCanonicalEnsemblGeneMap = canonicalEnsemblGenesByChromosomeByReferenceGenome.get(referenceGenome);
         // when the transcript info is not available, we should always annotate the genomic location
-        if (chromosomeCanonicalEnsembleGeneMap == null || chromosomeCanonicalEnsembleGeneMap.isEmpty()) {
+        if (chromosomeCanonicalEnsemblGeneMap == null || chromosomeCanonicalEnsemblGeneMap.isEmpty()) {
             return true;
         }
         GenomicLocation gl = null;
@@ -357,8 +368,8 @@ public class CacheFetcher {
         }
         GenomicLocation finalGl = gl;
 
-        if (chromosomeCanonicalEnsembleGeneMap.containsKey(finalGl.getChromosome())){
-            return chromosomeCanonicalEnsembleGeneMap.get(finalGl.getChromosome()).stream().anyMatch(ensemblGene -> withinBuffer(ensemblGene, finalGl));
+        if (chromosomeCanonicalEnsemblGeneMap.containsKey(finalGl.getChromosome())){
+            return chromosomeCanonicalEnsemblGeneMap.get(finalGl.getChromosome()).stream().anyMatch(ensemblGene -> withinBuffer(ensemblGene, finalGl));
         }
 
         return false;
