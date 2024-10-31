@@ -360,6 +360,17 @@ public class IndicatorUtils {
                     if (gene.getHugoSymbol().equals("KIT")) {
                         CustomizeComparator.sortKitTreatment(treatments);
                     }
+                    for (IndicatorQueryTreatment treatment : treatments) {
+                        treatment.setDescription(CplUtils.annotate(
+                            treatment.getDescription(),
+                            query.getHugoSymbol(),
+                            query.getAlteration(),
+                            query.getTumorType(),
+                            query.getReferenceGenome(),
+                            gene,
+                            matchedTumorType
+                        ));
+                    }
                     indicatorQuery.setTreatments(treatments);
                     highestLevels = findHighestLevel(new HashSet<>(treatments));
                     indicatorQuery.setHighestSensitiveLevel(highestLevels.get("sensitive"));

@@ -619,7 +619,15 @@ public class MainUtils {
                         variant.setDrug(EvidenceUtils.getDrugs(Collections.singleton(evidence)));
                         variant.setDrugPmids(EvidenceUtils.getPmids(Collections.singleton(evidence)));
                         variant.setDrugAbstracts(EvidenceUtils.getAbstracts(Collections.singleton(evidence)));
-                        variant.setDrugDescription(evidence.getDescription());
+                        variant.setDrugDescription(CplUtils.annotate(
+                            evidence.getDescription(),
+                            gene.getHugoSymbol(),
+                            variant.getVariant().getName(),
+                            null,
+                            null,
+                            gene,
+                            null
+                        ));
                         variants.add(variant);
                     }
                 }
