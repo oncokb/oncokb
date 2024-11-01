@@ -122,11 +122,7 @@ public class CacheFetcher {
                     continue;
                 }
                 String chromosome = ensemblGene.getChromosome();
-
-                if (!chromosomeEnsemblGenesMap.containsKey(chromosome)) {
-                    chromosomeEnsemblGenesMap.put(chromosome, new HashSet<>());
-                }
-
+                chromosomeEnsemblGenesMap.putIfAbsent(chromosome, new HashSet<>());
                 chromosomeEnsemblGenesMap.get(chromosome).add(ensemblGene);
             }
         }
