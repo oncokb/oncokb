@@ -338,7 +338,7 @@ public class CacheFetcher {
                 return false;
             }
         }
-        Map<String, Set<EnsemblGene>> chromosomeCanonicalEnsemblGeneMap = canonicalEnsemblGenesByChromosomeByReferenceGenome.get(referenceGenome);
+        Map<String, Set<EnsemblGene>> chromosomeCanonicalEnsemblGeneMap = getCanonicalEnsemblGenesByChromosome(referenceGenome);
         // when the transcript info is not available, we should always annotate the genomic location
         if (chromosomeCanonicalEnsemblGeneMap == null || chromosomeCanonicalEnsemblGeneMap.isEmpty()) {
             return true;
@@ -349,6 +349,9 @@ public class CacheFetcher {
                 gl = notationConverter.parseGenomicLocation(query);
             } else if (gnVariantAnnotationType.equals(GNVariantAnnotationType.HGVS_G)) {
                 query = notationConverter.hgvsNormalizer(query);
+                // We are only doing a partial HGVSg -> Genomic Location conversion.
+                // The withinBuffer method only requires the chromosome and range, so we do
+                // not need to parse the ref/var residues. This is slightly more performanant than using regex.
                 gl = MainUtils.parseChromosomeAndRangeFromHGVSg(query);
             }
             if (gl == null) {

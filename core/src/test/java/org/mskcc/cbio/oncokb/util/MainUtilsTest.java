@@ -2,6 +2,9 @@ package org.mskcc.cbio.oncokb.util;
 
 import static org.mskcc.cbio.oncokb.util.MainUtils.*;
 
+import org.cbioportal.genome_nexus.model.GenomicLocation;
+import org.junit.Test;
+
 import junit.framework.TestCase;
 import org.mskcc.cbio.oncokb.model.AnnotationSearchQueryType;
 import org.mskcc.cbio.oncokb.model.MutationEffect;
@@ -94,5 +97,37 @@ public class MainUtilsTest extends TestCase {
         assertTrue(compareAnnotationSearchQueryType(null, null, true) == 0);
         assertTrue(compareAnnotationSearchQueryType(AnnotationSearchQueryType.VARIANT, AnnotationSearchQueryType.GENE, true) > 0);
         assertTrue(compareAnnotationSearchQueryType(AnnotationSearchQueryType.VARIANT, AnnotationSearchQueryType.GENE, false) < 0);
+    }
+
+    public void testParseChromosomeAndRangeFromHGVSg() {
+        GenomicLocation parsedGl = parseChromosomeAndRangeFromHGVSg("7:g.100A>T");
+        assertEquals("7", parsedGl.getChromosome());
+        assertEquals(new Integer(100), parsedGl.getStart());
+        assertEquals(new Integer(100), parsedGl.getEnd());
+        
+
+        parsedGl = parseChromosomeAndRangeFromHGVSg("X:g.100_105del");
+        assertEquals("X", parsedGl.getChromosome());
+        assertEquals(new Integer(100), parsedGl.getStart());
+        assertEquals(new Integer(105), parsedGl.getEnd());
+
+        assertEquals(null, parseChromosomeAndRangeFromHGVSg(""));
+        assertEquals(null, parseChromosomeAndRangeFromHGVSg(":g.100A>T"));
+        assertEquals(null, parseChromosomeAndRangeFromHGVSg("7:g."));
+        assertEquals(null, parseChromosomeAndRangeFromHGVSg("7:g.A"));
+        assertEquals(null, parseChromosomeAndRangeFromHGVSg("7:g.A_B"));
+        assertEquals(null, parseChromosomeAndRangeFromHGVSg("7:g.100_A"));
+        assertEquals(null, parseChromosomeAndRangeFromHGVSg("7:g.A_100"));
+    }
+
+    public void testFindDigitEndIndex() {
+        assertEquals(-1, findDigitEndIndex("100T", -1));
+        assertEquals(-1, findDigitEndIndex("100-", 3));
+        assertEquals(-1, findDigitEndIndex("abc123def", 0));
+
+        assertEquals(3, findDigitEndIndex("100T", 0));
+        assertEquals(3, findDigitEndIndex("100-", 0));
+        assertEquals(6, findDigitEndIndex("abc123def", 3));
+        assertEquals(6, findDigitEndIndex("abc123def", 5));
     }
 }
