@@ -151,7 +151,12 @@ public class AnnotationsApiController {
             throw new ApiHttpErrorException("genomicLocation is missing.", HttpStatus.BAD_REQUEST);
         }
         ReferenceGenome matchedRG = resolveMatchedRG(referenceGenome);
-        indicatorQueryResp = this.getIndicatorQueryFromGenomicLocation(matchedRG, genomicLocation, tumorType, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")), cacheFetcher.getAllTranscriptGenes());
+        indicatorQueryResp = this.getIndicatorQueryFromGenomicLocation(
+            matchedRG,
+            genomicLocation,
+            tumorType,
+            new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ","))
+        );
         return new ResponseEntity<>(indicatorQueryResp, HttpStatus.OK);
     }
 
@@ -184,9 +189,8 @@ public class AnnotationsApiController {
         if (body == null) {
             throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         } else {
-            Set<org.oncokb.oncokb_transcript.client.Gene> allTranscriptGenes = cacheFetcher.getAllTranscriptGenes();
             for (AnnotateMutationByGenomicChangeQuery query : body) {
-                IndicatorQueryResp resp = this.getIndicatorQueryFromGenomicLocation(query.getReferenceGenome(), query.getGenomicLocation(), query.getTumorType(), query.getEvidenceTypes(), allTranscriptGenes);
+                IndicatorQueryResp resp = this.getIndicatorQueryFromGenomicLocation(query.getReferenceGenome(), query.getGenomicLocation(), query.getTumorType(), query.getEvidenceTypes());
                 resp.getQuery().setId(query.getId());
                 result.add(resp);
             }
@@ -225,8 +229,7 @@ public class AnnotationsApiController {
                 matchedRG,
                 hgvsg,
                 tumorType,
-                new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")),
-                cacheFetcher.getAllTranscriptGenes()
+                new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ","))
             );
         }
         return new ResponseEntity<>(indicatorQueryResp, HttpStatus.OK);
@@ -250,14 +253,12 @@ public class AnnotationsApiController {
         if (body == null) {
             throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         } else {
-            Set<org.oncokb.oncokb_transcript.client.Gene> allTranscriptGenes = cacheFetcher.getAllTranscriptGenes();
             for (AnnotateMutationByHGVSgQuery query : body) {
                 IndicatorQueryResp resp = this.getIndicatorQueryFromHGVSg(
                     query.getReferenceGenome(),
                     query.getHgvsg(),
                     query.getTumorType(),
-                    query.getEvidenceTypes(),
-                    allTranscriptGenes
+                    query.getEvidenceTypes()
                 );
                 resp.getQuery().setId(query.getId());
                 result.add(resp);
@@ -532,11 +533,10 @@ public class AnnotationsApiController {
         ReferenceGenome referenceGenome,
         String genomicLocation,
         String tumorType,
-        Set<EvidenceType> evidenceTypes,
-        Set<org.oncokb.oncokb_transcript.client.Gene> allTranscriptGenes
+        Set<EvidenceType> evidenceTypes
     ) throws ApiException, org.genome_nexus.ApiException {
         Alteration alteration;
-        if (!this.cacheFetcher.genomicLocationShouldBeAnnotated(GNVariantAnnotationType.GENOMIC_LOCATION, genomicLocation, referenceGenome, allTranscriptGenes)) {
+        if (!this.cacheFetcher.genomicLocationShouldBeAnnotated(GNVariantAnnotationType.GENOMIC_LOCATION, genomicLocation, referenceGenome)) {
             alteration = new Alteration();
         } else {
             alteration = this.cacheFetcher.getAlterationFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, referenceGenome, genomicLocation);
@@ -565,11 +565,10 @@ public class AnnotationsApiController {
         ReferenceGenome referenceGenome,
         String hgvsg,
         String tumorType,
-        Set<EvidenceType> evidenceTypes,
-        Set<org.oncokb.oncokb_transcript.client.Gene> allTranscriptGenes
+        Set<EvidenceType> evidenceTypes
     ) throws ApiException, org.genome_nexus.ApiException {
         Alteration alteration;
-        if (!this.cacheFetcher.genomicLocationShouldBeAnnotated(GNVariantAnnotationType.HGVS_G, hgvsg, referenceGenome, allTranscriptGenes)) {
+        if (!this.cacheFetcher.genomicLocationShouldBeAnnotated(GNVariantAnnotationType.HGVS_G, hgvsg, referenceGenome)) {
             alteration = new Alteration();
         } else {
             alteration = this.cacheFetcher.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, referenceGenome, hgvsg);
