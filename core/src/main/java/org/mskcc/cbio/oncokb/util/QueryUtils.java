@@ -49,17 +49,19 @@ public class QueryUtils {
         query.setReferenceGenome(referenceGenome);
         query.setHgvs(hgvsg);
         query.setTumorType(tumorType);
-        if (alteration.getGene() != null) {
-            query.setHugoSymbol(alteration.getGene().getHugoSymbol());
-            query.setEntrezGeneId(alteration.getGene().getEntrezGeneId());
-        }
-        query.setAlteration(alteration.getAlteration());
-        query.setProteinStart(alteration.getProteinStart());
-        query.setProteinEnd(alteration.getProteinEnd());
-        if (alteration.getConsequence() != null) {
-            query.setConsequence(alteration.getConsequence().getTerm());
-            if (alteration.getConsequence().getTerm().equals(UPSTREAM_GENE) && StringUtils.isNullOrEmpty(query.getAlteration())) {
-                query.setAlteration(SpecialVariant.PROMOTER.getVariant());
+        if (alteration != null) {
+            if (alteration.getGene() != null) {
+                query.setHugoSymbol(alteration.getGene().getHugoSymbol());
+                query.setEntrezGeneId(alteration.getGene().getEntrezGeneId());
+            }
+            query.setAlteration(alteration.getAlteration());
+            query.setProteinStart(alteration.getProteinStart());
+            query.setProteinEnd(alteration.getProteinEnd());
+            if (alteration.getConsequence() != null) {
+                query.setConsequence(alteration.getConsequence().getTerm());
+                if (alteration.getConsequence().getTerm().equals(UPSTREAM_GENE) && StringUtils.isNullOrEmpty(query.getAlteration())) {
+                    query.setAlteration(SpecialVariant.PROMOTER.getVariant());
+                }
             }
         }
         return query;
