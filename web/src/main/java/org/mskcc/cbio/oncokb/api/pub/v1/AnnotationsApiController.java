@@ -4,6 +4,8 @@ import static org.mskcc.cbio.oncokb.util.AnnotationSearchUtils.annotationSearch;
 
 import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
+import org.genome_nexus.client.GenomicLocation;
+import org.mskcc.cbio.oncokb.apiModels.VariantAnnotation;
 import org.mskcc.cbio.oncokb.apiModels.annotation.*;
 import org.mskcc.cbio.oncokb.cache.CacheFetcher;
 import org.mskcc.cbio.oncokb.config.annotation.PremiumPublicApi;
@@ -60,7 +62,7 @@ public class AnnotationsApiController {
         IndicatorQueryResp indicatorQueryResp = null;
 
         if (entrezGeneId != null && hugoSymbol != null && !GeneUtils.isSameGene(entrezGeneId, hugoSymbol)) {
-            throw new ApiHttpErrorException("entrezGeneId \"" + entrezGeneId + "\"" + " and hugoSymbol \"" + hugoSymbol +"\" are not the same gene.", HttpStatus.BAD_REQUEST);
+            throw new ApiHttpErrorException("entrezGeneId \"" + entrezGeneId + "\"" + " and hugoSymbol \"" + hugoSymbol + "\" are not the same gene.", HttpStatus.BAD_REQUEST);
         } else {
             ReferenceGenome matchedRG = resolveMatchedRG(referenceGenome);
             Query query = new Query(null, matchedRG, entrezGeneId, hugoSymbol, proteinChange, null, null, tumorType, consequence, proteinStart, proteinEnd, null);
@@ -151,9 +153,10 @@ public class AnnotationsApiController {
             throw new ApiHttpErrorException("genomicLocation is missing.", HttpStatus.BAD_REQUEST);
         }
         ReferenceGenome matchedRG = resolveMatchedRG(referenceGenome);
+        Map<String, Alteration> map = getAlterationsFromGenomeNexusByGenomicLocation(matchedRG, Collections.singletonList(GenomeNexusUtils.convertGenomicLocation(genomicLocation)));
         indicatorQueryResp = this.getIndicatorQueryFromGenomicLocation(
             matchedRG,
-            genomicLocation,
+            map.isEmpty() ? new Alteration() : map.get(map.keySet().iterator().next()),
             tumorType,
             new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ","))
         );
@@ -189,8 +192,33 @@ public class AnnotationsApiController {
         if (body == null) {
             throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         } else {
+            List<GenomicLocation> grch37Queries = new ArrayList<>();
+            List<GenomicLocation> grch38Queries = new ArrayList<>();
+            List<String> normalizedGenomicLocations = new ArrayList<>();
+
             for (AnnotateMutationByGenomicChangeQuery query : body) {
-                IndicatorQueryResp resp = this.getIndicatorQueryFromGenomicLocation(query.getReferenceGenome(), query.getGenomicLocation(), query.getTumorType(), query.getEvidenceTypes());
+                ReferenceGenome referenceGenome = query.getReferenceGenome();
+                if (referenceGenome == null) {
+                    query.setReferenceGenome(ReferenceGenome.GRCh37);
+                }
+                GenomicLocation genomicLocation = GenomeNexusUtils.convertGenomicLocation(query.getGenomicLocation());
+                normalizedGenomicLocations.add(GenomeNexusUtils.convertGenomicLocation(genomicLocation));
+                if (referenceGenome == ReferenceGenome.GRCh38) {
+                    grch38Queries.add(genomicLocation);
+                } else {
+                    grch37Queries.add(genomicLocation);
+                }
+            }
+
+            Map<String, Alteration> grch37Alts = getAlterationsFromGenomeNexusByGenomicLocation(ReferenceGenome.GRCh37, grch37Queries);
+            Map<String, Alteration> grch38Alts = getAlterationsFromGenomeNexusByGenomicLocation(ReferenceGenome.GRCh38, grch38Queries);
+
+            for (int i = 0; i < body.size(); i++) {
+                AnnotateMutationByGenomicChangeQuery query = body.get(i);
+                String normalized = normalizedGenomicLocations.get(i);
+                Alteration alteration = query.getReferenceGenome() == ReferenceGenome.GRCh37 ? grch37Alts.get(normalized) : grch38Alts.get(normalized);
+                if (alteration == null) alteration = new Alteration();
+                IndicatorQueryResp resp = this.getIndicatorQueryFromGenomicLocation(query.getReferenceGenome(), alteration, query.getTumorType(), query.getEvidenceTypes());
                 resp.getQuery().setId(query.getId());
                 result.add(resp);
             }
@@ -225,8 +253,11 @@ public class AnnotationsApiController {
                 throw new ApiHttpErrorException("hgvsg is invalid.", HttpStatus.BAD_REQUEST);
             }
 
+            Map<String, Alteration> map = getAlterationsFromGenomeNexusByHgvsg(matchedRG, Collections.singletonList(hgvsg));
+            Alteration alteration = map.isEmpty() ? new Alteration() : map.get(map.keySet().iterator().next());
             indicatorQueryResp = this.getIndicatorQueryFromHGVSg(
                 matchedRG,
+                alteration,
                 hgvsg,
                 tumorType,
                 new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ","))
@@ -253,9 +284,32 @@ public class AnnotationsApiController {
         if (body == null) {
             throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         } else {
+            List<String> grch37Queries = new ArrayList<>();
+            List<String> grch38Queries = new ArrayList<>();
+
             for (AnnotateMutationByHGVSgQuery query : body) {
+                ReferenceGenome referenceGenome = query.getReferenceGenome();
+                if (referenceGenome == null) {
+                    referenceGenome = ReferenceGenome.GRCh37;
+                }
+                query.setReferenceGenome(referenceGenome);
+                if (referenceGenome == ReferenceGenome.GRCh38) {
+                    grch38Queries.add(query.getHgvsg());
+                } else {
+                    grch37Queries.add(query.getHgvsg());
+                }
+            }
+
+            Map<String, Alteration> grch37Alts = getAlterationsFromGenomeNexusByHgvsg(ReferenceGenome.GRCh37, grch37Queries);
+            Map<String, Alteration> grch38Alts = getAlterationsFromGenomeNexusByHgvsg(ReferenceGenome.GRCh38, grch38Queries);
+
+            for (AnnotateMutationByHGVSgQuery query : body) {
+                Alteration alteration = query.getReferenceGenome() == ReferenceGenome.GRCh37 ? grch37Alts.get(query.getHgvsg()) : grch38Alts.get(query.getHgvsg());
+                if (alteration == null) alteration = new Alteration();
+
                 IndicatorQueryResp resp = this.getIndicatorQueryFromHGVSg(
                     query.getReferenceGenome(),
+                    alteration,
                     query.getHgvsg(),
                     query.getTumorType(),
                     query.getEvidenceTypes()
@@ -288,7 +342,7 @@ public class AnnotationsApiController {
         IndicatorQueryResp indicatorQueryResp = null;
 
         if (entrezGeneId != null && hugoSymbol != null && !GeneUtils.isSameGene(entrezGeneId, hugoSymbol)) {
-            throw new ApiHttpErrorException("entrezGeneId \"" + entrezGeneId + "\"" + " and hugoSymbol \"" + hugoSymbol +"\" are not the same gene.", HttpStatus.BAD_REQUEST);
+            throw new ApiHttpErrorException("entrezGeneId \"" + entrezGeneId + "\"" + " and hugoSymbol \"" + hugoSymbol + "\" are not the same gene.", HttpStatus.BAD_REQUEST);
         } else {
             if (copyNameAlterationType == null) {
                 throw new ApiHttpErrorException("copyNameAlterationType is missing.", HttpStatus.BAD_REQUEST);
@@ -390,13 +444,13 @@ public class AnnotationsApiController {
 
         if (structuralVariantType == null) {
             throw new ApiHttpErrorException("structuralVariantType is missing.", HttpStatus.BAD_REQUEST);
-        } else if  (isFunctionalFusion == null) {
+        } else if (isFunctionalFusion == null) {
             throw new ApiHttpErrorException("isFunctionalFusion is missing.", HttpStatus.BAD_REQUEST);
         }
         if (entrezGeneIdA != null && hugoSymbolA != null && !GeneUtils.isSameGene(entrezGeneIdA, hugoSymbolA)) {
-            throw new ApiHttpErrorException("entrezGeneIdA \"" + entrezGeneIdA + "\"" + " and hugoSymbolA \"" + hugoSymbolA +"\" are not the same gene.", HttpStatus.BAD_REQUEST);
+            throw new ApiHttpErrorException("entrezGeneIdA \"" + entrezGeneIdA + "\"" + " and hugoSymbolA \"" + hugoSymbolA + "\" are not the same gene.", HttpStatus.BAD_REQUEST);
         } else if (entrezGeneIdB != null && hugoSymbolB != null && !GeneUtils.isSameGene(entrezGeneIdB, hugoSymbolB)) {
-            throw new ApiHttpErrorException("entrezGeneIdB \"" + entrezGeneIdB + "\"" + " and hugoSymbolB \"" + hugoSymbolB +"\" are not the same gene.", HttpStatus.BAD_REQUEST);
+            throw new ApiHttpErrorException("entrezGeneIdB \"" + entrezGeneIdB + "\"" + " and hugoSymbolB \"" + hugoSymbolB + "\" are not the same gene.", HttpStatus.BAD_REQUEST);
         } else {
             Gene geneA = new Gene();
             try {
@@ -493,7 +547,7 @@ public class AnnotationsApiController {
                 String fusionName = FusionUtils.getFusionName(geneA, geneB);
 
                 IndicatorQueryResp resp = this.cacheFetcher.processQuery(
-                    query.getReferenceGenome(),  null, fusionName, null, AlterationType.STRUCTURAL_VARIANT.name(), query.getTumorType(), query.getFunctionalFusion() ? "fusion" : "", null, null, query.getStructuralVariantType(), null,
+                    query.getReferenceGenome(), null, fusionName, null, AlterationType.STRUCTURAL_VARIANT.name(), query.getTumorType(), query.getFunctionalFusion() ? "fusion" : "", null, null, query.getStructuralVariantType(), null,
                     null, false, query.getEvidenceTypes(), false);
                 resp.getQuery().setId(query.getId());
                 result.add(resp);
@@ -516,7 +570,7 @@ public class AnnotationsApiController {
         final int DEFAULT_LIMIT = 10;
         final int QUERY_MIN_LENGTH = 2;
         Set<AnnotationSearchResult> result = new TreeSet<>();
-        if(limit == null) {
+        if (limit == null) {
             limit = DEFAULT_LIMIT;
         }
         if (query != null && query.length() >= QUERY_MIN_LENGTH) {
@@ -531,16 +585,10 @@ public class AnnotationsApiController {
 
     private IndicatorQueryResp getIndicatorQueryFromGenomicLocation(
         ReferenceGenome referenceGenome,
-        String genomicLocation,
+        Alteration alteration,
         String tumorType,
         Set<EvidenceType> evidenceTypes
-    ) throws ApiException, org.genome_nexus.ApiException {
-        Alteration alteration;
-        if (!this.cacheFetcher.genomicLocationShouldBeAnnotated(GNVariantAnnotationType.GENOMIC_LOCATION, genomicLocation, referenceGenome)) {
-            alteration = new Alteration();
-        } else {
-            alteration = this.cacheFetcher.getAlterationFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, referenceGenome, genomicLocation);
-        }
+    ) {
         Query query = QueryUtils.getQueryFromAlteration(referenceGenome, tumorType, alteration, null);
         return this.cacheFetcher.processQuery(
             referenceGenome,
@@ -557,23 +605,50 @@ public class AnnotationsApiController {
             null,
             false,
             evidenceTypes,
-                false
+            false
         );
+    }
+
+    private Map<String, Alteration> getAlterationsFromGenomeNexusByHgvsg(ReferenceGenome referenceGenome, List<String> queries) throws ApiException, org.genome_nexus.ApiException {
+        List<String> queriesToGN = new ArrayList<>();
+
+        for (String query : queries) {
+            if (this.cacheFetcher.hgvsgShouldBeAnnotated(query, referenceGenome)) {
+                queriesToGN.add(query);
+            }
+        }
+        List<org.genome_nexus.client.VariantAnnotation> variantAnnotations = GenomeNexusUtils.getHgvsgVariantsAnnotation(queriesToGN, referenceGenome);
+        Map<String, Alteration> annotatedAlterations = new HashMap<>();
+        if (!queriesToGN.isEmpty()) {
+            annotatedAlterations = AlterationUtils.getAlterationsFromGenomeNexus(variantAnnotations, referenceGenome);
+        }
+        return annotatedAlterations;
+    }
+
+    private Map<String, Alteration> getAlterationsFromGenomeNexusByGenomicLocation(ReferenceGenome referenceGenome, List<GenomicLocation> queries) throws ApiException, org.genome_nexus.ApiException {
+        List<GenomicLocation> queriesToGN = new ArrayList<>();
+
+        for (GenomicLocation query : queries) {
+            if (this.cacheFetcher.genomicLocationShouldBeAnnotated(query, referenceGenome)) {
+                queriesToGN.add(query);
+            }
+        }
+        List<org.genome_nexus.client.VariantAnnotation> variantAnnotations = GenomeNexusUtils.getGenomicLocationVariantsAnnotation(queriesToGN, referenceGenome);
+        Map<String, Alteration> annotatedAlterations = new HashMap<>();
+        if (!queriesToGN.isEmpty()) {
+            annotatedAlterations = AlterationUtils.getAlterationsFromGenomeNexus(variantAnnotations, referenceGenome);
+        }
+        return annotatedAlterations;
     }
 
     private IndicatorQueryResp getIndicatorQueryFromHGVSg(
         ReferenceGenome referenceGenome,
+        Alteration hgvsgAlt,
         String hgvsg,
         String tumorType,
         Set<EvidenceType> evidenceTypes
-    ) throws ApiException, org.genome_nexus.ApiException {
-        Alteration alteration;
-        if (!this.cacheFetcher.genomicLocationShouldBeAnnotated(GNVariantAnnotationType.HGVS_G, hgvsg, referenceGenome)) {
-            alteration = new Alteration();
-        } else {
-            alteration = this.cacheFetcher.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, referenceGenome, hgvsg);
-        }
-        Query query = QueryUtils.getQueryFromAlteration(referenceGenome, tumorType, alteration, hgvsg);
+    ) {
+        Query query = QueryUtils.getQueryFromAlteration(referenceGenome, tumorType, hgvsgAlt, hgvsg);
 
         return this.cacheFetcher.processQuery(
             referenceGenome,
@@ -588,9 +663,9 @@ public class AnnotationsApiController {
             null,
             query.getHgvs(),
             null,
-                false,
-                evidenceTypes,
-                false
+            false,
+            evidenceTypes,
+            false
         );
     }
 }
