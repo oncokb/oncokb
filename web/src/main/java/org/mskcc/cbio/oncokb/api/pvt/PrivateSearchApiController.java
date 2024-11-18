@@ -134,7 +134,10 @@ public class PrivateSearchApiController implements PrivateSearchApi {
                         }
                     }
                     try {
-                        alterationModel = this.cacheFetcher.getAlterationFromGenomeNexus(type, referenceGenome, trimmedQuery);
+                        alterationModel = AlterationUtils.getAlterationFromGenomeNexus(type, referenceGenome, trimmedQuery);
+                        if (alterationModel == null) {
+                            alterationModel = new Alteration();
+                        }
                         if (alterationModel.getGene() != null) {
                             Query annotationQuery = QueryUtils.getQueryFromAlteration(referenceGenome, "", alterationModel, HGVSG_FORMAT.equals(type) ? trimmedQuery : "");
                             IndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuery(annotationQuery, null, false, null, true);
