@@ -528,8 +528,12 @@ public class IndicatorUtils {
 
         // Get penetrance info
         List<Evidence> penetranceEvis = EvidenceUtils.getEvidence(Collections.singletonList(matchedAlt), Collections.singleton(EvidenceType.VARIANT_PENETRANCE), null);
-        if (penetranceEvis.size() > 0) {
+        if (penetranceEvis.isEmpty()) {
+            penetranceEvis.addAll(EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(matchedAlt.getGene(), Collections.singleton(EvidenceType.GENE_PENETRANCE)));
+        } else {
             sortGermlineEvidenceByAlterationSize(penetranceEvis);
+        }
+        if (!penetranceEvis.isEmpty()) {
             Evidence penetranceEvi = penetranceEvis.iterator().next();
             germlineVariant.setPenetrance(penetranceEvi.getKnownEffect());
             germlineVariant.setPenetranceDescription(StringUtils.isEmpty(penetranceEvi.getDescription()) ? "" : penetranceEvi.getDescription());
@@ -548,8 +552,12 @@ public class IndicatorUtils {
 
         // Get inheritance mechanism info
         List<Evidence> inheritanceMechanismEvis = EvidenceUtils.getEvidence(Collections.singletonList(matchedAlt), Collections.singleton(EvidenceType.VARIANT_INHERITANCE_MECHANISM), null);
-        if (inheritanceMechanismEvis.size() > 0) {
+        if (inheritanceMechanismEvis.isEmpty()) {
+            inheritanceMechanismEvis.addAll(EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(matchedAlt.getGene(), Collections.singleton(EvidenceType.GENE_INHERITANCE_MECHANISM)));
+        } else {
             sortGermlineEvidenceByAlterationSize(inheritanceMechanismEvis);
+        }
+        if (!inheritanceMechanismEvis.isEmpty()) {
             Evidence inheritanceMechanismEvi = inheritanceMechanismEvis.iterator().next();
             germlineVariant.setInheritanceMechanism(inheritanceMechanismEvi.getKnownEffect());
             germlineVariant.setInheritanceMechanismDescription(StringUtils.isEmpty(inheritanceMechanismEvi.getDescription()) ? "" : inheritanceMechanismEvi.getDescription());
@@ -561,9 +569,9 @@ public class IndicatorUtils {
         alts.addAll(relevantAlterations);
         List<Evidence> genomicIndicatorEvis = EvidenceUtils.getEvidence(alts, Collections.singleton(EvidenceType.GENOMIC_INDICATOR), null);
         if (StringUtils.isNotEmpty(alleleState)) {
-            genomicIndicatorEvis = genomicIndicatorEvis.stream().filter(evidence -> evidence.getKnownEffect().toLowerCase().contains(alleleState)).collect(Collectors.toList());
+            genomicIndicatorEvis = genomicIndicatorEvis.stream().filter(evidence -> StringUtils.isEmpty(evidence.getKnownEffect()) || evidence.getKnownEffect().toLowerCase().contains(alleleState)).collect(Collectors.toList());
         }
-        germlineVariant.setGenomicIndicators(genomicIndicatorEvis.stream().map(Evidence::getDescription).collect(Collectors.toList()));
+        germlineVariant.setGenomicIndicators(genomicIndicatorEvis.stream().map(Evidence::getName).collect(Collectors.toList()));
         return germlineVariant;
     }
 
