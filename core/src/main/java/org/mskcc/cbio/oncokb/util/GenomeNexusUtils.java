@@ -142,18 +142,18 @@ public class GenomeNexusUtils {
         } else if (type == GNVariantAnnotationType.HGVS_G) {
             annotations.addAll(getHgvsgVariantsAnnotation(Collections.singletonList(query), referenceGenome));
         }
-        Map<String, TranscriptConsequenceSummary> map = getTranscriptsConsequence(annotations, referenceGenome);
+        List<TranscriptConsequenceSummary> map = getTranscriptsConsequence(annotations, referenceGenome);
         if (map.isEmpty()) {
             return null;
         } else {
-            return map.get(map.keySet().iterator().next());
+            return map.get(0);
         }
     }
 
-    public static Map<String, TranscriptConsequenceSummary> getTranscriptsConsequence(List<VariantAnnotation> annotations, ReferenceGenome referenceGenome) throws ApiException {
-        Map<String, TranscriptConsequenceSummary> result = new HashMap<>();
+    public static List<TranscriptConsequenceSummary> getTranscriptsConsequence(List<VariantAnnotation> annotations, ReferenceGenome referenceGenome) throws ApiException {
+        List<TranscriptConsequenceSummary> result = new ArrayList<>();
         for (VariantAnnotation annotation : annotations) {
-            result.put(annotation.getOriginalVariantQuery(), getConsequence(annotation, referenceGenome));
+            result.add(getConsequence(annotation, referenceGenome));
         }
         return result;
     }

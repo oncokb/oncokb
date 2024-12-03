@@ -1,5 +1,6 @@
 package org.mskcc.cbio.oncokb.util;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.genome_nexus.ApiException;
 import org.genome_nexus.client.TranscriptConsequenceSummary;
@@ -728,19 +729,21 @@ public final class AlterationUtils {
         if (variantAnnotations.isEmpty()) {
             return null;
         } else {
-            Map<String, Alteration> map = getAlterationsFromGenomeNexus(variantAnnotations, referenceGenome);
-            return map.isEmpty() ? null : map.get(map.keySet().iterator().next());
+            List<Alteration> alterations = getAlterationsFromGenomeNexus(variantAnnotations, referenceGenome);
+            return alterations.isEmpty() ? null : alterations.get(0);
         }
     }
 
-    public static Map<String, Alteration> getAlterationsFromGenomeNexus(List<VariantAnnotation> variantAnnotations, ReferenceGenome referenceGenome) throws ApiException {
-        Map<String, TranscriptConsequenceSummary> transcriptsConsequenceSummary = GenomeNexusUtils.getTranscriptsConsequence(variantAnnotations, referenceGenome);
-        Map<String, Alteration> result = new HashMap<>();
+    public static List<Alteration> getAlterationsFromGenomeNexus(List<VariantAnnotation> variantAnnotations, ReferenceGenome referenceGenome) throws ApiException {
+        List<TranscriptConsequenceSummary> transcriptsConsequenceSummary = GenomeNexusUtils.getTranscriptsConsequence(variantAnnotations, referenceGenome);
+        List<Alteration> result = new ArrayList<>();
 
-        for (String query : transcriptsConsequenceSummary.keySet()) {
-            Alteration alteration = convertTranscriptConsequenceSummaryToAlteration(transcriptsConsequenceSummary.get(query));
+        for (TranscriptConsequenceSummary summary : transcriptsConsequenceSummary) {
+            Alteration alteration = convertTranscriptConsequenceSummaryToAlteration(summary);
             if (alteration != null) {
-                result.put(query, alteration);
+                result.add(alteration);
+            } else {
+                result.add(new Alteration());
             }
         }
         return result;

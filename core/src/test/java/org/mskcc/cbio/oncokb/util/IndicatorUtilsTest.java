@@ -905,8 +905,8 @@ public class IndicatorUtilsTest {
         genomicLocation = "23,100611185,100611185,G,A";
         alteration1 = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, DEFAULT_REFERENCE_GENOME, genomicLocation);
         List<VariantAnnotation> annotations = GenomeNexusUtils.getGenomicLocationVariantsAnnotation(Collections.singletonList(GenomeNexusUtils.convertGenomicLocation(genomicLocation)), DEFAULT_REFERENCE_GENOME);
-        Map<String, Alteration> map = AlterationUtils.getAlterationsFromGenomeNexus(annotations, DEFAULT_REFERENCE_GENOME);
-        alteration2 = map.get(map.keySet().iterator().next());
+        List<Alteration> map = AlterationUtils.getAlterationsFromGenomeNexus(annotations, DEFAULT_REFERENCE_GENOME);
+        alteration2 = map.get(0);
         query1 = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", alteration1, genomicLocation1);
         query2 = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", alteration2, genomicLocation2);
 
