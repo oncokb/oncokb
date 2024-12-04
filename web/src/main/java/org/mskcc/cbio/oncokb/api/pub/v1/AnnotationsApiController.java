@@ -631,6 +631,9 @@ public class AnnotationsApiController {
         }
         // query to GN needs to be a list of uniq queries
         List<org.genome_nexus.client.VariantAnnotation> variantAnnotations = GenomeNexusUtils.getHgvsgVariantsAnnotation(queriesToGN, referenceGenome);
+        if(variantAnnotations.size() != queriesToGN.size()){
+            throw new ApiException("Number of variants that have been annotated by GenomeNexus is not equal to the number of queries");
+        }
         List<Alteration> annotatedAlterations = new ArrayList<>();
         if (!queriesToGN.isEmpty()) {
             annotatedAlterations = AlterationUtils.getAlterationsFromGenomeNexus(variantAnnotations, referenceGenome);
@@ -658,6 +661,9 @@ public class AnnotationsApiController {
             }
         }
         List<org.genome_nexus.client.VariantAnnotation> variantAnnotations = GenomeNexusUtils.getGenomicLocationVariantsAnnotation(queriesToGN, referenceGenome);
+        if(variantAnnotations.size() != queriesToGN.size()){
+            throw new ApiException("Number of variants that have been annotated by GenomeNexus is not equal to the number of queries");
+        }
         List<Alteration> annotatedAlterations = new ArrayList<>();
         if (!queriesToGN.isEmpty()) {
             annotatedAlterations = AlterationUtils.getAlterationsFromGenomeNexus(variantAnnotations, referenceGenome);
