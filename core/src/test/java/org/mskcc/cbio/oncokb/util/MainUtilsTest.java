@@ -1,11 +1,8 @@
 package org.mskcc.cbio.oncokb.util;
 
 import static org.mskcc.cbio.oncokb.util.MainUtils.*;
-
-import org.cbioportal.genome_nexus.model.GenomicLocation;
-import org.junit.Test;
-
 import junit.framework.TestCase;
+import org.genome_nexus.client.GenomicLocation;
 import org.mskcc.cbio.oncokb.model.AnnotationSearchQueryType;
 import org.mskcc.cbio.oncokb.model.MutationEffect;
 
@@ -104,7 +101,7 @@ public class MainUtilsTest extends TestCase {
         assertEquals("7", parsedGl.getChromosome());
         assertEquals(new Integer(100), parsedGl.getStart());
         assertEquals(new Integer(100), parsedGl.getEnd());
-        
+
 
         parsedGl = parseChromosomeAndRangeFromHGVSg("X:g.100_105del");
         assertEquals("X", parsedGl.getChromosome());

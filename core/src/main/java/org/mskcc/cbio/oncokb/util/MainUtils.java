@@ -1,7 +1,6 @@
 package org.mskcc.cbio.oncokb.util;
 
-import org.apache.commons.lang3.StringUtils;
-import org.cbioportal.genome_nexus.model.GenomicLocation;
+import org.genome_nexus.client.GenomicLocation;
 import org.mskcc.cbio.oncokb.apiModels.*;
 import org.mskcc.cbio.oncokb.model.*;
 import org.w3c.dom.Document;
@@ -885,7 +884,7 @@ public class MainUtils {
     /**
      * We don't intend to check if the HGVSg is valid. If you need a method that validates and parses,
      * then use the NotationConverter.parseHGVSg() method.
-     * @param hgvsg 
+     * @param hgvsg
      * @return null if cannot parse, otherwise the GenomicLocation
      */
     public static GenomicLocation parseChromosomeAndRangeFromHGVSg(String hgvsg) {

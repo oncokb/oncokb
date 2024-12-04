@@ -1,12 +1,12 @@
 package org.mskcc.cbio.oncokb.util;
 
 import junit.framework.TestCase;
+import org.genome_nexus.client.GenomicLocation;
 import org.genome_nexus.client.TranscriptConsequenceSummary;
 import org.junit.Assert;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.ReferenceGenome;
-import org.mskcc.cbio.oncokb.model.VariantConsequence;
 
 
 import static org.junit.Assert.assertNotEquals;
@@ -147,4 +147,77 @@ public class GenomeNexusUtilsTest extends TestCase {
         assertEquals("Picked transcript gene symbol is not expected, but it should.", "TERT", consequence.getHugoGeneSymbol());
         assertEquals("Consequence is not expected, but it should.", "upstream_gene_variant", consequence.getConsequenceTerms());
     }
+
+    public void testChromosomeNormalizer() {
+        assertNull(GenomeNexusUtils.chromosomeNormalizer(null));
+        assertEquals("", GenomeNexusUtils.chromosomeNormalizer(""));
+        assertEquals("", GenomeNexusUtils.chromosomeNormalizer(" "));
+        assertEquals("1", GenomeNexusUtils.chromosomeNormalizer("chr1"));
+        assertEquals("X", GenomeNexusUtils.chromosomeNormalizer("23"));
+        assertEquals("X", GenomeNexusUtils.chromosomeNormalizer("X"));
+        assertEquals("Y", GenomeNexusUtils.chromosomeNormalizer("24"));
+        assertEquals("Y", GenomeNexusUtils.chromosomeNormalizer("Y"));
+    }
+
+    public void testConvertGenomicLocationToObject() {
+        convertGenomicLocationTestSuit("7,140453136,140453136,A,T", "7", 140453136, 140453136, "A", "T");
+        convertGenomicLocationTestSuit("7 ,140453136,140453136,A,T", "7", 140453136, 140453136, "A", "T");
+        convertGenomicLocationTestSuit("7 , 140453136,140453136,A,T", "7", 140453136, 140453136, "A", "T");
+        convertGenomicLocationTestSuit("7 , 140453136, 140453136,A,T", "7", 140453136, 140453136, "A", "T");
+        convertGenomicLocationTestSuit("7 , 140453136, 140453136, A,T", "7", 140453136, 140453136, "A", "T");
+        convertGenomicLocationTestSuit("7 , 140453136, 140453136, A, T", "7", 140453136, 140453136, "A", "T");
+        convertGenomicLocationTestSuit("7 , 140453136, A, A, T", "7", 140453136, null, "A", "T");
+
+        // test some edge cases
+        assertNull(GenomeNexusUtils.convertGenomicLocation(""));
+        assertNull(GenomeNexusUtils.convertGenomicLocation(" "));
+        assertNull(GenomeNexusUtils.convertGenomicLocation("7,"));
+        assertNull(GenomeNexusUtils.convertGenomicLocation("7,140453136"));
+        assertNull(GenomeNexusUtils.convertGenomicLocation("7,140453136,140453136"));
+        assertNull(GenomeNexusUtils.convertGenomicLocation("7,140453136,140453136,A"));
+
+        // 23/24 chr will be converted to X/Y
+        convertGenomicLocationTestSuit("23,140453136,140453136,A,T", "X", 140453136, 140453136, "A", "T");
+        convertGenomicLocationTestSuit("X,140453136,140453136,A,T", "X", 140453136, 140453136, "A", "T");
+        convertGenomicLocationTestSuit("24,140453136,140453136,A,T", "Y", 140453136, 140453136, "A", "T");
+        convertGenomicLocationTestSuit("Y,140453136,140453136,A,T", "Y", 140453136, 140453136, "A", "T");
+    }
+
+    private void convertGenomicLocationTestSuit(String genomicLocation, String expectedChr, Integer expectedStart, Integer expectedEnd, String expectedReferenceAllele, String expectedVariantAllele) {
+        GenomicLocation gl = GenomeNexusUtils.convertGenomicLocation(genomicLocation);
+        assertNotNull(gl);
+        assertEquals(gl.getChromosome(), expectedChr);
+        assertEquals(gl.getStart(), expectedStart);
+        assertEquals(gl.getEnd(), expectedEnd);
+        assertEquals(gl.getReferenceAllele(), expectedReferenceAllele);
+        assertEquals(gl.getVariantAllele(), expectedVariantAllele);
+    }
+
+    public void testConvertGenomicLocationToString() {
+        GenomicLocation gl = new GenomicLocation();
+        gl.setChromosome("1");
+        gl.setStart(140453136);
+        gl.setEnd(140453136);
+        gl.setReferenceAllele("A");
+        gl.setVariantAllele("T");
+        assertEquals("1,140453136,140453136,A,T", GenomeNexusUtils.convertGenomicLocation(gl));
+
+        gl.setChromosome("1");
+        gl.setStart(null);
+        gl.setEnd(140453136);
+        gl.setReferenceAllele("A");
+        gl.setVariantAllele("T");
+        assertEquals("1,,140453136,A,T", GenomeNexusUtils.convertGenomicLocation(gl));
+
+        gl.setChromosome("1");
+        gl.setStart(null);
+        gl.setEnd(140453136);
+        gl.setReferenceAllele("A");
+        gl.setVariantAllele(null);
+        assertEquals("1,,140453136,A,", GenomeNexusUtils.convertGenomicLocation(gl));
+
+        gl = null;
+        assertEquals("", GenomeNexusUtils.convertGenomicLocation(gl));
+    }
+
 }
