@@ -823,16 +823,6 @@ public final class AlterationUtils {
         return result;
     }
 
-    public static List<Alteration> excludePositionedAlterations(List<Alteration> alterations) {
-        List<Alteration> result = new ArrayList<>();
-        for (Alteration alteration : alterations) {
-            if (!isPositionedAlteration(alteration)) {
-                result.add(alteration);
-            }
-        }
-        return result;
-    }
-
     public static Boolean isInferredAlterations(String alteration) {
         Boolean isInferredAlt = false;
         if (alteration != null) {
@@ -1058,9 +1048,6 @@ public final class AlterationUtils {
         return new ArrayList<>();
     }
 
-    public static List<Alteration> getUniqueAlterations(List<Alteration> alterations) {
-        return new ArrayList<>(new LinkedHashSet<>(alterations));
-    }
 
     private static List<Alteration> getAlleleAlterationsSub(ReferenceGenome referenceGenome, Alteration alteration, List<Alteration> fullAlterations) {
         boolean isPositionalVariant = AlterationUtils.isPositionedAlteration(alteration);
@@ -1343,18 +1330,6 @@ public final class AlterationUtils {
         return findAlterationsByStartWith(StructuralAlteration.FUSIONS.getVariant(), fullAlterations);
     }
 
-    private static List<Alteration> findAlterationsByRegex(String regex, Set<Alteration> fullAlterations) {
-        Comparator<Alteration> byAlt = Comparator.comparing(Alteration::getAlteration).reversed();
-        TreeSet<Alteration> matchedAlterations = new TreeSet<>(byAlt);
-        // Implement the data access logic
-        for (Alteration alt : fullAlterations) {
-            if (alt.getAlteration() != null && alt.getAlteration().matches(regex)) {
-                matchedAlterations.add(alt);
-            }
-        }
-        return matchedAlterations.stream().collect(Collectors.toList());
-    }
-
     private static boolean startsWithIgnoreCase(String url, String param) {
         return url.regionMatches(true, 0, param, 0, param.length());
     }
@@ -1539,36 +1514,6 @@ public final class AlterationUtils {
         return isOncogenic;
     }
 
-    public static Boolean hasImportantCuratedOncogenicity(Set<Oncogenicity> oncogenicities) {
-        Set<Oncogenicity> curatedOncogenicities = new HashSet<>();
-        curatedOncogenicities.add(Oncogenicity.RESISTANCE);
-        curatedOncogenicities.add(Oncogenicity.YES);
-        curatedOncogenicities.add(Oncogenicity.LIKELY);
-        curatedOncogenicities.add(Oncogenicity.LIKELY_NEUTRAL);
-        curatedOncogenicities.add(Oncogenicity.INCONCLUSIVE);
-        return !Collections.disjoint(curatedOncogenicities, oncogenicities);
-    }
-
-    public static Boolean hasOncogenic(Set<Oncogenicity> oncogenicities) {
-        Set<Oncogenicity> curatedOncogenicities = new HashSet<>();
-        curatedOncogenicities.add(Oncogenicity.YES);
-        curatedOncogenicities.add(Oncogenicity.LIKELY);
-        curatedOncogenicities.add(Oncogenicity.RESISTANCE);
-        return !Collections.disjoint(curatedOncogenicities, oncogenicities);
-    }
-
-    public static Set<Oncogenicity> getCuratedOncogenicity(Alteration alteration) {
-        Set<Oncogenicity> curatedOncogenicities = new HashSet<>();
-
-        EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
-        List<Evidence> oncogenicEvs = evidenceBo.findEvidencesByAlteration(Collections.singleton(alteration), Collections.singleton(EvidenceType.ONCOGENIC));
-
-        for (Evidence evidence : oncogenicEvs) {
-            curatedOncogenicities.add(Oncogenicity.getByEvidence(evidence));
-        }
-        return curatedOncogenicities;
-    }
-
     public static Set<String> getGeneralVariants() {
         Set<String> variants = new HashSet<>();
         variants.addAll(getInferredMutations());
@@ -1615,7 +1560,6 @@ public final class AlterationUtils {
         }
         return variants;
     }
-
 
     public static boolean isGeneralAlterations(String variant) {
         boolean is = false;
