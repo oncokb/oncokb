@@ -1360,7 +1360,15 @@ public final class AlterationUtils {
     }
 
     private static List<Alteration> findAlterationsByStartWith(String startWith, List<Alteration> fullAlterations) {
-        Comparator<Alteration> byAlt = Comparator.comparing(Alteration::getAlteration).reversed();
+        Comparator<Alteration> byAlt = ((Comparator<Alteration>) (o1, o2) -> {
+            int result = o1.getAlteration().compareTo(o2.getAlteration());
+            if (result == 0) {
+                if (o1.getId() == null) return 1;
+                if (o2.getId() == null) return -1;
+                return o1.getId().compareTo(o2.getId());
+            }
+            return result;
+        }).reversed();
         TreeSet<Alteration> matchedAlterations = new TreeSet<>(byAlt);
 
         for (int i = 0; i < fullAlterations.size(); i++) {
