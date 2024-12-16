@@ -8,8 +8,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 
 /**
- * Define you global exception handlers
+ * Define your global exception handlers
  */
+
 @ControllerAdvice
 public class ExceptionTranslator {
     @ExceptionHandler(ApiHttpErrorException.class)
