@@ -1,16 +1,15 @@
 package org.mskcc.cbio.oncokb.util;
 
-import junit.framework.TestCase;
+import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.FrameshiftVariant;
 import org.mskcc.cbio.oncokb.model.Gene;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
+import junit.framework.TestCase;
 
 /**
  * Created by Hongxin Zhang on 6/20/18.
@@ -553,5 +552,11 @@ public class AlterationUtilsTest extends TestCase {
         assertTrue(AlterationUtils.isSameFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("N105Efs*4"), AlterationUtils.parseFrameshiftVariant("N105fs*4")));
         assertTrue(AlterationUtils.isSameFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("N105fs*4"), AlterationUtils.parseFrameshiftVariant("N105Efs*4")));
 
+    }
+
+    public void testComplexDelinsClassifiedAsTruncating() {
+        Gene gene = GeneUtils.getGeneByHugoSymbol("NF1");
+        Alteration alteration = generateAlteration(gene, "L1340_Q1341delinsF*");
+        assertEquals(alteration.getConsequence(), VariantConsequenceUtils.findVariantConsequenceByTerm("stop_gained"));
     }
 }
