@@ -106,6 +106,7 @@ public class CplUtils {
         }
         text = text.replace("[[fusion name]]", altName);
         text = text.replace("[[fusion name]]", altName);
-        return text.trim().replaceAll("\\s+", " ");
+        // Replace all whitespace except newlines
+        return text.trim().replaceAll("[^\\S\\n]+", " ");
     }
 }
