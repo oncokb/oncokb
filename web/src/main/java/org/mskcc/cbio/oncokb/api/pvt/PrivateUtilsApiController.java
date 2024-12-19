@@ -2,6 +2,7 @@ package org.mskcc.cbio.oncokb.api.pvt;
 
 import com.mysql.jdbc.StringUtils;
 import io.swagger.annotations.ApiParam;
+import org.genome_nexus.client.GenomicLocation;
 import org.genome_nexus.client.TranscriptConsequenceSummary;
 import org.mskcc.cbio.oncokb.apiModels.*;
 import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotateMutationByGenomicChangeQuery;
@@ -381,13 +382,17 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             }
         }
         if (!StringUtils.isNullOrEmpty(hgvsg) || !StringUtils.isNullOrEmpty(genomicChange)) {
-            String genomicQuery = StringUtils.isNullOrEmpty(hgvsg) ? genomicChange : hgvsg;
-            GNVariantAnnotationType type = StringUtils.isNullOrEmpty(hgvsg) ? GNVariantAnnotationType.GENOMIC_LOCATION : GNVariantAnnotationType.HGVS_G;
-            Alteration alterationModel;
-            if (!this.cacheFetcher.genomicLocationShouldBeAnnotated(type, genomicQuery, matchedRG)) {
-                alterationModel = new Alteration();
+            Alteration alterationModel = null;
+            if (!StringUtils.isNullOrEmpty(hgvsg)) {
+                if (this.cacheFetcher.hgvsgShouldBeAnnotated(hgvsg, matchedRG)) {
+                    alterationModel = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, matchedRG, hgvsg);
+                }
+                if (alterationModel == null) alterationModel = new Alteration();
             } else {
-                alterationModel = this.cacheFetcher.getAlterationFromGenomeNexus(type, matchedRG, genomicQuery);
+                if (this.cacheFetcher.genomicLocationShouldBeAnnotated(GenomeNexusUtils.convertGenomicLocation(genomicChange), matchedRG)) {
+                    alterationModel = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, matchedRG, genomicChange);
+                }
+                if (alterationModel == null) alterationModel = new Alteration();
             }
             query = QueryUtils.getQueryFromAlteration(matchedRG, tumorType, alterationModel, hgvsg);
             gene = GeneUtils.getGeneByEntrezId(query.getEntrezGeneId());
@@ -594,14 +599,14 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     @Override
     public ResponseEntity<List<TranscriptCoverageFilterResult>> utilFilterHgvsgBasedOnCoveragePost(
         @ApiParam(value = "List of queries.", required = true) @RequestBody List<AnnotateMutationByHGVSgQuery> body
-    ) throws ApiException, org.genome_nexus.ApiException, ApiHttpErrorException {
+    ) throws ApiException, ApiHttpErrorException {
         List<TranscriptCoverageFilterResult> result = new ArrayList<>();
 
         if (body == null) {
             throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         } else {
             for (AnnotateMutationByHGVSgQuery query : body) {
-                boolean shouldAnnotate = this.cacheFetcher.genomicLocationShouldBeAnnotated(GNVariantAnnotationType.HGVS_G, query.getHgvsg(), query.getReferenceGenome());
+                boolean shouldAnnotate = this.cacheFetcher.hgvsgShouldBeAnnotated(query.getHgvsg(), query.getReferenceGenome());
                 result.add(new TranscriptCoverageFilterResult(query.getHgvsg(), shouldAnnotate));
             }
         }
@@ -611,14 +616,14 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     @Override
     public ResponseEntity<List<TranscriptCoverageFilterResult>> utilFilterGenomicChangeBasedOnCoveragePost(
         @ApiParam(value = "List of queries.", required = true) @RequestBody List<AnnotateMutationByGenomicChangeQuery> body
-    ) throws ApiException, org.genome_nexus.ApiException, ApiHttpErrorException {
+    ) throws ApiException, ApiHttpErrorException {
         List<TranscriptCoverageFilterResult> result = new ArrayList<>();
 
         if (body == null) {
             throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         } else {
             for (AnnotateMutationByGenomicChangeQuery query : body) {
-                boolean shouldAnnotate = this.cacheFetcher.genomicLocationShouldBeAnnotated(GNVariantAnnotationType.GENOMIC_LOCATION, query.getGenomicLocation(), query.getReferenceGenome());
+                boolean shouldAnnotate = this.cacheFetcher.genomicLocationShouldBeAnnotated(GenomeNexusUtils.convertGenomicLocation(query.getGenomicLocation()), query.getReferenceGenome());
                 result.add(new TranscriptCoverageFilterResult(query.getGenomicLocation(), shouldAnnotate));
             }
         }
