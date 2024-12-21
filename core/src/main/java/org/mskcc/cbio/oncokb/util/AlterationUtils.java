@@ -304,7 +304,7 @@ public final class AlterationUtils {
 
         proteinChange = proteinChange.trim();
 
-        Pattern p = Pattern.compile("([A-Z]?)([0-9]+)(_[A-Z]?([0-9]+))?(delins|ins|del)([A-Z0-9]*)", Pattern.CASE_INSENSITIVE);
+        Pattern p = Pattern.compile("([A-Z]?)([0-9]+)(_[A-Z]?([0-9]+))?(delins|ins|del)([A-Z0-9\\*]*)", Pattern.CASE_INSENSITIVE);
         Matcher m = p.matcher(proteinChange);
             if (m.matches()) {
                 if (m.group(1) != null && m.group(3) == null) {
@@ -328,7 +328,10 @@ public final class AlterationUtils {
                     String groupSix = m.group(6);
                     String groupSixWithoutDigits = MainUtils.removeDigits(groupSix);
 
-                    if (groupSixWithoutDigits.length() != groupSix.length() && groupSixWithoutDigits.length() > 0) {
+                    if (groupSixWithoutDigits.contains("*")) {
+                        consequence = "stop_gained";
+                    } 
+                    else if (groupSixWithoutDigits.length() != groupSix.length() && groupSixWithoutDigits.length() > 0) {
                         if (groupSixWithoutDigits.length() > deletion) {
                             consequence = IN_FRAME_INSERTION;
                         } else {
