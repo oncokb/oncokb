@@ -380,7 +380,9 @@ public class CurationValidationApiController {
                 null,
                 alteration.getProteinStart(),
                 alteration.getProteinEnd(),
-                null);
+                null,
+                false,
+                "");
             IndicatorQueryResp response = IndicatorUtils.processQuery(query, null, false,null, false);
             if (!allowedOncogenicities.contains(response.getOncogenic())) {
                 if (response.getHighestSensitiveLevel() != null || response.getHighestResistanceLevel() != null) {
@@ -393,7 +395,7 @@ public class CurationValidationApiController {
                                 return new TumorType(excludedTT);
                             }).collect(Collectors.toSet());
                             String tumorName = TumorTypeUtils.getTumorTypesNameWithExclusion(Collections.singleton(tumorTypeModel), excludedTumorTypeModels);
-                            
+
                             StringBuilder errorMessage = new StringBuilder();
                             errorMessage.append("Is ");
                             errorMessage.append(response.getOncogenic());

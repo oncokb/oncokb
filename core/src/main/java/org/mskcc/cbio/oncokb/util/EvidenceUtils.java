@@ -218,7 +218,7 @@ public class EvidenceUtils {
 
         // Get all gene related evidences
         Map<Gene, Set<Evidence>> mappedEvidences =
-            EvidenceUtils.getEvidenceByGenesAndEvidenceTypes(genes, Sets.intersection(EvidenceTypeUtils.getGeneEvidenceTypes(), evidenceTypes));
+            EvidenceUtils.getEvidenceByGenesAndEvidenceTypes(genes, Sets.intersection(EvidenceTypeUtils.getGeneEvidenceTypes(query.getQuery().isGermline()), evidenceTypes));
         for (Map.Entry<Gene, Set<Evidence>> cursor : mappedEvidences.entrySet()) {
             evidences.addAll(cursor.getValue());
         }
@@ -229,7 +229,7 @@ public class EvidenceUtils {
         }
         // Get all mutation related evidences
 
-        Set<EvidenceType> common = Sets.intersection(EvidenceTypeUtils.getMutationEvidenceTypes(), evidenceTypes);
+        Set<EvidenceType> common = Sets.intersection(EvidenceTypeUtils.getMutationEvidenceTypes(query.getQuery().isGermline()), evidenceTypes);
         if (common.size() > 0) {
             evidences.addAll(getEvidence(new ArrayList<>(alterations), common, null));
         }
@@ -487,7 +487,7 @@ public class EvidenceUtils {
 
     public static Oncogenicity getOncogenicityFromEvidence(Set<Evidence> evidences) {
         Set<Oncogenicity> result = new HashSet<>();
-
+        if (evidences == null) return null;
         for (Evidence evidence : evidences) {
             if (evidence.getKnownEffect() != null) {
                 result.add(Oncogenicity.getByEvidence(evidence));
@@ -496,6 +496,24 @@ public class EvidenceUtils {
 
         if (result.size() > 1) {
             return MainUtils.findHighestOncogenicity(result);
+        } else if (result.size() == 1) {
+            return result.iterator().next();
+        } else {
+            return null;
+        }
+    }
+
+    public static Pathogenicity getPathogenicityFromEvidence(Set<Evidence> evidences) {
+        Set<Pathogenicity> result = new HashSet<>();
+        if (evidences == null) return null;
+        for (Evidence evidence : evidences) {
+            if (evidence.getKnownEffect() != null) {
+                result.add(Pathogenicity.getByEvidence(evidence));
+            }
+        }
+
+        if (result.size() > 1) {
+            return MainUtils.findHighestPathogenicity(result);
         } else if (result.size() == 1) {
             return result.iterator().next();
         } else {
@@ -827,14 +845,6 @@ public class EvidenceUtils {
                                                         Set<LevelOfEvidence> levelOfEvidences, Boolean highestLevelOnly, Boolean geneQueryOnly) {
         List<EvidenceQueryRes> evidenceQueries = new ArrayList<>();
 
-        if (evidenceTypes == null) {
-            if (levelOfEvidences == null) {
-                evidenceTypes = new HashSet<>(EvidenceTypeUtils.getAllEvidenceTypes());
-            } else {
-                evidenceTypes = new HashSet<>(EvidenceTypeUtils.getTreatmentEvidenceTypes());
-            }
-        }
-
         levelOfEvidences = levelOfEvidences == null ? levelOfEvidences :
             new HashSet<>(CollectionUtils.intersection(levelOfEvidences, LevelUtils.getPublicLevels()));
 
@@ -868,6 +878,10 @@ public class EvidenceUtils {
                 EvidenceQueryRes query = new EvidenceQueryRes();
 
                 requestQuery.enrich();
+
+                if (evidenceTypes == null) {
+                    evidenceTypes = new HashSet<>(EvidenceTypeUtils.getAllEvidenceTypes(requestQuery.isGermline()));
+                }
 
                 query.setQuery(requestQuery);
 
@@ -920,7 +934,7 @@ public class EvidenceUtils {
                     relevantEvidences = getEvidence(requestQuery.getReferenceGenome(), query, evidenceTypes, levelOfEvidences);
                 }
                 query = assignEvidence(relevantEvidences,
-                    Collections.singletonList(query), highestLevelOnly).iterator().next();
+                    Collections.singletonList(query), highestLevelOnly, query.getQuery().isGermline()).iterator().next();
 
                 Set<Evidence> updatedEvidences = new HashSet<>();
                 final List<LevelOfEvidence> allowedLevels = query.getLevelOfEvidences();
@@ -967,9 +981,15 @@ public class EvidenceUtils {
     }
 
     private static List<EvidenceQueryRes> assignEvidence(Set<Evidence> evidences, List<EvidenceQueryRes> evidenceQueries,
-                                                         Boolean highestLevelOnly) {
+                                                         Boolean highestLevelOnly, Boolean germline) {
         for (EvidenceQueryRes query : evidenceQueries) {
-            Set<Evidence> filteredEvidences = new HashSet<>(evidences);
+            Set<Evidence> filteredEvidences = new HashSet<>();
+            if (germline == null) {
+                filteredEvidences = new HashSet<>(evidences);
+            } else {
+                filteredEvidences = evidences.stream().filter(evidence -> evidence.getForGermline().equals(germline)).collect(Collectors.toSet());
+            }
+
             if (highestLevelOnly) {
                 List<Evidence> filteredHighestEvidences = new ArrayList<>();
 
@@ -1123,7 +1143,7 @@ public class EvidenceUtils {
         Set<Gene> genes = new HashSet<>();
         List<Evidence> evidences = new ArrayList<>();
         for (Alteration alteration : alterations) {
-            genes.add(alteration.getGene());
+            if (alteration != null) genes.add(alteration.getGene());
         }
         if (genes.size() == 1) {
             evidences.addAll(CacheUtils.getEvidences(genes.iterator().next()));

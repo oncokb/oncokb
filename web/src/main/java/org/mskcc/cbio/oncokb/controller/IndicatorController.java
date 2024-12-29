@@ -4,6 +4,7 @@
  */
 package org.mskcc.cbio.oncokb.controller;
 
+import io.swagger.annotations.ApiParam;
 import org.apache.commons.collections.CollectionUtils;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.service.JsonResultFactory;
@@ -45,9 +46,11 @@ public class IndicatorController {
         @RequestParam(value = "levels", required = false) String levels,
         @RequestParam(value = "highestLevelOnly", required = false) Boolean highestLevelOnly,
         @RequestParam(value = "fields", required = false) String fields,
-        @RequestParam(value = "hgvs", required = false) String hgvs
+        @RequestParam(value = "hgvs", required = false) String hgvs,
+        @RequestParam(value = "germline", required = false) Boolean germline,
+        @RequestParam(value = "alleleState", required = false) String alleleState
     ) {
-        Query query = new Query(id, referenceGenome, entrezGeneId, hugoSymbol, alteration, alterationType, svType, tumorType, consequence, proteinStart, proteinEnd, hgvs);
+        Query query = new Query(id, referenceGenome, entrezGeneId, hugoSymbol, alteration, alterationType, svType, tumorType, consequence, proteinStart, proteinEnd, hgvs, germline, alleleState);
         Set<LevelOfEvidence> levelOfEvidences = levels == null ? null : LevelUtils.parseStringLevelOfEvidences(levels);
         IndicatorQueryResp resp = IndicatorUtils.processQuery(query, levelOfEvidences, highestLevelOnly, null, false);
 
