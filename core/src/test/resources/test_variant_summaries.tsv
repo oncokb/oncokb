@@ -8,7 +8,7 @@ PIK3CB	A1048T	Likely Oncogenic	There is no available functional data about the P
 AKT2	R170L	Likely Oncogenic	There is no available functional data about the AKT2 R170L mutation (last reviewed on 04/18/2017). However, AKT2 R170W is likely oncogenic, and therefore AKT2 R170L is considered likely oncogenic.
 BRAF	R509Q	Unknown	There is no available functional data about the BRAF R509Q mutation (last reviewed on 04/04/2023). While BRAF R509H is likely neutral, the oncogenic effect of BRAF R509Q is unknown.
 AKT2	D324Y	Unknown	There is no available functional data about the AKT2 D324Y mutation (last reviewed on 08/04/2017), and therefore its biological significance is unknown.
-ERBB2	E717V	Likely Oncogenic	There is no available functional data about the ERBB2 E717V mutation (last reviewed on 06/20/2023). However, ERBB2 E717D is likely oncogenic and ERBB2 E717K has been found in the context of resistance; therefore ERBB2 E717V is considered likely oncogenic.
+ERBB2	E717V	Likely Oncogenic	There is no available functional data about the ERBB2 E717V mutation (last reviewed on 06/20/2023). However, ERBB2 E717D is likely oncogenic and ERBB2 E717K has been found in the context of resistance to a targeted therapy(s); therefore ERBB2 E717V is considered likely oncogenic.
 
 ## Table 9.2b: Assigning an Oncogenic Effect and Creating Variant Summaries for Alternate Alleles When There is >1 Curated Reference Alleles with different oncogenic effect
 KLF5	E419G	Likely Oncogenic	There is no available functional data about the KLF5 E419G mutation (last reviewed on 10/15/2019). However, KLF5 E419Q is known to be oncogenic and KLF5 E419K is likely oncogenic; therefore KLF5 E419G is considered likely oncogenic.
@@ -17,10 +17,10 @@ ERBB2	A644S	Likely Oncogenic	There is no available functional data about the ERB
 BRCA1	M1628F	Unknown	The BRCA1 M1628F mutation has not specifically been reviewed by the OncoKB team. While BRCA1 M1628T/V are likely neutral, the oncogenic effect of BRCA1 M1628F is unknown.
 PIK3CA	G451K	Likely Oncogenic	There is no available functional data about the PIK3CA G451K mutation (last reviewed on 08/04/2017). However, PIK3CA G451R is likely oncogenic, and therefore PIK3CA G451K is considered likely oncogenic.
 BRCA1	M1652L	Likely Oncogenic	The BRCA1 M1652L mutation has not specifically been reviewed by the OncoKB team. However, BRCA1 M1652K is likely oncogenic and BRCA1 M1652I is likely neutral; therefore BRCA1 M1652L is considered likely oncogenic.
-ALK	G1269E	Likely Oncogenic	There is no available functional data about the ALK G1269E mutation (last reviewed on 03/22/2023). However, ALK G1269A is likely oncogenic and ALK G1269S has been found in the context of resistance; therefore ALK G1269E is considered likely oncogenic.
-EGFR	D761K	Likely Oncogenic	The EGFR D761K mutation has not specifically been reviewed by the OncoKB team. However, EGFR D761N is likely oncogenic and EGFR D761Y has been found in the context of resistance; therefore EGFR D761K is considered likely oncogenic.
-SMO	E518V	Unknown	The SMO E518V mutation has not specifically been reviewed by the OncoKB team. While SMO E518K is likely neutral and SMO E518A has been found in the context of resistance, the oncogenic effect of SMO E518V is unknown.
-ERBB2	E719A	Unknown	The ERBB2 E719A mutation has not specifically been reviewed by the OncoKB team. While ERBB2 E719G has been found in the context of resistance, the oncogenic effect of ERBB2 E719A is unknown.
+ALK	G1269E	Likely Oncogenic	There is no available functional data about the ALK G1269E mutation (last reviewed on 03/22/2023). However, ALK G1269A is likely oncogenic and ALK G1269S has been found in the context of resistance to a targeted therapy(s); therefore ALK G1269E is considered likely oncogenic.
+EGFR	D761K	Likely Oncogenic	The EGFR D761K mutation has not specifically been reviewed by the OncoKB team. However, EGFR D761N is likely oncogenic and EGFR D761Y has been found in the context of resistance to a targeted therapy(s); therefore EGFR D761K is considered likely oncogenic.
+SMO	E518V	Unknown	The SMO E518V mutation has not specifically been reviewed by the OncoKB team. While SMO E518K is likely neutral and SMO E518A has been found in the context of resistance to a targeted therapy(s), the oncogenic effect of SMO E518V is unknown.
+ERBB2	E719A	Unknown	The ERBB2 E719A mutation has not specifically been reviewed by the OncoKB team. While ERBB2 E719G has been found in the context of resistance to a targeted therapy(s), the oncogenic effect of ERBB2 E719A is unknown.
 
 ## Table 9.3: Leading Sentences, mainly test unknown mutation but fall under umbrella terms(Truncating Mutations, Fusion)
 ### Truncating mutation in oncogene
@@ -28,7 +28,7 @@ BRAF	T100*	Unknown	BRAF is considered an oncogene and truncating mutations in on
 ### Truncating mutation in TSG
 BRCA1	T100*	Likely Oncogenic	The BRCA1 T100* is a truncating mutation in a tumor suppressor gene, and therefore is likely oncogenic.
 ### Truncating mutations in TSG that are not curated
-PPP2R2A	T100*	Unknown	The PPP2R2A T100* mutation has not specifically been reviewed by the OncoKB team, and therefore its biological significance is unknown.
+PPP2R2A	T100*	Likely Oncogenic	The PPP2R2A T100* is a truncating mutation in a tumor suppressor gene, and therefore is likely oncogenic.
 ### Truncating mutation in both
 PTPN1	T100*	Likely Oncogenic	The PTPN1 T100* is a truncating mutation; truncating mutations in this gene are considered likely oncogenic.
 ### Truncating mutation in neither
@@ -40,8 +40,12 @@ ALK	Test-ALK fusion	Likely Oncogenic	The Test-ALK fusion is likely oncogenic.
 ### Fusion in TSG
 BRCA1	Test-BRCA1 fusion	Likely Oncogenic	The Test-BRCA1 fusion leads to truncation of the BRCA1 tumor suppressor gene and is considered likely oncogenic.
 ### Fusion in TSG that Truncating Mutations is not curated
-PPP2R2A	Test-PPP2R2A fusion	Unknown	The Test-PPP2R2A fusion has not specifically been reviewed by the OncoKB team, and therefore its biological significance is unknown.
+PPP2R2A	Test-PPP2R2A fusion	Likely Oncogenic	The Test-PPP2R2A fusion leads to truncation of the PPP2R2A tumor suppressor gene and is considered likely oncogenic.
 ### Fusion in both
 PTPN1	Test-PTPN1 fusion	Likely Oncogenic	The Test-PTPN1 fusion leads to truncation of the PTPN1 tumor suppressor gene and is considered likely oncogenic.
 ### Fusion in neither
 GATA1	Test-GATA1 fusion	Unknown	The Test-GATA1 fusion has not specifically been reviewed by the OncoKB team, and therefore its biological significance is unknown.
+
+### Plural mutation
+TP53	DNA binding domain deletions	Likely Oncogenic	TP53 DNA binding domain deletions are likely oncogenic.
+MED12	Exon 1 mutations	Oncogenic	MED12 exon 1 mutations are known to be oncogenic.

@@ -13,9 +13,11 @@ import org.mskcc.cbio.oncokb.model.TumorType;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.mskcc.cbio.oncokb.util.LevelUtils.getTherapeuticLevelsWithPriorityLIstIterator;
 import static org.mskcc.cbio.oncokb.util.SummaryUtils.allelesToStr;
+import static org.mskcc.cbio.oncokb.util.SummaryUtils.getVUSSummary;
 
 /**
  * Created by hongxinzhang on 4/5/16.
@@ -23,7 +25,7 @@ import static org.mskcc.cbio.oncokb.util.SummaryUtils.allelesToStr;
 public class IndicatorUtils {
     public static IndicatorQueryResp processQuery(Query query,
                                                   Set<LevelOfEvidence> levels, Boolean highestLevelOnly,
-                                                  Set<EvidenceType> evidenceTypes) {
+                                                  Set<EvidenceType> evidenceTypes, Boolean geneQueryOnly) {
         highestLevelOnly = highestLevelOnly == null ? false : highestLevelOnly;
 
         levels = levels == null ? LevelUtils.getPublicLevels() :
@@ -169,7 +171,7 @@ public class IndicatorUtils {
                     tmpGene.getHugoSymbol(), query.getAlteration(), null, query.getSvType(),
                     query.getTumorType(), query.getConsequence(), query.getProteinStart(),
                     query.getProteinEnd(), query.getHgvs(), query.isGermline(), query.getAlleleState());
-                result.add(IndicatorUtils.processQuery(tmpQuery, levels, highestLevelOnly, evidenceTypes));
+                result.add(IndicatorUtils.processQuery(tmpQuery, levels, highestLevelOnly, evidenceTypes, geneQueryOnly));
             }
             return result.iterator().next();
         }
@@ -199,7 +201,7 @@ public class IndicatorUtils {
             List<TumorType> relevantUpwardTumorTypes = new ArrayList<>();
             List<TumorType> relevantDownwardTumorTypes = new ArrayList<>();
 
-            Alteration matchedAlt = ApplicationContextSingleton.getAlterationBo().findExactlyMatchedAlteration(query.getReferenceGenome(), alteration, AlterationUtils.getAllAlterations(query.getReferenceGenome(), gene));
+            Alteration matchedAlt = AlterationUtils.findExactlyMatchedAlteration(query.getReferenceGenome(), alteration, AlterationUtils.getAllAlterations(query.getReferenceGenome(), gene));
 
             if (matchedAlt == null && isStructuralVariantEvent) {
                 matchedAlt = AlterationUtils.getRevertFusions(query.getReferenceGenome(), alteration);
@@ -273,7 +275,15 @@ public class IndicatorUtils {
                             MutationEffectResp mutationEffectResp = new MutationEffectResp();
                             mutationEffectResp.setKnownEffect(indicatorQueryMutationEffect.getMutationEffect().getMutationEffect());
                             if (indicatorQueryMutationEffect.getMutationEffectEvidence() != null && StringUtils.isNotEmpty(indicatorQueryMutationEffect.getMutationEffectEvidence().getDescription())) {
-                                mutationEffectResp.setDescription(SummaryUtils.enrichDescription(indicatorQueryMutationEffect.getMutationEffectEvidence().getDescription(), gene, alteration.getReferenceGenomes().iterator().next(), query, matchedTumorType));
+                                mutationEffectResp.setDescription(CplUtils.annotate(
+                                    indicatorQueryMutationEffect.getMutationEffectEvidence().getDescription(),
+                                    query.getHugoSymbol(),
+                                    query.getAlteration(),
+                                    query.getTumorType(),
+                                    query.getReferenceGenome(),
+                                    gene,
+                                    matchedTumorType
+                                ));
                                 mutationEffectResp.setCitations(MainUtils.getCitationsByEvidence(indicatorQueryMutationEffect.getMutationEffectEvidence()));
                             }
                             indicatorQuery.setMutationEffect(mutationEffectResp);
@@ -281,34 +291,33 @@ public class IndicatorUtils {
                     }
                 }
 
+                // Set implications
                 if (hasTreatmentEvidence) {
                     if (StringUtils.isEmpty(query.getTumorType())) {
                         treatmentEvidences = EvidenceUtils.getRelevantEvidences(query, matchedAlt,
-                            selectedTreatmentEvidence, levels, relevantAlterationsWithoutAlternativeAlleles, alleles);
+                            selectedTreatmentEvidence, levels, relevantAlterationsWithoutAlternativeAlleles, alleles, geneQueryOnly);
                     } else {
                         treatmentEvidences = EvidenceUtils.keepHighestLevelForSameTreatments(
                             EvidenceUtils.getRelevantEvidences(query, matchedAlt,
-                                selectedTreatmentEvidence, levels, relevantAlterationsWithoutAlternativeAlleles, alleles), query.getReferenceGenome(), matchedAlt);
+                                selectedTreatmentEvidence, levels, relevantAlterationsWithoutAlternativeAlleles, alleles, geneQueryOnly), query.getReferenceGenome(), matchedAlt);
                     }
                 }
 
-                if (hasDiagnosticImplicationEvidence) {
+                if (gene != null && hasDiagnosticImplicationEvidence) {
                     List<Implication> implications = new ArrayList<>();
-                    implications.addAll(getImplications(matchedAlt, alleles, relevantAlterationsWithoutAlternativeAlleles, EvidenceType.DIAGNOSTIC_IMPLICATION, matchedTumorType, StringUtils.isEmpty(query.getTumorType()) ? null : relevantDownwardTumorTypes, query.getHugoSymbol(), Collections.singleton(LevelOfEvidence.LEVEL_Dx1)));
-
-                    // For Dx2 and Dx3, the logic is the same as Tx/Px
                     Set<LevelOfEvidence> levelOfEvidences = new HashSet<>();
+                    levelOfEvidences.add(LevelOfEvidence.LEVEL_Dx1);
                     levelOfEvidences.add(LevelOfEvidence.LEVEL_Dx2);
                     levelOfEvidences.add(LevelOfEvidence.LEVEL_Dx3);
-                    implications.addAll(getImplications(matchedAlt, alleles, relevantAlterationsWithoutAlternativeAlleles, EvidenceType.DIAGNOSTIC_IMPLICATION, matchedTumorType, StringUtils.isEmpty(query.getTumorType()) ? null : relevantUpwardTumorTypes, query.getHugoSymbol(), levelOfEvidences));
+                    implications.addAll(getImplications(gene, matchedAlt, alleles, relevantAlterationsWithoutAlternativeAlleles, EvidenceType.DIAGNOSTIC_IMPLICATION, matchedTumorType, StringUtils.isEmpty(query.getTumorType()) ? null : relevantUpwardTumorTypes, query.getHugoSymbol(), levelOfEvidences, geneQueryOnly));
                     indicatorQuery.setDiagnosticImplications(implications);
                     if (indicatorQuery.getDiagnosticImplications().size() > 0) {
                         indicatorQuery.setHighestDiagnosticImplicationLevel(LevelUtils.getHighestDiagnosticImplicationLevel(indicatorQuery.getDiagnosticImplications().stream().map(implication -> implication.getLevelOfEvidence()).collect(Collectors.toSet())));
                     }
                 }
 
-                if (hasPrognosticImplicationEvidence) {
-                    indicatorQuery.setPrognosticImplications(getImplications(matchedAlt, alleles, relevantAlterationsWithoutAlternativeAlleles, EvidenceType.PROGNOSTIC_IMPLICATION, matchedTumorType, StringUtils.isEmpty(query.getTumorType()) ? null : relevantUpwardTumorTypes, query.getHugoSymbol(), null));
+                if (gene != null && hasPrognosticImplicationEvidence) {
+                    indicatorQuery.setPrognosticImplications(getImplications(gene, matchedAlt, alleles, relevantAlterationsWithoutAlternativeAlleles, EvidenceType.PROGNOSTIC_IMPLICATION, matchedTumorType, StringUtils.isEmpty(query.getTumorType()) ? null : relevantUpwardTumorTypes, query.getHugoSymbol(), null, geneQueryOnly));
                     if (indicatorQuery.getPrognosticImplications().size() > 0) {
                         indicatorQuery.setHighestPrognosticImplicationLevel(LevelUtils.getHighestPrognosticImplicationLevel(indicatorQuery.getPrognosticImplications().stream().map(implication -> implication.getLevelOfEvidence()).collect(Collectors.toSet())));
                     }
@@ -356,6 +365,17 @@ public class IndicatorUtils {
                     if (gene.getHugoSymbol().equals("KIT")) {
                         CustomizeComparator.sortKitTreatment(treatments);
                     }
+                    for (IndicatorQueryTreatment treatment : treatments) {
+                        treatment.setDescription(CplUtils.annotate(
+                            treatment.getDescription(),
+                            query.getHugoSymbol(),
+                            query.getAlteration(),
+                            query.getTumorType(),
+                            query.getReferenceGenome(),
+                            gene,
+                            matchedTumorType
+                        ));
+                    }
                     indicatorQuery.setTreatments(treatments);
                     highestLevels = findHighestLevel(new HashSet<>(treatments));
                     indicatorQuery.setHighestSensitiveLevel(highestLevels.get("sensitive"));
@@ -383,7 +403,7 @@ public class IndicatorUtils {
             }
 
             // Mutation summary
-            if (evidenceTypes.contains(EvidenceType.MUTATION_SUMMARY)) {
+            if (evidenceTypes.contains(EvidenceType.MUTATION_SUMMARY) && StringUtils.isNotEmpty(matchedAlt.getAlteration())) {
                 indicatorQuery.setVariantSummary(SummaryUtils.variantSummary(gene, matchedAlt,
                     new ArrayList<>(relevantAlterations), query));
             }
@@ -588,7 +608,7 @@ public class IndicatorUtils {
             String hugoSymbol = StringUtils.isEmpty(queryHugoSymbol) ? evidence.getGene().getHugoSymbol() : queryHugoSymbol;
             implication.setPmids(citations.getPmids());
             implication.setAbstracts(citations.getAbstracts());
-            implication.setDescription(SummaryUtils.enrichDescription(evidence.getDescription(), hugoSymbol));
+            implication.setDescription(CplUtils.annotateGene(evidence.getDescription(), hugoSymbol));
             return implication;
         }).collect(Collectors.toSet());
     }
@@ -610,23 +630,30 @@ public class IndicatorUtils {
         return implications;
     }
 
-    private static List<Implication> getImplications(Alteration matchedAlt, List<Alteration> alternativeAlleles, List<Alteration> relevantAlterations, EvidenceType evidenceType, TumorType matchedTumorType, List<TumorType> tumorTypes, String queryHugoSymbol, Set<LevelOfEvidence> levelOfEvidences) {
+    private static List<Implication> getImplications(Gene gene, Alteration matchedAlt, List<Alteration> alternativeAlleles, List<Alteration> relevantAlterations, EvidenceType evidenceType, TumorType matchedTumorType, List<TumorType> tumorTypes, String queryHugoSymbol, Set<LevelOfEvidence> levelOfEvidences, Boolean geneQueryOnly) {
         List<Implication> implications = new ArrayList<>();
 
-        // Find alteration specific evidence
-        List<Evidence> selfAltEvis = EvidenceUtils.getEvidence(Collections.singletonList(matchedAlt), Collections.singleton(evidenceType), matchedTumorType, tumorTypes, levelOfEvidences);
-        if (selfAltEvis != null && selfAltEvis.size() > 0) {
-            implications.addAll(getImplicationFromEvidence(selfAltEvis, queryHugoSymbol));
-        }
-
-        List<Alteration> listToBeRemoved = new ArrayList<>(alternativeAlleles);
-        listToBeRemoved.add(matchedAlt);
-
-        for (Alteration alt : AlterationUtils.removeAlterationsFromList(relevantAlterations, listToBeRemoved)) {
-            List<Evidence> altEvis = EvidenceUtils.getEvidence(Collections.singletonList(alt), Collections.singleton(evidenceType), matchedTumorType, tumorTypes, levelOfEvidences);
-            if (altEvis != null && altEvis.size() > 0) {
-                implications.addAll(getImplicationFromEvidence(altEvis, queryHugoSymbol));
+        if (matchedAlt != null && !StringUtils.isEmpty(matchedAlt.getAlteration())) {
+            // Find alteration specific evidence
+            List<Evidence> selfAltEvis = EvidenceUtils.getEvidence(Collections.singletonList(matchedAlt), Collections.singleton(evidenceType), matchedTumorType, tumorTypes, levelOfEvidences);
+            if (selfAltEvis != null && selfAltEvis.size() > 0) {
+                implications.addAll(getImplicationFromEvidence(selfAltEvis, queryHugoSymbol));
             }
+
+            List<Alteration> listToBeRemoved = new ArrayList<>(alternativeAlleles);
+            listToBeRemoved.add(matchedAlt);
+
+            for (Alteration alt : AlterationUtils.removeAlterationsFromList(relevantAlterations, listToBeRemoved)) {
+                List<Evidence> altEvis = EvidenceUtils.getEvidence(Collections.singletonList(alt), Collections.singleton(evidenceType), matchedTumorType, tumorTypes, levelOfEvidences);
+                if (altEvis != null && altEvis.size() > 0) {
+                    implications.addAll(getImplicationFromEvidence(altEvis, queryHugoSymbol));
+                }
+            }
+        } else if (geneQueryOnly){
+            Set<Evidence> geneEvisSet = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Stream.of(evidenceType).collect(Collectors.toSet()));
+            List<Evidence> geneEvis = new ArrayList<>();
+            geneEvis.addAll(geneEvisSet);
+            implications.addAll(getImplicationFromEvidence(geneEvis, queryHugoSymbol));
         }
         return filterImplication(implications);
     }
@@ -722,6 +749,26 @@ public class IndicatorUtils {
         return new IndicatorQueryPathogenicity(pathogenicity, pathogenicityEvidence);
     }
 
+    private static String getMutationEffectDescriptionForUnknownAltButWithAA(Alteration alteration, Set<Evidence> evidences, Set<Alteration> alternativeAllele, String alternativeAlleleDescription) {
+        StringBuilder sb = new StringBuilder("");
+        boolean isVus = MainUtils.isVUS(alteration);
+        if (isVus) {
+            sb.append(getVUSSummary(alteration, "[[gene]] [[mutation]] [[[mutation]]]", true));
+        } else {
+            sb.append("The [[gene]] [[mutation]] [[[mutation]]] has not specifically been reviewed by the OncoKB team.");
+        }
+        sb.append(" However, ");
+        Set<Alteration> evisAlts = new HashSet<>();
+        evidences.forEach(evidence -> evisAlts.addAll(evidence.getAlterations()));
+        Set<Alteration> intersectedAlts = Sets.intersection(evisAlts, new HashSet<>(alternativeAllele));
+        if (intersectedAlts.size() > 1) {
+            sb.append("we have mutation effect descriptions for [[gene]] " + allelesToStr(new HashSet<>(alternativeAllele)) + ".");
+        } else {
+            sb.append("the mutation effect description for [[gene]] " + evisAlts.iterator().next().getName() + ", an alternate allele of [[gene]] [[mutation]], " + " is: ");
+            sb.append(alternativeAlleleDescription);
+        }
+        return sb.toString();
+    }
     private static IndicatorQueryMutationEffect getMutationEffect(Alteration alteration, List<Alteration> alternativeAllele, List<Alteration> relevantAlterations) {
         IndicatorQueryMutationEffect indicatorQueryMutationEffect = new IndicatorQueryMutationEffect();
         // Find alteration specific mutation effect
@@ -731,31 +778,21 @@ public class IndicatorUtils {
             indicatorQueryMutationEffect = MainUtils.findHighestMutationEffectByEvidence(new HashSet<>(selfAltMEEvis));
         }
 
+        Set<Evidence> alternativeAlleleEvis = new HashSet<>();
         if (indicatorQueryMutationEffect.getMutationEffect() == null || indicatorQueryMutationEffect.getMutationEffect().equals(MutationEffect.UNKNOWN)) {
+            alternativeAlleleEvis = new HashSet<>(EvidenceUtils.getEvidence(new ArrayList<>(alternativeAllele), Collections.singleton(EvidenceType.MUTATION_EFFECT), null));
             boolean isPositionalVariant = AlterationUtils.isPositionedAlteration(alteration);
             // Find mutation effect from alternative alleles
             if (alternativeAllele.size() > 0 && !isPositionalVariant) {
-                List<Evidence> alternativeAlleleEvis= EvidenceUtils.getEvidence(
-                    new ArrayList<>(alternativeAllele)
-                    , Collections.singleton(EvidenceType.MUTATION_EFFECT)
-                    , null
-                );
-                indicatorQueryMutationEffect =
-                    MainUtils.setToAlternativeAlleleMutationEffect(
-                        MainUtils.findHighestMutationEffectByEvidence(new HashSet<>(alternativeAlleleEvis))
-                    );
-                if (indicatorQueryMutationEffect.getMutationEffect() != null && !indicatorQueryMutationEffect.getMutationEffect().equals(MutationEffect.INCONCLUSIVE) && !indicatorQueryMutationEffect.getMutationEffect().equals(MutationEffect.UNKNOWN)) {
-                    Set<Alteration> evisAlts = new HashSet<>();
-                    alternativeAlleleEvis.forEach(evidence -> evisAlts.addAll(evidence.getAlterations()));
-                    Set<Alteration> alternativeAlleleWithMutationEffects = Sets.intersection(evisAlts, new HashSet<>(alternativeAllele));
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("We do not have a mutation effect description for [[gene]] [[mutation]], however, ");
-                    if (alternativeAlleleWithMutationEffects.size() > 1) {
-                        sb.append("we have mutation effect descriptions for [[gene]] " + allelesToStr(new HashSet<>(alternativeAllele)) + ".");
-                    } else {
-                        sb.append("the mutation effect description for [[gene]] " + alternativeAlleleWithMutationEffects.iterator().next().getName() + " is: ");
-                        sb.append(indicatorQueryMutationEffect.getMutationEffectEvidence().getDescription());
-                    }
+                Set<Evidence> evidences = MainUtils.getMutationEffectFromAlternativeAlleles(alternativeAlleleEvis);
+                StringBuilder sb = new StringBuilder();
+                if (evidences.size() > 0) {
+                    Evidence evidenceToUse = evidences.iterator().next();
+                    indicatorQueryMutationEffect.setMutationEffectEvidence(evidenceToUse);
+                    indicatorQueryMutationEffect.setMutationEffect(MainUtils.setToAlternativeAlleleMutationEffect(MutationEffect.getByName(evidenceToUse.getKnownEffect())));
+
+                    sb.append(getMutationEffectDescriptionForUnknownAltButWithAA(alteration, evidences, new HashSet<>(alternativeAllele), indicatorQueryMutationEffect.getMutationEffectEvidence().getDescription()));
+
                     Evidence evidence = new Evidence(indicatorQueryMutationEffect.getMutationEffectEvidence(), indicatorQueryMutationEffect.getMutationEffectEvidence().getId());
                     evidence.setDescription(sb.toString());
                     indicatorQueryMutationEffect.setMutationEffectEvidence(evidence);
@@ -794,6 +831,15 @@ public class IndicatorUtils {
         }
         if (indicatorQueryMutationEffect.getMutationEffect() == null) {
             indicatorQueryMutationEffect.setMutationEffect(MutationEffect.UNKNOWN);
+            // add information if alternative allele has mutation effect
+            if (alternativeAlleleEvis.size() > 0) {
+                StringBuilder sb = new StringBuilder();
+                sb.append(getMutationEffectDescriptionForUnknownAltButWithAA(alteration, alternativeAlleleEvis, new HashSet<>(alternativeAllele), alternativeAlleleEvis.iterator().next().getDescription()));
+                Evidence evidence = new Evidence();
+                evidence.setKnownEffect(MutationEffect.UNKNOWN.getMutationEffect());
+                evidence.setDescription(sb.toString());
+                indicatorQueryMutationEffect.setMutationEffectEvidence(evidence);
+            }
         }
         return indicatorQueryMutationEffect;
     }
@@ -873,7 +919,7 @@ public class IndicatorUtils {
                                 List<TumorType> relevantTumorTypes = TumorTypeUtils.findRelevantTumorTypes(TumorTypeUtils.getTumorTypeName(tumorType), StringUtils.isEmpty(tumorType.getSubtype()), RelevantTumorTypeDirection.DOWNWARD);
                                 IndicatorQueryTreatment indicatorQueryTreatment = new IndicatorQueryTreatment();
                                 indicatorQueryTreatment.setDrugs(treatment.getDrugs());
-                                indicatorQueryTreatment.setApprovedIndications(treatment.getApprovedIndications().stream().map(indication -> SummaryUtils.enrichDescription(indication, hugoSymbol)).collect(Collectors.toSet()));
+                                indicatorQueryTreatment.setApprovedIndications(treatment.getApprovedIndications().stream().map(indication -> CplUtils.annotateGene(indication, hugoSymbol)).collect(Collectors.toSet()));
                                 indicatorQueryTreatment.setLevel(level);
                                 indicatorQueryTreatment.setFdaLevel(LevelUtils.getHighestFdaLevel(fdaLevelMap.get(treatment)));
                                 indicatorQueryTreatment.setPmids(pmidsMap.get(treatment));
@@ -884,7 +930,7 @@ public class IndicatorUtils {
                                     Set<org.mskcc.cbio.oncokb.apiModels.TumorType> excludedCancerTypes = evidence.getExcludedCancerTypes().stream().filter(ect -> relevantTumorTypes.contains(ect)).map(ect -> new org.mskcc.cbio.oncokb.apiModels.TumorType(ect)).collect(Collectors.toSet());
                                     indicatorQueryTreatment.setLevelExcludedCancerTypes(excludedCancerTypes);
                                 }
-                                indicatorQueryTreatment.setDescription(SummaryUtils.enrichDescription(descriptionMap.get(treatment), queryHugoSymbol));
+                                indicatorQueryTreatment.setDescription(CplUtils.annotateGene(descriptionMap.get(treatment), queryHugoSymbol));
                                 treatments.add(indicatorQueryTreatment);
                             }
                         }

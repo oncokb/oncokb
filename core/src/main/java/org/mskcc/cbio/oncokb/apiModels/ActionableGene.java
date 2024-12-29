@@ -20,6 +20,7 @@ public class ActionableGene {
     String drugs;
     String pmids;
     String abstracts;
+    String description;
 
     public String getGrch37Isoform() {
         return grch37Isoform;
@@ -133,7 +134,15 @@ public class ActionableGene {
         this.abstracts = abstracts;
     }
 
-    public ActionableGene(String grch37Isoform, String grch37RefSeq, String grch38Isoform, String grch38RefSeq, Integer entrezGeneId, String gene, String referenceGenome, String variant, String proteinChange, String cancerType, String level, String drugs, String pmids, String abstracts) {
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public ActionableGene(String grch37Isoform, String grch37RefSeq, String grch38Isoform, String grch38RefSeq, Integer entrezGeneId, String gene, String referenceGenome, String variant, String proteinChange, String cancerType, String level, String drugs, String pmids, String abstracts, String description) {
         this.grch37Isoform = grch37Isoform;
         this.grch37RefSeq = grch37RefSeq;
         this.grch38Isoform = grch38Isoform;
@@ -148,6 +157,7 @@ public class ActionableGene {
         this.drugs = drugs;
         this.pmids = pmids;
         this.abstracts = abstracts;
+        this.description = description;
     }
 
     public ActionableGene() {

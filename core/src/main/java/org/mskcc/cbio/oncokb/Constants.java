@@ -19,11 +19,12 @@ public final class Constants {
     public static final String MISSENSE_VARIANT = "missense_variant";
     public static final String IN_FRAME_DELETION = "inframe_deletion";
     public static final String IN_FRAME_INSERTION = "inframe_insertion";
+    public static final String FRAMESHIFT_VARIANT = "frameshift_variant";
     public static final String FIVE_UTR = "5_prime_UTR_variant";
     public static final String UPSTREAM_GENE = "upstream_gene_variant";
     public static final String PROTEIN_ALTERING_VARIANT = "protein_altering_variant";
 
-    public static final String PUBLIC_API_VERSION = "v1.4.0";
+    public static final String PUBLIC_API_VERSION = "v1.4.1";
     public static final String PRIVATE_API_VERSION = "v1.4.1";
 
     // Defaults

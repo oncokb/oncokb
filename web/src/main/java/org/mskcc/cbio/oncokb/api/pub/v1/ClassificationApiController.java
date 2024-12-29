@@ -1,8 +1,6 @@
 package org.mskcc.cbio.oncokb.api.pub.v1;
 
-import org.mskcc.cbio.oncokb.model.OncoKBVariant;
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
-import org.mskcc.cbio.oncokb.util.MainUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;

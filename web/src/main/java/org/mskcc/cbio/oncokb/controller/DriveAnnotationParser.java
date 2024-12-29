@@ -2,14 +2,14 @@ package org.mskcc.cbio.oncokb.controller;
 
 import com.google.gdata.util.common.base.Pair;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.mskcc.cbio.oncokb.bo.*;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.TumorType;
-import org.mskcc.cbio.oncokb.bo.OncokbTranscriptService;
 import org.mskcc.cbio.oncokb.util.*;
+import org.mskcc.cbio.oncokb.bo.OncokbTranscriptService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,6 +21,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static org.mskcc.cbio.oncokb.util.ArticleUtils.getAbstractFromText;
+import static org.mskcc.cbio.oncokb.util.ArticleUtils.getPmidsFromText;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 /**
@@ -51,6 +53,7 @@ public class DriveAnnotationParser {
     private static final String SOLID_PROPAGATION_KEY = "propagation";
     private static final String LIQUID_PROPAGATION_KEY = "propagationLiquid";
     private static final String FDA_LEVEL_KEY = "fdaLevel";
+    private static final String EXCLUDED_RCTS_KEY = "excludedRCTs";
 
     private static String ALLELE_STATES_BIALLELIC = "biallelic";
     private static String ALLELE_STATES_MONOALLELIC = "monoallelic";
@@ -570,6 +573,21 @@ public class DriveAnnotationParser {
                 }
             }
 
+            // add mutation summary
+            String mutationSummary = mutationObj.has("summary") ? mutationObj.getString("summary") : "";
+            if (StringUtils.isNotEmpty(mutationSummary)) {
+                Evidence evidence = new Evidence();
+                evidence.setEvidenceType(EvidenceType.MUTATION_SUMMARY);
+                evidence.setAlterations(alterations);
+                evidence.setGene(gene);
+                evidence.setDescription(mutationSummary);
+                setDocuments(mutationSummary, evidence);
+                evidence.setUuid(getUUID(mutationObj, "summary"));
+                evidence.setLastEdit(getLastEdit(mutationObj, "summary"));
+                EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+                evidenceBo.save(evidence);
+            }
+
             // Save germline variant penetrance
             if (mutationObj.has(MUTATION_PENETRANCE_KEY)) {
                 JSONObject mutationPenetrance = mutationObj.getJSONObject(MUTATION_PENETRANCE_KEY);
@@ -607,10 +625,8 @@ public class DriveAnnotationParser {
                         excludedCancerTypes = getTumorTypes(cancers.getJSONObject(i).getJSONArray("excludedCancerTypes"));
                     }
 
-                    List<TumorType> relevantCancerTypes = new ArrayList<>();
-                    if (cancers.getJSONObject(i).has("relevantCancerTypes")) {
-                        relevantCancerTypes = getTumorTypes(cancers.getJSONObject(i).getJSONArray("relevantCancerTypes"));
-                    }
+                    List<TumorType> relevantCancerTypes = getRelevantCancerTypesIfExistsFromJsonObject(cancers.getJSONObject(i), tumorTypes, excludedCancerTypes, null);
+
                     parseCancer(germline, gene, alterations, cancers.getJSONObject(i), tumorTypes, excludedCancerTypes, relevantCancerTypes, nestLevel + 1);
                 }
             }
@@ -824,76 +840,50 @@ public class DriveAnnotationParser {
         Evidence diagnosticEvidence = parseImplication(germline, gene, alterations, tumorTypes, excludedCancerTypes, relevantCancerTypes, cancerObj.has("diagnostic") ? cancerObj.getJSONObject("diagnostic") : null, getUUID(cancerObj, "diagnostic"), EvidenceType.DIAGNOSTIC_IMPLICATION, nestLevel + 1);
 
         // diagnostic summary
-        saveDxPxSummaries(germline, cancerObj, "diagnosticSummary", gene, alterations, tumorTypes, excludedCancerTypes, cancerObj.has("diagnostic") && cancerObj.getJSONObject("diagnostic").has("relevantCancerTypes") ? getTumorTypes(cancerObj.getJSONObject("diagnostic").getJSONArray("relevantCancerTypes")) : relevantCancerTypes, EvidenceType.DIAGNOSTIC_SUMMARY, nestLevel, diagnosticEvidence == null ? null : diagnosticEvidence.getLevelOfEvidence());
+        List<TumorType> diagnosticRCT = getRelevantCancerTypesIfExistsFromJsonObject(cancerObj.getJSONObject("diagnostic"), tumorTypes, excludedCancerTypes, diagnosticEvidence == null ? null : diagnosticEvidence.getLevelOfEvidence());
+        saveDxPxSummaries(
+            germline,
+            cancerObj,
+            "diagnosticSummary",
+            gene,
+            alterations,
+            tumorTypes,
+            excludedCancerTypes,
+            cancerObj.has("diagnostic") ? diagnosticRCT : relevantCancerTypes,
+            EvidenceType.DIAGNOSTIC_SUMMARY,
+            nestLevel,
+            diagnosticEvidence == null ? null : diagnosticEvidence.getLevelOfEvidence()
+        );
 
         // prognostic summary
-        saveDxPxSummaries(germline, cancerObj, "prognosticSummary", gene, alterations, tumorTypes, excludedCancerTypes, cancerObj.has("prognostic") && cancerObj.getJSONObject("prognostic").has("relevantCancerTypes") ? getTumorTypes(cancerObj.getJSONObject("prognostic").getJSONArray("relevantCancerTypes")) : relevantCancerTypes, EvidenceType.PROGNOSTIC_SUMMARY, nestLevel, prognosticEvidence == null ? null : prognosticEvidence.getLevelOfEvidence());
+        List<TumorType> prognosticRCT = getRelevantCancerTypesIfExistsFromJsonObject(cancerObj.getJSONObject("prognostic"), tumorTypes, excludedCancerTypes, prognosticEvidence == null ? null : prognosticEvidence.getLevelOfEvidence());
+        saveDxPxSummaries(
+            germline,
+            cancerObj,
+            "prognosticSummary",
+            gene,
+            alterations,
+            tumorTypes,
+            excludedCancerTypes,
+            cancerObj.has("prognostic") ? prognosticRCT : relevantCancerTypes,
+            EvidenceType.PROGNOSTIC_SUMMARY,
+            nestLevel,
+            prognosticEvidence == null ? null : prognosticEvidence.getLevelOfEvidence()
+        );
 
         JSONArray implications = cancerObj.getJSONArray("TIs");
 
         for (int i = 0; i < implications.length(); i++) {
             JSONObject implication = implications.getJSONObject(i);
             if ((implication.has("description") && !implication.getString("description").trim().isEmpty()) || (implication.has("treatments") && implication.getJSONArray("treatments").length() > 0)) {
-                EvidenceType evidenceType = EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY;
-                String type = "";
-                if (implication.has("type")) {
-                    if (implication.getString("type").equals("SS")) {
-                        evidenceType = EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY;
-                        type = "Sensitive";
-                    } else if (implication.getString("type").equals("SR")) {
-                        evidenceType = EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE;
-                        type = "Resistant";
-                    }
-                    if (implication.getString("type").equals("IS")) {
-                        evidenceType = EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY;
-                        type = "Sensitive";
-                    } else if (implication.getString("type").equals("IR")) {
-                        evidenceType = EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE;
-                        type = "Resistant";
-                    }
-                    parseTherapeuticImplications(germline, gene, alterations, tumorTypes, excludedCancerTypes, relevantCancerTypes, implication, evidenceType, type, nestLevel + 1);
-                }
+                parseTherapeuticImplications(germline, gene, alterations, tumorTypes, excludedCancerTypes, relevantCancerTypes, implication, nestLevel + 1);
             }
         }
     }
 
-    private void parseTherapeuticImplications(Boolean germline, Gene gene, Set<Alteration> alterations, List<TumorType> tumorTypes, List<TumorType> excludedCancerTypes, List<TumorType> relevantCancerTypes, JSONObject implicationObj, EvidenceType evidenceType, String knownEffectOfEvidence, Integer nestLevel) throws Exception {
-        System.out.println(spaceStrByNestLevel(nestLevel) + evidenceType);
-
+    private void parseTherapeuticImplications(Boolean germline, Gene gene, Set<Alteration> alterations, List<TumorType> tumorTypes, List<TumorType> excludedCancerTypes, List<TumorType> relevantCancerTypes, JSONObject implicationObj,
+                                              Integer nestLevel) throws Exception {
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
-
-        if (implicationObj.has("description") && !implicationObj.getString("description").trim().isEmpty()) {
-            // general description
-            System.out.println(spaceStrByNestLevel(nestLevel + 1) + "Has General Description.");
-            Date lastEdit = getLastEdit(implicationObj, "description");
-            Evidence evidence = new Evidence();
-            evidence.setEvidenceType(evidenceType);
-            evidence.setAlterations(alterations);
-            evidence.setGene(gene);
-            evidence.setCancerTypes(new HashSet<>(tumorTypes));
-            evidence.setKnownEffect(knownEffectOfEvidence);
-            evidence.setUuid(getUUID(implicationObj, "description"));
-            evidence.setLastEdit(lastEdit);
-            if (lastEdit != null) {
-                System.out.println(spaceStrByNestLevel(nestLevel + 1) + "Last update on: " + MainUtils.getTimeByDate(lastEdit));
-            }
-            String desc = implicationObj.getString("description");
-            evidence.setDescription(desc);
-            setDocuments(desc, evidence);
-
-            if (excludedCancerTypes != null) {
-                evidence.setExcludedCancerTypes(new HashSet<>(excludedCancerTypes));
-            }
-
-            if (implicationObj.has("relevantCancerTypes")) {
-                evidence.setRelevantCancerTypes(new HashSet<>(getTumorTypes(implicationObj.getJSONArray("relevantCancerTypes"))));
-            } else if (relevantCancerTypes != null) {
-                evidence.setRelevantCancerTypes(new HashSet<>(relevantCancerTypes));
-            }
-
-            evidence.setForGermline(germline);
-            evidenceBo.save(evidence);
-        }
 
         // specific evidence
         DrugBo drugBo = ApplicationContextSingleton.getDrugBo();
@@ -912,12 +902,23 @@ public class DriveAnnotationParser {
             Set<Date> lastEditDates = new HashSet<>();
             addDateToLastEditSetFromObject(lastEditDates, drugObj, "name");
 
+            ImmutablePair<EvidenceType, String> evidenceTypeAndKnownEffect = getEvidenceTypeAndKnownEffectFromDrugObj(drugObj);
+            EvidenceType evidenceType = evidenceTypeAndKnownEffect.getLeft();
+            String knownEffect = evidenceTypeAndKnownEffect.getRight();
+            if (evidenceType == null) {
+                System.err.println(spaceStrByNestLevel(nestLevel + 1) + "Could not get evidence type" + drugObj.toString());
+                continue;
+            }
+            if (knownEffect == null) {
+                System.err.println(spaceStrByNestLevel(nestLevel + 1) + "Could not get known effect" + drugObj.toString());
+            }
+
             Evidence evidence = new Evidence();
             evidence.setEvidenceType(evidenceType);
             evidence.setAlterations(alterations);
             evidence.setGene(gene);
             evidence.setCancerTypes(new HashSet<>(tumorTypes));
-            evidence.setKnownEffect(knownEffectOfEvidence);
+            evidence.setKnownEffect(knownEffect);
             evidence.setUuid(getUUID(drugObj, "name"));
 
             // approved indications
@@ -1075,8 +1076,9 @@ public class DriveAnnotationParser {
                 evidence.setExcludedCancerTypes(new HashSet<>(excludedCancerTypes));
             }
 
-            if (drugObj.has("relevantCancerTypes")) {
-                evidence.setRelevantCancerTypes(new HashSet<>(getTumorTypes(drugObj.getJSONArray("relevantCancerTypes"))));
+            List<TumorType> drugRCT = getRelevantCancerTypesIfExistsFromJsonObject(drugObj, tumorTypes, excludedCancerTypes, evidence.getLevelOfEvidence());
+            if (drugRCT.size() > 0) {
+                evidence.setRelevantCancerTypes(new HashSet<>(drugRCT));
             } else if (relevantCancerTypes != null) {
                 evidence.setRelevantCancerTypes(new HashSet<>(relevantCancerTypes));
             }
@@ -1110,8 +1112,9 @@ public class DriveAnnotationParser {
                 addDateToLastEditSetFromObject(lastEditDates, implication, "level");
             }
 
-            if (implication.has("relevantCancerTypes")) {
-                evidence.setRelevantCancerTypes(new HashSet<>(getTumorTypes(implication.getJSONArray("relevantCancerTypes"))));
+            List<TumorType> implicationRCT = getRelevantCancerTypesIfExistsFromJsonObject(implication, tumorTypes, excludedCancerTypes, evidence.getLevelOfEvidence());
+            if (implicationRCT.size() > 0) {
+                evidence.setRelevantCancerTypes(new HashSet<>(implicationRCT));
             } else if (relevantCancerTypes != null && relevantCancerTypes.size() > 0) {
                 evidence.setRelevantCancerTypes(new HashSet<>(relevantCancerTypes));
             } else if (LevelOfEvidence.LEVEL_Dx1.equals(evidence.getLevelOfEvidence())) {
@@ -1148,61 +1151,33 @@ public class DriveAnnotationParser {
         if (str == null) return;
         Set<Article> docs = new HashSet<>();
         ArticleBo articleBo = ApplicationContextSingleton.getArticleBo();
-        Pattern pmidPattern = Pattern.compile("PMIDs?:?\\s*([\\d,\\s*]+)", Pattern.CASE_INSENSITIVE);
-        Pattern abstractPattern = Pattern.compile("\\(?\\s*Abstract\\s*:([^\\)]*);?\\s*\\)?", Pattern.CASE_INSENSITIVE);
-        Pattern abItemPattern = Pattern.compile("(.*?)\\.\\s*(http.*)", Pattern.CASE_INSENSITIVE);
-        Matcher m = pmidPattern.matcher(str);
-        int start = 0;
+
         Set<String> pmidToSearch = new HashSet<>();
-        while (m.find(start)) {
-            String pmids = m.group(1).trim();
-            for (String pmid : pmids.split(", *(PMID:)? *")) {
-                Article doc = articleBo.findArticleByPmid(pmid);
-                if (doc == null) {
-                    pmidToSearch.add(pmid);
-                }
-                if (doc != null) {
-                    docs.add(doc);
-                }
+        getPmidsFromText(evidence.getDescription()).forEach(pmid -> {
+            Article doc = articleBo.findArticleByPmid(pmid);
+            if (doc != null) {
+                docs.add(doc);
+            } else {
+                pmidToSearch.add(pmid);
             }
-            start = m.end();
-        }
+        });
 
         if (!pmidToSearch.isEmpty()) {
             for (Article article : NcbiEUtils.readPubmedArticles(pmidToSearch)) {
-                docs.add(article);
                 articleBo.save(article);
+                docs.add(article);
             }
         }
 
-        Matcher abstractMatch = abstractPattern.matcher(str);
-        start = 0;
-        String abstracts = "", abContent = "", abLink = "";
-        while (abstractMatch.find(start)) {
-            abstracts = abstractMatch.group(1).trim();
-            for (String abs : abstracts.split(";")) {
-                Matcher abItems = abItemPattern.matcher(abs);
-                if (abItems.find()) {
-                    abContent = abItems.group(1).trim();
-                    abLink = abItems.group(2).trim();
-                }
-                if (!abContent.isEmpty()) {
-                    Article doc = articleBo.findArticleByAbstract(abContent);
-                    if (doc == null) {
-                        doc = new Article();
-                        doc.setAbstractContent(abContent);
-                        doc.setLink(abLink);
-                        articleBo.save(doc);
-                    }
-                    docs.add(doc);
-                }
-                abContent = "";
-                abLink = "";
-
+        getAbstractFromText(evidence.getDescription()).stream().forEach(article -> {
+            Article dbArticle = articleBo.findArticleByAbstract(article.getAbstractContent());
+            if (dbArticle == null) {
+                articleBo.save(article);
+                docs.add(article);
+            } else {
+                docs.add(dbArticle);
             }
-            start = abstractMatch.end();
-
-        }
+        });
 
         evidence.addArticles(docs);
     }
@@ -1227,5 +1202,65 @@ public class DriveAnnotationParser {
     private Date getMostRecentDate(Set<Date> dates) {
         if (dates == null || dates.size() == 0) return null;
         return Collections.max(dates);
+    }
+
+    private ImmutablePair<EvidenceType, String> getEvidenceTypeAndKnownEffectFromDrugObj(JSONObject drugObj) {
+        ImmutablePair<EvidenceType, String> emptyPair = new ImmutablePair<EvidenceType, String>(null, null);
+        if (!drugObj.has("level") || drugObj.getString("level").trim().isEmpty()) {
+            return emptyPair;
+        }
+        String level = drugObj.getString("level").trim();
+        LevelOfEvidence levelOfEvidence = LevelOfEvidence.getByLevel(level.toUpperCase());
+
+        EvidenceType evidenceType = EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY;
+        String type = "";
+        if (LevelOfEvidence.LEVEL_1.equals(levelOfEvidence) || LevelOfEvidence.LEVEL_2.equals(levelOfEvidence)) {
+            evidenceType = EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_SENSITIVITY;
+            type = "Sensitive";
+        } else if (LevelOfEvidence.LEVEL_R1.equals(levelOfEvidence)) {
+            evidenceType = EvidenceType.STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE;
+            type = "Resistant";
+        } else if (LevelOfEvidence.LEVEL_3A.equals(levelOfEvidence) || LevelOfEvidence.LEVEL_4.equals(levelOfEvidence)) {
+            evidenceType = EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY;
+            type = "Sensitive";
+        } else if (LevelOfEvidence.LEVEL_R2.equals(levelOfEvidence)) {
+            evidenceType = EvidenceType.INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE;
+            type = "Resistant";
+        } else {
+            return emptyPair;
+        }
+
+        return new ImmutablePair<EvidenceType, String>(evidenceType, type);
+    }
+
+    private List<TumorType> getRelevantCancerTypes(List<TumorType> tumorTypes, List<TumorType> excludedTumorTypes, LevelOfEvidence level, List<TumorType> excludedRelevantCancerTypes) {
+        RelevantTumorTypeDirection direction = level != null && LevelOfEvidence.LEVEL_Dx1.equals(level) ? RelevantTumorTypeDirection.UPWARD : RelevantTumorTypeDirection.DOWNWARD;
+
+        Set<TumorType> queriedTumorTypes = tumorTypes.stream().map(tt -> {
+                return TumorTypeUtils.findRelevantTumorTypes(TumorTypeUtils.getTumorTypeName(tt), StringUtils.isEmpty(tt.getSubtype()), direction, false);
+            })
+            .flatMap(Collection::stream)
+            .collect(Collectors.toSet());
+
+        Set<TumorType> queriedExcludedTumorTypes = excludedTumorTypes.stream().map(ett -> {
+                return TumorTypeUtils.findRelevantTumorTypes(TumorTypeUtils.getTumorTypeName(ett), StringUtils.isEmpty(ett.getSubtype()), direction, false);
+            })
+            .flatMap(Collection::stream)
+            .collect(Collectors.toSet());
+
+        queriedTumorTypes.removeAll(queriedExcludedTumorTypes);
+        queriedTumorTypes.removeAll(excludedRelevantCancerTypes);
+
+
+        return new ArrayList<>(queriedTumorTypes);
+    }
+
+    private List<TumorType> getRelevantCancerTypesIfExistsFromJsonObject(JSONObject jsonObject, List<TumorType> tumorTypes, List<TumorType> excludedCancerTypes, LevelOfEvidence level) throws JSONException, Exception {
+        List<TumorType> relevantCancerTypes = new ArrayList<>();
+        if (jsonObject.has(EXCLUDED_RCTS_KEY)) {
+            List<TumorType> excludedRCT = getTumorTypes(jsonObject.getJSONArray(EXCLUDED_RCTS_KEY));
+            relevantCancerTypes = getRelevantCancerTypes(tumorTypes, excludedCancerTypes, level, excludedRCT);
+        }
+        return relevantCancerTypes;
     }
 }

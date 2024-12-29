@@ -4,6 +4,7 @@ import io.swagger.annotations.*;
 import org.mskcc.cbio.oncokb.apiModels.ActionableGene;
 import org.mskcc.cbio.oncokb.apiModels.AnnotatedVariant;
 import org.mskcc.cbio.oncokb.apiModels.CuratedGene;
+import org.mskcc.cbio.oncokb.apiModels.VariantOfUnknownSignificance;
 import org.mskcc.cbio.oncokb.config.annotation.PremiumPublicApi;
 import org.mskcc.cbio.oncokb.config.annotation.PublicApi;
 import org.mskcc.cbio.oncokb.model.CancerGene;
@@ -18,11 +19,6 @@ import java.util.List;
 
 import static org.mskcc.cbio.oncokb.api.pub.v1.Constants.INCLUDE_EVIDENCE;
 import static org.mskcc.cbio.oncokb.api.pub.v1.Constants.VERSION;
-import static org.springframework.util.MimeTypeUtils.TEXT_PLAIN_VALUE;
-
-/**
- * Created by Hongxin on 10/28/16.
- */
 
 // It was tags=Utils. But temporally name it Cancer Genes so the Utils tag would not show up with empty content
 @Api(tags = "Cancer Genes", description = "Cancer Genes")
@@ -48,11 +44,34 @@ public interface UtilsApi {
         @ApiResponse(code = 503, message = "Service Unavailable")
     })
     @RequestMapping(value = "/utils/allAnnotatedVariants.txt",
-        produces = TEXT_PLAIN_VALUE,
+        produces = "text/plain; charset=UTF-8",
         method = RequestMethod.GET)
     ResponseEntity<String> utilsAllAnnotatedVariantsTxtGet(
         @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
     );
+
+    @PremiumPublicApi
+    @ApiOperation(value = "", notes = "Get All Variants of Unknown Significance.", response = VariantOfUnknownSignificance.class, responseContainer = "List", tags = {"Variants"})
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK", response = VariantOfUnknownSignificance.class, responseContainer = "List"),
+        @ApiResponse(code = 404, message = "Not Found"),
+        @ApiResponse(code = 503, message = "Service Unavailable")
+    })
+    @RequestMapping(value = "/utils/allVariantsOfUnknownSignificance", produces = {"application/json"},
+        method = RequestMethod.GET)
+    ResponseEntity<List<VariantOfUnknownSignificance>> utilsAllVariantsOfUnknownSignificanceGet();
+
+    @PremiumPublicApi
+    @ApiOperation(value = "", notes = "Get All Variants of Unknown Significance in text file.", tags = {"Variants"})
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK"),
+        @ApiResponse(code = 404, message = "Not Found"),
+        @ApiResponse(code = 503, message = "Service Unavailable")
+    })
+    @RequestMapping(value = "/utils/allVariantsOfUnknownSignificance.txt",
+        produces = "text/plain; charset=UTF-8",
+        method = RequestMethod.GET)
+    ResponseEntity<String> utilsAllVariantsOfUnknownSignificanceTxtGet();
 
     @PremiumPublicApi
     @ApiOperation(value = "", notes = "Get All Actionable Variants.", response = ActionableGene.class, responseContainer = "List", tags = {"Variants"})
@@ -76,7 +95,7 @@ public interface UtilsApi {
         @ApiResponse(code = 503, message = "Service Unavailable")
     })
     @RequestMapping(value = "/utils/allActionableVariants.txt",
-        produces = TEXT_PLAIN_VALUE,
+        produces = "text/plain; charset=UTF-8",
         method = RequestMethod.GET)
     ResponseEntity<String> utilsAllActionableVariantsTxtGet(
         @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
@@ -106,7 +125,7 @@ public interface UtilsApi {
         @ApiResponse(code = 503, message = "Service Unavailable")
     })
     @RequestMapping(value = "/utils/cancerGeneList.txt",
-        produces = TEXT_PLAIN_VALUE,
+        produces = "text/plain; charset=UTF-8",
         method = RequestMethod.GET)
     ResponseEntity<String> utilsCancerGeneListTxtGet(
         @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
@@ -137,7 +156,7 @@ public interface UtilsApi {
         @ApiResponse(code = 503, message = "Service Unavailable")
     })
     @RequestMapping(value = "/utils/allCuratedGenes.txt",
-        produces = TEXT_PLAIN_VALUE,
+        produces = "text/plain; charset=UTF-8",
         method = RequestMethod.GET)
     ResponseEntity<String> utilsAllCuratedGenesTxtGet(
         @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version

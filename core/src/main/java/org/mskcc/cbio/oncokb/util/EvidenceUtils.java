@@ -8,7 +8,6 @@ import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.ArticleBo;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.TumorType;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.util.*;
@@ -58,7 +57,7 @@ public class EvidenceUtils {
 
     public static Set<Evidence> getRelevantEvidences(
         Query query, Alteration matchedAlt,
-        Set<EvidenceType> evidenceTypes, Set<LevelOfEvidence> levelOfEvidences, List<Alteration> relevantAlterations, List<Alteration> alternativeAlleles) {
+        Set<EvidenceType> evidenceTypes, Set<LevelOfEvidence> levelOfEvidences, List<Alteration> relevantAlterations, List<Alteration> alternativeAlleles, Boolean geneQueryOnly) {
         if (query == null) {
             return new HashSet<>();
         }
@@ -89,7 +88,7 @@ public class EvidenceUtils {
 
             relevantEvidences = getEvidence(query.getReferenceGenome(), evidenceQueryRes, evidenceTypes, levelOfEvidences);
 
-            return filterEvidence(relevantEvidences, evidenceQueryRes);
+            return filterEvidence(relevantEvidences, evidenceQueryRes, geneQueryOnly);
         } else {
             return new HashSet<>();
         }
@@ -177,11 +176,11 @@ public class EvidenceUtils {
         if (query.getOncoTreeTypes() != null) {
             upwardTumorTypes.addAll(query.getOncoTreeTypes());
         }
-        downwardTumorTypes.addAll(TumorTypeUtils.findRelevantTumorTypes(query.getQuery().getTumorType(),null, DOWNWARD));
+        downwardTumorTypes.addAll(TumorTypeUtils.findRelevantTumorTypes(query.getQuery().getTumorType(), null, DOWNWARD));
 
         if (query.getGene() != null) {
             genes.add(query.getGene());
-            if (query.getExactMatchedAlteration() == null && query.getAlterations().isEmpty() && query.getAlleles().isEmpty()) {
+            if ((query.getExactMatchedAlteration() != null && query.getExactMatchedAlteration().getAlteration().length() == 0) && query.getAlterations().isEmpty() && query.getAlleles().isEmpty()) {
                 alterations.addAll(AlterationUtils.getAllAlterations(referenceGenome, query.getGene()));
             } else {
                 if (query.getAlterations() != null) {
@@ -347,7 +346,7 @@ public class EvidenceUtils {
         return tmpEvidences;
     }
 
-    private static Set<Evidence> filterEvidence(Set<Evidence> evidences, EvidenceQueryRes evidenceQuery) {
+    private static Set<Evidence> filterEvidence(Set<Evidence> evidences, EvidenceQueryRes evidenceQuery, Boolean geneQueryOnly) {
         Set<Evidence> filtered = new HashSet<>();
 
         // Logic step 1, liquid therapies will not be propagated to solid
@@ -365,6 +364,8 @@ public class EvidenceUtils {
                 if (evidence.getGene().equals(evidenceQuery.getGene())) {
                     //Add all gene specific evidences
                     if (evidence.getAlterations().isEmpty()) {
+                        filtered.add(evidence);
+                    } else if (evidenceQuery.getExactMatchedAlteration() != null && StringUtils.isEmpty(evidenceQuery.getExactMatchedAlteration().getAlteration()) && geneQueryOnly) {
                         filtered.add(evidence);
                     } else {
                         boolean hasjointed = !Collections.disjoint(evidence.getAlterations(), evidenceQuery.getAlterations());
@@ -389,6 +390,13 @@ public class EvidenceUtils {
                                 if (hasjointed || com.mysql.jdbc.StringUtils.isNullOrEmpty(evidenceQuery.getQuery().getTumorType())) {
                                     filtered.add(evidence);
                                 } else if (tumorForm != null) {
+                                    // if the cancer type is specifically excluded, it should not even be propagated
+                                    if (evidence.getExcludedCancerTypes().size() > 0) {
+                                        hasjointed = !Collections.disjoint(evidence.getExcludedCancerTypes(), evidenceQuery.getOncoTreeTypes());
+                                        if (hasjointed) {
+                                            continue;
+                                        }
+                                    }
                                     if (evidence.getLevelOfEvidence() != null) {
                                         Evidence propagatedLevel = getPropagateEvidence(evidenceQuery.getLevelOfEvidences(), evidence, tumorForm);
                                         if (propagatedLevel != null) {
@@ -542,15 +550,15 @@ public class EvidenceUtils {
         return result;
     }
 
-    public static Set<String> getDrugs(Set<Evidence> evidences) {
-        Set<String> result = new HashSet<>();
+    public static LinkedHashSet<String> getDrugs(Set<Evidence> evidences) {
+        LinkedHashSet<String> result = new LinkedHashSet<>();
 
         for (Evidence evidence : evidences) {
-            for (Treatment treatment : evidence.getTreatments()) {
-                Set<String> drugsInTreatment = new HashSet<>();
-                for (Drug drug : treatment.getDrugs()) {
-                    if (drug.getDrugName() != null) {
-                        drugsInTreatment.add(drug.getDrugName());
+            for (Treatment treatment : evidence.getTreatments().stream().sorted(Comparator.comparingInt(Treatment::getPriority)).collect(toList())) {
+                LinkedHashSet<String> drugsInTreatment = new LinkedHashSet<>();
+                for (TreatmentDrug treatmentDrug : treatment.getTreatmentDrugs().stream().sorted(Comparator.comparingInt(TreatmentDrug::getPriority)).collect(toList())) {
+                    if (treatmentDrug.getDrug() != null && treatmentDrug.getDrug().getDrugName() != null) {
+                        drugsInTreatment.add(treatmentDrug.getDrug().getDrugName());
                     }
                 }
                 result.add(StringUtils.join(drugsInTreatment, " + "));
@@ -834,7 +842,7 @@ public class EvidenceUtils {
 
     // Temporary move evidence process methods here in order to share the code between new APIs and legacies
     public static List<EvidenceQueryRes> processRequest(List<Query> requestQueries, Set<EvidenceType> evidenceTypes,
-                                                        Set<LevelOfEvidence> levelOfEvidences, Boolean highestLevelOnly) {
+                                                        Set<LevelOfEvidence> levelOfEvidences, Boolean highestLevelOnly, Boolean geneQueryOnly) {
         List<EvidenceQueryRes> evidenceQueries = new ArrayList<>();
 
         levelOfEvidences = levelOfEvidences == null ? levelOfEvidences :
@@ -919,7 +927,12 @@ public class EvidenceUtils {
                     }
                 }
                 query.setLevelOfEvidences(levelOfEvidences == null ? null : new ArrayList<>(levelOfEvidences));
-                Set<Evidence> relevantEvidences = getEvidence(requestQuery.getReferenceGenome(), query, evidenceTypes, levelOfEvidences);
+                Set<Evidence> relevantEvidences = new HashSet<>();
+                if (query.getExactMatchedAlteration() != null) {
+                    relevantEvidences = getRelevantEvidences(query.getQuery(), query.getExactMatchedAlteration(), evidenceTypes, levelOfEvidences, AlterationUtils.getRelevantAlterations(requestQuery.getReferenceGenome(), query.getExactMatchedAlteration()), query.getAlleles(), geneQueryOnly);
+                } else {
+                    relevantEvidences = getEvidence(requestQuery.getReferenceGenome(), query, evidenceTypes, levelOfEvidences);
+                }
                 query = assignEvidence(relevantEvidences,
                     Collections.singletonList(query), highestLevelOnly, query.getQuery().isGermline()).iterator().next();
 
@@ -946,7 +959,17 @@ public class EvidenceUtils {
                 if (!StringUtils.isEmpty(requestQuery.getHugoSymbol()) || query.getGene() != null) {
                     String hugoSymbol = StringUtils.isEmpty(requestQuery.getHugoSymbol()) ? query.getGene().getHugoSymbol() : requestQuery.getHugoSymbol();
                     for (Evidence evidence : updatedEvidences) {
-                        evidence.setDescription(SummaryUtils.enrichDescription(evidence.getDescription(), hugoSymbol));
+                        evidence.setDescription(
+                            CplUtils.annotate(
+                                evidence.getDescription(),
+                                hugoSymbol,
+                                evidence.getAlterations().stream().map(alteration -> alteration.getName()).collect(joining(", ")),
+                                TumorTypeUtils.getTumorTypesNameWithExclusion(evidence.getCancerTypes(), evidence.getExcludedCancerTypes()),
+                                null,
+                                evidence.getGene(),
+                                null
+                            )
+                        );
                     }
                 }
                 query.setEvidences(new ArrayList<>(StringUtils.isEmpty(query.getQuery().getTumorType()) ? updatedEvidences : keepHighestLevelForSameTreatments(updatedEvidences, requestQuery.getReferenceGenome(), query.getExactMatchedAlteration())));

@@ -10,6 +10,7 @@ import org.mskcc.cbio.oncokb.model.VariantConsequence;
 
 
 import static org.junit.Assert.assertNotEquals;
+import static org.mskcc.cbio.oncokb.Constants.FRAMESHIFT_VARIANT;
 import static org.mskcc.cbio.oncokb.Constants.IN_FRAME_DELETION;
 
 /**
@@ -65,7 +66,7 @@ public class GenomeNexusUtilsTest extends TestCase {
         assertEquals("Picked transcript protein change is not tH2324Pfs*55, but it should.",
             "p.H2324Pfs*55", consequence.getHgvspShort());
         assertEquals("Picked transcript protein change is not tH2324Pfs*55, but it should.",
-            VariantConsequenceUtils.findVariantConsequenceByTerm("frameshift_variant"), VariantConsequenceUtils.findVariantConsequenceByTerm(consequence.getConsequenceTerms()));
+            VariantConsequenceUtils.findVariantConsequenceByTerm(FRAMESHIFT_VARIANT), VariantConsequenceUtils.findVariantConsequenceByTerm(consequence.getConsequenceTerms()));
 
         // BRAF V600E genomic location
         consequence = GenomeNexusUtils.getTranscriptConsequence(GNVariantAnnotationType.GENOMIC_LOCATION, "7,140453136,140453136,A,T", mskReferenceGenome);

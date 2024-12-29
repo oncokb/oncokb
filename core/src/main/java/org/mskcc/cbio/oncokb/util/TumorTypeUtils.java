@@ -232,6 +232,10 @@ public class TumorTypeUtils {
         return relevantCancerTypes;
     }
     public static List<TumorType> findRelevantTumorTypes(String tumorType, Boolean isMainType, RelevantTumorTypeDirection direction) {
+        return findRelevantTumorTypes(tumorType, isMainType, direction, true);
+    }
+
+    public static List<TumorType> findRelevantTumorTypes(String tumorType, Boolean isMainType, RelevantTumorTypeDirection direction, Boolean includeSpecialTumorTypes) {
         // Check whether the tumorType is special tumor type
         SpecialTumorType specialTumorType = ApplicationContextSingleton.getTumorTypeBo().getSpecialTumorTypeByName(tumorType);
         if (specialTumorType != null) {
@@ -273,20 +277,22 @@ public class TumorTypeUtils {
             }
         }
 
-        // Include all solid tumors
-        if (hasSolidTumor(new HashSet<>(mappedTumorTypes))) {
-            mappedTumorTypes.add(ApplicationContextSingleton.getTumorTypeBo().getBySpecialTumor(ALL_SOLID_TUMORS));
-        }
+        if (includeSpecialTumorTypes) {
+            // Include all solid tumors
+            if (hasSolidTumor(new HashSet<>(mappedTumorTypes))) {
+                mappedTumorTypes.add(ApplicationContextSingleton.getTumorTypeBo().getBySpecialTumor(ALL_SOLID_TUMORS));
+            }
 
-        // Include all liquid tumors
-        if (hasLiquidTumor(new HashSet<>(mappedTumorTypes))) {
-            mappedTumorTypes.add(ApplicationContextSingleton.getTumorTypeBo().getBySpecialTumor(ALL_LIQUID_TUMORS));
-        }
+            // Include all liquid tumors
+            if (hasLiquidTumor(new HashSet<>(mappedTumorTypes))) {
+                mappedTumorTypes.add(ApplicationContextSingleton.getTumorTypeBo().getBySpecialTumor(ALL_LIQUID_TUMORS));
+            }
 
-        // Include all tumors
-        TumorType allTumor = ApplicationContextSingleton.getTumorTypeBo().getBySpecialTumor(SpecialTumorType.ALL_TUMORS);
-        if (allTumor != null) {
-            mappedTumorTypes.add(allTumor);
+            // Include all tumors
+            TumorType allTumor = ApplicationContextSingleton.getTumorTypeBo().getBySpecialTumor(SpecialTumorType.ALL_TUMORS);
+            if (allTumor != null) {
+                mappedTumorTypes.add(allTumor);
+            }
         }
 
         return new ArrayList<>(new LinkedHashSet<>(mappedTumorTypes));

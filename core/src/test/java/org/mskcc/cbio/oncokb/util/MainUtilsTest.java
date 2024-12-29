@@ -1,47 +1,44 @@
 package org.mskcc.cbio.oncokb.util;
 
-import junit.framework.TestCase;
-import org.mskcc.cbio.oncokb.model.MutationEffect;
+import static org.mskcc.cbio.oncokb.util.MainUtils.*;
 
-import static org.mskcc.cbio.oncokb.util.MainUtils.replaceLast;
-import static org.mskcc.cbio.oncokb.util.MainUtils.toLowerCaseExceptAllCaps;
+import org.cbioportal.genome_nexus.model.GenomicLocation;
+import org.junit.Test;
+
+import junit.framework.TestCase;
+import org.mskcc.cbio.oncokb.model.AnnotationSearchQueryType;
+import org.mskcc.cbio.oncokb.model.MutationEffect;
 
 /**
  * Created by Hongxin Zhang on 3/1/18.
  */
 public class MainUtilsTest extends TestCase {
     public void testSetToAlternativeAlleleMutationEffect() throws Exception {
-        IndicatorQueryMutationEffect indicatorQueryMutationEffect = new IndicatorQueryMutationEffect();
+        MutationEffect mutationEffect = null;
 
         // Neutral
-        indicatorQueryMutationEffect.setMutationEffect(null);
-        indicatorQueryMutationEffect = MainUtils.setToAlternativeAlleleMutationEffect(indicatorQueryMutationEffect);
-        assertEquals("The null should be returned.", null, indicatorQueryMutationEffect.getMutationEffect());
+        mutationEffect = MainUtils.setToAlternativeAlleleMutationEffect(null);
+        assertEquals("The null should be returned.", null, mutationEffect);
 
         // Neutral
-        indicatorQueryMutationEffect.setMutationEffect(MutationEffect.NEUTRAL);
-        indicatorQueryMutationEffect = MainUtils.setToAlternativeAlleleMutationEffect(indicatorQueryMutationEffect);
-        assertEquals("The neutral should not be propagated.", null, indicatorQueryMutationEffect.getMutationEffect());
+        mutationEffect = MainUtils.setToAlternativeAlleleMutationEffect(MutationEffect.NEUTRAL);
+        assertEquals("The neutral should not be propagated.", null, mutationEffect);
 
         // Likely Neutral
-        indicatorQueryMutationEffect.setMutationEffect(MutationEffect.LIKELY_NEUTRAL);
-        indicatorQueryMutationEffect = MainUtils.setToAlternativeAlleleMutationEffect(indicatorQueryMutationEffect);
-        assertEquals("The likely neutral should not be propagated.", null, indicatorQueryMutationEffect.getMutationEffect());
+        mutationEffect = MainUtils.setToAlternativeAlleleMutationEffect(MutationEffect.LIKELY_NEUTRAL);
+        assertEquals("The likely neutral should not be propagated.", null, mutationEffect);
 
         // Inconclusive
-        indicatorQueryMutationEffect.setMutationEffect(MutationEffect.INCONCLUSIVE);
-        indicatorQueryMutationEffect = MainUtils.setToAlternativeAlleleMutationEffect(indicatorQueryMutationEffect);
-        assertEquals("The inconclusive should not be propagated.", null, indicatorQueryMutationEffect.getMutationEffect());
+        mutationEffect = MainUtils.setToAlternativeAlleleMutationEffect(MutationEffect.INCONCLUSIVE);
+        assertEquals("The inconclusive should not be propagated.", null, mutationEffect);
 
         // Gain-of-function
-        indicatorQueryMutationEffect.setMutationEffect(MutationEffect.GAIN_OF_FUNCTION);
-        indicatorQueryMutationEffect = MainUtils.setToAlternativeAlleleMutationEffect(indicatorQueryMutationEffect);
-        assertEquals("The Gain-of-function should be propagated to likely gain-of-function.", MutationEffect.LIKELY_GAIN_OF_FUNCTION, indicatorQueryMutationEffect.getMutationEffect());
+        mutationEffect = MainUtils.setToAlternativeAlleleMutationEffect(MutationEffect.GAIN_OF_FUNCTION);
+        assertEquals("The Gain-of-function should be propagated to likely gain-of-function.", MutationEffect.LIKELY_GAIN_OF_FUNCTION, mutationEffect);
 
         // Likely Gain-of-function
-        indicatorQueryMutationEffect.setMutationEffect(MutationEffect.LIKELY_GAIN_OF_FUNCTION);
-        indicatorQueryMutationEffect = MainUtils.setToAlternativeAlleleMutationEffect(indicatorQueryMutationEffect);
-        assertEquals("The Likely Gain-of-function should be propagated to likely gain-of-function.", MutationEffect.LIKELY_GAIN_OF_FUNCTION, indicatorQueryMutationEffect.getMutationEffect());
+        mutationEffect = MainUtils.setToAlternativeAlleleMutationEffect(MutationEffect.LIKELY_GAIN_OF_FUNCTION);
+        assertEquals("The Likely Gain-of-function should be propagated to likely gain-of-function.", MutationEffect.LIKELY_GAIN_OF_FUNCTION, mutationEffect);
 
     }
 
@@ -67,21 +64,70 @@ public class MainUtilsTest extends TestCase {
     }
 
     public void testToLowerCaseExceptAllCaps() {
-        assertEquals("test", toLowerCaseExceptAllCaps("test"));
-        assertEquals("test", toLowerCaseExceptAllCaps("Test"));
-        assertEquals("test", toLowerCaseExceptAllCaps("TesT"));
-        assertEquals("TEST", toLowerCaseExceptAllCaps("TEST"));
-        assertEquals("TEST-A", toLowerCaseExceptAllCaps("TEST-A"));
-        assertEquals("test-A", toLowerCaseExceptAllCaps("Test-A"));
-        assertEquals("test_a", toLowerCaseExceptAllCaps("Test_A"));
-        assertEquals("test A", toLowerCaseExceptAllCaps("TesT A"));
-        assertEquals("TEST A", toLowerCaseExceptAllCaps("TEST A"));
-        assertEquals("", toLowerCaseExceptAllCaps(""));
-        assertEquals("_", toLowerCaseExceptAllCaps("_"));
-        assertEquals("1", toLowerCaseExceptAllCaps("1"));
-        assertEquals("-", toLowerCaseExceptAllCaps("-"));
-        assertEquals("t", toLowerCaseExceptAllCaps("t"));
-        assertEquals("T", toLowerCaseExceptAllCaps("T"));
-        assertEquals("?", toLowerCaseExceptAllCaps("?"));
+        assertEquals("test", lowerCaseAlterationName("test"));
+        assertEquals("test", lowerCaseAlterationName("Test"));
+        assertEquals("test", lowerCaseAlterationName("TesT"));
+        assertEquals("TEST", lowerCaseAlterationName("TEST"));
+        assertEquals("TEST-A", lowerCaseAlterationName("TEST-A"));
+        assertEquals("test-A", lowerCaseAlterationName("Test-A"));
+        assertEquals("test_a", lowerCaseAlterationName("Test_A"));
+        assertEquals("test A", lowerCaseAlterationName("TesT A"));
+        assertEquals("TEST A", lowerCaseAlterationName("TEST A"));
+        assertEquals("TEst", lowerCaseAlterationName("TEst"));
+        assertEquals("TEst-test", lowerCaseAlterationName("TEst-tEst"));
+        assertEquals("teST", lowerCaseAlterationName("teST"));
+        assertEquals("test", lowerCaseAlterationName("tesT"));
+        assertEquals("", lowerCaseAlterationName(""));
+        assertEquals("_", lowerCaseAlterationName("_"));
+        assertEquals("1", lowerCaseAlterationName("1"));
+        assertEquals("-", lowerCaseAlterationName("-"));
+        assertEquals("t", lowerCaseAlterationName("t"));
+        assertEquals("T", lowerCaseAlterationName("T"));
+        assertEquals("?", lowerCaseAlterationName("?"));
+    }
+
+    public void testCompareAnnotationSearchQueryType() {
+        assertTrue(compareAnnotationSearchQueryType(AnnotationSearchQueryType.GENE, AnnotationSearchQueryType.VARIANT, true) < 0);
+        assertTrue(compareAnnotationSearchQueryType(AnnotationSearchQueryType.GENE, AnnotationSearchQueryType.CANCER_TYPE, true) < 0);
+        assertTrue(compareAnnotationSearchQueryType(AnnotationSearchQueryType.GENE, AnnotationSearchQueryType.DRUG, true) < 0);
+        assertTrue(compareAnnotationSearchQueryType(AnnotationSearchQueryType.VARIANT, AnnotationSearchQueryType.CANCER_TYPE, true) < 0);
+        assertTrue(compareAnnotationSearchQueryType(AnnotationSearchQueryType.GENE, null, true) < 0);
+        assertTrue(compareAnnotationSearchQueryType(null, AnnotationSearchQueryType.GENE, true) > 0);
+        assertTrue(compareAnnotationSearchQueryType(AnnotationSearchQueryType.GENE, AnnotationSearchQueryType.GENE, true) == 0);
+        assertTrue(compareAnnotationSearchQueryType(null, null, true) == 0);
+        assertTrue(compareAnnotationSearchQueryType(AnnotationSearchQueryType.VARIANT, AnnotationSearchQueryType.GENE, true) > 0);
+        assertTrue(compareAnnotationSearchQueryType(AnnotationSearchQueryType.VARIANT, AnnotationSearchQueryType.GENE, false) < 0);
+    }
+
+    public void testParseChromosomeAndRangeFromHGVSg() {
+        GenomicLocation parsedGl = parseChromosomeAndRangeFromHGVSg("7:g.100A>T");
+        assertEquals("7", parsedGl.getChromosome());
+        assertEquals(new Integer(100), parsedGl.getStart());
+        assertEquals(new Integer(100), parsedGl.getEnd());
+        
+
+        parsedGl = parseChromosomeAndRangeFromHGVSg("X:g.100_105del");
+        assertEquals("X", parsedGl.getChromosome());
+        assertEquals(new Integer(100), parsedGl.getStart());
+        assertEquals(new Integer(105), parsedGl.getEnd());
+
+        assertEquals(null, parseChromosomeAndRangeFromHGVSg(""));
+        assertEquals(null, parseChromosomeAndRangeFromHGVSg(":g.100A>T"));
+        assertEquals(null, parseChromosomeAndRangeFromHGVSg("7:g."));
+        assertEquals(null, parseChromosomeAndRangeFromHGVSg("7:g.A"));
+        assertEquals(null, parseChromosomeAndRangeFromHGVSg("7:g.A_B"));
+        assertEquals(null, parseChromosomeAndRangeFromHGVSg("7:g.100_A"));
+        assertEquals(null, parseChromosomeAndRangeFromHGVSg("7:g.A_100"));
+    }
+
+    public void testFindDigitEndIndex() {
+        assertEquals(-1, findDigitEndIndex("100T", -1));
+        assertEquals(-1, findDigitEndIndex("100-", 3));
+        assertEquals(-1, findDigitEndIndex("abc123def", 0));
+
+        assertEquals(3, findDigitEndIndex("100T", 0));
+        assertEquals(3, findDigitEndIndex("100-", 0));
+        assertEquals(6, findDigitEndIndex("abc123def", 3));
+        assertEquals(6, findDigitEndIndex("abc123def", 5));
     }
 }

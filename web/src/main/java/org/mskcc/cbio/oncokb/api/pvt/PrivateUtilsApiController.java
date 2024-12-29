@@ -13,6 +13,7 @@ import org.mskcc.cbio.oncokb.apiModels.ensembl.EnsemblGene;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.PortalAlterationBo;
 import org.mskcc.cbio.oncokb.cache.CacheFetcher;
+import org.mskcc.cbio.oncokb.controller.advice.ApiHttpErrorException;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.TumorType;
@@ -386,7 +387,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             String genomicQuery = StringUtils.isNullOrEmpty(hgvsg) ? genomicChange : hgvsg;
             GNVariantAnnotationType type = StringUtils.isNullOrEmpty(hgvsg) ? GNVariantAnnotationType.GENOMIC_LOCATION : GNVariantAnnotationType.HGVS_G;
             Alteration alterationModel;
-            if (!this.cacheFetcher.genomicLocationShouldBeAnnotated(type, genomicQuery, matchedRG, this.cacheFetcher.getAllTranscriptGenes())) {
+            if (!this.cacheFetcher.genomicLocationShouldBeAnnotated(type, genomicQuery, matchedRG)) {
                 alterationModel = new Alteration();
             } else {
                 alterationModel = this.cacheFetcher.getAlterationFromGenomeNexus(type, matchedRG, genomicQuery);
@@ -412,8 +413,8 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         }
         query.setTumorType(tumorType);
         query.setGermline(germline);
-        List<EvidenceQueryRes> responses = EvidenceUtils.processRequest(Collections.singletonList(query), new HashSet<>(EvidenceTypeUtils.getAllEvidenceTypes(query.isGermline())), LevelUtils.getPublicLevels(), false);
-        IndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null);
+        List<EvidenceQueryRes> responses = EvidenceUtils.processRequest(Collections.singletonList(query), new HashSet<>(EvidenceTypeUtils.getAllEvidenceTypes(query.isGermline())), LevelUtils.getPublicLevels(), false, false);
+        IndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null, false);
 
         EvidenceQueryRes response = responses.iterator().next();
 
@@ -429,7 +430,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
 
         Set<Evidence> background = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Collections.singleton(EvidenceType.GENE_BACKGROUND));
         if (background.size() > 0) {
-            annotation.setBackground(SummaryUtils.enrichDescription(background.iterator().next().getDescription(), gene.getHugoSymbol()));
+            annotation.setBackground(CplUtils.annotateGene(background.iterator().next().getDescription(), gene.getHugoSymbol()));
         }
 
         for (TumorType uniqueTumorType : response.getEvidences().stream().filter(evidence -> !evidence.getCancerTypes().isEmpty()).map(evidence -> evidence.getCancerTypes()).flatMap(Collection::stream).collect(Collectors.toSet())) {
@@ -590,39 +591,35 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     @Override
     public ResponseEntity<List<TranscriptCoverageFilterResult>> utilFilterHgvsgBasedOnCoveragePost(
         @ApiParam(value = "List of queries.", required = true) @RequestBody List<AnnotateMutationByHGVSgQuery> body
-    ) throws ApiException, org.genome_nexus.ApiException {
-        HttpStatus status = HttpStatus.OK;
+    ) throws ApiException, org.genome_nexus.ApiException, ApiHttpErrorException {
         List<TranscriptCoverageFilterResult> result = new ArrayList<>();
 
         if (body == null) {
-            status = HttpStatus.BAD_REQUEST;
+            throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         } else {
-            Set<org.oncokb.oncokb_transcript.client.Gene> genes = this.cacheFetcher.getAllTranscriptGenes();
             for (AnnotateMutationByHGVSgQuery query : body) {
-                boolean shouldAnnotate = this.cacheFetcher.genomicLocationShouldBeAnnotated(GNVariantAnnotationType.HGVS_G, query.getHgvsg(), query.getReferenceGenome(), genes);
+                boolean shouldAnnotate = this.cacheFetcher.genomicLocationShouldBeAnnotated(GNVariantAnnotationType.HGVS_G, query.getHgvsg(), query.getReferenceGenome());
                 result.add(new TranscriptCoverageFilterResult(query.getHgvsg(), shouldAnnotate));
             }
         }
-        return new ResponseEntity<>(result, status);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<List<TranscriptCoverageFilterResult>> utilFilterGenomicChangeBasedOnCoveragePost(
         @ApiParam(value = "List of queries.", required = true) @RequestBody List<AnnotateMutationByGenomicChangeQuery> body
-    ) throws ApiException, org.genome_nexus.ApiException {
-        HttpStatus status = HttpStatus.OK;
+    ) throws ApiException, org.genome_nexus.ApiException, ApiHttpErrorException {
         List<TranscriptCoverageFilterResult> result = new ArrayList<>();
 
         if (body == null) {
-            status = HttpStatus.BAD_REQUEST;
+            throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         } else {
-            Set<org.oncokb.oncokb_transcript.client.Gene> genes = this.cacheFetcher.getAllTranscriptGenes();
             for (AnnotateMutationByGenomicChangeQuery query : body) {
-                boolean shouldAnnotate = this.cacheFetcher.genomicLocationShouldBeAnnotated(GNVariantAnnotationType.GENOMIC_LOCATION, query.getGenomicLocation(), query.getReferenceGenome(), genes);
+                boolean shouldAnnotate = this.cacheFetcher.genomicLocationShouldBeAnnotated(GNVariantAnnotationType.GENOMIC_LOCATION, query.getGenomicLocation(), query.getReferenceGenome());
                 result.add(new TranscriptCoverageFilterResult(query.getGenomicLocation(), shouldAnnotate));
             }
         }
-        return new ResponseEntity<>(result, status);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
 }

@@ -12,14 +12,14 @@ public class SemVer implements Serializable {
     String[] suffixTokens;
     Boolean stable;
 
-    public SemVer(String version) {
+    public SemVer(String version, Semver.SemverType semverType) {
         if (version == null) {
             version = "";
         }
         if (version.startsWith("v")) {
             version = version.substring(1);
         }
-        Semver semver = new Semver(version, Semver.SemverType.STRICT);
+        Semver semver = new Semver(version, semverType == null ? Semver.SemverType.STRICT : semverType);
         this.version = "v" + version;
         this.major = semver.getMajor();
         this.minor = semver.getMinor();
