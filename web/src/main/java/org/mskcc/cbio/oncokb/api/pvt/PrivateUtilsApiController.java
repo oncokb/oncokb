@@ -34,6 +34,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.mskcc.cbio.oncokb.util.GitHubUtils.getOncoKBSqlDumpFileName;
+import static org.mskcc.cbio.oncokb.util.GitHubUtils.getOncoKBTranscriptSqlDumpFileName;
 import static org.mskcc.cbio.oncokb.util.HttpUtils.getDataDownloadResponseEntity;
 
 /**
@@ -586,6 +587,13 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
     ) {
         return getDataDownloadResponseEntity(version, getOncoKBSqlDumpFileName(version), FileExtension.GZ);
+    }
+
+    @Override
+    public ResponseEntity<byte[]> utilDataTranscriptSqlDump(
+        @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
+    ) {
+        return getDataDownloadResponseEntity(version, getOncoKBTranscriptSqlDumpFileName(version), FileExtension.GZ);
     }
 
     @Override
