@@ -263,6 +263,13 @@ public interface PrivateUtilsApi {
         @ApiParam(value = "version", required = true) @RequestParam(value = "version") String version
     );
 
+    @RequestMapping(value = "/utils/data/transcriptSqlDump",
+        produces = {"application/gz"},
+        method = RequestMethod.GET)
+    ResponseEntity<byte[]> utilDataTranscriptSqlDump(
+        @ApiParam(value = "version", required = true) @RequestParam(value = "version") String version
+    );
+
     @ApiOperation(value = "", notes = "Filter HGVSg based on oncokb coverage", response = String.class, responseContainer = "List")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = String.class, responseContainer = "List"),

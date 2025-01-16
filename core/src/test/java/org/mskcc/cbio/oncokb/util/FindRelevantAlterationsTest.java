@@ -76,6 +76,7 @@ public class FindRelevantAlterationsTest {
 
                 // Check stop_gained
                 {"MAP2K4", "R304*", null, "R304*, Truncating Mutations"},
+                {"NF1", "L1340_Q1341delinsF*", null, "1_2771trunc, Oncogenic Mutations"},
 
                 // Check stop_lost, especially it should not be associated with truncating mutation
                 {"MLH1", "*757Kext*36", null, "*757Kext*36"},
