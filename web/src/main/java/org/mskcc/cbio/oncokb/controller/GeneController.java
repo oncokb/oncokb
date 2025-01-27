@@ -10,6 +10,8 @@ import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.Geneset;
 import org.mskcc.cbio.oncokb.service.JsonResultFactory;
 import org.mskcc.cbio.oncokb.util.*;
+import org.mskcc.cbio.oncokb.model.Evidence;
+import org.mskcc.cbio.oncokb.model.EvidenceType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -51,6 +53,48 @@ public class GeneController {
         }
 
         return JsonResultFactory.getGene(new ArrayList<>(genes), fields);
+    }
+
+    @RequestMapping(value = "/legacy-api/genomic-indicators")
+    public @ResponseBody
+    List<Evidence> getGenomicIndicators(
+        @RequestParam(value = "entrezGeneId", required = false) List<Integer> entrezGeneIds
+        , @RequestParam(value = "hugoSymbol", required = false) List<String> hugoSymbols
+        , @RequestParam(value = "fields", required = false) String fields
+    ) {
+        if (entrezGeneIds == null && hugoSymbols == null) {
+            return new ArrayList<>();
+        }
+
+        Set<Gene> genes = new HashSet<>();
+        if (entrezGeneIds != null) {
+            for (Integer enterz : entrezGeneIds) {
+                Gene gene = GeneUtils.getGeneByEntrezId(enterz);
+                if (gene != null) {
+                    genes.add(gene);
+                }
+            }
+        }
+        if (hugoSymbols != null) {
+            for (String hugoSymbol : hugoSymbols) {
+                Gene gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
+                if (gene != null) {
+                    genes.add(gene);
+                }
+            }
+        }
+        Map<Gene, Set<Evidence>> map = EvidenceUtils.getEvidenceByGenes(genes);
+        List<Evidence> evidenceList = new ArrayList<>();
+
+        for (Map.Entry<Gene, Set<Evidence>> entry : map.entrySet()) {
+            for (Evidence evidence : entry.getValue()) {
+                if (evidence.getEvidenceType() == EvidenceType.GENOMIC_INDICATOR) {
+                    evidenceList.add(evidence);
+                }
+            }
+        }
+
+        return JsonResultFactory.getEvidence(evidenceList, fields);
     }
 
     @RequestMapping(value = "/legacy-api/genes/update/{hugoSymbol}", method = RequestMethod.POST)
