@@ -303,7 +303,7 @@ public class GenomeNexusUtils {
         return variantsAnnotation;
     }
 
-    private static TranscriptConsequenceSummary getConsequence(VariantAnnotation variantAnnotation, ReferenceGenome referenceGenome) {
+    private static TranscriptConsequenceSummary getConsequence(VariantAnnotation variantAnnotation, ReferenceGenome referenceGenome) throws ApiException {
         List<TranscriptConsequenceSummary> summaries = new ArrayList<>();
 
         if (variantAnnotation == null || variantAnnotation.getAnnotationSummary() == null || variantAnnotation.getAnnotationSummary().getTranscriptConsequenceSummaries() == null) {
@@ -311,6 +311,7 @@ public class GenomeNexusUtils {
         }
 
         if (variantAnnotation.getAnnotationSummary() != null && variantAnnotation.getAnnotationSummary().getTranscriptConsequenceSummaries() != null) {
+            // Loop through all transcript consequence summaries and extract the ones where transcriptID matches oncokb canonical transcript
             for (TranscriptConsequenceSummary consequenceSummary : variantAnnotation.getAnnotationSummary().getTranscriptConsequenceSummaries()) {
                 Integer entrezGeneId = null;
                 if (StringUtils.isNotEmpty(consequenceSummary.getEntrezGeneId())) {
@@ -324,7 +325,7 @@ public class GenomeNexusUtils {
                 if (StringUtils.isNotEmpty(consequenceSummary.getTranscriptId())) {
                     Gene gene = GeneUtils.getGene(entrezGeneId, hugoSymbol);
                     String isoform = getIsoform(gene, referenceGenome);
-                    if (gene != null && (StringUtils.isEmpty(isoform) || isoform.equals(consequenceSummary.getTranscriptId()))) {
+                    if (gene != null && !StringUtils.isEmpty(isoform) && isoform.equals(consequenceSummary.getTranscriptId())) {
                         summaries.add(consequenceSummary);
                     }
                 }
@@ -332,15 +333,22 @@ public class GenomeNexusUtils {
         }
 
         TranscriptConsequenceSummary summary;
-        // only one transcript marked as canonical
         if (summaries.size() == 1) {
+            // If there is only one matching transcript, use the summary.
             summary = summaries.iterator().next();
         } else if (summaries.size() > 1) {
-            summary = pickTranscriptConsequenceSummary(summaries, variantAnnotation.getAnnotationSummary().getCanonicalTranscriptId(), variantAnnotation.getMostSevereConsequence());
+            // This scenario is not possible based on our understanding, but we will handle this edge case.
+            summary = summaries.iterator().next();
+            String referenceHgvsp = summary.getHgvsp();
+            if (!summaries.stream().allMatch(s -> referenceHgvsp.equals(s.getHgvsp()))) {
+                // If there are two summaries, then check their resolved protein change. If they are
+                // different, we need to catch this scenario and look into further.
+                throw new ApiException("Unexpected state: multiple canonical transcripts found with differing hgvsp");
+            }
         }
-        // no transcript marked as canonical (list.size() == 0), use most sever consequence to decide which one to pick among all available
         else {
-            summary = pickTranscriptConsequenceSummary(variantAnnotation.getAnnotationSummary().getTranscriptConsequenceSummaries(), variantAnnotation.getAnnotationSummary().getCanonicalTranscriptId(), variantAnnotation.getMostSevereConsequence());
+            // If there are no matching summaries, we cannot annotate this variant.
+            summary = null;
         }
 
         // Only return one consequence term
@@ -351,21 +359,8 @@ public class GenomeNexusUtils {
             }
             summary.setConsequenceTerms(consequence == null ? "" : consequence.getTerm());
         }
+
         return summary;
-    }
-
-    private static TranscriptConsequenceSummary pickTranscriptConsequenceSummary(List<TranscriptConsequenceSummary> summaries, String canonicalTranscript, String mostSevereConsequence) {
-        if (summaries == null) {
-            return null;
-        }
-        // Find canonical isoforms first
-        List<TranscriptConsequenceSummary> canonicalTranscripts = summaries.stream().filter(summary -> StringUtils.isNotEmpty(summary.getTranscriptId()) && summary.getTranscriptId().equals(canonicalTranscript)).collect(Collectors.toList());
-
-        if (StringUtils.isNotEmpty(mostSevereConsequence)) {
-            canonicalTranscripts = canonicalTranscripts.stream().filter(summary -> StringUtils.isNotEmpty(summary.getConsequenceTerms()) && Arrays.asList(summary.getConsequenceTerms().split(",")).contains(mostSevereConsequence)).collect(Collectors.toList());
-        }
-
-        return canonicalTranscripts.size() > 0 ? canonicalTranscripts.get(0) : null;
     }
 
     public static List<EnsemblTranscript> getEnsemblTranscriptList(List<String> ensembelTranscriptIds, ReferenceGenome referenceGenome) throws ApiException {

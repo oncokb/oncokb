@@ -12,6 +12,7 @@ import org.mskcc.cbio.oncokb.config.annotation.PremiumPublicApi;
 import org.mskcc.cbio.oncokb.config.annotation.PublicApi;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.model.*;
+import org.mskcc.cbio.oncokb.model.genomeNexus.AlterationInfo;
 import org.mskcc.cbio.oncokb.util.*;
 import org.oncokb.oncokb_transcript.ApiException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -255,8 +256,8 @@ public class AnnotationsApiController {
                 throw new ApiHttpErrorException("hgvsg is invalid.", HttpStatus.BAD_REQUEST);
             }
 
-            List<Alteration> alterations = getAlterationsFromGenomeNexusByHgvsg(matchedRG, Collections.singletonList(hgvsg));
-            Alteration alteration = alterations.isEmpty() ? new Alteration() : alterations.get(0);
+            List<AlterationInfo> alterationInfos = getAlterationsFromGenomeNexusByHgvsg(matchedRG, Collections.singletonList(hgvsg));
+            Alteration alteration = alterationInfos.isEmpty() ? new Alteration() : alterationInfos.get(0).getAlteration();
             indicatorQueryResp = this.getIndicatorQueryFromHGVSg(
                 matchedRG,
                 alteration,
@@ -264,6 +265,7 @@ public class AnnotationsApiController {
                 tumorType,
                 new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ","))
             );
+            indicatorQueryResp.getQuery().setHgvsInfo(alterationInfos.get(0).getMessage());
         }
         return new ResponseEntity<>(indicatorQueryResp, HttpStatus.OK);
     }
@@ -307,12 +309,13 @@ public class AnnotationsApiController {
                 }
             }
 
-            List<Alteration> grch37Alts = getAlterationsFromGenomeNexusByHgvsg(ReferenceGenome.GRCh37, grch37Queries);
-            List<Alteration> grch38Alts = getAlterationsFromGenomeNexusByHgvsg(ReferenceGenome.GRCh38, grch38Queries);
+            List<AlterationInfo> grch37Alts = getAlterationsFromGenomeNexusByHgvsg(ReferenceGenome.GRCh37, grch37Queries);
+            List<AlterationInfo> grch38Alts = getAlterationsFromGenomeNexusByHgvsg(ReferenceGenome.GRCh38, grch38Queries);
 
             for (int i = 0; i < body.size(); i++) {
                 AnnotateMutationByHGVSgQuery query = body.get(i);
-                Alteration alteration = query.getReferenceGenome() == ReferenceGenome.GRCh37 ? grch37Alts.get(grch37Map.get(i)) : grch38Alts.get(grch38Map.get(i));
+                AlterationInfo alterationInfo = query.getReferenceGenome() == ReferenceGenome.GRCh37 ? grch37Alts.get(grch37Map.get(i)) : grch38Alts.get(grch38Map.get(i))
+                Alteration alteration = alterationInfo.getAlteration();
                 if (alteration == null) alteration = new Alteration();
 
                 IndicatorQueryResp resp = this.getIndicatorQueryFromHGVSg(
@@ -323,6 +326,7 @@ public class AnnotationsApiController {
                     query.getEvidenceTypes()
                 );
                 resp.getQuery().setId(query.getId());
+                resp.getQuery().setHgvsInfo(alterationInfo.getMessage());
                 result.add(resp);
             }
         }
@@ -617,7 +621,7 @@ public class AnnotationsApiController {
         );
     }
 
-    private List<Alteration> getAlterationsFromGenomeNexusByHgvsg(ReferenceGenome referenceGenome, List<String> queries) throws ApiException, org.genome_nexus.ApiException {
+    private List<AlterationInfo> getAlterationsFromGenomeNexusByHgvsg(ReferenceGenome referenceGenome, List<String> queries) throws ApiException, org.genome_nexus.ApiException {
         List<String> queriesToGN = new ArrayList<>();
         Map<String, Integer> queryIndexMap = new HashMap<>();
 
@@ -638,18 +642,21 @@ public class AnnotationsApiController {
         if (!queriesToGN.isEmpty()) {
             annotatedAlterations = AlterationUtils.getAlterationsFromGenomeNexus(variantAnnotations, referenceGenome);
         }
-        List<Alteration> result = new ArrayList<>();
+        List<AlterationInfo> result = new ArrayList<>();
         for (String query : queries) {
+            Alteration alteration;
             if (queryIndexMap.containsKey(query)) {
-                result.add(annotatedAlterations.get(queryIndexMap.get(query)));
+                alteration = annotatedAlterations.get(queryIndexMap.get(query));
+                result.add(new AlterationInfo(alteration, null));
             } else {
-                result.add(new Alteration());
+                alteration = new Alteration();
+                result.add(new AlterationInfo(alteration, "The variant (" + query + ") does not fall within the genomic range of an OncoKB cancer gene."));
             }
         }
         return result;
     }
 
-    private List<Alteration> getAlterationsFromGenomeNexusByGenomicLocation(ReferenceGenome referenceGenome, List<GenomicLocation> queries) throws ApiException, org.genome_nexus.ApiException {
+    private List<AlterationInfo> getAlterationsFromGenomeNexusByGenomicLocation(ReferenceGenome referenceGenome, List<GenomicLocation> queries) throws ApiException, org.genome_nexus.ApiException {
         List<GenomicLocation> queriesToGN = new ArrayList<>();
         Map<GenomicLocation, Integer> queryIndexMap = new HashMap<>();
         for (GenomicLocation query : queries) {

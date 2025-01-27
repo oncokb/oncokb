@@ -32,6 +32,7 @@ public class Query implements java.io.Serializable {
     private Integer proteinStart;
     private Integer proteinEnd;
     private String hgvs;
+    private String hgvsInfo;
 
     public Query() {
     }
@@ -215,6 +216,14 @@ public class Query implements java.io.Serializable {
 
     public void setHgvs(String hgvs) {
         this.hgvs = hgvs;
+    }
+
+    public String getHgvsInfo() {
+        return this.hgvsInfo;
+    }
+
+    public void setHgvsInfo(String hgvsInfo) {
+        this.hgvsInfo = hgvsInfo;
     }
 
     public void enrich() {
