@@ -8,6 +8,7 @@ import io.swagger.annotations.ApiParam;
 import org.mskcc.cbio.oncokb.bo.GeneBo;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.Geneset;
+import org.mskcc.cbio.oncokb.model.GenomicIndicator;
 import org.mskcc.cbio.oncokb.service.JsonResultFactory;
 import org.mskcc.cbio.oncokb.util.*;
 import org.mskcc.cbio.oncokb.model.Evidence;
@@ -37,8 +38,8 @@ public class GeneController {
 
         Set<Gene> genes = new HashSet<>();
         if (entrezGeneIds != null) {
-            for (Integer enterz : entrezGeneIds) {
-                Gene gene = GeneUtils.getGeneByEntrezId(enterz);
+            for (Integer entrez : entrezGeneIds) {
+                Gene gene = GeneUtils.getGeneByEntrezId(entrez);
                 if (gene != null) {
                     genes.add(gene);
                 }
@@ -57,7 +58,7 @@ public class GeneController {
 
     @RequestMapping(value = "/legacy-api/genomic-indicators")
     public @ResponseBody
-    List<Evidence> getGenomicIndicators(
+    List<GenomicIndicator> getGenomicIndicators(
         @RequestParam(value = "entrezGeneId", required = false) List<Integer> entrezGeneIds
         , @RequestParam(value = "hugoSymbol", required = false) List<String> hugoSymbols
         , @RequestParam(value = "fields", required = false) String fields
@@ -68,8 +69,8 @@ public class GeneController {
 
         Set<Gene> genes = new HashSet<>();
         if (entrezGeneIds != null) {
-            for (Integer enterz : entrezGeneIds) {
-                Gene gene = GeneUtils.getGeneByEntrezId(enterz);
+            for (Integer entrez : entrezGeneIds) {
+                Gene gene = GeneUtils.getGeneByEntrezId(entrez);
                 if (gene != null) {
                     genes.add(gene);
                 }
@@ -84,17 +85,22 @@ public class GeneController {
             }
         }
         Map<Gene, Set<Evidence>> map = EvidenceUtils.getEvidenceByGenes(genes);
-        List<Evidence> evidenceList = new ArrayList<>();
+        List<GenomicIndicator> indicators = new ArrayList<>();
 
         for (Map.Entry<Gene, Set<Evidence>> entry : map.entrySet()) {
             for (Evidence evidence : entry.getValue()) {
                 if (evidence.getEvidenceType() == EvidenceType.GENOMIC_INDICATOR) {
-                    evidenceList.add(evidence);
+                    GenomicIndicator indicator = new GenomicIndicator();
+                    indicator.setId(evidence.getId());
+                    indicator.setGene(evidence.getGene());
+                    indicator.setName(evidence.getName());
+                    indicator.setDescription(evidence.getDescription());
+                    indicators.add(indicator);
                 }
             }
         }
 
-        return JsonResultFactory.getEvidence(evidenceList, fields);
+        return indicators;
     }
 
     @RequestMapping(value = "/legacy-api/genes/update/{hugoSymbol}", method = RequestMethod.POST)
