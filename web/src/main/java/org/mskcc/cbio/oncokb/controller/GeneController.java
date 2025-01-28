@@ -61,7 +61,6 @@ public class GeneController {
     List<GenomicIndicator> getGenomicIndicators(
         @RequestParam(value = "entrezGeneId", required = false) List<Integer> entrezGeneIds
         , @RequestParam(value = "hugoSymbol", required = false) List<String> hugoSymbols
-        , @RequestParam(value = "fields", required = false) String fields
     ) {
         if (entrezGeneIds == null && hugoSymbols == null) {
             return new ArrayList<>();
