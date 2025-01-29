@@ -143,7 +143,7 @@ KRAS	G12C	Breast Cancer	3B: Adagrasib+Cetuximab; 3B: Adagrasib+Panitumumab; 3B: 
 KRAS	G12D	Breast Cancer	4: MRTX-1133; 4: RMC-6236; 4: Trametinib; 4: ASP3082; 4: Cobimetinib; 4: Binimetinib;
 KRAS	G12C	NSCLC	1: Sotorasib; 1: Adagrasib; 3B: Adagrasib+Cetuximab; 3B: Adagrasib+Panitumumab; 3B: Sotorasib+Cetuximab; 3B: Sotorasib+Panitumumab; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
 KRAS	G12D	NSCLC	3A: ASP3082; 3A: RMC-6236; 4: MRTX-1133; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
-KRAS	G12C	Colorectal Cancer	R1: Cetuximab; R1: Panitumumab; R1: Tucatinib+Trastuzumab; 1: Adagrasib+Cetuximab; 2: Adagrasib+Panitumumab; 2: Sotorasib+Cetuximab; 2: Sotorasib+Panitumumab; 3B: Sotorasib; 3B: Adagrasib; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
+KRAS	G12C	Colorectal Cancer	R1: Cetuximab; R1: Panitumumab; R1: Tucatinib+Trastuzumab; 1: Adagrasib+Cetuximab; 1: Sotorasib+Panitumumab; 2: Adagrasib+Panitumumab; 2: Sotorasib+Cetuximab; 3B: Sotorasib; 3B: Adagrasib; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
 KRAS	G12D	Colorectal Cancer	R1: Cetuximab; R1: Panitumumab; R1: Tucatinib+Trastuzumab; 4: MRTX-1133; 4: RMC-6236; 4: Trametinib; 4: ASP3082; 4: Cobimetinib; 4: Binimetinib;
 KRAS	G12C	AML
 KRAS	G12D	AML
