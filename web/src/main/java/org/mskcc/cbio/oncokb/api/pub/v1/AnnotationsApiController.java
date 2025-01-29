@@ -65,7 +65,7 @@ public class AnnotationsApiController {
             throw new ApiHttpErrorException("entrezGeneId \"" + entrezGeneId + "\"" + " and hugoSymbol \"" + hugoSymbol +"\" are not the same gene.", HttpStatus.BAD_REQUEST);
         } else {
             ReferenceGenome matchedRG = resolveMatchedRG(referenceGenome);
-            Query query = new Query(null, matchedRG, entrezGeneId, hugoSymbol, proteinChange, null, null, tumorType, consequence, proteinStart, proteinEnd, null, isGermline, alleleState);
+            Query query = new Query(null, matchedRG, entrezGeneId, hugoSymbol, proteinChange, null, null, tumorType, consequence, proteinStart, proteinEnd, null, isGermline, alleleState, null);
             indicatorQueryResp = this.cacheFetcher.processQuery(
                 query.getReferenceGenome(),
                 query.getEntrezGeneId(),
@@ -80,6 +80,7 @@ public class AnnotationsApiController {
                 null,
                 query.isGermline(),
                 query.getAlleleState(),
+                null,
                 null,
                 false,
                 new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")),
@@ -123,6 +124,7 @@ public class AnnotationsApiController {
                     null,
                     query.isGermline(),
                     query.getAlleleState(),
+                    null,
                     null,
                     false,
                     query.getEvidenceTypes(),
@@ -327,6 +329,7 @@ public class AnnotationsApiController {
                 germline,
                 alleleState,
                 null,
+                null,
                 false,
                 new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")),
                 false);
@@ -377,7 +380,7 @@ public class AnnotationsApiController {
                     StringUtils.capitalize(query.getCopyNameAlterationType().name().toLowerCase()),
                     null,
                     query.getTumorType(), null, null, null, null,
-                    null, query.isGermline(), query.getAlleleState(), null, false, query.getEvidenceTypes(), false);
+                    null, query.isGermline(), query.getAlleleState(), null, null, false, query.getEvidenceTypes(), false);
                 resp.getQuery().setId(query.getId());
                 result.add(resp);
             }
@@ -450,7 +453,7 @@ public class AnnotationsApiController {
             String fusionName = FusionUtils.getFusionName(geneA, geneB);
             indicatorQueryResp = this.cacheFetcher.processQuery(
                 matchedRG, null, fusionName, null, AlterationType.STRUCTURAL_VARIANT.name(), tumorType, isFunctionalFusion ? "fusion" : null, null, null, structuralVariantType, null,
-                germline, alleleState, null, false, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")), false);
+                germline, alleleState, null, null, false, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")), false);
         }
         return new ResponseEntity<>(indicatorQueryResp, HttpStatus.OK);
     }
@@ -516,7 +519,7 @@ public class AnnotationsApiController {
 
                 IndicatorQueryResp resp = this.cacheFetcher.processQuery(
                     query.getReferenceGenome(),  null, fusionName, null, AlterationType.STRUCTURAL_VARIANT.name(), query.getTumorType(), query.getFunctionalFusion() ? "fusion" : "", null, null, query.getStructuralVariantType(), null,
-                    query.isGermline(), query.getAlleleState(), null, false, query.getEvidenceTypes(), false);
+                    query.isGermline(), query.getAlleleState(), null, null, false, query.getEvidenceTypes(), false);
                 resp.getQuery().setId(query.getId());
                 result.add(resp);
             }
@@ -581,6 +584,7 @@ public class AnnotationsApiController {
             germline,
             alleleState,
             null,
+            null,
             false,
             evidenceTypes,
                 false
@@ -618,9 +622,10 @@ public class AnnotationsApiController {
             germline,
             alleleState,
             null,
-                false,
-                evidenceTypes,
-                false
+            null,
+            false,
+            evidenceTypes,
+            false
         );
     }
 }

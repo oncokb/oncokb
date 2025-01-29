@@ -71,7 +71,7 @@ public class EvidencesApiController implements EvidencesApi {
         Query tmpQuery = new Query(null, DEFAULT_REFERENCE_GENOME, entrezGeneId,
             hugoSymbol, variant, null, null,
             tumorType, consequence, proteinStart == null ? null : Integer.parseInt(proteinStart),
-            proteinEnd == null ? null : Integer.parseInt(proteinEnd), null, germline, null);
+            proteinEnd == null ? null : Integer.parseInt(proteinEnd), null, germline, null, null);
 
         List<EvidenceQueryRes> evidenceQueries = EvidenceUtils.processRequest(
             Collections.singletonList(tmpQuery),

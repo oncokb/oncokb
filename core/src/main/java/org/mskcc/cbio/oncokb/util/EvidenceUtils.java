@@ -11,6 +11,7 @@ import org.mskcc.cbio.oncokb.model.*;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.util.*;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.*;
@@ -315,6 +316,22 @@ public class EvidenceUtils {
             }
         }
         return result;
+    }
+
+    public static List<Evidence> getGenomicIndicatorsByAlteration(List<Alteration> alterations, String alleleState) {
+        List<Evidence> genomicIndicatorEvis = EvidenceUtils.getEvidence(alterations, Collections.singleton(EvidenceType.GENOMIC_INDICATOR), null);
+        if (StringUtils.isNotEmpty(alleleState)) {
+            genomicIndicatorEvis = genomicIndicatorEvis.stream().filter(evidence -> StringUtils.isEmpty(evidence.getKnownEffect()) || evidence.getKnownEffect().toLowerCase().contains(alleleState)).collect(Collectors.toList());
+        }
+        return genomicIndicatorEvis;
+    }
+
+    public static List<Evidence> getGenomicIndicatorAssociatedWithPathogenicVariants(Gene gene, String alleleState) {
+        List<Evidence> genomicIndicatorEvis = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Collections.singleton(EvidenceType.GENOMIC_INDICATOR)).stream().collect(Collectors.toList());
+        if (StringUtils.isNotEmpty(alleleState)) {
+            genomicIndicatorEvis = genomicIndicatorEvis.stream().filter(evidence -> StringUtils.isEmpty(evidence.getKnownEffect()) || evidence.getKnownEffect().toLowerCase().contains(alleleState)).collect(Collectors.toList());
+        }
+        return genomicIndicatorEvis;
     }
 
     public static Set<Evidence> convertEvidenceLevel(List<Evidence> evidences, Set<TumorType> tumorTypes) {

@@ -8,7 +8,6 @@ import org.mskcc.cbio.oncokb.apiModels.Citations;
 import org.mskcc.cbio.oncokb.apiModels.Implication;
 import org.mskcc.cbio.oncokb.apiModels.MutationEffectResp;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.TumorType;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -170,7 +169,7 @@ public class IndicatorUtils {
                 Query tmpQuery = new Query(query.getId(), query.getReferenceGenome(), tmpGene.getEntrezGeneId(),
                     tmpGene.getHugoSymbol(), query.getAlteration(), null, query.getSvType(),
                     query.getTumorType(), query.getConsequence(), query.getProteinStart(),
-                    query.getProteinEnd(), query.getHgvs(), query.isGermline(), query.getAlleleState());
+                    query.getProteinEnd(), query.getHgvs(), query.isGermline(), query.getAlleleState(), query.getPathogenicity());
                 result.add(IndicatorUtils.processQuery(tmpQuery, levels, highestLevelOnly, evidenceTypes, geneQueryOnly));
             }
             return result.iterator().next();
@@ -321,6 +320,17 @@ public class IndicatorUtils {
                     if (indicatorQuery.getPrognosticImplications().size() > 0) {
                         indicatorQuery.setHighestPrognosticImplicationLevel(LevelUtils.getHighestPrognosticImplicationLevel(indicatorQuery.getPrognosticImplications().stream().map(implication -> implication.getLevelOfEvidence()).collect(Collectors.toSet())));
                     }
+                }
+            }
+
+            // If the variant does not exist and Pathogenicity is P/LP, then we will
+            // return the genomic indicators associated with Pathogenic Variants
+            if (query.isGermline() && !indicatorQuery.getVariantExist() && query.getPathogenicity() != null) {
+                if (query.getPathogenicity().equals(Pathogenicity.YES) || query.getPathogenicity().equals(Pathogenicity.LIKELY)) {
+                    GermlineVariant germlineVariant = new GermlineVariant();
+                    List<Evidence> genomicIndicatorEvis = EvidenceUtils.getGenomicIndicatorAssociatedWithPathogenicVariants(gene, query.getAlleleState());
+                    germlineVariant.setGenomicIndicators(genomicIndicatorEvis.stream().map(Evidence::getName).collect(Collectors.toList()));
+                    indicatorQuery.setGermline(germlineVariant);
                 }
             }
 
@@ -506,7 +516,7 @@ public class IndicatorUtils {
             Query tmpQuery = new Query(null, originalQuery.getReferenceGenome(), alteration.getGene().getEntrezGeneId(),
                 alteration.getGene().getHugoSymbol(), alteration.getAlteration(), null, null,
                 originalQuery.getTumorType(), alteration.getConsequence().getTerm(), alteration.getProteinStart(),
-                alteration.getProteinEnd(), null, originalQuery.isGermline(), originalQuery.getAlleleState());
+                alteration.getProteinEnd(), null, originalQuery.isGermline(), originalQuery.getAlleleState(), originalQuery.getPathogenicity());
 
             // Add oncogenicity
             IndicatorQueryOncogenicity indicatorQueryOncogenicity = getOncogenicity(alteration, new ArrayList<>(), new ArrayList<>());
@@ -587,10 +597,7 @@ public class IndicatorUtils {
         List<Alteration> alts = new ArrayList<>();
         alts.add(matchedAlt);
         alts.addAll(relevantAlterations);
-        List<Evidence> genomicIndicatorEvis = EvidenceUtils.getEvidence(alts, Collections.singleton(EvidenceType.GENOMIC_INDICATOR), null);
-        if (StringUtils.isNotEmpty(alleleState)) {
-            genomicIndicatorEvis = genomicIndicatorEvis.stream().filter(evidence -> StringUtils.isEmpty(evidence.getKnownEffect()) || evidence.getKnownEffect().toLowerCase().contains(alleleState)).collect(Collectors.toList());
-        }
+        List<Evidence> genomicIndicatorEvis = EvidenceUtils.getGenomicIndicatorsByAlteration(alts, alleleState);
         germlineVariant.setGenomicIndicators(genomicIndicatorEvis.stream().map(Evidence::getName).collect(Collectors.toList()));
         return germlineVariant;
     }
