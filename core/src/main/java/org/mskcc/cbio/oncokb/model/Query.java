@@ -34,6 +34,7 @@ public class Query implements java.io.Serializable {
     private String hgvs;
     private boolean isGermline = false;
     private String alleleState;
+    private Pathogenicity pathogenicity;
 
     public Query() {
     }
@@ -103,7 +104,7 @@ public class Query implements java.io.Serializable {
     public Query(String id, ReferenceGenome referenceGenome, Integer entrezGeneId, String hugoSymbol,
                  String alteration, String alterationType, StructuralVariantType svType,
                  String tumorType, String consequence, Integer proteinStart, Integer proteinEnd, String hgvs,
-                 Boolean isGermline, String alleleState) {
+                 Boolean isGermline, String alleleState, Pathogenicity pathogenicity) {
         this.id = id;
         this.referenceGenome = referenceGenome == null ? DEFAULT_REFERENCE_GENOME : referenceGenome;
         if (hugoSymbol != null && !hugoSymbol.isEmpty()) {
@@ -120,6 +121,7 @@ public class Query implements java.io.Serializable {
         this.setHgvs(hgvs);
         this.isGermline = isGermline == null ? false : isGermline;
         this.alleleState = alleleState;
+        this.pathogenicity = pathogenicity;
     }
 
     public String getId() {
@@ -238,6 +240,14 @@ public class Query implements java.io.Serializable {
 
     public void setAlleleState(String alleleState) {
         this.alleleState = alleleState;
+    }
+
+    public Pathogenicity getPathogenicity() {
+        return this.pathogenicity;
+    }
+
+    public void setPathogenicity(Pathogenicity pathogenicity) {
+        this.pathogenicity = pathogenicity;
     }
 
     public void enrich() {

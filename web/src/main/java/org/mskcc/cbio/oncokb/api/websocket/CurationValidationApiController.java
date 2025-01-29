@@ -382,7 +382,8 @@ public class CurationValidationApiController {
                 alteration.getProteinEnd(),
                 null,
                 false,
-                "");
+                "",
+                null);
             IndicatorQueryResp response = IndicatorUtils.processQuery(query, null, false,null, false);
             if (!allowedOncogenicities.contains(response.getOncogenic())) {
                 if (response.getHighestSensitiveLevel() != null || response.getHighestResistanceLevel() != null) {
