@@ -9,7 +9,6 @@ import org.json.JSONObject;
 import org.mskcc.cbio.oncokb.bo.*;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.*;
-import org.mskcc.cbio.oncokb.bo.OncokbTranscriptService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -455,6 +454,8 @@ public class DriveAnnotationParser {
         String DESC_KEY = "description";
         String ALLELE_STATES_KEY = "allele_state";
 
+        EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+
         for (int i = 0; i < genomicIndicators.length(); i++) {
             JSONObject genomicIndicator = genomicIndicators.getJSONObject(i);
 
@@ -475,7 +476,7 @@ public class DriveAnnotationParser {
                 JSONObject alleleStatesObject = genomicIndicator.getJSONObject(ALLELE_STATES_KEY);
                 evidence.setKnownEffect(Arrays.stream(ALLELE_STATE_CHECKS).filter(alleleState -> alleleStatesObject.has(alleleState) && StringUtils.isNotEmpty(alleleStatesObject.getString(alleleState))).collect(Collectors.joining(",")));
             }
-            ApplicationContextSingleton.getEvidenceBo().save(evidence);
+            evidenceBo.save(evidence);
         }
     }
 
@@ -486,15 +487,18 @@ public class DriveAnnotationParser {
             JSONObject associatedVariant = associatedVariants.getJSONObject(i);
             String name = associatedVariant.getString("name");
             String uuid = associatedVariant.getString("uuid");
-            Optional<Alteration> matchedOptional = alterations.stream().filter(alteration -> {
-                if (StringUtils.isNotEmpty(uuid)) {
-                    if (uuid.equals(alteration.getUuid())) return true;
+            name = AlterationUtils.trimComment(name);
+            Optional<Alteration> matchedOptional = Optional.empty();
+            for (Alteration alteration : alterations) {
+                if (StringUtils.isNotEmpty(uuid) && uuid.equals(alteration.getUuid())) {
+                    matchedOptional = Optional.of(alteration);
+                    break;
                 }
-                if (StringUtils.isNotEmpty(name)) {
-                    if (name.toLowerCase().equals(alteration.getAlteration().toLowerCase())) return true;
+                if (StringUtils.isNotEmpty(name) && name.equalsIgnoreCase(alteration.getAlteration())) {
+                    matchedOptional = Optional.of(alteration);
+                    break;
                 }
-                return false;
-            }).findFirst();
+            }
             if (matchedOptional.isPresent()) {
                 mappedAlterations.add(matchedOptional.get());
             } else {
