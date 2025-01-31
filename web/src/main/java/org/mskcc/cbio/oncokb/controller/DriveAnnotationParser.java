@@ -487,11 +487,7 @@ public class DriveAnnotationParser {
             JSONObject associatedVariant = associatedVariants.getJSONObject(i);
             String name = associatedVariant.getString("name");
             String uuid = associatedVariant.getString("uuid");
-            List<Alteration> parsedAssociatedVariantList = AlterationUtils.parseMutationString(name, ",");
-            if (!parsedAssociatedVariantList.isEmpty()) {
-                // At this point, associated variant is a single variant, so we will get the first element from the mutation string parsing method.
-                name = parsedAssociatedVariantList.get(0).getName();
-            }
+            name = AlterationUtils.trimComment(name);
             Optional<Alteration> matchedOptional = Optional.empty();
             for (Alteration alteration : alterations) {
                 if (StringUtils.isNotEmpty(uuid) && uuid.equals(alteration.getUuid())) {
