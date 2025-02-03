@@ -410,6 +410,25 @@ public class AnnotationsApiController {
         return new ResponseEntity<>(MainUtils.getLimit(orderedResult, limit), HttpStatus.OK);
     }
 
+    @PublicApi
+    @PremiumPublicApi
+    @ApiOperation(value = "", notes = "Annotate sample.", response = SampleQueryResp.class, responseContainer = "Map")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK", response = SampleQueryResp.class, responseContainer = "Map"),
+        @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiHttpError.class)})
+    @RequestMapping(value = "/annotate/sample",
+        consumes = {"application/json"},
+        produces = {"application/json"},
+        method = RequestMethod.POST)
+    public ResponseEntity<SampleQueryResp> annotateSamplePost(
+        @ApiParam(value = "Sample query. Please see swagger.json for request body format.", required = true) @RequestBody() AnnotateSampleQuery body
+    ) throws ApiHttpErrorException, ApiException, org.genome_nexus.ApiException {
+        if (body == null) {
+            throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(annotateSample(body), HttpStatus.OK);
+    }
+
     private IndicatorQueryResp getIndicatorQueryFromGenomicLocation(
         ReferenceGenome referenceGenome,
         Alteration alteration,
