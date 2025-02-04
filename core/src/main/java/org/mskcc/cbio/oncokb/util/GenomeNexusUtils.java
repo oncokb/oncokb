@@ -14,6 +14,7 @@ import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.ReferenceGenome;
 import org.mskcc.cbio.oncokb.model.VariantConsequence;
+import org.mskcc.cbio.oncokb.model.genomeNexus.TranscriptSummaryAlterationResult;
 import org.mskcc.cbio.oncokb.model.genomeNexusPreAnnotations.GenomeNexusAnnotatedVariantInfo;
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
@@ -135,14 +136,14 @@ public class GenomeNexusUtils {
         }
     }
 
-    public static TranscriptConsequenceSummary getTranscriptConsequence(GNVariantAnnotationType type, String query, ReferenceGenome referenceGenome) throws ApiException {
+    public static TranscriptSummaryAlterationResult getTranscriptConsequence(GNVariantAnnotationType type, String query, ReferenceGenome referenceGenome) throws ApiException {
         List<VariantAnnotation> annotations = new ArrayList<>();
         if (type == GNVariantAnnotationType.GENOMIC_LOCATION) {
             annotations.addAll(getGenomicLocationVariantsAnnotation(Collections.singletonList(GenomeNexusUtils.convertGenomicLocation(query)), referenceGenome));
         } else if (type == GNVariantAnnotationType.HGVS_G) {
             annotations.addAll(getHgvsgVariantsAnnotation(Collections.singletonList(query), referenceGenome));
         }
-        List<TranscriptConsequenceSummary> map = getTranscriptsConsequence(annotations, referenceGenome);
+        List<TranscriptSummaryAlterationResult> map = getTranscriptsConsequence(annotations, referenceGenome);
         if (map.isEmpty()) {
             return null;
         } else {
@@ -150,8 +151,8 @@ public class GenomeNexusUtils {
         }
     }
 
-    public static List<TranscriptConsequenceSummary> getTranscriptsConsequence(List<VariantAnnotation> annotations, ReferenceGenome referenceGenome) throws ApiException {
-        List<TranscriptConsequenceSummary> result = new ArrayList<>();
+    public static List<TranscriptSummaryAlterationResult> getTranscriptsConsequence(List<VariantAnnotation> annotations, ReferenceGenome referenceGenome) throws ApiException {
+        List<TranscriptSummaryAlterationResult> result = new ArrayList<>();
         for (VariantAnnotation annotation : annotations) {
             result.add(getConsequence(annotation, referenceGenome));
         }
@@ -200,7 +201,8 @@ public class GenomeNexusUtils {
 
             }
 
-            TranscriptConsequenceSummary transcriptConsequenceSummary = getConsequence(annotation, referenceGenome);
+            TranscriptSummaryAlterationResult annotationResult = getConsequence(annotation, referenceGenome);
+            TranscriptConsequenceSummary transcriptConsequenceSummary = annotationResult.getTranscriptConsequenceSummary();
             if (transcriptConsequenceSummary != null) {
                 preAnnotatedVariantInfo.setHugoSymbol(transcriptConsequenceSummary.getHugoGeneSymbol());
                 Integer entrezGeneId = StringUtils.isNumeric(transcriptConsequenceSummary.getEntrezGeneId()) ? Integer.parseInt(transcriptConsequenceSummary.getEntrezGeneId()) : null;
@@ -303,8 +305,8 @@ public class GenomeNexusUtils {
         return variantsAnnotation;
     }
 
-    private static TranscriptConsequenceSummary getConsequence(VariantAnnotation variantAnnotation, ReferenceGenome referenceGenome) throws ApiException {
-        List<TranscriptConsequenceSummary> summaries = new ArrayList<>();
+    private static TranscriptSummaryAlterationResult getConsequence(VariantAnnotation variantAnnotation, ReferenceGenome referenceGenome) throws ApiException {
+        List<TranscriptSummaryAlterationResult> annotationResult = new ArrayList<>();
 
         if (variantAnnotation == null || variantAnnotation.getAnnotationSummary() == null || variantAnnotation.getAnnotationSummary().getTranscriptConsequenceSummaries() == null) {
             return null;
@@ -326,21 +328,21 @@ public class GenomeNexusUtils {
                     Gene gene = GeneUtils.getGene(entrezGeneId, hugoSymbol);
                     String isoform = getIsoform(gene, referenceGenome);
                     if (gene != null && !StringUtils.isEmpty(isoform) && isoform.equals(consequenceSummary.getTranscriptId())) {
-                        summaries.add(consequenceSummary);
+                        annotationResult.add(new TranscriptSummaryAlterationResult(consequenceSummary));
                     }
                 }
             }
         }
 
-        TranscriptConsequenceSummary summary;
-        if (summaries.size() == 1) {
+        TranscriptSummaryAlterationResult selectedAnnotationResult;
+        if (annotationResult.size() == 1) {
             // If there is only one matching transcript, use the summary.
-            summary = summaries.iterator().next();
-        } else if (summaries.size() > 1) {
+            selectedAnnotationResult = annotationResult.iterator().next();
+        } else if (annotationResult.size() > 1) {
             // This scenario is not possible based on our understanding, but we will handle this edge case.
-            summary = summaries.iterator().next();
-            String referenceHgvsp = summary.getHgvsp();
-            if (!summaries.stream().allMatch(s -> referenceHgvsp.equals(s.getHgvsp()))) {
+            selectedAnnotationResult = annotationResult.iterator().next();
+            String referenceHgvsp = selectedAnnotationResult.getTranscriptConsequenceSummary().getHgvsp();
+            if (!annotationResult.stream().map(TranscriptSummaryAlterationResult::getTranscriptConsequenceSummary).allMatch(s -> referenceHgvsp.equals(s.getHgvsp()))) {
                 // If there are two summaries, then check their resolved protein change. If they are
                 // different, we need to catch this scenario and look into further.
                 throw new ApiException("Unexpected state: multiple canonical transcripts found with differing hgvsp");
@@ -348,11 +350,12 @@ public class GenomeNexusUtils {
         }
         else {
             // If there are no matching summaries, we cannot annotate this variant.
-            summary = null;
+            selectedAnnotationResult = new TranscriptSummaryAlterationResult();
         }
 
         // Only return one consequence term
-        if (summary != null) {
+        if (selectedAnnotationResult != null && selectedAnnotationResult.getTranscriptConsequenceSummary() != null) {
+            TranscriptConsequenceSummary summary = selectedAnnotationResult.getTranscriptConsequenceSummary();
             VariantConsequence consequence = consequenceResolver(summary.getConsequenceTerms(), summary.getVariantClassification());
             if (consequence == null && StringUtils.isNotEmpty(summary.getVariantClassification())) {
                 consequence = VariantConsequenceUtils.findVariantConsequenceByTerm(summary.getVariantClassification());
@@ -360,7 +363,7 @@ public class GenomeNexusUtils {
             summary.setConsequenceTerms(consequence == null ? "" : consequence.getTerm());
         }
 
-        return summary;
+        return selectedAnnotationResult;
     }
 
     public static List<EnsemblTranscript> getEnsemblTranscriptList(List<String> ensembelTranscriptIds, ReferenceGenome referenceGenome) throws ApiException {

@@ -33,6 +33,7 @@ public class Query implements java.io.Serializable {
     private Integer proteinEnd;
     private String hgvs;
     private String hgvsInfo;
+    private String canonicalTranscript;
 
     public Query() {
     }
@@ -51,6 +52,8 @@ public class Query implements java.io.Serializable {
         newQuery.setProteinStart(this.proteinStart);
         newQuery.setProteinEnd(this.proteinEnd);
         newQuery.setHgvs(this.hgvs);
+        newQuery.setHgvsInfo(this.hgvsInfo);
+        newQuery.setCanonicalTranscript(this.canonicalTranscript);
         return newQuery;
     }
 
@@ -225,6 +228,15 @@ public class Query implements java.io.Serializable {
     public void setHgvsInfo(String hgvsInfo) {
         this.hgvsInfo = hgvsInfo;
     }
+
+    public String getCanonicalTranscript() {
+        return this.canonicalTranscript;
+    }
+
+    public void setCanonicalTranscript(String canonicalTranscript) {
+        this.canonicalTranscript = canonicalTranscript;
+    }
+
 
     public void enrich() {
         if (this.getEntrezGeneId() == null && this.getHugoSymbol() == null
