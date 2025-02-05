@@ -623,9 +623,8 @@ public class AnnotationsApiController {
         TranscriptConsequenceSummary summary = transcriptSummaryAlterationResult.getTranscriptConsequenceSummary();
         if (summary != null && StringUtils.isNotEmpty(summary.getTranscriptId())) {
             indicatorQueryResp.getQuery().setCanonicalTranscript(summary.getTranscriptId());
-        } else {
-            indicatorQueryResp.getQuery().setHgvsInfo("This variant does not occur within a canonical transcript range of an OncoKB-recognized cancer gene.");
         }
+        indicatorQueryResp.getQuery().setHgvsInfo(transcriptSummaryAlterationResult.getMessage());
         return indicatorQueryResp;
     }
 
@@ -704,15 +703,7 @@ public class AnnotationsApiController {
     ) {
         Query query = QueryUtils.getQueryFromAlteration(referenceGenome, tumorType, transcriptSummaryAlterationResult, hgvsg);
 
-        // Indicate which transcript was used to generate the annotation
-        TranscriptConsequenceSummary summary = transcriptSummaryAlterationResult.getTranscriptConsequenceSummary();
-        if (summary != null && StringUtils.isNotEmpty(summary.getTranscriptId())) {
-            query.setCanonicalTranscript(summary.getTranscriptId());
-        } else {
-            query.setHgvsInfo("This variant does not occur within a canonical transcript range of an OncoKB-recognized cancer gene.");
-        }
-
-        return this.cacheFetcher.processQuery(
+        IndicatorQueryResp indicatorQueryResp = this.cacheFetcher.processQuery(
             referenceGenome,
             query.getEntrezGeneId(),
             query.getHugoSymbol(),
@@ -729,5 +720,13 @@ public class AnnotationsApiController {
             evidenceTypes,
             false
         );
+
+        // Indicate which transcript was used to generate the annotation
+        TranscriptConsequenceSummary summary = transcriptSummaryAlterationResult.getTranscriptConsequenceSummary();
+        if (summary != null && StringUtils.isNotEmpty(summary.getTranscriptId())) {
+            indicatorQueryResp.getQuery().setCanonicalTranscript(summary.getTranscriptId());
+        }
+        indicatorQueryResp.getQuery().setHgvsInfo(transcriptSummaryAlterationResult.getMessage());
+        return indicatorQueryResp;
     }
 }

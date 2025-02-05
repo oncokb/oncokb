@@ -309,7 +309,9 @@ public class GenomeNexusUtils {
         List<TranscriptSummaryAlterationResult> annotationResult = new ArrayList<>();
 
         if (variantAnnotation == null || variantAnnotation.getAnnotationSummary() == null || variantAnnotation.getAnnotationSummary().getTranscriptConsequenceSummaries() == null) {
-            return null;
+            TranscriptSummaryAlterationResult unableToAnnotateResult =  new TranscriptSummaryAlterationResult();
+            unableToAnnotateResult.setMessage("Genome Nexus was not able to annotate this variant.");
+            return unableToAnnotateResult;
         }
 
         if (variantAnnotation.getAnnotationSummary() != null && variantAnnotation.getAnnotationSummary().getTranscriptConsequenceSummaries() != null) {
@@ -351,6 +353,7 @@ public class GenomeNexusUtils {
         else {
             // If there are no matching summaries, we cannot annotate this variant.
             selectedAnnotationResult = new TranscriptSummaryAlterationResult();
+            selectedAnnotationResult.setMessage("This variant does not occur within a canonical transcript range of an OncoKB-recognized cancer gene.");
         }
 
         // Only return one consequence term
