@@ -347,7 +347,11 @@ public class GenomeNexusUtils {
             if (!annotationResult.stream().map(TranscriptSummaryAlterationResult::getTranscriptConsequenceSummary).allMatch(s -> referenceHgvsp.equals(s.getHgvsp()))) {
                 // If there are two summaries, then check their resolved protein change. If they are
                 // different, we need to catch this scenario and look into further.
+                // TODO: Send to Sentry
                 throw new ApiException("Unexpected state: multiple canonical transcripts found with differing hgvsp");
+            } else {
+                // We can still annotate as long as the protein changes are the same, but we want to capture this scenario to report to VEP.
+                // TODO: Send to Sentry
             }
         }
         else {
