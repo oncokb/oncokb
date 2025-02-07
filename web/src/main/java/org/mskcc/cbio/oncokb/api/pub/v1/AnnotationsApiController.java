@@ -629,8 +629,22 @@ public class AnnotationsApiController {
             String fusionName = FusionUtils.getFusionName(geneA, geneB);
 
             IndicatorQueryResp resp = this.cacheFetcher.processQuery(
-                query.getReferenceGenome(), null, fusionName, null, AlterationType.STRUCTURAL_VARIANT.name(), query.getTumorType(), query.getFunctionalFusion() ? "fusion" : "", null, null, query.getStructuralVariantType(), null,
-                null, false, query.getEvidenceTypes(), false);
+                query.getReferenceGenome(),
+                null,
+                fusionName,
+                null,
+                AlterationType.STRUCTURAL_VARIANT.name(),
+                query.getTumorType(),
+                query.getFunctionalFusion() ? "fusion" : "",
+                null,
+                null,
+                query.getStructuralVariantType(),
+                null,
+                null,
+                false, 
+                query.getEvidenceTypes(), 
+                false
+            );
             resp.getQuery().setId(query.getId());
             result.add(resp);
         }
@@ -662,8 +676,17 @@ public class AnnotationsApiController {
                 gene.getHugoSymbol(),
                 StringUtils.capitalize(query.getCopyNameAlterationType().name().toLowerCase()),
                 null,
-                query.getTumorType(), null, null, null, null,
-                null, null, false, query.getEvidenceTypes(), false);
+                query.getTumorType(),
+                null, 
+                null, 
+                null, 
+                null,
+                null, 
+                null, 
+                false, 
+                query.getEvidenceTypes(),
+                false
+            );
             resp.getQuery().setId(query.getId());
             result.add(resp);
         }
