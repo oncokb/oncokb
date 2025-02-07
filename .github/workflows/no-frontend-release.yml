@@ -12,22 +12,6 @@ jobs:
         with:
           ref: master
 
-      - name: Merge master to no-frontend
-        uses: devmasx/merge-branch@v1.3.1
-        with:
-          type: now
-          target_branch: 'no-frontend'
-          github_token: ${{ github.token }}
-
-      - uses: actions/checkout@v2
-        with:
-          ref: no-frontend
-
-      - uses: actions/setup-java@v2
-        with:
-          distribution: 'adopt'
-          java-version: 8
-
       - name: Update Pom
         env:
           TAG_NAME: ${{ github.event.release.tag_name }}
