@@ -410,7 +410,6 @@ public class AnnotationsApiController {
         return new ResponseEntity<>(MainUtils.getLimit(orderedResult, limit), HttpStatus.OK);
     }
 
-    @PublicApi
     @PremiumPublicApi
     @ApiOperation(value = "", notes = "Annotate sample.", response = SampleQueryResp.class, responseContainer = "Map")
     @ApiResponses(value = {
