@@ -6,7 +6,7 @@ import org.genome_nexus.ApiException;
 import org.genome_nexus.client.TranscriptConsequenceSummary;
 import org.genome_nexus.client.VariantAnnotation;
 import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotateMutationByGenomicChangeQuery;
-import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotateMutationByHGVSQuery;
+import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotateMutationByHGVSgQuery;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
@@ -732,8 +732,8 @@ public final class AlterationUtils {
         }
     }
 
-    public static List<VariantAnnotation> getHgvsgVariantsAnnotationWithQueries(List<AnnotateMutationByHGVSQuery> queries, ReferenceGenome referenceGenome) throws ApiException {
-        return GenomeNexusUtils.getHgvsVariantsAnnotation(queries.stream().map(AnnotateMutationByHGVSQuery::getHgvs).collect(Collectors.toList()), referenceGenome);
+    public static List<VariantAnnotation> getHgvsgVariantsAnnotationWithQueries(List<AnnotateMutationByHGVSgQuery> queries, ReferenceGenome referenceGenome) throws ApiException {
+        return GenomeNexusUtils.getHgvsVariantsAnnotation(queries.stream().map(AnnotateMutationByHGVSgQuery::getHgvsg).collect(Collectors.toList()), referenceGenome);
     }
 
     public static List<VariantAnnotation> getGenomicLocationVariantsAnnotationWithQueries(List<AnnotateMutationByGenomicChangeQuery> queries, ReferenceGenome referenceGenome) throws ApiException {

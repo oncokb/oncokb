@@ -13,7 +13,6 @@ import org.mskcc.cbio.oncokb.config.annotation.PublicApi;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.genomeNexus.TranscriptSummaryAlterationResult;
 import org.mskcc.cbio.oncokb.util.*;
-import org.oncokb.client.AnnotateMutationByHGVSgQuery;
 import org.oncokb.oncokb_transcript.ApiException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -201,7 +200,7 @@ public class AnnotationsApiController {
                 throw new ApiHttpErrorException("hgvsg is invalid.", HttpStatus.BAD_REQUEST);
             }
 
-            List<TranscriptSummaryAlterationResult> annotatedAlteration = getAlterationsFromGenomeNexusByHgvsg(matchedRG, Collections.singletonList(hgvsg));
+            List<TranscriptSummaryAlterationResult> annotatedAlteration = getAlterationsFromGenomeNexusByHgvs(matchedRG, Collections.singletonList(hgvsg));
             TranscriptSummaryAlterationResult selectedAnnotatedAlteration = annotatedAlteration.isEmpty() ? new TranscriptSummaryAlterationResult() : annotatedAlteration.get(0);
             indicatorQueryResp = this.getIndicatorQueryFromHGVS(
                 matchedRG,
@@ -225,12 +224,12 @@ public class AnnotationsApiController {
         produces = {"application/json"},
         method = RequestMethod.POST)
     public ResponseEntity<List<IndicatorQueryResp>> annotateMutationsByHGVSgPost(
-        @ApiParam(value = "List of queries. Please see swagger.json for request body format.", required = true) @RequestBody() List<AnnotateMutationByHGVSQuery> body
+        @ApiParam(value = "List of queries. Please see swagger.json for request body format.", required = true) @RequestBody() List<AnnotateMutationByHGVSgQuery> body
     ) throws ApiException, org.genome_nexus.ApiException, ApiHttpErrorException {
         if (body == null) {
             throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>(annotateMutationsByHGVS(body), HttpStatus.OK);
+        return new ResponseEntity<>(annotateMutationsByHGVSg(body), HttpStatus.OK);
     }
 
     // Annotate copy number alterations
@@ -537,40 +536,6 @@ public class AnnotationsApiController {
         return indicatorQueryResp;
     }
 
-    private List<TranscriptSummaryAlterationResult> getAlterationsFromGenomeNexusByHgvsg(ReferenceGenome referenceGenome, List<String> queries) throws ApiException, org.genome_nexus.ApiException {
-        List<String> queriesToGN = new ArrayList<>();
-        Map<String, Integer> queryIndexMap = new HashMap<>();
-
-        for (String query : queries) {
-            if (this.cacheFetcher.hgvsgShouldBeAnnotated(query, referenceGenome)) {
-                if (!queryIndexMap.containsKey(query)) {
-                    queryIndexMap.put(query, queriesToGN.size());
-                    queriesToGN.add(query);
-                }
-            }
-        }
-        // query to GN needs to be a list of uniq queries
-        List<org.genome_nexus.client.VariantAnnotation> variantAnnotations = GenomeNexusUtils.getHgvsVariantsAnnotation(queriesToGN, referenceGenome);
-        if(variantAnnotations.size() != queriesToGN.size()){
-            throw new ApiException("Number of variants that have been annotated by GenomeNexus is not equal to the number of queries");
-        }
-        List<TranscriptSummaryAlterationResult> annotatedAlterationResult = new ArrayList<>();
-        if (!queriesToGN.isEmpty()) {
-            annotatedAlterationResult = AlterationUtils.getAlterationsFromGenomeNexus(variantAnnotations, referenceGenome);
-        }
-        List<TranscriptSummaryAlterationResult> result = new ArrayList<>();
-        for (String query : queries) {
-            if (queryIndexMap.containsKey(query)) {
-                result.add(annotatedAlterationResult.get(queryIndexMap.get(query)));
-            } else {
-                TranscriptSummaryAlterationResult emptyAnnotationResult = new TranscriptSummaryAlterationResult();
-                emptyAnnotationResult.setAlteration(new Alteration());
-                result.add(emptyAnnotationResult);
-            }
-        }
-        return result;
-    }
-
     private List<TranscriptSummaryAlterationResult> getAlterationsFromGenomeNexusByGenomicLocation(ReferenceGenome referenceGenome, List<GenomicLocation> queries) throws ApiException, org.genome_nexus.ApiException {
         List<GenomicLocation> queriesToGN = new ArrayList<>();
         Map<GenomicLocation, Integer> queryIndexMap = new HashMap<>();
@@ -628,10 +593,10 @@ public class AnnotationsApiController {
                 proteinChange = annotateMutationsByProteinChange(sample.getMutations().getProteinChange());
             }
             if (sample.getMutations().getHgvsg() != null) {
-                hgvsg = annotateMutationsByHGVS(sample.getMutations().getHgvsg());
+                hgvsg = annotateMutationsByHGVSg(sample.getMutations().getHgvsg());
             }
             if (sample.getMutations().getcDnaChange() != null) {
-                cDnaChange = annotateMutationsByHGVS(sample.getMutations().getcDnaChange());
+                cDnaChange = annotateMutationsByHGVSg(sample.getMutations().getcDnaChange());
             }
         }
 
@@ -814,7 +779,7 @@ public class AnnotationsApiController {
         return result;
     }
 
-    private List<IndicatorQueryResp> annotateMutationsByHGVS(List<AnnotateMutationByHGVSQuery> mutations) throws ApiException, org.genome_nexus.ApiException {
+    private List<IndicatorQueryResp> annotateMutationsByHGVSg(List<AnnotateMutationByHGVSgQuery> mutations) throws ApiException, org.genome_nexus.ApiException {
         List<IndicatorQueryResp> result = new ArrayList<>();
         List<String> grch37Queries = new ArrayList<>();
         List<String> grch38Queries = new ArrayList<>();
@@ -822,7 +787,7 @@ public class AnnotationsApiController {
         Map<Integer, Integer> grch38Map = new HashMap<>();
 
         for (int i = 0; i < mutations.size(); i++) {
-            AnnotateMutationByHGVSQuery query = mutations.get(i);
+            AnnotateMutationByHGVSgQuery query = mutations.get(i);
             ReferenceGenome referenceGenome = query.getReferenceGenome();
             if (referenceGenome == null) {
                 referenceGenome = ReferenceGenome.GRCh37;
@@ -830,24 +795,24 @@ public class AnnotationsApiController {
             query.setReferenceGenome(referenceGenome);
             if (referenceGenome == ReferenceGenome.GRCh38) {
                 grch38Map.put(i, grch38Queries.size());
-                grch38Queries.add(query.getHgvs());
+                grch38Queries.add(query.getHgvsg());
             } else {
                 grch37Map.put(i, grch37Queries.size());
-                grch37Queries.add(query.getHgvs());
+                grch37Queries.add(query.getHgvsg());
             }
         }
 
-        List<TranscriptSummaryAlterationResult> grch37Alts = getAlterationsFromGenomeNexusByHgvsg(ReferenceGenome.GRCh37, grch37Queries);
-        List<TranscriptSummaryAlterationResult> grch38Alts = getAlterationsFromGenomeNexusByHgvsg(ReferenceGenome.GRCh38, grch38Queries);
+        List<TranscriptSummaryAlterationResult> grch37Alts = getAlterationsFromGenomeNexusByHgvs(ReferenceGenome.GRCh37, grch37Queries);
+        List<TranscriptSummaryAlterationResult> grch38Alts = getAlterationsFromGenomeNexusByHgvs(ReferenceGenome.GRCh38, grch38Queries);
 
         for (int i = 0; i < mutations.size(); i++) {
-            AnnotateMutationByHGVSQuery query = mutations.get(i);
+            AnnotateMutationByHGVSgQuery query = mutations.get(i);
             TranscriptSummaryAlterationResult alterationInfo = query.getReferenceGenome() == ReferenceGenome.GRCh37 ? grch37Alts.get(grch37Map.get(i)) : grch38Alts.get(grch38Map.get(i));
 
             IndicatorQueryResp resp = this.getIndicatorQueryFromHGVS(
                 query.getReferenceGenome(),
                 alterationInfo,
-                query.getHgvs(),
+                query.getHgvsg(),
                 query.getTumorType(),
                 query.getEvidenceTypes()
             );
