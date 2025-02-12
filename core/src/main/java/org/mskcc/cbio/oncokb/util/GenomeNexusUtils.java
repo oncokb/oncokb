@@ -341,17 +341,16 @@ public class GenomeNexusUtils {
             // If there is only one matching transcript, use the summary.
             selectedAnnotationResult = annotationResult.iterator().next();
         } else if (annotationResult.size() > 1) {
-            // This scenario is not possible based on our understanding, but we will handle this edge case.
-            selectedAnnotationResult = annotationResult.iterator().next();
-            String referenceHgvsp = selectedAnnotationResult.getTranscriptConsequenceSummary().getHgvsp();
-            if (!annotationResult.stream().map(TranscriptSummaryAlterationResult::getTranscriptConsequenceSummary).allMatch(s -> referenceHgvsp.equals(s.getHgvsp()))) {
-                // If there are two summaries, then check their resolved protein change. If they are
-                // different, we need to catch this scenario and look into further.
-                // TODO: Send to Sentry
-                throw new ApiException("Unexpected state: multiple canonical transcripts found with differing hgvsp");
+            // Prioritize based on most_severe_consequence
+            annotationResult = filterTranscriptConsequenceSummaryByMostSevereConsequence(annotationResult, variantAnnotation.getMostSevereConsequence());
+            if (!annotationResult.isEmpty()) {
+                // If there are multiple summaries that match most_severe_consequence, we will pick the first one.
+                selectedAnnotationResult = annotationResult.iterator().next();
             } else {
-                // We can still annotate as long as the protein changes are the same, but we want to capture this scenario to report to VEP.
-                // TODO: Send to Sentry
+                // TODO: If we can't find a summary with the most severe consequence, we should sort by variant consequence priority and pick first.
+                // https://github.com/genome-nexus/genome-nexus/blob/master/component/src/main/java/org/cbioportal/genome_nexus/component/annotation/TranscriptConsequencePrioritizer.java#L81
+                // For now, we are not annotating this scenario.
+                selectedAnnotationResult = new TranscriptSummaryAlterationResult();
             }
         }
         else {
@@ -371,6 +370,19 @@ public class GenomeNexusUtils {
         }
 
         return selectedAnnotationResult;
+    }
+
+    private static List<TranscriptSummaryAlterationResult> filterTranscriptConsequenceSummaryByMostSevereConsequence(List<TranscriptSummaryAlterationResult> list, String mostSevereConsequence) {
+        List<TranscriptSummaryAlterationResult> summaries = list;
+        if (StringUtils.isNotEmpty(mostSevereConsequence)) {
+            summaries = list.stream()
+                .filter(transcriptSummaryAlterationResult -> {
+                    TranscriptConsequenceSummary summary = transcriptSummaryAlterationResult.getTranscriptConsequenceSummary();
+                    return StringUtils.isNotEmpty(summary.getConsequenceTerms()) && Arrays.asList(summary.getConsequenceTerms().split(",")).contains(mostSevereConsequence);
+                })
+                .collect(Collectors.toList());
+        }
+        return summaries;
     }
 
     public static List<EnsemblTranscript> getEnsemblTranscriptList(List<String> ensembelTranscriptIds, ReferenceGenome referenceGenome) throws ApiException {
