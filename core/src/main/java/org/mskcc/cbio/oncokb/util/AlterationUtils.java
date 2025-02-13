@@ -6,11 +6,12 @@ import org.genome_nexus.ApiException;
 import org.genome_nexus.client.TranscriptConsequenceSummary;
 import org.genome_nexus.client.VariantAnnotation;
 import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotateMutationByGenomicChangeQuery;
-import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotateMutationByHGVSQuery;
+import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotateMutationByHGVSgQuery;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.model.*;
+import org.mskcc.cbio.oncokb.model.genomeNexus.TranscriptSummaryAlterationResult;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -690,52 +691,56 @@ public final class AlterationUtils {
         return alt;
     }
 
-    private static Alteration convertTranscriptConsequenceSummaryToAlteration(TranscriptConsequenceSummary transcriptConsequenceSummary) {
-        if (transcriptConsequenceSummary != null) {
-            Alteration alteration = new Alteration();
-            String hugoSymbol = transcriptConsequenceSummary.getHugoGeneSymbol();
-            Integer entrezGeneId = StringUtils.isNumeric(transcriptConsequenceSummary.getEntrezGeneId()) ? Integer.parseInt(transcriptConsequenceSummary.getEntrezGeneId()) : null;
-            if (StringUtils.isNotEmpty(transcriptConsequenceSummary.getHugoGeneSymbol())) {
-                Gene gene = GeneUtils.getGene(hugoSymbol);
-                if (gene == null) {
-                    gene = new Gene();
-                    gene.setHugoSymbol(transcriptConsequenceSummary.getHugoGeneSymbol());
-                    gene.setEntrezGeneId(entrezGeneId);
+    private static Alteration convertTranscriptConsequenceSummaryToAlteration(TranscriptSummaryAlterationResult transcriptSummaryAlterationResult) {
+        if (transcriptSummaryAlterationResult != null) {
+            TranscriptConsequenceSummary transcriptConsequenceSummary = transcriptSummaryAlterationResult.getTranscriptConsequenceSummary();
+            if (transcriptConsequenceSummary != null) {
+                Alteration alteration = new Alteration();
+                String hugoSymbol = transcriptConsequenceSummary.getHugoGeneSymbol();
+                Integer entrezGeneId = StringUtils.isNumeric(transcriptConsequenceSummary.getEntrezGeneId()) ? Integer.parseInt(transcriptConsequenceSummary.getEntrezGeneId()) : null;
+                if (StringUtils.isNotEmpty(transcriptConsequenceSummary.getHugoGeneSymbol())) {
+                    Gene gene = GeneUtils.getGene(hugoSymbol);
+                    if (gene == null) {
+                        gene = new Gene();
+                        gene.setHugoSymbol(transcriptConsequenceSummary.getHugoGeneSymbol());
+                        gene.setEntrezGeneId(entrezGeneId);
+                    }
+                    alteration.setGene(gene);
                 }
-                alteration.setGene(gene);
-            }
 
-            if (StringUtils.isNotEmpty(transcriptConsequenceSummary.getHgvspShort())) {
-                String hgvspShort = transcriptConsequenceSummary.getHgvspShort().trim().replace("p.", "");
-                alteration.setAlteration(hgvspShort);
-                alteration.setName(hgvspShort);
-            }
-            if (transcriptConsequenceSummary.getProteinPosition() != null) {
-                if (transcriptConsequenceSummary.getProteinPosition().getStart() != null) {
-                    alteration.setProteinStart(transcriptConsequenceSummary.getProteinPosition().getStart());
+                if (StringUtils.isNotEmpty(transcriptConsequenceSummary.getHgvspShort())) {
+                    String hgvspShort = transcriptConsequenceSummary.getHgvspShort().trim().replace("p.", "");
+                    alteration.setAlteration(hgvspShort);
+                    alteration.setName(hgvspShort);
                 }
-                if (transcriptConsequenceSummary.getProteinPosition().getEnd() != null) {
-                    alteration.setProteinEnd(transcriptConsequenceSummary.getProteinPosition().getEnd());
+                if (transcriptConsequenceSummary.getProteinPosition() != null) {
+                    if (transcriptConsequenceSummary.getProteinPosition().getStart() != null) {
+                        alteration.setProteinStart(transcriptConsequenceSummary.getProteinPosition().getStart());
+                    }
+                    if (transcriptConsequenceSummary.getProteinPosition().getEnd() != null) {
+                        alteration.setProteinEnd(transcriptConsequenceSummary.getProteinPosition().getEnd());
+                    }
                 }
+                if (StringUtils.isNotEmpty(transcriptConsequenceSummary.getConsequenceTerms())) {
+                    alteration.setConsequence(VariantConsequenceUtils.findVariantConsequenceByTerm(transcriptConsequenceSummary.getConsequenceTerms()));
+                }
+                return alteration;
             }
-            if (StringUtils.isNotEmpty(transcriptConsequenceSummary.getConsequenceTerms())) {
-                alteration.setConsequence(VariantConsequenceUtils.findVariantConsequenceByTerm(transcriptConsequenceSummary.getConsequenceTerms()));
-            }
-            return alteration;
+            return null;
         } else {
             return null;
         }
     }
 
-    public static List<VariantAnnotation> getHgvsgVariantsAnnotationWithQueries(List<AnnotateMutationByHGVSQuery> queries, ReferenceGenome referenceGenome) throws ApiException {
-        return GenomeNexusUtils.getHgvsVariantsAnnotation(queries.stream().map(AnnotateMutationByHGVSQuery::getHgvs).collect(Collectors.toList()), referenceGenome);
+    public static List<VariantAnnotation> getHgvsgVariantsAnnotationWithQueries(List<AnnotateMutationByHGVSgQuery> queries, ReferenceGenome referenceGenome) throws ApiException {
+        return GenomeNexusUtils.getHgvsVariantsAnnotation(queries.stream().map(AnnotateMutationByHGVSgQuery::getHgvsg).collect(Collectors.toList()), referenceGenome);
     }
 
     public static List<VariantAnnotation> getGenomicLocationVariantsAnnotationWithQueries(List<AnnotateMutationByGenomicChangeQuery> queries, ReferenceGenome referenceGenome) throws ApiException {
         return GenomeNexusUtils.getGenomicLocationVariantsAnnotation(queries.stream().map(query -> GenomeNexusUtils.convertGenomicLocation(query.getGenomicLocation())).collect(Collectors.toList()), referenceGenome);
     }
 
-    public static Alteration getAlterationFromGenomeNexus(GNVariantAnnotationType type, ReferenceGenome referenceGenome, String query) throws ApiException {
+    public static TranscriptSummaryAlterationResult getAlterationFromGenomeNexus(GNVariantAnnotationType type, ReferenceGenome referenceGenome, String query) throws ApiException {
         List<VariantAnnotation> variantAnnotations = new ArrayList<>();
         if (GNVariantAnnotationType.HGVS_G == type) {
             variantAnnotations = GenomeNexusUtils.getHgvsVariantsAnnotation(Collections.singletonList(query), referenceGenome);
@@ -745,24 +750,26 @@ public final class AlterationUtils {
         if (variantAnnotations.isEmpty()) {
             return null;
         } else {
-            List<Alteration> alterations = getAlterationsFromGenomeNexus(variantAnnotations, referenceGenome);
-            return alterations.isEmpty() ? null : alterations.get(0);
+            List<TranscriptSummaryAlterationResult> alterationInfos = getAlterationsFromGenomeNexus(variantAnnotations, referenceGenome);
+            return alterationInfos.isEmpty() ? null : alterationInfos.get(0);
         }
     }
 
-    public static List<Alteration> getAlterationsFromGenomeNexus(List<VariantAnnotation> variantAnnotations, ReferenceGenome referenceGenome) throws ApiException {
-        List<TranscriptConsequenceSummary> transcriptsConsequenceSummary = GenomeNexusUtils.getTranscriptsConsequence(variantAnnotations, referenceGenome);
-        List<Alteration> result = new ArrayList<>();
-
-        for (TranscriptConsequenceSummary summary : transcriptsConsequenceSummary) {
-            Alteration alteration = convertTranscriptConsequenceSummaryToAlteration(summary);
+    public static List<TranscriptSummaryAlterationResult> getAlterationsFromGenomeNexus(List<VariantAnnotation> variantAnnotations, ReferenceGenome referenceGenome) throws ApiException {
+        List<TranscriptSummaryAlterationResult> annotationResult = GenomeNexusUtils.getTranscriptsConsequence(variantAnnotations, referenceGenome);
+        // Use the transcript consequence summary from GN to generate a corresponding Alteration model
+        for (TranscriptSummaryAlterationResult result : annotationResult) {
+            if (result == null) {
+                result = new TranscriptSummaryAlterationResult();
+            }
+            Alteration alteration = convertTranscriptConsequenceSummaryToAlteration(result);
             if (alteration != null) {
-                result.add(alteration);
+                result.setAlteration(alteration);
             } else {
-                result.add(new Alteration());
+                result.setAlteration(new Alteration());
             }
         }
-        return result;
+        return annotationResult;
     }
 
     public static String getOncogenic(List<Alteration> alterations) {

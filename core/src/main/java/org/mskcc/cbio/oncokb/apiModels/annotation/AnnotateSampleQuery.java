@@ -10,9 +10,9 @@ public class AnnotateSampleQuery implements java.io.Serializable {
 
     public static class MutationsQuery {
         private List<AnnotateMutationByGenomicChangeQuery> genomicChange = new ArrayList<>();
-        private List<AnnotateMutationByHGVSQuery> cDnaChange = new ArrayList<>();
+        private List<AnnotateMutationByHGVSgQuery> cDnaChange = new ArrayList<>();
         private List<AnnotateMutationByProteinChangeQuery> proteinChange = new ArrayList<>();
-        private List<AnnotateMutationByHGVSQuery> hgvsg = new ArrayList<>();
+        private List<AnnotateMutationByHGVSgQuery> hgvsg = new ArrayList<>();
 
         public List<AnnotateMutationByGenomicChangeQuery> getGenomicChange() {
             return genomicChange;
@@ -22,11 +22,11 @@ public class AnnotateSampleQuery implements java.io.Serializable {
             this.genomicChange = genomicChange;
         }
 
-        public List<AnnotateMutationByHGVSQuery> getcDnaChange() {
+        public List<AnnotateMutationByHGVSgQuery> getcDnaChange() {
             return cDnaChange;
         }
 
-        public void setcDnaChange(List<AnnotateMutationByHGVSQuery> cDnaChange) {
+        public void setcDnaChange(List<AnnotateMutationByHGVSgQuery> cDnaChange) {
             this.cDnaChange = cDnaChange;
         }
 
@@ -38,11 +38,11 @@ public class AnnotateSampleQuery implements java.io.Serializable {
             this.proteinChange = proteinChange;
         }
 
-        public List<AnnotateMutationByHGVSQuery> getHgvsg() {
+        public List<AnnotateMutationByHGVSgQuery> getHgvsg() {
             return hgvsg;
         }
 
-        public void setHgvsg(List<AnnotateMutationByHGVSQuery> hgvsg) {
+        public void setHgvsg(List<AnnotateMutationByHGVSgQuery> hgvsg) {
             this.hgvsg = hgvsg;
         }
     }
