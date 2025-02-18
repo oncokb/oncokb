@@ -38,7 +38,7 @@ public class GenomeNexusUtilsTest extends TestCase {
 
         // the same BRAF V600E GRCh37 change should not get annotated by GN in GRCh38
         TranscriptSummaryAlterationResult transcriptSummaryAlterationResult38 = GenomeNexusUtils.getTranscriptConsequence(GNVariantAnnotationType.HGVS_G, BRAF_V600E_37, ReferenceGenome.GRCh38);
-        TranscriptConsequenceSummary consequence38 = transcriptSummaryAlterationResult.getTranscriptConsequenceSummary();
+        TranscriptConsequenceSummary consequence38 = transcriptSummaryAlterationResult38.getTranscriptConsequenceSummary();
         assertNotEquals("The consequence should not be the same", consequence, consequence38);
 
 
