@@ -11,6 +11,7 @@ public class EvidenceTypeUtils {
         Set<EvidenceType> evidenceTypes = new HashSet<>();
         if(Boolean.TRUE.equals(germline)) {
             evidenceTypes.add(EvidenceType.GENE_SUMMARY);
+            evidenceTypes.add(EvidenceType.GENOMIC_INDICATOR);
         } else {
             evidenceTypes.add(EvidenceType.GENE_SUMMARY);
         }
