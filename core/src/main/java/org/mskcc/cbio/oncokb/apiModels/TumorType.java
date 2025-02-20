@@ -1,6 +1,8 @@
 package org.mskcc.cbio.oncokb.apiModels;
 
 import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
 import org.mskcc.cbio.oncokb.model.TumorForm;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 
@@ -13,15 +15,25 @@ import java.util.Objects;
 @ApiModel(description = "OncoTree Detailed Cancer Type")
 public class TumorType implements Serializable {
 
+    @ApiModelProperty(value = "Database TumorType ID")
     private Integer id = null;
+    @ApiModelProperty(value = "Oncotree code")
     private String code = null;
+    @ApiModelProperty(value = "(Nullable) Color of tumor")
     private String color = null;
+    @ApiModelProperty(value = "(Nullable) Oncotree sub type")
     private String name = null;
+    @ApiModelProperty(value = "(Nullable) Oncotree tumor main type")
     private MainType mainType = null;
+    @ApiModelProperty(value = "(Nullable) Oncotree tumor tissue")
     private String tissue = null;
+    @ApiModelProperty(value = "Map of child tumor types")
     private Map<String, TumorType> children = new HashMap<String, TumorType>();
+    @ApiModelProperty(value = "(Nullable) Parent tumor name")
     private String parent = null;
+    @ApiModelProperty(value = "Oncotree tumor type level. -1 indicates special tumor types")
     private Integer level = null;
+    @ApiModelProperty(value = "Tumor form")
     private TumorForm tumorForm = null;
 
     public Integer getId() {
