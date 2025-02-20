@@ -656,6 +656,7 @@ public class DriveAnnotationParser {
             evidence.setUuid(getUUID(drugObj, "name"));
 
             // approved indications
+            // TODO: Remove because we do not support indication on new curation platform anymore
             Set<String> approvedIndications = new HashSet<>();
             if (drugObj.has("indication") && !drugObj.getString("indication").trim().isEmpty()) {
                 approvedIndications = new HashSet<>(Arrays.asList(drugObj.getString("indication").split(";")));
