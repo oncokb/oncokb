@@ -17,6 +17,8 @@ public class ActionableGene {
     String proteinChange;
     String cancerType;
     String level;
+    String solidPropagationLevel;
+    String liquidPropagationLevel;
     String drugs;
     String pmids;
     String abstracts;
@@ -110,6 +112,22 @@ public class ActionableGene {
         this.level = level;
     }
 
+    public String getSolidPropagationLevel() {
+        return solidPropagationLevel;
+    }
+
+    public void setSolidPropagationLevel(String solidPropagationLevel) {
+        this.solidPropagationLevel = solidPropagationLevel;
+    }
+
+    public String getLiquidPropagationLevel() {
+        return liquidPropagationLevel;
+    }
+
+    public void setLiquidPropagationLevel(String liquidPropagationLevel) {
+        this.liquidPropagationLevel = liquidPropagationLevel;
+    }
+
     public String getDrugs() {
         return drugs;
     }
@@ -142,7 +160,7 @@ public class ActionableGene {
         this.description = description;
     }
 
-    public ActionableGene(String grch37Isoform, String grch37RefSeq, String grch38Isoform, String grch38RefSeq, Integer entrezGeneId, String gene, String referenceGenome, String variant, String proteinChange, String cancerType, String level, String drugs, String pmids, String abstracts, String description) {
+    public ActionableGene(String grch37Isoform, String grch37RefSeq, String grch38Isoform, String grch38RefSeq, Integer entrezGeneId, String gene, String referenceGenome, String variant, String proteinChange, String cancerType, String level, String solidPropagationLevel, String liquidPropagationLevel, String drugs, String pmids, String abstracts, String description) {
         this.grch37Isoform = grch37Isoform;
         this.grch37RefSeq = grch37RefSeq;
         this.grch38Isoform = grch38Isoform;
@@ -154,6 +172,8 @@ public class ActionableGene {
         this.proteinChange = proteinChange;
         this.cancerType = cancerType;
         this.level = level;
+        this.solidPropagationLevel = solidPropagationLevel;
+        this.liquidPropagationLevel = liquidPropagationLevel;
         this.drugs = drugs;
         this.pmids = pmids;
         this.abstracts = abstracts;

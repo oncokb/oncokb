@@ -228,6 +228,8 @@ public class UtilsApiController implements UtilsApi {
         header.add("Protein Change");
         header.add("Cancer Type");
         header.add("Level");
+        header.add("Solid Propagation Level");
+        header.add("Liquid Propagation Level");
         header.add("Drugs(s)");
         header.add("PMIDs");
         header.add("Abstracts");
@@ -248,6 +250,8 @@ public class UtilsApiController implements UtilsApi {
             row.add(actionableGene.getProteinChange());
             row.add(actionableGene.getCancerType());
             row.add(actionableGene.getLevel());
+            row.add(actionableGene.getSolidPropagationLevel());
+            row.add(actionableGene.getLiquidPropagationLevel());
             row.add(actionableGene.getDrugs());
             row.add(actionableGene.getPmids());
             row.add(actionableGene.getAbstracts());
@@ -290,6 +294,8 @@ public class UtilsApiController implements UtilsApi {
                         clinicalVariant.getVariant().getAlteration(),
                         cancerTypeName,
                         clinicalVariant.getLevel(),
+                        clinicalVariant.getSolidPropagationLevel(),
+                        clinicalVariant.getLiquidPropagationLevel(),
                         MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrug()), ", ", true),
                         MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrugPmids()), ", ", true),
                         MainUtils.listToString(abstracts, "; ", true),
@@ -315,6 +321,8 @@ public class UtilsApiController implements UtilsApi {
                             clinicalVariant.getVariant().getAlteration(),
                             TumorTypeUtils.getTumorTypeName(tumorType),
                             clinicalVariant.getLevel(),
+                            clinicalVariant.getSolidPropagationLevel(),
+                            clinicalVariant.getLiquidPropagationLevel(),
                             MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrug()), ", ", true),
                             MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrugPmids()), ", ", true),
                             MainUtils.listToString(abstracts, "; ", true),

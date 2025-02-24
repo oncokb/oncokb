@@ -617,6 +617,12 @@ public class MainUtils {
                         if (evidence.getFdaLevel() != null) {
                             variant.setFdaLevel(evidence.getFdaLevel().getLevel());
                         }
+                        if (evidence.getSolidPropagationLevel() != null) {
+                            variant.setSolidPropagationLevel(evidence.getSolidPropagationLevel().getLevel());
+                        }
+                        if (evidence.getLiquidPropagationLevel() != null) {
+                            variant.setLiquidPropagationLevel(evidence.getLiquidPropagationLevel().getLevel());
+                        }
                         variant.setDrug(EvidenceUtils.getDrugs(Collections.singleton(evidence)));
                         variant.setDrugPmids(EvidenceUtils.getPmids(Collections.singleton(evidence)));
                         variant.setDrugAbstracts(EvidenceUtils.getAbstracts(Collections.singleton(evidence)));
