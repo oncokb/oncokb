@@ -14,7 +14,7 @@ public class MutationEffectResp implements Serializable {
     "Switch-of-function, Likely Neutral")
     String knownEffect = "";
 
-    @ApiModelProperty(value = "A brief overview of the biological and oncogenic effect of the VPS. Defaulted to \"\"")
+    @ApiModelProperty(value = "A brief overview of the biological and oncogenic effect of the variant. Defaulted to \"\"")
     String description = "";
 
     @ApiModelProperty(value = "Mutation effect-relevant PMIDs, Abstracts, and other citation sources")

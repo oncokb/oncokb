@@ -11,7 +11,7 @@ import java.util.List;
 public class IndicatorQueryResp implements java.io.Serializable {
     private Query query;
 
-    @ApiModelProperty(value = "Indicates whether the gene is an OncoKB cancer gene")
+    @ApiModelProperty(value = "Indicates whether the gene is curated by OncoKB")
     private Boolean geneExist = false;
 
     @ApiModelProperty(value = "Indicates whether an exact match for the queried variant is curated")

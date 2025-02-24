@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Objects;
 
 
-@ApiModel(description = "OncoTree Detailed Cancer Type")
+@ApiModel(description = "OncoTree Detailed Cancer Type. See https://oncotree.mskcc.org/?version=oncotree_2019_12_01")
 public class TumorType implements Serializable {
 
     @ApiModelProperty(value = "Database TumorType ID")
@@ -27,7 +27,7 @@ public class TumorType implements Serializable {
     private MainType mainType = null;
     @ApiModelProperty(value = "(Nullable) Oncotree tumor tissue")
     private String tissue = null;
-    @ApiModelProperty(value = "Map of child tumor types")
+    @ApiModelProperty(value = "Map from parent tumor type to children tumor types")
     private Map<String, TumorType> children = new HashMap<String, TumorType>();
     @ApiModelProperty(value = "(Nullable) Parent tumor name")
     private String parent = null;
