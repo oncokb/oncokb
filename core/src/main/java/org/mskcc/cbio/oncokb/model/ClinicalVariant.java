@@ -19,6 +19,8 @@ public class ClinicalVariant {
     private String oncogenic = null;
     private String level = null;
     private String fdaLevel = null;
+    private String solidPropagationLevel = "";
+    private String liquidPropagationLevel = "";
     private Set<String> drug = new HashSet<>();
     private Set<String> drugPmids = new HashSet<>();
     private Set<ArticleAbstract> drugAbstracts = new HashSet<>();
@@ -94,6 +96,22 @@ public class ClinicalVariant {
         this.fdaLevel = fdaLevel;
     }
 
+    public String getSolidPropagationLevel() {
+        return solidPropagationLevel;
+    }
+
+    public void setSolidPropagationLevel(String solidPropagationLevel) {
+        this.solidPropagationLevel = solidPropagationLevel;
+    }
+
+    public String getLiquidPropagationLevel() {
+        return liquidPropagationLevel;
+    }
+
+    public void setLiquidPropagationLevel(String liquidPropagationLevel) {
+        this.liquidPropagationLevel = liquidPropagationLevel;
+    }
+
     /**
      **/
     @ApiModelProperty(value = "")
@@ -151,6 +169,8 @@ public class ClinicalVariant {
             Objects.equals(getOncogenic(), that.getOncogenic()) &&
             Objects.equals(getLevel(), that.getLevel()) &&
             Objects.equals(getFdaLevel(), that.getFdaLevel()) &&
+            Objects.equals(getSolidPropagationLevel(), that.getSolidPropagationLevel()) &&
+            Objects.equals(getLiquidPropagationLevel(), that.getLiquidPropagationLevel()) &&
             Objects.equals(getDrug(), that.getDrug()) &&
             Objects.equals(getDrugPmids(), that.getDrugPmids()) &&
             Objects.equals(getDrugAbstracts(), that.getDrugAbstracts()) &&
@@ -170,6 +190,8 @@ public class ClinicalVariant {
             ", oncogenic='" + oncogenic + '\'' +
             ", level='" + level + '\'' +
             ", fdaLevel='" + fdaLevel + '\'' +
+            ", solidPropagationLevel='" + solidPropagationLevel + '\'' +
+            ", liquidPropagationLevel='" + liquidPropagationLevel + '\'' +
             ", drug=" + drug +
             ", drugPmids=" + drugPmids +
             ", drugAbstracts=" + drugAbstracts +
