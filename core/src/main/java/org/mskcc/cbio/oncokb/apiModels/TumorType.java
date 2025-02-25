@@ -31,7 +31,7 @@ public class TumorType implements Serializable {
     private Map<String, TumorType> children = new HashMap<String, TumorType>();
     @ApiModelProperty(value = "(Nullable) Parent tumor name")
     private String parent = null;
-    @ApiModelProperty(value = "Oncotree tumor type level. -1 indicates special tumor types")
+    @ApiModelProperty(value = "Oncotree tumor type level. -1 indicates special tumor types (See SpecialTumorTypes.java)")
     private Integer level = null;
     @ApiModelProperty(value = "Tumor form")
     private TumorForm tumorForm = null;
