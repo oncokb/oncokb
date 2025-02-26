@@ -2,7 +2,8 @@ package org.mskcc.cbio.oncokb.apiModels;
 
 import org.mskcc.cbio.oncokb.model.ArticleAbstract;
 import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
-import org.mskcc.cbio.oncokb.apiModels.TumorType;
+
+import io.swagger.annotations.ApiModelProperty;
 
 import java.io.Serializable;
 import java.util.HashSet;
@@ -12,11 +13,17 @@ import java.util.Set;
  * Created by Hongxin Zhang on 2019-05-29.
  */
 public class Implication implements Serializable {
+    @ApiModelProperty(value = "Level associated with implication")
     LevelOfEvidence levelOfEvidence;
+    @ApiModelProperty(value = "List of alterations associated with implication")
     Set<String> alterations = new HashSet<>();
+    @ApiModelProperty(value = "Tumor type associated with implication")
     TumorType tumorType;
+    @ApiModelProperty(value = "List of PubMed IDs cited to support the level of evidence. Defaulted to empty list")
     private Set<String> pmids = new HashSet<String>(0);
+    @ApiModelProperty(value = "List of abstracts cited to support the level of evidence. Defaulted to empty list")
     private Set<ArticleAbstract> abstracts = new HashSet<ArticleAbstract>(0);
+    @ApiModelProperty(value = "DEPRECATED")
     String description = "";
 
     public LevelOfEvidence getLevelOfEvidence() {
