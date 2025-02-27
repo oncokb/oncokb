@@ -3,7 +3,9 @@ package org.mskcc.cbio.oncokb.model;
 import com.vdurmont.semver4j.Semver;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.apiModels.InfoLevel;
+import org.mskcc.cbio.oncokb.model.genomeNexus.version.ParsedGenomeNexusVersion;
 import org.mskcc.cbio.oncokb.util.*;
+import org.springframework.web.client.RestClientException;
 
 import java.io.Serializable;
 import java.util.List;
@@ -22,6 +24,7 @@ public class OncoKBInfo implements Serializable {
     SemVer appVersion;
     SemVer apiVersion;
     Boolean publicInstance;
+    ParsedGenomeNexusVersion genomeNexus;
 
     public OncoKBInfo() {
         Info info = CacheUtils.getInfo();
@@ -48,6 +51,12 @@ public class OncoKBInfo implements Serializable {
             this.publicInstance = true;
         } else {
             this.publicInstance = false;
+        }
+
+        try {
+            this.genomeNexus = GenomeNexusUtils.getParsedGenomeNexusVersion();
+        } catch (RestClientException e) {
+            this.genomeNexus = null;
         }
     }
 
@@ -77,5 +86,9 @@ public class OncoKBInfo implements Serializable {
 
     public SemVer getApiVersion() {
         return apiVersion;
+    }
+
+    public ParsedGenomeNexusVersion getGenomeNexus() {
+        return genomeNexus;
     }
 }

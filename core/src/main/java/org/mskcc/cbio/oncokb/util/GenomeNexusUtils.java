@@ -15,8 +15,11 @@ import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.ReferenceGenome;
 import org.mskcc.cbio.oncokb.model.VariantConsequence;
 import org.mskcc.cbio.oncokb.model.genomeNexus.TranscriptSummaryAlterationResult;
+import org.mskcc.cbio.oncokb.model.genomeNexus.version.GenomeNexusVersion;
+import org.mskcc.cbio.oncokb.model.genomeNexus.version.ParsedGenomeNexusVersion;
 import org.mskcc.cbio.oncokb.model.genomeNexusPreAnnotations.GenomeNexusAnnotatedVariantInfo;
 import org.springframework.http.*;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
@@ -414,6 +417,13 @@ public class GenomeNexusUtils {
                 throw e;
             }
         }
+    }
+
+    public static ParsedGenomeNexusVersion getParsedGenomeNexusVersion() throws RestClientException {
+        RestTemplate restTemplate = new RestTemplate();
+        GenomeNexusVersion grch37Version = restTemplate.getForObject(getGenomeNexusUrl(ReferenceGenome.GRCh37) + "/version", GenomeNexusVersion.class);
+        GenomeNexusVersion grch38Version = restTemplate.getForObject(getGenomeNexusUrl(ReferenceGenome.GRCh38) + "/version", GenomeNexusVersion.class);
+        return new ParsedGenomeNexusVersion(grch37Version.toParsedVersionInfo(), grch38Version.toParsedVersionInfo());
     }
 
     private static Optional<EnsemblTranscript> getEnsemblTranscript(String hugoSymbol, TranscriptPair transcriptPair) throws ApiException {
