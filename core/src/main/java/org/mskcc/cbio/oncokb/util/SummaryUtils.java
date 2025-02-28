@@ -202,7 +202,8 @@ public class SummaryUtils {
             query.getTumorType(),
             query.getReferenceGenome(),
             gene,
-            matchedTumorType
+            matchedTumorType,
+            false
         ));
 
         return tumorTypeSummary;

@@ -40,7 +40,7 @@ public class UtilsApiController implements UtilsApi {
         if (version != null) {
             return getDataDownloadResponseEntity(version, FileName.ALL_ANNOTATED_VARIANTS, FileExtension.JSON);
         }
-        return new ResponseEntity<>(getAllAnnotatedVariants(), HttpStatus.OK);
+        return new ResponseEntity<>(getAllAnnotatedVariants(false), HttpStatus.OK);
     }
 
     @Override
@@ -72,7 +72,7 @@ public class UtilsApiController implements UtilsApi {
         sb.append(MainUtils.listToString(header, separator));
         sb.append(newLine);
 
-        for (AnnotatedVariant annotatedVariant : getAllAnnotatedVariants()) {
+        for (AnnotatedVariant annotatedVariant : getAllAnnotatedVariants(true)) {
             List<String> row = new ArrayList<>();
             row.add(annotatedVariant.getGrch37Isoform());
             row.add(annotatedVariant.getGrch37RefSeq());
@@ -123,7 +123,7 @@ public class UtilsApiController implements UtilsApi {
         return new ResponseEntity<>(sb.toString(), HttpStatus.OK);
     }
 
-    private List<AnnotatedVariant> getAllAnnotatedVariants() {
+    private List<AnnotatedVariant> getAllAnnotatedVariants(Boolean isTextFile) {
         List<AnnotatedVariant> annotatedVariantList = new ArrayList<>();
         Set<Gene> genes = CacheUtils.getAllGenes();
         Map<Gene, Set<BiologicalVariant>> map = new HashMap<>();
@@ -162,7 +162,8 @@ public class UtilsApiController implements UtilsApi {
                         null,
                         null,
                         gene,
-                        null
+                        null,
+                        isTextFile
                     )
                 ));
             }
@@ -203,7 +204,7 @@ public class UtilsApiController implements UtilsApi {
         if (version != null) {
             return getDataDownloadResponseEntity(version, FileName.ALL_ACTIONABLE_VARIANTS, FileExtension.JSON);
         }
-        return new ResponseEntity<>(getAllActionableVariants(), HttpStatus.OK);
+        return new ResponseEntity<>(getAllActionableVariants(false), HttpStatus.OK);
     }
 
     @Override
@@ -237,7 +238,7 @@ public class UtilsApiController implements UtilsApi {
         sb.append(MainUtils.listToString(header, separator));
         sb.append(newLine);
 
-        for (ActionableGene actionableGene : getAllActionableVariants()) {
+        for (ActionableGene actionableGene : getAllActionableVariants(true)) {
             List<String> row = new ArrayList<>();
             row.add(actionableGene.getGrch37Isoform());
             row.add(actionableGene.getGrch37RefSeq());
@@ -262,7 +263,7 @@ public class UtilsApiController implements UtilsApi {
         return new ResponseEntity<>(sb.toString(), HttpStatus.OK);
     }
 
-    private List<ActionableGene> getAllActionableVariants() {
+    private List<ActionableGene> getAllActionableVariants(Boolean isTextFile) {
         List<ActionableGene> actionableGeneList = new ArrayList<>();
         Set<Gene> genes = CacheUtils.getAllGenes();
         Map<Gene, Set<ClinicalVariant>> map = new HashMap<>();
@@ -306,7 +307,8 @@ public class UtilsApiController implements UtilsApi {
                             cancerTypeName,
                             null,
                             gene,
-                            null
+                            null,
+                            isTextFile
                         )
                     ));
                 } else {
@@ -333,7 +335,8 @@ public class UtilsApiController implements UtilsApi {
                                 TumorTypeUtils.getTumorTypeName(tumorType),
                                 null,
                                 gene,
-                                tumorType
+                                tumorType,
+                                isTextFile
                             )
                         ));
                     }
