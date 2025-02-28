@@ -953,7 +953,8 @@ public class EvidenceUtils {
                                 TumorTypeUtils.getTumorTypesNameWithExclusion(evidence.getCancerTypes(), evidence.getExcludedCancerTypes()),
                                 null,
                                 evidence.getGene(),
-                                null
+                                null,
+                                false
                             )
                         );
                     }

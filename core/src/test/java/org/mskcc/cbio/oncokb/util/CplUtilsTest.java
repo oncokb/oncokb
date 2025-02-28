@@ -20,7 +20,8 @@ public class CplUtilsTest {
                 null,
                 null,
                 null,
-                null
+                null,
+                false
             )
         );
         assertEquals(
@@ -32,7 +33,8 @@ public class CplUtilsTest {
                 null,
                 null,
                 null,
-                null
+                null,
+                false
             )
         );
 
@@ -48,7 +50,8 @@ public class CplUtilsTest {
                 null,
                 null,
                 gene,
-                null
+                null,
+                false
             )
         );
 
@@ -61,7 +64,8 @@ public class CplUtilsTest {
                 null,
                 null,
                 null,
-                null
+                null,
+                false
             )
         );
 
@@ -74,7 +78,8 @@ public class CplUtilsTest {
                 null,
                 null,
                 null,
-                null
+                null,
+                false
             )
         );
 
@@ -87,7 +92,8 @@ public class CplUtilsTest {
                 null,
                 null,
                 null,
-                null
+                null,
+                false
             )
         );
 
@@ -100,7 +106,8 @@ public class CplUtilsTest {
                 "Melanoma",
                 null,
                 null,
-                null
+                null,
+                false
             )
         );
 
@@ -113,7 +120,8 @@ public class CplUtilsTest {
                 "Melanoma",
                 null,
                 null,
-                null
+                null,
+                false
             )
         );
     }

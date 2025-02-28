@@ -278,7 +278,8 @@ public class IndicatorUtils {
                                 query.getTumorType(),
                                 query.getReferenceGenome(),
                                 gene,
-                                matchedTumorType
+                                matchedTumorType,
+                                false
                             ));
                             mutationEffectResp.setCitations(MainUtils.getCitationsByEvidence(indicatorQueryMutationEffect.getMutationEffectEvidence()));
                         }
@@ -368,7 +369,8 @@ public class IndicatorUtils {
                             query.getTumorType(),
                             query.getReferenceGenome(),
                             gene,
-                            matchedTumorType
+                            matchedTumorType,
+                            false
                         ));
                     }
                     indicatorQuery.setTreatments(treatments);

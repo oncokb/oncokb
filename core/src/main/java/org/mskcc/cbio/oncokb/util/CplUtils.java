@@ -36,9 +36,10 @@ public class CplUtils {
      * @param referenceGenome  reference genome this alteration belongs to. null if no preference
      * @param gene             Gene model that can be linked to queryHugoSymbol
      * @param matchedTumorType TumorType model that can be linked to queryCancerType
+     * @param escapeNewLine    If true, replace newline with the literal "\n"
      * @return
      */
-    public static String annotate(String text, String queryHugoSymbol, String queryAlteration, String queryCancerType, ReferenceGenome referenceGenome, Gene gene, TumorType matchedTumorType) {
+    public static String annotate(String text, String queryHugoSymbol, String queryAlteration, String queryCancerType, ReferenceGenome referenceGenome, Gene gene, TumorType matchedTumorType, Boolean escapeNewLine) {
         if (StringUtils.isEmpty(text))
             return "";
 
@@ -107,6 +108,10 @@ public class CplUtils {
         text = text.replace("[[fusion name]]", altName);
         text = text.replace("[[fusion name]]", altName);
         // Replace all whitespace except newlines
-        return text.trim().replaceAll("[^\\S\\n]+", " ");
+        String trimmedText = text.trim().replaceAll("[^\\S\\n]+", " ");
+        if (Boolean.TRUE.equals(escapeNewLine)) {
+            trimmedText = trimmedText.replaceAll("\\r?\\n", "\\\\n");
+        }
+        return trimmedText;
     }
 }

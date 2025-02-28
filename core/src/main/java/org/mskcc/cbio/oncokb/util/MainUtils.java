@@ -633,7 +633,8 @@ public class MainUtils {
                             null,
                             null,
                             gene,
-                            null
+                            null,
+                            false
                         ));
                         variants.add(variant);
                     }
