@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.mskcc.cbio.oncokb</groupId>
     <artifactId>master</artifactId>
-    <version>3.27.0</version>
+    <version>3.28.0</version>
     <packaging>pom</packaging>
     <modules>
         <module>web</module>
