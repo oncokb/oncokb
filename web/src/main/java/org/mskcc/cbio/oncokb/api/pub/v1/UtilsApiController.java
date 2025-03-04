@@ -263,7 +263,7 @@ public class UtilsApiController implements UtilsApi {
         return new ResponseEntity<>(sb.toString(), HttpStatus.OK);
     }
 
-    private List<ActionableGene> getAllActionableVariants(Boolean isTextFile) {
+    public List<ActionableGene> getAllActionableVariants(Boolean isTextFile) {
         List<ActionableGene> actionableGeneList = new ArrayList<>();
         Set<Gene> genes = CacheUtils.getAllGenes();
         Map<Gene, Set<ClinicalVariant>> map = new HashMap<>();

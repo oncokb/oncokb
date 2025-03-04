@@ -1,5 +1,7 @@
 package org.mskcc.cbio.oncokb.controller;
 
+import org.mskcc.cbio.oncokb.api.pub.v1.UtilsApiController;
+import org.mskcc.cbio.oncokb.apiModels.ActionableGene;
 import org.mskcc.cbio.oncokb.model.health.InMemoryCacheSizes;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 import org.mskcc.cbio.oncokb.util.CacheUtils;
@@ -20,11 +22,19 @@ public class HealthController {
     private static final Logger LOGGER = LoggerFactory.getLogger(HealthController.class);
 
     /**
-     * Checks if the in-memory caches initilized during application startup is consistent.
-     * @return true if the cache size is consistent, otherwise false
+     * Checks if system is healthy
      */
-    @GetMapping("/cache-size")
-    public ResponseEntity<Void> checkInMemoryCacheSizes() {
+    @GetMapping
+    public ResponseEntity<Void> systemHealthCheck() {
+        Boolean memoryCacheSizeCheckPassed = checkInMemoryCacheSizeConsistency();
+        Boolean successfullyFetchedActionableVariants = checkActionableGenesResponse();
+        if (!memoryCacheSizeCheckPassed || !successfullyFetchedActionableVariants) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+        return ResponseEntity.ok().build();
+    }
+
+    private Boolean checkInMemoryCacheSizeConsistency() {
         // Re-fetch MySQL data
         Integer reloadedGeneCacheSize = ApplicationContextSingleton.getGeneBo().countAll();
         Integer reloadedAlterationCacheSize = ApplicationContextSingleton.getAlterationBo().countAll();
@@ -38,10 +48,19 @@ public class HealthController {
         InMemoryCacheSizes currentCacheSizes = CacheUtils.getCurrentCacheSizes();
 
         List<String> invalidCacheNames = reloadedCacheSize.getDifferentCacheSizes(currentCacheSizes);
-        if (!invalidCacheNames.isEmpty()) {
+        if(!invalidCacheNames.isEmpty()) {
             LOGGER.debug(String.join("\n", invalidCacheNames));
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-        return ResponseEntity.ok().build();
+        return invalidCacheNames.isEmpty();
+    }
+
+    private Boolean checkActionableGenesResponse() {
+        UtilsApiController utilsApiController = new UtilsApiController();
+        List<ActionableGene> actionableVariants = utilsApiController.getAllActionableVariants(false);
+        Boolean result = !actionableVariants.isEmpty();
+        if (result == false) {
+            LOGGER.debug("Failed get actionable genes check");
+        }
+        return result;
     }
 }
