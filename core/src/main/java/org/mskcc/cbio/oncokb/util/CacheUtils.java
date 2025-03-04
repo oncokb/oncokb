@@ -4,6 +4,7 @@ import com.mysql.jdbc.StringUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.mskcc.cbio.oncokb.apiModels.download.DownloadAvailability;
 import org.mskcc.cbio.oncokb.model.*;
+import org.mskcc.cbio.oncokb.model.health.InMemoryCacheSizes;
 
 import java.io.IOException;
 import java.util.*;
@@ -130,6 +131,22 @@ public class CacheUtils {
         }
     };
 
+    public static InMemoryCacheSizes getCurrentCacheSizes() {
+
+        return new InMemoryCacheSizes(
+            genes.size(),
+            alterations.values().stream().mapToInt(List::size).sum(),
+            drugs.size(),
+            cancerTypes.size(),
+            evidences.size()
+        );
+    }
+
+    private static String getCacheCompletionMessage(Long startTime) {
+        Long diffInMilliseconds = MainUtils.getTimestampDiff(startTime);
+        return "(Completed in " + diffInMilliseconds + "ms" + " at " + MainUtils.getCurrentTime() + ")";
+    }
+
     private static void notifyOtherServices(String cmd, Set<Integer> entrezGeneIds) throws IOException {
         System.out.println("Notify other services..." + " at " + MainUtils.getCurrentTime());
         if (cmd == null) {
@@ -165,7 +182,7 @@ public class CacheUtils {
             GeneObservable.getInstance().addObserver(numbersObserver);
             GeneObservable.getInstance().addObserver(drugsObserver);
 
-            System.out.println("Observer: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
+            System.out.println("Add observers " + getCacheCompletionMessage(current));
 
             cacheAllGenes();
 
@@ -173,7 +190,7 @@ public class CacheUtils {
 
             current = MainUtils.getCurrentTimestamp();
             drugs = new HashSet<>(ApplicationContextSingleton.getDrugBo().findAll());
-            System.out.println("Cached all drugs: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
+            System.out.println("Cached " + drugs.size() + " drugs " + CacheUtils.getCacheCompletionMessage(current));
             current = MainUtils.getCurrentTimestamp();
 
             cancerTypes = ApplicationContextSingleton.getTumorTypeBo().findAll();
@@ -188,37 +205,39 @@ public class CacheUtils {
                     cancerTypesByLowercaseSubtype.put(ct.getSubtype().toLowerCase(), ct);
                 }
             });
+            System.out.println("Cached " + cancerTypes.size() +  " tumor types " + CacheUtils.getCacheCompletionMessage(current));
             subtypes = cancerTypes.stream().filter(tumorType -> org.apache.commons.lang3.StringUtils.isNotEmpty(tumorType.getCode()) && tumorType.getLevel() > 0).collect(Collectors.toList());
+            System.out.println("Cached " + subtypes.size() +  " tumor sub types " + CacheUtils.getCacheCompletionMessage(current));
             mainTypes = cancerTypes.stream().filter(tumorType -> org.apache.commons.lang3.StringUtils.isEmpty(tumorType.getCode()) || tumorType.getLevel() > 0).collect(Collectors.toList());
-            System.out.println("Cached all tumor types: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
+            System.out.println("Cached " + mainTypes.size() + " tumor main types " + CacheUtils.getCacheCompletionMessage(current));
             current = MainUtils.getCurrentTimestamp();
 
             specialCancerTypes = Arrays.stream(SpecialTumorType.values()).map(specialTumorType -> cancerTypes.stream().filter(cancerType -> !StringUtils.isNullOrEmpty(cancerType.getMainType()) && cancerType.getMainType().equals(specialTumorType.getTumorType())).findAny().orElse(null)).filter(cancerType -> cancerType != null).collect(Collectors.toList());
-            System.out.println("Cached all special tumor types: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
+            System.out.println("Cached " + specialCancerTypes.size() + " special tumor types " + CacheUtils.getCacheCompletionMessage(current));
 
             current = MainUtils.getCurrentTimestamp();
             synEvidences();
-            System.out.println("Cached all evidences: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
+            System.out.println("Cached all evidences " + CacheUtils.getCacheCompletionMessage(current));
             current = MainUtils.getCurrentTimestamp();
 
             for (Map.Entry<Integer, List<Evidence>> entry : evidences.entrySet()) {
                 setVUS(entry.getKey(), new HashSet<>(entry.getValue()));
             }
-            System.out.println("Cached all VUSs: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
+            System.out.println("Cached " + VUS.size() + " VUSs " + CacheUtils.getCacheCompletionMessage(current));
             current = MainUtils.getCurrentTimestamp();
 
             NamingUtils.cacheAllAbbreviations();
-            System.out.println("Cached abbreviation ontology: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
+            System.out.println("Cached abbreviation ontology " + CacheUtils.getCacheCompletionMessage(current));
             current = MainUtils.getCurrentTimestamp();
 
             cacheDownloadAvailability();
-            System.out.println("Cached downloadable files availability on github: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
+            System.out.println("Cached downloadable files availability on github " + CacheUtils.getCacheCompletionMessage(current));
 
             oncokbInfo = ApplicationContextSingleton.getInfoBo().get();
-            System.out.println("Cached oncokb info " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
+            System.out.println("Cached oncokb info " + CacheUtils.getCacheCompletionMessage(current));
 
             registerOtherServices();
-            System.out.println("Register other services: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
+            System.out.println("Register other services " + CacheUtils.getCacheCompletionMessage(current));
             current = MainUtils.getCurrentTimestamp();
 
         } catch (Exception e) {
@@ -267,7 +286,7 @@ public class CacheUtils {
             hugoSymbolToEntrez.put(gene.getHugoSymbol(), gene.getEntrezGeneId());
         }
         cancerGeneList = null;
-        System.out.println("Cached all genes: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
+        System.out.println("Cached "+ genesByEntrezId.size() + " genes " + CacheUtils.getCacheCompletionMessage(current));
     }
 
     public static List<CancerGene> getCancerGeneList() throws IOException {
@@ -410,7 +429,7 @@ public class CacheUtils {
                 alterationsByReferenceGenome.get(gene.getEntrezGeneId()).get(refGenome).add(alteration);
             }
         }
-        System.out.println("Cached all alterations: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
+        System.out.println("Cached " + allAlterations.size() + " alterations " + CacheUtils.getCacheCompletionMessage(current));
     }
 
     public static Set<Drug> getAllDrugs() {
@@ -636,7 +655,7 @@ public class CacheUtils {
             evidences.put(entrezGeneId, pair.getValue());
             updateEvidenceRelevantCancerTypes(entrezGeneId, pair.getValue());
         }
-        System.out.println("Cached all evidences by gene: " + MainUtils.getTimestampDiff(current) + " at " + MainUtils.getCurrentTime());
+        System.out.println("Cached all evidences of " + mappedEvidence.size() + " genes" + CacheUtils.getCacheCompletionMessage(current));
     }
 
     public static void updateEvidenceRelevantCancerTypes(Integer entrezGeneId, List<Evidence> geneEvidences) {
