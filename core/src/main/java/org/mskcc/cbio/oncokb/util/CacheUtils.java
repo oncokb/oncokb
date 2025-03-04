@@ -35,6 +35,7 @@ public class CacheUtils {
 
     private static List<DownloadAvailability> downloadAvailabilities = new ArrayList<>();
 
+    private static Integer allEvidencesSize;
 
     // Cache data from database
     private static Set<Gene> genes = new HashSet<>();
@@ -138,7 +139,7 @@ public class CacheUtils {
             alterations.values().stream().mapToInt(List::size).sum(),
             drugs.size(),
             cancerTypes.size(),
-            evidences.size()
+            allEvidencesSize
         );
     }
 
@@ -217,7 +218,7 @@ public class CacheUtils {
 
             current = MainUtils.getCurrentTimestamp();
             synEvidences();
-            System.out.println("Cached all evidences " + CacheUtils.getCacheCompletionMessage(current));
+            System.out.println("Cached " + allEvidencesSize + " evidences " + CacheUtils.getCacheCompletionMessage(current));
             current = MainUtils.getCurrentTimestamp();
 
             for (Map.Entry<Integer, List<Evidence>> entry : evidences.entrySet()) {
@@ -644,10 +645,10 @@ public class CacheUtils {
 
     private static void cacheAllEvidencesByGenes() {
         Long current = MainUtils.getCurrentTimestamp();
+        List<Evidence> allEvidences = ApplicationContextSingleton.getEvidenceBo().findAll();
+        allEvidencesSize = allEvidences.size();
 
-        Map<Gene, List<Evidence>> mappedEvidence =
-            EvidenceUtils.separateEvidencesByGene(genes, new HashSet<>(
-                ApplicationContextSingleton.getEvidenceBo().findAll()));
+        Map<Gene, List<Evidence>> mappedEvidence = EvidenceUtils.separateEvidencesByGene(genes, new HashSet<>(allEvidences));
         Iterator it = mappedEvidence.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry<Gene, List<Evidence>> pair = (Map.Entry) it.next();
