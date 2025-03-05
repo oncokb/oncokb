@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.genome_nexus.ApiException;
 import org.genome_nexus.client.TranscriptConsequenceSummary;
 import org.genome_nexus.client.VariantAnnotation;
+import org.mskcc.cbio.oncokb.apiModels.ActionableGene;
 import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotateMutationByGenomicChangeQuery;
 import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotateMutationByHGVSgQuery;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
@@ -1676,5 +1677,91 @@ public final class AlterationUtils {
             }
         }
         return false;
+    }
+
+    public static List<ActionableGene> getAllActionableVariants(Boolean isTextFile) {
+        List<ActionableGene> actionableGeneList = new ArrayList<>();
+        Set<Gene> genes = CacheUtils.getAllGenes();
+        Map<Gene, Set<ClinicalVariant>> map = new HashMap<>();
+
+        for (Gene gene : genes) {
+            map.put(gene, MainUtils.getClinicalVariants(gene));
+        }
+
+        Set<ActionableGene> actionableGenes = new HashSet<>();
+        for (Map.Entry<Gene, Set<ClinicalVariant>> entry : map.entrySet()) {
+            Gene gene = entry.getKey();
+            for (ClinicalVariant clinicalVariant : entry.getValue()) {
+                Set<ArticleAbstract> articleAbstracts = clinicalVariant.getDrugAbstracts();
+                List<String> abstracts = new ArrayList<>();
+                for (ArticleAbstract articleAbstract : articleAbstracts) {
+                    abstracts.add(articleAbstract.getAbstractContent() + " " + articleAbstract.getLink());
+                }
+
+                if (clinicalVariant.getExcludedCancerTypes().size() > 0) {
+                    String cancerTypeName = TumorTypeUtils.getTumorTypesNameWithExclusion(clinicalVariant.getCancerTypes(), clinicalVariant.getExcludedCancerTypes());
+                    // for any clinical variant that has cancer type excluded, we no longer list the cancer types separately
+                    actionableGenes.add(new ActionableGene(
+                        gene.getGrch37Isoform(), gene.getGrch37RefSeq(),
+                        gene.getGrch38Isoform(), gene.getGrch38RefSeq(),
+                        gene.getEntrezGeneId(),
+                        gene.getHugoSymbol(),
+                        clinicalVariant.getVariant().getReferenceGenomes().stream().map(referenceGenome -> referenceGenome.name()).collect(Collectors.joining(", ")),
+                        clinicalVariant.getVariant().getName(),
+                        clinicalVariant.getVariant().getAlteration(),
+                        cancerTypeName,
+                        clinicalVariant.getLevel(),
+                        clinicalVariant.getSolidPropagationLevel(),
+                        clinicalVariant.getLiquidPropagationLevel(),
+                        MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrug()), ", ", true),
+                        MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrugPmids()), ", ", true),
+                        MainUtils.listToString(abstracts, "; ", true),
+                        CplUtils.annotate(
+                            clinicalVariant.getDrugDescription(),
+                            gene.getHugoSymbol(),
+                            clinicalVariant.getVariant().getName(),
+                            cancerTypeName,
+                            null,
+                            gene,
+                            null,
+                            isTextFile
+                        )
+                    ));
+                } else {
+                    for (TumorType tumorType : clinicalVariant.getCancerTypes()) {
+                        actionableGenes.add(new ActionableGene(
+                            gene.getGrch37Isoform(), gene.getGrch37RefSeq(),
+                            gene.getGrch38Isoform(), gene.getGrch38RefSeq(),
+                            gene.getEntrezGeneId(),
+                            gene.getHugoSymbol(),
+                            clinicalVariant.getVariant().getReferenceGenomes().stream().map(referenceGenome -> referenceGenome.name()).collect(Collectors.joining(", ")),
+                            clinicalVariant.getVariant().getName(),
+                            clinicalVariant.getVariant().getAlteration(),
+                            TumorTypeUtils.getTumorTypeName(tumorType),
+                            clinicalVariant.getLevel(),
+                            clinicalVariant.getSolidPropagationLevel(),
+                            clinicalVariant.getLiquidPropagationLevel(),
+                            MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrug()), ", ", true),
+                            MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrugPmids()), ", ", true),
+                            MainUtils.listToString(abstracts, "; ", true),
+                            CplUtils.annotate(
+                                clinicalVariant.getDrugDescription(),
+                                gene.getHugoSymbol(),
+                                clinicalVariant.getVariant().getName(),
+                                TumorTypeUtils.getTumorTypeName(tumorType),
+                                null,
+                                gene,
+                                tumorType,
+                                isTextFile
+                            )
+                        ));
+                    }
+                }
+            }
+        }
+
+        actionableGeneList.addAll(actionableGenes);
+        MainUtils.sortActionableVariants(actionableGeneList);
+        return actionableGeneList;
     }
 }

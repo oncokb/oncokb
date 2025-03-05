@@ -1,8 +1,8 @@
 package org.mskcc.cbio.oncokb.controller;
 
-import org.mskcc.cbio.oncokb.api.pub.v1.UtilsApiController;
 import org.mskcc.cbio.oncokb.apiModels.ActionableGene;
 import org.mskcc.cbio.oncokb.model.health.InMemoryCacheSizes;
+import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 import org.mskcc.cbio.oncokb.util.CacheUtils;
 import org.slf4j.Logger;
@@ -55,8 +55,7 @@ public class HealthController {
     }
 
     private Boolean checkActionableGenesResponse() {
-        UtilsApiController utilsApiController = new UtilsApiController();
-        List<ActionableGene> actionableVariants = utilsApiController.getAllActionableVariants(false);
+        List<ActionableGene> actionableVariants = AlterationUtils.getAllActionableVariants(false);
         Boolean result = !actionableVariants.isEmpty();
         if (result == false) {
             LOGGER.debug("Failed get actionable genes check");
