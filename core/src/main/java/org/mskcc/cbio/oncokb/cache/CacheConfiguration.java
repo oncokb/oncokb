@@ -2,6 +2,8 @@ package org.mskcc.cbio.oncokb.cache;
 
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.cache.keygenerator.ConcatGenerator;
+import org.mskcc.cbio.oncokb.model.OncoKBInfo;
+import org.mskcc.cbio.oncokb.util.CacheUtils;
 import org.mskcc.cbio.oncokb.util.PropertiesUtils;
 import org.mskcc.oncokb.meta.enumeration.RedisType;
 import org.redisson.Redisson;
@@ -102,12 +104,22 @@ public class CacheConfiguration {
     }
 
     private void setRedisClientName(BaseConfig baseConfig) {
-        String appName = PropertiesUtils.getProperties("app.name");
-        if (StringUtils.isNotEmpty(appName)) {
-            baseConfig.setClientName(appName);
-        } else {
-            baseConfig.setClientName("oncokb-core");
-        }
+        String appNameProperty = PropertiesUtils.getProperties("app.name");
+
+        StringBuilder appName = new StringBuilder();
+        appName.append(StringUtils.isNotEmpty(appNameProperty) ? appNameProperty : "oncokb-core");
+
+        OncoKBInfo oncoKBInfo = new OncoKBInfo();
+        appName.append("-app:");
+        appName.append(oncoKBInfo.getAppVersion().getVersion());
+        appName.append("-data:");
+        appName.append(oncoKBInfo.getDataVersion().getVersion());
+
+        // Use a versioned cache key prefix to prevent conflicts during deployments.
+        // In Kubernetes, old pods may still process requests and write stale data to Redis 
+        // while new pods are starting up. By including the software and data version in 
+        // the cache key, we ensure that each deployment is fetching the correct values from Redis.
+        baseConfig.setClientName(appName.toString());
     }
 
     @Bean
