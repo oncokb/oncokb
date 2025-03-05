@@ -1,6 +1,8 @@
 package org.mskcc.cbio.oncokb.model.genomeNexus.version;
 
-public class ParsedVersionInfo {
+import java.io.Serializable;
+
+public class ParsedVersionInfo implements Serializable {
     private final String genomeNexusVersion;
     private final String genomeNexusVepVersion;
     private final String vepVersion;
