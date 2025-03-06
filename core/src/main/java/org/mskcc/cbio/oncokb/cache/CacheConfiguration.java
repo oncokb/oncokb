@@ -2,8 +2,6 @@ package org.mskcc.cbio.oncokb.cache;
 
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.cache.keygenerator.ConcatGenerator;
-import org.mskcc.cbio.oncokb.model.OncoKBInfo;
-import org.mskcc.cbio.oncokb.util.CacheUtils;
 import org.mskcc.cbio.oncokb.util.PropertiesUtils;
 import org.mskcc.oncokb.meta.enumeration.RedisType;
 import org.redisson.Redisson;
