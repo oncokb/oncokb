@@ -33,7 +33,7 @@ public class OncokbTranscriptService {
 
     public OncokbTranscriptService() {
         this.client = Configuration.getDefaultApiClient();
-        String timeoutProperty = PropertiesUtils.getProperties("genome_nexus.api_timeout");
+        String timeoutProperty = PropertiesUtils.getProperties("oncokb_transcript.api_timeout");
         Integer timeout = StringUtils.isNumeric(timeoutProperty) ? Integer.parseInt(timeoutProperty) : DEFAULT_TIMEOUT;
         this.client.setConnectTimeout(timeout);
         this.client.setReadTimeout(timeout);
