@@ -3,18 +3,12 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
 	<display-name>OncoKB</display-name>
-    <welcome-file-list>
-        <welcome-file>/index.jsp</welcome-file>
-    </welcome-file-list>
 	<context-param>
 		<param-name>contextClass</param-name>
 		<param-value>
 			org.springframework.web.context.support.AnnotationConfigWebApplicationContext
 		</param-value>
 	</context-param>
-    <welcome-file-list>
-        <welcome-file>/index.jsp</welcome-file>
-    </welcome-file-list>
 	<listener>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
@@ -30,7 +24,7 @@
 		</init-param>
 		<init-param>
 			<param-name>contextConfigLocation</param-name>
-			<param-value>org.mskcc.cbio.oncokb.config.MvcConfiguration</param-value>
+			<param-value>org.mskcc.cbio.oncokb.config.MvcConfigurationEnterprise</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
@@ -42,60 +36,6 @@
         <url-pattern>/legacy-api</url-pattern>
         <url-pattern>/v1/health</url-pattern>
 	</servlet-mapping>
-    <servlet>
-        <servlet-name>PublicSinglePage</servlet-name>
-        <jsp-file>/index.jsp</jsp-file>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>PublicSinglePage</servlet-name>
-        <url-pattern>/gene/*</url-pattern>
-        <url-pattern>/genes/*</url-pattern>
-        <url-pattern>/levels/*</url-pattern>
-        <url-pattern>/team/*</url-pattern>
-        <url-pattern>/about/*</url-pattern>
-        <url-pattern>/actionableGenes/*</url-pattern>
-        <url-pattern>/terms/*</url-pattern>
-        <url-pattern>/news/*</url-pattern>
-        <url-pattern>/updates/*</url-pattern>
-        <url-pattern>/dataAccess/*</url-pattern>
-        <url-pattern>/cancerGenes/*</url-pattern>
-    </servlet-mapping>
-
-    <servlet>
-        <servlet-name>SiteMapIndex</servlet-name>
-        <jsp-file>/sitemap_index.jsp</jsp-file>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>SiteMapIndex</servlet-name>
-        <url-pattern>/sitemap_index.xml</url-pattern>
-    </servlet-mapping>
-
-    <servlet>
-        <servlet-name>SiteMapGeneral</servlet-name>
-        <jsp-file>/sitemap_general.jsp</jsp-file>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>SiteMapGeneral</servlet-name>
-        <url-pattern>/sitemap_general.xml</url-pattern>
-    </servlet-mapping>
-
-    <servlet>
-        <servlet-name>SiteMapGene</servlet-name>
-        <jsp-file>/sitemap_gene.jsp</jsp-file>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>SiteMapGene</servlet-name>
-        <url-pattern>/sitemap_gene.xml</url-pattern>
-    </servlet-mapping>
-
-    <servlet>
-        <servlet-name>RobotsIndex</servlet-name>
-        <jsp-file>/robots.jsp</jsp-file>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>RobotsIndex</servlet-name>
-        <url-pattern>/robots.txt</url-pattern>
-    </servlet-mapping>
     <!-- The cors needs to be enabled here, we do need the CORS support in the internal instances -->
     <session-config>
         <session-timeout>1</session-timeout>

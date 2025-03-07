@@ -36,18 +36,26 @@ cp -r core/src/main/resources/properties-EXAMPLE core/src/main/resources/propert
 
 ## Build the WAR file
 
-`mvn clean install -P public -DskipTests=true`
+### Choose profile
+
+1. `enterprise`: includes public and private APIs
+2. `public-api`: includes only public API endpoints
+3. `image-build`: uses Jib to generate a docker image and push to DockerHub
+
+> **_NOTE:_**  We deprecated the legacy `public` and `curate` profiles.
+
+`mvn clean install -P <profile(s)> -DskipTests=true`
 
 The WAR file is under `/web/target/`
 
-## Deploy with frontend
+## Run locally on VSCode
 
-Please choose one of the profile when building the war file
-
--   curate - core + API + curation website
--   public - core + API + public website (deprecated)
-
-You could find specific instructions in curate or public repo,
+1. Download VSCode extension `Community Server Connector`
+2. In VSCode sidebar, find `Servers` dropdown.
+3. Right click `Community Server Connector` and choose `Create New Server`.
+4. Either download Tomcat 8 on local machine or let CSC download for you.
+5. Right click Tomcat server and choose `Add Deployment`. This is the WAR file generated in the previous step.
+6. Start Tomcat server. Make sure to `Publish Server (Full)` to keep server synchronized with WAR file (if changes were made).
 
 ## Run with Docker containers
 

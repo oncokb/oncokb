@@ -12,31 +12,18 @@ jobs:
 
       - uses: actions/setup-java@v2
         with:
-          distribution: 'adopt'
+          distribution: "adopt"
           java-version: 8
 
-      - name: Package public application with Jib
+      - name: Generate docker image for enterprise build
         env:
           DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}
           DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
           TAG_NAME: ${{ github.event.release.tag_name }}
           REPOSITORY: ${{ github.repository }}
         run: |
-          mvn -ntp package -P public,production \
+          mvn -ntp package -P enterprise,image-build \
           -DskipTests \
           -Djib.to.image="${REPOSITORY}:${TAG_NAME:1}" \
-          -Djib.to.auth.username=$DOCKER_USERNAME \
-          -Djib.to.auth.password=$DOCKER_PASSWORD
-
-      - name: Package curation application with Jib
-        env:
-          DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}
-          DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
-          TAG_NAME: ${{ github.event.release.tag_name }}
-          REPOSITORY: ${{ github.repository }}
-        run: |
-          mvn -ntp package -P curate,production \
-          -DskipTests \
-          -Djib.to.image="${REPOSITORY}:${TAG_NAME:1}-curate" \
           -Djib.to.auth.username=$DOCKER_USERNAME \
           -Djib.to.auth.password=$DOCKER_PASSWORD
