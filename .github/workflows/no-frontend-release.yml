@@ -1,7 +1,7 @@
 name: Build/Push no-frontend docker image
 on:
   release:
-    types: [ published ]
+    types: [published]
 jobs:
   main:
     if: github.repository == 'oncokb/oncokb'
@@ -18,14 +18,14 @@ jobs:
         run: |
           mvn --batch-mode versions:set -DnewVersion=${TAG_NAME:1}-no-frontend -DgenerateBackupPoms=false
 
-      - name: Package application with Jib
+      - name: Generate docker image for public-api build
         env:
           DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}
           DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
           TAG_NAME: ${{ github.event.release.tag_name }}
           REPOSITORY: ${{ github.repository }}
         run: |
-          mvn -ntp package -P production \
+          mvn -ntp package -P public-api,image-build \
           -DskipTests \
           -Djib.to.image="${REPOSITORY}:${TAG_NAME:1}-no-frontend" \
           -Djib.to.auth.username=$DOCKER_USERNAME \
