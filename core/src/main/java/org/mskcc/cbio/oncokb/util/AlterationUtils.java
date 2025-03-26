@@ -1334,7 +1334,7 @@ public final class AlterationUtils {
         return findAlterationsByStartWith(StructuralAlteration.FUSIONS.getVariant(), fullAlterations);
     }
 
-    private static boolean startsWithIgnoreCase(String url, String param) {
+    public static boolean startsWithIgnoreCase(String url, String param) {
         return url.regionMatches(true, 0, param, 0, param.length());
     }
 
