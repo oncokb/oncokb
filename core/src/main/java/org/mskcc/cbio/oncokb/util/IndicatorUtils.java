@@ -328,7 +328,7 @@ public class IndicatorUtils {
             if (query.isGermline() && !indicatorQuery.getVariantExist() && query.getPathogenicity() != null) {
                 if (query.getPathogenicity().equals(Pathogenicity.YES) || query.getPathogenicity().equals(Pathogenicity.LIKELY)) {
                     GermlineVariant germlineVariant = new GermlineVariant();
-                    List<Evidence> genomicIndicatorEvis = EvidenceUtils.getGenomicIndicatorAssociatedWithPathogenicVariants(gene, query.getAlleleState());
+                    List<Evidence> genomicIndicatorEvis = EvidenceUtils.getGenomicIndicatorAssociatedWithPathogenicVariants(gene, query.getReferenceGenome(), query.getAlleleState());
                     germlineVariant.setGenomicIndicators(genomicIndicatorEvis.stream().map(Evidence::getName).collect(Collectors.toList()));
                     indicatorQuery.setGermline(germlineVariant);
                 }

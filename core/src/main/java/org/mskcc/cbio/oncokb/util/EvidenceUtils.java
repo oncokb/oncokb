@@ -326,8 +326,14 @@ public class EvidenceUtils {
         return genomicIndicatorEvis;
     }
 
-    public static List<Evidence> getGenomicIndicatorAssociatedWithPathogenicVariants(Gene gene, String alleleState) {
-        List<Evidence> genomicIndicatorEvis = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Collections.singleton(EvidenceType.GENOMIC_INDICATOR)).stream().collect(Collectors.toList());
+    public static List<Evidence> getGenomicIndicatorAssociatedWithPathogenicVariants(Gene gene, ReferenceGenome referenceGenome, String alleleState) {
+        List<Alteration> pathogenicAlterations = AlterationUtils
+            .getAllAlterations(referenceGenome, gene)
+            .stream().filter(alt -> {
+                return alt.getAlteration() != null && AlterationUtils.startsWithIgnoreCase(alt.getAlteration(), InferredMutation.PATHOGENIC_VARIANTS.getVariant());
+            })
+            .collect(Collectors.toList());
+        List<Evidence> genomicIndicatorEvis = evidenceBo.findEvidencesByAlteration(pathogenicAlterations, Collections.singleton(EvidenceType.GENOMIC_INDICATOR));
         if (StringUtils.isNotEmpty(alleleState)) {
             genomicIndicatorEvis = genomicIndicatorEvis.stream().filter(evidence -> StringUtils.isEmpty(evidence.getKnownEffect()) || evidence.getKnownEffect().toLowerCase().contains(alleleState)).collect(Collectors.toList());
         }
