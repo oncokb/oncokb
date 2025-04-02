@@ -2,8 +2,8 @@ package org.mskcc.cbio.oncokb.util;
 
 import org.apache.commons.collections.ListUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.TumorType;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -255,6 +255,15 @@ public class SummaryUtils {
     public static String variantSummary(Gene gene, Alteration exactMatchAlteration, List<Alteration> alterations, Query query) {
         if (!StringUtils.isEmpty(query.getAlteration()) && query.getAlteration().toLowerCase().startsWith(InferredMutation.ONCOGENIC_MUTATIONS.getVariant().toLowerCase())) {
             return ONCOGENIC_MUTATIONS_DEFAULT_SUMMARY;
+        }
+        EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+        // Use the curated mutation summary if exists to override the generated summary only for the exact mutation. Subject to change
+        List<Evidence> mutationSummaryList = evidenceBo.findEvidencesByAlteration(Collections.singleton(exactMatchAlteration), Collections.singleton(EvidenceType.MUTATION_SUMMARY));
+        if (mutationSummaryList.size() > 0) {
+            String mutationSummary = mutationSummaryList.iterator().next().getDescription();
+            if (StringUtils.isNotEmpty(mutationSummary)) {
+                return mutationSummary;
+            }
         }
         return getOncogenicSummarySubFunc(gene, exactMatchAlteration, alterations, query);
     }
