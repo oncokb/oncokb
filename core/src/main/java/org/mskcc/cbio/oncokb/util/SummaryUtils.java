@@ -257,7 +257,7 @@ public class SummaryUtils {
             return ONCOGENIC_MUTATIONS_DEFAULT_SUMMARY;
         }
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
-        // Use the curated mutation summary if exists to override the generated summary only for the excact mutation. Subject to change
+        // Use the curated mutation summary if exists to override the generated summary only for the exact mutation. Subject to change
         List<Evidence> mutationSummaryList = evidenceBo.findEvidencesByAlteration(Collections.singleton(exactMatchAlteration), Collections.singleton(EvidenceType.MUTATION_SUMMARY));
         if (mutationSummaryList.size() > 0) {
             String mutationSummary = mutationSummaryList.iterator().next().getDescription();
