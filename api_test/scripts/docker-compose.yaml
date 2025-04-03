@@ -37,6 +37,8 @@ services:
     build:
       dockerfile: ../golang/Dockerfile
       context: ../golang
+    volumes: 
+      - ../golang/output:/output
     depends_on:
       core:
         condition: service_healthy
