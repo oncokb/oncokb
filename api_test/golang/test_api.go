@@ -128,19 +128,19 @@ func writeDiffFiles(filename string, actual []byte, expected []byte) {
 	actualDir := outputDir + "/actual"
 	expectedDir := outputDir + "/expected"
 
-	if err := os.MkdirAll(actualDir, 0750); err != nil {
+	if err := os.MkdirAll(actualDir, 0666); err != nil {
 		panic(err)
 	}
 
-	if err := os.MkdirAll(expectedDir, 0750); err != nil {
+	if err := os.MkdirAll(expectedDir, 0666); err != nil {
 		panic(err)
 	}
 
-	if err := os.WriteFile(actualDir+"/"+filename, actual, 0660); err != nil {
+	if err := os.WriteFile(actualDir+"/"+filename, actual, 0666); err != nil {
 		panic(err)
 	}
 
-	if err := os.WriteFile(expectedDir+"/"+filename, expected, 0660); err != nil {
+	if err := os.WriteFile(expectedDir+"/"+filename, expected, 0666); err != nil {
 		panic(err)
 	}
 }
