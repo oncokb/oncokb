@@ -44,7 +44,7 @@ func main() {
 		}
 
 		expectedResponse, err := fs.ReadFile(expectedResponsesFs, d.Name())
-		if err == nil {
+		if err != nil {
 			expectedResponse = []byte{}
 		}
 
@@ -63,22 +63,6 @@ func main() {
 		os.Exit(1)
 	}
 }
-
-// type jsonArray string
-
-// func (json *jsonArray) post(url string) (string, error) {
-// 	resp, err := http.Post(url, "application/json", bytes.NewBuffer([]byte(*json)))
-// 	if err != nil {
-// 		return "", err
-// 	}
-
-// 	body, err := io.ReadAll(resp.Body)
-// 	if err != nil {
-// 		return "", err
-// 	}
-
-// 	return string(body), nil
-// }
 
 func get(requestUrl string, queryData []byte) ([]byte, error) {
 	var jsonMap map[string]any
@@ -124,7 +108,7 @@ func writeDiffFiles(filename string, actual []byte, expected []byte) {
 		panic("unable to get current filename")
 	}
 
-	outputDir := filepath.Dir(filepath.Dir(file)) + "/output"
+	outputDir := filepath.Dir(file) + "/output"
 	actualDir := outputDir + "/actual"
 	expectedDir := outputDir + "/expected"
 
@@ -144,29 +128,3 @@ func writeDiffFiles(filename string, actual []byte, expected []byte) {
 		panic(err)
 	}
 }
-
-// func constructJsonArray(jsonObjectsDir string) (jsonArray, error) {
-// 	jsonObjectsDirFs := os.Mkdir()
-
-// 	jsonObjects := []string{}
-// 	err := filepath.WalkDir(jsonObjectsDir, func(_ string, d fs.DirEntry, err error) error {
-// 		if err != nil {
-// 			return err
-// 		}
-
-// 		if strings.HasSuffix(d.Name(), ".json") {
-// 			file_contents, err := fs.ReadFile(jsonObjectsDirFs, d.Name())
-// 			if err != nil {
-// 				return err
-// 			}
-
-// 			jsonObjects = append(jsonObjects, string(file_contents))
-// 		}
-// 		return nil
-// 	})
-// 	if err != nil {
-// 		return "", err
-// 	}
-
-// 	return jsonArray("[" + strings.Join(jsonObjects, ",") + "]"), nil
-// }
