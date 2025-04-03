@@ -11,7 +11,7 @@ jobs:
 
         - name: Run Docker containers
           run: |
-            docker compose -f ./api_test/scripts/docker-compose.yaml up --build
+            ./api_test/scripts/run_test.sh
 
         - name: Archive diffs
           if: failure()
