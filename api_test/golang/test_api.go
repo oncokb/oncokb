@@ -10,21 +10,36 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strconv"
 )
 
 const QUERIES_DIR = "queries"
+const PROTEIN_CHANGE_DIR = QUERIES_DIR + "/protein_change"
+const GENOMIC_CHANGE_DIR = QUERIES_DIR + "/genomic_change"
+const HGVSG_DIR = QUERIES_DIR + "/hgvsg"
 const EXPECTED_RESPONSES_DIR = "expected_responses"
+
 const BASE_URL = "http://core:8080"
 const PROTEIN_CHANGE_URL = BASE_URL + "/api/v1/annotate/mutations/byProteinChange"
+const GENOMIC_LOCATION_URL = BASE_URL + "/api/v1/annotate/mutations/byGenomicChange"
+const HGVSG_URL = BASE_URL + "/api/v1/annotate/mutations/byHGVSg"
 
 func main() {
-	queriesDirFs := os.DirFS(QUERIES_DIR)
+	proteinChangeFailure := runQueriesAndReportFailure(PROTEIN_CHANGE_DIR, PROTEIN_CHANGE_URL)
+	genomicLocationFailure := runQueriesAndReportFailure(GENOMIC_CHANGE_DIR, GENOMIC_LOCATION_URL)
+	hgvsgFailure := runQueriesAndReportFailure(HGVSG_DIR, HGVSG_URL)
+	if proteinChangeFailure || genomicLocationFailure || hgvsgFailure {
+		os.Exit(1)
+	}
+}
+
+func runQueriesAndReportFailure(dir string, url string) bool {
+	dirFs := os.DirFS(dir)
 	expectedResponsesFs := os.DirFS(EXPECTED_RESPONSES_DIR)
 
 	isFailure := false
-	err := filepath.WalkDir(QUERIES_DIR, func(_ string, d fs.DirEntry, err error) error {
+
+	err := filepath.WalkDir(dir, func(_ string, d fs.DirEntry, err error) error {
 		if fs.DirEntry.Type(d).IsDir() { // omit root dir
 			return nil
 		}
@@ -33,12 +48,12 @@ func main() {
 			panic(err)
 		}
 
-		queryData, err := fs.ReadFile(queriesDirFs, d.Name())
+		queryData, err := fs.ReadFile(dirFs, d.Name())
 		if err != nil {
 			panic(fmt.Sprintf("Error reading file %v/%v: %v", QUERIES_DIR, d.Name(), err))
 		}
 
-		actualResponse, err := get(PROTEIN_CHANGE_URL, queryData)
+		actualResponse, err := get(url, queryData)
 		if err != nil {
 			panic(fmt.Sprintf("Error executing GET request for %v/%v: %v", QUERIES_DIR, d.Name(), err))
 		}
@@ -59,9 +74,7 @@ func main() {
 		panic(err)
 	}
 
-	if isFailure {
-		os.Exit(1)
-	}
+	return isFailure
 }
 
 func get(requestUrl string, queryData []byte) ([]byte, error) {
@@ -103,12 +116,12 @@ func get(requestUrl string, queryData []byte) ([]byte, error) {
 }
 
 func writeDiffFiles(filename string, actual []byte, expected []byte) {
-	_, file, _, ok := runtime.Caller(0)
-	if !ok {
-		panic("unable to get current filename")
+	ex, err := os.Executable()
+	if err != nil {
+		panic(err)
 	}
 
-	outputDir := filepath.Dir(file) + "/output"
+	outputDir := filepath.Dir(ex) + "/output"
 	actualDir := outputDir + "/actual"
 	expectedDir := outputDir + "/expected"
 
