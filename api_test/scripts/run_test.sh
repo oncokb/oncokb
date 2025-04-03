@@ -4,4 +4,4 @@ if [ -d $RESOURCES_DIR ]; then
 fi
 
 mvn -ntp package -P enterprise -DskipTests=true
-docker compose -f $PWD/api_test/scripts/docker-compose.yaml up --build
+docker compose -f $PWD/api_test/scripts/docker-compose.yaml up --build --exit-code-from api-test
