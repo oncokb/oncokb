@@ -4,6 +4,8 @@ import com.google.common.collect.Sets;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.ArticleBo;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
@@ -516,6 +518,18 @@ public class EvidenceUtils {
         return result;
     }
 
+    public static Set<String> getPmids(JSONObject evidence) {
+        Set<String> result = new HashSet<>();
+        JSONArray articles = evidence.getJSONArray("articles");
+        for (int i =0; i<articles.length(); i++) {
+            JSONObject article = articles.getJSONObject(i);
+            if (article.optString("pmid", null) != null) {
+                result.add(article.getString("pmid"));
+            }
+        }
+        return result;
+    }
+
     public static Set<ArticleAbstract> getAbstracts(Set<Evidence> evidences) {
         Set<ArticleAbstract> result = new HashSet<>();
 
@@ -527,6 +541,21 @@ public class EvidenceUtils {
                     articleAbstract.setLink(article.getLink());
                     result.add(articleAbstract);
                 }
+            }
+        }
+        return result;
+    }
+
+    public static Set<ArticleAbstract> getAbstracts(JSONObject evidence) {
+        Set<ArticleAbstract> result = new HashSet<>();
+        JSONArray articles = evidence.getJSONArray("articles");
+        for (int i =0; i<articles.length(); i++) {
+            JSONObject article = articles.getJSONObject(i);
+            if (!StringUtils.isEmpty(article.optString("abstract", null))) {
+                ArticleAbstract articleAbstract = new ArticleAbstract();
+                articleAbstract.setAbstractContent(article.getString("abstract"));
+                articleAbstract.setLink(article.optString("link", null));
+                result.add(articleAbstract);
             }
         }
         return result;
