@@ -1,8 +1,5 @@
 package org.mskcc.cbio.oncokb.util;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Sets;
 import com.mysql.jdbc.StringUtils;
 import org.json.JSONArray;
@@ -241,14 +238,15 @@ public class ValidationUtils {
     }
 
     public static JSONArray compareActionableGene() throws IOException {
-        String json = null;
         JSONArray data = new JSONArray();
-        json = FileUtils.readPublicOncoKBRemote("https://www.oncokb.org/api/v1/evidences/lookup?levelOfEvidence=" + org.apache.commons.lang3.StringUtils.join(LevelUtils.getTherapeuticLevels(), ",") + "&evidenceTypes=" + org.apache.commons.lang3.StringUtils.join(EvidenceTypeUtils.getTreatmentEvidenceTypes(), ","));
-
-        ObjectMapper mapper = new ObjectMapper()
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        List<Evidence> publicTherapeuticEvidences = mapper.readValue(json,new TypeReference<ArrayList<Evidence>>() {});
-        Set<String> publicEvidenceStrings = publicTherapeuticEvidences.stream().map(evidence -> evidenceUniqueString(evidence)).collect(Collectors.toSet());
+        String url = "https://www.oncokb.org/api/v1/evidences/lookup?levelOfEvidence=" + org.apache.commons.lang3.StringUtils.join(LevelUtils.getTherapeuticLevels(), ",") + "&evidenceTypes=" + org.apache.commons.lang3.StringUtils.join(EvidenceTypeUtils.getTreatmentEvidenceTypes(), ",");
+        String json = FileUtils.readPublicOncoKBRemote(url);
+        JSONArray publicTherapeuticEvidences = new JSONArray(json);
+        Set<String> publicEvidenceStrings = new HashSet<>();
+        for (int i = 0; i < publicTherapeuticEvidences.length(); i++) {
+            JSONObject evidence = publicTherapeuticEvidences.getJSONObject(i);
+            publicEvidenceStrings.add(evidenceUniqueString(evidence));
+        }
 
         Set<Evidence> latestTherapeuticEvidences = EvidenceUtils.getEvidenceByEvidenceTypesAndLevels(EvidenceTypeUtils.getTreatmentEvidenceTypes(), LevelUtils.getTherapeuticLevels());
         Set<String> latestEvidenceStrings = latestTherapeuticEvidences.stream().map(evidence -> evidenceUniqueString(evidence)).collect(Collectors.toSet());
@@ -262,6 +260,20 @@ public class ValidationUtils {
         latestEvidenceStrings.stream().forEach(string -> data.put(getErrorMessage(string, "Latest")));
 
         return data;
+        
+    }
+
+    private static String evidenceUniqueString(JSONObject evidence) {
+        List<String> strings = new ArrayList<>();
+        strings.add(evidence.optString("levelOfEvidence", null));
+        strings.add(evidence.getJSONObject("gene").optString("hugoSymbol", null));
+        strings.add(getEvidenceSortedAlterationsName(evidence));
+        strings.add(TumorTypeUtils.getEvidenceTumorTypesName(evidence));
+        strings.add(TreatmentUtils.getTreatmentName(evidence.getJSONArray("treatments")));
+        List<String> pmids = EvidenceUtils.getPmids(evidence).stream().sorted().collect(Collectors.toList());
+        strings.add(pmids.size() > 0 ? String.join(", ", pmids) : " 0 pmids");
+        strings.add(EvidenceUtils.getAbstracts(evidence).size() + " abstract(s)");
+        return String.join(" / ", strings);
     }
 
     private static String evidenceUniqueString(Evidence evidence) {
@@ -314,6 +326,16 @@ public class ValidationUtils {
         return evidence.getAlterations().stream().map(alteration -> getAlterationName(alteration)).sorted().collect(Collectors.joining(", "));
     }
 
+    private static String getEvidenceSortedAlterationsName(JSONObject evidence) {
+        JSONArray alterations = evidence.getJSONArray("alterations");
+        List<String> alterationNames = new ArrayList<>();
+        for (int i=0; i< alterations.length(); i++) {
+            JSONObject alteration = alterations.getJSONObject(i);
+            alterationNames.add(getAlterationName(alteration));
+        }
+        return alterationNames.stream().sorted().collect(Collectors.joining(", "));
+    }
+
     private static String getTargetByAlteration(Alteration alteration) {
         return getTarget(alteration.getGene().getHugoSymbol(), getAlterationName(alteration));
     }
@@ -323,6 +345,16 @@ public class ValidationUtils {
             return alteration.getName();
         } else {
             return alteration.getName() + " (" + alteration.getAlteration() + ")";
+        }
+    }
+
+    private static String getAlterationName(JSONObject alteration) {
+        String alterationName = alteration.getString("name");
+        String alterationAlteration = alteration.getString("alteration");
+        if (alterationName.equals(alterationAlteration) || alterationAlteration.contains("excluding")) {
+            return alterationName;
+        } else {
+            return alterationName+ " (" + alterationAlteration + ")";
         }
     }
 
