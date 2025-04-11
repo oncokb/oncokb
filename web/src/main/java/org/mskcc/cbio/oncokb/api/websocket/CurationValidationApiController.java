@@ -25,6 +25,8 @@ import static org.mskcc.cbio.oncokb.model.StructuralAlteration.TRUNCATING_MUTATI
 
 @ServerEndpoint(value = "/api/websocket/curation/validation")
 public class CurationValidationApiController {
+    private static final String DEV_TEAM_ISSUE = " This is an issue the dev team needs to fix during the data release.";
+
 
     private Session session;
 
@@ -313,7 +315,7 @@ public class CurationValidationApiController {
                 }
                 String altTargetName = alteration.getName() + " / " + (MainUtils.isVUS(alteration) ? "VUS" : "CURATED");
                 if (StringUtils.isEmpty(sequence)) {
-                    data.put(ValidationUtils.getErrorMessage(ValidationUtils.getTarget(alteration.getGene().getHugoSymbol(), altTargetName), "No sequence available for " + alteration.getGene().getHugoSymbol()));
+                    data.put(ValidationUtils.getErrorMessage(ValidationUtils.getTarget(alteration.getGene().getHugoSymbol(), altTargetName), "No sequence available for " + alteration.getGene().getHugoSymbol()) + DEV_TEAM_ISSUE);
                 } else if (referenceGenome != null) {
                     if (sequence.length() < alteration.getProteinStart()) {
                         data.put(ValidationUtils.getErrorMessage(ValidationUtils.getTarget(alteration.getGene().getHugoSymbol(), altTargetName), "The gene only has " + sequence.length() + " AAs. But the variant protein start is " + alteration.getProteinStart()));
@@ -393,7 +395,7 @@ public class CurationValidationApiController {
                                 return new TumorType(excludedTT);
                             }).collect(Collectors.toSet());
                             String tumorName = TumorTypeUtils.getTumorTypesNameWithExclusion(Collections.singleton(tumorTypeModel), excludedTumorTypeModels);
-                            
+
                             StringBuilder errorMessage = new StringBuilder();
                             errorMessage.append("Is ");
                             errorMessage.append(response.getOncogenic());
