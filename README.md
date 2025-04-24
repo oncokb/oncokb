@@ -82,30 +82,9 @@ For this option, you need to download the VEP cache, which is used in the `gn-ve
 
 1. OncoKB requires a MySQL server and the `oncokb` and `oncokb-transcript` databases imported. This step must be completed before continuing the installation process. Reach out to contact@oncokb.org to get access to the data dump. [How to setup MySQL Server](#how-to-setup-mysql-server)
 
-2. Download the Genome Nexus VEP data from our AWS S3 Bucket.
+2. Follow the [Genome Nexus VEP instructions](https://github.com/genome-nexus/genome-nexus-vep) for downloading and setting up the VEP MySQL server. 
 
-    ```
-    # The home directory is used to store the VEP cache in this tutorial, but this can be changed to your preferred download location.
-    cd ~
-    mkdir gn-vep-data && cd "$_"
-
-    mkdir 98_GRCh37 && cd "$_"
-    curl -o 98_GRCh37.tar https://oncokb.s3.amazonaws.com/gn-vep-data/98_GRCh37/98_GRCh37.tar
-    tar xvf 98_GRCh37.tar
-
-    cd ..
-    mkdir 98_GRCh38 && cd "$_"
-    curl -o 98_GRCh38.tar https://oncokb.s3.amazonaws.com/gn-vep-data/98_GRCh38/98_GRCh38.tar
-    tar xvf 98_GRCh38.tar
-    ```
-
-3. Set environment variable for the location of VEP caches
-    ```
-    # Update path if the VEP data was installed elsewhere
-    export VEP_CACHE=~/gn-vep-data/98_GRCh37
-    export VEP_GRCH38_CACHE=~/gn-vep-data/98_GRCh38
-    ```
-4. Run docker-compose to create containers.
+3. Run docker-compose to create containers.
     ```
     docker-compose --profile genome-nexus up -d
     ```
