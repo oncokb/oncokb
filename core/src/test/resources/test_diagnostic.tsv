@@ -12,5 +12,5 @@ ABL1	BCR-ABL1 Fusion	CML	The presence of a BCR-ABL1 fusion is required for a dia
 ABL1	BCR-ABL1 Fusion	MPN			0
 
 # Alternative allele should not get Dx from the curated alteration
-BRAF	V600E	Hairy Cell Leukemia	The presence of a BRAF V600E mutation strongly supports a diagnosis of hairy cell leukemia.	Dx2	1
+BRAF	V600E	Hairy Cell Leukemia	The presence of a BRAF V600E mutation supports a diagnosis of hairy cell leukemia.	Dx2	1
 BRAF	V600K	Hairy Cell Leukemia			0
