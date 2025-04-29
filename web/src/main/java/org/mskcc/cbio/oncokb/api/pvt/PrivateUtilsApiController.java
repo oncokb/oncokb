@@ -630,4 +630,21 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
+    @Override
+    public ResponseEntity<String> utilAnnotateCPL(@ApiParam(value = "CPL Request", required = true) @RequestBody CplAnnotationRequest cplRequest) {
+        String interpolatedText =  CplUtils.annotate(
+            cplRequest.getTemplate(),
+            cplRequest.getHugoSymbol(),
+            cplRequest.getAlteration(),
+            cplRequest.getCancerType(),
+            cplRequest.getReferenceGenome(),
+            null,
+            null,
+            false
+        );
+
+        return new ResponseEntity<>(interpolatedText, HttpStatus.OK);
+        
+    }
+
 }
