@@ -6,7 +6,7 @@ services:
   # oncokb requires that a MySQL server is started and has the the oncokb data imported into the database.
   # Reach out to contact@oncokb.org to get access to the data dump
   oncokb:
-    image: oncokb/oncokb:3.20.3
+    image: oncokb/oncokb:3.29.1
     ports:
       - "8080:8080"
     environment:
@@ -44,7 +44,14 @@ services:
       - "8888:8888"
     environment:
       - SERVER_PORT=8888
-    command: java -Dgn_vep.region.url=http://gn-vep:8080/vep/human/region/VARIANT -Dspring.data.mongodb.uri=mongodb://gn-mongo:27017/annotator -jar /app.war
+    command: >
+      java 
+      -Dgn_vep.region.url=http://gn-vep:8080/vep/human/region/VARIANT 
+      -Dspring.data.mongodb.uri=mongodb://gn-mongo:27017/annotator 
+      -Dcache.enabled=true
+      -Dvep.static=true
+      -jar 
+      /app.war
     links:
       - gn-mongo
     depends_on:
@@ -52,7 +59,7 @@ services:
 
   gn-mongo:
     profiles: ["genome-nexus"]
-    image: genomenexus/gn-mongo:0.24
+    image: genomenexus/gn-mongo:0.32
     restart: always
 
   # gn-vep requires that a MySQL server is started and has the the oncokb data imported into the database.
@@ -81,6 +88,8 @@ services:
       java 
       -Dspring.data.mongodb.uri=mongodb://gn-mongo-grch38:27017/annotator
       -Dgn_vep.region.url=http://gn-vep-grch38:8080/vep/human/region/VARIANT
+      -Dcache.enabled=true
+      -Dvep.static=true
       -jar 
       /app.war
     links:
@@ -90,7 +99,7 @@ services:
 
   gn-mongo-grch38:
     profiles: ["genome-nexus"]
-    image: genomenexus/gn-mongo:v0.24_grch38_ensembl95
+    image: genomenexus/gn-mongo:0.32_grch38_ensembl95
     restart: always
 
   gn-vep-grch38:
