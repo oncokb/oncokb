@@ -94,6 +94,8 @@ public class Alteration implements java.io.Serializable {
     @Column(name = "variant_residues")
     private String variantResidues;
 
+    private Integer exon;
+
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "alteration_reference_genome", joinColumns = @JoinColumn(name = "alteration_id", nullable = false))
     @Column(length = 10, name = "reference_genome")
@@ -208,6 +210,14 @@ public class Alteration implements java.io.Serializable {
 
     public void setVariantResidues(String variantResidues) {
         this.variantResidues = variantResidues;
+    }
+
+    public Integer getExon() {
+        return exon;
+    }
+
+    public void setExon(Integer exon) {
+        this.exon = exon;
     }
 
     public Set<ReferenceGenome> getReferenceGenomes() {
