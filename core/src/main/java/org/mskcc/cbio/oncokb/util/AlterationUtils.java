@@ -1,6 +1,33 @@
 package org.mskcc.cbio.oncokb.util;
 
-import org.apache.commons.lang3.ArrayUtils;
+import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
+import static org.mskcc.cbio.oncokb.Constants.FRAMESHIFT_VARIANT;
+import static org.mskcc.cbio.oncokb.Constants.IN_FRAME_DELETION;
+import static org.mskcc.cbio.oncokb.Constants.IN_FRAME_INSERTION;
+import static org.mskcc.cbio.oncokb.Constants.MISSENSE_VARIANT;
+import static org.mskcc.cbio.oncokb.Constants.SPLICE_SITE_VARIANTS;
+import static org.mskcc.cbio.oncokb.Constants.UPSTREAM_GENE;
+import static org.mskcc.cbio.oncokb.model.StructuralAlteration.TRUNCATING_MUTATIONS;
+import static org.mskcc.cbio.oncokb.util.MainUtils.isOncogenic;
+import static org.mskcc.cbio.oncokb.util.VariantConsequenceUtils.TOO_BROAD_CONSEQUENCES;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.StringUtils;
 import org.genome_nexus.ApiException;
 import org.genome_nexus.client.TranscriptConsequenceSummary;
@@ -11,18 +38,23 @@ import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotateMutationByHGVSgQuery;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
-import org.mskcc.cbio.oncokb.model.*;
+import org.mskcc.cbio.oncokb.model.Alteration;
+import org.mskcc.cbio.oncokb.model.AlterationPositionBoundary;
+import org.mskcc.cbio.oncokb.model.AlterationType;
+import org.mskcc.cbio.oncokb.model.ArticleAbstract;
+import org.mskcc.cbio.oncokb.model.ClinicalVariant;
+import org.mskcc.cbio.oncokb.model.Evidence;
+import org.mskcc.cbio.oncokb.model.EvidenceType;
+import org.mskcc.cbio.oncokb.model.FrameshiftVariant;
+import org.mskcc.cbio.oncokb.model.Gene;
+import org.mskcc.cbio.oncokb.model.InferredMutation;
+import org.mskcc.cbio.oncokb.model.Oncogenicity;
+import org.mskcc.cbio.oncokb.model.ReferenceGenome;
+import org.mskcc.cbio.oncokb.model.SpecialVariant;
+import org.mskcc.cbio.oncokb.model.StructuralAlteration;
+import org.mskcc.cbio.oncokb.model.TumorType;
+import org.mskcc.cbio.oncokb.model.VariantConsequence;
 import org.mskcc.cbio.oncokb.model.genomeNexus.TranscriptSummaryAlterationResult;
-
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import static org.mskcc.cbio.oncokb.Constants.*;
-import static org.mskcc.cbio.oncokb.model.StructuralAlteration.TRUNCATING_MUTATIONS;
-import static org.mskcc.cbio.oncokb.util.MainUtils.isOncogenic;
-import static org.mskcc.cbio.oncokb.util.VariantConsequenceUtils.TOO_BROAD_CONSEQUENCES;
 
 /**
  * @author jgao, Hongxin Zhang
@@ -694,43 +726,47 @@ public final class AlterationUtils {
 
     private static Alteration convertTranscriptConsequenceSummaryToAlteration(TranscriptSummaryAlterationResult transcriptSummaryAlterationResult) {
         if (transcriptSummaryAlterationResult != null) {
-            TranscriptConsequenceSummary transcriptConsequenceSummary = transcriptSummaryAlterationResult.getTranscriptConsequenceSummary();
-            if (transcriptConsequenceSummary != null) {
-                Alteration alteration = new Alteration();
-                String hugoSymbol = transcriptConsequenceSummary.getHugoGeneSymbol();
-                Integer entrezGeneId = StringUtils.isNumeric(transcriptConsequenceSummary.getEntrezGeneId()) ? Integer.parseInt(transcriptConsequenceSummary.getEntrezGeneId()) : null;
-                if (StringUtils.isNotEmpty(transcriptConsequenceSummary.getHugoGeneSymbol())) {
-                    Gene gene = GeneUtils.getGene(hugoSymbol);
-                    if (gene == null) {
-                        gene = new Gene();
-                        gene.setHugoSymbol(transcriptConsequenceSummary.getHugoGeneSymbol());
-                        gene.setEntrezGeneId(entrezGeneId);
-                    }
-                    alteration.setGene(gene);
-                }
-
-                if (StringUtils.isNotEmpty(transcriptConsequenceSummary.getHgvspShort())) {
-                    String hgvspShort = transcriptConsequenceSummary.getHgvspShort().trim().replace("p.", "");
-                    alteration.setAlteration(hgvspShort);
-                    alteration.setName(hgvspShort);
-                }
-                if (transcriptConsequenceSummary.getProteinPosition() != null) {
-                    if (transcriptConsequenceSummary.getProteinPosition().getStart() != null) {
-                        alteration.setProteinStart(transcriptConsequenceSummary.getProteinPosition().getStart());
-                    }
-                    if (transcriptConsequenceSummary.getProteinPosition().getEnd() != null) {
-                        alteration.setProteinEnd(transcriptConsequenceSummary.getProteinPosition().getEnd());
-                    }
-                }
-                if (StringUtils.isNotEmpty(transcriptConsequenceSummary.getConsequenceTerms())) {
-                    alteration.setConsequence(VariantConsequenceUtils.findVariantConsequenceByTerm(transcriptConsequenceSummary.getConsequenceTerms()));
-                }
-                return alteration;
-            }
-            return null;
+            return convertTranscriptConsequenceSummaryToAlteration(transcriptSummaryAlterationResult.getTranscriptConsequenceSummary());
         } else {
             return null;
         }
+    }
+
+    public static Alteration convertTranscriptConsequenceSummaryToAlteration(TranscriptConsequenceSummary transcriptConsequenceSummary) {
+        if (transcriptConsequenceSummary == null) {
+            return null;
+        }
+        
+        Alteration alteration = new Alteration();
+        String hugoSymbol = transcriptConsequenceSummary.getHugoGeneSymbol();
+        Integer entrezGeneId = StringUtils.isNumeric(transcriptConsequenceSummary.getEntrezGeneId()) ? Integer.parseInt(transcriptConsequenceSummary.getEntrezGeneId()) : null;
+        if (StringUtils.isNotEmpty(transcriptConsequenceSummary.getHugoGeneSymbol())) {
+            Gene gene = GeneUtils.getGene(hugoSymbol);
+            if (gene == null) {
+                gene = new Gene();
+                gene.setHugoSymbol(transcriptConsequenceSummary.getHugoGeneSymbol());
+                gene.setEntrezGeneId(entrezGeneId);
+            }
+            alteration.setGene(gene);
+        }
+
+        if (StringUtils.isNotEmpty(transcriptConsequenceSummary.getHgvspShort())) {
+            String hgvspShort = transcriptConsequenceSummary.getHgvspShort().trim().replace("p.", "");
+            alteration.setAlteration(hgvspShort);
+            alteration.setName(hgvspShort);
+        }
+        if (transcriptConsequenceSummary.getProteinPosition() != null) {
+            if (transcriptConsequenceSummary.getProteinPosition().getStart() != null) {
+                alteration.setProteinStart(transcriptConsequenceSummary.getProteinPosition().getStart());
+            }
+            if (transcriptConsequenceSummary.getProteinPosition().getEnd() != null) {
+                alteration.setProteinEnd(transcriptConsequenceSummary.getProteinPosition().getEnd());
+            }
+        }
+        if (StringUtils.isNotEmpty(transcriptConsequenceSummary.getConsequenceTerms())) {
+            alteration.setConsequence(VariantConsequenceUtils.findVariantConsequenceByTerm(transcriptConsequenceSummary.getConsequenceTerms()));
+        }
+        return alteration;
     }
 
     public static List<VariantAnnotation> getHgvsgVariantsAnnotationWithQueries(List<AnnotateMutationByHGVSgQuery> queries, ReferenceGenome referenceGenome) throws ApiException {
