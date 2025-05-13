@@ -724,7 +724,7 @@ public final class AlterationUtils {
         return alt;
     }
 
-    private static Alteration convertTranscriptConsequenceSummaryToAlteration(TranscriptSummaryAlterationResult transcriptSummaryAlterationResult) {
+    private static Alteration convertTranscriptSummaryAlterationResultToAlteration(TranscriptSummaryAlterationResult transcriptSummaryAlterationResult) {
         if (transcriptSummaryAlterationResult != null) {
             return convertTranscriptConsequenceSummaryToAlteration(transcriptSummaryAlterationResult.getTranscriptConsequenceSummary());
         } else {
@@ -799,7 +799,7 @@ public final class AlterationUtils {
             if (result == null) {
                 result = new TranscriptSummaryAlterationResult();
             }
-            Alteration alteration = convertTranscriptConsequenceSummaryToAlteration(result);
+            Alteration alteration = convertTranscriptSummaryAlterationResultToAlteration(result);
             if (alteration != null) {
                 result.setAlteration(alteration);
             } else {
