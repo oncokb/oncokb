@@ -86,15 +86,6 @@ public class AnnotationsApiController {
                 new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")),
                 false
             );
-
-            try {
-                List<TranscriptSummaryAlterationResult> annotatedAlterations = getAlterationsFromGenomeNexusByHgvs(
-                    matchedRG,
-                    Collections.singletonList((hugoSymbol + ":p." + proteinChange).toUpperCase())
-                );
-                TranscriptSummaryAlterationResult selectedAnnotatedAlteration = annotatedAlterations.isEmpty() ? new TranscriptSummaryAlterationResult() : annotatedAlterations.get(0);
-                addTranscriptAndExonToResponse(indicatorQueryResp, selectedAnnotatedAlteration.getTranscriptConsequenceSummary());
-            } catch (Exception e) { }
         }
 
         return new ResponseEntity<>(indicatorQueryResp, HttpStatus.OK);
@@ -780,14 +771,6 @@ public class AnnotationsApiController {
                 false
             );
             resp.getQuery().setId(query.getId());
-            try {
-                List<TranscriptSummaryAlterationResult> annotatedAlterations = getAlterationsFromGenomeNexusByHgvs(
-                    query.getReferenceGenome(),
-                    Collections.singletonList((query.getGene().getHugoSymbol() + ":p." + query.getAlteration()).toUpperCase())
-                );
-                TranscriptSummaryAlterationResult selectedAnnotatedAlteration = annotatedAlterations.isEmpty() ? new TranscriptSummaryAlterationResult() : annotatedAlterations.get(0);
-                addTranscriptAndExonToResponse(resp, selectedAnnotatedAlteration.getTranscriptConsequenceSummary());
-            } catch (Exception e) { }
             result.add(resp);
         }
         return result;

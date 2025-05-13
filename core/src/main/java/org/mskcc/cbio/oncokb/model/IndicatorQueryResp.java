@@ -49,7 +49,7 @@ public class IndicatorQueryResp implements java.io.Serializable {
     private Boolean VUS = false;
     @ApiModelProperty(value = "Whether variant is recurrently found in cancer with statistical significance, as defined in Chang et al. (2017). See SOP Protocol 9.2")
     private Boolean hotspot = false;
-    @ApiModelProperty(value = "(Nullable) The affected exon of this variant, if applicable")
+    @ApiModelProperty(value = "(Nullable) The affected exon of this variant, if applicable (currently only supported when annotating via HGVSg or Genomic Location)")
     private String exon;
 
     @ApiModelProperty(value = "Gene summary. Defaulted to \"\"")
