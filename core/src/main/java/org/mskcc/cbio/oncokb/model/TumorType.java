@@ -20,7 +20,7 @@ import java.util.*;
 
 @Entity
 @Table(name = "cancer_type")
-@ApiModel(description = "OncoTree Detailed Cancer Type")
+@ApiModel(description = "OncoTree Detailed Cancer Type", value="TumorTypeEntity")
 public class TumorType implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
