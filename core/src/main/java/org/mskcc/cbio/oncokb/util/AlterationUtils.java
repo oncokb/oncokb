@@ -71,6 +71,7 @@ public final class AlterationUtils {
     // We do not intend to do comprehensive checking, but only eliminate some basic errors.
     // GenomeNexus will evaluate it further
     public static Pattern HGVSG_FORMAT = Pattern.compile("((grch37|grch38):)?((chr)?[\\dxy]+:g\\.\\d+.*)", Pattern.CASE_INSENSITIVE);
+    public static Pattern HGVSP_FORMAT = Pattern.compile("((grch37|grch38):)?(.+:p\\..+)", Pattern.CASE_INSENSITIVE); 
     public static Pattern HGVSC_FORMAT = Pattern.compile("((grch37|grch38):)?(ENST\\d+(\\.\\d+)?:c\\.\\d+.*)", Pattern.CASE_INSENSITIVE);
     public static Pattern GENOMIC_CHANGE_FORMAT = Pattern.compile("((grch37|grch38):)?([\\dxy]+,\\d+,\\d+,.*)", Pattern.CASE_INSENSITIVE);
 
@@ -106,6 +107,13 @@ public final class AlterationUtils {
             return false;
         }
         return HGVSC_FORMAT.matcher(hgvsc).matches();
+    }
+    public static boolean isValidHgvsp(String hgvsp) {
+        hgvsp = hgvsp == null ? null : hgvsp.trim();
+        if (StringUtils.isEmpty(hgvsp)) {
+            return false;
+        }
+        return HGVSP_FORMAT.matcher(hgvsp).matches();
     }
 
     public static boolean isValidHgvs(String hgvs) {
