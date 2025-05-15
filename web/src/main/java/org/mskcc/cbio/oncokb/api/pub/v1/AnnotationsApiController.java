@@ -821,12 +821,12 @@ public class AnnotationsApiController {
     }
 
     private void addTranscriptAndExonToResponse(IndicatorQueryResp response, TranscriptConsequenceSummary summary) {
-        if (summary != null && StringUtils.isNotEmpty(summary.getTranscriptId())) {
+        if (summary != null) {
             if (StringUtils.isNotEmpty(summary.getTranscriptId())) {
                 response.getQuery().setCanonicalTranscript(summary.getTranscriptId());
             }
             if (StringUtils.isNotEmpty(summary.getExon())) {
-                response.setExon(summary.getExon().replaceAll("/.*", ""));
+                response.setExon(StringUtils.substringBefore(summary.getExon(), "/"));
             }
         }
     }
