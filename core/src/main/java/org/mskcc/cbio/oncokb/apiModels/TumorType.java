@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Objects;
 
 
-@ApiModel(description = "OncoTree Detailed Cancer Type. See https://oncotree.mskcc.org/?version=oncotree_2019_12_01")
+@ApiModel(description = "OncoTree Detailed Cancer Type. See https://oncotree.mskcc.org/?version=oncotree_2019_12_01", value="TumorType")
 public class TumorType implements Serializable {
 
     @ApiModelProperty(value = "Database TumorType ID")
