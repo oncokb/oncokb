@@ -177,7 +177,8 @@ public class CacheFetcher {
                     gene.getGrch37Isoform(), gene.getGrch37RefSeq(),
                     gene.getGrch38Isoform(), gene.getGrch38RefSeq(),
                     gene.getEntrezGeneId(), gene.getHugoSymbol(),
-                    gene.getTSG(), gene.getOncogene(),
+                    gene.getGeneType().equals(GeneType.ONCOGENE_AND_TSG) || gene.getGeneType().equals(GeneType.TSG), 
+                    gene.getGeneType().equals(GeneType.ONCOGENE_AND_TSG) || gene.getGeneType().equals(GeneType.ONCOGENE), 
                     highestSensitiveLevel, highestResistanceLevel,
                     includeEvidence ? SummaryUtils.geneSummary(gene, gene.getHugoSymbol()) : "",
                     includeEvidence ? SummaryUtils.geneBackground(gene, gene.getHugoSymbol()) : ""

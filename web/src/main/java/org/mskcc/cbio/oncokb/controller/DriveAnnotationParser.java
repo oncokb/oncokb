@@ -129,19 +129,21 @@ public class DriveAnnotationParser {
         String oncogene = geneType == null ? null : (geneType.has("ocg") ? geneType.getString("ocg").trim() : null);
         String tsg = geneType == null ? null : (geneType.has("tsg") ? geneType.getString("tsg").trim() : null);
 
-        if (oncogene != null) {
-            if (oncogene.equals("Oncogene")) {
-                gene.setOncogene(true);
+        // null previously represented unknown or neither? Let's default to unknown
+        if (oncogene == null && tsg == null) {
+            gene.setGeneType(GeneType.UNKNOWN);
+        } else if (oncogene != null && tsg != null) {
+            if (oncogene.equals("Oncogene") && tsg.equals("Tumor Suppressor")) {
+                gene.setGeneType(GeneType.ONCOGENE_AND_TSG);
+            } else if (oncogene.equals("Oncogene")) {
+                gene.setGeneType(GeneType.ONCOGENE);
             } else {
-                gene.setOncogene(false);
+                gene.setGeneType(GeneType.TSG);
             }
-        }
-        if (tsg != null) {
-            if (tsg.equals("Tumor Suppressor")) {
-                gene.setTSG(true);
-            } else {
-                gene.setTSG(false);
-            }
+        } else if (oncogene != null && oncogene.equals("Oncogene")) {
+            gene.setGeneType(GeneType.ONCOGENE);
+        } else if (tsg != null && tsg.equals("Tumor Suppressor")) {
+            gene.setGeneType(GeneType.TSG);
         }
 
         String grch37Isoform = geneInfo.has("isoform_override") ? geneInfo.getString("isoform_override") : null;
