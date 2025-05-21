@@ -357,7 +357,7 @@ public class CurationValidationApiController {
         }
 
         for (Gene gene : genes) {
-            if (!gene.getTSG()) {
+            if (gene.getGeneType() != null && !(gene.getGeneType().equals(GeneType.ONCOGENE_AND_TSG) || gene.getGeneType().equals(GeneType.TSG))) {
                 data.put(ValidationUtils.getErrorMessage(ValidationUtils.getTarget(gene.getHugoSymbol()), "The gene " + gene.getHugoSymbol() + " is not tumor suppressor gene but has Truncating Mutations curated."));
             }
         }

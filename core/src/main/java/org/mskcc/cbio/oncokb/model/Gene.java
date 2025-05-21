@@ -37,10 +37,9 @@ public class Gene implements Serializable {
     @Column(name = "hugo_symbol", length = 50, unique = true)
     private String hugoSymbol;
 
-    @Column(name = "tsg")
-    @ApiModelProperty(value = "tumorSuppressorGene")
-    private Boolean TSG;
-    private Boolean oncogene;
+    @Column(name = "gene_type", length = 30)
+    @Enumerated(EnumType.STRING)
+    private GeneType geneType;
 
     @Column(name = "grch37_isoform", length = 100)
     private String grch37Isoform;
@@ -100,20 +99,12 @@ public class Gene implements Serializable {
         this.geneAliases = geneAliases;
     }
 
-    public Boolean getTSG() {
-        return TSG;
+    public GeneType getGeneType() {
+        return geneType;
     }
 
-    public void setTSG(Boolean TSG) {
-        this.TSG = TSG;
-    }
-
-    public Boolean getOncogene() {
-        return oncogene;
-    }
-
-    public void setOncogene(Boolean oncogene) {
-        this.oncogene = oncogene;
+    public void setGeneType(GeneType geneType) {
+        this.geneType = geneType;
     }
 
     public String getGrch37Isoform() {

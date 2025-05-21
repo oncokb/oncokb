@@ -196,3 +196,9 @@ alter table evidence
     add fda_level varchar(255) null;
 update evidence set fda_level='LEVEL_Fda2' where level_of_evidence in ('LEVEL_1', 'LEVEL_R1', 'LEVEL_2');
 update evidence set fda_level='LEVEL_Fda3' where level_of_evidence in ('LEVEL_3A', 'LEVEL_4', 'LEVEL_R2');
+
+-- update to v4.30
+alter table gene
+    add gene_type varchar(30) null,
+    drop oncogene,
+    drop tsg;
