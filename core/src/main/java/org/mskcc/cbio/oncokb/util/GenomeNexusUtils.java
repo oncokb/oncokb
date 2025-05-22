@@ -344,7 +344,7 @@ public class GenomeNexusUtils {
             }
         }
 
-        TranscriptSummaryAlterationResult selectedAnnotationResult;
+        TranscriptSummaryAlterationResult selectedAnnotationResult = null;
         if (annotationResult.size() == 1) {
             // If there is only one matching transcript, use the summary.
             selectedAnnotationResult = annotationResult.iterator().next();
@@ -354,14 +354,10 @@ public class GenomeNexusUtils {
             if (!annotationResult.isEmpty()) {
                 // If there are multiple summaries that match most_severe_consequence, we will pick the first one.
                 selectedAnnotationResult = annotationResult.iterator().next();
-            } else {
-                // TODO: If we can't find a summary with the most severe consequence, we should sort by variant consequence priority and pick first.
-                // https://github.com/genome-nexus/genome-nexus/blob/master/component/src/main/java/org/cbioportal/genome_nexus/component/annotation/TranscriptConsequencePrioritizer.java#L81
-                // For now, we are not annotating this scenario.
-                selectedAnnotationResult = new TranscriptSummaryAlterationResult(); // TODO: remove this case
-            }
+            } 
         }
-        else {
+
+        if (selectedAnnotationResult == null) {
             // If there are no matching summaries, we cannot annotate this variant.
             List<TranscriptConsequenceSummary> summariesWithMostSevereConsequence = filterTranscriptConsequenceSummaryByMostSevereConsequence(allConsequenceSummaries, variantAnnotation.getMostSevereConsequence());
             if (summariesWithMostSevereConsequence.isEmpty()) {
