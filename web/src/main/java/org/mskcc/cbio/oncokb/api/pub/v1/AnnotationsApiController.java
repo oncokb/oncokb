@@ -68,7 +68,6 @@ public class AnnotationsApiController {
         } else {
             ReferenceGenome matchedRG = resolveMatchedRG(referenceGenome);
             Query query = new Query(null, matchedRG, entrezGeneId, hugoSymbol, proteinChange, null, null, tumorType, consequence, proteinStart, proteinEnd, null);
-            
             indicatorQueryResp = this.cacheFetcher.processQuery(
                 query.getReferenceGenome(),
                 query.getEntrezGeneId(),
@@ -460,7 +459,9 @@ public class AnnotationsApiController {
 
         // Indicate which transcript was used to generate the annotation
         TranscriptConsequenceSummary summary = transcriptSummaryAlterationResult.getTranscriptConsequenceSummary();
-        addTranscriptAndExonToResponse(indicatorQueryResp, summary);
+        if (summary != null && StringUtils.isNotEmpty(summary.getTranscriptId())) {
+            indicatorQueryResp.getQuery().setCanonicalTranscript(summary.getTranscriptId());
+        }
         indicatorQueryResp.getQuery().setHgvsInfo(transcriptSummaryAlterationResult.getMessage());
         return indicatorQueryResp;
     }
@@ -470,7 +471,7 @@ public class AnnotationsApiController {
         Map<String, Integer> queryIndexMap = new HashMap<>();
 
         for (String query : queries) {
-            if (this.cacheFetcher.hgvsgShouldBeAnnotated(query, referenceGenome) || AlterationUtils.isValidHgvsp(query)) {
+            if (this.cacheFetcher.hgvsgShouldBeAnnotated(query, referenceGenome)) {
                 if (!queryIndexMap.containsKey(query)) {
                     queryIndexMap.put(query, queriesToGN.size());
                     queriesToGN.add(query);
@@ -528,7 +529,9 @@ public class AnnotationsApiController {
 
         // Indicate which transcript was used to generate the annotation
         TranscriptConsequenceSummary summary = transcriptSummaryAlterationResult.getTranscriptConsequenceSummary();
-        addTranscriptAndExonToResponse(indicatorQueryResp, summary);
+        if (summary != null && StringUtils.isNotEmpty(summary.getTranscriptId())) {
+            indicatorQueryResp.getQuery().setCanonicalTranscript(summary.getTranscriptId());
+        }
         indicatorQueryResp.getQuery().setHgvsInfo(transcriptSummaryAlterationResult.getMessage());
         return indicatorQueryResp;
     }
@@ -818,16 +821,5 @@ public class AnnotationsApiController {
             result.add(resp);
         }
         return result;
-    }
-
-    private void addTranscriptAndExonToResponse(IndicatorQueryResp response, TranscriptConsequenceSummary summary) {
-        if (summary != null) {
-            if (StringUtils.isNotEmpty(summary.getTranscriptId())) {
-                response.getQuery().setCanonicalTranscript(summary.getTranscriptId());
-            }
-            if (StringUtils.isNotEmpty(summary.getExon())) {
-                response.setExon(StringUtils.substringBefore(summary.getExon(), "/"));
-            }
-        }
     }
 }
