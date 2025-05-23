@@ -111,13 +111,15 @@ public class AnnotationSearchUtils {
 
                         if (genomeNexusAnnotation.getAnnotationSummary() != null && genomeNexusAnnotation.getAnnotationSummary().getTranscriptConsequenceSummary() != null) {
                             Alteration oncokbAnnotation = AlterationUtils.convertTranscriptConsequenceSummaryToAlteration(genomeNexusAnnotation.getAnnotationSummary().getTranscriptConsequenceSummary());
-                            if (oncokbAnnotation != null) {
-                                String oncokbVariant = oncokbAnnotation.getAlteration();
+                            Alteration foundAlteration = AlterationUtils.findAlteration(oncokbAnnotation.getGene(), DEFAULT_REFERENCE_GENOME, oncokbAnnotation.getAlteration());
+
+                            if (foundAlteration != null) {
+                                String oncokbVariant = foundAlteration.getAlteration();
                                 String oncokbTranscript  = genomeNexusAnnotation.getAnnotationSummary().getTranscriptConsequenceSummary().getTranscriptId();   
                                 String inputVariant = keywords.get(1).toUpperCase();
-                                String gene = oncokbAnnotation.getGene().getHugoSymbol();
+                                String gene = foundAlteration.getGene().getHugoSymbol();
 
-                                TypeaheadSearchResp response = newTypeaheadVariant(oncokbAnnotation);
+                                TypeaheadSearchResp response = newTypeaheadVariant(foundAlteration);
                                 response.setAnnotation(gene 
                                     + " " 
                                     + inputVariant  
