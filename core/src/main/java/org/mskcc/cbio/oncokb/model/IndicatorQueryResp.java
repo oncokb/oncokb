@@ -49,8 +49,6 @@ public class IndicatorQueryResp implements java.io.Serializable {
     private Boolean VUS = false;
     @ApiModelProperty(value = "Whether variant is recurrently found in cancer with statistical significance, as defined in Chang et al. (2017). See SOP Protocol 9.2")
     private Boolean hotspot = false;
-    @ApiModelProperty(value = "(Nullable) The affected exon of this variant, if applicable (currently only supported when annotating via HGVSg or Genomic Location)")
-    private String exon;
 
     @ApiModelProperty(value = "Gene summary. Defaulted to \"\"")
     private String geneSummary = "";
@@ -94,7 +92,6 @@ public class IndicatorQueryResp implements java.io.Serializable {
         newResp.setOtherSignificantResistanceLevels(new ArrayList<>(this.otherSignificantResistanceLevels));
         newResp.setVUS(this.VUS);
         newResp.setHotspot(this.hotspot);
-        newResp.setExon(this.exon);
         newResp.setGeneSummary(this.geneSummary);
         newResp.setVariantSummary(this.variantSummary);
         newResp.setTumorTypeSummary(this.tumorTypeSummary);
@@ -218,14 +215,6 @@ public class IndicatorQueryResp implements java.io.Serializable {
 
     public void setHotspot(Boolean hotspot) {
         this.hotspot = hotspot;
-    }
-
-    public String getExon() {
-        return exon;
-    }
-
-    public void setExon(String exon) {
-        this.exon = exon;
     }
 
     public Boolean getAlleleExist() {
