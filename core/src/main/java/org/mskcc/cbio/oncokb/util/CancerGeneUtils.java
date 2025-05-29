@@ -45,9 +45,7 @@ public class CancerGeneUtils {
                 cancerGene.setGrch38RefSeq(gene.getGrch38RefSeq());
                 cancerGene.setOncokbAnnotated(true);
                 cancerGene.setOccurrenceCount(1);
-                if (gene.getGeneType() != null) {
-                    cancerGene.setGeneType(gene.getGeneType());
-                }
+                cancerGene.setGeneType(gene.getGeneType());
                 cancerGene.setGeneAliases(gene.getGeneAliases());
                 cancerGenes.add(cancerGene);
             });

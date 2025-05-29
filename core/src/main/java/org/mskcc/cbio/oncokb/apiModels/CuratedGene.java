@@ -14,7 +14,7 @@ public class CuratedGene implements Serializable {
     String grch38RefSeq;
     Integer entrezGeneId;
     String hugoSymbol;
-    GeneType geneType = GeneType.INSUFFICIENT_EVIDENCE;
+    GeneType geneType;
     String highestSensitiveLevel;
     String highestResistanceLevel;
     String summary;
