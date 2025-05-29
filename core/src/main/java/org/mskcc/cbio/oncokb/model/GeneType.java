@@ -9,7 +9,7 @@ public enum GeneType {
     ONCOGENE_AND_TSG("Oncogene and TSG"),
     ONCOGENE("Oncogene"),
     TSG("Tumor Suppressor Gene"),
-    UNKNOWN("Unknown"),
+    INSUFFICIENT_EVIDENCE("Insufficient Evidence"),
     NEITHER("Neither");
 
     private GeneType(String geneType) {
