@@ -21,7 +21,7 @@ public class CancerGene implements Serializable {
     private Boolean foundationHeme = false;
     private Boolean vogelstein = false;
     private Boolean sangerCGC = false;
-    private GeneType geneType = GeneType.INSUFFICIENT_EVIDENCE;
+    private GeneType geneType;
     private Set<String> geneAliases = new HashSet<>();
 
     public String getHugoSymbol() {
