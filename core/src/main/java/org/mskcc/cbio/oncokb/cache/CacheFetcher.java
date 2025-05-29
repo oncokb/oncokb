@@ -86,9 +86,9 @@ public class CacheFetcher {
             row.add(cancerGene.getGrch38Isoform());
             row.add(cancerGene.getGrch38RefSeq());
             if (cancerGene.getGeneType() != null) {
-                row.add("");
-            } else {
                 row.add(cancerGene.getGeneType().toString());
+            } else {
+                row.add("");
             }
             row.add(String.valueOf(cancerGene.getOccurrenceCount()));
             row.add(getStringByBoolean(cancerGene.getOncokbAnnotated()));
@@ -222,9 +222,9 @@ public class CacheFetcher {
             row.add(String.valueOf(gene.getEntrezGeneId()));
             row.add(gene.getHugoSymbol());
             if (gene.getGeneType() != null) {
-                row.add("");
-            } else {
                 row.add(gene.getGeneType().toString());
+            } else {
+                row.add("");
             }
             row.add(gene.getHighestSensitiveLevel());
             row.add(gene.getHighestResistancLevel());
