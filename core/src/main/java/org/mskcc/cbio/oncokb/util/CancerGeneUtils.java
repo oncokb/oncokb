@@ -1,12 +1,16 @@
 package org.mskcc.cbio.oncokb.util;
 
-import org.apache.commons.lang3.math.NumberUtils;
+import java.io.IOException;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.mskcc.cbio.oncokb.model.CancerGene;
 import org.mskcc.cbio.oncokb.model.Gene;
-
-import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Created by jiaojiao on 6/9/17.
@@ -41,8 +45,9 @@ public class CancerGeneUtils {
                 cancerGene.setGrch38RefSeq(gene.getGrch38RefSeq());
                 cancerGene.setOncokbAnnotated(true);
                 cancerGene.setOccurrenceCount(1);
-                cancerGene.setOncogene(gene.getOncogene());
-                cancerGene.setTSG(gene.getTSG());
+                if (gene.getGeneType() != null) {
+                    cancerGene.setGeneType(gene.getGeneType());
+                }
                 cancerGene.setGeneAliases(gene.getGeneAliases());
                 cancerGenes.add(cancerGene);
             });

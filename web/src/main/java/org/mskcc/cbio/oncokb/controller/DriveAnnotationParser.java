@@ -128,22 +128,19 @@ public class DriveAnnotationParser {
         JSONObject geneType = geneInfo.has("type") ? geneInfo.getJSONObject("type") : null;
         String oncogene = geneType == null ? null : (geneType.has("ocg") ? geneType.getString("ocg").trim() : null);
         String tsg = geneType == null ? null : (geneType.has("tsg") ? geneType.getString("tsg").trim() : null);
+        String none = geneType == null ? null : (geneType.has("neither") ? geneType.getString("neither").trim() : null);
 
         // null previously represented unknown or neither? Let's default to unknown
-        if (oncogene == null && tsg == null) {
-            gene.setGeneType(GeneType.UNKNOWN);
-        } else if (oncogene != null && tsg != null) {
-            if (oncogene.equals("Oncogene") && tsg.equals("Tumor Suppressor")) {
-                gene.setGeneType(GeneType.ONCOGENE_AND_TSG);
-            } else if (oncogene.equals("Oncogene")) {
-                gene.setGeneType(GeneType.ONCOGENE);
-            } else {
-                gene.setGeneType(GeneType.TSG);
-            }
+        if (oncogene != null && oncogene.equals("Oncogene") && tsg != null && tsg.equals("Tumor Suppressor")) {
+            gene.setGeneType(GeneType.ONCOGENE_AND_TSG);
         } else if (oncogene != null && oncogene.equals("Oncogene")) {
             gene.setGeneType(GeneType.ONCOGENE);
         } else if (tsg != null && tsg.equals("Tumor Suppressor")) {
             gene.setGeneType(GeneType.TSG);
+        } else if (none != null && none.equals("Neither")) {
+            gene.setGeneType(GeneType.NEITHER);
+        } else {
+            gene.setGeneType(GeneType.UNKNOWN);
         }
 
         String grch37Isoform = geneInfo.has("isoform_override") ? geneInfo.getString("isoform_override") : null;
