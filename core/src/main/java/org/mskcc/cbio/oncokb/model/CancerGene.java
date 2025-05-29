@@ -21,8 +21,7 @@ public class CancerGene implements Serializable {
     private Boolean foundationHeme = false;
     private Boolean vogelstein = false;
     private Boolean sangerCGC = false;
-    private Boolean isOncogene = false;
-    private Boolean isTSG = false;
+    private GeneType geneType = GeneType.UNKNOWN;
     private Set<String> geneAliases = new HashSet<>();
 
     public String getHugoSymbol() {
@@ -137,20 +136,12 @@ public class CancerGene implements Serializable {
         this.sangerCGC = sangerCGC;
     }
 
-    public Boolean getOncogene() {
-        return isOncogene;
+    public GeneType getGeneType() {
+        return geneType;
     }
 
-    public void setOncogene(Boolean oncogene) {
-        isOncogene = oncogene;
-    }
-
-    public Boolean getTSG() {
-        return isTSG;
-    }
-
-    public void setTSG(Boolean TSG) {
-        isTSG = TSG;
+    public void setGeneType(GeneType geneType) {
+        this.geneType = geneType;
     }
 
     public Set<String> getGeneAliases() {

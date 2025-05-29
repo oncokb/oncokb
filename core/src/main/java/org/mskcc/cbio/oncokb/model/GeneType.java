@@ -10,7 +10,7 @@ public enum GeneType {
     ONCOGENE("Oncogene"),
     TSG("Tumor Suppressor Gene"),
     UNKNOWN("Unknown"),
-    NONE("None");
+    NEITHER("Neither");
 
     private GeneType(String geneType) {
         this.geneType = geneType;
