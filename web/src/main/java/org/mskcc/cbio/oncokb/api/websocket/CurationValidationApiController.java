@@ -119,7 +119,7 @@ public class CurationValidationApiController {
     private void validateGeneInfo() {
         sendText(generateInfo(MISSING_GENE_INFO, ValidationStatus.IS_PENDING, new JSONArray()));
 
-        JSONArray data = ValidationUtils.checkGeneSummaryBackground();
+        JSONArray data = ValidationUtils.checkGeneSummaryBackgroundType();
         if (data.length() == 0) {
             sendText(generateInfo(MISSING_GENE_INFO, ValidationStatus.IS_COMPLETE, new JSONArray()));
         } else {
