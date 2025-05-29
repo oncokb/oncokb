@@ -311,6 +311,7 @@ public class GenomeNexusUtils {
     }
 
     private static TranscriptSummaryAlterationResult getConsequence(VariantAnnotation variantAnnotation, ReferenceGenome referenceGenome) throws ApiException {
+        List<TranscriptConsequenceSummary> allConsequenceSummaries = new ArrayList<>();
         List<TranscriptSummaryAlterationResult> annotationResult = new ArrayList<>();
 
         if (variantAnnotation == null || variantAnnotation.getAnnotationSummary() == null || variantAnnotation.getAnnotationSummary().getTranscriptConsequenceSummaries() == null) {
@@ -322,6 +323,8 @@ public class GenomeNexusUtils {
         if (variantAnnotation.getAnnotationSummary() != null && variantAnnotation.getAnnotationSummary().getTranscriptConsequenceSummaries() != null) {
             // Loop through all transcript consequence summaries and extract the ones where transcriptID matches oncokb canonical transcript
             for (TranscriptConsequenceSummary consequenceSummary : variantAnnotation.getAnnotationSummary().getTranscriptConsequenceSummaries()) {
+                allConsequenceSummaries.add(consequenceSummary);
+                
                 Integer entrezGeneId = null;
                 if (StringUtils.isNotEmpty(consequenceSummary.getEntrezGeneId())) {
                     entrezGeneId = Integer.parseInt(consequenceSummary.getEntrezGeneId());
@@ -341,26 +344,34 @@ public class GenomeNexusUtils {
             }
         }
 
-        TranscriptSummaryAlterationResult selectedAnnotationResult;
+        TranscriptSummaryAlterationResult selectedAnnotationResult = null;
         if (annotationResult.size() == 1) {
             // If there is only one matching transcript, use the summary.
             selectedAnnotationResult = annotationResult.iterator().next();
         } else if (annotationResult.size() > 1) {
             // Prioritize based on most_severe_consequence
-            annotationResult = filterTranscriptConsequenceSummaryByMostSevereConsequence(annotationResult, variantAnnotation.getMostSevereConsequence());
+            annotationResult = filterTranscriptSummaryAlterationResultByMostSevereConsequence(annotationResult, variantAnnotation.getMostSevereConsequence());
             if (!annotationResult.isEmpty()) {
                 // If there are multiple summaries that match most_severe_consequence, we will pick the first one.
                 selectedAnnotationResult = annotationResult.iterator().next();
-            } else {
-                // TODO: If we can't find a summary with the most severe consequence, we should sort by variant consequence priority and pick first.
-                // https://github.com/genome-nexus/genome-nexus/blob/master/component/src/main/java/org/cbioportal/genome_nexus/component/annotation/TranscriptConsequencePrioritizer.java#L81
-                // For now, we are not annotating this scenario.
-                selectedAnnotationResult = new TranscriptSummaryAlterationResult();
-            }
+            } 
         }
-        else {
+
+        if (selectedAnnotationResult == null) {
             // If there are no matching summaries, we cannot annotate this variant.
-            selectedAnnotationResult = new TranscriptSummaryAlterationResult();
+            List<TranscriptConsequenceSummary> summariesWithMostSevereConsequence = filterTranscriptConsequenceSummaryByMostSevereConsequence(allConsequenceSummaries, variantAnnotation.getMostSevereConsequence());
+            if (summariesWithMostSevereConsequence.isEmpty()) {
+                return new TranscriptSummaryAlterationResult();
+            }
+
+            TranscriptConsequenceSummary selectedConsequenceSummary = summariesWithMostSevereConsequence.get(0);
+            TranscriptConsequenceSummary transcriptConsequenceSummary = new TranscriptConsequenceSummary();
+            transcriptConsequenceSummary.setHugoGeneSymbol(selectedConsequenceSummary.getHugoGeneSymbol());
+            transcriptConsequenceSummary.setEntrezGeneId(selectedConsequenceSummary.getEntrezGeneId());
+            transcriptConsequenceSummary.setConsequenceTerms(selectedConsequenceSummary.getConsequenceTerms());
+            transcriptConsequenceSummary.setVariantClassification(selectedConsequenceSummary.getVariantClassification());
+
+            selectedAnnotationResult = new TranscriptSummaryAlterationResult(transcriptConsequenceSummary);
             selectedAnnotationResult.setMessage("This variant does not occur within a gene or transcript annotated in OncoKB.");
         }
 
@@ -377,17 +388,30 @@ public class GenomeNexusUtils {
         return selectedAnnotationResult;
     }
 
-    private static List<TranscriptSummaryAlterationResult> filterTranscriptConsequenceSummaryByMostSevereConsequence(List<TranscriptSummaryAlterationResult> list, String mostSevereConsequence) {
+    private static List<TranscriptSummaryAlterationResult> filterTranscriptSummaryAlterationResultByMostSevereConsequence(List<TranscriptSummaryAlterationResult> list, String mostSevereConsequence) {
         List<TranscriptSummaryAlterationResult> summaries = list;
         if (StringUtils.isNotEmpty(mostSevereConsequence)) {
             summaries = list.stream()
                 .filter(transcriptSummaryAlterationResult -> {
-                    TranscriptConsequenceSummary summary = transcriptSummaryAlterationResult.getTranscriptConsequenceSummary();
-                    return StringUtils.isNotEmpty(summary.getConsequenceTerms()) && Arrays.asList(summary.getConsequenceTerms().split(",")).contains(mostSevereConsequence);
+                    return containsMostSevereConsequence(transcriptSummaryAlterationResult.getTranscriptConsequenceSummary(), mostSevereConsequence);
                 })
                 .collect(Collectors.toList());
         }
         return summaries;
+    }
+
+    private static List<TranscriptConsequenceSummary> filterTranscriptConsequenceSummaryByMostSevereConsequence(List<TranscriptConsequenceSummary> list, String mostSevereConsequence) {
+        List<TranscriptConsequenceSummary> summaries = list;
+        if (StringUtils.isNotEmpty(mostSevereConsequence)) {
+            summaries = list.stream()
+                .filter(summary -> containsMostSevereConsequence(summary, mostSevereConsequence))
+                .collect(Collectors.toList());
+        }
+        return summaries;
+    }
+
+    private static boolean containsMostSevereConsequence(TranscriptConsequenceSummary summary, String mostSevereConsequence) {
+        return StringUtils.isNotEmpty(summary.getConsequenceTerms()) && Arrays.asList(summary.getConsequenceTerms().split(",")).contains(mostSevereConsequence);
     }
 
     public static List<EnsemblTranscript> getEnsemblTranscriptList(List<String> ensembelTranscriptIds, ReferenceGenome referenceGenome) throws ApiException {
