@@ -84,6 +84,48 @@ public class CplUtilsTest {
         );
 
         assertEquals(
+            "BRAF V600E mutations",
+            annotate(
+                "[[gene]] [[mutation]] [[[mutation|plural]]]",
+                "BRAF",
+                "V600E",
+                null,
+                null,
+                null,
+                null,
+                false
+            )
+        );
+
+        assertEquals(
+            "BRAF V600E mutants",
+            annotate(
+                "[[gene]] [[mutation]] [[[mutant|plural]]]",
+                "BRAF",
+                "V600E",
+                null,
+                null,
+                null,
+                null,
+                false
+            )
+        );
+
+        assertEquals(
+            "BRAF Oncogenic Mutation",
+            annotate(
+                "[[gene]] [[mutation|singular]]",
+                "BRAF",
+                "Oncogenic Mutations",
+                null,
+                null,
+                null,
+                null,
+                false
+            )
+        );
+
+        assertEquals(
             "BRAF V600E mutant",
             annotate(
                 "[[gene]] [[mutation]] [[[mutant]]]",
