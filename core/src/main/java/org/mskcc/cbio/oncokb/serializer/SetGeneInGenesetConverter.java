@@ -18,8 +18,7 @@ public class SetGeneInGenesetConverter extends StdConverter<Set<Gene>, Set<Gene>
             newGene.setGeneAliases(newGene.getGeneAliases());
             newGene.setHugoSymbol(gene.getHugoSymbol());
             newGene.setEntrezGeneId(gene.getEntrezGeneId());
-            newGene.setOncogene(gene.getOncogene());
-            newGene.setTSG(gene.getTSG());
+            newGene.setGeneType(gene.getGeneType());
             newGene.setGrch37Isoform(gene.getGrch37Isoform());
             newGene.setGrch37RefSeq(gene.getGrch37RefSeq());
             newGene.setGrch38Isoform(gene.getGrch38Isoform());

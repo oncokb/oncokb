@@ -67,11 +67,12 @@ public class ValidationUtils {
         return data;
     }
 
-    public static JSONArray checkGeneSummaryBackground() {
+    public static JSONArray checkGeneSummaryBackgroundType() {
         final String NO_SUMMARY = "No gene summary is specified";
         final String MULTIPLE_SUMMARY = "Multiple gene summary exist";
         final String NO_BACKGROUND = "No gene background is specified";
         final String MULTIPLE_BACKGROUND = "Multiple gene background exist";
+        final String NO_TYPE = "No gene type is specified";
         JSONArray data = new JSONArray();
 
         for (Gene gene : CacheUtils.getAllGenes()) {
@@ -92,6 +93,10 @@ public class ValidationUtils {
                 data.put(getErrorMessage(getTarget(gene.getHugoSymbol()), MULTIPLE_BACKGROUND));
             } else if (evidences.size() == 0) {
                 data.put(getErrorMessage(getTarget(gene.getHugoSymbol()), NO_BACKGROUND));
+            }
+
+            if (gene.getGeneType() == null) {
+                data.put(getErrorMessage(getTarget(gene.getHugoSymbol()), NO_TYPE));
             }
         }
         return data;
