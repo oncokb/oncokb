@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AnnotateSampleQuery implements java.io.Serializable {
+    private String id;
     private List<AnnotateStructuralVariantQuery> structuralVariants = new ArrayList<>();
     private List<AnnotateCopyNumberAlterationQuery> copyNumberAlterations = new ArrayList<>();
     private MutationsQuery mutations = new MutationsQuery();
@@ -45,6 +46,14 @@ public class AnnotateSampleQuery implements java.io.Serializable {
         public void setHgvsg(List<AnnotateMutationByHGVSgQuery> hgvsg) {
             this.hgvsg = hgvsg;
         }
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public List<AnnotateStructuralVariantQuery> getStructuralVariants() {

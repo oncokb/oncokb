@@ -414,21 +414,27 @@ public class AnnotationsApiController {
     }
 
     @PremiumPublicApi
-    @ApiOperation(value = "", notes = "Annotate sample.", response = SampleQueryResp.class, responseContainer = "Map")
+    @ApiOperation(value = "", notes = "Annotate samples.", response = SampleQueryResp.class, responseContainer = "List")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "OK", response = SampleQueryResp.class, responseContainer = "Map"),
+        @ApiResponse(code = 200, message = "OK", response = SampleQueryResp.class, responseContainer = "List"),
         @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiHttpError.class)})
     @RequestMapping(value = "/annotate/sample",
         consumes = {"application/json"},
         produces = {"application/json"},
         method = RequestMethod.POST)
-    public ResponseEntity<SampleQueryResp> annotateSamplePost(
-        @ApiParam(value = "Sample query. Please see swagger.json for request body format.", required = true) @RequestBody() AnnotateSampleQuery body
+    public ResponseEntity<List<SampleQueryResp>> annotateSamplePost(
+        @ApiParam(value = "Sample query. Please see swagger.json for request body format.", required = true) @RequestBody() List<AnnotateSampleQuery> body
     ) throws ApiHttpErrorException, ApiException, org.genome_nexus.ApiException {
         if (body == null) {
             throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>(annotateSample(body), HttpStatus.OK);
+
+        List<SampleQueryResp> annotatedSamples = new ArrayList<>();
+        for (AnnotateSampleQuery query : body) {
+            annotatedSamples.add(annotateSample(query));
+        }
+
+        return new ResponseEntity<>(annotatedSamples, HttpStatus.OK);
     }
 
     private IndicatorQueryResp getIndicatorQueryFromGenomicLocation(
@@ -568,6 +574,7 @@ public class AnnotationsApiController {
 
     private SampleQueryResp annotateSample(AnnotateSampleQuery sample) throws ApiException, org.genome_nexus.ApiException {
         SampleQueryResp annotatedSample = new SampleQueryResp();
+        annotatedSample.setId(sample.getId());
 
         List<IndicatorQueryResp> structuralVariants = new ArrayList<>();
         List<IndicatorQueryResp> copyNumberAlterations = new ArrayList<>();

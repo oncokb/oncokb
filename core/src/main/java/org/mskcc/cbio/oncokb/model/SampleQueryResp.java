@@ -3,9 +3,18 @@ package org.mskcc.cbio.oncokb.model;
 import java.util.List;
 
 public class SampleQueryResp implements java.io.Serializable {
+    private String id;
     private List<IndicatorQueryResp> structuralVariants;
     private List<IndicatorQueryResp> copyNumberAlterations;
     private List<IndicatorQueryResp> mutations;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public List<IndicatorQueryResp> getStructuralVariants() {
         return structuralVariants;
