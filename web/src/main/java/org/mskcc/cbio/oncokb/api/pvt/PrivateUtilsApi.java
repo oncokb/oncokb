@@ -294,5 +294,16 @@ public interface PrivateUtilsApi {
         @ApiParam(value = "List of queries.", required = true) @RequestBody List<AnnotateMutationByGenomicChangeQuery> body
     ) throws ApiException, org.genome_nexus.ApiException, ApiHttpErrorException;
 
+    @ApiOperation(value = "", notes = "Annotate a string using CPL", response = String.class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK", response = String.class),
+        @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiHttpError.class)})
+    @RequestMapping(value = "/utils/annotateCPL",
+        consumes = {"application/json"},
+        produces = {"application/json"},
+        method = RequestMethod.POST)
+    ResponseEntity<String> utilAnnotateCPL(
+        @ApiParam(value = "CPL annotation request", required = true) @RequestBody CplAnnotationRequest cplRequest);
+
 }
 
