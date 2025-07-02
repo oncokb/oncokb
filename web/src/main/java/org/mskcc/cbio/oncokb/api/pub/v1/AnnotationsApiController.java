@@ -4,6 +4,7 @@ import static org.mskcc.cbio.oncokb.util.AnnotationSearchUtils.annotationSearch;
 
 import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.genome_nexus.client.GenomicLocation;
 import org.genome_nexus.client.TranscriptConsequenceSummary;
 import org.mskcc.cbio.oncokb.apiModels.annotation.*;
@@ -583,23 +584,31 @@ public class AnnotationsApiController {
         List<IndicatorQueryResp> proteinChange = new ArrayList<>();
         List<IndicatorQueryResp> hgvsg = new ArrayList<>();
 
+        String tumorType = sample.getTumorType();
+        annotatedSample.setTumorType(tumorType);
         if (sample.getStructuralVariants() != null) {
+            setTumorTypeForQueries(sample.getStructuralVariants(), tumorType);
             structuralVariants = annotateStructuralVariants(sample.getStructuralVariants());
         }
         if (sample.getCopyNumberAlterations() != null) {
+            setTumorTypeForQueries(sample.getCopyNumberAlterations(), tumorType);
             copyNumberAlterations = annotateCopyNumberAlterations(sample.getCopyNumberAlterations());
         }
         if (sample.getMutations() != null) {
             if (sample.getMutations().getGenomicChange() != null) {
+                setTumorTypeForQueries(sample.getMutations().getGenomicChange(), tumorType);
                 genomicChange = annotateMutationsByGenomicChange(sample.getMutations().getGenomicChange());
             }
             if (sample.getMutations().getProteinChange() != null) {
+                setTumorTypeForQueries(sample.getMutations().getProteinChange(), tumorType);
                 proteinChange = annotateMutationsByProteinChange(sample.getMutations().getProteinChange());
             }
             if (sample.getMutations().getHgvsg() != null) {
+                setTumorTypeForQueries(sample.getMutations().getHgvsg(), tumorType);
                 hgvsg = annotateMutationsByHGVSg(sample.getMutations().getHgvsg());
             }
             if (sample.getMutations().getcDnaChange() != null) {
+                setTumorTypeForQueries(sample.getMutations().getcDnaChange(), tumorType);
                 cDnaChange = annotateMutationsByHGVSg(sample.getMutations().getcDnaChange());
             }
         }
@@ -611,6 +620,16 @@ public class AnnotationsApiController {
             .collect(Collectors.toList())
         );
         return annotatedSample;
+    }
+
+    private <T extends AnnotationQuery> void setTumorTypeForQueries(List<T> queries, String tumorType) {
+        if (Strings.isEmpty(tumorType)) {
+            return;
+        }
+
+        for (AnnotationQuery query : queries) {
+            query.setTumorType(tumorType);
+        }
     }
 
     private List<IndicatorQueryResp> annotateStructuralVariants(List<AnnotateStructuralVariantQuery> structuralVariants) {

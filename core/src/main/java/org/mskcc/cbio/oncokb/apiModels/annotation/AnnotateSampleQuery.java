@@ -5,6 +5,7 @@ import java.util.List;
 
 public class AnnotateSampleQuery implements java.io.Serializable {
     private String id;
+    private String tumorType;
     private List<AnnotateStructuralVariantQuery> structuralVariants = new ArrayList<>();
     private List<AnnotateCopyNumberAlterationQuery> copyNumberAlterations = new ArrayList<>();
     private MutationsQuery mutations = new MutationsQuery();
@@ -54,6 +55,14 @@ public class AnnotateSampleQuery implements java.io.Serializable {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getTumorType() {
+        return tumorType;
+    }
+
+    public void setTumorType(String tumorType) {
+        this.tumorType = tumorType;
     }
 
     public List<AnnotateStructuralVariantQuery> getStructuralVariants() {
