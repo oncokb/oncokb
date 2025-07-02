@@ -4,6 +4,7 @@ import java.util.List;
 
 public class SampleQueryResp implements java.io.Serializable {
     private String id;
+    private String tumorType;
     private List<IndicatorQueryResp> structuralVariants;
     private List<IndicatorQueryResp> copyNumberAlterations;
     private List<IndicatorQueryResp> mutations;
@@ -14,6 +15,14 @@ public class SampleQueryResp implements java.io.Serializable {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getTumorType() {
+        return tumorType;
+    }
+
+    public void setTumorType(String tumorType) {
+        this.tumorType = tumorType;
     }
 
     public List<IndicatorQueryResp> getStructuralVariants() {
