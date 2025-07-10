@@ -19,7 +19,7 @@ public class LevelUtils {
             LevelOfEvidence.LEVEL_Fda3, LevelOfEvidence.LEVEL_Fda2, LevelOfEvidence.LEVEL_Fda1,
             LevelOfEvidence.LEVEL_Px3, LevelOfEvidence.LEVEL_Px2, LevelOfEvidence.LEVEL_Px1,
             LevelOfEvidence.LEVEL_Dx3, LevelOfEvidence.LEVEL_Dx2, LevelOfEvidence.LEVEL_Dx1,
-            LevelOfEvidence.LEVEL_R2, LevelOfEvidence.LEVEL_4, LevelOfEvidence.LEVEL_3B, LevelOfEvidence.LEVEL_3A,
+            LevelOfEvidence.LEVEL_R2, LevelOfEvidence.LEVEL_3B, LevelOfEvidence.LEVEL_4, LevelOfEvidence.LEVEL_3A,
             LevelOfEvidence.LEVEL_2, LevelOfEvidence.LEVEL_1, LevelOfEvidence.LEVEL_R1
             )
     );
@@ -27,7 +27,7 @@ public class LevelUtils {
     // Levels related to therapy
 
     public static final List<LevelOfEvidence> THERAPEUTIC_SENSITIVE_LEVELS = Collections.unmodifiableList(
-        Arrays.asList(LevelOfEvidence.LEVEL_4, LevelOfEvidence.LEVEL_3B, LevelOfEvidence.LEVEL_3A,
+        Arrays.asList(LevelOfEvidence.LEVEL_3B, LevelOfEvidence.LEVEL_4, LevelOfEvidence.LEVEL_3A,
             LevelOfEvidence.LEVEL_2, LevelOfEvidence.LEVEL_1)
     );
 
@@ -42,7 +42,7 @@ public class LevelUtils {
     // This is for sorting treatments when all levels are in one array. The only difference at the moment is the level 3A will be prioritised over 2B.
     // But 2B is still higher level of 3A
     private static final List<LevelOfEvidence> THERAPEUTIC_LEVELS_WITH_PRIORITY = Collections.unmodifiableList(
-        Arrays.asList(LevelOfEvidence.LEVEL_R2, LevelOfEvidence.LEVEL_4, LevelOfEvidence.LEVEL_3B,
+        Arrays.asList(LevelOfEvidence.LEVEL_R2, LevelOfEvidence.LEVEL_3B, LevelOfEvidence.LEVEL_4,
             LevelOfEvidence.LEVEL_3A, LevelOfEvidence.LEVEL_2, LevelOfEvidence.LEVEL_1, LevelOfEvidence.LEVEL_R1)
     );
 
