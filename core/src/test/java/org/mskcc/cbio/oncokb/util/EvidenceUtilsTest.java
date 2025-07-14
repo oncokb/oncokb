@@ -260,7 +260,7 @@ public class EvidenceUtilsTest extends TestCase {
         e1.setLevelOfEvidence(LevelOfEvidence.LEVEL_3A);
         e1.setCancerTypes(Collections.singleton(tumorType2));
         e5.setLevelOfEvidence(LevelOfEvidence.LEVEL_4);
-        filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets, DEFAULT_REFERENCE_GENOME, alteration, "Melanoma");
+        filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets, DEFAULT_REFERENCE_GENOME, alteration, tumorType1);
         assertEquals("5", getIds(filtered));
     }
 

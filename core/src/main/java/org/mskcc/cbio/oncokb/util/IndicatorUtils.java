@@ -296,7 +296,7 @@ public class IndicatorUtils {
                 } else {
                     treatmentEvidences = EvidenceUtils.keepHighestLevelForSameTreatments(
                         EvidenceUtils.getRelevantEvidences(query, matchedAlt,
-                            selectedTreatmentEvidence, levels, relevantAlterationsWithoutAlternativeAlleles, alleles, geneQueryOnly), query.getReferenceGenome(), matchedAlt, query.getTumorType());
+                            selectedTreatmentEvidence, levels, relevantAlterationsWithoutAlternativeAlleles, alleles, geneQueryOnly), query.getReferenceGenome(), matchedAlt, matchedTumorType);
                 }
             }
 
@@ -335,7 +335,7 @@ public class IndicatorUtils {
                             treatmentEvidences.addAll(EvidenceUtils.keepHighestLevelForSameTreatments(
                                 EvidenceUtils.convertEvidenceLevel(
                                     EvidenceUtils.getEvidence(oncogenicMutations,
-                                        selectedTreatmentEvidence, levels), new HashSet<>(relevantUpwardTumorTypes)), query.getReferenceGenome(), matchedAlt, query.getTumorType()));
+                                        selectedTreatmentEvidence, levels), new HashSet<>(relevantUpwardTumorTypes)), query.getReferenceGenome(), matchedAlt, matchedTumorType));
                         }
                     }
                 }
