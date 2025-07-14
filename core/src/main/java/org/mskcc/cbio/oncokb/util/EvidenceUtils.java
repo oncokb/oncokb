@@ -692,7 +692,7 @@ public class EvidenceUtils {
         return levels;
     }
 
-    public static Set<Evidence> keepHighestLevelForSameTreatments(Set<Evidence> evidences, ReferenceGenome referenceGenome, Alteration exactMatch, String cancerType) {
+    public static Set<Evidence> keepHighestLevelForSameTreatments(Set<Evidence> evidences, ReferenceGenome referenceGenome, Alteration exactMatch, TumorType matchedTumorType) {
         Map<String, Set<Evidence>> maps = new HashedMap();
         Set<Evidence> filtered = new HashSet<>();
 
@@ -713,27 +713,25 @@ public class EvidenceUtils {
         }
 
         // If an evidence has a tumor type that is same as query, prioritize it
-        if (cancerType != null) {
-            TumorType matchedTumorType = ApplicationContextSingleton.getTumorTypeBo().getByName(cancerType);
-            if (matchedTumorType != null) {
-                for (Entry<String, Set<Evidence>> entry : maps.entrySet()) {
-                    Set<Evidence> evidencesMatchingCancerType = new LinkedHashSet<>(); 
-    
-                    for (Evidence evidence : entry.getValue()) {
-                        for (TumorType tumorType : evidence.getCancerTypes()) {
-                            if (tumorType.equals(matchedTumorType)) {
-                                evidencesMatchingCancerType.add(evidence);
-                                break;
-                            }
+        if (matchedTumorType != null) {
+            for (Entry<String, Set<Evidence>> entry : maps.entrySet()) {
+                Set<Evidence> evidencesMatchingCancerType = new LinkedHashSet<>(); 
+
+                for (Evidence evidence : entry.getValue()) {
+                    for (TumorType tumorType : evidence.getCancerTypes()) {
+                        if (tumorType.equals(matchedTumorType)) {
+                            evidencesMatchingCancerType.add(evidence);
+                            break;
                         }
                     }
-    
-                    if (evidencesMatchingCancerType.size() > 0) {
-                        maps.put(entry.getKey(), evidencesMatchingCancerType);
-                    }
+                }
+
+                if (evidencesMatchingCancerType.size() > 0) {
+                    maps.put(entry.getKey(), evidencesMatchingCancerType);
                 }
             }
         }
+        
 
         TumorType tumorTypeNA = new TumorType();
         tumorTypeNA.setSubtype("NA");
@@ -1012,7 +1010,7 @@ public class EvidenceUtils {
                         );
                     }
                 }
-                query.setEvidences(new ArrayList<>(StringUtils.isEmpty(query.getQuery().getTumorType()) ? updatedEvidences : keepHighestLevelForSameTreatments(updatedEvidences, requestQuery.getReferenceGenome(), query.getExactMatchedAlteration(), query.getQuery().getTumorType())));
+                query.setEvidences(new ArrayList<>(StringUtils.isEmpty(query.getQuery().getTumorType()) ? updatedEvidences : keepHighestLevelForSameTreatments(updatedEvidences, requestQuery.getReferenceGenome(), query.getExactMatchedAlteration(), query.getExactMatchedTumorType())));
                 evidenceQueries.add(query);
             }
         }
