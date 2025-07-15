@@ -9,6 +9,13 @@ import javax.persistence.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@NamedQueries({
+    @NamedQuery(
+        name = "findGenomicAlterationByGenomicLocation",
+        query = "select g from GenomicAlteration g where g.chromosome=? and g.start=? and g.end=? and g.ref=? and g.var=?"
+    )
+})
+
 // TODO: look into UUID column
 @Entity
 @Table(name = "genomic_alteration")
