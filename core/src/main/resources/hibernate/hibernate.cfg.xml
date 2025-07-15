@@ -21,6 +21,7 @@
     <property name="hibernate.cache.use_query_cache">false</property>
     <mapping class="org.mskcc.cbio.oncokb.model.Drug"/>
     <mapping class="org.mskcc.cbio.oncokb.model.Alteration"/>
+    <mapping class="org.mskcc.cbio.oncokb.model.GenomicAlteration"/>
     <mapping class="org.mskcc.cbio.oncokb.model.Article"/>
     <mapping class="org.mskcc.cbio.oncokb.model.PortalAlteration"/>
     <mapping class="org.mskcc.cbio.oncokb.model.Evidence"/>

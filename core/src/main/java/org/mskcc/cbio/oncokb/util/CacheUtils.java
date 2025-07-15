@@ -43,7 +43,9 @@ public class CacheUtils {
     private static Map<Integer, List<Evidence>> evidences = new HashMap<>(); //Gene based evidences
     private static Map<Integer, Map<Integer, Set<TumorType>>> evidenceRelevantCancerTypes = new HashedMap();
     private static Map<Integer, List<Alteration>> alterations = new HashMap<>(); //Gene based alterations
+    private static Map<Integer, List<GenomicAlteration>> genomicAlterations = new HashMap<>(); //Gene based genomic alterations
     private static Map<Integer, Map<ReferenceGenome, List<Alteration>>> alterationsByReferenceGenome = new HashMap<>(); //Gene based alterations
+    private static Map<Integer, Map<ReferenceGenome, List<GenomicAlteration>>> genomicAlterationsByReferenceGenome = new HashMap<>(); //Gene based genomic alterations
     private static Map<Integer, Set<Alteration>> VUS = new HashMap<>(); //Gene based VUSs
 
     private static List<TumorType> cancerTypes = new ArrayList<>();
@@ -188,6 +190,8 @@ public class CacheUtils {
             cacheAllGenes();
 
             setAllAlterations();
+
+            cacheAllGenomicAlterations();
 
             current = MainUtils.getCurrentTimestamp();
             drugs = new HashSet<>(ApplicationContextSingleton.getDrugBo().findAll());
@@ -431,6 +435,30 @@ public class CacheUtils {
             }
         }
         System.out.println("Cached " + allAlterations.size() + " alterations " + CacheUtils.getCacheCompletionMessage(current));
+    }
+
+    private static void cacheAllGenomicAlterations() {
+        Long current = MainUtils.getCurrentTimestamp();
+        List<GenomicAlteration> allGenomicAlterations = ApplicationContextSingleton.getGenomicAlterationBo().findAll();
+
+        for (GenomicAlteration genomicAlteration : allGenomicAlterations) {
+            Gene gene = genomicAlteration.getGene();
+            if (!genomicAlterations.containsKey(gene.getEntrezGeneId())) {
+                genomicAlterations.put(gene.getEntrezGeneId(), new ArrayList<>());
+            }
+            if (!genomicAlterationsByReferenceGenome.containsKey(gene.getEntrezGeneId())) {
+                genomicAlterationsByReferenceGenome.put(gene.getEntrezGeneId(), new HashMap<>());
+            }
+            genomicAlterations.get(gene.getEntrezGeneId()).add(genomicAlteration);
+
+            for (ReferenceGenome refGenome : genomicAlteration.getReferenceGenomes()) {
+                if (!genomicAlterationsByReferenceGenome.get(gene.getEntrezGeneId()).containsKey(refGenome)) {
+                    genomicAlterationsByReferenceGenome.get(gene.getEntrezGeneId()).put(refGenome, new ArrayList<>());
+                }
+                genomicAlterationsByReferenceGenome.get(gene.getEntrezGeneId()).get(refGenome).add(genomicAlteration);
+            }
+        }
+        System.out.println("Cached " + genomicAlterations.size() + " genomic alterations " + CacheUtils.getCacheCompletionMessage(current));
     }
 
     public static Set<Drug> getAllDrugs() {

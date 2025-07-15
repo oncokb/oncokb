@@ -5,6 +5,7 @@
 package org.mskcc.cbio.oncokb.util;
 
 import org.mskcc.cbio.oncokb.bo.*;
+import org.mskcc.cbio.oncokb.bo.impl.GenomicAlterationBo;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -25,6 +26,10 @@ public final class ApplicationContextSingleton {
 
     public static AlterationBo getAlterationBo() {
         return AlterationBo.class.cast(getApplicationContext().getBean("alterationBo"));
+    }
+
+    public static GenomicAlterationBo getGenomicAlterationBo() {
+        return GenomicAlterationBo.class.cast(getApplicationContext().getBean("genomicAlterationBo"));
     }
 
     public static ArticleBo getArticleBo() {

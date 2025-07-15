@@ -13,6 +13,7 @@ http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 	<import resource="../beans/Drug.xml"/>
     <import resource="../beans/DrugGroup.xml"/>
 	<import resource="../beans/Alteration.xml"/>
+	<import resource="../beans/GenomicAlteration.xml"/>
 	<import resource="../beans/Article.xml"/>
 	<import resource="../beans/Treatment.xml"/>
 	<import resource="../beans/Evidence.xml"/>
