@@ -76,7 +76,7 @@ public class CacheUtils {
     private static List<TumorType> mainTypes = new ArrayList<>();
     private static List<TumorType> specialCancerTypes = new ArrayList<>();
 
-    private static String oncokbS3Bucket = "oncokb";
+    private static String oncokbS3Bucket = "oncokb-dev";
     private static String mappingsS3Path = "clinical-trials/mappings";
     private static String trialsS3Path = String.format("%s/trials.json",mappingsS3Path);
     private static String oncotreeS3Path = String.format("%s/oncotree_mapping.json",mappingsS3Path);
