@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.genome_nexus.client.GenomicLocation;
 import org.genome_nexus.client.TranscriptConsequenceSummary;
+import org.genome_nexus.client.VariantAnnotation;
 import org.mskcc.cbio.oncokb.apiModels.annotation.*;
 import org.mskcc.cbio.oncokb.cache.CacheFetcher;
 import org.mskcc.cbio.oncokb.config.annotation.PremiumPublicApi;
@@ -201,16 +202,14 @@ public class AnnotationsApiController {
             if (!AlterationUtils.isValidHgvsg(hgvsg)) {
                 throw new ApiHttpErrorException("hgvsg is invalid.", HttpStatus.BAD_REQUEST);
             }
+            
+            AnnotateMutationByHGVSgQuery query = new AnnotateMutationByHGVSgQuery();
+            query.setHgvsg(hgvsg);
+            query.setReferenceGenome(matchedRG);
+            query.setTumorType(tumorType);
+            query.setEvidenceTypes(new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
 
-            List<TranscriptSummaryAlterationResult> annotatedAlteration = getAlterationsFromGenomeNexusByHgvs(matchedRG, Collections.singletonList(hgvsg));
-            TranscriptSummaryAlterationResult selectedAnnotatedAlteration = annotatedAlteration.isEmpty() ? new TranscriptSummaryAlterationResult() : annotatedAlteration.get(0);
-            indicatorQueryResp = this.getIndicatorQueryFromHGVS(
-                matchedRG,
-                selectedAnnotatedAlteration,
-                hgvsg,
-                tumorType,
-                new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ","))
-            );
+            indicatorQueryResp = annotateMutationsByHGVSg(Collections.singletonList(query)).get(0);
         }
         return new ResponseEntity<>(indicatorQueryResp, HttpStatus.OK);
     }
@@ -572,7 +571,6 @@ public class AnnotationsApiController {
         return result;
     }
 
-
     private SampleQueryResp annotateSample(AnnotateSampleQuery sample) throws ApiException, org.genome_nexus.ApiException {
         SampleQueryResp annotatedSample = new SampleQueryResp();
         annotatedSample.setId(sample.getId());
@@ -804,8 +802,8 @@ public class AnnotationsApiController {
 
     private List<IndicatorQueryResp> annotateMutationsByHGVSg(List<AnnotateMutationByHGVSgQuery> mutations) throws ApiException, org.genome_nexus.ApiException {
         List<IndicatorQueryResp> result = new ArrayList<>();
-        List<String> grch37Queries = new ArrayList<>();
-        List<String> grch38Queries = new ArrayList<>();
+        List<AnnotateMutationByHGVSgQuery> grch37Queries = new ArrayList<>();
+        List<AnnotateMutationByHGVSgQuery> grch38Queries = new ArrayList<>();
         Map<Integer, Integer> grch37Map = new HashMap<>();
         Map<Integer, Integer> grch38Map = new HashMap<>();
 
@@ -818,30 +816,98 @@ public class AnnotationsApiController {
             query.setReferenceGenome(referenceGenome);
             if (referenceGenome == ReferenceGenome.GRCh38) {
                 grch38Map.put(i, grch38Queries.size());
-                grch38Queries.add(query.getHgvsg());
+                grch38Queries.add(query);
             } else {
                 grch37Map.put(i, grch37Queries.size());
-                grch37Queries.add(query.getHgvsg());
+                grch37Queries.add(query);
             }
         }
 
-        List<TranscriptSummaryAlterationResult> grch37Alts = getAlterationsFromGenomeNexusByHgvs(ReferenceGenome.GRCh37, grch37Queries);
-        List<TranscriptSummaryAlterationResult> grch38Alts = getAlterationsFromGenomeNexusByHgvs(ReferenceGenome.GRCh38, grch38Queries);
+        List<IndicatorQueryResp> grch37Alts = annotateMutationsByHGVSg(ReferenceGenome.GRCh37, grch37Queries);
+        List<IndicatorQueryResp> grch38Alts = annotateMutationsByHGVSg(ReferenceGenome.GRCh38, grch38Queries);
 
         for (int i = 0; i < mutations.size(); i++) {
             AnnotateMutationByHGVSgQuery query = mutations.get(i);
-            TranscriptSummaryAlterationResult alterationInfo = query.getReferenceGenome() == ReferenceGenome.GRCh37 ? grch37Alts.get(grch37Map.get(i)) : grch38Alts.get(grch38Map.get(i));
+            result.add(query.getReferenceGenome() == ReferenceGenome.GRCh37 ? grch37Alts.get(grch37Map.get(i)) : grch38Alts.get(grch38Map.get(i)));
+        }
+        return result;
+    }
 
-            IndicatorQueryResp resp = this.getIndicatorQueryFromHGVS(
-                query.getReferenceGenome(),
-                alterationInfo,
-                query.getHgvsg(),
-                query.getTumorType(),
-                query.getEvidenceTypes()
-            );
-            resp.getQuery().setId(query.getId());
-            resp.getQuery().setHgvsInfo(alterationInfo.getMessage());
-            result.add(resp);
+    private List<IndicatorQueryResp> annotateMutationsByHGVSg(ReferenceGenome referenceGenome, List<AnnotateMutationByHGVSgQuery> queries) throws ApiException, org.genome_nexus.ApiException {
+        List<String> queriesToGN = new ArrayList<>();
+        Map<String, Integer> queryIndexMap = new HashMap<>();
+        for (AnnotateMutationByHGVSgQuery query : queries) {
+            String hgvsg = query.getHgvsg();
+            if (this.cacheFetcher.hgvsgShouldBeAnnotated(hgvsg, referenceGenome) || AlterationUtils.isValidHgvsp(hgvsg)) {
+                if (!queryIndexMap.containsKey(query.getHgvsg())) {
+                    queryIndexMap.put(hgvsg, queriesToGN.size());
+                    queriesToGN.add(hgvsg);
+                }
+            }
+        }
+
+        List<org.genome_nexus.client.VariantAnnotation> variantAnnotations = GenomeNexusUtils.getHgvsVariantsAnnotation(queriesToGN, referenceGenome);
+        if(variantAnnotations.size() != queriesToGN.size()){
+            throw new ApiException("Number of variants that have been annotated by GenomeNexus is not equal to the number of queries");
+        }
+        
+        List<IndicatorQueryResp> result = new ArrayList<>();
+        for (AnnotateMutationByHGVSgQuery query : queries) {
+            IndicatorQueryResp indicatorQueryResp = null;
+            if (queryIndexMap.containsKey(query.getHgvsg())) {
+                VariantAnnotation variantAnnotation = variantAnnotations.get(queryIndexMap.get(query.getHgvsg()));
+                Alteration alteration = AlterationUtils.findAlteration(
+                    referenceGenome,
+                    variantAnnotation.getHgvsg(),
+                    AlterationUtils.getAllAlterations()
+                );
+
+                if (alteration != null) {
+                    indicatorQueryResp = this.cacheFetcher.processQuery(
+                        query.getReferenceGenome(),
+                        null,
+                        alteration.getGene().getHugoSymbol(),
+                        variantAnnotation.getHgvsg(),
+                        null,
+                        query.getTumorType(),
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        false,
+                        query.getEvidenceTypes(),
+                        false
+                    );
+                } else {
+                    List<TranscriptSummaryAlterationResult> annotatedAlteration = AlterationUtils.getAlterationsFromGenomeNexus(
+                        Collections.singletonList(variantAnnotation), 
+                        referenceGenome
+                    );
+                    TranscriptSummaryAlterationResult selectedAnnotatedAlteration = annotatedAlteration.isEmpty() 
+                        ? new TranscriptSummaryAlterationResult() 
+                        : annotatedAlteration.get(0);
+                    indicatorQueryResp = this.getIndicatorQueryFromHGVS(
+                        query.getReferenceGenome(),
+                        selectedAnnotatedAlteration,
+                        variantAnnotation.getHgvsg(),
+                        query.getTumorType(),
+                        new HashSet<>(query.getEvidenceTypes())
+                    );
+                    indicatorQueryResp.getQuery().setHgvsInfo(selectedAnnotatedAlteration.getMessage());
+                }
+            } else {
+                indicatorQueryResp = this.getIndicatorQueryFromHGVS(
+                    query.getReferenceGenome(),
+                    new TranscriptSummaryAlterationResult(),
+                    query.getHgvsg(),
+                    query.getTumorType(),
+                    query.getEvidenceTypes()
+                );
+            }
+            indicatorQueryResp.getQuery().setId(query.getId());
+            result.add(indicatorQueryResp);
         }
         return result;
     }
