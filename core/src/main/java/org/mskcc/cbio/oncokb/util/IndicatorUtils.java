@@ -8,13 +8,13 @@ import org.mskcc.cbio.oncokb.apiModels.Citations;
 import org.mskcc.cbio.oncokb.apiModels.Implication;
 import org.mskcc.cbio.oncokb.apiModels.MutationEffectResp;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.TumorType;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.mskcc.cbio.oncokb.util.AlterationUtils.isValidHgvsg;
 import static org.mskcc.cbio.oncokb.util.LevelUtils.getTherapeuticLevelsWithPriorityLIstIterator;
 import static org.mskcc.cbio.oncokb.util.SummaryUtils.allelesToStr;
 import static org.mskcc.cbio.oncokb.util.SummaryUtils.getVUSSummary;
@@ -155,10 +155,14 @@ public class IndicatorUtils {
         } else {
             gene = GeneUtils.getGene(query.getEntrezGeneId(), query.getHugoSymbol());
             if (gene != null) {
-                Alteration alt = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getAlteration(),
-                    null, query.getConsequence(), query.getProteinStart(), query.getProteinEnd(), query.getReferenceGenome());
-
-                relevantAlterations = AlterationUtils.getRelevantAlterations(query.getReferenceGenome(), alt);
+                if (isValidHgvsg(query.getAlteration())) {
+                    Alteration alt = AlterationUtils.findAlteration(gene, query.getReferenceGenome(), query.getAlteration());
+                    relevantAlterations = Collections.singletonList(alt);
+                } else {
+                    Alteration alt = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getAlteration(), 
+                        null, query.getConsequence(), query.getProteinStart(), query.getProteinEnd(), query.getReferenceGenome());
+                    relevantAlterations = AlterationUtils.getRelevantAlterations(query.getReferenceGenome(), alt);
+                }
             }
         }
 
