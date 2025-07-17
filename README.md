@@ -55,7 +55,9 @@ The WAR file is under `/web/target/`
 3. Right click `Community Server Connector` and choose `Create New Server`.
 4. Either download Tomcat 8 on local machine or let CSC download for you.
 5. Right click Tomcat server and choose `Add Deployment`. This is the WAR file generated in the previous step.
-6. Start Tomcat server. Make sure to `Publish Server (Full)` to keep server synchronized with WAR file (if changes were made).
+6. Edit the Tomcat server and add `"vm.install.path": "/path/to/java8"`.
+7. Start Tomcat server. Make sure to `Publish Server (Full)` to keep server synchronized with WAR file (if changes were made).
+8. Test the endpoint by making a request to `http://localhost:8080/app/api/v1/info`
 
 ## Run with Docker containers
 
