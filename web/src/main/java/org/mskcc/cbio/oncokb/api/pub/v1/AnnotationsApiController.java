@@ -848,7 +848,7 @@ public class AnnotationsApiController {
         Map<String, Integer> queryIndexMap = new HashMap<>();
         for (AnnotateMutationByHGVSgQuery query : queries) {
             String hgvsg = query.getHgvsg();
-            if (this.cacheFetcher.hgvsgShouldBeAnnotated(hgvsg, referenceGenome) || AlterationUtils.isValidHgvsp(hgvsg)) {
+            if (this.cacheFetcher.hgvsgShouldBeAnnotated(hgvsg, referenceGenome)) {
                 if (!queryIndexMap.containsKey(query.getHgvsg())) {
                     queryIndexMap.put(hgvsg, queriesToGN.size());
                     queriesToGN.add(hgvsg);
