@@ -506,38 +506,6 @@ public class AnnotationsApiController {
         return indicatorQueryResp;
     }
 
-    private List<TranscriptSummaryAlterationResult> getAlterationsFromGenomeNexusByGenomicLocation(ReferenceGenome referenceGenome, List<GenomicLocation> queries) throws ApiException, org.genome_nexus.ApiException {
-        List<GenomicLocation> queriesToGN = new ArrayList<>();
-        Map<GenomicLocation, Integer> queryIndexMap = new HashMap<>();
-        for (GenomicLocation query : queries) {
-            if (this.cacheFetcher.genomicLocationShouldBeAnnotated(query, referenceGenome)) {
-                if (!queryIndexMap.containsKey(query)) {
-                    queryIndexMap.put(query, queriesToGN.size());
-                    queriesToGN.add(query);
-                }
-            }
-        }
-        List<org.genome_nexus.client.VariantAnnotation> variantAnnotations = GenomeNexusUtils.getGenomicLocationVariantsAnnotation(queriesToGN, referenceGenome);
-        if(variantAnnotations.size() != queriesToGN.size()){
-            throw new ApiException("Number of variants that have been annotated by GenomeNexus is not equal to the number of queries");
-        }
-        List<TranscriptSummaryAlterationResult> annotatedAlterationResult = new ArrayList<>();
-        if (!queriesToGN.isEmpty()) {
-            annotatedAlterationResult = AlterationUtils.getAlterationsFromGenomeNexus(variantAnnotations, referenceGenome);
-        }
-        List<TranscriptSummaryAlterationResult> result = new ArrayList<>();
-        for (GenomicLocation query : queries) {
-            if (queryIndexMap.containsKey(query)) {
-                result.add(annotatedAlterationResult.get(queryIndexMap.get(query)));
-            } else {
-                TranscriptSummaryAlterationResult emptyAnnotationResult = new TranscriptSummaryAlterationResult();
-                emptyAnnotationResult.setAlteration(new Alteration());
-                result.add(emptyAnnotationResult);
-            }
-        }
-        return result;
-    }
-
     private SampleQueryResp annotateSample(AnnotateSampleQuery sample) throws ApiException, org.genome_nexus.ApiException {
         SampleQueryResp annotatedSample = new SampleQueryResp();
         annotatedSample.setId(sample.getId());
@@ -778,7 +746,7 @@ public class AnnotationsApiController {
                         null,
                         null,
                         null,
-                        null,
+                        variantAnnotation.getHgvsg(),
                         null,
                         false,
                         query.getEvidenceTypes(),
@@ -916,7 +884,7 @@ public class AnnotationsApiController {
                         null,
                         null,
                         null,
-                        null,
+                        variantAnnotation.getHgvsg(),
                         null,
                         false,
                         query.getEvidenceTypes(),

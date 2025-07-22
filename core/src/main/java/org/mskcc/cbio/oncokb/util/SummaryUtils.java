@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 import static org.mskcc.cbio.oncokb.Constants.IN_FRAME_DELETION;
 import static org.mskcc.cbio.oncokb.Constants.IN_FRAME_INSERTION;
+import static org.mskcc.cbio.oncokb.util.AlterationUtils.isValidHgvsg;
 import static org.mskcc.cbio.oncokb.util.MainUtils.altNameShouldConvertToLowerCase;
 import static org.mskcc.cbio.oncokb.util.MainUtils.lowerCaseAlterationName;
 import static org.mskcc.cbio.oncokb.util.MainUtils.manuallyAssignedTruncatingMutation;
@@ -926,6 +927,8 @@ public class SummaryUtils {
         }
         if (AlterationUtils.isGeneralAlterations(queryAlteration, true)) {
             sb.append(queryHugoSymbol + " " + queryAlteration.toLowerCase());
+        } else if (isValidHgvsg(queryAlteration)) {
+            sb.append(queryHugoSymbol + " " + queryAlteration);
         } else if (StringUtils.equalsIgnoreCase(queryAlteration, "gain")) {
             queryAlteration = "amplification (gain)";
             sb.append(queryHugoSymbol + " " + queryAlteration);
