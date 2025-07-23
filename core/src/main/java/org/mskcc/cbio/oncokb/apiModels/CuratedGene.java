@@ -2,6 +2,8 @@ package org.mskcc.cbio.oncokb.apiModels;
 
 import java.io.Serializable;
 
+import org.mskcc.cbio.oncokb.model.GeneType;
+
 /**
  * Created by Hongxin on 10/28/16.
  */
@@ -12,8 +14,7 @@ public class CuratedGene implements Serializable {
     String grch38RefSeq;
     Integer entrezGeneId;
     String hugoSymbol;
-    private Boolean TSG;
-    private Boolean oncogene;
+    GeneType geneType;
     String highestSensitiveLevel;
     String highestResistanceLevel;
     String summary;
@@ -75,20 +76,12 @@ public class CuratedGene implements Serializable {
         this.hugoSymbol = hugoSymbol;
     }
 
-    public Boolean getTSG() {
-        return TSG;
+    public GeneType getGeneType() {
+        return geneType;
     }
 
-    public void setTSG(Boolean TSG) {
-        this.TSG = TSG;
-    }
-
-    public Boolean getOncogene() {
-        return oncogene;
-    }
-
-    public void setOncogene(Boolean oncogene) {
-        this.oncogene = oncogene;
+    public void setGeneType(GeneType geneType) {
+        this.geneType = geneType;
     }
 
     public String getHighestSensitiveLevel() {
@@ -123,15 +116,14 @@ public class CuratedGene implements Serializable {
         this.background = background;
     }
 
-    public CuratedGene(String grch37Isoform, String grch37RefSeq, String grch38Isoform, String grch38RefSeq, Integer entrezGeneId, String hugoSymbol, Boolean TSG, Boolean oncogene, String highestSensitiveLevel, String highestResistanceLevel, String summary, String background) {
+    public CuratedGene(String grch37Isoform, String grch37RefSeq, String grch38Isoform, String grch38RefSeq, Integer entrezGeneId, String hugoSymbol, GeneType geneType, String highestSensitiveLevel, String highestResistanceLevel, String summary, String background) {
         this.grch37Isoform = grch37Isoform;
         this.grch37RefSeq = grch37RefSeq;
         this.grch38Isoform = grch38Isoform;
         this.grch38RefSeq = grch38RefSeq;
         this.entrezGeneId = entrezGeneId;
         this.hugoSymbol = hugoSymbol;
-        this.TSG = TSG;
-        this.oncogene = oncogene;
+        this.geneType = geneType;
         this.highestSensitiveLevel = highestSensitiveLevel;
         this.highestResistanceLevel = highestResistanceLevel;
         this.summary = summary;

@@ -64,8 +64,7 @@ public class CacheFetcher {
         header.add("GRCh37 RefSeq");
         header.add("GRCh38 Isoform");
         header.add("GRCh38 RefSeq");
-        header.add("Is Oncogene");
-        header.add("Is Tumor Suppressor Gene");
+        header.add("Gene Type");
         header.add("# of occurrence within resources (Column J-P)");
         header.add("OncoKB Annotated");
         header.add("MSK-IMPACT");
@@ -86,8 +85,11 @@ public class CacheFetcher {
             row.add(cancerGene.getGrch37RefSeq());
             row.add(cancerGene.getGrch38Isoform());
             row.add(cancerGene.getGrch38RefSeq());
-            row.add(getStringByBoolean(cancerGene.getOncogene()));
-            row.add(getStringByBoolean(cancerGene.getTSG()));
+            if (cancerGene.getGeneType() != null) {
+                row.add(cancerGene.getGeneType().toString());
+            } else {
+                row.add("");
+            }
             row.add(String.valueOf(cancerGene.getOccurrenceCount()));
             row.add(getStringByBoolean(cancerGene.getOncokbAnnotated()));
             row.add(getStringByBoolean(cancerGene.getmSKImpact()));
@@ -177,7 +179,7 @@ public class CacheFetcher {
                     gene.getGrch37Isoform(), gene.getGrch37RefSeq(),
                     gene.getGrch38Isoform(), gene.getGrch38RefSeq(),
                     gene.getEntrezGeneId(), gene.getHugoSymbol(),
-                    gene.getTSG(), gene.getOncogene(),
+                    gene.getGeneType() != null ? gene.getGeneType() : GeneType.INSUFFICIENT_EVIDENCE,
                     highestSensitiveLevel, highestResistanceLevel,
                     includeEvidence ? SummaryUtils.geneSummary(gene, gene.getHugoSymbol()) : "",
                     includeEvidence ? SummaryUtils.geneBackground(gene, gene.getHugoSymbol()) : ""
@@ -200,8 +202,7 @@ public class CacheFetcher {
         header.add("GRCh38 RefSeq");
         header.add("Entrez Gene ID");
         header.add("Hugo Symbol");
-        header.add("Is Oncogene");
-        header.add("Is Tumor Suppressor Gene");
+        header.add("Gene Type");
         header.add("Highest Level of Evidence(sensitivity)");
         header.add("Highest Level of Evidence(resistance)");
         if (includeEvidence == Boolean.TRUE) {
@@ -220,8 +221,11 @@ public class CacheFetcher {
             row.add(gene.getGrch38RefSeq());
             row.add(String.valueOf(gene.getEntrezGeneId()));
             row.add(gene.getHugoSymbol());
-            row.add(getStringByBoolean(gene.getOncogene()));
-            row.add(getStringByBoolean(gene.getTSG()));
+            if (gene.getGeneType() != null) {
+                row.add(gene.getGeneType().toString());
+            } else {
+                row.add("");
+            }
             row.add(gene.getHighestSensitiveLevel());
             row.add(gene.getHighestResistancLevel());
             if (includeEvidence == Boolean.TRUE) {

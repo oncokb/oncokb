@@ -396,10 +396,10 @@ public class SummaryUtils {
             return getVUSOncogenicSummary(query.getReferenceGenome(), alteration, query);
         }
 
-        if (query.getAlteration().toLowerCase().contains("truncating mutation") || (alteration.getConsequence() != null && alteration.getConsequence().getIsGenerallyTruncating())) {
-            if (gene.getOncogene()) {
+        if (query.getAlteration().toLowerCase().contains("truncating mutation") || (alteration.getConsequence() != null && alteration.getConsequence().getIsGenerallyTruncating()) && gene.getGeneType() != null) {
+            if (gene.getGeneType().equals(GeneType.ONCOGENE_AND_TSG) || gene.getGeneType().equals(GeneType.ONCOGENE)) {
                 return query.getHugoSymbol() + " is considered an oncogene and truncating mutations in oncogenes are typically nonfunctional.";
-            } else if (!gene.getTSG() && oncogenic == null) {
+            } else if (!gene.getGeneType().equals(GeneType.TSG) && oncogenic == null) {
                 return "It is unknown whether a truncating mutation in " + query.getHugoSymbol() + " is oncogenic.";
             }
         }
@@ -572,16 +572,16 @@ public class SummaryUtils {
             sb.append(" leads to truncation of the " + hugoSymbol + " tumor suppressor gene and is considered ");
         } else {
             sb.append(" is a truncating mutation");
-            if (alteration.getGene().getTSG()) {
-                if (alteration.getGene().getOncogene()) {
+            if (alteration.getGene().getGeneType() != null) {
+                if (alteration.getGene().getGeneType().equals(GeneType.ONCOGENE_AND_TSG)) {
                     sb.append("; truncating mutations in this gene are considered ");
-                } else {
+                } else if (alteration.getGene().getGeneType().equals(GeneType.TSG)) {
                     sb.append(" in a tumor suppressor gene");
                     sb.append(", and therefore is ");
+                } else {
+                    sb.append(hugoSymbol);
+                    sb.append(", and therefore is ");
                 }
-            } else {
-                sb.append(hugoSymbol);
-                sb.append(", and therefore is ");
             }
         }
         sb.append(oncogenicity.getOncogenic().toLowerCase());

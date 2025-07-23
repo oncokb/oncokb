@@ -63,8 +63,7 @@ public class GeneController {
         Gene gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
         if (gene != null) {
             GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
-            gene.setTSG(queryGene.getTSG());
-            gene.setOncogene(queryGene.getOncogene());
+            gene.setGeneType(queryGene.getGeneType());
             geneBo.update(gene);
         }
         return "success";
