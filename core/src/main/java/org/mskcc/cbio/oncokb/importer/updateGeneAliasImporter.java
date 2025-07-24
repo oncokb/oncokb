@@ -6,7 +6,6 @@ import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 import org.mskcc.cbio.oncokb.util.CacheUtils;
 import org.mskcc.cbio.oncokb.util.FileUtils;
-import org.mskcc.cbio.oncokb.util.GeneUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;

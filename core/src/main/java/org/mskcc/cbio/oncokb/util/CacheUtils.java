@@ -2,6 +2,8 @@ package org.mskcc.cbio.oncokb.util;
 
 import com.mysql.jdbc.StringUtils;
 import org.apache.commons.collections.map.HashedMap;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.mskcc.cbio.oncokb.apiModels.download.DownloadAvailability;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.health.InMemoryCacheSizes;
@@ -27,6 +29,7 @@ import java.util.stream.Collectors;
 
 
 public class CacheUtils {
+    private static final Logger LOGGER = LogManager.getLogger();
     private static Map<Integer, Gene> genesByEntrezId = new HashMap<>();
     private static Map<String, Integer> hugoSymbolToEntrez = new HashMap<>();
 
@@ -149,13 +152,13 @@ public class CacheUtils {
     }
 
     private static void notifyOtherServices(String cmd, Set<Integer> entrezGeneIds) throws IOException {
-        System.out.println("Notify other services..." + " at " + MainUtils.getCurrentTime());
+        LOGGER.info("Notify other services... at {}", MainUtils.getCurrentTime());
         if (cmd == null) {
             cmd = "";
         }
-        System.out.println("\tcmd is " + cmd);
+        LOGGER.info("cmd is {}", cmd);
         if (cmd == "update" && entrezGeneIds != null && entrezGeneIds.size() > 0) {
-            System.out.println("\t# of other services" + otherServices.size());
+            LOGGER.info("# of other services {}", otherServices.size());
             for (String service : otherServices) {
                 if (!StringUtils.isNullOrEmpty(service)) {
                     HttpUtils.postRequest(service + "?cmd=updateGene&entrezGeneIds=" +
@@ -169,7 +172,7 @@ public class CacheUtils {
                 }
             }
         } else {
-            System.out.println("\tcmd=" + cmd + ", has gene:" + entrezGeneIds != null && entrezGeneIds.size() > 0);
+            LOGGER.info("cmd= {}, has gene: {}", cmd, entrezGeneIds != null && entrezGeneIds.size() > 0);
         }
     }
 
@@ -183,7 +186,7 @@ public class CacheUtils {
             GeneObservable.getInstance().addObserver(numbersObserver);
             GeneObservable.getInstance().addObserver(drugsObserver);
 
-            System.out.println("Add observers " + getCacheCompletionMessage(current));
+            LOGGER.info("Add observers {}", getCacheCompletionMessage(current));
 
             cacheAllGenes();
 
@@ -191,7 +194,7 @@ public class CacheUtils {
 
             current = MainUtils.getCurrentTimestamp();
             drugs = new HashSet<>(ApplicationContextSingleton.getDrugBo().findAll());
-            System.out.println("Cached " + drugs.size() + " drugs " + CacheUtils.getCacheCompletionMessage(current));
+            LOGGER.info("Cached {} drugs {}", drugs.size(), CacheUtils.getCacheCompletionMessage(current));
             current = MainUtils.getCurrentTimestamp();
 
             cancerTypes = ApplicationContextSingleton.getTumorTypeBo().findAll();
@@ -206,43 +209,43 @@ public class CacheUtils {
                     cancerTypesByLowercaseSubtype.put(ct.getSubtype().toLowerCase(), ct);
                 }
             });
-            System.out.println("Cached " + cancerTypes.size() +  " tumor types " + CacheUtils.getCacheCompletionMessage(current));
+            LOGGER.info("Cached " + cancerTypes.size() +  " tumor types " + CacheUtils.getCacheCompletionMessage(current));
             subtypes = cancerTypes.stream().filter(tumorType -> org.apache.commons.lang3.StringUtils.isNotEmpty(tumorType.getCode()) && tumorType.getLevel() > 0).collect(Collectors.toList());
-            System.out.println("Cached " + subtypes.size() +  " tumor sub types " + CacheUtils.getCacheCompletionMessage(current));
+            LOGGER.info("Cached " + subtypes.size() +  " tumor sub types " + CacheUtils.getCacheCompletionMessage(current));
             mainTypes = cancerTypes.stream().filter(tumorType -> org.apache.commons.lang3.StringUtils.isEmpty(tumorType.getCode()) || tumorType.getLevel() > 0).collect(Collectors.toList());
-            System.out.println("Cached " + mainTypes.size() + " tumor main types " + CacheUtils.getCacheCompletionMessage(current));
+            LOGGER.info("Cached " + mainTypes.size() + " tumor main types " + CacheUtils.getCacheCompletionMessage(current));
             current = MainUtils.getCurrentTimestamp();
 
             specialCancerTypes = Arrays.stream(SpecialTumorType.values()).map(specialTumorType -> cancerTypes.stream().filter(cancerType -> !StringUtils.isNullOrEmpty(cancerType.getMainType()) && cancerType.getMainType().equals(specialTumorType.getTumorType())).findAny().orElse(null)).filter(cancerType -> cancerType != null).collect(Collectors.toList());
-            System.out.println("Cached " + specialCancerTypes.size() + " special tumor types " + CacheUtils.getCacheCompletionMessage(current));
+            LOGGER.info("Cached " + specialCancerTypes.size() + " special tumor types " + CacheUtils.getCacheCompletionMessage(current));
 
             current = MainUtils.getCurrentTimestamp();
             synEvidences();
-            System.out.println("Cached " + allEvidencesSize + " evidences " + CacheUtils.getCacheCompletionMessage(current));
+            LOGGER.info("Cached " + allEvidencesSize + " evidences " + CacheUtils.getCacheCompletionMessage(current));
             current = MainUtils.getCurrentTimestamp();
 
             for (Map.Entry<Integer, List<Evidence>> entry : evidences.entrySet()) {
                 setVUS(entry.getKey(), new HashSet<>(entry.getValue()));
             }
-            System.out.println("Cached " + VUS.size() + " VUSs " + CacheUtils.getCacheCompletionMessage(current));
+            LOGGER.info("Cached " + VUS.size() + " VUSs " + CacheUtils.getCacheCompletionMessage(current));
             current = MainUtils.getCurrentTimestamp();
 
             NamingUtils.cacheAllAbbreviations();
-            System.out.println("Cached abbreviation ontology " + CacheUtils.getCacheCompletionMessage(current));
+            LOGGER.info("Cached abbreviation ontology " + CacheUtils.getCacheCompletionMessage(current));
             current = MainUtils.getCurrentTimestamp();
 
             cacheDownloadAvailability();
-            System.out.println("Cached downloadable files availability on github " + CacheUtils.getCacheCompletionMessage(current));
+            LOGGER.info("Cached downloadable files availability on github " + CacheUtils.getCacheCompletionMessage(current));
 
             oncokbInfo = ApplicationContextSingleton.getInfoBo().get();
-            System.out.println("Cached oncokb info " + CacheUtils.getCacheCompletionMessage(current));
+            LOGGER.info("Cached oncokb info " + CacheUtils.getCacheCompletionMessage(current));
 
             registerOtherServices();
-            System.out.println("Register other services " + CacheUtils.getCacheCompletionMessage(current));
+            LOGGER.info("Register other services " + CacheUtils.getCacheCompletionMessage(current));
             current = MainUtils.getCurrentTimestamp();
 
         } catch (Exception e) {
-            System.out.println(e + " at " + MainUtils.getCurrentTime());
+            LOGGER.error("Unexpected exception", e);
         }
     }
 
@@ -287,7 +290,7 @@ public class CacheUtils {
             hugoSymbolToEntrez.put(gene.getHugoSymbol(), gene.getEntrezGeneId());
         }
         cancerGeneList = null;
-        System.out.println("Cached "+ genesByEntrezId.size() + " genes " + CacheUtils.getCacheCompletionMessage(current));
+        LOGGER.info("Cached {} genes {}", genesByEntrezId.size(), CacheUtils.getCacheCompletionMessage(current));
     }
 
     public static List<CancerGene> getCancerGeneList() throws IOException {
@@ -430,7 +433,7 @@ public class CacheUtils {
                 alterationsByReferenceGenome.get(gene.getEntrezGeneId()).get(refGenome).add(alteration);
             }
         }
-        System.out.println("Cached " + allAlterations.size() + " alterations " + CacheUtils.getCacheCompletionMessage(current));
+        LOGGER.info("Cached {} alterations {}", allAlterations.size(), CacheUtils.getCacheCompletionMessage(current));
     }
 
     public static Set<Drug> getAllDrugs() {
@@ -609,30 +612,30 @@ public class CacheUtils {
     }
 
     public static void updateGene(Set<Integer> entrezGeneIds, Boolean propagate) throws IOException {
-        System.out.println("Update gene on instance " + PropertiesUtils.getProperties("app.name") + " at " + MainUtils.getCurrentTime());
+        LOGGER.info("Update gene on instance {}", PropertiesUtils.getProperties("app.name"));
         if (propagate == null) {
             propagate = false;
         }
         if(entrezGeneIds == null || entrezGeneIds.size() == 0){
-            System.out.println("\tThere is no entrez gene ids specified.");
+            LOGGER.warn("There is no entrez gene ids specified.");
             return;
         }
         entrezGeneIds.forEach(entrezGeneId -> GeneObservable.getInstance().update("update", entrezGeneId.toString()));
         if (propagate) {
             notifyOtherServices("update", entrezGeneIds);
         }else{
-            System.out.println("\tDo not propagate.");
+            LOGGER.info("Do not propagate.");
         }
     }
 
     public static void resetAll() throws IOException {
-        System.out.println("Reset all genes cache on instance " + PropertiesUtils.getProperties("app.name") + " at " + MainUtils.getCurrentTime());
+        LOGGER.info("Reset all genes cache on instance {}", PropertiesUtils.getProperties("app.name"));
         GeneObservable.getInstance().update("reset", null);
         notifyOtherServices("reset", null);
     }
 
     public static void resetAll(Boolean propagate) throws IOException {
-        System.out.println("Reset all genes cache on instance " + PropertiesUtils.getProperties("app.name") + " at " + MainUtils.getCurrentTime());
+        LOGGER.info("Reset all genes cache on instance {}", PropertiesUtils.getProperties("app.name"));
         GeneObservable.getInstance().update("reset", null);
         if (propagate == null) {
             propagate = false;
@@ -656,7 +659,7 @@ public class CacheUtils {
             evidences.put(entrezGeneId, pair.getValue());
             updateEvidenceRelevantCancerTypes(entrezGeneId, pair.getValue());
         }
-        System.out.println("Cached all evidences of " + mappedEvidence.size() + " genes" + CacheUtils.getCacheCompletionMessage(current));
+        LOGGER.info("Cached all evidences of {} genes {}", mappedEvidence.size(), CacheUtils.getCacheCompletionMessage(current));
     }
 
     public static void updateEvidenceRelevantCancerTypes(Integer entrezGeneId, List<Evidence> geneEvidences) {
@@ -701,9 +704,9 @@ public class CacheUtils {
         try {
             downloadAvailabilities = GitHubUtils.getDownloadAvailability();
         } catch (IOException e) {
-            System.out.println("There is an issue connecting to GitHub.");
+            LOGGER.error("There is an issue connecting to GitHub.", e);
         } catch (NoPropertyException exception) {
-            System.out.println("The data access token is not available");
+            LOGGER.error("The data access token is not available", exception);
         }
     }
 }
