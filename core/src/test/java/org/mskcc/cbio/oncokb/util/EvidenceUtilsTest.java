@@ -152,15 +152,20 @@ public class EvidenceUtilsTest extends TestCase {
         e4.setLevelOfEvidence(LevelOfEvidence.LEVEL_2);
         e5.setLevelOfEvidence(LevelOfEvidence.LEVEL_R1);
 
-        TumorType tumorType = new TumorType();
-        tumorType.setMainType("Melanoma");
-        tumorType.setSubtype("Melanoma");
+        TumorType tumorType1 = new TumorType();
+        tumorType1.setMainType("Melanoma");
+        tumorType1.setSubtype("Melanoma");
+        tumorType1.setId(453);
 
-        e1.setCancerTypes(Collections.singleton(tumorType));
-        e2.setCancerTypes(Collections.singleton(tumorType));
-        e3.setCancerTypes(Collections.singleton(tumorType));
-        e4.setCancerTypes(Collections.singleton(tumorType));
-        e5.setCancerTypes(Collections.singleton(tumorType));
+        TumorType tumorType2 = new TumorType();
+        tumorType1.setMainType("Non-Small Cell Lung Cancer");
+        tumorType1.setSubtype("Non-Small Cell Lung Cancer");
+
+        e1.setCancerTypes(Collections.singleton(tumorType1));
+        e2.setCancerTypes(Collections.singleton(tumorType1));
+        e3.setCancerTypes(Collections.singleton(tumorType1));
+        e4.setCancerTypes(Collections.singleton(tumorType1));
+        e5.setCancerTypes(Collections.singleton(tumorType1));
 
         Drug d1 = new Drug("Vemurafenib");
         Drug d2 = new Drug("Dabrafenib");
@@ -211,21 +216,21 @@ public class EvidenceUtilsTest extends TestCase {
         sets.add(e1);
         sets.add(e2);
 
-        Set<Evidence> filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets, DEFAULT_REFERENCE_GENOME, alteration);
+        Set<Evidence> filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets, DEFAULT_REFERENCE_GENOME, alteration, null);
         assertEquals("1,2", getIds(filtered));
 
         sets.add(e3);
-        filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets, DEFAULT_REFERENCE_GENOME, alteration);
+        filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets, DEFAULT_REFERENCE_GENOME, alteration, null);
         assertEquals("1,2,3", getIds(filtered));
 
         sets = new HashSet<>();
         sets.add(e1);
         sets.add(e4);
-        filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets, DEFAULT_REFERENCE_GENOME, alteration);
+        filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets, DEFAULT_REFERENCE_GENOME, alteration, null);
         assertEquals("1,4", getIds(filtered));
 
         e1.setLevelOfEvidence(LevelOfEvidence.LEVEL_3A);
-        filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets, DEFAULT_REFERENCE_GENOME, alteration);
+        filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets, DEFAULT_REFERENCE_GENOME, alteration, null);
         assertEquals("4", getIds(filtered));
 
         sets = new HashSet<>();
@@ -234,23 +239,29 @@ public class EvidenceUtilsTest extends TestCase {
 
         e1.setLevelOfEvidence(LevelOfEvidence.LEVEL_1);
         e5.setLevelOfEvidence(LevelOfEvidence.LEVEL_R1);
-        filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets, DEFAULT_REFERENCE_GENOME, alteration);
+        filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets, DEFAULT_REFERENCE_GENOME, alteration, null);
         assertEquals("5", getIds(filtered));
 
         e1.setLevelOfEvidence(LevelOfEvidence.LEVEL_2);
         e5.setLevelOfEvidence(LevelOfEvidence.LEVEL_R1);
-        filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets, DEFAULT_REFERENCE_GENOME, alteration);
+        filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets, DEFAULT_REFERENCE_GENOME, alteration, null);
         assertEquals("5", getIds(filtered));
 
         e1.setLevelOfEvidence(LevelOfEvidence.LEVEL_2);
         e5.setLevelOfEvidence(LevelOfEvidence.LEVEL_R2);
-        filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets, DEFAULT_REFERENCE_GENOME, alteration);
+        filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets, DEFAULT_REFERENCE_GENOME, alteration, null);
         assertEquals("1,5", getIds(filtered));
 
         e1.setLevelOfEvidence(LevelOfEvidence.LEVEL_4);
         e5.setLevelOfEvidence(LevelOfEvidence.LEVEL_R2);
-        filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets, DEFAULT_REFERENCE_GENOME, alteration);
+        filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets, DEFAULT_REFERENCE_GENOME, alteration, null);
         assertEquals("1,5", getIds(filtered));
+
+        e1.setLevelOfEvidence(LevelOfEvidence.LEVEL_3A);
+        e1.setCancerTypes(Collections.singleton(tumorType2));
+        e5.setLevelOfEvidence(LevelOfEvidence.LEVEL_4);
+        filtered = EvidenceUtils.keepHighestLevelForSameTreatments(sets, DEFAULT_REFERENCE_GENOME, alteration, tumorType1);
+        assertEquals("5", getIds(filtered));
     }
 
     private String getIds(Set<Evidence> evidences) {
