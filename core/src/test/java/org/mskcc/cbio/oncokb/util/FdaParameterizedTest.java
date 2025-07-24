@@ -6,6 +6,9 @@ import org.junit.runners.Parameterized;
 import org.mskcc.cbio.oncokb.model.IndicatorQueryResp;
 import org.mskcc.cbio.oncokb.model.Query;
 
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -21,6 +24,7 @@ import static org.junit.Assert.assertEquals;
  */
 @RunWith(Parameterized.class)
 public class FdaParameterizedTest {
+    private static final Logger LOGGER = LogManager.getLogger();
     private static String FDA_EXAMPLES_PATH = "src/test/resources/test_fda.tsv";
 
     private String hugoSymbol;
@@ -52,7 +56,7 @@ public class FdaParameterizedTest {
 
     private static List<String[]> importer() throws IOException {
         if (FDA_EXAMPLES_PATH == null) {
-            System.out.println("Please specify the testing file path");
+            LOGGER.error("Please specify the testing file path");
             return null;
         }
 
@@ -78,13 +82,13 @@ public class FdaParameterizedTest {
                     queries.add(query);
                     count++;
                 } catch (Exception e) {
-                    System.err.println("Could not add line '" + line + "'. " + e);
+                    LOGGER.error("Could not add line '{}'.", line, e);
                 }
             }
             line = buf.readLine();
         }
-        System.err.println("Contains " + count + " tumor type summary queries.");
-        System.err.println("Done.");
+        LOGGER.info("Contains {} tumor type summary queries.", count);
+        LOGGER.info("Done.");
 
         return queries;
     }

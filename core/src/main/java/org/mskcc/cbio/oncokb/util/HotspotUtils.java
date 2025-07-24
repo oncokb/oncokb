@@ -10,6 +10,9 @@ import org.mskcc.cbio.oncokb.model.AlterationPositionBoundary;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.ReferenceGenome;
 
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.*;
@@ -63,13 +66,14 @@ class EnrichedHotspot extends Hotspot {
 }
 
 public class HotspotUtils {
+    private static final Logger LOGGER = LogManager.getLogger();
     private static final String HOTSPOT_FILE_PATH = "/data/cancer-hotspots-gn.json";
     private static Map<Gene, List<EnrichedHotspot>> hotspotMutations = new HashMap<>();
     private static final String POSITIONAL_MUTATION_TYPE="positional";
     private static final String RANGE_INFRAME_MUTATION_TYPE="rangeInframe";
 
     static {
-        System.out.println("Cache all hotspots at " + MainUtils.getCurrentTime());
+        LOGGER.info("Cache all hotspots");
         getHotspotsFromDataFile();
     }
 

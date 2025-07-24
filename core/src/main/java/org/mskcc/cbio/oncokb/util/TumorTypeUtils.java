@@ -11,6 +11,9 @@ import org.json.JSONObject;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.Tumor;
 
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.*;
@@ -21,6 +24,7 @@ import static org.mskcc.cbio.oncokb.model.SpecialTumorType.ALL_SOLID_TUMORS;
 
 
 public class TumorTypeUtils {
+    private static final Logger LOGGER = LogManager.getLogger();
     private static String ONCO_TREE_API_URL = null;
     private static final ImmutableList<String> LiquidTumorTissues = ImmutableList.of(
         "Lymph", "Blood", "Lymphoid", "Myeloid"
@@ -383,8 +387,7 @@ public class TumorTypeUtils {
             org.mskcc.oncotree.model.TumorType oncoTreeTumorType = new ObjectMapper().convertValue(data.get("TISSUE"), org.mskcc.oncotree.model.TumorType.class);
             result.put("TISSUE", oncoTreeTumorType);
         } catch (Exception e) {
-            System.out.println("You need to include oncotree nested file. Endpoint: tumorTypes?version=" + CacheUtils.getInfo().getOncoTreeVersion() + "&flat=false");
-            e.printStackTrace();
+            LOGGER.error("You need to include oncotree nested file. Endpoint: tumorTypes?version={}&flat=false", CacheUtils.getInfo().getOncoTreeVersion(), e);
         }
         return result;
     }
@@ -404,8 +407,7 @@ public class TumorTypeUtils {
                 tumorTypes.add(tumorType);
             }
         } catch (Exception e) {
-            System.out.println("You need to include oncotree flat file. Endpoint: tumorTypes?version=" + CacheUtils.getInfo().getOncoTreeVersion() + "&flat=true");
-            e.printStackTrace();
+            LOGGER.error("You need to include oncotree flat file. Endpoint: tumorTypes?version={}&flat=true", CacheUtils.getInfo().getOncoTreeVersion(), e);
         }
         return tumorTypes;
     }

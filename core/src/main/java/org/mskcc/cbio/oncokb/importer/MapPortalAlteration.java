@@ -12,6 +12,9 @@ import org.mskcc.cbio.oncokb.model.ReferenceGenome;
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,6 +27,7 @@ import static org.mskcc.cbio.oncokb.Constants.*;
  * @author jiaojiao Sep/8/2017 Import alteration data from portal database
  */
 public class MapPortalAlteration {
+    private static final Logger LOGGER = LogManager.getLogger();
     private static List<Alteration> findAlterationList(Gene gene, String proteinChange, String mutation_type, Integer proteinStartPosition, Integer proteinEndPosition) {
         List<Alteration> alterations = new ArrayList<>();
         List<Alteration> alterationsSet = new ArrayList<>();
@@ -65,7 +69,7 @@ public class MapPortalAlteration {
 
         String[] consequences = mapper.get(mutation_type);
         if (consequences == null) {
-            System.out.println("No mutation type mapping for " + mutation_type);
+            LOGGER.info("No mutation type mapping for {}", mutation_type);
         } else {
             for (String consequence : consequences) {
                 Alteration alt = AlterationUtils.getAlteration(gene == null ? null : gene.getHugoSymbol(),
@@ -89,6 +93,6 @@ public class MapPortalAlteration {
                 ApplicationContextSingleton.getAlterationBo().update(oncoKBAlteration);
             }
         }
-        System.out.println("Finished.");
+        LOGGER.info("Finished.");
     }
 }

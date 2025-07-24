@@ -12,8 +12,12 @@ import org.mskcc.cbio.oncokb.model.Version;
 import org.mskcc.cbio.oncokb.util.MainUtils;
 import org.mskcc.cbio.oncokb.util.PropertiesUtils;
 
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 @Component
 public class CacheNameResolver {
+    private static final Logger LOGGER = LogManager.getLogger();
     String keyPrefix;
     public CacheNameResolver() {
         String appNameProperty = PropertiesUtils.getProperties("app.name");
@@ -26,8 +30,7 @@ public class CacheNameResolver {
         if (StringUtils.isNotEmpty(appVersion)) {
             appName.append((new SemVer(appVersion, Semver.SemverType.STRICT).getVersion()));
         } else {
-            // Todo: Throw Sentry error
-            System.out.println("[Warning] Redis cache prefix not setup properly.");
+            LOGGER.error("Redis cache prefix not setup properly.");
         }
 
         appName.append("-data:");
@@ -37,8 +40,8 @@ public class CacheNameResolver {
         appName.append(dataVersion.getVersion());
 
         // Use a versioned cache key prefix to prevent conflicts during deployments.
-        // In Kubernetes, old pods may still process requests and write stale data to Redis 
-        // while new pods are starting up. By including the software and data version in 
+        // In Kubernetes, old pods may still process requests and write stale data to Redis
+        // while new pods are starting up. By including the software and data version in
         // the cache key, we ensure that each deployment is fetching the correct values from Redis.
         this.keyPrefix = appName.toString();
     }

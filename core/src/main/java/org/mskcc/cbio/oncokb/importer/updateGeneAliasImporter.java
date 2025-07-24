@@ -7,6 +7,9 @@ import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 import org.mskcc.cbio.oncokb.util.CacheUtils;
 import org.mskcc.cbio.oncokb.util.FileUtils;
 
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -17,6 +20,8 @@ import java.util.Set;
  * @author Hongxin Zhang
  */
 public class updateGeneAliasImporter {
+    private static final Logger LOGGER = LogManager.getLogger();
+
     private updateGeneAliasImporter() {
         throw new AssertionError();
     }
@@ -41,7 +46,7 @@ public class updateGeneAliasImporter {
             for (String alias : aliases) {
                 if (hugoSymbols.contains(alias)) {
                     gene.getGeneAliases().remove(alias);
-                    System.out.println("Alias of " + gene.getHugoSymbol() + " has been removed: " + alias);
+                    LOGGER.info("Alias of {} has been removed: {}", gene.getHugoSymbol(), alias);
                 }
             }
             ApplicationContextSingleton.getGeneBo().saveOrUpdate(gene);

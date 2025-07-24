@@ -5,10 +5,15 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 public class TestUtils {
+    private static final Logger LOGGER = LogManager.getLogger();
+
     static public BufferedReader getTestFileBufferedReader(String filePath) throws FileNotFoundException {
         if (filePath == null) {
-            System.out.println("Please specify the testing file path");
+            LOGGER.info("Please specify the testing file path");
             return null;
         }
 

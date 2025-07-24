@@ -7,6 +7,9 @@ import org.mskcc.cbio.oncokb.model.IndicatorQueryResp;
 import org.mskcc.cbio.oncokb.model.Query;
 import org.mskcc.cbio.oncokb.model.StructuralVariantType;
 
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -22,6 +25,7 @@ import static org.junit.Assert.assertEquals;
  */
 @RunWith(Parameterized.class)
 public class StructuralVariantParameterizedTest {
+    private static final Logger LOGGER = LogManager.getLogger();
     private static String EXAMPLES_PATH = "src/test/resources/test_structural_variants.tsv";
 
     private String fusionPair;
@@ -87,7 +91,6 @@ public class StructuralVariantParameterizedTest {
             query.setConsequence("fusion");
         }
         IndicatorQueryResp resp = IndicatorUtils.processQuery(query, null, true, null, false);
-//        System.out.println("New: " + fusionPair + "&&" + alteration + "&&" + svClass + "&&" + tumorType + "&&" + isFunctionalFusion.toString().toUpperCase() + "&&" + resp.getOncogenic() + "&&" + resp.getGeneSummary() + "&&" + resp.getVariantSummary() + "&&" + resp.getTumorTypeSummary());
 
         assertEquals("Oncogenicities are not matched. Query: " + _query, oncogenicity, resp.getOncogenic());
         assertEquals("Gene summaries are not matched. Query: " + _query, geneSummary, resp.getGeneSummary());
@@ -102,7 +105,7 @@ public class StructuralVariantParameterizedTest {
 
     private static List<String[]> importer() throws IOException {
         if (EXAMPLES_PATH == null) {
-            System.out.println("Please specify the testing file path");
+            LOGGER.error("Please specify the testing file path");
             return null;
         }
 
@@ -133,13 +136,13 @@ public class StructuralVariantParameterizedTest {
                     queries.add(query);
                     count++;
                 } catch (Exception e) {
-                    System.err.println("Could not add line '" + line + "'. " + e);
+                    LOGGER.error("Could not add line '{}'. ", line, e);
                 }
             }
             line = buf.readLine();
         }
-        System.err.println("Contains " + count + " tumor type summary queries.");
-        System.err.println("Done.");
+        LOGGER.info("Contains {} tumor type summary queries.", count);
+        LOGGER.info("Done.");
 
         return queries;
     }

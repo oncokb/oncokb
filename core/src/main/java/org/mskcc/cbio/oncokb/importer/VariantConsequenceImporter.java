@@ -10,12 +10,16 @@ import org.mskcc.cbio.oncokb.bo.VariantConsequenceBo;
 import org.mskcc.cbio.oncokb.model.VariantConsequence;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 import org.mskcc.cbio.oncokb.util.FileUtils;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  *
  * @author jgao
  */
 public class VariantConsequenceImporter {
+    private static final Logger LOGGER = LogManager.getLogger();
+
     private VariantConsequenceImporter() {
         throw new AssertionError();
     }
@@ -29,7 +33,7 @@ public class VariantConsequenceImporter {
     	VariantConsequenceBo variantConsequenceBo = ApplicationContextSingleton.getVariantConsequenceBo();
 
         int nLines = lines.size();
-        System.out.println("importing...");
+        LOGGER.info("importing...");
         for (int i=0; i<nLines; i++) {
             String line = lines.get(i);
             if (line.startsWith("#")) continue;

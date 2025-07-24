@@ -15,11 +15,15 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 /**
  * Created by Hongxin on 12/5/16.
  */
 @RunWith(Parameterized.class)
 public class VariantTreatmentParameterizedTest {
+    private static final Logger LOGGER = LogManager.getLogger();
     private static String TREATMENT_EXAMPLES_PATH = "src/test/resources/test_variant_treatments.tsv";
 
     private String gene;
@@ -56,10 +60,7 @@ public class VariantTreatmentParameterizedTest {
         }
         String tl = stringBuilder.toString().trim();
 
-//        System.out.println("New: " + gene + "&&" + variant + "&&" + tl);
-
         assertEquals("Gene summary, Query: " + gene + " " + variant, treatment, tl);
-
     }
 
     @Parameterized.Parameters
@@ -69,7 +70,7 @@ public class VariantTreatmentParameterizedTest {
 
     private static List<String[]> importer() throws IOException {
         if (TREATMENT_EXAMPLES_PATH == null) {
-            System.out.println("Please specify the testing file path");
+            LOGGER.error("Please specify the testing file path");
             return null;
         }
 
@@ -94,13 +95,13 @@ public class VariantTreatmentParameterizedTest {
                     queries.add(query);
                     count++;
                 } catch (Exception e) {
-                    System.err.println("Could not add line '" + line + "'. " + e);
+                    LOGGER.error("Could not add line '{}'.", line, e);
                 }
             }
             line = buf.readLine();
         }
-        System.err.println("Contains " + count + " queries.");
-        System.err.println("Done.");
+        LOGGER.info("Contains {} queries.", count);
+        LOGGER.info("Done.");
 
         return queries;
     }

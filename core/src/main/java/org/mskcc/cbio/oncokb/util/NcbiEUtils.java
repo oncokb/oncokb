@@ -9,6 +9,9 @@ package org.mskcc.cbio.oncokb.util;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.model.Article;
 
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -18,6 +21,8 @@ import java.util.*;
  * @author jgao
  */
 public final class NcbiEUtils {
+    private static final Logger LOGGER = LogManager.getLogger();
+
     private NcbiEUtils() {
         throw new AssertionError();
     }
@@ -36,7 +41,7 @@ public final class NcbiEUtils {
                 continue;
 
             if (!StringUtils.isNumeric(pmid)) {
-                System.out.println("pmid has to be a numeric string, but the input is '" + pmid + "'");
+                LOGGER.error("pmid has to be a numeric string, but the input is '{}'", pmid);
             } else {
                 purified.add(pmid);
             }
@@ -52,8 +57,7 @@ public final class NcbiEUtils {
                 throw new Exception();
             }
         } catch (Exception e) {
-            System.out.println("NCBI API KEY needs to be specified. Please see here for details: https://www.ncbi.nlm.nih.gov/books/NBK25497/");
-            e.printStackTrace();
+            LOGGER.error("NCBI API KEY needs to be specified. Please see here for details: https://www.ncbi.nlm.nih.gov/books/NBK25497/", e);
         }
         Set<Article> results = new HashSet<>();
 
@@ -67,10 +71,8 @@ public final class NcbiEUtils {
             return results;
         }
 
-        DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
-        Date date = new Date();
         String url = URL_NCBI_EUTILS + "esummary.fcgi?api_key=" + apiKey + "&db=pubmed&retmode=json&id=" + MainUtils.listToString(new ArrayList<>(pmids), ",");
-        System.out.println("Making a NCBI request at " + dateFormat.format(date) + " " + url);
+        LOGGER.info("Making a NCBI request at {}", url);
 
         Map result = null;
         try {
@@ -103,7 +105,7 @@ public final class NcbiEUtils {
                 String title = (String) (articleInfo.get("title"));
 
                 if (title == null) {
-                    System.out.println("Warning: Article doesn't have a title for " + pmid);
+                    LOGGER.warn("Article doesn't have a title for {}", pmid);
                     continue;
                 }
 
@@ -126,7 +128,7 @@ public final class NcbiEUtils {
 
                 results.add(article);
             } else {
-                System.out.println("Warning: No article info for " + pmid);
+                LOGGER.warn("No article info for {}", pmid);
             }
         }
 

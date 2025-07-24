@@ -1,6 +1,8 @@
 package org.mskcc.cbio.oncokb.util;
 
-import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 import org.mskcc.cbio.oncokb.model.CancerGene;
 import org.mskcc.cbio.oncokb.model.Gene;
 
@@ -12,6 +14,7 @@ import java.util.stream.Collectors;
  * Created by jiaojiao on 6/9/17.
  */
 public class CancerGeneUtils {
+    private static final Logger LOGGER = LogManager.getLogger();
     private static final String MSKIMPACT_GENES = "msk_impact_505_genes.csv";
     private static final String MSKIMPACT_HEME_GENES = "msk_impact_heme_400_heme_pact_v4_575_genes.csv";
     private static final String FOUNDATION_GENES = "foundation_one_cdx_324_genes.csv";
@@ -153,7 +156,7 @@ public class CancerGeneUtils {
 
                 String[] items = line.split(",");
                 if (items.length != 2) {
-                    System.out.println("ERROR line format: " + line);
+                    LOGGER.error("ERROR line format: {}", line);
                     continue;
                 }
 
@@ -166,7 +169,7 @@ public class CancerGeneUtils {
                     gene.setEntrezGeneId(entrezGeneId);
                     allGenes.add(gene);
                 } else {
-                    System.out.println("ERROR line content: " + items[0] + " " + items[1]);
+                    LOGGER.error("ERROR line content: {} {}",  items[0], items[1]);
                 }
             }
             return allGenes;
