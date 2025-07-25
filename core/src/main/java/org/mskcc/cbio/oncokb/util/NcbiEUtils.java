@@ -20,7 +20,7 @@ import java.util.*;
  * @author jgao
  */
 public final class NcbiEUtils {
-    private static final Logger LOGGER = LoggerFactory.getLogger(RequestResponseLoggingFilter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NcbiEUtils.class);
 
     private NcbiEUtils() {
         throw new AssertionError();

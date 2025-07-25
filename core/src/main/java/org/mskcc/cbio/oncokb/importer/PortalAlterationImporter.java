@@ -24,7 +24,7 @@ import java.text.DecimalFormat;
  * @author jiaojiao Sep/8/2017 Import alteration data from portal database
  */
 public class PortalAlterationImporter {
-    private static final Logger LOGGER = LoggerFactory.getLogger(RequestResponseLoggingFilter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PortalAlterationImporter.class);
 
     public static void main(String[] args) throws IOException {
         PortalAlterationBo portalAlterationBo = ApplicationContextSingleton.getPortalAlterationBo();
