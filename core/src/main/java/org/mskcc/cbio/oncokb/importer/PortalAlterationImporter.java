@@ -14,6 +14,9 @@ import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
 import org.mskcc.cbio.oncokb.util.FileUtils;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.text.DecimalFormat;
 
@@ -21,6 +24,7 @@ import java.text.DecimalFormat;
  * @author jiaojiao Sep/8/2017 Import alteration data from portal database
  */
 public class PortalAlterationImporter {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RequestResponseLoggingFilter.class);
 
     public static void main(String[] args) throws IOException {
         PortalAlterationBo portalAlterationBo = ApplicationContextSingleton.getPortalAlterationBo();
@@ -36,8 +40,8 @@ public class PortalAlterationImporter {
                 String mutationUrl = "https://cbioportal.mskcc.org/api/molecular-profiles/msk_impact_2017_mutations/mutations?sampleListId=" + sampleListId + "&projection=DETAILED";
                 String mutationResult = FileUtils.readMSKPortal(mutationUrl);
                 JSONArray mutationJSONResult = new JSONArray(mutationResult);
-                System.out.println("*****************************************************************************");
-                System.out.println("Importing for " + cancerType);
+                LOGGER.info("*****************************************************************************");
+                LOGGER.info("Importing for {}", cancerType);
                 for (int j = 0; j < mutationJSONResult.length(); j++) {
                     JSONObject sampleObject = mutationJSONResult.getJSONObject(j);
                     String sampleId = sampleObject.getString("sampleId");
@@ -54,9 +58,9 @@ public class PortalAlterationImporter {
                 }
                 DecimalFormat myFormatter = new DecimalFormat("##.##");
                 String output = myFormatter.format(100 * (i + 1) / sampleListsJSONResult.length());
-                System.out.println("Importing " + output + "% done.");
+                LOGGER.info("Importing {}% done.", output);
             }
         }
-        System.out.println("Finished.");
+        LOGGER.info("Finished.");
     }
 }

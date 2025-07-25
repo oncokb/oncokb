@@ -6,6 +6,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.mskcc.cbio.oncokb.model.*;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,6 +20,7 @@ import static org.mskcc.cbio.oncokb.util.TestUtils.getTestFileBufferedReader;
 
 @RunWith(Parameterized.class)
 public class AnnotateAlterationParameterizedTest {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AnnotateAlterationParameterizedTest.class);
     private static String EXAMPLES_PATH = "src/test/resources/test_annotate_alterations.tsv";
 
     private String proteinChange;
@@ -84,13 +88,13 @@ public class AnnotateAlterationParameterizedTest {
                     queries.add(query);
                     count++;
                 } catch (Exception e) {
-                    System.err.println("Could not add line '" + line + "'. " + e);
+                    LOGGER.error("Could not add line '{}'. ", line, e);
                 }
             }
             line = buf.readLine();
         }
-        System.err.println("Contains " + count + " queries.");
-        System.err.println("Done.");
+        LOGGER.info("Contains {} queries.", count);
+        LOGGER.info("Done.");
 
         return queries;
     }

@@ -19,9 +19,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.mskcc.cbio.oncokb.util.ArticleUtils.getAbstractFromText;
 import static org.mskcc.cbio.oncokb.util.ArticleUtils.getPmidsFromText;
@@ -32,6 +33,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
  */
 @Controller
 public class DriveAnnotationParser {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DriveAnnotationParser.class);
     OncokbTranscriptService oncokbTranscriptService = new OncokbTranscriptService();
 
     @RequestMapping(value = "/legacy-api/driveAnnotation", method = POST)
@@ -44,7 +46,7 @@ public class DriveAnnotationParser {
     ) throws Exception {
 
         if (gene == null) {
-            System.out.println("#No gene info available.");
+            LOGGER.error("#No gene info available.");
         } else {
             JSONObject jsonObj = new JSONObject(gene);
             JSONArray jsonArray = null;
@@ -63,13 +65,13 @@ public class DriveAnnotationParser {
     private static final String EXCLUDED_RCTS_KEY = "excludedRCTs";
 
     public void parseVUS(Gene gene, JSONArray vus, Integer nestLevel) throws JSONException {
-        System.out.println(spaceStrByNestLevel(nestLevel) + "Variants of unknown significance");
+        LOGGER.info("{} Variants of unknown significance", spaceStrByNestLevel(nestLevel));
         if (vus != null) {
             AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
             EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
             AlterationType type = AlterationType.MUTATION; //TODO: cna and fusion
 
-            System.out.println("\t" + vus.length() + " VUSs");
+            LOGGER.info("{} VUSs", vus.length());
             for (int i = 0; i < vus.length(); i++) {
                 JSONObject variant = vus.getJSONObject(i);
                 String mutationStr = variant.has("name") ? variant.getString("name") : null;
@@ -110,16 +112,16 @@ public class DriveAnnotationParser {
 //                        evidence.setLastReview(date);
                     }
                     if (evidence.getLastEdit() == null) {
-                        System.out.println(spaceStrByNestLevel(nestLevel + 1) + "WARNING: " + mutationStr + " do not have last update.");
+                        LOGGER.info("{} WARNING: {} do not have last update.", spaceStrByNestLevel(nestLevel + 1), mutationStr);
                     }
                     evidenceBo.save(evidence);
                 }
                 if (i % 10 == 9)
-                    System.out.println("\t\tImported " + (i + 1));
+                    LOGGER.info("Imported {}", i + 1);
             }
         } else {
             if (vus == null) {
-                System.out.println(spaceStrByNestLevel(nestLevel) + "No VUS available.");
+                LOGGER.info("{} No VUS available.", spaceStrByNestLevel(nestLevel));
             }
         }
     }
@@ -171,12 +173,12 @@ public class DriveAnnotationParser {
                 Gene gene = geneBo.findGeneByHugoSymbol(hugo);
 
                 if (gene == null) {
-                    System.out.println(spaceStrByNestLevel(nestLevel) + "Gene " + hugo + " is not in the released list.");
+                    LOGGER.info("{} Gene {} is not in the released list.", spaceStrByNestLevel(nestLevel), hugo);
                     if (releaseGene) {
                         OncokbTranscriptService oncokbTranscriptService = new OncokbTranscriptService();
                         gene = oncokbTranscriptService.findGeneBySymbol(hugo);
                         if (gene == null) {
-                            System.out.println("!!!!!!!!!Could not find gene " + hugo + " either.");
+                            LOGGER.error("!!!!!!!!!Could not find gene {} either.", hugo);
                             throw new IOException("!!!!!!!!!Could not find gene " + hugo + ".");
                         } else {
                             updateGeneInfo(geneInfo, gene);
@@ -188,7 +190,7 @@ public class DriveAnnotationParser {
                 }
 
                 if (gene != null) {
-                    System.out.println(spaceStrByNestLevel(nestLevel) + "Gene: " + gene.getHugoSymbol());
+                    LOGGER.info("{} Gene: {}", spaceStrByNestLevel(nestLevel), gene.getHugoSymbol());
                     updateGeneInfo(geneInfo, gene);
                     geneBo.update(gene);
 
@@ -221,11 +223,11 @@ public class DriveAnnotationParser {
 
                     CacheUtils.updateGene(Collections.singleton(gene.getEntrezGeneId()), true);
                 } else {
-                    System.out.print(spaceStrByNestLevel(nestLevel) + "No info about " + hugo);
+                    LOGGER.info("{} No info about {}", spaceStrByNestLevel(nestLevel), hugo);
                 }
                 return gene;
             } else {
-                System.out.println(spaceStrByNestLevel(nestLevel) + "No hugoSymbol available");
+                LOGGER.info("No hugoSymbol available {}", spaceStrByNestLevel(nestLevel));
             }
         }
         return null;
@@ -241,7 +243,7 @@ public class DriveAnnotationParser {
     }
 
     private void parseSummary(Gene gene, String geneSummary, String uuid, Date lastEdit, Integer nestLevel) {
-        System.out.println(spaceStrByNestLevel(nestLevel) + "Summary");
+        LOGGER.info("{} Summary", spaceStrByNestLevel(nestLevel));
         // gene summary
         if (geneSummary != null && !geneSummary.isEmpty()) {
             Evidence evidence = new Evidence();
@@ -250,24 +252,18 @@ public class DriveAnnotationParser {
             evidence.setDescription(geneSummary);
             evidence.setUuid(uuid);
             evidence.setLastEdit(lastEdit);
-//            evidence.setLastReview(lastReview);
             if (lastEdit != null) {
-                System.out.println(spaceStrByNestLevel(nestLevel + 1) +
-                    "Last update on: " + MainUtils.getTimeByDate(lastEdit));
+                LOGGER.info("{} Last update on: {}", spaceStrByNestLevel(nestLevel + 1), MainUtils.getTimeByDate(lastEdit));
             }
-//            if (lastReview != null) {
-//                System.out.println(spaceStrByNestLevel(nestLevel + 1) +
-//                    "Last review on: " + MainUtils.getTimeByDate(lastReview));
-//            }
             setDocuments(geneSummary, evidence);
             EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
             evidenceBo.save(evidence);
-            System.out.println(spaceStrByNestLevel(nestLevel + 1) + "Has description");
+            LOGGER.info("{} Has description", spaceStrByNestLevel(nestLevel + 1));
         }
     }
 
     private void parseGeneBackground(Gene gene, String bg, String uuid, Date lastEdit, Integer nestLevel) {
-        System.out.println(spaceStrByNestLevel(nestLevel) + "Background");
+        LOGGER.info("{} Background", spaceStrByNestLevel(nestLevel));
 
         if (bg != null && !bg.isEmpty()) {
             Evidence evidence = new Evidence();
@@ -276,26 +272,24 @@ public class DriveAnnotationParser {
             evidence.setDescription(bg);
             evidence.setUuid(uuid);
             evidence.setLastEdit(lastEdit);
-//            evidence.setLastReview(lastReview);
             if (lastEdit != null) {
-                System.out.println(spaceStrByNestLevel(nestLevel + 1) +
-                    "Last update on: " + MainUtils.getTimeByDate(lastEdit));
+                LOGGER.info("{} Last update on: {}", spaceStrByNestLevel(nestLevel + 1), MainUtils.getTimeByDate(lastEdit));
             }
             setDocuments(bg, evidence);
             EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
             evidenceBo.save(evidence);
-            System.out.println(spaceStrByNestLevel(nestLevel + 1) + "Has description");
+            LOGGER.info("{} Has description", spaceStrByNestLevel(nestLevel + 1));
         }
     }
 
     private void parseMutations(Gene gene, JSONArray mutations, Integer nestLevel) throws Exception {
         if (mutations != null) {
-            System.out.println(spaceStrByNestLevel(nestLevel) + mutations.length() + " mutations.");
+            LOGGER.info("{} {} mutations.", spaceStrByNestLevel(nestLevel), mutations.length());
             for (int i = 0; i < mutations.length(); i++) {
                 parseMutation(gene, mutations.getJSONObject(i), nestLevel + 1);
             }
         } else {
-            System.out.println(spaceStrByNestLevel(nestLevel) + "No mutation.");
+            LOGGER.info("{} No mutation.", spaceStrByNestLevel(nestLevel));
         }
     }
 
@@ -304,7 +298,7 @@ public class DriveAnnotationParser {
 
         if (mutationStr != null && !mutationStr.isEmpty() && !mutationStr.contains("?")) {
             EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
-            System.out.println(spaceStrByNestLevel(nestLevel) + "Mutation: " + mutationStr);
+            LOGGER.info("{} Mutation: {}", spaceStrByNestLevel(nestLevel), mutationStr);
 
             AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
             AlterationType type = AlterationType.MUTATION; //TODO: cna and fusion
@@ -394,7 +388,7 @@ public class DriveAnnotationParser {
             if (mutationObj.has("tumors")) {
                 JSONArray cancers = mutationObj.getJSONArray("tumors");
                 if (cancers != null && cancers.length() > 0) {
-                    System.out.println(spaceStrByNestLevel(nestLevel) + "Tumor Types");
+                    LOGGER.info("{} Tumor Types", spaceStrByNestLevel(nestLevel));
                 }
                 for (int i = 0; i < cancers.length(); i++) {
                     JSONArray subTumorTypes = cancers.getJSONObject(i).getJSONArray("cancerTypes");
@@ -411,7 +405,7 @@ public class DriveAnnotationParser {
                 }
             }
         } else {
-            System.out.println(spaceStrByNestLevel(nestLevel) + "Mutation does not have name skip...");
+            LOGGER.info("{} Mutation does not have name skip...", spaceStrByNestLevel(nestLevel));
         }
     }
 
@@ -519,9 +513,8 @@ public class DriveAnnotationParser {
     private void saveTumorLevelSummaries(JSONObject cancerObj, String summaryKey, Gene gene, Set<Alteration> alterations, List<TumorType> tumorTypes, List<TumorType> excludedCancerTypes, List<TumorType> relevantCancerTypes, EvidenceType evidenceType, Integer nestLevel) {
         if (cancerObj.has(summaryKey) && !cancerObj.getString(summaryKey).isEmpty()) {
             EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
-            System.out.println(spaceStrByNestLevel(nestLevel + 1) + " " + summaryKey);
+            LOGGER.info("{} {}", spaceStrByNestLevel(nestLevel + 1), summaryKey);
             Date lastEdit = getLastEdit(cancerObj, summaryKey);
-//            Date lastReview = getLastReview(cancerObj, summaryKey);
             Evidence evidence = new Evidence();
             evidence.setEvidenceType(evidenceType);
             evidence.setGene(gene);
@@ -535,17 +528,14 @@ public class DriveAnnotationParser {
             if (relevantCancerTypes != null && !relevantCancerTypes.isEmpty()) {
                 evidence.setRelevantCancerTypes(new HashSet<>(relevantCancerTypes));
             }
-//            evidence.setLastReview(lastReview);
             if (lastEdit != null) {
-                System.out.println(spaceStrByNestLevel(nestLevel + 2) +
-                    "Last update on: " + MainUtils.getTimeByDate(lastEdit));
+                LOGGER.info("{} Last update on: {}", spaceStrByNestLevel(nestLevel + 2), MainUtils.getTimeByDate(lastEdit));
             }
             if (!tumorTypes.isEmpty()) {
                 evidence.setCancerTypes(new HashSet<>(tumorTypes));
             }
             setDocuments(cancerObj.getString(summaryKey), evidence);
-            System.out.println(spaceStrByNestLevel(nestLevel + 2) +
-                "Has description.");
+            LOGGER.info("{} Has description.", spaceStrByNestLevel(nestLevel + 2));
             evidenceBo.save(evidence);
         }
     }
@@ -555,7 +545,7 @@ public class DriveAnnotationParser {
             return;
         }
 
-        System.out.println(spaceStrByNestLevel(nestLevel) + "Tumor types: " + tumorTypes.stream().map(TumorTypeUtils::getTumorTypeName).collect(Collectors.joining(", ")));
+        LOGGER.info("{} Tumor types: {}", spaceStrByNestLevel(nestLevel), tumorTypes.stream().map(TumorTypeUtils::getTumorTypeName).collect(Collectors.joining(", ")));
 
         // cancer type summary
         saveTumorLevelSummaries(cancerObj, "summary", gene, alterations, tumorTypes, excludedCancerTypes, relevantCancerTypes, EvidenceType.TUMOR_TYPE_SUMMARY, nestLevel);
@@ -622,27 +612,25 @@ public class DriveAnnotationParser {
         for (int i = 0; i < treatmentsArray.length(); i++) {
             JSONObject drugObj = treatmentsArray.getJSONObject(i);
             if (!drugObj.has("name") || drugObj.getJSONArray("name").length() == 0) {
-                System.out.println(spaceStrByNestLevel(nestLevel + 1) + "Drug does not have name, skip... " + drugObj.toString());
+                LOGGER.info("{} Drug does not have name, skip... {}", spaceStrByNestLevel(nestLevel + 1), drugObj.toString());
                 continue;
             }
 
             JSONArray therapiesArray = drugObj.getJSONArray("name");
-            System.out.println(spaceStrByNestLevel(nestLevel + 1) + "Drug(s): " + therapiesArray.length());
+            LOGGER.info("{} Drug(s): {}", spaceStrByNestLevel(nestLevel + 1), therapiesArray.length());
 
             Set<Date> lastEditDates = new HashSet<>();
-            Set<Date> lastReviewDates = new HashSet<>();
             addDateToLastEditSetFromObject(lastEditDates, drugObj, "name");
-//            addDateToLastReviewSetFromLong(lastReviewDates, drugObj, "name");
 
             ImmutablePair<EvidenceType, String> evidenceTypeAndKnownEffect = getEvidenceTypeAndKnownEffectFromDrugObj(drugObj);
             EvidenceType evidenceType = evidenceTypeAndKnownEffect.getLeft();
             String knownEffect = evidenceTypeAndKnownEffect.getRight();
             if (evidenceType == null) {
-                System.err.println(spaceStrByNestLevel(nestLevel + 1) + "Could not get evidence type" + drugObj.toString());
+                LOGGER.error("{} Could not get evidence type {}", spaceStrByNestLevel(nestLevel + 1), drugObj);
                 continue;
             }
             if (knownEffect == null) {
-                System.err.println(spaceStrByNestLevel(nestLevel + 1) + "Could not get known effect" + drugObj.toString());
+                LOGGER.error("{} Could not get known effect {}", spaceStrByNestLevel(nestLevel + 1), drugObj);
             }
 
             Evidence evidence = new Evidence();
@@ -690,7 +678,7 @@ public class DriveAnnotationParser {
                         if (ncitCode != null) {
                             org.oncokb.oncokb_transcript.client.Drug ncitDrug = oncokbTranscriptService.findDrugByNcitCode(ncitCode);
                             if (ncitDrug == null) {
-                                System.out.println("ERROR: the NCIT code cannot be found... Code:" + ncitCode);
+                                LOGGER.error("The NCIT code cannot be found... Code: {}", ncitCode);
                             } else {
                                 drug = new Drug();
                                 drug.setDrugName(ncitDrug.getName());
@@ -728,26 +716,23 @@ public class DriveAnnotationParser {
 
             // highest level of evidence
             if (!drugObj.has("level") || drugObj.getString("level").trim().isEmpty()) {
-                System.err.println(spaceStrByNestLevel(nestLevel + 2) + "Error: no level of evidence");
+                LOGGER.error("{} No level of evidence", spaceStrByNestLevel(nestLevel + 2));
                 // TODO:
                 //throw new RuntimeException("no level of evidence");
             } else {
                 String level = drugObj.getString("level").trim();
                 addDateToLastEditSetFromObject(lastEditDates, drugObj, "level");
-//                addDateToLastReviewSetFromLong(lastReviewDates, drugObj, "level");
 
                 LevelOfEvidence levelOfEvidence = LevelOfEvidence.getByLevel(level.toUpperCase());
                 if (levelOfEvidence == null) {
-                    System.err.println(spaceStrByNestLevel(nestLevel + 2) + "Error: wrong level of evidence: " + level);
+                    LOGGER.error("{} Wrong level of evidence: {}", spaceStrByNestLevel(nestLevel + 2), level);
                     // TODO:
                     //throw new RuntimeException("wrong level of evidence: "+level);
                     continue;
                 } else if (LevelUtils.getAllowedCurationLevels().contains(levelOfEvidence)) {
-                    System.out.println(spaceStrByNestLevel(nestLevel + 2) +
-                        "Level: " + levelOfEvidence.getLevel());
+                    LOGGER.info("{} Level: {}", spaceStrByNestLevel(nestLevel + 2), levelOfEvidence.getLevel());
                 } else {
-                    System.err.println(spaceStrByNestLevel(nestLevel + 2) +
-                        "Level not allowed: " + levelOfEvidence.getLevel());
+                    LOGGER.info("{} Level not allowed: {}", spaceStrByNestLevel(nestLevel + 2), levelOfEvidence.getLevel());
                     continue;
                 }
                 evidence.setLevelOfEvidence(levelOfEvidence);
@@ -756,11 +741,11 @@ public class DriveAnnotationParser {
                 if (drugObj.has(FDA_LEVEL_KEY)) {
                     String fdaLevelStr = drugObj.getString(FDA_LEVEL_KEY);
                     fdaLevel = LevelOfEvidence.getByLevel(fdaLevelStr);
-                    System.out.println(spaceStrByNestLevel(nestLevel + 2) + "Manual FDA level: " + fdaLevel);
+                    LOGGER.info("{} Manual FDA level: {}", spaceStrByNestLevel(nestLevel + 2), fdaLevel);
                 } else {
                     fdaLevel = FdaAlterationUtils.convertToFdaLevel(evidence.getLevelOfEvidence());
                     if (fdaLevel != null) {
-                        System.out.println(spaceStrByNestLevel(nestLevel + 2) + "Default FDA level: " + fdaLevel);
+                        LOGGER.info("{} Default FDA level: {}", spaceStrByNestLevel(nestLevel + 2), fdaLevel);
                     }
                 }
                 if (fdaLevel != null && LevelUtils.getAllowedFdaLevels().contains(fdaLevel)) {
@@ -776,8 +761,7 @@ public class DriveAnnotationParser {
                         evidence.setSolidPropagationLevel(definedLevel);
                     }
                     if (evidence.getSolidPropagationLevel() != null) {
-                        System.out.println(spaceStrByNestLevel(nestLevel + 2) +
-                            "Manual solid propagation level: " + evidence.getSolidPropagationLevel());
+                        LOGGER.info("{} Manual solid propagation level: {}", spaceStrByNestLevel(nestLevel + 2), evidence.getSolidPropagationLevel());
                     }
                 } else {
                     evidence.setSolidPropagationLevel(LevelUtils.getDefaultPropagationLevelByTumorForm(evidence, TumorForm.SOLID));
@@ -793,42 +777,26 @@ public class DriveAnnotationParser {
                         evidence.setLiquidPropagationLevel(definedLevel);
                     }
                     if (evidence.getLiquidPropagationLevel() != null) {
-                        System.out.println(spaceStrByNestLevel(nestLevel + 2) +
-                            "Manual liquid propagation level: " + evidence.getLiquidPropagationLevel());
+                        LOGGER.info("{} Manual liquid propagation level: {}", spaceStrByNestLevel(nestLevel + 2), evidence.getLiquidPropagationLevel());
                     }
                 } else {
                     evidence.setLiquidPropagationLevel(LevelUtils.getDefaultPropagationLevelByTumorForm(evidence, TumorForm.LIQUID));
                 }
             }
 
-            // description
-//            if (drugObj.has("short") && !drugObj.getString("short").trim().isEmpty()) {
-//                String additionalInfo = drugObj.getString("short").trim();
-//                evidence.setAdditionalInfo(additionalInfo);
-//            }
             if (drugObj.has("description") && !drugObj.getString("description").trim().isEmpty()) {
                 String desc = drugObj.getString("description").trim();
                 addDateToLastEditSetFromObject(lastEditDates, drugObj, "description");
-//                addDateToLastReviewSetFromLong(lastReviewDates, drugObj, "description");
                 evidence.setDescription(desc);
-                System.out.println(spaceStrByNestLevel(nestLevel + 2) +
-                    "Has description.");
+                LOGGER.info("{} Has description.", spaceStrByNestLevel(nestLevel + 2));
                 setDocuments(desc, evidence);
             }
 
             Date lastEdit = getMostRecentDate(lastEditDates);
             if (lastEdit != null) {
-                System.out.println(spaceStrByNestLevel(nestLevel + 2) +
-                    "Last update on: " + MainUtils.getTimeByDate(lastEdit));
+                LOGGER.info("{} Last update on: {}", spaceStrByNestLevel(nestLevel + 2), MainUtils.getTimeByDate(lastEdit));
             }
             evidence.setLastEdit(lastEdit);
-
-//            Date lastReview = getMostRecentDate(lastReviewDates);
-//            if (lastReview != null) {
-//                System.out.println(spaceStrByNestLevel(nestLevel + 2) +
-//                    "Last update on: " + MainUtils.getTimeByDate(lastReview));
-//            }
-//            evidence.setLastReview(lastReview);
 
             if (excludedCancerTypes != null) {
                 evidence.setExcludedCancerTypes(new HashSet<>(excludedCancerTypes));
@@ -849,9 +817,8 @@ public class DriveAnnotationParser {
         if (evidenceType != null && implication != null &&
             ((implication.has("description") && !implication.getString("description").trim().isEmpty())
                 || (implication.has("level") && !implication.getString("level").trim().isEmpty()))) {
-            System.out.println(spaceStrByNestLevel(nestLevel) + evidenceType.name() + ":");
+            LOGGER.info("{} {}:", spaceStrByNestLevel(nestLevel), evidenceType.name());
             Set<Date> lastEditDates = new HashSet<>();
-            Set<Date> lastReviewDates = new HashSet<>();
             EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
             Evidence evidence = new Evidence();
 
@@ -867,7 +834,7 @@ public class DriveAnnotationParser {
 
             if (implication.has("level") && !implication.getString("level").trim().isEmpty()) {
                 LevelOfEvidence level = LevelOfEvidence.getByLevel(implication.getString("level").trim());
-                System.out.println(spaceStrByNestLevel(nestLevel + 1) + "Level of the implication: " + level);
+                LOGGER.info("{} Level of the implication: {}", spaceStrByNestLevel(nestLevel + 1), level);
                 evidence.setLevelOfEvidence(level);
                 addDateToLastEditSetFromObject(lastEditDates, implication, "level");
             }
@@ -882,27 +849,19 @@ public class DriveAnnotationParser {
             }
 
             if (implication.has("description") && !implication.getString("description").trim().isEmpty()) {
-                System.out.println(spaceStrByNestLevel(nestLevel + 1) + "Has description.");
+                LOGGER.info("{} Has description.", spaceStrByNestLevel(nestLevel + 1));
                 String desc = implication.getString("description").trim();
                 evidence.setDescription(desc);
                 addDateToLastEditSetFromObject(lastEditDates, implication, "description");
-//                addDateToLastReviewSetFromLong(lastReviewDates, implication, "description");
                 setDocuments(desc, evidence);
             }
 
             Date lastEdit = getMostRecentDate(lastEditDates);
             evidence.setLastEdit(lastEdit);
             if (lastEdit != null) {
-                System.out.println(spaceStrByNestLevel(nestLevel + 1) +
-                    "Last update on: " + MainUtils.getTimeByDate(lastEdit));
+                LOGGER.info("{} Last update on: {}", spaceStrByNestLevel(nestLevel + 1), MainUtils.getTimeByDate(lastEdit));
             }
 
-//            Date lastReview = getMostRecentDate(lastReviewDates);
-//            evidence.setLastReview(lastReview);
-//            if (lastReview != null) {
-//                System.out.println(spaceStrByNestLevel(nestLevel + 1) +
-//                    "Last review on: " + MainUtils.getTimeByDate(lastReview));
-//            }
             evidenceBo.save(evidence);
             return evidence;
         }

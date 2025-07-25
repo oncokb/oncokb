@@ -9,12 +9,12 @@ package org.mskcc.cbio.oncokb.util;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import org.json.JSONObject;
 import org.mskcc.cbio.oncokb.apiModels.CurationPlatformConfigs;
 import org.mskcc.cbio.oncokb.apiModels.FirebaseConfig;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.InputStream;
 import java.util.Properties;
 
@@ -23,6 +23,8 @@ import java.util.Properties;
  * @author jgao
  */
 public final class PropertiesUtils {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PropertiesUtils.class);
+
     private static Properties PROPERTIES;
     private PropertiesUtils() {
         throw new AssertionError();
@@ -42,11 +44,11 @@ public final class PropertiesUtils {
                 if (inputStream != null) {
                     PROPERTIES.load(inputStream);
                 } else {
-                    System.out.println("property file '" + propFileName + "' not found in the classpath");
+                    LOGGER.error("property file '{}' not found in the classpath", propFileName);
                 }
                 inputStream.close();
             } catch (Exception e) {
-                System.out.println(e);
+                LOGGER.error("Unexpected Error", e);
             }
         }
 
