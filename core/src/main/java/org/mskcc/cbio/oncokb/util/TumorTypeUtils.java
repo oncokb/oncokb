@@ -6,6 +6,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.Tumor;
 
@@ -312,17 +314,58 @@ public class TumorTypeUtils {
         }
     }
 
+    public static String getTumorTypeName(JSONObject tumorType) {
+        if (tumorType == null) {
+            return "";
+        } else {
+
+            if (!StringUtils.isEmpty(tumorType.getString("subtype"))) {
+                return tumorType.getString("subtype");
+            } else if (!StringUtils.isEmpty(tumorType.getString("mainType"))) {
+                return tumorType.getString("mainType");
+            } else{
+                return "";
+            }
+        }
+    }
+
     public static String getTumorTypesName(Collection<TumorType> tumorTypes) {
         return tumorTypes.stream().map(tumorType -> getTumorTypeName(tumorType)).collect(Collectors.joining(", "));
+    }
+
+    public static String getTumorTypesName(JSONArray tumorTypes) {
+        List<String> tumorTypeNames = new ArrayList<>();
+        for (int i=0; i<tumorTypes.length(); i++) {
+            JSONObject tumorType = tumorTypes.getJSONObject(i);
+            tumorTypeNames.add(getTumorTypeName(tumorType));
+        }
+        return tumorTypeNames.stream().collect(Collectors.joining(", "));
     }
 
     public static String getEvidenceTumorTypesName(Evidence evidence) {
         return getTumorTypesNameWithExclusion(evidence.getCancerTypes(), evidence.getExcludedCancerTypes());
     }
 
+    public static String getEvidenceTumorTypesName(JSONObject evidence) {
+        JSONArray cancerTypes = evidence.getJSONArray("cancerTypes");
+        JSONArray excludedCancerTypes = evidence.getJSONArray("excludedCancerTypes");
+
+        return getTumorTypesNameWithExclusion(cancerTypes, excludedCancerTypes);
+    }
+
     public static String getTumorTypesNameWithExclusion(Collection<TumorType> tumorTypes, Collection<TumorType> excludedTumorTypes) {
         StringBuilder sb = new StringBuilder(getTumorTypesName(tumorTypes));
         if (excludedTumorTypes != null && excludedTumorTypes.size() > 0) {
+            sb.append(" (excluding ");
+            sb.append(getTumorTypesName(excludedTumorTypes));
+            sb.append(")");
+        }
+        return sb.toString();
+    }
+
+    public static String getTumorTypesNameWithExclusion(JSONArray tumorTypes, JSONArray excludedTumorTypes) {
+        StringBuilder sb = new StringBuilder(getTumorTypesName(tumorTypes));
+        if (excludedTumorTypes != null && excludedTumorTypes.length() > 0) {
             sb.append(" (excluding ");
             sb.append(getTumorTypesName(excludedTumorTypes));
             sb.append(")");

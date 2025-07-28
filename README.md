@@ -36,18 +36,28 @@ cp -r core/src/main/resources/properties-EXAMPLE core/src/main/resources/propert
 
 ## Build the WAR file
 
-`mvn clean install -P public -DskipTests=true`
+### Choose profile
+
+1. `enterprise`: includes public and private APIs
+2. `public-api`: includes only public API endpoints
+3. `image-build`: uses Jib to generate a docker image and push to DockerHub
+
+> **_NOTE:_**  We deprecated the legacy `public` and `curate` profiles.
+
+`mvn clean install -P <profile(s)> -DskipTests=true`
 
 The WAR file is under `/web/target/`
 
-## Deploy with frontend
+## Run locally on VSCode
 
-Please choose one of the profile when building the war file
-
--   curate - core + API + curation website
--   public - core + API + public website (deprecated)
-
-You could find specific instructions in curate or public repo,
+1. Download VSCode extension `Community Server Connector`
+2. In VSCode sidebar, find `Servers` dropdown.
+3. Right click `Community Server Connector` and choose `Create New Server`.
+4. Either download Tomcat 8 on local machine or let CSC download for you.
+5. Right click Tomcat server and choose `Add Deployment`. This is the WAR file generated in the previous step.
+6. Edit the Tomcat server and add `"vm.install.path": "/path/to/java8"`.
+7. Start Tomcat server. Make sure to `Publish Server (Full)` to keep server synchronized with WAR file (if changes were made).
+8. Test the endpoint by making a request to `http://localhost:8080/app/api/v1/info`
 
 ## Run with Docker containers
 
@@ -74,30 +84,9 @@ For this option, you need to download the VEP cache, which is used in the `gn-ve
 
 1. OncoKB requires a MySQL server and the `oncokb` and `oncokb-transcript` databases imported. This step must be completed before continuing the installation process. Reach out to contact@oncokb.org to get access to the data dump. [How to setup MySQL Server](#how-to-setup-mysql-server)
 
-2. Download the Genome Nexus VEP data from our AWS S3 Bucket.
+2. Follow the [Genome Nexus VEP instructions](https://github.com/genome-nexus/genome-nexus-vep) for downloading and setting up the VEP MySQL server. 
 
-    ```
-    # The home directory is used to store the VEP cache in this tutorial, but this can be changed to your preferred download location.
-    cd ~
-    mkdir gn-vep-data && cd "$_"
-
-    mkdir 98_GRCh37 && cd "$_"
-    curl -o 98_GRCh37.tar https://oncokb.s3.amazonaws.com/gn-vep-data/98_GRCh37/98_GRCh37.tar
-    tar xvf 98_GRCh37.tar
-
-    cd ..
-    mkdir 98_GRCh38 && cd "$_"
-    curl -o 98_GRCh38.tar https://oncokb.s3.amazonaws.com/gn-vep-data/98_GRCh38/98_GRCh38.tar
-    tar xvf 98_GRCh38.tar
-    ```
-
-3. Set environment variable for the location of VEP caches
-    ```
-    # Update path if the VEP data was installed elsewhere
-    export VEP_CACHE=~/gn-vep-data/98_GRCh37
-    export VEP_GRCH38_CACHE=~/gn-vep-data/98_GRCh38
-    ```
-4. Run docker-compose to create containers.
+3. Run docker-compose to create containers.
     ```
     docker-compose --profile genome-nexus up -d
     ```

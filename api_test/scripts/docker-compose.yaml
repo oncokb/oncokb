@@ -1,0 +1,49 @@
+services:
+  mysql:
+    image: mysql:8.0.36
+    environment:
+      MYSQL_DATABASE: "oncokb_v5_0_demo"
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - type: bind
+        source: ../mysql_dumps
+        target: /docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+  core:
+    build:
+      dockerfile: ${PWD}/web/Dockerfile
+      context: ${PWD}/web
+    environment:
+      JAVA_OPTS: |
+        -Djdbc.driverClassName=com.mysql.jdbc.Driver
+        -Djdbc.url=jdbc:mysql://mysql:3306/oncokb_v5_0_demo?useUnicode=yes&characterEncoding=UTF-8
+        -Djdbc.username=root
+        -Djdbc.password=${MYSQL_PASSWORD}
+        -Dgenomenexus.api=https://www.genomenexus.org/
+        -Dredis.enable=false
+        -Dshow_sitemaps=false
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      timeout: 20s
+      retries: 10
+    depends_on:
+      mysql:
+        condition: service_healthy
+        restart: true
+  api-test:
+    build:
+      dockerfile: ../golang/Dockerfile
+      context: ../golang
+    volumes: 
+      - ../golang/output:/output
+    depends_on:
+      core:
+        condition: service_healthy
+        restart: true
+
+
+
+      

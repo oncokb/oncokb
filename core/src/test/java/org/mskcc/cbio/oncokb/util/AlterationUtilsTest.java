@@ -1,16 +1,15 @@
 package org.mskcc.cbio.oncokb.util;
 
-import junit.framework.TestCase;
+import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.FrameshiftVariant;
 import org.mskcc.cbio.oncokb.model.Gene;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
+import junit.framework.TestCase;
 
 /**
  * Created by Hongxin Zhang on 6/20/18.
@@ -438,7 +437,37 @@ public class AlterationUtilsTest extends TestCase {
         assertFalse(AlterationUtils.isValidHgvsg(hgvsg));
         hgvsg = "a:g.140453136A>T";
         assertFalse(AlterationUtils.isValidHgvsg(hgvsg));
+        hgvsg = " 7:c.140453136A>T ";
+        assertFalse(AlterationUtils.isValidHgvsg(hgvsg));
+    }
 
+    public void testHgvscFormat() {
+        String hgvsc = "ENST00000377346.4:c.241G>A";
+        assertTrue(AlterationUtils.isValidHgvsc(hgvsc));
+        hgvsc = "ENST00000396946.4:c.2104G>A";
+        assertTrue(AlterationUtils.isValidHgvsc(hgvsc));
+        hgvsc = "ENST00000321945:c.205C>G";
+        assertTrue(AlterationUtils.isValidHgvsc(hgvsc));
+
+        hgvsc = "";
+        assertFalse(AlterationUtils.isValidHgvsc(hgvsc));
+        hgvsc = " ";
+        assertFalse(AlterationUtils.isValidHgvsc(hgvsc));
+        hgvsc = "test";
+        assertFalse(AlterationUtils.isValidHgvsc(hgvsc));
+
+        hgvsc = "chr7:g.140453136A>T";
+        assertFalse(AlterationUtils.isValidHgvsc(hgvsc));
+        hgvsc = "g.140453136A>T";
+        assertFalse(AlterationUtils.isValidHgvsc(hgvsc));
+        hgvsc = "ENS00000396946:1234:c.205C>G";
+        assertFalse(AlterationUtils.isValidHgvsc(hgvsc));
+        hgvsc = "ENST00000396946.4:c.G>A";
+        assertFalse(AlterationUtils.isValidHgvsc(hgvsc));
+        hgvsc = "ENST00000321945c.205C>G";
+        assertFalse(AlterationUtils.isValidHgvsc(hgvsc));
+        hgvsc = "ENST00000377346.4:.241G>A";
+        assertFalse(AlterationUtils.isValidHgvsc(hgvsc));
     }
 
     public void testTrimComment() {
@@ -553,5 +582,11 @@ public class AlterationUtilsTest extends TestCase {
         assertTrue(AlterationUtils.isSameFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("N105Efs*4"), AlterationUtils.parseFrameshiftVariant("N105fs*4")));
         assertTrue(AlterationUtils.isSameFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("N105fs*4"), AlterationUtils.parseFrameshiftVariant("N105Efs*4")));
 
+    }
+
+    public void testComplexDelinsClassifiedAsTruncating() {
+        Gene gene = GeneUtils.getGeneByHugoSymbol("NF1");
+        Alteration alteration = generateAlteration(gene, "L1340_Q1341delinsF*");
+        assertEquals(alteration.getConsequence(), VariantConsequenceUtils.findVariantConsequenceByTerm("stop_gained"));
     }
 }

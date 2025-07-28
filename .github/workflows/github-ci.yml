@@ -13,4 +13,4 @@ jobs:
           java-version: 8
 
       - name: Build Application
-        run: mvn -ntp -Ppublic -DskipTests install
+        run: mvn -ntp -Penterprise -DskipTests install

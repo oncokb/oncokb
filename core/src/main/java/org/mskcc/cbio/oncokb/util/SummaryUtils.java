@@ -2,8 +2,8 @@ package org.mskcc.cbio.oncokb.util;
 
 import org.apache.commons.collections.ListUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.TumorType;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 import static org.mskcc.cbio.oncokb.Constants.IN_FRAME_DELETION;
 import static org.mskcc.cbio.oncokb.Constants.IN_FRAME_INSERTION;
+import static org.mskcc.cbio.oncokb.util.AlterationUtils.isValidHgvsg;
 import static org.mskcc.cbio.oncokb.util.MainUtils.altNameShouldConvertToLowerCase;
 import static org.mskcc.cbio.oncokb.util.MainUtils.lowerCaseAlterationName;
 import static org.mskcc.cbio.oncokb.util.MainUtils.manuallyAssignedTruncatingMutation;
@@ -202,7 +203,8 @@ public class SummaryUtils {
             query.getTumorType(),
             query.getReferenceGenome(),
             gene,
-            matchedTumorType
+            matchedTumorType,
+            false
         ));
 
         return tumorTypeSummary;
@@ -254,6 +256,15 @@ public class SummaryUtils {
     public static String variantSummary(Gene gene, Alteration exactMatchAlteration, List<Alteration> alterations, Query query) {
         if (!StringUtils.isEmpty(query.getAlteration()) && query.getAlteration().toLowerCase().startsWith(InferredMutation.ONCOGENIC_MUTATIONS.getVariant().toLowerCase())) {
             return ONCOGENIC_MUTATIONS_DEFAULT_SUMMARY;
+        }
+        EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
+        // Use the curated mutation summary if exists to override the generated summary only for the exact mutation. Subject to change
+        List<Evidence> mutationSummaryList = evidenceBo.findEvidencesByAlteration(Collections.singleton(exactMatchAlteration), Collections.singleton(EvidenceType.MUTATION_SUMMARY));
+        if (mutationSummaryList.size() > 0) {
+            String mutationSummary = mutationSummaryList.iterator().next().getDescription();
+            if (StringUtils.isNotEmpty(mutationSummary)) {
+                return mutationSummary;
+            }
         }
         return getOncogenicSummarySubFunc(gene, exactMatchAlteration, alterations, query);
     }
@@ -385,10 +396,10 @@ public class SummaryUtils {
             return getVUSOncogenicSummary(query.getReferenceGenome(), alteration, query);
         }
 
-        if (query.getAlteration().toLowerCase().contains("truncating mutation") || (alteration.getConsequence() != null && alteration.getConsequence().getIsGenerallyTruncating())) {
-            if (gene.getOncogene()) {
+        if (query.getAlteration().toLowerCase().contains("truncating mutation") || (alteration.getConsequence() != null && alteration.getConsequence().getIsGenerallyTruncating()) && gene.getGeneType() != null) {
+            if (gene.getGeneType().equals(GeneType.ONCOGENE_AND_TSG) || gene.getGeneType().equals(GeneType.ONCOGENE)) {
                 return query.getHugoSymbol() + " is considered an oncogene and truncating mutations in oncogenes are typically nonfunctional.";
-            } else if (!gene.getTSG() && oncogenic == null) {
+            } else if (!gene.getGeneType().equals(GeneType.TSG) && oncogenic == null) {
                 return "It is unknown whether a truncating mutation in " + query.getHugoSymbol() + " is oncogenic.";
             }
         }
@@ -561,16 +572,16 @@ public class SummaryUtils {
             sb.append(" leads to truncation of the " + hugoSymbol + " tumor suppressor gene and is considered ");
         } else {
             sb.append(" is a truncating mutation");
-            if (alteration.getGene().getTSG()) {
-                if (alteration.getGene().getOncogene()) {
+            if (alteration.getGene().getGeneType() != null) {
+                if (alteration.getGene().getGeneType().equals(GeneType.ONCOGENE_AND_TSG)) {
                     sb.append("; truncating mutations in this gene are considered ");
-                } else {
+                } else if (alteration.getGene().getGeneType().equals(GeneType.TSG)) {
                     sb.append(" in a tumor suppressor gene");
                     sb.append(", and therefore is ");
+                } else {
+                    sb.append(hugoSymbol);
+                    sb.append(", and therefore is ");
                 }
-            } else {
-                sb.append(hugoSymbol);
-                sb.append(", and therefore is ");
             }
         }
         sb.append(oncogenicity.getOncogenic().toLowerCase());
@@ -916,6 +927,8 @@ public class SummaryUtils {
         }
         if (AlterationUtils.isGeneralAlterations(queryAlteration, true)) {
             sb.append(queryHugoSymbol + " " + queryAlteration.toLowerCase());
+        } else if (isValidHgvsg(queryAlteration)) {
+            sb.append(queryHugoSymbol + " " + queryAlteration);
         } else if (StringUtils.equalsIgnoreCase(queryAlteration, "gain")) {
             queryAlteration = "amplification (gain)";
             sb.append(queryHugoSymbol + " " + queryAlteration);

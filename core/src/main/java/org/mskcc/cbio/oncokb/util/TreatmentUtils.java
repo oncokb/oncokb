@@ -7,7 +7,11 @@
 package org.mskcc.cbio.oncokb.util;
 
 import java.util.*;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.mskcc.cbio.oncokb.model.*;
+
+import com.google.gdata.util.common.base.StringUtil;
 
 /**
  * @author zhangh2
@@ -45,6 +49,11 @@ public final class TreatmentUtils {
         return MainUtils.listToString(treatmentNames, ", ");
     }
 
+    public static String getTreatmentName(JSONArray treatments) {
+        List<String> treatmentNames = getTreatments(treatments);
+        return MainUtils.listToString(treatmentNames, ", ");
+    }
+
     public static List<Treatment> sortTreatmentsByName(List<Treatment> treatments) {
         Collections.sort(treatments, new Comparator<Treatment>() {
             public int compare(Treatment t1, Treatment t2) {
@@ -62,7 +71,6 @@ public final class TreatmentUtils {
         List<String> treatmentNames = new ArrayList<>();
         List<Treatment> sortedTreatment = new ArrayList<>(treatments);
         sortTreatmentsByPriority(sortedTreatment);
-
         for (Treatment treatment : sortedTreatment) {
             List<String> drugNames = new ArrayList<>();
             for (Drug drug : treatment.getDrugs()) {
@@ -72,6 +80,39 @@ public final class TreatmentUtils {
             }
             treatmentNames.add(MainUtils.listToString(drugNames, "+"));
         }
+        return treatmentNames;
+    }
+
+    public static List<String> getTreatments(JSONArray treatments) {
+        List<String> treatmentNames = new ArrayList<>();
+
+        List<JSONObject> sortedTreatments = new ArrayList<>();
+        for (int i = 0; i < treatments.length(); i++) {
+            sortedTreatments.add(treatments.getJSONObject(i));
+        }
+
+        sortedTreatments.sort(Comparator.comparingInt(t -> t.optInt("priority", Integer.MAX_VALUE)));
+    
+        for (JSONObject treatment : sortedTreatments) {
+            JSONArray drugs = treatment.getJSONArray("drugs");
+    
+            List<JSONObject> sortedDrugs = new ArrayList<>();
+            for (int j = 0; j < drugs.length(); j++) {
+                sortedDrugs.add(drugs.getJSONObject(j));
+            }
+            sortedDrugs.sort(Comparator.comparingInt(drug -> drug.optInt("priority", Integer.MAX_VALUE)));
+    
+            List<String> drugNames = new ArrayList<>();
+            for (JSONObject drug : sortedDrugs) {
+                String name = drug.optString("drugName", null);
+                if (!StringUtil.isEmpty(name)) {
+                    drugNames.add(name.trim());
+                }
+            }
+    
+            treatmentNames.add(MainUtils.listToString(drugNames, "+"));
+        }
+        
         return treatmentNames;
     }
 

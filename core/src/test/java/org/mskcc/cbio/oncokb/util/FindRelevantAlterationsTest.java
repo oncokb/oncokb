@@ -76,6 +76,7 @@ public class FindRelevantAlterationsTest {
 
                 // Check stop_gained
                 {"MAP2K4", "R304*", null, "R304*, Truncating Mutations"},
+                {"NF1", "L1340_Q1341delinsF*", null, "1_2772trunc, Oncogenic Mutations"},
 
                 // Check stop_lost, especially it should not be associated with truncating mutation
                 {"MLH1", "*757Kext*36", null, "*757Kext*36"},
@@ -172,7 +173,7 @@ public class FindRelevantAlterationsTest {
 //                {"MED12", "G22D", null, "1_33nontrunc, 1_33mut"},
 
                 // Check Variants of Unknown Significance is associated
-                {"BRCA2", "V159L", null, "V159L, V159M, Variants of Unknown Significance"}, // this is curated VUS
+                {"BRCA2", "L2106I", null, "L2106I, L2106P, Variants of Unknown Significance"}, // this is curated VUS
                 {"BRCA2", "R2659G", null, "R2659G"}, // this is curated inconclusive
                 {"BRCA2", "E3002K", null, "E3002K, E3002D, Oncogenic Mutations"}, // this is curated likely oncogenic
                 {"BRCA2", "Y3035C", null, "Y3035C"}, // this is curated likely neutral

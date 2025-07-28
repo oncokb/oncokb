@@ -1,7 +1,6 @@
 package org.mskcc.cbio.oncokb.util;
 
-import org.apache.commons.lang3.StringUtils;
-import org.cbioportal.genome_nexus.model.GenomicLocation;
+import org.genome_nexus.client.GenomicLocation;
 import org.mskcc.cbio.oncokb.apiModels.*;
 import org.mskcc.cbio.oncokb.model.*;
 import org.w3c.dom.Document;
@@ -635,6 +634,12 @@ public class MainUtils {
                         if (evidence.getFdaLevel() != null) {
                             variant.setFdaLevel(evidence.getFdaLevel().getLevel());
                         }
+                        if (evidence.getSolidPropagationLevel() != null) {
+                            variant.setSolidPropagationLevel(evidence.getSolidPropagationLevel().getLevel());
+                        }
+                        if (evidence.getLiquidPropagationLevel() != null) {
+                            variant.setLiquidPropagationLevel(evidence.getLiquidPropagationLevel().getLevel());
+                        }
                         variant.setDrug(EvidenceUtils.getDrugs(Collections.singleton(evidence)));
                         variant.setDrugPmids(EvidenceUtils.getPmids(Collections.singleton(evidence)));
                         variant.setDrugAbstracts(EvidenceUtils.getAbstracts(Collections.singleton(evidence)));
@@ -645,7 +650,8 @@ public class MainUtils {
                             null,
                             null,
                             gene,
-                            null
+                            null,
+                            false
                         ));
                         variants.add(variant);
                     }

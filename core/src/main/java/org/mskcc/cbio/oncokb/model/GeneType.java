@@ -6,8 +6,11 @@ package org.mskcc.cbio.oncokb.model;
  * @author zhangh2
  */
 public enum GeneType {
+    ONCOGENE_AND_TSG("Oncogene and TSG"),
     ONCOGENE("Oncogene"),
-    TSG("Tumor Suppressor Gene");
+    TSG("Tumor Suppressor Gene"),
+    INSUFFICIENT_EVIDENCE("Insufficient Evidence"),
+    NEITHER("Neither");
 
     private GeneType(String geneType) {
         this.geneType = geneType;

@@ -73,7 +73,7 @@ public class UtilsApiController implements UtilsApi {
         sb.append(MainUtils.listToString(header, separator));
         sb.append(newLine);
 
-        for (AnnotatedVariant annotatedVariant : getAllAnnotatedVariants(false)) {
+        for (AnnotatedVariant annotatedVariant : getAllAnnotatedVariants(truefalse)) {
             List<String> row = new ArrayList<>();
             row.add(annotatedVariant.getGrch37Isoform());
             row.add(annotatedVariant.getGrch37RefSeq());
@@ -124,7 +124,7 @@ public class UtilsApiController implements UtilsApi {
         return new ResponseEntity<>(sb.toString(), HttpStatus.OK);
     }
 
-    private List<AnnotatedVariant> getAllAnnotatedVariants(boolean germline) {
+    private List<AnnotatedVariant> getAllAnnotatedVariants(Boolean isTextFileboolean germline) {
         List<AnnotatedVariant> annotatedVariantList = new ArrayList<>();
         Set<Gene> genes = CacheUtils.getAllGenes();
         Map<Gene, Set<BiologicalVariant>> map = new HashMap<>();
@@ -163,7 +163,8 @@ public class UtilsApiController implements UtilsApi {
                         null,
                         null,
                         gene,
-                        null
+                        null,
+                        isTextFile
                     )
                 ));
             }
@@ -204,7 +205,7 @@ public class UtilsApiController implements UtilsApi {
         if (version != null) {
             return getDataDownloadResponseEntity(version, FileName.ALL_ACTIONABLE_VARIANTS, FileExtension.JSON);
         }
-        return new ResponseEntity<>(getAllActionableVariants(), HttpStatus.OK);
+        return new ResponseEntity<>(AlterationUtils.getAllActionableVariants(false), HttpStatus.OK);
     }
 
     @Override
@@ -229,6 +230,8 @@ public class UtilsApiController implements UtilsApi {
         header.add("Protein Change");
         header.add("Cancer Type");
         header.add("Level");
+        header.add("Solid Propagation Level");
+        header.add("Liquid Propagation Level");
         header.add("Drugs(s)");
         header.add("PMIDs");
         header.add("Abstracts");
@@ -236,7 +239,7 @@ public class UtilsApiController implements UtilsApi {
         sb.append(MainUtils.listToString(header, separator));
         sb.append(newLine);
 
-        for (ActionableGene actionableGene : getAllActionableVariants()) {
+        for (ActionableGene actionableGene : AlterationUtils.getAllActionableVariants(true)) {
             List<String> row = new ArrayList<>();
             row.add(actionableGene.getGrch37Isoform());
             row.add(actionableGene.getGrch37RefSeq());
@@ -249,6 +252,8 @@ public class UtilsApiController implements UtilsApi {
             row.add(actionableGene.getProteinChange());
             row.add(actionableGene.getCancerType());
             row.add(actionableGene.getLevel());
+            row.add(actionableGene.getSolidPropagationLevel());
+            row.add(actionableGene.getLiquidPropagationLevel());
             row.add(actionableGene.getDrugs());
             row.add(actionableGene.getPmids());
             row.add(actionableGene.getAbstracts());

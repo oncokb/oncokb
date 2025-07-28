@@ -1,15 +1,20 @@
 package org.mskcc.cbio.oncokb.api.pvt;
 
+import static org.mskcc.cbio.oncokb.util.GenomeNexusUtils.*;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import java.sql.Ref;
+import java.util.stream.Collectors;
 import org.genome_nexus.ApiException;
 import org.genome_nexus.client.EnsemblTranscript;
 import org.mskcc.cbio.oncokb.apiModels.TranscriptMatchResult;
 import org.mskcc.cbio.oncokb.apiModels.TranscriptPair;
 import org.mskcc.cbio.oncokb.apiModels.TranscriptResult;
+import org.mskcc.cbio.oncokb.apiModels.VariantAnnotation;
 import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotateMutationByGenomicChangeQuery;
 import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotateMutationByHGVSgQuery;
 import org.mskcc.cbio.oncokb.cache.CacheFetcher;
@@ -18,13 +23,11 @@ import org.mskcc.cbio.oncokb.controller.advice.ApiHttpErrorException;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.model.ReferenceGenome;
 import org.mskcc.cbio.oncokb.model.genomeNexusPreAnnotations.GenomeNexusAnnotatedVariantInfo;
+import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.GenomeNexusUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
-
-import static org.mskcc.cbio.oncokb.util.GenomeNexusUtils.getCanonicalEnsemblTranscript;
-import static org.mskcc.cbio.oncokb.util.GenomeNexusUtils.matchTranscript;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,16 +77,27 @@ public class PrivateGenomeNexusController {
         method = RequestMethod.POST)
     public ResponseEntity<List<GenomeNexusAnnotatedVariantInfo>> fetchGenomeNexusVariantInfoByHGVSgPost(
         @ApiParam(value = "List of queries. Please see swagger.json for request body format.", required = true) @RequestBody() List<AnnotateMutationByHGVSgQuery> body
-    ) throws ApiException, org.genome_nexus.ApiException, ApiHttpErrorException {
+    ) throws org.genome_nexus.ApiException, ApiHttpErrorException {
         List<GenomeNexusAnnotatedVariantInfo> result = new ArrayList<>();
 
         if (body == null) {
             throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         } else {
+            List<AnnotateMutationByHGVSgQuery> grch37Queries = new ArrayList<>();
+            List<AnnotateMutationByHGVSgQuery> grch38Queries = new ArrayList<>();
             for (AnnotateMutationByHGVSgQuery query : body) {
-                GenomeNexusAnnotatedVariantInfo resp = GenomeNexusUtils.getAnnotatedVariantFromGenomeNexus(GNVariantAnnotationType.HGVS_G, query.getHgvsg(), query.getReferenceGenome());
-                result.add(resp);
+                ReferenceGenome referenceGenome = ReferenceGenome.GRCh37;
+                if (query.getReferenceGenome() != null) {
+                    referenceGenome = query.getReferenceGenome();
+                }
+                if (referenceGenome == ReferenceGenome.GRCh37) {
+                    grch37Queries.add(query);
+                } else {
+                    grch38Queries.add(query);
+                }
             }
+            result.addAll(GenomeNexusUtils.getAnnotatedVariantsFromGenomeNexus(GNVariantAnnotationType.HGVS_G, AlterationUtils.getHgvsgVariantsAnnotationWithQueries(grch37Queries, ReferenceGenome.GRCh37), ReferenceGenome.GRCh37));
+            result.addAll(GenomeNexusUtils.getAnnotatedVariantsFromGenomeNexus(GNVariantAnnotationType.HGVS_G, AlterationUtils.getHgvsgVariantsAnnotationWithQueries(grch38Queries, ReferenceGenome.GRCh38), ReferenceGenome.GRCh38));
         }
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
@@ -98,16 +112,27 @@ public class PrivateGenomeNexusController {
         method = RequestMethod.POST)
     public ResponseEntity<List<GenomeNexusAnnotatedVariantInfo>> fetchGenomeNexusVariantInfoByGenomicChangePost(
         @ApiParam(value = "List of queries. Please see swagger.json for request body format.", required = true) @RequestBody() List<AnnotateMutationByGenomicChangeQuery> body
-    ) throws ApiException, org.genome_nexus.ApiException, ApiHttpErrorException {
+    ) throws org.genome_nexus.ApiException, ApiHttpErrorException {
         List<GenomeNexusAnnotatedVariantInfo> result = new ArrayList<>();
 
         if (body == null) {
             throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         } else {
+            List<AnnotateMutationByGenomicChangeQuery> grch37Queries = new ArrayList<>();
+            List<AnnotateMutationByGenomicChangeQuery> grch38Queries = new ArrayList<>();
             for (AnnotateMutationByGenomicChangeQuery query : body) {
-                GenomeNexusAnnotatedVariantInfo resp = GenomeNexusUtils.getAnnotatedVariantFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, query.getGenomicLocation(), query.getReferenceGenome());
-                result.add(resp);
+                ReferenceGenome referenceGenome = ReferenceGenome.GRCh37;
+                if (query.getReferenceGenome() != null) {
+                    referenceGenome = query.getReferenceGenome();
+                }
+                if (referenceGenome == ReferenceGenome.GRCh37) {
+                    grch37Queries.add(query);
+                } else {
+                    grch38Queries.add(query);
+                }
             }
+            result.addAll(GenomeNexusUtils.getAnnotatedVariantsFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, AlterationUtils.getGenomicLocationVariantsAnnotationWithQueries(grch37Queries, ReferenceGenome.GRCh37), ReferenceGenome.GRCh37));
+            result.addAll(GenomeNexusUtils.getAnnotatedVariantsFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, AlterationUtils.getGenomicLocationVariantsAnnotationWithQueries(grch38Queries, ReferenceGenome.GRCh38), ReferenceGenome.GRCh38));
         }
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
@@ -122,7 +147,7 @@ public class PrivateGenomeNexusController {
         method = RequestMethod.POST)
     public ResponseEntity<Void> cacheGenomeNexusVariantInfoPost(
         @ApiParam(value = "List of queries. Please see swagger.json for request body format.", required = true) @RequestBody() List<GenomeNexusAnnotatedVariantInfo> body
-    ) throws ApiException, org.genome_nexus.ApiException, IllegalStateException, ApiHttpErrorException {
+    ) throws IllegalStateException, ApiHttpErrorException {
 
         if (body == null) {
             throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
@@ -133,5 +158,4 @@ public class PrivateGenomeNexusController {
         }
         return new ResponseEntity<>(HttpStatus.OK);
     }
-
 }

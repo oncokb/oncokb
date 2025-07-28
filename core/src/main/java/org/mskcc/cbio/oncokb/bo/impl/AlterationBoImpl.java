@@ -467,7 +467,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
     }
 
     private LinkedHashSet<Alteration> oncogeneTruncMuts(Alteration alteration, LinkedHashSet<Alteration> relevantAlts) {
-        if (alteration.getGene().getOncogene() != null && alteration.getGene().getTSG() != null && alteration.getGene().getOncogene() && !alteration.getGene().getTSG() && alteration.getConsequence().getIsGenerallyTruncating()) {
+        if (alteration.getGene().getGeneType() != null && alteration.getGene().getGeneType().equals(GeneType.ONCOGENE) && alteration.getConsequence().getIsGenerallyTruncating()) {
             LinkedHashSet<Alteration> filtered = new LinkedHashSet<>();
             for (Alteration alt : relevantAlts) {
                 if (alt.getConsequence().getIsGenerallyTruncating() || alt.getProteinEnd().equals(alt.getProteinStart()) || alt.getProteinStart().equals(-1)) {

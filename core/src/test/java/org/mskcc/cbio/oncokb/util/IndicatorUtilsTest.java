@@ -1,18 +1,18 @@
 package org.mskcc.cbio.oncokb.util;
 
+import java.util.*;
 import org.apache.commons.lang3.StringUtils;
+import org.genome_nexus.client.VariantAnnotation;
 import org.junit.Test;
 import org.mskcc.cbio.oncokb.apiModels.Implication;
 import org.mskcc.cbio.oncokb.apiModels.MainType;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.model.*;
+import org.mskcc.cbio.oncokb.model.genomeNexus.TranscriptSummaryAlterationResult;
 import org.mskcc.cbio.oncokb.apiModels.TumorType;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 import static org.junit.Assert.*;
 import static org.mskcc.cbio.oncokb.Constants.*;
@@ -162,8 +162,8 @@ public class IndicatorUtilsTest {
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "KRAS", "Q61K", null, null, "Colorectal Cancer", null, null, null, null, false, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null, false);
         assertEquals("The oncogenicity should be 'Likely Oncogenic'", Oncogenicity.LIKELY.getOncogenic(), indicatorQueryResp.getOncogenic());
-        assertEquals("The highest sensitive level should be 4",
-            LevelOfEvidence.LEVEL_4, indicatorQueryResp.getHighestSensitiveLevel());
+        assertEquals("The highest sensitive level should be 3B",
+            LevelOfEvidence.LEVEL_3B, indicatorQueryResp.getHighestSensitiveLevel());
         assertEquals("The highest resistance level should be R1",
             LevelOfEvidence.LEVEL_R1, indicatorQueryResp.getHighestResistanceLevel());
 
@@ -848,6 +848,123 @@ public class IndicatorUtilsTest {
 
         assertNotSame("The annotation without tumor type should have more treatments", resp1.getTreatments().size(), resp2.getTreatments().size());
 
+    }
+
+    @Test
+    public void testProcessQueryWithGenomicChange() throws Exception {
+        String hgvsg = "7:g.140453136A>T";
+        TranscriptSummaryAlterationResult transcriptSummaryAlterationResult = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, DEFAULT_REFERENCE_GENOME, hgvsg);
+        Query query = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", transcriptSummaryAlterationResult, hgvsg);
+        IndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null, false);
+        assertTrue("The geneExist is not true, but it should be.", indicatorQueryResp.getGeneExist() == true);
+        assertEquals("The oncogenicity is not Oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The highest sensitive level is not 1, but it should be.", LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
+
+        hgvsg = ":g.140453136A>T";
+        transcriptSummaryAlterationResult = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, DEFAULT_REFERENCE_GENOME, hgvsg);
+        query = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", transcriptSummaryAlterationResult, hgvsg);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null, false);
+        assertTrue("The geneExist is not false, but it should be.", indicatorQueryResp.getGeneExist() == false);
+        assertEquals("The oncogenicity is not Unknown, but it should be.", Oncogenicity.UNKNOWN.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The highest sensitive level is not null, but it should be.", null, indicatorQueryResp.getHighestSensitiveLevel());
+
+        hgvsg = "7:g.140453136A>T";
+        transcriptSummaryAlterationResult = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, DEFAULT_REFERENCE_GENOME, hgvsg);
+        Query query1 = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", transcriptSummaryAlterationResult, hgvsg);
+        Query query2 = new Query(null, DEFAULT_REFERENCE_GENOME, null, "BRAF", "V600E", null, null, "Melanoma", null, null, null, null);
+
+        IndicatorQueryResp resp1 = IndicatorUtils.processQuery(query1, null, false, null, false);
+        IndicatorQueryResp resp2 = IndicatorUtils.processQuery(query2, null, false, null, false);
+
+        assertTrue("Genes are not the same, but they should.", resp1.getGeneSummary().equals(resp2.getGeneSummary()));
+        assertTrue("Oncogenicities are not the same, but they should.", resp1.getOncogenic().equals(resp2.getOncogenic()));
+        assertTrue("Treatments are not the same, but they should.", resp1.getTreatments().equals(resp2.getTreatments()));
+        assertTrue("Highest sensitive levels are not the same, but they should.", LevelUtils.areSameLevels(resp1.getHighestSensitiveLevel(), resp2.getHighestSensitiveLevel()));
+        assertTrue("Highest resistance levels are not the same, but they should.", LevelUtils.areSameLevels(resp1.getHighestResistanceLevel(), resp2.getHighestResistanceLevel()));
+
+        // different format of chromosome should have the same annotation
+        String hgvsg1 = "23:g.100611185G>A";
+        String hgvsg2 = "X:g.100611185G>A";
+        TranscriptSummaryAlterationResult transcriptSummaryAlterationResult1 = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, DEFAULT_REFERENCE_GENOME, hgvsg1);
+        TranscriptSummaryAlterationResult transcriptSummaryAlterationResult2 = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, DEFAULT_REFERENCE_GENOME, hgvsg2);
+        query1 = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", transcriptSummaryAlterationResult1, hgvsg1);
+        query2 = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", transcriptSummaryAlterationResult2, hgvsg2);
+
+        resp1 = IndicatorUtils.processQuery(query1, null, false, null, false);
+        resp2 = IndicatorUtils.processQuery(query2, null, false, null, false);
+
+        assertTrue("Genes are not the same, but they should.", resp1.getGeneSummary().equals(resp2.getGeneSummary()));
+        assertTrue("Oncogenicities are not the same, but they should.", resp1.getOncogenic().equals(resp2.getOncogenic()));
+        assertTrue("Treatments are not the same, but they should.", resp1.getTreatments().equals(resp2.getTreatments()));
+        assertTrue("Highest sensitive levels are not the same, but they should.", LevelUtils.areSameLevels(resp1.getHighestSensitiveLevel(), resp2.getHighestSensitiveLevel()));
+        assertTrue("Highest resistance levels are not the same, but they should.", LevelUtils.areSameLevels(resp1.getHighestResistanceLevel(), resp2.getHighestResistanceLevel()));
+
+
+        // Test indicator endpoint supports genomic location
+        String genomicLocation = "7,140453136,140453136,A,T";
+        transcriptSummaryAlterationResult = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, DEFAULT_REFERENCE_GENOME, genomicLocation);
+        query = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", transcriptSummaryAlterationResult, genomicLocation);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null, false);
+        assertTrue("The geneExist is not true, but it should be.", indicatorQueryResp.getGeneExist() == true);
+        assertEquals("The oncogenicity is not Oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The highest sensitive level is not 1, but it should be.", LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
+
+        hgvsg = ",140453136,140453136,A,T";
+        transcriptSummaryAlterationResult = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, DEFAULT_REFERENCE_GENOME, hgvsg);
+        query = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", transcriptSummaryAlterationResult, hgvsg);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null, false);
+        assertTrue("The geneExist is not false, but it should be.", indicatorQueryResp.getGeneExist() == false);
+        assertEquals("The oncogenicity is not Unknown, but it should be.", Oncogenicity.UNKNOWN.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The highest sensitive level is not null, but it should be.", null, indicatorQueryResp.getHighestSensitiveLevel());
+
+        genomicLocation = "7,140453136,140453136,A,T";
+        transcriptSummaryAlterationResult = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, DEFAULT_REFERENCE_GENOME, genomicLocation);
+        query1 = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", transcriptSummaryAlterationResult, genomicLocation);
+        query2 = new Query(null, DEFAULT_REFERENCE_GENOME, null, "BRAF", "V600E", null, null, "Melanoma", null, null, null, null);
+
+        resp1 = IndicatorUtils.processQuery(query1, null, false, null, false);
+        resp2 = IndicatorUtils.processQuery(query2, null, false, null, false);
+
+        assertTrue("Genes are not the same, but they should.", resp1.getGeneSummary().equals(resp2.getGeneSummary()));
+        assertTrue("Oncogenicities are not the same, but they should.", resp1.getOncogenic().equals(resp2.getOncogenic()));
+        assertTrue("Treatments are not the same, but they should.", resp1.getTreatments().equals(resp2.getTreatments()));
+        assertTrue("Highest sensitive levels are not the same, but they should.", LevelUtils.areSameLevels(resp1.getHighestSensitiveLevel(), resp2.getHighestSensitiveLevel()));
+        assertTrue("Highest resistance levels are not the same, but they should.", LevelUtils.areSameLevels(resp1.getHighestResistanceLevel(), resp2.getHighestResistanceLevel()));
+
+        // different format of chromosome should have the same annotation
+        String genomicLocation1 = "23,100611185,100611185,G,A";
+        String genomicLocation2 = "X,100611185,100611185,G,A";
+        transcriptSummaryAlterationResult1 = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, DEFAULT_REFERENCE_GENOME, genomicLocation1);
+        transcriptSummaryAlterationResult2 = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, DEFAULT_REFERENCE_GENOME, genomicLocation2);
+        query1 = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", transcriptSummaryAlterationResult1, genomicLocation1);
+        query2 = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", transcriptSummaryAlterationResult2, genomicLocation2);
+
+        resp1 = IndicatorUtils.processQuery(query1, null, false, null, false);
+        resp2 = IndicatorUtils.processQuery(query2, null, false, null, false);
+
+        assertTrue("Genes are not the same, but they should.", resp1.getGeneSummary().equals(resp2.getGeneSummary()));
+        assertTrue("Oncogenicities are not the same, but they should.", resp1.getOncogenic().equals(resp2.getOncogenic()));
+        assertTrue("Treatments are not the same, but they should.", resp1.getTreatments().equals(resp2.getTreatments()));
+        assertTrue("Highest sensitive levels are not the same, but they should.", LevelUtils.areSameLevels(resp1.getHighestSensitiveLevel(), resp2.getHighestSensitiveLevel()));
+        assertTrue("Highest resistance levels are not the same, but they should.", LevelUtils.areSameLevels(resp1.getHighestResistanceLevel(), resp2.getHighestResistanceLevel()));
+
+        // String query vs List GenomicLocation should have the same response
+        genomicLocation = "23,100611185,100611185,G,A";
+        transcriptSummaryAlterationResult1 = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, DEFAULT_REFERENCE_GENOME, genomicLocation);
+        List<VariantAnnotation> annotations = GenomeNexusUtils.getGenomicLocationVariantsAnnotation(Collections.singletonList(GenomeNexusUtils.convertGenomicLocation(genomicLocation)), DEFAULT_REFERENCE_GENOME);
+        List<TranscriptSummaryAlterationResult> map = AlterationUtils.getAlterationsFromGenomeNexus(annotations, DEFAULT_REFERENCE_GENOME);
+        transcriptSummaryAlterationResult2 = map.get(0);
+        query1 = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", transcriptSummaryAlterationResult1, genomicLocation1);
+        query2 = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", transcriptSummaryAlterationResult2, genomicLocation2);
+
+        resp1 = IndicatorUtils.processQuery(query1, null, false, null, false);
+        resp2 = IndicatorUtils.processQuery(query2, null, false, null, false);
+
+        assertTrue("Genes are not the same, but they should.", resp1.getGeneSummary().equals(resp2.getGeneSummary()));
+        assertTrue("Oncogenicities are not the same, but they should.", resp1.getOncogenic().equals(resp2.getOncogenic()));
+        assertTrue("Treatments are not the same, but they should.", resp1.getTreatments().equals(resp2.getTreatments()));
+        assertTrue("Highest sensitive levels are not the same, but they should.", LevelUtils.areSameLevels(resp1.getHighestSensitiveLevel(), resp2.getHighestSensitiveLevel()));
+        assertTrue("Highest resistance levels are not the same, but they should.", LevelUtils.areSameLevels(resp1.getHighestResistanceLevel(), resp2.getHighestResistanceLevel()));
     }
 
     // Most of the annotation service should not have clinical implication returned when alteration is not available.

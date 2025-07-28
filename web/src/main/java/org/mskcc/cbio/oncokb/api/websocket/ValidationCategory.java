@@ -7,7 +7,7 @@ public enum ValidationCategory {
     ACTIONABLE_INFO(ValidationType.INFO, "The actionable genes comparison between public and latest"),
     MISSING_TREATMENT_INFO(ValidationType.TEST, "Whether treatment missing information"),
     MISSING_BIOLOGICAL_ALTERATION_INFO(ValidationType.TEST, "Whether biological alteration missing information"),
-    MISSING_GENE_INFO(ValidationType.TEST, "Whether gene missing summary or background"),
+    MISSING_GENE_INFO(ValidationType.TEST, "Whether gene missing summary, background, or type"),
     INCORRECT_EVIDENCE_DESCRIPTION_FORMAT(ValidationType.TEST, "Whether evidence description has wrong format content"),
     OUTDATED_INFO_EVIDENCE_DESCRIPTION(ValidationType.TEST, "Whether evidence description has outdated content"),
     INCORRECT_ALTERATION_NAME_FORMAT(ValidationType.TEST, "Whether alteration is named appropriately"),

@@ -2,6 +2,7 @@ package org.mskcc.cbio.oncokb.api.pvt;
 
 import com.mysql.jdbc.StringUtils;
 import io.swagger.annotations.ApiParam;
+import org.genome_nexus.client.GenomicLocation;
 import org.genome_nexus.client.TranscriptConsequenceSummary;
 import org.mskcc.cbio.oncokb.apiModels.*;
 import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotateMutationByGenomicChangeQuery;
@@ -17,6 +18,7 @@ import org.mskcc.cbio.oncokb.controller.advice.ApiHttpErrorException;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.TumorType;
+import org.mskcc.cbio.oncokb.model.genomeNexus.TranscriptSummaryAlterationResult;
 import org.mskcc.cbio.oncokb.bo.OncokbTranscriptService;
 import org.mskcc.cbio.oncokb.util.*;
 import org.oncokb.oncokb_transcript.ApiException;
@@ -33,6 +35,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.mskcc.cbio.oncokb.util.GitHubUtils.getOncoKBSqlDumpFileName;
+import static org.mskcc.cbio.oncokb.util.GitHubUtils.getOncoKBTranscriptSqlDumpFileName;
 import static org.mskcc.cbio.oncokb.util.HttpUtils.getDataDownloadResponseEntity;
 
 /**
@@ -384,15 +387,17 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         }
         if(germline == null) germline = false;
         if (!StringUtils.isNullOrEmpty(hgvsg) || !StringUtils.isNullOrEmpty(genomicChange)) {
-            String genomicQuery = StringUtils.isNullOrEmpty(hgvsg) ? genomicChange : hgvsg;
-            GNVariantAnnotationType type = StringUtils.isNullOrEmpty(hgvsg) ? GNVariantAnnotationType.GENOMIC_LOCATION : GNVariantAnnotationType.HGVS_G;
-            Alteration alterationModel;
-            if (!this.cacheFetcher.genomicLocationShouldBeAnnotated(type, genomicQuery, matchedRG)) {
-                alterationModel = new Alteration();
+            TranscriptSummaryAlterationResult transcriptSummaryAlterationResult = null;
+            if (!StringUtils.isNullOrEmpty(hgvsg)) {
+                if (this.cacheFetcher.hgvsgShouldBeAnnotated(hgvsg, matchedRG)) {
+                    transcriptSummaryAlterationResult = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, matchedRG, hgvsg);
+                }
             } else {
-                alterationModel = this.cacheFetcher.getAlterationFromGenomeNexus(type, matchedRG, genomicQuery);
+                if (this.cacheFetcher.genomicLocationShouldBeAnnotated(GenomeNexusUtils.convertGenomicLocation(genomicChange), matchedRG)) {
+                    transcriptSummaryAlterationResult = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, matchedRG, genomicChange);
+                }
             }
-            query = QueryUtils.getQueryFromAlteration(matchedRG, tumorType, alterationModel, hgvsg);
+            query = QueryUtils.getQueryFromAlteration(matchedRG, tumorType, transcriptSummaryAlterationResult, hgvsg);
             gene = GeneUtils.getGeneByEntrezId(query.getEntrezGeneId());
         } else {
             gene = GeneUtils.getGene(entrezGeneId, hugoSymbol);
@@ -422,7 +427,8 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
 
         // for any hgvsg variant, we need to check whether it is VUE
         if(!StringUtils.isNullOrEmpty(hgvsg)) {
-            TranscriptConsequenceSummary transcriptConsequenceSummary = GenomeNexusUtils.getTranscriptConsequence(GNVariantAnnotationType.HGVS_G, hgvsg, matchedRG);
+            TranscriptSummaryAlterationResult annotationResult = GenomeNexusUtils.getTranscriptConsequence(GNVariantAnnotationType.HGVS_G, hgvsg, matchedRG);
+            TranscriptConsequenceSummary transcriptConsequenceSummary = annotationResult.getTranscriptConsequenceSummary();
             if (transcriptConsequenceSummary != null && transcriptConsequenceSummary.isIsVue() != null && transcriptConsequenceSummary.isIsVue()) {
                 annotation.setVUE(true);
             }
@@ -589,16 +595,23 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     }
 
     @Override
+    public ResponseEntity<byte[]> utilDataTranscriptSqlDump(
+        @ApiParam(value = "version") @RequestParam(value = "version", required = false) String version
+    ) {
+        return getDataDownloadResponseEntity(version, getOncoKBTranscriptSqlDumpFileName(version), FileExtension.GZ);
+    }
+
+    @Override
     public ResponseEntity<List<TranscriptCoverageFilterResult>> utilFilterHgvsgBasedOnCoveragePost(
         @ApiParam(value = "List of queries.", required = true) @RequestBody List<AnnotateMutationByHGVSgQuery> body
-    ) throws ApiException, org.genome_nexus.ApiException, ApiHttpErrorException {
+    ) throws ApiException, ApiHttpErrorException {
         List<TranscriptCoverageFilterResult> result = new ArrayList<>();
 
         if (body == null) {
             throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         } else {
             for (AnnotateMutationByHGVSgQuery query : body) {
-                boolean shouldAnnotate = this.cacheFetcher.genomicLocationShouldBeAnnotated(GNVariantAnnotationType.HGVS_G, query.getHgvsg(), query.getReferenceGenome());
+                boolean shouldAnnotate = this.cacheFetcher.hgvsgShouldBeAnnotated(query.getHgvsg(), query.getReferenceGenome());
                 result.add(new TranscriptCoverageFilterResult(query.getHgvsg(), shouldAnnotate));
             }
         }
@@ -608,14 +621,14 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     @Override
     public ResponseEntity<List<TranscriptCoverageFilterResult>> utilFilterGenomicChangeBasedOnCoveragePost(
         @ApiParam(value = "List of queries.", required = true) @RequestBody List<AnnotateMutationByGenomicChangeQuery> body
-    ) throws ApiException, org.genome_nexus.ApiException, ApiHttpErrorException {
+    ) throws ApiException, ApiHttpErrorException {
         List<TranscriptCoverageFilterResult> result = new ArrayList<>();
 
         if (body == null) {
             throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         } else {
             for (AnnotateMutationByGenomicChangeQuery query : body) {
-                boolean shouldAnnotate = this.cacheFetcher.genomicLocationShouldBeAnnotated(GNVariantAnnotationType.GENOMIC_LOCATION, query.getGenomicLocation(), query.getReferenceGenome());
+                boolean shouldAnnotate = this.cacheFetcher.genomicLocationShouldBeAnnotated(GenomeNexusUtils.convertGenomicLocation(query.getGenomicLocation()), query.getReferenceGenome());
                 result.add(new TranscriptCoverageFilterResult(query.getGenomicLocation(), shouldAnnotate));
             }
         }

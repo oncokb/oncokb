@@ -24,7 +24,7 @@ public class OncokbTranscriptService {
     private static final String ONCOKB_TRANSCRIPT_URL = "https://transcript.oncokb.org";
 
     private ApiClient client;
-    private final int TIMEOUT = 30000;
+    private final int DEFAULT_TIMEOUT = 30000;
     private final String SEQUENCE_TYPE = "PROTEIN";
     private Boolean enabled = false;
 
@@ -33,8 +33,10 @@ public class OncokbTranscriptService {
 
     public OncokbTranscriptService() {
         this.client = Configuration.getDefaultApiClient();
-        this.client.setConnectTimeout(TIMEOUT);
-        this.client.setReadTimeout(TIMEOUT);
+        String timeoutProperty = PropertiesUtils.getProperties("oncokb_transcript.api_timeout");
+        Integer timeout = StringUtils.isNumeric(timeoutProperty) ? Integer.parseInt(timeoutProperty) : DEFAULT_TIMEOUT;
+        this.client.setConnectTimeout(timeout);
+        this.client.setReadTimeout(timeout);
         this.client.setBasePath(getOncokbTranscriptUrl());
 
         String oncokbTranscriptToken = PropertiesUtils.getProperties("oncokb_transcript.token");

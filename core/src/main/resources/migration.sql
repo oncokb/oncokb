@@ -204,3 +204,9 @@ alter table alteration
     add protein_change longtext null after alteration;
 alter table evidence
     add name longtext null after known_effect;
+
+-- update to v4.30
+alter table gene
+    add gene_type varchar(30) null,
+    drop oncogene,
+    drop tsg;

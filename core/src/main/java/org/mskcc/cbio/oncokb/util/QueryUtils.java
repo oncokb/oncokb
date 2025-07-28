@@ -2,6 +2,7 @@ package org.mskcc.cbio.oncokb.util;
 
 import com.mysql.jdbc.StringUtils;
 import org.mskcc.cbio.oncokb.model.*;
+import org.mskcc.cbio.oncokb.model.genomeNexus.TranscriptSummaryAlterationResult;
 
 import java.util.LinkedHashSet;
 
@@ -44,22 +45,26 @@ public class QueryUtils {
         return name;
     }
 
-    public static Query getQueryFromAlteration(ReferenceGenome referenceGenome, String tumorType, Alteration alteration, String hgvsg) {
+    public static Query getQueryFromAlteration(ReferenceGenome referenceGenome, String tumorType, TranscriptSummaryAlterationResult transcriptSummaryAlterationResult, String hgvs) {
         Query query = new Query();
         query.setReferenceGenome(referenceGenome);
-        query.setHgvs(hgvsg);
+        query.setHgvs(hgvs);
         query.setTumorType(tumorType);
-        if (alteration.getGene() != null) {
-            query.setHugoSymbol(alteration.getGene().getHugoSymbol());
-            query.setEntrezGeneId(alteration.getGene().getEntrezGeneId());
-        }
-        query.setAlteration(alteration.getAlteration());
-        query.setProteinStart(alteration.getProteinStart());
-        query.setProteinEnd(alteration.getProteinEnd());
-        if (alteration.getConsequence() != null) {
-            query.setConsequence(alteration.getConsequence().getTerm());
-            if (alteration.getConsequence().getTerm().equals(UPSTREAM_GENE) && StringUtils.isNullOrEmpty(query.getAlteration())) {
-                query.setAlteration(SpecialVariant.PROMOTER.getVariant());
+
+        if (transcriptSummaryAlterationResult != null) {
+            Alteration alteration = transcriptSummaryAlterationResult.getAlteration();
+            if (alteration.getGene() != null) {
+                query.setHugoSymbol(alteration.getGene().getHugoSymbol());
+                query.setEntrezGeneId(alteration.getGene().getEntrezGeneId());
+            }
+            query.setAlteration(alteration.getAlteration());
+            query.setProteinStart(alteration.getProteinStart());
+            query.setProteinEnd(alteration.getProteinEnd());
+            if (alteration.getConsequence() != null) {
+                query.setConsequence(alteration.getConsequence().getTerm());
+                if (alteration.getConsequence().getTerm().equals(UPSTREAM_GENE) && StringUtils.isNullOrEmpty(query.getAlteration())) {
+                    query.setAlteration(SpecialVariant.PROMOTER.getVariant());
+                }
             }
         }
         return query;

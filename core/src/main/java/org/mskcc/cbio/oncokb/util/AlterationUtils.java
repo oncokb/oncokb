@@ -1,22 +1,60 @@
 package org.mskcc.cbio.oncokb.util;
 
-import org.apache.commons.lang3.StringUtils;
-import org.genome_nexus.ApiException;
-import org.genome_nexus.client.TranscriptConsequenceSummary;
-import org.mskcc.cbio.oncokb.bo.AlterationBo;
-import org.mskcc.cbio.oncokb.bo.EvidenceBo;
-import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
-import org.mskcc.cbio.oncokb.model.*;
+import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
+import static org.mskcc.cbio.oncokb.Constants.FRAMESHIFT_VARIANT;
+import static org.mskcc.cbio.oncokb.Constants.IN_FRAME_DELETION;
+import static org.mskcc.cbio.oncokb.Constants.IN_FRAME_INSERTION;
+import static org.mskcc.cbio.oncokb.Constants.MISSENSE_VARIANT;
+import static org.mskcc.cbio.oncokb.Constants.SPLICE_SITE_VARIANTS;
+import static org.mskcc.cbio.oncokb.Constants.UPSTREAM_GENE;
+import static org.mskcc.cbio.oncokb.model.StructuralAlteration.TRUNCATING_MUTATIONS;
+import static org.mskcc.cbio.oncokb.util.MainUtils.isOncogenic;
+import static org.mskcc.cbio.oncokb.util.VariantConsequenceUtils.TOO_BROAD_CONSEQUENCES;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static org.mskcc.cbio.oncokb.Constants.*;
-import static org.mskcc.cbio.oncokb.model.StructuralAlteration.TRUNCATING_MUTATIONS;
-import static org.mskcc.cbio.oncokb.util.MainUtils.isOncogenic;
-import static org.mskcc.cbio.oncokb.util.VariantConsequenceUtils.TOO_BROAD_CONSEQUENCES;
+import org.apache.commons.lang3.StringUtils;
+import org.genome_nexus.ApiException;
+import org.genome_nexus.client.TranscriptConsequenceSummary;
+import org.genome_nexus.client.VariantAnnotation;
+import org.mskcc.cbio.oncokb.apiModels.ActionableGene;
+import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotateMutationByGenomicChangeQuery;
+import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotateMutationByHGVSgQuery;
+import org.mskcc.cbio.oncokb.bo.AlterationBo;
+import org.mskcc.cbio.oncokb.bo.EvidenceBo;
+import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
+import org.mskcc.cbio.oncokb.model.Alteration;
+import org.mskcc.cbio.oncokb.model.AlterationPositionBoundary;
+import org.mskcc.cbio.oncokb.model.AlterationType;
+import org.mskcc.cbio.oncokb.model.ArticleAbstract;
+import org.mskcc.cbio.oncokb.model.ClinicalVariant;
+import org.mskcc.cbio.oncokb.model.Evidence;
+import org.mskcc.cbio.oncokb.model.EvidenceType;
+import org.mskcc.cbio.oncokb.model.FrameshiftVariant;
+import org.mskcc.cbio.oncokb.model.Gene;
+import org.mskcc.cbio.oncokb.model.InferredMutation;
+import org.mskcc.cbio.oncokb.model.Oncogenicity;
+import org.mskcc.cbio.oncokb.model.ReferenceGenome;
+import org.mskcc.cbio.oncokb.model.SpecialVariant;
+import org.mskcc.cbio.oncokb.model.StructuralAlteration;
+import org.mskcc.cbio.oncokb.model.TumorType;
+import org.mskcc.cbio.oncokb.model.VariantConsequence;
+import org.mskcc.cbio.oncokb.model.genomeNexus.TranscriptSummaryAlterationResult;
 
 /**
  * @author jgao, Hongxin Zhang
@@ -33,6 +71,8 @@ public final class AlterationUtils {
     // We do not intend to do comprehensive checking, but only eliminate some basic errors.
     // GenomeNexus will evaluate it further
     public static Pattern HGVSG_FORMAT = Pattern.compile("((grch37|grch38):)?((chr)?[\\dxy]+:g\\.\\d+.*)", Pattern.CASE_INSENSITIVE);
+    public static Pattern HGVSP_FORMAT = Pattern.compile("((grch37|grch38):)?(.+:p\\..+)", Pattern.CASE_INSENSITIVE); 
+    public static Pattern HGVSC_FORMAT = Pattern.compile("((grch37|grch38):)?(ENST\\d+(\\.\\d+)?:c\\.\\d+.*)", Pattern.CASE_INSENSITIVE);
     public static Pattern GENOMIC_CHANGE_FORMAT = Pattern.compile("((grch37|grch38):)?([\\dxy]+,\\d+,\\d+,.*)", Pattern.CASE_INSENSITIVE);
 
     private static String EXCLUSION_SEPERATOR_REGEX = "\\s*;\\s*";
@@ -59,6 +99,25 @@ public final class AlterationUtils {
             return false;
         }
         return HGVSG_FORMAT.matcher(hgvsg).matches();
+    }
+
+    public static boolean isValidHgvsc(String hgvsc) {
+        hgvsc = hgvsc == null ? null : hgvsc.trim();
+        if (StringUtils.isEmpty(hgvsc)) {
+            return false;
+        }
+        return HGVSC_FORMAT.matcher(hgvsc).matches();
+    }
+    public static boolean isValidHgvsp(String hgvsp) {
+        hgvsp = hgvsp == null ? null : hgvsp.trim();
+        if (StringUtils.isEmpty(hgvsp)) {
+            return false;
+        }
+        return HGVSP_FORMAT.matcher(hgvsp).matches();
+    }
+
+    public static boolean isValidHgvs(String hgvs) {
+        return isValidHgvsg(hgvs) || isValidHgvsc(hgvs);
     }
 
     public static boolean isValidGenomicChange(String query) {
@@ -300,7 +359,7 @@ public final class AlterationUtils {
 
         proteinChange = proteinChange.trim();
 
-        Pattern p = Pattern.compile("([A-Z]?)([0-9]+)(_[A-Z]?([0-9]+))?(delins|ins|del)([A-Z0-9]*)", Pattern.CASE_INSENSITIVE);
+        Pattern p = Pattern.compile("([A-Z]?)([0-9]+)(_[A-Z]?([0-9]+))?(delins|ins|del)([A-Z0-9\\*]*)", Pattern.CASE_INSENSITIVE);
         Matcher m = p.matcher(proteinChange);
             if (m.matches()) {
                 if (m.group(1) != null && m.group(3) == null) {
@@ -324,7 +383,10 @@ public final class AlterationUtils {
                     String groupSix = m.group(6);
                     String groupSixWithoutDigits = MainUtils.removeDigits(groupSix);
 
-                    if (groupSixWithoutDigits.length() != groupSix.length() && groupSixWithoutDigits.length() > 0) {
+                    if (groupSixWithoutDigits.contains("*")) {
+                        consequence = "stop_gained";
+                    } 
+                    else if (groupSixWithoutDigits.length() != groupSix.length() && groupSixWithoutDigits.length() > 0) {
                         if (groupSixWithoutDigits.length() > deletion) {
                             consequence = IN_FRAME_INSERTION;
                         } else {
@@ -670,42 +732,89 @@ public final class AlterationUtils {
         return alt;
     }
 
-    public static Alteration getAlterationFromGenomeNexus(GNVariantAnnotationType type, ReferenceGenome referenceGenome, String query) throws ApiException {
-        Alteration alteration = new Alteration();
-        if (query != null && !query.trim().isEmpty()) {
-            TranscriptConsequenceSummary transcriptConsequenceSummary = GenomeNexusUtils.getTranscriptConsequence(type, query, referenceGenome);
-            if (transcriptConsequenceSummary != null) {
-                String hugoSymbol = transcriptConsequenceSummary.getHugoGeneSymbol();
-                Integer entrezGeneId = StringUtils.isNumeric(transcriptConsequenceSummary.getEntrezGeneId()) ? Integer.parseInt(transcriptConsequenceSummary.getEntrezGeneId()) : null;
-                if (StringUtils.isNotEmpty(transcriptConsequenceSummary.getHugoGeneSymbol())) {
-                    Gene gene = GeneUtils.getGene(hugoSymbol);
-                    if (gene == null) {
-                        gene = new Gene();
-                        gene.setHugoSymbol(transcriptConsequenceSummary.getHugoGeneSymbol());
-                        gene.setEntrezGeneId(entrezGeneId);
-                    }
-                    alteration.setGene(gene);
-                }
+    private static Alteration convertTranscriptSummaryAlterationResultToAlteration(TranscriptSummaryAlterationResult transcriptSummaryAlterationResult) {
+        if (transcriptSummaryAlterationResult != null) {
+            return convertTranscriptConsequenceSummaryToAlteration(transcriptSummaryAlterationResult.getTranscriptConsequenceSummary());
+        } else {
+            return null;
+        }
+    }
 
-                if (StringUtils.isNotEmpty(transcriptConsequenceSummary.getHgvspShort())) {
-                    String hgvspShort = transcriptConsequenceSummary.getHgvspShort().trim().replace("p.", "");
-                    alteration.setAlteration(hgvspShort);
-                    alteration.setName(hgvspShort);
-                }
-                if (transcriptConsequenceSummary.getProteinPosition() != null) {
-                    if (transcriptConsequenceSummary.getProteinPosition().getStart() != null) {
-                        alteration.setProteinStart(transcriptConsequenceSummary.getProteinPosition().getStart());
-                    }
-                    if (transcriptConsequenceSummary.getProteinPosition() != null) {
-                        alteration.setProteinEnd(transcriptConsequenceSummary.getProteinPosition().getEnd());
-                    }
-                }
-                if (StringUtils.isNotEmpty(transcriptConsequenceSummary.getConsequenceTerms())) {
-                    alteration.setConsequence(VariantConsequenceUtils.findVariantConsequenceByTerm(transcriptConsequenceSummary.getConsequenceTerms()));
-                }
+    public static Alteration convertTranscriptConsequenceSummaryToAlteration(TranscriptConsequenceSummary transcriptConsequenceSummary) {
+        if (transcriptConsequenceSummary == null) {
+            return null;
+        }
+        
+        Alteration alteration = new Alteration();
+        String hugoSymbol = transcriptConsequenceSummary.getHugoGeneSymbol();
+        Integer entrezGeneId = StringUtils.isNumeric(transcriptConsequenceSummary.getEntrezGeneId()) ? Integer.parseInt(transcriptConsequenceSummary.getEntrezGeneId()) : null;
+        if (StringUtils.isNotEmpty(transcriptConsequenceSummary.getHugoGeneSymbol())) {
+            Gene gene = GeneUtils.getGene(hugoSymbol);
+            if (gene == null) {
+                gene = new Gene();
+                gene.setHugoSymbol(transcriptConsequenceSummary.getHugoGeneSymbol());
+                gene.setEntrezGeneId(entrezGeneId);
+            }
+            alteration.setGene(gene);
+        }
+
+        if (StringUtils.isNotEmpty(transcriptConsequenceSummary.getHgvspShort())) {
+            String hgvspShort = transcriptConsequenceSummary.getHgvspShort().trim().replace("p.", "");
+            alteration.setAlteration(hgvspShort);
+            alteration.setName(hgvspShort);
+        }
+        if (transcriptConsequenceSummary.getProteinPosition() != null) {
+            if (transcriptConsequenceSummary.getProteinPosition().getStart() != null) {
+                alteration.setProteinStart(transcriptConsequenceSummary.getProteinPosition().getStart());
+            }
+            if (transcriptConsequenceSummary.getProteinPosition().getEnd() != null) {
+                alteration.setProteinEnd(transcriptConsequenceSummary.getProteinPosition().getEnd());
             }
         }
+        if (StringUtils.isNotEmpty(transcriptConsequenceSummary.getConsequenceTerms())) {
+            alteration.setConsequence(VariantConsequenceUtils.findVariantConsequenceByTerm(transcriptConsequenceSummary.getConsequenceTerms()));
+        }
         return alteration;
+    }
+
+    public static List<VariantAnnotation> getHgvsgVariantsAnnotationWithQueries(List<AnnotateMutationByHGVSgQuery> queries, ReferenceGenome referenceGenome) throws ApiException {
+        return GenomeNexusUtils.getHgvsVariantsAnnotation(queries.stream().map(AnnotateMutationByHGVSgQuery::getHgvsg).collect(Collectors.toList()), referenceGenome);
+    }
+
+    public static List<VariantAnnotation> getGenomicLocationVariantsAnnotationWithQueries(List<AnnotateMutationByGenomicChangeQuery> queries, ReferenceGenome referenceGenome) throws ApiException {
+        return GenomeNexusUtils.getGenomicLocationVariantsAnnotation(queries.stream().map(query -> GenomeNexusUtils.convertGenomicLocation(query.getGenomicLocation())).collect(Collectors.toList()), referenceGenome);
+    }
+
+    public static TranscriptSummaryAlterationResult getAlterationFromGenomeNexus(GNVariantAnnotationType type, ReferenceGenome referenceGenome, String query) throws ApiException {
+        List<VariantAnnotation> variantAnnotations = new ArrayList<>();
+        if (GNVariantAnnotationType.HGVS_G == type) {
+            variantAnnotations = GenomeNexusUtils.getHgvsVariantsAnnotation(Collections.singletonList(query), referenceGenome);
+        } else if (GNVariantAnnotationType.GENOMIC_LOCATION == type) {
+            variantAnnotations = GenomeNexusUtils.getGenomicLocationVariantsAnnotation(Collections.singletonList(GenomeNexusUtils.convertGenomicLocation(query)), referenceGenome);
+        }
+        if (variantAnnotations.isEmpty()) {
+            return null;
+        } else {
+            List<TranscriptSummaryAlterationResult> alterationInfos = getAlterationsFromGenomeNexus(variantAnnotations, referenceGenome);
+            return alterationInfos.isEmpty() ? null : alterationInfos.get(0);
+        }
+    }
+
+    public static List<TranscriptSummaryAlterationResult> getAlterationsFromGenomeNexus(List<VariantAnnotation> variantAnnotations, ReferenceGenome referenceGenome) throws ApiException {
+        List<TranscriptSummaryAlterationResult> annotationResult = GenomeNexusUtils.getTranscriptsConsequence(variantAnnotations, referenceGenome);
+        // Use the transcript consequence summary from GN to generate a corresponding Alteration model
+        for (TranscriptSummaryAlterationResult result : annotationResult) {
+            if (result == null) {
+                result = new TranscriptSummaryAlterationResult();
+            }
+            Alteration alteration = convertTranscriptSummaryAlterationResultToAlteration(result);
+            if (alteration != null) {
+                result.setAlteration(alteration);
+            } else {
+                result.setAlteration(new Alteration());
+            }
+        }
+        return annotationResult;
     }
 
     public static String getOncogenic(List<Alteration> alterations) {
@@ -1616,5 +1725,91 @@ public final class AlterationUtils {
             }
         }
         return false;
+    }
+
+    public static List<ActionableGene> getAllActionableVariants(Boolean isTextFile) {
+        List<ActionableGene> actionableGeneList = new ArrayList<>();
+        Set<Gene> genes = CacheUtils.getAllGenes();
+        Map<Gene, Set<ClinicalVariant>> map = new HashMap<>();
+
+        for (Gene gene : genes) {
+            map.put(gene, MainUtils.getClinicalVariants(gene));
+        }
+
+        Set<ActionableGene> actionableGenes = new HashSet<>();
+        for (Map.Entry<Gene, Set<ClinicalVariant>> entry : map.entrySet()) {
+            Gene gene = entry.getKey();
+            for (ClinicalVariant clinicalVariant : entry.getValue()) {
+                Set<ArticleAbstract> articleAbstracts = clinicalVariant.getDrugAbstracts();
+                List<String> abstracts = new ArrayList<>();
+                for (ArticleAbstract articleAbstract : articleAbstracts) {
+                    abstracts.add(articleAbstract.getAbstractContent() + " " + articleAbstract.getLink());
+                }
+
+                if (clinicalVariant.getExcludedCancerTypes().size() > 0) {
+                    String cancerTypeName = TumorTypeUtils.getTumorTypesNameWithExclusion(clinicalVariant.getCancerTypes(), clinicalVariant.getExcludedCancerTypes());
+                    // for any clinical variant that has cancer type excluded, we no longer list the cancer types separately
+                    actionableGenes.add(new ActionableGene(
+                        gene.getGrch37Isoform(), gene.getGrch37RefSeq(),
+                        gene.getGrch38Isoform(), gene.getGrch38RefSeq(),
+                        gene.getEntrezGeneId(),
+                        gene.getHugoSymbol(),
+                        clinicalVariant.getVariant().getReferenceGenomes().stream().map(referenceGenome -> referenceGenome.name()).collect(Collectors.joining(", ")),
+                        clinicalVariant.getVariant().getName(),
+                        clinicalVariant.getVariant().getAlteration(),
+                        cancerTypeName,
+                        clinicalVariant.getLevel(),
+                        clinicalVariant.getSolidPropagationLevel(),
+                        clinicalVariant.getLiquidPropagationLevel(),
+                        MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrug()), ", ", true),
+                        MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrugPmids()), ", ", true),
+                        MainUtils.listToString(abstracts, "; ", true),
+                        CplUtils.annotate(
+                            clinicalVariant.getDrugDescription(),
+                            gene.getHugoSymbol(),
+                            clinicalVariant.getVariant().getName(),
+                            cancerTypeName,
+                            null,
+                            gene,
+                            null,
+                            isTextFile
+                        )
+                    ));
+                } else {
+                    for (TumorType tumorType : clinicalVariant.getCancerTypes()) {
+                        actionableGenes.add(new ActionableGene(
+                            gene.getGrch37Isoform(), gene.getGrch37RefSeq(),
+                            gene.getGrch38Isoform(), gene.getGrch38RefSeq(),
+                            gene.getEntrezGeneId(),
+                            gene.getHugoSymbol(),
+                            clinicalVariant.getVariant().getReferenceGenomes().stream().map(referenceGenome -> referenceGenome.name()).collect(Collectors.joining(", ")),
+                            clinicalVariant.getVariant().getName(),
+                            clinicalVariant.getVariant().getAlteration(),
+                            TumorTypeUtils.getTumorTypeName(tumorType),
+                            clinicalVariant.getLevel(),
+                            clinicalVariant.getSolidPropagationLevel(),
+                            clinicalVariant.getLiquidPropagationLevel(),
+                            MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrug()), ", ", true),
+                            MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrugPmids()), ", ", true),
+                            MainUtils.listToString(abstracts, "; ", true),
+                            CplUtils.annotate(
+                                clinicalVariant.getDrugDescription(),
+                                gene.getHugoSymbol(),
+                                clinicalVariant.getVariant().getName(),
+                                TumorTypeUtils.getTumorTypeName(tumorType),
+                                null,
+                                gene,
+                                tumorType,
+                                isTextFile
+                            )
+                        ));
+                    }
+                }
+            }
+        }
+
+        actionableGeneList.addAll(actionableGenes);
+        MainUtils.sortActionableVariants(actionableGeneList);
+        return actionableGeneList;
     }
 }

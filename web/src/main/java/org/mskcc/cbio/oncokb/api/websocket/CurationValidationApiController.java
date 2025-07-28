@@ -25,6 +25,8 @@ import static org.mskcc.cbio.oncokb.model.StructuralAlteration.TRUNCATING_MUTATI
 
 @ServerEndpoint(value = "/api/websocket/curation/validation")
 public class CurationValidationApiController {
+    private static final String DEV_TEAM_ISSUE = " This is an issue the dev team needs to fix during the data release.";
+
 
     private Session session;
 
@@ -117,7 +119,7 @@ public class CurationValidationApiController {
     private void validateGeneInfo() {
         sendText(generateInfo(MISSING_GENE_INFO, ValidationStatus.IS_PENDING, new JSONArray()));
 
-        JSONArray data = ValidationUtils.checkGeneSummaryBackground();
+        JSONArray data = ValidationUtils.checkGeneSummaryBackgroundType();
         if (data.length() == 0) {
             sendText(generateInfo(MISSING_GENE_INFO, ValidationStatus.IS_COMPLETE, new JSONArray()));
         } else {
@@ -313,7 +315,7 @@ public class CurationValidationApiController {
                 }
                 String altTargetName = alteration.getName() + " / " + (MainUtils.isVUS(alteration) ? "VUS" : "CURATED");
                 if (StringUtils.isEmpty(sequence)) {
-                    data.put(ValidationUtils.getErrorMessage(ValidationUtils.getTarget(alteration.getGene().getHugoSymbol(), altTargetName), "No sequence available for " + alteration.getGene().getHugoSymbol()));
+                    data.put(ValidationUtils.getErrorMessage(ValidationUtils.getTarget(alteration.getGene().getHugoSymbol(), altTargetName), "No sequence available for " + alteration.getGene().getHugoSymbol()) + DEV_TEAM_ISSUE);
                 } else if (referenceGenome != null) {
                     if (sequence.length() < alteration.getProteinStart()) {
                         data.put(ValidationUtils.getErrorMessage(ValidationUtils.getTarget(alteration.getGene().getHugoSymbol(), altTargetName), "The gene only has " + sequence.length() + " AAs. But the variant protein start is " + alteration.getProteinStart()));
@@ -355,7 +357,7 @@ public class CurationValidationApiController {
         }
 
         for (Gene gene : genes) {
-            if (!gene.getTSG()) {
+            if (gene.getGeneType() != null && !(gene.getGeneType().equals(GeneType.ONCOGENE_AND_TSG) || gene.getGeneType().equals(GeneType.TSG))) {
                 data.put(ValidationUtils.getErrorMessage(ValidationUtils.getTarget(gene.getHugoSymbol()), "The gene " + gene.getHugoSymbol() + " is not tumor suppressor gene but has Truncating Mutations curated."));
             }
         }

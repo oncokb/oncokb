@@ -1,27 +1,54 @@
 package org.mskcc.cbio.oncokb.util;
 
 import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
-import static org.mskcc.cbio.oncokb.util.AlterationUtils.GENOMIC_CHANGE_FORMAT;
-import static org.mskcc.cbio.oncokb.util.AlterationUtils.HGVSG_FORMAT;
 import static org.mskcc.cbio.oncokb.util.LevelUtils.THERAPEUTIC_RESISTANCE_LEVELS;
 import static org.mskcc.cbio.oncokb.util.LevelUtils.THERAPEUTIC_SENSITIVE_LEVELS;
 
-import java.util.*;
-import java.util.regex.Matcher;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
+import org.genome_nexus.ApiException;
+import org.genome_nexus.client.VariantAnnotation;
 import org.mskcc.cbio.oncokb.apiModels.CancerTypeMatch;
 import org.mskcc.cbio.oncokb.apiModels.DrugMatch;
 import org.mskcc.cbio.oncokb.apiModels.LevelsOfEvidenceMatch;
-import org.mskcc.cbio.oncokb.apiModels.annotation.QueryGene;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
-import org.mskcc.cbio.oncokb.model.*;
+import org.mskcc.cbio.oncokb.model.Alteration;
+import org.mskcc.cbio.oncokb.model.AnnotationSearchQueryType;
+import org.mskcc.cbio.oncokb.model.AnnotationSearchResult;
+import org.mskcc.cbio.oncokb.model.Drug;
+import org.mskcc.cbio.oncokb.model.Evidence;
+import org.mskcc.cbio.oncokb.model.Gene;
+import org.mskcc.cbio.oncokb.model.IndicatorQueryResp;
+import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
+import org.mskcc.cbio.oncokb.model.Oncogenicity;
+import org.mskcc.cbio.oncokb.model.Query;
+import org.mskcc.cbio.oncokb.model.ReferenceGenome;
+import org.mskcc.cbio.oncokb.model.Treatment;
+import org.mskcc.cbio.oncokb.model.TumorType;
+import org.mskcc.cbio.oncokb.model.TypeaheadQueryType;
+import org.mskcc.cbio.oncokb.model.TypeaheadSearchResp;
 
 public class AnnotationSearchUtils {
 
-    public static Set<TypeaheadSearchResp> searchNonHgvsAnnotation(String query){
+    public static Set<TypeaheadSearchResp> searchNonHgvsAnnotation(String query) {
         LinkedHashSet<TypeaheadSearchResp> result = new LinkedHashSet<>();
         // genomic queries will not have space in the query
         String trimmedQuery = query.trim().replaceAll(" ", "");
@@ -70,6 +97,46 @@ public class AnnotationSearchUtils {
 
             // Blur search for cancer type
             result.addAll(findMatchingCancerTypes(fullKeywords, false));
+
+            // If there is no match in OncoKB database, assume the format is gene:alteration (i.e BRAF V600E) and see if is on a different transcript
+            if (result.size() == 0 && keywords.size() == 2) {
+                try {
+                    List<VariantAnnotation> annotations =  GenomeNexusUtils.getHgvsVariantsAnnotation(
+                        Arrays.asList((keywords.get(0) + ":p." + keywords.get(1)).toUpperCase()),
+                        DEFAULT_REFERENCE_GENOME
+                    );
+
+                    if (annotations.size() == 1) {
+                        VariantAnnotation genomeNexusAnnotation = annotations.get(0);
+
+                        if (genomeNexusAnnotation.getAnnotationSummary() != null && genomeNexusAnnotation.getAnnotationSummary().getTranscriptConsequenceSummary() != null) {
+                            Alteration oncokbAnnotation = AlterationUtils.convertTranscriptConsequenceSummaryToAlteration(genomeNexusAnnotation.getAnnotationSummary().getTranscriptConsequenceSummary());
+                            Alteration foundAlteration = AlterationUtils.findAlteration(oncokbAnnotation.getGene(), DEFAULT_REFERENCE_GENOME, oncokbAnnotation.getAlteration());
+
+                            if (foundAlteration != null) {
+                                String oncokbVariant = foundAlteration.getAlteration();
+                                String oncokbTranscript  = genomeNexusAnnotation.getAnnotationSummary().getTranscriptConsequenceSummary().getTranscriptId();   
+                                String inputVariant = keywords.get(1).toUpperCase();
+                                String gene = foundAlteration.getGene().getHugoSymbol();
+
+                                TypeaheadSearchResp response = newTypeaheadVariant(foundAlteration);
+                                response.setAnnotation(gene 
+                                    + " " 
+                                    + inputVariant  
+                                    + " is based on a transcript not used by OncoKB. The equivalent mutation " 
+                                    + gene
+                                    + " "
+                                    + oncokbVariant
+                                    + " is annotated on OncoKB transcript "
+                                    + oncokbTranscript
+                                    + "."
+                                );
+                                result.add(response);
+                            }
+                        }                        
+                    }
+                } catch (ApiException e) {}
+            }
 
             // If there is no match in OncoKB database, still try to annotate variant
             // Only when the oncogenicity is not empty
@@ -663,7 +730,13 @@ public class AnnotationSearchUtils {
         Query query = new Query();
         query.setEntrezGeneId(alteration.getGene().getEntrezGeneId());
         query.setAlteration(alteration.getAlteration());
-        query.setReferenceGenome(alteration.getReferenceGenomes().iterator().next());
+
+        Iterator<ReferenceGenome> referenceGenomeIterator = alteration.getReferenceGenomes().iterator();
+        if (referenceGenomeIterator.hasNext()) {
+            query.setReferenceGenome(referenceGenomeIterator.next());
+        } else {
+            query.setReferenceGenome(referenceGenome);
+        }
 
         IndicatorQueryResp resp = IndicatorUtils.processQuery(query, null, false, null, false);
         typeaheadSearchResp.setOncogenicity(resp.getOncogenic());

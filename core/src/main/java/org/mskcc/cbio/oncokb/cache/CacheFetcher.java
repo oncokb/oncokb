@@ -2,9 +2,9 @@ package org.mskcc.cbio.oncokb.cache;
 
 import org.apache.commons.lang3.StringUtils;
 import org.cbioportal.genome_nexus.component.annotation.NotationConverter;
-import org.cbioportal.genome_nexus.model.GenomicLocation;
 import org.cbioportal.genome_nexus.util.exception.InvalidHgvsException;
 import org.cbioportal.genome_nexus.util.exception.TypeNotSupportedException;
+import org.genome_nexus.client.GenomicLocation;
 import org.mskcc.cbio.oncokb.apiModels.CuratedGene;
 import org.mskcc.cbio.oncokb.bo.OncokbTranscriptService;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
@@ -64,8 +64,7 @@ public class CacheFetcher {
         header.add("GRCh37 RefSeq");
         header.add("GRCh38 Isoform");
         header.add("GRCh38 RefSeq");
-        header.add("Is Oncogene");
-        header.add("Is Tumor Suppressor Gene");
+        header.add("Gene Type");
         header.add("# of occurrence within resources (Column J-P)");
         header.add("OncoKB Annotated");
         header.add("MSK-IMPACT");
@@ -86,8 +85,11 @@ public class CacheFetcher {
             row.add(cancerGene.getGrch37RefSeq());
             row.add(cancerGene.getGrch38Isoform());
             row.add(cancerGene.getGrch38RefSeq());
-            row.add(getStringByBoolean(cancerGene.getOncogene()));
-            row.add(getStringByBoolean(cancerGene.getTSG()));
+            if (cancerGene.getGeneType() != null) {
+                row.add(cancerGene.getGeneType().toString());
+            } else {
+                row.add("");
+            }
             row.add(String.valueOf(cancerGene.getOccurrenceCount()));
             row.add(getStringByBoolean(cancerGene.getOncokbAnnotated()));
             row.add(getStringByBoolean(cancerGene.getmSKImpact()));
@@ -177,7 +179,7 @@ public class CacheFetcher {
                     gene.getGrch37Isoform(), gene.getGrch37RefSeq(),
                     gene.getGrch38Isoform(), gene.getGrch38RefSeq(),
                     gene.getEntrezGeneId(), gene.getHugoSymbol(),
-                    gene.getTSG(), gene.getOncogene(),
+                    gene.getGeneType() != null ? gene.getGeneType() : GeneType.INSUFFICIENT_EVIDENCE,
                     highestSensitiveLevel, highestResistanceLevel,
                     includeEvidence ? SummaryUtils.geneSummary(gene, gene.getHugoSymbol(), false) : "",
                     includeEvidence ? SummaryUtils.geneBackground(gene, gene.getHugoSymbol()) : ""
@@ -200,8 +202,7 @@ public class CacheFetcher {
         header.add("GRCh38 RefSeq");
         header.add("Entrez Gene ID");
         header.add("Hugo Symbol");
-        header.add("Is Oncogene");
-        header.add("Is Tumor Suppressor Gene");
+        header.add("Gene Type");
         header.add("Highest Level of Evidence(sensitivity)");
         header.add("Highest Level of Evidence(resistance)");
         if (includeEvidence == Boolean.TRUE) {
@@ -220,8 +221,11 @@ public class CacheFetcher {
             row.add(gene.getGrch38RefSeq());
             row.add(String.valueOf(gene.getEntrezGeneId()));
             row.add(gene.getHugoSymbol());
-            row.add(getStringByBoolean(gene.getOncogene()));
-            row.add(getStringByBoolean(gene.getTSG()));
+            if (gene.getGeneType() != null) {
+                row.add(gene.getGeneType().toString());
+            } else {
+                row.add("");
+            }
             row.add(gene.getHighestSensitiveLevel());
             row.add(gene.getHighestResistancLevel());
             if (includeEvidence == Boolean.TRUE) {
@@ -275,12 +279,6 @@ public class CacheFetcher {
         );
     }
 
-    @Cacheable(cacheResolver = "generalCacheResolver",
-        keyGenerator = "concatKeyGenerator")
-    public Alteration getAlterationFromGenomeNexus(GNVariantAnnotationType gnVariantAnnotationType, ReferenceGenome referenceGenome, String genomicLocation) throws org.genome_nexus.ApiException {
-        return AlterationUtils.getAlterationFromGenomeNexus(gnVariantAnnotationType, referenceGenome, genomicLocation);
-    }
-
     public void cacheAlterationFromGenomeNexus(GenomeNexusAnnotatedVariantInfo gnAnnotatedVariantInfo) throws IllegalStateException {
         if (cacheManager == null) {
             throw new IllegalStateException("Cannot cache pre-annotated GN variants. Change property redis.enable to True.");
@@ -330,16 +328,31 @@ public class CacheFetcher {
         return oncokbTranscriptService.findEnsemblTranscriptsByIds(ids, referenceGenome);
     }
 
-    public boolean genomicLocationShouldBeAnnotated(GNVariantAnnotationType gnVariantAnnotationType, String query, ReferenceGenome referenceGenome) throws ApiException {
-        if (StringUtils.isEmpty(query)) {
+    public boolean genomicLocationShouldBeAnnotated(GenomicLocation genomicLocation, ReferenceGenome referenceGenome) throws ApiException {
+        if (genomicLocation == null) {
             return false;
-        }else{
-            query = query.trim();
         }
-        if (GNVariantAnnotationType.HGVS_G.equals(gnVariantAnnotationType)) {
-            if (!AlterationUtils.isValidHgvsg(query)) {
-                return false;
-            }
+        Map<String, Set<EnsemblGene>> chromosomeCanonicalEnsemblGeneMap = getCanonicalEnsemblGenesByChromosome(referenceGenome);
+        // when the transcript info is not available, we should always annotate the genomic location
+        if (chromosomeCanonicalEnsemblGeneMap == null || chromosomeCanonicalEnsemblGeneMap.isEmpty()) {
+            return true;
+        }
+        if (chromosomeCanonicalEnsemblGeneMap.containsKey(genomicLocation.getChromosome())){
+            return chromosomeCanonicalEnsemblGeneMap.get(genomicLocation.getChromosome()).stream().anyMatch(ensemblGene -> withinBuffer(ensemblGene, genomicLocation));
+        }
+        return false;
+    }
+
+    public boolean hgvsgShouldBeAnnotated(String hgvsg, ReferenceGenome referenceGenome) throws ApiException {
+        if (StringUtils.isEmpty(hgvsg)) {
+            return false;
+        }
+        hgvsg = hgvsg.trim();
+        if (StringUtils.isEmpty(hgvsg)) {
+            return false;
+        }
+        if (!AlterationUtils.isValidHgvsg(hgvsg)) {
+            return false;
         }
         Map<String, Set<EnsemblGene>> chromosomeCanonicalEnsemblGeneMap = getCanonicalEnsemblGenesByChromosome(referenceGenome);
         // when the transcript info is not available, we should always annotate the genomic location
@@ -348,21 +361,17 @@ public class CacheFetcher {
         }
         GenomicLocation gl = null;
         try {
-            if (gnVariantAnnotationType.equals(GNVariantAnnotationType.GENOMIC_LOCATION)) {
-                gl = notationConverter.parseGenomicLocation(query);
-            } else if (gnVariantAnnotationType.equals(GNVariantAnnotationType.HGVS_G)) {
-                query = notationConverter.hgvsNormalizer(query);
-                // We are only doing a partial HGVSg -> Genomic Location conversion.
-                // The withinBuffer method only requires the chromosome and range, so we do
-                // not need to parse the ref/var residues. This is slightly more performanant than using regex.
-                gl = MainUtils.parseChromosomeAndRangeFromHGVSg(query);
-            }
+            hgvsg = notationConverter.hgvsNormalizer(hgvsg);
+            // We are only doing a partial HGVSg -> Genomic Location conversion.
+            // The withinBuffer method only requires the chromosome and range, so we do
+            // not need to parse the ref/var residues. This is slightly more performanant than using regex.
+            gl = MainUtils.parseChromosomeAndRangeFromHGVSg(hgvsg);
             if (gl == null) {
                 return false;
             }
         } catch (InvalidHgvsException | TypeNotSupportedException e) {
             // If GN throws InvalidHgvsException, we still need to check whether it's a duplication. The GN does not support dup in HGVSg format but it can still be annotated by VEP.
-            if (query.endsWith("dup")) {
+            if (hgvsg.endsWith("dup")) {
                 return true;
             } else {
                 return false;
@@ -370,7 +379,7 @@ public class CacheFetcher {
         }
         GenomicLocation finalGl = gl;
 
-        if (chromosomeCanonicalEnsemblGeneMap.containsKey(finalGl.getChromosome())){
+        if (chromosomeCanonicalEnsemblGeneMap.containsKey(finalGl.getChromosome())) {
             return chromosomeCanonicalEnsemblGeneMap.get(finalGl.getChromosome()).stream().anyMatch(ensemblGene -> withinBuffer(ensemblGene, finalGl));
         }
 
