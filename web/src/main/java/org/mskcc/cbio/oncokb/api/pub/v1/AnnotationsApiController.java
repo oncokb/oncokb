@@ -474,6 +474,9 @@ public class AnnotationsApiController {
             query.getProteinEnd(),
             null,
             query.getHgvs(),
+            query.isGermline(),
+            query.getAlleleState(),
+            null,
             null,
             false,
             evidenceTypes,
@@ -508,6 +511,9 @@ public class AnnotationsApiController {
             query.getProteinEnd(),
             null,
             query.getHgvs(),
+            query.isGermline(),
+            query.getAlleleState(),
+            null,
             null,
             false,
             evidenceTypes,
@@ -623,35 +629,125 @@ public class AnnotationsApiController {
 
             String fusionName = FusionUtils.getFusionName(geneA, geneB);
 
-                IndicatorQueryResp resp = this.cacheFetcher.processQuery(
-                    query.getReferenceGenome(),  null, fusionName, null, AlterationType.STRUCTURAL_VARIANT.name(), query.getTumorType(), query.getFunctionalFusion() ? "fusion" : "", null, null, query.getStructuralVariantType(), null,
-                    query.isGermline(), query.getAlleleState(), null, null, false, query.getEvidenceTypes(), false);
-                resp.getQuery().setId(query.getId());
-                result.add(resp);
-            }
+            IndicatorQueryResp resp = this.cacheFetcher.processQuery(
+                query.getReferenceGenome(),
+                null,
+                fusionName,
+                null,
+                AlterationType.STRUCTURAL_VARIANT.name(),
+                query.getTumorType(),
+                query.getFunctionalFusion() ? "fusion" : "",
+                null,
+                null,
+                query.getStructuralVariantType(),
+                null,
+                query.isGermline(),
+                query.getAlleleState(),
+                null,
+                null,
+                false, 
+                query.getEvidenceTypes(), 
+                false
+            );
+            resp.getQuery().setId(query.getId());
+            result.add(resp);
         }
-        return new ResponseEntity<>(result, HttpStatus.OK);
+        return result;
     }
 
-    @PremiumPublicApi
-    @ApiOperation(value = "", notes = "Get annotations based on search", response = AnnotationSearchResult.class, responseContainer = "List")
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "OK")})
-    @RequestMapping(value = "/annotation/search",
-        produces = {"application/json"},
-        method = RequestMethod.GET)
-    ResponseEntity<LinkedHashSet<AnnotationSearchResult>> annotationSearchGet(
-        @ApiParam(value = "The search query, it could be hugoSymbol, variant or cancer type. At least two characters. Maximum two keywords are supported, separated by space", required = true) @RequestParam(value = "query") String query,
-        @ApiParam(value = "The limit of returned result.") @RequestParam(value = "limit", defaultValue = "10", required = false) Integer limit
-    ) {
-        final int DEFAULT_LIMIT = 10;
-        final int QUERY_MIN_LENGTH = 2;
-        Set<AnnotationSearchResult> result = new TreeSet<>();
-        if(limit == null) {
-            limit = DEFAULT_LIMIT;
+    private List<IndicatorQueryResp> annotateCopyNumberAlterations(List<AnnotateCopyNumberAlterationQuery> copyNumberAlterations) {
+        List<IndicatorQueryResp> result = new ArrayList<>();
+        for (AnnotateCopyNumberAlterationQuery query : copyNumberAlterations) {
+            Gene gene = new Gene();
+            if (query.getGene() != null) {
+                try {
+                    gene = this.cacheFetcher.findGeneBySymbol(
+                        query.getGene().getEntrezGeneId() != null ?
+                            query.getGene().getEntrezGeneId().toString() :
+                            query.getGene().getHugoSymbol()
+                    );
+                    if (gene == null) {
+                        gene = new Gene();
+                        gene.setEntrezGeneId(query.getGene().getEntrezGeneId());
+                        gene.setHugoSymbol(query.getGene().getHugoSymbol());
+                    }
+                } catch (ApiException e) {
+                }
+            }
+            IndicatorQueryResp resp = this.cacheFetcher.processQuery(
+                query.getReferenceGenome(),
+                gene.getEntrezGeneId(),
+                gene.getHugoSymbol(),
+                StringUtils.capitalize(query.getCopyNameAlterationType().name().toLowerCase()),
+                null,
+                query.getTumorType(),
+                null, 
+                null, 
+                null, 
+                null,
+                null, 
+                query.isGermline(),
+                query.getAlleleState(),
+                null,
+                null,
+                false, 
+                query.getEvidenceTypes(),
+                false
+            );
+            resp.getQuery().setId(query.getId());
+            result.add(resp);
         }
-        if (query != null && query.length() >= QUERY_MIN_LENGTH) {
-            result = annotationSearch(query);
+        return result;
+    }
+
+    private List<IndicatorQueryResp> annotateMutationsByGenomicChange(List<AnnotateMutationByGenomicChangeQuery> mutations) throws ApiException, org.genome_nexus.ApiException {
+        List<IndicatorQueryResp> result = new ArrayList<>();
+        List<AnnotateMutationByGenomicChangeQuery> grch37Queries = new ArrayList<>();
+        List<AnnotateMutationByGenomicChangeQuery> grch38Queries = new ArrayList<>();
+        Map<Integer, Integer> grch37Map = new HashMap<>();
+        Map<Integer, Integer> grch38Map = new HashMap<>();
+
+        for (int i = 0; i < mutations.size(); i++) {
+            AnnotateMutationByGenomicChangeQuery query = mutations.get(i);
+            ReferenceGenome referenceGenome = query.getReferenceGenome();
+            if (referenceGenome == null) {
+                query.setReferenceGenome(ReferenceGenome.GRCh37);
+            }
+            if (referenceGenome == ReferenceGenome.GRCh38) {
+                grch38Map.put(i, grch38Queries.size());
+                grch38Queries.add(query);
+            } else {
+                grch37Map.put(i, grch37Queries.size());
+                grch37Queries.add(query);
+            }
+        }
+
+        List<IndicatorQueryResp> grch37Alts = annotateMutationsByGenomicChange(ReferenceGenome.GRCh37, grch37Queries);
+        List<IndicatorQueryResp> grch38Alts = annotateMutationsByGenomicChange(ReferenceGenome.GRCh38, grch38Queries);
+
+        for (int i = 0; i < mutations.size(); i++) {
+            AnnotateMutationByGenomicChangeQuery query = mutations.get(i);
+            result.add(query.getReferenceGenome() == ReferenceGenome.GRCh37 ? grch37Alts.get(grch37Map.get(i)) : grch38Alts.get(grch38Map.get(i)));
+        }
+        return result;
+    }
+
+    private List<IndicatorQueryResp> annotateMutationsByGenomicChange(ReferenceGenome referenceGenome, List<AnnotateMutationByGenomicChangeQuery> queries) throws ApiException, org.genome_nexus.ApiException {
+        List<GenomicLocation> queriesToGN = new ArrayList<>();
+        Map<String, Integer> queryIndexMap = new HashMap<>();
+        for (AnnotateMutationByGenomicChangeQuery query : queries) {
+            GenomicLocation genomicLocation = GenomeNexusUtils.convertGenomicLocation(query.getGenomicLocation());
+            if (this.cacheFetcher.genomicLocationShouldBeAnnotated(genomicLocation, referenceGenome)) {
+                if (!queryIndexMap.containsKey(query.getGenomicLocation())) {
+                    queryIndexMap.put(query.getGenomicLocation(), queriesToGN.size());
+                    queriesToGN.add(genomicLocation);
+                }
+            }
+        }
+
+        List<org.genome_nexus.client.VariantAnnotation> variantAnnotations = GenomeNexusUtils.getGenomicLocationVariantsAnnotation(queriesToGN, referenceGenome);
+        if(variantAnnotations.size() != queriesToGN.size()){
+            throw new ApiException("Number of variants that have been annotated by GenomeNexus is not equal to the number of queries");
         }
         
         List<IndicatorQueryResp> result = new ArrayList<>();
@@ -678,6 +774,9 @@ public class AnnotationsApiController {
                         null,
                         null,
                         variantAnnotation.getHgvsg(),
+                        query.isGermline(),
+                        query.getAlleleState(),
+                        null,
                         null,
                         false,
                         query.getEvidenceTypes(),
@@ -729,6 +828,9 @@ public class AnnotationsApiController {
                 query.getProteinStart(),
                 query.getProteinEnd(),
                 null,
+                null,
+                query.isGermline(),
+                query.getAlleleState(),
                 null,
                 null,
                 false,
@@ -816,6 +918,9 @@ public class AnnotationsApiController {
                         null,
                         null,
                         variantAnnotation.getHgvsg(),
+                        query.isGermline(),
+                        query.getAlleleState(),
+                        null,
                         null,
                         false,
                         query.getEvidenceTypes(),

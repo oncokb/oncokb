@@ -242,6 +242,7 @@ public class CacheUtils {
             current = MainUtils.getCurrentTimestamp();
 
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             System.out.println(e + " at " + MainUtils.getCurrentTime());
         }
     }

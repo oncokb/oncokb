@@ -41,7 +41,7 @@ public class UtilsApiController implements UtilsApi {
         if (version != null) {
             return getDataDownloadResponseEntity(version, FileName.ALL_ANNOTATED_VARIANTS, FileExtension.JSON);
         }
-        return new ResponseEntity<>(getAllAnnotatedVariants(false), HttpStatus.OK);
+        return new ResponseEntity<>(getAllAnnotatedVariants(false, false), HttpStatus.OK);
     }
 
     @Override
@@ -73,7 +73,7 @@ public class UtilsApiController implements UtilsApi {
         sb.append(MainUtils.listToString(header, separator));
         sb.append(newLine);
 
-        for (AnnotatedVariant annotatedVariant : getAllAnnotatedVariants(truefalse)) {
+        for (AnnotatedVariant annotatedVariant : getAllAnnotatedVariants(true, false)) {
             List<String> row = new ArrayList<>();
             row.add(annotatedVariant.getGrch37Isoform());
             row.add(annotatedVariant.getGrch37RefSeq());
@@ -124,7 +124,7 @@ public class UtilsApiController implements UtilsApi {
         return new ResponseEntity<>(sb.toString(), HttpStatus.OK);
     }
 
-    private List<AnnotatedVariant> getAllAnnotatedVariants(Boolean isTextFileboolean germline) {
+    private List<AnnotatedVariant> getAllAnnotatedVariants(Boolean isTextFile, boolean germline) {
         List<AnnotatedVariant> annotatedVariantList = new ArrayList<>();
         Set<Gene> genes = CacheUtils.getAllGenes();
         Map<Gene, Set<BiologicalVariant>> map = new HashMap<>();
@@ -205,7 +205,7 @@ public class UtilsApiController implements UtilsApi {
         if (version != null) {
             return getDataDownloadResponseEntity(version, FileName.ALL_ACTIONABLE_VARIANTS, FileExtension.JSON);
         }
-        return new ResponseEntity<>(AlterationUtils.getAllActionableVariants(false), HttpStatus.OK);
+        return new ResponseEntity<>(AlterationUtils.getAllActionableVariants(false, false), HttpStatus.OK);
     }
 
     @Override
@@ -239,7 +239,7 @@ public class UtilsApiController implements UtilsApi {
         sb.append(MainUtils.listToString(header, separator));
         sb.append(newLine);
 
-        for (ActionableGene actionableGene : AlterationUtils.getAllActionableVariants(true)) {
+        for (ActionableGene actionableGene : AlterationUtils.getAllActionableVariants(true, false)) {
             List<String> row = new ArrayList<>();
             row.add(actionableGene.getGrch37Isoform());
             row.add(actionableGene.getGrch37RefSeq());
@@ -264,7 +264,7 @@ public class UtilsApiController implements UtilsApi {
         return new ResponseEntity<>(sb.toString(), HttpStatus.OK);
     }
 
-    private List<ActionableGene> getAllActionableVariants() {
+    private List<ActionableGene> getAllActionableVariants(Boolean isTextFile) {
         List<ActionableGene> actionableGeneList = new ArrayList<>();
         Set<Gene> genes = CacheUtils.getAllGenes();
         Map<Gene, Set<ClinicalVariant>> map = new HashMap<>();
@@ -296,6 +296,8 @@ public class UtilsApiController implements UtilsApi {
                         clinicalVariant.getVariant().getAlteration(),
                         cancerTypeName,
                         clinicalVariant.getLevel(),
+                        clinicalVariant.getSolidPropagationLevel(),
+                        clinicalVariant.getLiquidPropagationLevel(),
                         MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrug()), ", ", true),
                         MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrugPmids()), ", ", true),
                         MainUtils.listToString(abstracts, "; ", true),
@@ -306,7 +308,8 @@ public class UtilsApiController implements UtilsApi {
                             cancerTypeName,
                             null,
                             gene,
-                            null
+                            null,
+                            isTextFile
                         )
                     ));
                 } else {
@@ -321,6 +324,8 @@ public class UtilsApiController implements UtilsApi {
                             clinicalVariant.getVariant().getAlteration(),
                             TumorTypeUtils.getTumorTypeName(tumorType),
                             clinicalVariant.getLevel(),
+                            clinicalVariant.getSolidPropagationLevel(),
+                            clinicalVariant.getLiquidPropagationLevel(),
                             MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrug()), ", ", true),
                             MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrugPmids()), ", ", true),
                             MainUtils.listToString(abstracts, "; ", true),
@@ -331,7 +336,8 @@ public class UtilsApiController implements UtilsApi {
                                 TumorTypeUtils.getTumorTypeName(tumorType),
                                 null,
                                 gene,
-                                tumorType
+                                tumorType,
+                                isTextFile
                             )
                         ));
                     }

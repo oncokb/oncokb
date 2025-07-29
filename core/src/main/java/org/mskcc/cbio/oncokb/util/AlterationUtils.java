@@ -1727,13 +1727,13 @@ public final class AlterationUtils {
         return false;
     }
 
-    public static List<ActionableGene> getAllActionableVariants(Boolean isTextFile) {
+    public static List<ActionableGene> getAllActionableVariants(Boolean isTextFile, boolean germline) {
         List<ActionableGene> actionableGeneList = new ArrayList<>();
         Set<Gene> genes = CacheUtils.getAllGenes();
         Map<Gene, Set<ClinicalVariant>> map = new HashMap<>();
 
         for (Gene gene : genes) {
-            map.put(gene, MainUtils.getClinicalVariants(gene));
+            map.put(gene, MainUtils.getClinicalVariants(gene, germline));
         }
 
         Set<ActionableGene> actionableGenes = new HashSet<>();
