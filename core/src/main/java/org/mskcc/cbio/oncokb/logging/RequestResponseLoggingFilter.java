@@ -50,6 +50,9 @@ public class RequestResponseLoggingFilter extends OncePerRequestFilter {
             }
             int status = wrappedResponse.getStatusCode();
             LOGGER.info("Response status: {}", status);
+        } catch (Exception e) {
+            LOGGER.error("Unhandled exception", e);
+            throw e;
         } finally {
             MDC.remove(MDC_REQUEST_ID_KEY);
         }
