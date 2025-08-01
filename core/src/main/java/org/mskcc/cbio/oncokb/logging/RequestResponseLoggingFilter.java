@@ -34,9 +34,12 @@ public class RequestResponseLoggingFilter extends OncePerRequestFilter {
         MDC.put(MDC_REQUEST_ID_KEY, requestId);
 
         try {
+            ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(request);
+            ContentCachingResponseWrapper wrappedResponse = new ContentCachingResponseWrapper(response);
+            String url = wrappedRequest.getRequestURL().toString();
+            String method = wrappedRequest.getMethod();
+            LOGGER.info("Incoming Request: {} {}", method, url);
             if (LOGGER.isDebugEnabled()) {
-                ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(request);
-                ContentCachingResponseWrapper wrappedResponse = new ContentCachingResponseWrapper(response);
 
                 filterChain.doFilter(wrappedRequest, wrappedResponse);
 
@@ -45,6 +48,8 @@ public class RequestResponseLoggingFilter extends OncePerRequestFilter {
             } else {
                 filterChain.doFilter(request, response);
             }
+            int status = wrappedResponse.getStatusCode();
+            LOGGER.info("Response status: {}", status);
         } finally {
             MDC.remove(MDC_REQUEST_ID_KEY);
         }
