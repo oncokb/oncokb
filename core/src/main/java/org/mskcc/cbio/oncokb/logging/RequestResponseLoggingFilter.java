@@ -36,7 +36,7 @@ public class RequestResponseLoggingFilter extends OncePerRequestFilter {
         try {
             ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(request);
             ContentCachingResponseWrapper wrappedResponse = new ContentCachingResponseWrapper(response);
-            String url = wrappedRequest.getRequestURL().toString();
+            String url = wrappedRequest.getRequestURI();
             String method = wrappedRequest.getMethod();
             LOGGER.info("Incoming Request: {} {}", method, url);
             if (LOGGER.isDebugEnabled()) {
