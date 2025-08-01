@@ -7,12 +7,16 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import static org.mskcc.cbio.oncokb.Constants.*;
 
 /**
  * Created by Hongxin on 8/10/15.
  */
 public class VariantConsequenceUtils {
+    private static final Logger LOGGER = LoggerFactory.getLogger(VariantConsequenceUtils.class);
 
     private static final String VARIANT_CONSEQUENCE_FILE_PATH = "/data/variant-consequences.txt";
     private static Map<String, VariantConsequence> VariantConsequencesMap = null;
@@ -75,7 +79,7 @@ public class VariantConsequenceUtils {
                     VariantConsequenceUtils.class.getResourceAsStream(VARIANT_CONSEQUENCE_FILE_PATH));
 
                 int nLines = lines.size();
-                System.out.println("importing...");
+                LOGGER.info("importing...");
                 for (int i = 0; i < nLines; i++) {
                     String line = lines.get(i);
                     if (line.startsWith("#")) continue;

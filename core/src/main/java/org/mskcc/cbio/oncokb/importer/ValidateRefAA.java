@@ -9,12 +9,16 @@ import org.mskcc.cbio.oncokb.model.ReferenceGenome;
 import org.mskcc.cbio.oncokb.util.*;
 import org.oncokb.oncokb_transcript.ApiException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
 
 public class ValidateRefAA {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ValidateRefAA.class);
 
     public void main(String[] args) throws ApiException, IOException {
         for (Alteration alteration : AlterationUtils.excludeVUS(new ArrayList<>(AlterationUtils.getAllAlterations()))) {
@@ -47,7 +51,7 @@ public class ValidateRefAA {
     private void checkAlteration(Alteration alteration, Boolean isVus) throws ApiException, IOException {
         if (alteration.getProteinStart() >= 0 && alteration.getReferenceGenomes() != null) {
             if (alteration.getReferenceGenomes() == null || alteration.getReferenceGenomes().size() == 0) {
-                System.out.println("Alteration " + alteration.getGene().getHugoSymbol() + " " + alteration.getName() + " does not have reference genome");
+                LOGGER.error("Alteration {} {} does not have reference genome", alteration.getGene().getHugoSymbol(), alteration.getName());
             } else {
                 if (alteration.getRefResidues() != null) {
                     OncokbTranscriptService oncokbTranscriptService = new OncokbTranscriptService();
@@ -89,6 +93,6 @@ public class ValidateRefAA {
     }
 
     private static void printContent(List<String> content) {
-        System.out.println(content.stream().collect(Collectors.joining("\t")));
+        LOGGER.info(content.stream().collect(Collectors.joining("\t")));
     }
 }

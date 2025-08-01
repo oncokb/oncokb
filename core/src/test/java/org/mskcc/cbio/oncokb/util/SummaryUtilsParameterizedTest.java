@@ -6,6 +6,9 @@ import org.junit.runners.Parameterized;
 import org.mskcc.cbio.oncokb.model.IndicatorQueryResp;
 import org.mskcc.cbio.oncokb.model.Query;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -21,6 +24,7 @@ import static org.junit.Assert.assertEquals;
  */
 @RunWith(Parameterized.class)
 public class SummaryUtilsParameterizedTest {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SummaryUtilsParameterizedTest.class);
     private static String TUMOR_TYPE_SUMMARY_EXAMPLES_PATH = "src/test/resources/test_tumor_type_summaries.tsv";
 
     private String gene;
@@ -51,7 +55,6 @@ public class SummaryUtilsParameterizedTest {
         String _geneSummary = resp.getGeneSummary();
         String _variantSummary = resp.getVariantSummary();
         String _tumorTypeSummary = resp.getTumorTypeSummary();
-//        System.out.println("New: " + gene + "&&" + variant + "&&" + tumorType + "&&" + _geneSummary + "&&" + _variantSummary + "&&" + _tumorTypeSummary);
         assertEquals("Gene summary, Query: " + _query, geneSummary, _geneSummary);
         assertEquals("Variant summary, Query: " + _query, variantSummary, _variantSummary);
         assertEquals("Tumor Type summary, Query: " + _query, tumorTypeSummary, _tumorTypeSummary);
@@ -63,7 +66,7 @@ public class SummaryUtilsParameterizedTest {
 
     private static List<String[]> importer() throws IOException {
         if (TUMOR_TYPE_SUMMARY_EXAMPLES_PATH == null) {
-            System.out.println("Please specify the testing file path");
+            LOGGER.error("Please specify the testing file path");
             return null;
         }
 
@@ -91,13 +94,13 @@ public class SummaryUtilsParameterizedTest {
                     queries.add(query);
                     count++;
                 } catch (Exception e) {
-                    System.err.println("Could not add line '" + line + "'. " + e);
+                    LOGGER.error("Could not add line '{}'. ", line, e);
                 }
             }
             line = buf.readLine();
         }
-        System.err.println("Contains " + count + " tumor type summary queries.");
-        System.err.println("Done.");
+        LOGGER.info("Contains {} tumor type summary queries.", count);
+        LOGGER.info("Done.");
 
         return queries;
     }

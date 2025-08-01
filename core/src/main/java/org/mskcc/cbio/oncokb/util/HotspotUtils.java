@@ -16,6 +16,9 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import static org.mskcc.cbio.oncokb.Constants.MISSENSE_VARIANT;
 import static org.mskcc.cbio.oncokb.util.HotspotUtils.extractProteinPos;
 import static org.mskcc.cbio.oncokb.util.VariantConsequenceUtils.toGNMutationType;
@@ -63,13 +66,14 @@ class EnrichedHotspot extends Hotspot {
 }
 
 public class HotspotUtils {
+    private static final Logger LOGGER = LoggerFactory.getLogger(HotspotUtils.class);
     private static final String HOTSPOT_FILE_PATH = "/data/cancer-hotspots-gn.json";
     private static Map<Gene, List<EnrichedHotspot>> hotspotMutations = new HashMap<>();
     private static final String POSITIONAL_MUTATION_TYPE="positional";
     private static final String RANGE_INFRAME_MUTATION_TYPE="rangeInframe";
 
     static {
-        System.out.println("Cache all hotspots at " + MainUtils.getCurrentTime());
+        LOGGER.info("Cache all hotspots");
         getHotspotsFromDataFile();
     }
 

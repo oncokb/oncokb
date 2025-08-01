@@ -6,6 +6,9 @@ import org.junit.runners.Parameterized;
 import org.mskcc.cbio.oncokb.model.IndicatorQueryResp;
 import org.mskcc.cbio.oncokb.model.Query;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -18,6 +21,7 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
 public class MutationEffectParameterizedTest {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MutationEffectParameterizedTest.class);
     private static String VARIANT_SUMMARY_EXAMPLES_PATH = "src/test/resources/test_mutation_effect_summaries.tsv";
 
     private String gene;
@@ -42,7 +46,6 @@ public class MutationEffectParameterizedTest {
         String _query = gene + " " + variant;
         String _mutationEffect = resp.getMutationEffect().getKnownEffect();
         String _description = resp.getMutationEffect().getDescription();
-//        System.out.println("New: " + gene + "&&" + variant + "&&" + _mutationEffect + "&&" + _description);
         assertEquals("Mutation effect, Query: " + _query, mutationEffect, _mutationEffect);
         assertEquals("Description, Query: " + _query, description, _description);
     }
@@ -54,7 +57,7 @@ public class MutationEffectParameterizedTest {
 
     private static List<String[]> importer() throws IOException {
         if (VARIANT_SUMMARY_EXAMPLES_PATH == null) {
-            System.out.println("Please specify the testing file path");
+            LOGGER.error("Please specify the testing file path");
             return null;
         }
 
@@ -80,13 +83,13 @@ public class MutationEffectParameterizedTest {
                     queries.add(query);
                     count++;
                 } catch (Exception e) {
-                    System.err.println("Could not add line '" + line + "'. " + e);
+                    LOGGER.error("Could not add line '{}'. ", line, e);
                 }
             }
             line = buf.readLine();
         }
-        System.err.println("Contains " + count + " queries.");
-        System.err.println("Done.");
+        LOGGER.info("Contains {} queries.", count);
+        LOGGER.info("Done.");
 
         return queries;
     }

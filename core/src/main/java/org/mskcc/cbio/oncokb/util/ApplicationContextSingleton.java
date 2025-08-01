@@ -8,15 +8,20 @@ import org.mskcc.cbio.oncokb.bo.*;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * @author jgao
  */
 public final class ApplicationContextSingleton {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationContextSingleton.class);
+
     private final static ApplicationContext appContext =
         new ClassPathXmlApplicationContext("spring/config/BeanLocations.xml");
 
     public static void main(String[] args) {
-        System.out.println(getGeneBo().findGeneByHugoSymbol("BRAF").getHugoSymbol());
+        LOGGER.info(getGeneBo().findGeneByHugoSymbol("BRAF").getHugoSymbol());
     }
 
     private static ApplicationContext getApplicationContext() {

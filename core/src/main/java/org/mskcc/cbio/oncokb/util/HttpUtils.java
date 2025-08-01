@@ -8,6 +8,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -18,6 +21,7 @@ import java.nio.charset.StandardCharsets;
  * Created by Hongxin on 11/03/16.
  */
 public class HttpUtils {
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpUtils.class);
 
     public static String postRequest(String url, String postBody) throws IOException {
         if (url != null) {
@@ -41,8 +45,8 @@ public class HttpUtils {
             wr.close();
 
             int responseCode = con.getResponseCode();
-            System.out.println("\nSending 'POST' request to URL : " + url);
-            System.out.println("Response Code : " + responseCode);
+            LOGGER.info("Sending 'POST' request to URL : {}", url);
+            LOGGER.info("Response Code : {}", responseCode);
 
             return FileUtils.readStream(con.getInputStream());
         } else {
@@ -76,8 +80,8 @@ public class HttpUtils {
             wr.close();
 
             int responseCode = con.getResponseCode();
-            System.out.println("\nSending '" + con.getRequestMethod() + "' request to URL : " + url);
-            System.out.println("Response Code : " + responseCode);
+            LOGGER.info("Sending '{}' request to URL : ", con.getRequestMethod(), url);
+            LOGGER.info("Response Code : {}", responseCode);
 
             return FileUtils.readStream(con.getInputStream());
         } else {
@@ -87,7 +91,7 @@ public class HttpUtils {
 
     public static String getRequest(String url) throws IOException {
         if (url != null) {
-            System.out.println("Sending request: " + url);
+            LOGGER.info("Sending request: {}", url);
             URL obj = new URL(url);
             HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 
@@ -96,7 +100,7 @@ public class HttpUtils {
             con.connect();
 
             int responseCode = con.getResponseCode();
-            System.out.println("Response Code : " + responseCode);
+            LOGGER.info("Response Code : {}", responseCode);
 
             return FileUtils.readStream(con.getInputStream());
         } else {
