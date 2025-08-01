@@ -136,7 +136,7 @@ public class CacheUtils {
 
         return new InMemoryCacheSizes(
             genes.size(),
-            alterations.values().stream().mapToInt(List::size).sum(),
+            new HashMap<>(alterations).values().stream().mapToInt(List::size).sum(),
             drugs.size(),
             cancerTypes.size(),
             allEvidencesSize
