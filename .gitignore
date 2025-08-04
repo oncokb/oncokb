@@ -12,6 +12,7 @@ target
 dist
 *.iml
 core/src/main/resources/properties
+core/src/main/resources/schema-export.sql
 core/src/main/resources/certificate
 core/src/main/resources/log4j.properties
 web/src/main/resources/certificate

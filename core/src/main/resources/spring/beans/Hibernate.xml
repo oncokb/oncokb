@@ -4,12 +4,43 @@
 http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 
     <!-- Hibernate session factory -->
-    <bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
+        <!-- Reference another spring bean with database connection  -->
         <property name="dataSource">
             <ref bean="dataSource"/>
         </property>
-        <property name="configLocation">
-            <value>classpath:/hibernate/hibernate.cfg.xml</value>
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">org.mskcc.cbio.oncokb.util.UTF8MySQLDialect</prop>
+                <prop key="hibernate.show_sql">false</prop>
+                <prop key="hibernate.format_sql">false</prop>
+                <prop key="hibernate.connection.useUnicode">true</prop>
+                <prop key="hibernate.connection.characterEncoding">utf8</prop>
+                <prop key="hibernate.connection.charSet">utf8</prop>
+                <prop key="hibernate.current_session_context_class">thread</prop>
+                <prop key="hibernate.connection.release_mode">after_statement</prop>
+                <!-- Change to "create" to generate an empty schema -->
+                <prop key="hibernate.hbm2ddl.auto">none</prop>
+                <prop key="hibernate.cache.use_second_level_cache">false</prop>
+                <prop key="hibernate.cache.use_query_cache">false</prop>
+            </props>
+        </property>
+        <!-- Must include hibernate annotations to be marked as entities -->
+        <property name="annotatedClasses">
+            <list>
+                <value>org.mskcc.cbio.oncokb.model.Drug</value>
+                <value>org.mskcc.cbio.oncokb.model.Alteration</value>
+                <value>org.mskcc.cbio.oncokb.model.Article</value>
+                <value>org.mskcc.cbio.oncokb.model.PortalAlteration</value>
+                <value>org.mskcc.cbio.oncokb.model.Evidence</value>
+                <value>org.mskcc.cbio.oncokb.model.Treatment</value>
+                <value>org.mskcc.cbio.oncokb.model.Gene</value>
+                <value>org.mskcc.cbio.oncokb.model.VariantConsequence</value>
+                <value>org.mskcc.cbio.oncokb.model.TreatmentDrug</value>
+                <value>org.mskcc.cbio.oncokb.model.Geneset</value>
+                <value>org.mskcc.cbio.oncokb.model.TumorType</value>
+                <value>org.mskcc.cbio.oncokb.model.Info</value>
+            </list>
         </property>
     </bean>
 </beans>
