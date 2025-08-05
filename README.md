@@ -106,6 +106,10 @@ For this option, you need to download the VEP cache, which is used in the `gn-ve
 
 ### Additional Information
 
+#### Running unit tests
+1. Continue to use `mvn test` command that connects to a local MySQL server defined in database.properties file. Note that some test cases will insert dummy data, so make sure the database is not used for any downstream workflows.
+2. Run tests using docker-compose by running `sh unit_test/scripts/run_docker_test.sh`. Make sure to add a mysql data dump file under `unit_test/mysql_dumps`
+
 #### Generating oncokb-transcript token
 
 The docker compose file has a pre-generated oncokb-transcript [JWT](https://jwt.io/introduction) token, which is required to make API requests to the oncokb-transcript service. To generate the JWT token, go to the https://jwt.io/ website and follow these instructions:
