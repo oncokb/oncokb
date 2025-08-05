@@ -5,6 +5,8 @@ services:
       MYSQL_DATABASE: "oncokb_core_test"
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DEFAULT_AUTHENTICATION_PLUGIN: mysql_native_password
+    # Workaround to resolve error (https://stackoverflow.com/questions/50424900/error-client-does-not-support-authentication-protocol-requested-by-server-cons)
+    # TLDR; we need to upgrade our MySQL connect from v5 to v8, so that everything works properly with mysql v8+
     command: --default-authentication-plugin=mysql_native_password
     volumes:
       - type: bind
