@@ -16,13 +16,17 @@ The core of OncoKB Annotation service.
 
 Please confirm your running environment is:
 
--   **Java version: 8**
--   **MySQL version: 8.0.36**
+- **Java version: 8**
+- **MySQL version: 8.0.36**
 
 ## Prepare properties files
 
 ```
 cp -r core/src/main/resources/properties-EXAMPLE core/src/main/resources/properties
+# Otherwise you will not see logs
+# You can also do -Dlog4j.configuration=file:core/src/main/resources/properties/log4j.properties
+# if you want to skip this step
+cp core/src/main/resources/properties-EXAMPLE/log4j.properties core/src/main/resources/log4j.properties
 ```
 
 ### Properties file
@@ -42,7 +46,7 @@ cp -r core/src/main/resources/properties-EXAMPLE core/src/main/resources/propert
 2. `public-api`: includes only public API endpoints
 3. `image-build`: uses Jib to generate a docker image and push to DockerHub
 
-> **_NOTE:_**  We deprecated the legacy `public` and `curate` profiles.
+> **_NOTE:_** We deprecated the legacy `public` and `curate` profiles.
 
 `mvn clean install -P <profile(s)> -DskipTests=true`
 
@@ -65,18 +69,17 @@ OncoKB™ is a precision oncology knowledge base developed at Memorial Sloan Ket
 
 OncoKB docker compose file consists of the following services:
 
--   OncoKB: provides variant annotations
--   OncoKB Transcript: serves OncoKB metadata including gene, transcript, sequence, etc.
--   Genome Nexus: provides annotation and interpretation of genetic variants in cancer
-
-    -   GRCh37 (optional):
-        -   gn-spring-boot: the backend service responsible for aggregating variant annotations from various sources
-        -   gn-mongo: variants fetched from external resources and small static data are cached in the MongoDB database
-        -   gn-vep: is a spring boot REST wrapper service for [VEP](https://github.com/Ensembl/ensembl-vep) using GRCh37 data
-    -   GRCh38 (optional):
-        -   gn-spring-boot-grch38: same as `gn-spring-boot` service, however the VEP URL points to `gn-vep-grch38`
-        -   gn-mongo-grch38: contains static data relevant to GRCh38
-        -   gn-vep-grch38: a spring boot REST wrapper service for VEP using GRCh38 data
+- OncoKB: provides variant annotations
+- OncoKB Transcript: serves OncoKB metadata including gene, transcript, sequence, etc.
+- Genome Nexus: provides annotation and interpretation of genetic variants in cancer
+    - GRCh37 (optional):
+        - gn-spring-boot: the backend service responsible for aggregating variant annotations from various sources
+        - gn-mongo: variants fetched from external resources and small static data are cached in the MongoDB database
+        - gn-vep: is a spring boot REST wrapper service for [VEP](https://github.com/Ensembl/ensembl-vep) using GRCh37 data
+    - GRCh38 (optional):
+        - gn-spring-boot-grch38: same as `gn-spring-boot` service, however the VEP URL points to `gn-vep-grch38`
+        - gn-mongo-grch38: contains static data relevant to GRCh38
+        - gn-vep-grch38: a spring boot REST wrapper service for VEP using GRCh38 data
 
 ### Option A: With Local installation of Genome Nexus
 
@@ -84,7 +87,7 @@ For this option, you need to download the VEP cache, which is used in the `gn-ve
 
 1. OncoKB requires a MySQL server and the `oncokb` and `oncokb-transcript` databases imported. This step must be completed before continuing the installation process. Reach out to contact@oncokb.org to get access to the data dump. [How to setup MySQL Server](#how-to-setup-mysql-server)
 
-2. Follow the [Genome Nexus VEP instructions](https://github.com/genome-nexus/genome-nexus-vep) for downloading and setting up the VEP MySQL server. 
+2. Follow the [Genome Nexus VEP instructions](https://github.com/genome-nexus/genome-nexus-vep) for downloading and setting up the VEP MySQL server.
 
 3. Run docker-compose to create containers.
     ```
