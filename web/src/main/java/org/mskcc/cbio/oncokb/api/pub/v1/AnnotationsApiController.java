@@ -517,6 +517,8 @@ public class AnnotationsApiController {
         TranscriptSummaryAlterationResult transcriptSummaryAlterationResult,
         String hgvs,
         String tumorType,
+        Boolean germline,
+        String alleleState,
         Set<EvidenceType> evidenceTypes
     ) {
         Query query = QueryUtils.getQueryFromAlteration(referenceGenome, tumorType, transcriptSummaryAlterationResult, hgvs);
@@ -533,8 +535,8 @@ public class AnnotationsApiController {
             query.getProteinEnd(),
             null,
             query.getHgvs(),
-            query.isGermline(),
-            query.getAlleleState(),
+            germline,
+            alleleState,
             null,
             null,
             false,
@@ -554,6 +556,8 @@ public class AnnotationsApiController {
         TranscriptSummaryAlterationResult transcriptSummaryAlterationResult,
         String hgvs,
         String tumorType,
+        Boolean germline,
+        String alleleState,
         Set<EvidenceType> evidenceTypes
     ) {
         Query query = QueryUtils.getQueryFromAlteration(referenceGenome, tumorType, transcriptSummaryAlterationResult, hgvs);
@@ -570,8 +574,8 @@ public class AnnotationsApiController {
             query.getProteinEnd(),
             null,
             query.getHgvs(),
-            query.isGermline(),
-            query.getAlleleState(),
+            germline,
+            alleleState,
             null,
             null,
             false,
@@ -854,6 +858,8 @@ public class AnnotationsApiController {
                         selectedAnnotatedAlteration,
                         query.getGenomicLocation(),
                         query.getTumorType(),
+                        query.getGermline(),
+                        query.getAlleleState(),
                         new HashSet<>(query.getEvidenceTypes())
                     );
                     indicatorQueryResp.getQuery().setHgvsInfo(selectedAnnotatedAlteration.getMessage());
@@ -864,6 +870,8 @@ public class AnnotationsApiController {
                     new TranscriptSummaryAlterationResult(),
                     query.getGenomicLocation(),
                     query.getTumorType(),
+                    query.getGermline(),
+                    query.getAlleleState(),
                     query.getEvidenceTypes()
                 );
             }
@@ -1031,6 +1039,8 @@ public class AnnotationsApiController {
                         selectedAnnotatedAlteration,
                         variantAnnotation.getHgvsg(),
                         query.getTumorType(),
+                        query.getGermline(),
+                        query.getAlleleState(),
                         new HashSet<>(query.getEvidenceTypes())
                     );
                     indicatorQueryResp.getQuery().setHgvsInfo(selectedAnnotatedAlteration.getMessage());
@@ -1041,6 +1051,8 @@ public class AnnotationsApiController {
                     new TranscriptSummaryAlterationResult(),
                     query.getHgvsg(),
                     query.getTumorType(),
+                    query.getGermline(),
+                    query.getAlleleState(),
                     query.getEvidenceTypes()
                 );
             }
@@ -1107,6 +1119,8 @@ public class AnnotationsApiController {
                     new TranscriptSummaryAlterationResult(),
                     query.getHgvsc(),
                     query.getTumorType(),
+                    query.getGermline(),
+                    query.getAlleleState(),
                     query.getEvidenceTypes()
                 );
                 resp.getQuery().setId(query.getId());
@@ -1137,6 +1151,8 @@ public class AnnotationsApiController {
                         selectedAnnotatedAlteration,
                         variantAnnotation.getHgvsg(),
                         query.getTumorType(),
+                        query.getGermline(),
+                        query.getAlleleState(),
                         new HashSet<>(query.getEvidenceTypes())
                     );
                     indicatorQueryResp.getQuery().setHgvsInfo(selectedAnnotatedAlteration.getMessage());
