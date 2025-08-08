@@ -14,6 +14,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.mskcc.cbio.oncokb.util.AlterationUtils.isValidHgvsc;
 import static org.mskcc.cbio.oncokb.util.AlterationUtils.isValidHgvsg;
 import static org.mskcc.cbio.oncokb.util.LevelUtils.getTherapeuticLevelsWithPriorityLIstIterator;
 import static org.mskcc.cbio.oncokb.util.SummaryUtils.allelesToStr;
@@ -155,7 +156,7 @@ public class IndicatorUtils {
         } else {
             gene = GeneUtils.getGene(query.getEntrezGeneId(), query.getHugoSymbol());
             if (gene != null) {
-                if (isValidHgvsg(query.getAlteration())) {
+                if (isValidHgvsg(query.getAlteration()) || isValidHgvsc(query.getAlteration())) {
                     Alteration alt = AlterationUtils.findAlteration(gene, query.getReferenceGenome(), query.getAlteration());
                     relevantAlterations = Collections.singletonList(alt);
                 } else {
