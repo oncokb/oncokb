@@ -146,6 +146,8 @@ public class AnnotationsApiController {
         query.setGenomicLocation(genomicLocation);
         query.setReferenceGenome(matchedRG);
         query.setTumorType(tumorType);
+        query.setGermline(germline);
+        query.setAlleleState(alleleState);
         query.setEvidenceTypes(new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
 
         indicatorQueryResp = annotateMutationsByGenomicChange(Collections.singletonList(query)).get(0);
@@ -216,6 +218,8 @@ public class AnnotationsApiController {
             query.setHgvsg(hgvsg);
             query.setReferenceGenome(matchedRG);
             query.setTumorType(tumorType);
+            query.setGermline(germline);
+            query.setAlleleState(alleleState);
             query.setEvidenceTypes(new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
 
             indicatorQueryResp = annotateMutationsByHGVSg(Collections.singletonList(query)).get(0);
@@ -275,6 +279,8 @@ public class AnnotationsApiController {
             query.setHgvsc(hgvsc);
             query.setReferenceGenome(matchedRG);
             query.setTumorType(tumorType);
+            query.setGermline(germline);
+            query.setAlleleState(alleleState);
             query.setEvidenceTypes(new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
 
             indicatorQueryResp = annotateMutationsByHGVSc(Collections.singletonList(query)).get(0);
