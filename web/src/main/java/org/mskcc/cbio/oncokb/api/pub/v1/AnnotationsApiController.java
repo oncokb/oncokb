@@ -262,7 +262,6 @@ public class AnnotationsApiController {
         , @ApiParam(value = "OncoTree(http://oncotree.info) tumor type name. The field supports OncoTree Code, OncoTree Name and OncoTree Main type. Example: Melanoma") @RequestParam(value = "tumorType", required = false) String tumorType
         , @ApiParam(value = "Whether is germline variant", required = false) @RequestParam(value = "germline", defaultValue = "FALSE", required = false) Boolean germline
         , @ApiParam(value = "Germline variant allele state(monoallelic vs biallelic)", required = false) @RequestParam(value = "alleleState", required = false) String alleleState
-        , @ApiParam(value = EVIDENCE_TYPES_DESCRIPTION) @RequestParam(value = "evidenceType", required = false) String evidenceTypes
     ) throws ApiException, org.genome_nexus.ApiException, ApiHttpErrorException {
         IndicatorQueryResp indicatorQueryResp = null;
 
@@ -281,7 +280,6 @@ public class AnnotationsApiController {
             query.setTumorType(tumorType);
             query.setGermline(germline);
             query.setAlleleState(alleleState);
-            query.setEvidenceTypes(new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
 
             indicatorQueryResp = annotateMutationsByHGVSc(Collections.singletonList(query)).get(0);
         }
@@ -1114,7 +1112,12 @@ public class AnnotationsApiController {
                 } else {
                     if (!queryToGNIndexMap.containsKey(query.getHgvsc())) {
                         queryToGNIndexMap.put(hgvsc, queriesToGN.size());
-                        queriesToGN.add(hgvsc);
+                        Gene gene = GeneUtils.getGeneByAlias(query.getGene());
+                        if (gene != null) {
+                            queriesToGN.add(gene.getHugoSymbol() + ":" + query.getAlteration());
+                        } else {
+                            queriesToGN.add(hgvsc);
+                        }
                     }
                     resultIndexToQuery[result.size()] = query;
                     result.add(null);
