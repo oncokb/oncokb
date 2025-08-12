@@ -72,7 +72,7 @@ public final class AlterationUtils {
     // GenomeNexus will evaluate it further
     public static Pattern HGVSG_FORMAT = Pattern.compile("((grch37|grch38):)?((chr)?[\\dxy]+:g\\.\\d+.*)", Pattern.CASE_INSENSITIVE);
     public static Pattern HGVSP_FORMAT = Pattern.compile("((grch37|grch38):)?(.+:p\\..+)", Pattern.CASE_INSENSITIVE); 
-    public static Pattern HGVSC_FORMAT = Pattern.compile("((grch37|grch38):)?(ENST\\d+(\\.\\d+)?:c\\.\\d+.*)", Pattern.CASE_INSENSITIVE);
+    public static Pattern HGVSC_FORMAT = Pattern.compile("((grch37|grch38):)?(.+:c\\.\\d+.*)", Pattern.CASE_INSENSITIVE);
     public static Pattern GENOMIC_CHANGE_FORMAT = Pattern.compile("((grch37|grch38):)?([\\dxy]+,\\d+,\\d+,.*)", Pattern.CASE_INSENSITIVE);
 
     private static String EXCLUSION_SEPERATOR_REGEX = "\\s*;\\s*";

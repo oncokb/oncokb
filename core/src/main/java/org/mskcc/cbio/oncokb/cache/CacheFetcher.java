@@ -386,6 +386,20 @@ public class CacheFetcher {
         return false;
     }
 
+    public boolean hgvscShouldBeAnnotated(String hgvsc) {
+        if (StringUtils.isEmpty(hgvsc)) {
+            return false;
+        }
+        hgvsc = hgvsc.trim();
+        if (StringUtils.isEmpty(hgvsc)) {
+            return false;
+        }
+        if (!AlterationUtils.isValidHgvsc(hgvsc)) {
+            return false;
+        }
+        return true;
+    }
+
     private Boolean withinBuffer(EnsemblGene ensemblGene, GenomicLocation genomicLocation) {
         int bpBuffer = 10000; // add some buffer on determine which genomic change should be annotated. We use the gene range from oncokb-transcript but that does not include gene regulatory sequence. Before having proper range, we use a buffer range instead.
         return rangesIntersect(ensemblGene.getStart() > bpBuffer ? (ensemblGene.getStart() - bpBuffer) : 0, ensemblGene.getEnd() + bpBuffer, genomicLocation.getStart(), genomicLocation.getEnd());
