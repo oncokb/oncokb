@@ -2,9 +2,6 @@ package org.mskcc.cbio.oncokb.apiModels.annotation;
 
 import java.util.Objects;
 
-/**
- * Created by Hongxin Zhang on 2019-03-25.
- */
 public class AnnotateMutationByHGVScQuery extends AnnotationQuery implements java.io.Serializable{
     private String hgvsc;
 
