@@ -726,6 +726,7 @@ public class AnnotationSearchUtils {
         Query query = new Query();
         query.setEntrezGeneId(alteration.getGene().getEntrezGeneId());
         query.setAlteration(alteration.getAlteration());
+        query.setGermline(alteration.getForGermline());
 
         Iterator<ReferenceGenome> referenceGenomeIterator = alteration.getReferenceGenomes().iterator();
         if (referenceGenomeIterator.hasNext()) {

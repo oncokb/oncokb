@@ -1007,10 +1007,11 @@ public class AnnotationsApiController {
         ReferenceGenome referenceGenome, 
         List<Alteration> allAlterations
     ) throws org.genome_nexus.ApiException {
-        Alteration alteration = AlterationUtils.findAlteration(
+        Alteration alteration = AlterationUtils.findAlterationWithGeneticType(
             referenceGenome,
             hgvsg,
-            allAlterations
+            allAlterations,
+            query.isGermline()
         );
         if (alteration != null && alteration.getForGermline() == query.isGermline()) {
             return this.cacheFetcher.processQuery(
@@ -1045,10 +1046,11 @@ public class AnnotationsApiController {
             String[] hgvscParts = hgvsc.split(":");
             if (hgvscParts.length == 2) {
                 hgvsc = hgvscParts[1];
-                alteration = AlterationUtils.findAlteration(
+                alteration = AlterationUtils.findAlterationWithGeneticType(
                     referenceGenome,
                     hgvsc,
-                    allAlterations
+                    allAlterations,
+                    query.isGermline()
                 );
             }
         }
@@ -1125,10 +1127,11 @@ public class AnnotationsApiController {
             String hgvsc = query.getHgvsc();
 
             if (this.cacheFetcher.hgvscShouldBeAnnotated(hgvsc)) {
-                Alteration alteration = AlterationUtils.findAlteration(
+                Alteration alteration = AlterationUtils.findAlterationWithGeneticType(
                     referenceGenome,
                     query.getAlteration(),
-                    allAlterations
+                    allAlterations,
+                    query.isGermline()
                 );
 
                 if (query.isGermline() || (alteration != null && alteration.getForGermline() == false)) {

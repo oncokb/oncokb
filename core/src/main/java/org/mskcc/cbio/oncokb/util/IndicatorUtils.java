@@ -157,7 +157,12 @@ public class IndicatorUtils {
             gene = GeneUtils.getGene(query.getEntrezGeneId(), query.getHugoSymbol());
             if (gene != null) {
                 if (isValidHgvsg(query.getAlteration()) || isValidHgvsc(query.getAlteration())) {
-                    Alteration alt = AlterationUtils.findAlteration(gene, query.getReferenceGenome(), query.getAlteration());
+                    Alteration alt = AlterationUtils.findAlterationWithGeneticType(
+                        query.getReferenceGenome(),
+                        query.getAlteration(), 
+                        CacheUtils.getAlterations(gene.getEntrezGeneId(), query.getReferenceGenome()),
+                        query.isGermline()
+                    );
                     relevantAlterations = Collections.singletonList(alt);
                 } else {
                     Alteration alt = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getAlteration(), 

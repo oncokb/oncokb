@@ -1556,13 +1556,17 @@ public final class AlterationUtils {
         return new ArrayList<>(result);
     }
     public static Alteration findAlteration(ReferenceGenome referenceGenome, String alteration, List<Alteration> fullAlterations) {
+        return findAlterationWithGeneticType(referenceGenome, alteration, fullAlterations, false);
+    }
+
+    public static Alteration findAlterationWithGeneticType(ReferenceGenome referenceGenome, String alteration, List<Alteration> fullAlterations, boolean isGermline) {
         if (alteration == null) {
             return null;
         }
         // Implement the data access logic
         for (int i = 0; i < fullAlterations.size(); i++) {
             Alteration alt = fullAlterations.get(i);
-            if (alt.getAlteration() != null && alt.getAlteration().equalsIgnoreCase(alteration)) {
+            if (alt.getAlteration() != null && alt.getAlteration().equalsIgnoreCase(alteration) && alt.getForGermline() == isGermline) {
                 if (referenceGenome == null) {
                     return alt;
                 } else if (alt.getReferenceGenomes().contains(referenceGenome)) {
@@ -1572,7 +1576,7 @@ public final class AlterationUtils {
         }
         for (int i = 0; i < fullAlterations.size(); i++) {
             Alteration alt = fullAlterations.get(i);
-            if (alt.getAlteration() != null && alt.getName().equalsIgnoreCase(alteration)) {
+            if (alt.getAlteration() != null && alt.getName().equalsIgnoreCase(alteration) && alt.getForGermline() == isGermline) {
                 if (referenceGenome == null) {
                     return alt;
                 } else if (alt.getReferenceGenomes().contains(referenceGenome)) {
