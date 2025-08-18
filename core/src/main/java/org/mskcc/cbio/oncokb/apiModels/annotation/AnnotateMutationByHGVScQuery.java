@@ -2,7 +2,7 @@ package org.mskcc.cbio.oncokb.apiModels.annotation;
 
 import java.util.Objects;
 
-public class AnnotateMutationByHGVScQuery extends AnnotationQuery implements java.io.Serializable{
+public class AnnotateMutationByHGVScQuery extends GermlineAnnotationQuery implements java.io.Serializable{
     private String hgvsc;
 
     public String getHgvsc() {

@@ -28,6 +28,7 @@ import org.genome_nexus.ApiException;
 import org.genome_nexus.client.VariantAnnotation;
 import org.mskcc.cbio.oncokb.apiModels.CancerTypeMatch;
 import org.mskcc.cbio.oncokb.apiModels.DrugMatch;
+import org.mskcc.cbio.oncokb.apiModels.GeneticType;
 import org.mskcc.cbio.oncokb.apiModels.LevelsOfEvidenceMatch;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.model.Alteration;
@@ -48,7 +49,7 @@ import org.mskcc.cbio.oncokb.model.TypeaheadSearchResp;
 
 public class AnnotationSearchUtils {
 
-    public static Set<TypeaheadSearchResp> searchNonHgvsAnnotation(String query) {
+    public static Set<TypeaheadSearchResp> searchCuratedAnnotation(String query) {
         LinkedHashSet<TypeaheadSearchResp> result = new LinkedHashSet<>();
         // genomic queries will not have space in the query
         String trimmedQuery = query.trim().replaceAll(" ", "");
@@ -569,28 +570,22 @@ public class AnnotationSearchUtils {
         if (genes != null) {
             Map<Gene, Set<Evidence>> evidences = EvidenceUtils.getEvidenceByGenes(genes);
             for (Gene gene : genes) {
-                TypeaheadSearchResp typeaheadSearchResp = new TypeaheadSearchResp();
-                typeaheadSearchResp.setGene(gene);
-                typeaheadSearchResp.setVariantExist(false);
-                typeaheadSearchResp.setLink("/gene/" + gene.getHugoSymbol());
-                typeaheadSearchResp.setQueryType(TypeaheadQueryType.GENE);
-
-                if (evidences.containsKey(gene)) {
-                    LevelOfEvidence highestSensitiveLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(evidences.get(gene), LevelUtils.getSensitiveLevels(), null);
-                    LevelOfEvidence highestResistanceLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(evidences.get(gene), LevelUtils.getResistanceLevels(), null);
-                    typeaheadSearchResp.setHighestSensitiveLevel(highestSensitiveLevel == null ? "" : highestSensitiveLevel.getLevel());
-                    typeaheadSearchResp.setHighestResistanceLevel(highestResistanceLevel == null ? "" : highestResistanceLevel.getLevel());
-                }
-                result.add(typeaheadSearchResp);
-
                 // include germline/somatic links
-                for (String geneticType : new String[]{"Somatic", "Germline"}) {
-                    typeaheadSearchResp = new TypeaheadSearchResp();
+                for (GeneticType geneticType : new GeneticType[]{GeneticType.SOMATIC, GeneticType.GERMLINE}) {
+                    TypeaheadSearchResp typeaheadSearchResp = new TypeaheadSearchResp();
                     typeaheadSearchResp.setGene(gene);
                     typeaheadSearchResp.setVariantExist(false);
                     typeaheadSearchResp.setLink("/gene/" + gene.getHugoSymbol() + "/" + geneticType.toLowerCase());
                     typeaheadSearchResp.setQueryType(TypeaheadQueryType.GENE);
-                    typeaheadSearchResp.setAnnotation(geneticType);
+                    typeaheadSearchResp.setGeneticType(geneticType);
+
+                    if (evidences.containsKey(gene)) {
+                        LevelOfEvidence highestSensitiveLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(evidences.get(gene), LevelUtils.getSensitiveLevels(), geneticType.equals(GeneticType.GERMLINE));
+                        LevelOfEvidence highestResistanceLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(evidences.get(gene), LevelUtils.getResistanceLevels(), geneticType.equals(GeneticType.GERMLINE));
+                        typeaheadSearchResp.setHighestSensitiveLevel(highestSensitiveLevel == null ? "" : highestSensitiveLevel.getLevel());
+                        typeaheadSearchResp.setHighestResistanceLevel(highestResistanceLevel == null ? "" : highestResistanceLevel.getLevel());
+                    }
+
                     result.add(typeaheadSearchResp);
                 }
             }
@@ -724,6 +719,7 @@ public class AnnotationSearchUtils {
         typeaheadSearchResp.setGene(alteration.getGene());
         typeaheadSearchResp.setVariants(Collections.singleton(alteration));
         typeaheadSearchResp.setVariantExist(true);
+        typeaheadSearchResp.setGeneticType(alteration.getForGermline() ? GeneticType.GERMLINE : GeneticType.SOMATIC);
 
         ReferenceGenome referenceGenome = alteration.getReferenceGenomes().stream().findAny().orElse(DEFAULT_REFERENCE_GENOME);
 
@@ -756,7 +752,13 @@ public class AnnotationSearchUtils {
 
         typeaheadSearchResp.setQueryType(TypeaheadQueryType.VARIANT);
 
-        String link = "/gene/" + alteration.getGene().getHugoSymbol() + "/" + alteration.getAlteration();
+        String link = "/gene/" 
+            + alteration.getGene().getHugoSymbol() 
+            + "/" 
+            + (alteration.getForGermline() ? GeneticType.GERMLINE.toLowerCase() : GeneticType.SOMATIC.toLowerCase()) 
+            + "/" 
+            + alteration.getAlteration();
+
         if (referenceGenome != DEFAULT_REFERENCE_GENOME) {
             link += "?refGenome=" + referenceGenome;
         }
@@ -769,6 +771,7 @@ public class AnnotationSearchUtils {
         typeaheadSearchResp.setGene(alteration.getGene());
         typeaheadSearchResp.setVariants(Collections.singleton(alteration));
         typeaheadSearchResp.setVariantExist(true);
+        typeaheadSearchResp.setGeneticType(alteration.getForGermline() ? GeneticType.GERMLINE : GeneticType.SOMATIC);
 
         typeaheadSearchResp.setOncogenicity(queryResp.getOncogenic());
         typeaheadSearchResp.setVUS(queryResp.getVUS());

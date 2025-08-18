@@ -88,10 +88,12 @@ public class DriveAnnotationParser {
                             alteration.setAlteration(mutation.getAlteration());
                             alteration.setName(mutation.getName());
                             alteration.setReferenceGenomes(mutation.getReferenceGenomes());
+                            alteration.setForGermline(germline);
                             AlterationUtils.annotateAlteration(alteration, mutation.getAlteration());
                             alterationBo.save(alteration);
                         } else if (!alteration.getReferenceGenomes().equals(mutation.getReferenceGenomes())) {
                             alteration.setReferenceGenomes(mutation.getReferenceGenomes());
+                            alteration.setForGermline(germline);
                             alterationBo.save(alteration);
                         }
                         alterations.add(alteration);
@@ -219,7 +221,7 @@ public class DriveAnnotationParser {
                         }
                     }
 
-                    Map<String, Pair<String, Set<Alteration>>> curationMutationsMap = curationMutations(gene, geneInfo);
+                    Map<String, Pair<String, Set<Alteration>>> curationMutationsMap = curationMutations(gene, geneInfo, germline);
                     Set<Alteration> allAlterations = new HashSet<>();
                     for (Map.Entry<String, Pair<String, Set<Alteration>>> entry : curationMutationsMap.entrySet()) {
                         allAlterations.addAll(entry.getValue().getSecond());
@@ -267,7 +269,7 @@ public class DriveAnnotationParser {
         return null;
     }
 
-    private Map<String, Pair<String, Set<Alteration>>> curationMutations(Gene gene, JSONObject geneJsonObject) {
+    private Map<String, Pair<String, Set<Alteration>>> curationMutations(Gene gene, JSONObject geneJsonObject, boolean germline) {
         Map<String, Pair<String, Set<Alteration>>> map = new HashMap<>();
         JSONArray mutations = geneJsonObject.has("mutations") ? geneJsonObject.getJSONArray("mutations") : null;
         AlterationBo alterationBo = ApplicationContextSingleton.getAlterationBo();
@@ -314,10 +316,12 @@ public class DriveAnnotationParser {
                             alteration.setProteinChange(alt.getProteinChange());
                             alteration.setName(alt.getName());
                             alteration.setReferenceGenomes(alt.getReferenceGenomes());
+                            alteration.setForGermline(germline);
                             AlterationUtils.annotateAlteration(alteration, alt.getAlteration());
                             alterationBo.save(alteration);
                         } else if (!alteration.getReferenceGenomes().equals(alt.getReferenceGenomes())) {
                             alteration.setReferenceGenomes(alt.getReferenceGenomes());
+                            alteration.setForGermline(germline);
                             alterationBo.save(alteration);
                         }
                         savedAlts.add(alteration);
