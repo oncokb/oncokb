@@ -5,7 +5,7 @@ import java.util.Objects;
 /**
  * Created by Hongxin Zhang on 2019-03-25.
  */
-public class AnnotateMutationByProteinChangeQuery extends AnnotationQuery implements java.io.Serializable{
+public class AnnotateMutationByProteinChangeQuery extends SomaticAnnotationQuery implements java.io.Serializable{
     private QueryGene gene;
     private String alteration;
     private String consequence;

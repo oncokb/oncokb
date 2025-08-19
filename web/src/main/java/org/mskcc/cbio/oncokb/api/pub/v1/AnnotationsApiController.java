@@ -641,12 +641,12 @@ public class AnnotationsApiController {
         return annotatedSample;
     }
 
-    private <T extends AnnotationQuery> void setTumorTypeForQueries(List<T> queries, String tumorType) {
+    private <T extends SomaticAnnotationQuery> void setTumorTypeForQueries(List<T> queries, String tumorType) {
         if (Strings.isEmpty(tumorType)) {
             return;
         }
 
-        for (AnnotationQuery query : queries) {
+        for (SomaticAnnotationQuery query : queries) {
             query.setTumorType(tumorType);
         }
     }
@@ -1001,7 +1001,7 @@ public class AnnotationsApiController {
     }
 
     private IndicatorQueryResp getIndicatorQueryForCuratedHgvs(
-        GermlineAnnotationQuery query,
+        AnnotationQuery query,
         String hgvsg,
         TranscriptSummaryAlterationResult selectedAnnotatedAlteration,
         ReferenceGenome referenceGenome, 

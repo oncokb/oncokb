@@ -5,7 +5,7 @@ import java.util.Objects;
 /**
  * Created by Hongxin Zhang on 2019-03-25.
  */
-public class AnnotateMutationByHGVSgQuery extends GermlineAnnotationQuery implements java.io.Serializable{
+public class AnnotateMutationByHGVSgQuery extends AnnotationQuery implements java.io.Serializable{
     private String hgvsg;
 
     public String getHgvsg() {

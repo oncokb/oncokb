@@ -8,7 +8,7 @@ import java.util.Objects;
 /**
  * Created by Hongxin Zhang on 2019-03-25.
  */
-public class AnnotateStructuralVariantQuery extends GermlineAnnotationQuery implements java.io.Serializable {
+public class AnnotateStructuralVariantQuery extends AnnotationQuery implements java.io.Serializable {
     private QueryGene geneA;
     private QueryGene geneB;
     private StructuralVariantType structuralVariantType;
