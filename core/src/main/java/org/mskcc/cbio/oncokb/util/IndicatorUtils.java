@@ -156,19 +156,10 @@ public class IndicatorUtils {
         } else {
             gene = GeneUtils.getGene(query.getEntrezGeneId(), query.getHugoSymbol());
             if (gene != null) {
-                if (isValidHgvsg(query.getAlteration()) || isValidHgvsc(query.getAlteration())) {
-                    Alteration alt = AlterationUtils.findAlterationWithGeneticType(
-                        query.getReferenceGenome(),
-                        query.getAlteration(), 
-                        CacheUtils.getAlterations(gene.getEntrezGeneId(), query.getReferenceGenome()),
-                        query.isGermline()
-                    );
-                    relevantAlterations = Collections.singletonList(alt);
-                } else {
-                    Alteration alt = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getAlteration(), 
-                        null, query.getConsequence(), query.getProteinStart(), query.getProteinEnd(), query.getReferenceGenome());
-                    relevantAlterations = AlterationUtils.getRelevantAlterations(query.getReferenceGenome(), alt);
-                }
+                Alteration alt = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getAlteration(), 
+                null, query.getConsequence(), query.getProteinStart(), query.getProteinEnd(), query.getReferenceGenome());
+                alt.setForGermline(query.isGermline());
+                relevantAlterations = AlterationUtils.getRelevantAlterations(query.getReferenceGenome(), alt);
             }
         }
 

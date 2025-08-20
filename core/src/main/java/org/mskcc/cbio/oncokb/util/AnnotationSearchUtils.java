@@ -865,6 +865,9 @@ class VariantComp implements Comparator<TypeaheadSearchResp> {
                         if (result == 0) {
                             // Compare gene name
                             result = e1.getGene().getHugoSymbol().compareTo(e2.getGene().getHugoSymbol());
+                            if (result == 0) {
+                                return e1.getGeneticType().compareTo(e2.getGeneticType());
+                            }
                         }
                     }
                 }

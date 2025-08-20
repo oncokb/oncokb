@@ -154,7 +154,7 @@ public class TypeaheadSearchResp {
             Objects.equals(getAnnotation(), that.getAnnotation()) &&
             Objects.equals(getQueryType(), that.getQueryType()) &&
             Objects.equals(getLink(), that.getLink()) &&
-            Objects.equals(geneticType, that.geneticType);
+            Objects.equals(getGeneticType(), that.getGeneticType());
     }
 
     @Override
