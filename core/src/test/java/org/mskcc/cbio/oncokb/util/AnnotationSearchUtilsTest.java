@@ -1,7 +1,7 @@
 package org.mskcc.cbio.oncokb.util;
 
 import static org.mskcc.cbio.oncokb.util.AnnotationSearchUtils.annotationSearch;
-import static org.mskcc.cbio.oncokb.util.AnnotationSearchUtils.searchNonHgvsAnnotation;
+import static org.mskcc.cbio.oncokb.util.AnnotationSearchUtils.searchCuratedAnnotation;
 
 import java.util.Set;
 import junit.framework.TestCase;
@@ -14,7 +14,7 @@ public class AnnotationSearchUtilsTest extends TestCase {
 
     public void testSearchNonHgvsAnnotation() {
         // test gene query
-        Set<TypeaheadSearchResp> respSet = searchNonHgvsAnnotation("BRAF");
+        Set<TypeaheadSearchResp> respSet = searchCuratedAnnotation("BRAF");
         // This is a gene search, there should be a gene search result
         assertTrue(respSet.stream().filter(resp -> TypeaheadQueryType.GENE.equals(resp.getQueryType())).count() > 0);
         // Since BRAF is mentioned in multiple alterations, variant search result should be available
@@ -23,7 +23,7 @@ public class AnnotationSearchUtilsTest extends TestCase {
         assertTrue(respSet.stream().filter(resp -> TypeaheadQueryType.CANCER_TYPE.equals(resp.getQueryType())).count() == 0);
 
         // test variant query
-        respSet = searchNonHgvsAnnotation("V600E");
+        respSet = searchCuratedAnnotation("V600E");
         // This is a variant search, there should not be any gene query search result
         assertTrue(respSet.stream().filter(resp -> TypeaheadQueryType.GENE.equals(resp.getQueryType())).count() == 0);
         // This is a variant search, variant search result should be available
@@ -32,7 +32,7 @@ public class AnnotationSearchUtilsTest extends TestCase {
         assertTrue(respSet.stream().filter(resp -> TypeaheadQueryType.CANCER_TYPE.equals(resp.getQueryType())).count() == 0);
 
         // test fusion query
-        respSet = searchNonHgvsAnnotation("BCR-ABL1");
+        respSet = searchCuratedAnnotation("BCR-ABL1");
         // This query contains gene names
         assertTrue(respSet.stream().filter(resp -> TypeaheadQueryType.GENE.equals(resp.getQueryType())).count() > 0);
         // This query is included in fusion name that we curated
@@ -41,7 +41,7 @@ public class AnnotationSearchUtilsTest extends TestCase {
         assertTrue(respSet.stream().filter(resp -> TypeaheadQueryType.CANCER_TYPE.equals(resp.getQueryType())).count() > 0);
 
         // test cancer type query
-        respSet = searchNonHgvsAnnotation("NSCLC");
+        respSet = searchCuratedAnnotation("NSCLC");
         // This is a cancer type search, there should not be any gene query search result
         assertTrue(respSet.stream().filter(resp -> TypeaheadQueryType.GENE.equals(resp.getQueryType())).count() == 0);
         // This is a cancer type search, there should not be any variant query search result
@@ -50,7 +50,7 @@ public class AnnotationSearchUtilsTest extends TestCase {
         assertTrue(respSet.stream().filter(resp -> TypeaheadQueryType.CANCER_TYPE.equals(resp.getQueryType())).count() > 0);
 
         // test gene+variant query
-        respSet = searchNonHgvsAnnotation("BRAF V600E");
+        respSet = searchCuratedAnnotation("BRAF V600E");
         // This is a variant search, there should not be any gene query search result
         assertTrue(respSet.stream().filter(resp -> TypeaheadQueryType.GENE.equals(resp.getQueryType())).count() == 0);
         // This is a variant search, variant search result should be available

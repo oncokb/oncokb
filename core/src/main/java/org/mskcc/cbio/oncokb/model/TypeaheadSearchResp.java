@@ -4,6 +4,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import org.mskcc.cbio.oncokb.apiModels.GeneticType;
+
 /**
  * Created by Hongxin on 6/7/17.
  */
@@ -21,6 +23,7 @@ public class TypeaheadSearchResp {
     private TypeaheadQueryType queryType;
     private String link;
     private Map<LevelOfEvidence, String> annotationByLevel;
+    private GeneticType geneticType;
 
     public Gene getGene() {
         return gene;
@@ -126,6 +129,14 @@ public class TypeaheadSearchResp {
         this.annotationByLevel = annotationByLevel;
     }
 
+    public GeneticType getGeneticType() {
+        return geneticType;
+    }
+
+    public void setGeneticType(GeneticType geneticType) {
+        this.geneticType = geneticType;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -142,11 +153,12 @@ public class TypeaheadSearchResp {
             Objects.equals(isVUS, that.isVUS) &&
             Objects.equals(getAnnotation(), that.getAnnotation()) &&
             Objects.equals(getQueryType(), that.getQueryType()) &&
-            Objects.equals(getLink(), that.getLink());
+            Objects.equals(getLink(), that.getLink()) &&
+            Objects.equals(getGeneticType(), that.getGeneticType());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getGene(), getVariants(), getTumorTypes(), getDrug(), getOncogenicity(), getHighestSensitiveLevel(), getHighestResistanceLevel(), getVariantExist(), isVUS, getAnnotation(), getQueryType(), getLink());
+        return Objects.hash(getGene(), getVariants(), getTumorTypes(), getDrug(), getOncogenicity(), getHighestSensitiveLevel(), getHighestResistanceLevel(), getVariantExist(), isVUS, getAnnotation(), getQueryType(), getLink(), getGeneticType());
     }
 }

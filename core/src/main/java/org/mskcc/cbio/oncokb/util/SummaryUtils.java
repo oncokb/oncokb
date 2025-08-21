@@ -530,20 +530,37 @@ public class SummaryUtils {
         if (gene != null && gene.getHugoSymbol().equals(SpecialStrings.OTHERBIOMARKERS)) {
             return "";
         }
-        return enrichGeneEvidenceDescription(EvidenceType.GENE_SUMMARY, gene, StringUtils.isEmpty(queryHugoSymbol) ? gene.getHugoSymbol() : queryHugoSymbol);
+        return enrichGeneEvidenceDescription(EvidenceType.GENE_SUMMARY, gene, StringUtils.isEmpty(queryHugoSymbol) ? gene.getHugoSymbol() : queryHugoSymbol, isGermline);
     }
 
     public static String geneBackground(Gene gene, String queryHugoSymbol) {
         if (gene != null && gene.getHugoSymbol().equals(SpecialStrings.OTHERBIOMARKERS)) {
             return "";
         }
-        return enrichGeneEvidenceDescription(EvidenceType.GENE_BACKGROUND, gene, StringUtils.isEmpty(queryHugoSymbol) ? gene.getHugoSymbol() : queryHugoSymbol);
+        return enrichGeneEvidenceDescription(EvidenceType.GENE_BACKGROUND, gene, StringUtils.isEmpty(queryHugoSymbol) ? gene.getHugoSymbol() : queryHugoSymbol, false);
     }
 
-    private static String enrichGeneEvidenceDescription(EvidenceType evidenceType, Gene gene, String hugoSymbol) {
+    private static String enrichGeneEvidenceDescription(EvidenceType evidenceType, Gene gene, String hugoSymbol, boolean isGermline) {
         Set<Evidence> geneBackgroundEvs = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Collections.singleton(evidenceType));
         String summary = "";
-        if (!geneBackgroundEvs.isEmpty()) {
+
+        if (evidenceType.equals(EvidenceType.GENE_SUMMARY) && geneBackgroundEvs.size() == 2) {
+            String somaticSummary = null;
+            String germlineSummary = null;
+            for (Evidence ev : geneBackgroundEvs) {
+                if (ev.getForGermline()) {
+                    germlineSummary = ev.getDescription();
+                } else {
+                    somaticSummary = ev.getDescription();
+                }
+            }
+
+            if (isGermline) {
+                summary = joinStringsWithSpace(somaticSummary, germlineSummary);
+            } else {
+                summary = somaticSummary;
+            }
+        } else if (!geneBackgroundEvs.isEmpty()) {
             Evidence ev = geneBackgroundEvs.iterator().next();
             if (ev != null) {
                 summary = ev.getDescription();
@@ -1085,5 +1102,16 @@ public class SummaryUtils {
             }
         }
         return isVowel ? "an" : "a";
+    }
+
+    private static String joinStringsWithSpace(String str1, String str2) {
+        if (str1 == null && str2 == null) {
+            return "";
+        } else if (str1 == null) {
+            return str2;
+        } else if (str2 == null) {
+            return str1;
+        }
+        return str1 + " " + str2;
     }
 }

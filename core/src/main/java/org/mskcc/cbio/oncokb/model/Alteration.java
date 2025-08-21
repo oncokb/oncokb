@@ -99,6 +99,10 @@ public class Alteration implements java.io.Serializable {
     @Column(name = "variant_residues")
     private String variantResidues;
 
+    @JsonIgnore
+    @Column(name = "for_germline")
+    private Boolean forGermline = false;
+
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "alteration_reference_genome", joinColumns = @JoinColumn(name = "alteration_id", nullable = false))
     @Column(length = 10, name = "reference_genome")
@@ -221,6 +225,14 @@ public class Alteration implements java.io.Serializable {
 
     public void setVariantResidues(String variantResidues) {
         this.variantResidues = variantResidues;
+    }
+
+    public Boolean getForGermline() {
+        return forGermline;
+    }
+
+    public void setForGermline(Boolean forGermline) {
+        this.forGermline = forGermline;
     }
 
     public Set<ReferenceGenome> getReferenceGenomes() {

@@ -104,7 +104,7 @@ public class Query implements java.io.Serializable {
         this.proteinStart = mutationQuery.getProteinStart();
         this.proteinEnd = mutationQuery.getProteinEnd();
         this.referenceGenome = mutationQuery.getReferenceGenome();
-        this.isGermline = mutationQuery.isGermline();
+        this.isGermline = false;
         if (this.referenceGenome == null) {
             this.referenceGenome = DEFAULT_REFERENCE_GENOME;
         }
