@@ -603,12 +603,13 @@ public class AnnotationSearchUtils {
         return result;
     }
 
-    private static TypeaheadSearchResp newTypeaheadDrug(DrugMatch drugMatch) {
+    private static TypeaheadSearchResp newTypeaheadDrug(DrugMatch drugMatch, GeneticType geneticType) {
         TypeaheadSearchResp typeaheadSearchResp = new TypeaheadSearchResp();
         typeaheadSearchResp.setGene(drugMatch.getGene());
         typeaheadSearchResp.setVariants(drugMatch.getAlterations());
         typeaheadSearchResp.setDrug(drugMatch.getDrug());
         typeaheadSearchResp.setTumorTypes(drugMatch.getTumorTypes());
+        typeaheadSearchResp.setGeneticType(geneticType);
 
         if (LevelUtils.isSensitiveLevel(drugMatch.getLevelOfEvidence())) {
             typeaheadSearchResp.setHighestSensitiveLevel(drugMatch.getLevelOfEvidence().getLevel());
@@ -617,10 +618,21 @@ public class AnnotationSearchUtils {
         }
         typeaheadSearchResp.setQueryType(TypeaheadQueryType.DRUG);
 
+
         if (drugMatch.getAlterations().size() > 1 || drugMatch.getAlterations().size() == 0) {
-            typeaheadSearchResp.setLink("/gene/" + drugMatch.getGene().getHugoSymbol());
+            typeaheadSearchResp.setLink("/gene/" 
+                + drugMatch.getGene().getHugoSymbol()
+                + "/"
+                + geneticType.toLowerCase()
+            );
         } else {
-            typeaheadSearchResp.setLink("/gene/" + drugMatch.getGene().getHugoSymbol() + "/" + drugMatch.getAlterations().iterator().next().getAlteration());
+            typeaheadSearchResp.setLink("/gene/" 
+                + drugMatch.getGene().getHugoSymbol() 
+                + "/"
+                + geneticType.toLowerCase() 
+                + "/"
+                + drugMatch.getAlterations().iterator().next().getAlteration()
+            );
         }
         return typeaheadSearchResp;
     }
@@ -643,7 +655,23 @@ public class AnnotationSearchUtils {
     }
 
     private static List<TypeaheadSearchResp> findEvidencesWithDrugAssociated(String query, Boolean exactMatch) {
-        Set<Evidence> evidences = EvidenceUtils.getEvidenceByEvidenceTypesAndLevels(EvidenceTypeUtils.getTreatmentEvidenceTypes(), LevelUtils.getPublicLevels());
+        Set<Evidence> allEvidences = EvidenceUtils.getEvidenceByEvidenceTypesAndLevels(EvidenceTypeUtils.getTreatmentEvidenceTypes(), LevelUtils.getPublicLevels());
+        Set<Evidence> somaticEvidences = new HashSet<>();
+        Set<Evidence> germlineEvidences = new HashSet<>();
+        for (Evidence evidence : allEvidences) {
+            if (evidence.getForGermline()) {
+                germlineEvidences.add(evidence);
+            } else {
+                somaticEvidences.add(evidence);
+            }
+        }
+        
+        List<TypeaheadSearchResp> result = findEvidencesWithDrugAssociatedByGeneticType(query, exactMatch, somaticEvidences, GeneticType.SOMATIC);
+        result.addAll(findEvidencesWithDrugAssociatedByGeneticType(query, exactMatch, germlineEvidences, GeneticType.GERMLINE));
+        return result;
+    }
+
+    private static List<TypeaheadSearchResp> findEvidencesWithDrugAssociatedByGeneticType(String query, Boolean exactMatch, Set<Evidence> evidences, GeneticType geneticType) {
         Map<String, DrugMatch> result = new HashMap<>();
 
         if (exactMatch == null) {
@@ -711,7 +739,7 @@ public class AnnotationSearchUtils {
             drugMatches.add(entry.getValue());
         }
 
-        return drugMatches.stream().map(drugMatch -> newTypeaheadDrug(drugMatch)).collect(Collectors.toList());
+        return drugMatches.stream().map(drugMatch -> newTypeaheadDrug(drugMatch, geneticType)).collect(Collectors.toList());
     }
 
     private static TypeaheadSearchResp newTypeaheadVariant(Alteration alteration) {
