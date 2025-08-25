@@ -438,7 +438,17 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             VariantAnnotationTumorType variantAnnotationTumorType = new VariantAnnotationTumorType();
             variantAnnotationTumorType.setRelevantTumorType(relevantTumorTypes.contains(uniqueTumorType));
             variantAnnotationTumorType.setTumorType(uniqueTumorType);
-            variantAnnotationTumorType.setEvidences(response.getEvidences().stream().filter(evidence -> !evidence.getCancerTypes().isEmpty() && evidence.getCancerTypes().contains(uniqueTumorType)).map(evidence -> {
+
+            List<Evidence> updatedEvidences = new ArrayList<>();
+            Map<String, LevelOfEvidence> treatmentToHighestLevel = new HashMap<>();
+            for (Evidence evidence : response.getEvidences().stream().filter(evidence -> !evidence.getCancerTypes().isEmpty() && evidence.getCancerTypes().contains(uniqueTumorType)).collect(Collectors.toList())) {     
+                String treament = TreatmentUtils.getTreatmentName(evidence.getTreatments());       
+                if (treatmentToHighestLevel.get(treament) == null 
+                    || LevelUtils.compareLevel(evidence.getLevelOfEvidence(), treatmentToHighestLevel.get(treament), LevelUtils.THERAPEUTIC_SENSITIVE_LEVELS) < 0
+                ) {
+                    treatmentToHighestLevel.put(treament, evidence.getLevelOfEvidence());
+                }
+                
                 Evidence updatedEvidence = new Evidence(evidence, evidence.getId());
                 if (updatedEvidence.getGene().getHugoSymbol().equals("ESR1")) {
                     updatedEvidence = MainUtils.convertSpecialESR1Evidence(updatedEvidence);
@@ -446,8 +456,29 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
                 if (updatedEvidence.getRelevantCancerTypes() == null || updatedEvidence.getRelevantCancerTypes().size() == 0) {
                     updatedEvidence.setRelevantCancerTypes(TumorTypeUtils.findEvidenceRelevantCancerTypes(evidence));
                 }
-                return updatedEvidence;
-            }).collect(Collectors.toList()));
+                updatedEvidences.add(updatedEvidence);
+            }
+
+            // If oncogenic mutations exists when there is also a mutation with a higher level for same cancer type and treament, remove oncogenic mutations
+            List<Evidence> filteredEvidences = new ArrayList<>();
+            for (Evidence evidence: updatedEvidences) {
+                if (evidence.getAlterations().size() > 1) {
+                    filteredEvidences.add(evidence);
+                    continue;
+                }
+
+                Alteration alt = (Alteration) evidence.getAlterations().toArray()[0];
+                if (!alt.getAlteration().equals(InferredMutation.ONCOGENIC_MUTATIONS.getVariant())) {
+                    filteredEvidences.add(evidence);
+                    continue;
+                }
+
+                if (LevelUtils.compareLevel(evidence.getLevelOfEvidence(), treatmentToHighestLevel.get(TreatmentUtils.getTreatmentName(evidence.getTreatments())), LevelUtils.THERAPEUTIC_SENSITIVE_LEVELS) <= 0) {
+                    filteredEvidences.add(evidence);
+                }
+            }
+            variantAnnotationTumorType.setEvidences(filteredEvidences);
+
             annotation.getTumorTypes().add(variantAnnotationTumorType);
         }
         return new ResponseEntity<>(annotation, HttpStatus.OK);
