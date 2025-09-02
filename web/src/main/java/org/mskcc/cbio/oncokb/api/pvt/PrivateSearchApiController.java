@@ -29,7 +29,7 @@ import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
 import static org.mskcc.cbio.oncokb.util.AlterationUtils.GENOMIC_CHANGE_FORMAT;
 import static org.mskcc.cbio.oncokb.util.AlterationUtils.HGVSG_FORMAT;
 import static org.mskcc.cbio.oncokb.util.AnnotationSearchUtils.newTypeaheadAnnotation;
-import static org.mskcc.cbio.oncokb.util.AnnotationSearchUtils.searchNonHgvsAnnotation;
+import static org.mskcc.cbio.oncokb.util.AnnotationSearchUtils.searchCuratedAnnotation;
 import static org.mskcc.cbio.oncokb.util.LevelUtils.*;
 
 /**
@@ -117,7 +117,8 @@ public class PrivateSearchApiController implements PrivateSearchApi {
         if (query != null && query.length() >= QUERY_MIN_LENGTH) {
             // genomic queries will not have space in the query
             String trimmedQuery = query.trim().replaceAll(" ", "");
-            if (AlterationUtils.isValidHgvsg(trimmedQuery) || AlterationUtils.isValidGenomicChange(trimmedQuery)) {
+            result.addAll(searchCuratedAnnotation(query));
+            if (result.isEmpty() && AlterationUtils.isValidHgvsg(trimmedQuery) || AlterationUtils.isValidGenomicChange(trimmedQuery)) {
                 GNVariantAnnotationType type = null;
 
                 if (AlterationUtils.isValidHgvsg(trimmedQuery)) {
@@ -151,8 +152,6 @@ public class PrivateSearchApiController implements PrivateSearchApi {
                         throw new RuntimeException(e);
                     }
                 }
-            } else {
-                result.addAll(searchNonHgvsAnnotation(query));
             }
         } else {
             TypeaheadSearchResp typeaheadSearchResp = new TypeaheadSearchResp();
