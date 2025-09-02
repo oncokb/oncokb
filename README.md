@@ -184,7 +184,7 @@ VEP_FASTAFILERELATIVEPATH=homo_sapiens/98_GRCh38/Homo_sapiens.GRCh38.dna.topleve
 
 2. Run MySQL container and attach to the network
    `docker run --name my-mysql -e MYSQL_ROOT_PASSWORD=root -p 3307:3306 --network mysql-test-network -d mysql:8`
-   We suggest using MySQL 8 since that is what we use in production. Our README still says 5.7.28, but we will update that shortly.
+   We suggest using MySQL 8 since that is what we use in production.
 
 3. If you already have a MySQL Docker container running, follow the steps to add network (otherwise skip)
 
