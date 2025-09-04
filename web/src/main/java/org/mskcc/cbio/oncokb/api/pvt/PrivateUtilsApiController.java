@@ -399,6 +399,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             gene = GeneUtils.getGene(entrezGeneId, hugoSymbol);
             Alteration alterationModel = AlterationUtils.findAlteration(gene, matchedRG, alteration);
             if (alterationModel == null) {
+                alteration = AlterationUtils.resolveProteinAlterationShort(alteration);
                 if (gene == null) {
                     alterationModel = new Alteration();
                     gene = new Gene();

@@ -1808,4 +1808,11 @@ public final class AlterationUtils {
         MainUtils.sortActionableVariants(actionableGeneList);
         return actionableGeneList;
     }
+
+    public static String resolveProteinAlterationShort(String alteration) {
+        if (alteration != null) {
+            alteration = alteration.replace("p.", "");
+        }
+        return AminoAcidConverterUtils.resolveHgvspShortFromHgvsp(alteration);
+    }
 }

@@ -8,6 +8,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.apiModels.annotation.*;
+import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.AminoAcidConverterUtils;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
 import org.mskcc.cbio.oncokb.util.QueryUtils;
@@ -185,10 +186,7 @@ public class Query implements java.io.Serializable {
     }
 
     public void setAlteration(String alteration) {
-        if (alteration != null) {
-            alteration = alteration.replace("p.", "");
-        }
-        this.alteration = AminoAcidConverterUtils.resolveHgvspShortFromHgvsp(alteration);;
+        this.alteration =  AlterationUtils.resolveProteinAlterationShort(alteration);
     }
 
     public String getAlterationType() {
