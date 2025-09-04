@@ -13,6 +13,14 @@
 
 Checklist for deployment after curation team approves beta
 
+-   [ ] Update Core README.md with the latest versions
+    - [ ] gn-spring-boot
+    - [ ] gn-mongo
+    - [ ] oncokb
+    - [ ] oncokb-transcript
+    - [ ] genome-nexus-vep
+    - [ ] mysql 
+    - [ ] redis
 -   [ ] Update oncokb-annotator tests by running this [script](https://github.com/knowledgesystems/oncokb-deployment/blob/master/oncokb-data-release/update_annotation.sh)
 -   [ ] Push data to private [oncokb-data repo](https://github.com/knowledgesystems/oncokb-data) and public [oncokb-datahub repo](https://github.com/oncokb/oncokb-datahub)
 -   [ ] Update release note
