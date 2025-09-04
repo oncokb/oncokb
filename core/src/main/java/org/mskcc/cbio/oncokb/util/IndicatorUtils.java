@@ -333,7 +333,7 @@ public class IndicatorUtils {
                         indicatorQuery.setOncogenic(Oncogenicity.LIKELY.getOncogenic());
                     }
                 } else if (!isValidHotspotOncogenicity) {
-                    // If oncogenicity is invalid, then we want to override to Oncogenic for hotspot mutations
+                    // If oncogenicity is invalid, then we want to override to Likely Oncogenic for hotspot mutations
                     indicatorQuery.setOncogenic(Oncogenicity.LIKELY.getOncogenic());
             
                     List<Alteration> oncogenicMutations = new ArrayList<>(AlterationUtils.findOncogenicMutations(AlterationUtils.getAllAlterations(query.getReferenceGenome(), gene)));
