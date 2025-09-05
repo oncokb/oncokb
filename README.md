@@ -60,8 +60,9 @@ The WAR file is under `/web/target/`
 4. Either download Tomcat 8 on local machine or let CSC download for you.
 5. Right click Tomcat server and choose `Add Deployment`. This is the WAR file generated in the previous step.
 6. Edit the Tomcat server and add `"vm.install.path": "/path/to/java8"`.
-7. Start Tomcat server. Make sure to `Publish Server (Full)` to keep server synchronized with WAR file (if changes were made).
-8. Test the endpoint by making a request to `http://localhost:8080/app/api/v1/info`
+7. Additionally, append `-Dlog4j.configuration=\"file:/path/to/log4j.properties\"` to `"args.vm.override.string"` to ensure Tomcat loads the correct Log4j configuration.
+8. Start Tomcat server. Make sure to `Publish Server (Full)` to keep server synchronized with WAR file (if changes were made).
+9. Test the endpoint by making a request to `http://localhost:8080/app/api/v1/info`
 
 ## Run with Docker containers
 
