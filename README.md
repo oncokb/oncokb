@@ -104,9 +104,26 @@ For this option, you need to download the VEP cache, which is used in the `gn-ve
     docker-compose up -d
     ```
 
+#### Compatibility Matrix
+
+| oncokb  | oncokb-transcript | gn-spring-boot | gn-mongo | genome-nexus-vep | MySQL | Redis | Oncokb Data |
+| ------- | ----------------- | -------------- | -------- | ---------------- | ----- | ----- | ----------- |
+| v3.17.1 | v0.9.4            | v1.3.1         | v0.31    | v0.0.1           | 8.x.x | 7.x.x | 4.x.x       |
+| v3.17.3 | v0.9.4            | v1.3.1         | v0.31    | v0.0.1           | 8.x.x | 7.x.x | 4.x.x       |
+| v3.18.0 | v0.9.4            | v1.3.2         | v0.31    | v0.0.1           | 8.x.x | 7.x.x | 4.x.x       |
+| v3.19.0 | v0.9.4            | v1.3.3         | v0.31    | v0.0.1           | 8.x.x | 7.x.x | 4.x.x       |
+| v3.21.0 | v0.9.4            | v1.4.0         | v0.31    | v0.0.1           | 8.x.x | 7.x.x | 4.x.x       |
+| v3.22.0 | v0.9.4            | v1.4.1         | v0.31    | v0.0.1           | 8.x.x | 7.x.x | 4.x.x       |
+| v3.24.0 | v0.9.4            | v1.4.1         | v0.31    | v0.0.1           | 8.x.x | 7.x.x | 4.x.x       |
+| v3.27.0 | v0.9.4            | v1.4.1         | v0.32    | v0.0.1           | 8.x.x | 7.x.x | 4.x.x       |
+| v3.28.2 | v0.9.4            | v1.4.1         | v0.32    | v0.0.1           | 8.x.x | 7.x.x | 4.x.x       |
+| v3.32.0 | v0.9.4            | v1.4.1         | v0.32    | v0.0.1           | 8.x.x | 7.x.x | 4.x.x       |
+| v4.0.0  | v0.9.4            | v1.4.1         | v0.32    | v0.0.1           | 8.x.x | 7.x.x | 5.x.x       |
+
 ### Additional Information
 
 #### Running unit tests
+
 1. Continue to use `mvn test` command that connects to a local MySQL server defined in database.properties file. Note that some test cases will insert dummy data, so make sure the database is not used for any downstream workflows.
 2. Run tests using docker-compose by running `sh unit_test/scripts/run_docker_test.sh`. Make sure to add a mysql data dump file under `unit_test/mysql_dumps`
 
