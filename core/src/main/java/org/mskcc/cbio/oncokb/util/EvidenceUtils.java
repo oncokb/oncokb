@@ -712,14 +712,17 @@ public class EvidenceUtils {
             }
         }
 
-        // If an evidence has a tumor type that is same as query, prioritize it
+        // If an evidence has a tumor type that is same as query, prioritize it, but keep resistance evidence
         if (matchedTumorType != null) {
             for (Entry<String, Set<Evidence>> entry : maps.entrySet()) {
                 Set<Evidence> evidencesMatchingCancerType = new LinkedHashSet<>(); 
 
                 for (Evidence evidence : entry.getValue()) {
                     for (TumorType tumorType : evidence.getCancerTypes()) {
-                        if (tumorType.equals(matchedTumorType)) {
+                        if (tumorType.equals(matchedTumorType) 
+                            || evidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_R1)
+                            || evidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_R2)
+                        ) {
                             evidencesMatchingCancerType.add(evidence);
                             break;
                         }
