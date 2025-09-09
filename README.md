@@ -106,9 +106,22 @@ For this option, you need to download the VEP cache, which is used in the `gn-ve
     docker-compose up -d
     ```
 
+#### Compatibility Matrix
+
+> [!WARNING]
+> OncoKB uses a native password for MySQL. If you use MySQL 8.1
+> or above you must configure native passwords enabled as they no longer are
+> enabled by default.
+
+| oncokb | oncokb-transcript | gn-spring-boot | gn-mongo | genome-nexus-vep | MySQL  | Redis  | Oncokb Data |
+| ------ | ----------------- | -------------- | -------- | ---------------- | ------ | ------ | ----------- |
+| v3.x.x | v0.9.4            | v1.x.x         | v0.x     | v0.0.1           | v8.0.x | v7.x.x | v4.x.x      |
+| v4.x.x | v0.9.4            | v1.x.x         | v0.x     | v0.0.1           | v8.0.x | v7.x.x | v5.x.x      |
+
 ### Additional Information
 
 #### Running unit tests
+
 1. Continue to use `mvn test` command that connects to a local MySQL server defined in database.properties file. Note that some test cases will insert dummy data, so make sure the database is not used for any downstream workflows.
 2. Run tests using docker-compose by running `sh unit_test/scripts/run_docker_test.sh`. Make sure to add a mysql data dump file under `unit_test/mysql_dumps`
 
