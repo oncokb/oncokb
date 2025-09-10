@@ -25,11 +25,11 @@ jobs:
         env:
           DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}
           DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
-          TAG_NAME: ${{ inputs.tag-name || github.event.release.tag_name }}
-          REPOSITORY: ${{ github.repository }}
+          TAG_NAME: ${{ inputs.tag-name || substring(github.event.release.tag_name, 1) }}
+          REPOSITORY: mskcc/oncokb
         run: |
           mvn -ntp package -P enterprise,image-build \
           -DskipTests \
-          -Djib.to.image="${REPOSITORY}:${TAG_NAME:1}" \
+          -Djib.to.image="${REPOSITORY}:${TAG_NAME}" \
           -Djib.to.auth.username=$DOCKER_USERNAME \
           -Djib.to.auth.password=$DOCKER_PASSWORD
