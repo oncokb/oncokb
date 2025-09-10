@@ -1,5 +1,11 @@
 name: Build/Push docker image
 on:
+  workflow_dispatch:
+    inputs:
+      tag-name:
+        description: "Tag name to use for the image (required if manually running)"
+        required: true
+        type: string
   release:
     types: [published]
 jobs:
@@ -19,7 +25,7 @@ jobs:
         env:
           DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}
           DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
-          TAG_NAME: ${{ github.event.release.tag_name }}
+          TAG_NAME: ${{ inputs.tag-name || github.event.release.tag_name }}
           REPOSITORY: ${{ github.repository }}
         run: |
           mvn -ntp package -P enterprise,image-build \
