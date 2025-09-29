@@ -285,7 +285,7 @@ public class IndicatorUtilsTest {
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "EGFR", "vV", null, null, "NSCLC", null, null, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null, false);
         assertEquals("The Oncogenicity is not oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
-        assertEquals("The variant summary is not expected.", "The EGFR vv alteration is known to be oncogenic.", indicatorQueryResp.getVariantSummary());
+        assertEquals("The variant summary is not expected.", "The EGFR vV alteration is known to be oncogenic.", indicatorQueryResp.getVariantSummary());
 
         // Check EGFR CTD
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "EGFR", "CTD", null, null, "NSCLC", null, null, null, null);

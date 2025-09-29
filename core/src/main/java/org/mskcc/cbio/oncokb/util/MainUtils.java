@@ -64,8 +64,15 @@ public class MainUtils {
         return null;
     }
 
-    public static boolean isEGFRTruncatingVariants(String alteration) {
-        return alteration == null ? false : (alteration.trim().matches("^v(II|III|IV(a|b|c)|V)?$"));
+    public static boolean isEGFRTruncatingVariants(String alteration, String name) {
+        String pattern = "^v(II|III|IV(a|b|c)|V)?$";
+        if (alteration != null && alteration.trim().matches(pattern)) {
+            return true;
+        } else if (name != null && name.trim().matches(pattern)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public static Map<String, Object> GetRequestQueries(
@@ -824,10 +831,11 @@ public class MainUtils {
     }
 
     public static boolean altNameShouldConvertToLowerCase(Alteration alteration) {
-        if (!Objects.equals(alteration.getName(), alteration.getAlteration())) {
+         boolean isEGFRTruncatingVariants = isEGFRTruncatingVariants(alteration.getAlteration(), alteration.getName());
+        if (!Objects.equals(alteration.getName(), alteration.getAlteration()) && !isEGFRTruncatingVariants) {
             return true;
         } else {
-            return (alteration.getProteinStart() == null || alteration.getProteinStart() == -1) && !isEGFRTruncatingVariants(alteration.getAlteration());
+            return (alteration.getProteinStart() == null || alteration.getProteinStart() == -1) && !isEGFRTruncatingVariants;
         }
     }
 
