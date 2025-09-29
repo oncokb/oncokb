@@ -41,11 +41,7 @@ jobs:
           MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
         run: |
           MYSQL_FILE_NAME=mysql.sql.gz
-          curl -s https://"${ONCOKB_OAUTH_TOKEN}"@raw.githubusercontent.com/knowledgesystems/oncokb-data/tree/master/RELEASE/latest/"${MYSQL_FILE_NAME}" -O
-
-          ls
-          file $MYSQL_FILE_NAME
-          head -n 5 $MYSQL_FILE_NAME
+          curl -s https://"${ONCOKB_OAUTH_TOKEN}"@raw.githubusercontent.com/knowledgesystems/oncokb-data/master/RELEASE/latest/"${MYSQL_FILE_NAME}" -O
 
           mysql --host=127.0.0.1 --user=root --password=${MYSQL_ROOT_PASSWORD} -e "CREATE DATABASE IF NOT EXISTS test"
           zcat "${MYSQL_FILE_NAME}" | mysql --host=127.0.0.1 --user=root --password=${MYSQL_ROOT_PASSWORD} test
