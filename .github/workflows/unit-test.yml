@@ -43,12 +43,15 @@ jobs:
           MYSQL_FILE_NAME=mysql.sql.gz
           curl -s https://"${ONCOKB_OAUTH_TOKEN}"@raw.githubusercontent.com/knowledgesystems/oncokb-data/master/RELEASE/latest/"${MYSQL_FILE_NAME}" -O
 
+          ls
+          file $MYSQL_FILE_NAME
+
           mysql --host=127.0.0.1 --user=root --password=${MYSQL_ROOT_PASSWORD} -e "CREATE DATABASE IF NOT EXISTS test"
           zcat "${MYSQL_FILE_NAME}" | mysql --host=127.0.0.1 --user=root --password=${MYSQL_ROOT_PASSWORD} test
 
       - uses: actions/setup-java@v2
         with:
-          distribution: 'adopt'
+          distribution: "adopt"
           java-version: 8
 
       - name: Run unit tests
