@@ -41,7 +41,7 @@ jobs:
           MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
         run: |
           MYSQL_FILE_NAME=mysql.sql.gz
-          curl -s https://"${ONCOKB_OAUTH_TOKEN}"@raw.githubusercontent.com/knowledgesystems/oncokb-data/master/RELEASE/latest/"${MYSQL_FILE_NAME}" -O
+          curl -s https://"${ONCOKB_OAUTH_TOKEN}"@raw.githubusercontent.com/knowledgesystems/oncokb-data/tree/master/RELEASE/latest/"${MYSQL_FILE_NAME}" -O
 
           ls
           file $MYSQL_FILE_NAME
