@@ -45,6 +45,7 @@ jobs:
 
           ls
           file $MYSQL_FILE_NAME
+          head -n 5 $MYSQL_FILE_NAME
 
           mysql --host=127.0.0.1 --user=root --password=${MYSQL_ROOT_PASSWORD} -e "CREATE DATABASE IF NOT EXISTS test"
           zcat "${MYSQL_FILE_NAME}" | mysql --host=127.0.0.1 --user=root --password=${MYSQL_ROOT_PASSWORD} test
