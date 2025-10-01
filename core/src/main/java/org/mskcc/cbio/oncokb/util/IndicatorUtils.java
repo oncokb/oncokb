@@ -250,6 +250,26 @@ public class IndicatorUtils {
                 // Add germline info
                 if(query.isGermline()){
                     indicatorQuery.setGermline(getGermlineVariantInfo(matchedAlt, query.getAlleleState(), relevantAlterations));
+
+                    // Get mutation effect description
+                    List<Evidence> mutationEffectEvis = EvidenceUtils.getEvidence(Collections.singletonList(matchedAlt), Collections.singleton(EvidenceType.MUTATION_EFFECT), null);
+                    if (!mutationEffectEvis.isEmpty()) {
+                        Evidence mutationEffectEvi = mutationEffectEvis.iterator().next();
+                        MutationEffectResp mutationEffectResp = new MutationEffectResp();
+                        mutationEffectResp.setDescription(CplUtils.annotate(
+                            mutationEffectEvi.getDescription(),
+                            query.getHugoSymbol(),
+                            query.getAlteration(),
+                            query.getTumorType(),
+                            query.getReferenceGenome(),
+                            gene,
+                            matchedTumorType,
+                        false
+                        ));
+                        mutationEffectResp.setCitations(MainUtils.getCitationsByEvidence(mutationEffectEvi));
+                        indicatorQuery.setMutationEffect(mutationEffectResp);
+                    }
+                    
                 }else{
                     if (hasOncogenicEvidence) {
                         IndicatorQueryOncogenicity indicatorQueryOncogenicity = getOncogenicity(matchedAlt, alleles, nonVUSRelevantAlts);
@@ -418,8 +438,13 @@ public class IndicatorUtils {
 
             // Mutation summary
             if (evidenceTypes.contains(EvidenceType.MUTATION_SUMMARY) && StringUtils.isNotEmpty(matchedAlt.getAlteration())) {
-                indicatorQuery.setVariantSummary(SummaryUtils.variantSummary(gene, matchedAlt,
-                    new ArrayList<>(relevantAlterations), query));
+                if (!query.isGermline()) {
+                    indicatorQuery.setVariantSummary(SummaryUtils.variantSummary(gene, matchedAlt,
+                        new ArrayList<>(relevantAlterations), query));
+                } else {
+                    // Variant summary is mostly auto-generated and we don't have the logic in place yet for germline variants
+                    // so we are skipping this.
+                }
             }
 
             // Diagnostic summary
