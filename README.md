@@ -61,9 +61,9 @@ The WAR file is under `/web/target/`
 5. Right click Tomcat server and choose `Add Deployment`. This is the WAR file generated in the previous step.
 6. Edit the Tomcat server and add `"vm.install.path": "/path/to/java8"`.
 7. Set `"args.override.boolean": "true"` to ensure VM override arguments are applied.
-7. Append `-Dlog4j.configuration=\"file:/path/to/log4j.properties\"` to `"args.vm.override.string"` so Tomcat loads the correct Log4j configuration.
-8. Start Tomcat server. Make sure to `Publish Server (Full)` to keep server synchronized with WAR file (if changes were made).
-9. Test the endpoint by making a request to `http://localhost:8080/app/api/v1/info`
+8. Append `-Dlog4j.configuration=\"file:/path/to/log4j.properties\"` to `"args.vm.override.string"` so Tomcat loads the correct Log4j configuration.
+9. Start Tomcat server. Make sure to `Publish Server (Full)` to keep server synchronized with WAR file (if changes were made).
+10. Test the endpoint by making a request to `http://localhost:8080/app/api/v1/info`
 
 ## Run with Docker containers
 
@@ -107,6 +107,14 @@ For this option, you need to download the VEP cache, which is used in the `gn-ve
     ```
 
 #### Compatibility Matrix
+
+> [!WARNING]
+> To reduce costs, future Docker Hub images for `oncokb` and `oncokb-transcript`
+> will be hosted under the MSKCC Docker Hub organization. You can find their
+> new locations here:
+>
+> - [mskcc/oncokb](https://hub.docker.com/repository/docker/mskcc/oncokb/general)
+> - [mskcc/oncokb-transcript](https://hub.docker.com/repository/docker/mskcc/oncokb-transcript/general)
 
 > [!WARNING]
 > OncoKB uses a native password for MySQL. If you use MySQL 8.1
