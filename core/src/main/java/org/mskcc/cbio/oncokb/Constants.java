@@ -36,6 +36,8 @@ public final class Constants {
 
     public static final List<VariantConsequence> SPLICE_SITE_VARIANTS = Arrays.asList("splice_acceptor_variant", "splice_donor_variant", "splice_region_variant").stream().map(term -> VariantConsequenceUtils.findVariantConsequenceByTerm(term)).collect(Collectors.toList());
 
+    public static final int OTHER_BIOMARKERS_ENTREZ_GENE_ID = -2;
+
     private Constants() {
     }
 }
