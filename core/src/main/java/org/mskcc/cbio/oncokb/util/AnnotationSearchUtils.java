@@ -74,7 +74,12 @@ public class AnnotationSearchUtils {
                     result.addAll(convertGene(GeneUtils.searchGene(subKeyword, false), subKeyword));
                 }
             }
-        } else {
+        } else if (keywords.size() == 2 && keywords.get(1).startsWith("(")) { // could be CDKN2A (p14)
+            String keyword = String.join(" ", keywords);
+            result.addAll(convertGene(GeneUtils.searchGene(keyword, false), keyword));
+        } 
+        
+        if (result.size() == 0) {
             // Assume one of the keyword is gene
             Map<String, Set<Gene>> map = new HashedMap();
             for (String keyword : keywords) {
