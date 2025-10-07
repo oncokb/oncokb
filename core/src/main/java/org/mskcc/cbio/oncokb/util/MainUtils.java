@@ -525,15 +525,39 @@ public class MainUtils {
                         if (mutationEffectEvidences != null && mutationEffectEvidences.size() > 0) {
                             variant.setMutationEffectDescription(mutationEffectEvidences.iterator().next().getDescription());
                         }
-                        if (map.get(EvidenceType.VARIANT_PENETRANCE) != null && !map.get(EvidenceType.VARIANT_PENETRANCE).isEmpty()) {
-                            variant.setPenetrance(map.get(EvidenceType.VARIANT_PENETRANCE).iterator().next().getKnownEffect());
+                        Set<Evidence> variantPenetrance = map.get(EvidenceType.VARIANT_PENETRANCE);
+                        if (variantPenetrance != null) {
+                            Evidence penetranceEvidence = variantPenetrance.stream().findFirst()
+                                .orElseGet(() -> EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(
+                                        gene, Collections.singleton(EvidenceType.GENE_PENETRANCE)
+                                    ).stream().findFirst().orElse(null));
+                            if (penetranceEvidence != null) {
+                                variant.setPenetrance(penetranceEvidence.getKnownEffect());
+                            }
                         }
-                        if (map.get(EvidenceType.VARIANT_INHERITANCE_MECHANISM) != null && !map.get(EvidenceType.VARIANT_INHERITANCE_MECHANISM).isEmpty()) {
-                            variant.setPenetrance(map.get(EvidenceType.VARIANT_INHERITANCE_MECHANISM).iterator().next().getKnownEffect());
+
+                        Set<Evidence> variantInheritance = map.get(EvidenceType.VARIANT_INHERITANCE_MECHANISM);
+                        if (variantInheritance != null) {
+                            Evidence inheritanceEvidence = variantInheritance.stream().findFirst()
+                                .orElseGet(() -> EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(
+                                        gene, Collections.singleton(EvidenceType.VARIANT_INHERITANCE_MECHANISM)
+                                    ).stream().findFirst().orElse(null));
+                            if (inheritanceEvidence != null) {
+                                variant.setInheritanceMechanism(inheritanceEvidence.getKnownEffect());
+                            }
                         }
-                        if (map.get(EvidenceType.VARIANT_CANCER_RISK) != null && !map.get(EvidenceType.VARIANT_CANCER_RISK).isEmpty()) {
-                            variant.setPenetrance(map.get(EvidenceType.VARIANT_CANCER_RISK).iterator().next().getKnownEffect());
+
+                        Set<Evidence> variantCancerRisk = map.get(EvidenceType.VARIANT_CANCER_RISK);
+                        if (variantCancerRisk != null) {
+                            Evidence cancerRiskEvidence = variantCancerRisk.stream().findFirst()
+                                .orElseGet(() -> EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(
+                                        gene, Collections.singleton(EvidenceType.VARIANT_CANCER_RISK)
+                                    ).stream().findFirst().orElse(null));
+                            if (cancerRiskEvidence != null) {
+                                variant.setCancerRisk(cancerRiskEvidence.getKnownEffect());
+                            }
                         }
+
                     }
                     if (mutationEffect != null) {
                         variant.setMutationEffect(mutationEffect.getMutationEffect());
