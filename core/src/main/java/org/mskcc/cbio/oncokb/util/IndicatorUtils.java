@@ -438,12 +438,11 @@ public class IndicatorUtils {
 
             // Mutation summary
             if (evidenceTypes.contains(EvidenceType.MUTATION_SUMMARY) && StringUtils.isNotEmpty(matchedAlt.getAlteration())) {
-                if (!query.isGermline()) {
+                if (query.isGermline()) {
+                    indicatorQuery.setVariantSummary(SummaryUtils.germlineVariantSummary(gene, matchedAlt));
+                } else {
                     indicatorQuery.setVariantSummary(SummaryUtils.variantSummary(gene, matchedAlt,
                         new ArrayList<>(relevantAlterations), query));
-                } else {
-                    // Variant summary is mostly auto-generated and we don't have the logic in place yet for germline variants
-                    // so we are skipping this.
                 }
             }
 
