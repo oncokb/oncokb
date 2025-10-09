@@ -20,13 +20,17 @@ services:
         -Doncokb_transcript.token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYXV0aCI6IlJPTEVfQURNSU4iLCJpYXQiOjE1MTYyMzkwMjJ9.XHIcA76cAnkgEIeJhyK9hyOrTsQhP3B5aUkVa4fkO6s
         -Dgenome_nexus.grch37.url=http://gn-spring-boot:8888
         -Dgenome_nexus.grch38.url=http://gn-spring-boot-grch38:8888
+        -Dlog4j.configuration=file:/config/log4j.properties
+    volumes:
+      # Update this path to your log4j properties file
+      - /path/to/log4j.properties:/config/log4j.properties:ro
     depends_on:
       - "oncokb-transcript"
 
   # oncokb-transcript requires a MySQL server and oncokb-transcript data imported into the database.
   # Reach out to contact@oncokb.org to get access to the data dump
   oncokb-transcript:
-    image: mskcc/oncokb-transcript:1.0.0
+    image: mskcc/oncokb-transcript:0.9.4
     ports:
       - "9090:9090"
     environment:
