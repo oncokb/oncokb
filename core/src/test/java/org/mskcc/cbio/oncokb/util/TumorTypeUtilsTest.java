@@ -63,7 +63,7 @@ public class TumorTypeUtilsTest extends TestCase {
         assertEquals(expectedResult, tumorTypesToString(tumorTypes));
 
         tumorTypes = TumorTypeUtils.findRelevantTumorTypes("MEL", false, RelevantTumorTypeDirection.DOWNWARD);
-        expectedResult = "Melanoma, M:Melanoma, Acral Melanoma, Congenital Nevus, Lentigo Maligna Melanoma, Cutaneous Melanoma, Melanoma of Unknown Primary, Desmoplastic Melanoma, Spitzoid Melanoma, M:All Solid Tumors, M:All Tumors";
+        expectedResult = "Melanoma, M:Melanoma, Acral Melanoma, Spitzoid Melanoma, Cutaneous Melanoma, Melanoma of Unknown Primary, Desmoplastic Melanoma, Congenital Nevus, Lentigo Maligna Melanoma, M:All Solid Tumors, M:All Tumors";
         assertEquals(expectedResult, tumorTypesToString(tumorTypes));
 
         tumorTypes = TumorTypeUtils.findRelevantTumorTypes("Melanoma", true, RelevantTumorTypeDirection.UPWARD);
@@ -83,7 +83,7 @@ public class TumorTypeUtilsTest extends TestCase {
         expectedResult = "M:Soft Tissue Sarcoma, M:All Tumors";
         assertEquals(expectedResult, tumorTypesToString(tumorTypes));
         // 863 subtypes, 117 main types, 7 special tumor types
-        assertEquals(987, ApplicationContextSingleton.getTumorTypeBo().getAllTumorTypes().size());
+        assertEquals(1034, ApplicationContextSingleton.getTumorTypeBo().getAllTumorTypes().size());
     }
 
     // Is solid tumor is decided on tissue level
@@ -228,17 +228,17 @@ public class TumorTypeUtilsTest extends TestCase {
         testEvi.setLevelOfEvidence(LevelOfEvidence.LEVEL_1);
         testEvi.setExcludedCancerTypes(new HashSet<>());
         cancerTypes = TumorTypeUtils.findEvidenceRelevantCancerTypes(testEvi);
-        assertEquals(983, cancerTypes.size());
+        assertEquals(1030, cancerTypes.size());
 
         testEvi.setCancerTypes(Collections.singleton(ApplicationContextSingleton.getTumorTypeBo().getBySpecialTumor(SpecialTumorType.ALL_LIQUID_TUMORS)));
         testEvi.setLevelOfEvidence(LevelOfEvidence.LEVEL_1);
         cancerTypes = TumorTypeUtils.findEvidenceRelevantCancerTypes(testEvi);
-        assertEquals(242, cancerTypes.size());
+        assertEquals(253, cancerTypes.size());
 
         testEvi.setCancerTypes(Collections.singleton(ApplicationContextSingleton.getTumorTypeBo().getBySpecialTumor(SpecialTumorType.ALL_SOLID_TUMORS)));
         testEvi.setLevelOfEvidence(LevelOfEvidence.LEVEL_1);
         cancerTypes = TumorTypeUtils.findEvidenceRelevantCancerTypes(testEvi);
-        assertEquals(742, cancerTypes.size());
+        assertEquals(779, cancerTypes.size());
     }
 
     private String tumorTypesToString(List<TumorType> tumorTypes) {

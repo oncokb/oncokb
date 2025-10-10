@@ -120,14 +120,14 @@ ABL1	BCR-ABL1 Fusion	B-Lymphoblastic Leukemia/Lymphoma	1: Imatinib; 1: Dasatinib
 ABL1	BCR-ABL1 Fusion	Chronic Myelogenous Leukemia	1: Imatinib; 1: Nilotinib; 1: Dasatinib; 1: Bosutinib; 1: Asciminib;
 ABL1	BCR-ABL1 Fusion	Acute Myeloid Leukemia
 IDH1	R132H	Acute Myeloid Leukemia	1: Ivosidenib; 1: Olutasidenib;
-IDH1	R132H	Glioblastoma	3A: Ivosidenib; 3B: Vorasidenib;
+IDH1	R132H	Glioblastoma, IDH-Wildtype	3A: Ivosidenib; 3B: Vorasidenib;
 IDH1	R132H	B-Lymphoblastic Leukemia/Lymphoma
 IDH1	R132H	Therapy-Related Acute Myeloid Leukemia	1: Ivosidenib; 1: Olutasidenib;
 IDH2	R172K	Acute Myeloid Leukemia	1: Enasidenib;
 IDH2	R172K	Melanoma	3B: Vorasidenib;
 MAP2K1	K57N	Erdheim-Chester Disease	2: Cobimetinib; 2: Trametinib;
 MAP2K1	K57N	Lung Adenocarcinoma	3A: Trametinib; 3A: Cobimetinib;
-MAP2K1	K57N	Glioblastoma	3B: Trametinib; 3B: Cobimetinib;
+MAP2K1	K57N	Glioblastoma, IDH-Wildtype	3B: Trametinib; 3B: Cobimetinib;
 #MAP2K1	K57N	Diffuse Large B-Cell Lymphoma, NOS
 PIK3CA	E545K	Breast Cancer	1: Alpelisib+Fulvestrant; 1: Inavolisib+Palbociclib+Fulvestrant; 1: Capivasertib+Fulvestrant; 4: RLY-2608; 4: RLY-2608+Fulvestrant;
 PIK3CA	E545K	Ovarian Cancer	3B: Alpelisib+Fulvestrant; 3B: Inavolisib+Palbociclib+Fulvestrant; 3B: Capivasertib+Fulvestrant; 4: RLY-2608;
