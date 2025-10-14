@@ -984,7 +984,7 @@ public class SummaryUtils {
             || StringUtils.containsIgnoreCase(queryAlteration, "del")
             || StringUtils.containsIgnoreCase(queryAlteration, "ins")
             || StringUtils.containsIgnoreCase(queryAlteration, "splice")
-            || MainUtils.isEGFRTruncatingVariants(queryAlteration)
+            || MainUtils.isEGFRTruncatingVariants(queryAlteration, alteration.getName())
         ) {
             if (NamingUtils.hasAbbreviation(queryAlteration)) {
                 sb.append(queryHugoSymbol).append(" ").append(NamingUtils.getFullName(queryAlteration)).append(" (").append(queryAlteration).append(")");
@@ -1056,7 +1056,7 @@ public class SummaryUtils {
                 || StringUtils.containsIgnoreCase(queryAlteration, "ins")
                 || StringUtils.containsIgnoreCase(queryAlteration, "splice")
                 || NamingUtils.hasAbbreviation(queryAlteration)
-                || MainUtils.isEGFRTruncatingVariants(queryAlteration)
+                || MainUtils.isEGFRTruncatingVariants(queryAlteration, alteration.getName())
             ) {
                 sb.append(queryAlteration + " altered");
             } else if (!queryAlteration.endsWith("mutation")) {

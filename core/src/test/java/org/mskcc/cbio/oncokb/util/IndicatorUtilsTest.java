@@ -299,19 +299,19 @@ public class IndicatorUtilsTest {
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null, false);
         assertEquals("The Oncogenicity is not oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The variant summary is not expected.", "The EGFR kinase domain duplication (KDD) is known to be oncogenic.", indicatorQueryResp.getVariantSummary());
-        assertEquals("The highest sensitive level should be 1", LevelOfEvidence.LEVEL_3A, indicatorQueryResp.getHighestSensitiveLevel());
+        assertEquals("The highest sensitive level should be 1", LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
 
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "EGFR", "KDD", "structural_variant", StructuralVariantType.DELETION, "NSCLC", null, null, null, null, false, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null, false);
         assertEquals("The Oncogenicity is not oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The variant summary is not expected.", "The EGFR kinase domain duplication (KDD) is known to be oncogenic.", indicatorQueryResp.getVariantSummary());
-        assertEquals("The highest sensitive level should be 1", LevelOfEvidence.LEVEL_3A, indicatorQueryResp.getHighestSensitiveLevel());
+        assertEquals("The highest sensitive level should be 1", LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
 
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "EGFR", "kinase domain duplication", null, null, "NSCLC", null, null, null, null, false, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null, false);
         assertEquals("The Oncogenicity is not oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The variant summary is not expected.", "The EGFR kinase domain duplication is known to be oncogenic.", indicatorQueryResp.getVariantSummary());
-        assertEquals("The highest sensitive level should be 1", LevelOfEvidence.LEVEL_3A, indicatorQueryResp.getHighestSensitiveLevel());
+        assertEquals("The highest sensitive level should be 1", LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
 
         // Check FLT3 ITD
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "FLT3", "ITD", null, null, "AML", null, null, null, null, false, null, null);
@@ -442,16 +442,16 @@ public class IndicatorUtilsTest {
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "EGFR", "C797S", null, null, "Lung Adenocarcinoma", null, null, null, null, false, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null, false);
         assertEquals("The oncogenicity should be 'Resistance'", Oncogenicity.RESISTANCE.getOncogenic(), indicatorQueryResp.getOncogenic());
-        assertEquals("The highest sensitive level should be 4",
-            null, indicatorQueryResp.getHighestSensitiveLevel());
+        assertEquals("The highest sensitive level should be 1",
+            LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
         assertEquals("The highest resistance level should be R1",
             LevelOfEvidence.LEVEL_R2, indicatorQueryResp.getHighestResistanceLevel());
 
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "EGFR", "Cys797Ser", null, null, "Lung Adenocarcinoma", null, null, null, null, false, null, null);
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null, false);
         assertEquals("The oncogenicity should be 'Resistance'", Oncogenicity.RESISTANCE.getOncogenic(), indicatorQueryResp.getOncogenic());
-        assertEquals("The highest sensitive level should be 4",
-            null, indicatorQueryResp.getHighestSensitiveLevel());
+        assertEquals("The highest sensitive level should be 1",
+            LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
         assertEquals("The highest resistance level should be R1",
             LevelOfEvidence.LEVEL_R2, indicatorQueryResp.getHighestResistanceLevel());
 

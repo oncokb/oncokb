@@ -1,5 +1,11 @@
 name: Build/Push no-frontend docker image
 on:
+  workflow_dispatch:
+    inputs:
+      tag-name:
+        description: "Tag name to use for the image must start with a v"
+        required: true
+        type: string
   release:
     types: [published]
 jobs:
@@ -22,8 +28,8 @@ jobs:
         env:
           DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}
           DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
-          TAG_NAME: ${{ github.event.release.tag_name }}
-          REPOSITORY: ${{ github.repository }}
+          TAG_NAME: ${{ inputs.tag-name || github.event.release.tag_name }}
+          REPOSITORY: mskcc/oncokb
         run: |
           mvn -ntp package -P public-api,image-build \
           -DskipTests \

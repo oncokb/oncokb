@@ -357,22 +357,30 @@ public class IndicatorUtils {
                 }
             }
 
-            // Set hotspot oncogenicity to Likely Oncogenic
-            if (indicatorQuery.getHotspot() && !MainUtils.isValidHotspotOncogenicity(Oncogenicity.getByEffect(indicatorQuery.getOncogenic()))) {
-                indicatorQuery.setOncogenic(Oncogenicity.LIKELY.getOncogenic());
-
-                // Check whether the gene has Oncogenic Mutations annotated
-                List<Alteration> oncogenicMutations = new ArrayList<>(AlterationUtils.findOncogenicMutations(AlterationUtils.getAllAlterations(query.getReferenceGenome(), gene)));
-                if (!oncogenicMutations.isEmpty()) {
-                    relevantAlterations.addAll(oncogenicMutations);
-                    if (hasTreatmentEvidence) {
-                        if (StringUtils.isEmpty(query.getTumorType())) {
-                            treatmentEvidences.addAll(EvidenceUtils.getEvidence(oncogenicMutations, selectedTreatmentEvidence, levels));
-                        } else {
-                            treatmentEvidences.addAll(EvidenceUtils.keepHighestLevelForSameTreatments(
-                                EvidenceUtils.convertEvidenceLevel(
-                                    EvidenceUtils.getEvidence(oncogenicMutations,
-                                        selectedTreatmentEvidence, levels), new HashSet<>(relevantUpwardTumorTypes)), query.getReferenceGenome(), matchedAlt));
+            Boolean isValidHotspotOncogenicity = MainUtils.isValidHotspotOncogenicity(Oncogenicity.getByEffect(indicatorQuery.getOncogenic()));
+            if (indicatorQuery.getHotspot()) {
+                if (isValidHotspotOncogenicity && !indicatorQuery.getVariantExist()) {
+                    // The oncogenicity of an uncurated variant can be Oncogenic if it has a relevant alteration that is Oncogenic
+                    // For uncurated hotspot mutations, we want to cap it at Likely Oncogenic
+                    if (Oncogenicity.YES.getOncogenic().equals(indicatorQuery.getOncogenic())) {
+                        indicatorQuery.setOncogenic(Oncogenicity.LIKELY.getOncogenic());
+                    }
+                } else if (!isValidHotspotOncogenicity) {
+                    // If oncogenicity is invalid, then we want to override to Likely Oncogenic for hotspot mutations
+                    indicatorQuery.setOncogenic(Oncogenicity.LIKELY.getOncogenic());
+            
+                    List<Alteration> oncogenicMutations = new ArrayList<>(AlterationUtils.findOncogenicMutations(AlterationUtils.getAllAlterations(query.getReferenceGenome(), gene)));
+                    if (!oncogenicMutations.isEmpty()) {
+                        relevantAlterations.addAll(oncogenicMutations);
+                        if (hasTreatmentEvidence) {
+                            if (StringUtils.isEmpty(query.getTumorType())) {
+                                treatmentEvidences.addAll(EvidenceUtils.getEvidence(oncogenicMutations, selectedTreatmentEvidence, levels));
+                            } else {
+                                treatmentEvidences.addAll(EvidenceUtils.keepHighestLevelForSameTreatments(
+                                    EvidenceUtils.convertEvidenceLevel(
+                                        EvidenceUtils.getEvidence(oncogenicMutations,
+                                            selectedTreatmentEvidence, levels), new HashSet<>(relevantUpwardTumorTypes)), query.getReferenceGenome(), matchedAlt, matchedTumorType));
+                            }
                         }
                     }
                 }
