@@ -321,7 +321,7 @@ public class IndicatorUtils {
                     } else {
                         treatmentEvidences = EvidenceUtils.keepHighestLevelForSameTreatments(
                             EvidenceUtils.getRelevantEvidences(query, matchedAlt,
-                                selectedTreatmentEvidence, levels, relevantAlterationsWithoutAlternativeAlleles, alleles, geneQueryOnly), query.getReferenceGenome(), matchedAlt);
+                                selectedTreatmentEvidence, levels, relevantAlterationsWithoutAlternativeAlleles, alleles, geneQueryOnly), query.getReferenceGenome(), matchedAlt, matchedTumorType);
                     }
                 }
 
