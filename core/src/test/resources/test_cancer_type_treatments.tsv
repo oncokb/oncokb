@@ -50,11 +50,11 @@ PDGFRA	D842I	GIST	1: Avapritinib; 2: Imatinib; 2: Sunitinib; 2: Regorafenib; 2: 
 PDGFRA	D842I	Thymic Tumor	3B: Avapritinib; 3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Ripretinib;
 PDGFRA	D842V	GIST	R1: Imatinib; 1: Avapritinib; 2: Dasatinib; 2: Sunitinib; 2: Regorafenib; 2: Ripretinib;
 PDGFRA	D842V	Thymic Tumor	3B: Avapritinib; 3B: Dasatinib; 3B: Imatinib; 3B: Sunitinib; 3B: Regorafenib; 3B: Ripretinib;
-EGFR	A763_Y764insFQEA	NSCLC	1: Amivantamab; 1: Amivantamab+Chemotherapy; 2: Erlotinib; 3A: Poziotinib; 3A: Zipalertinib; 4: Afatinib;
+EGFR	A763_Y764insFQEA	NSCLC	1: Amivantamab; 1: Datopotamab Deruxtecan; 1: Sunvozertinib; 1: Amivantamab+Chemotherapy; 2: Erlotinib; 3A: Poziotinib; 3A: Zipalertinib; 4: Afatinib;
 # this one overlaps with A763_Y764insFQEA, but the rule only applies to exact match, so R1 will be used
-EGFR	Y764_D770dup	NSCLC	R1: Erlotinib; R1: Gefitinib; R1: Afatinib; 1: Amivantamab; 1: Amivantamab+Chemotherapy; 3A: Poziotinib; 3A: Zipalertinib;
+EGFR	Y764_D770dup	NSCLC	R1: Erlotinib; R1: Gefitinib; R1: Afatinib; 1: Amivantamab; 1: Datopotamab Deruxtecan; 1: Sunvozertinib; 1: Amivantamab+Chemotherapy; 3A: Poziotinib; 3A: Zipalertinib;
 # this one does not overlap with A763_Y764insFQEA, so R1 for sure
-EGFR	N771delinsSTH	Lung Adenocarcinoma	R1: Erlotinib; R1: Gefitinib; R1: Afatinib; 1: Amivantamab; 1: Amivantamab+Chemotherapy; 3A: Poziotinib; 3A: Zipalertinib;
+EGFR	N771delinsSTH	Lung Adenocarcinoma	R1: Erlotinib; R1: Gefitinib; R1: Afatinib; 1: Amivantamab; 1: Datopotamab Deruxtecan; 1: Sunvozertinib; 1: Amivantamab+Chemotherapy; 3A: Poziotinib; 3A: Zipalertinib;
 
 # test cases cover the resistance treatment should overwrite sensitive from alternative allele
 ABL1	T315I	Chronic Myelogenous Leukemia	R1: Imatinib; R1: Dasatinib; R1: Nilotinib; R1: Bosutinib; 1: Ponatinib; 1: Asciminib;
@@ -120,14 +120,14 @@ ABL1	BCR-ABL1 Fusion	B-Lymphoblastic Leukemia/Lymphoma	1: Imatinib; 1: Dasatinib
 ABL1	BCR-ABL1 Fusion	Chronic Myelogenous Leukemia	1: Imatinib; 1: Nilotinib; 1: Dasatinib; 1: Bosutinib; 1: Asciminib;
 ABL1	BCR-ABL1 Fusion	Acute Myeloid Leukemia
 IDH1	R132H	Acute Myeloid Leukemia	1: Ivosidenib; 1: Olutasidenib;
-IDH1	R132H	Glioblastoma	3A: Ivosidenib; 3B: Vorasidenib;
+IDH1	R132H	Glioblastoma, IDH-Wildtype	3A: Ivosidenib; 3B: Vorasidenib;
 IDH1	R132H	B-Lymphoblastic Leukemia/Lymphoma
 IDH1	R132H	Therapy-Related Acute Myeloid Leukemia	1: Ivosidenib; 1: Olutasidenib;
 IDH2	R172K	Acute Myeloid Leukemia	1: Enasidenib;
 IDH2	R172K	Melanoma	3B: Vorasidenib;
 MAP2K1	K57N	Erdheim-Chester Disease	2: Cobimetinib; 2: Trametinib;
 MAP2K1	K57N	Lung Adenocarcinoma	3A: Trametinib; 3A: Cobimetinib;
-MAP2K1	K57N	Glioblastoma	3B: Trametinib; 3B: Cobimetinib;
+MAP2K1	K57N	Glioblastoma, IDH-Wildtype	3B: Trametinib; 3B: Cobimetinib;
 #MAP2K1	K57N	Diffuse Large B-Cell Lymphoma, NOS
 PIK3CA	E545K	Breast Cancer	1: Alpelisib+Fulvestrant; 1: Inavolisib+Palbociclib+Fulvestrant; 1: Capivasertib+Fulvestrant; 4: RLY-2608; 4: RLY-2608+Fulvestrant;
 PIK3CA	E545K	Ovarian Cancer	3B: Alpelisib+Fulvestrant; 3B: Inavolisib+Palbociclib+Fulvestrant; 3B: Capivasertib+Fulvestrant; 4: RLY-2608;
@@ -167,9 +167,9 @@ AKT1	E17K	Breast Cancer   1: Capivasertib+Fulvestrant; 3B: Capivasertib;
 AKT1	E17K	NSCLC   3B: Capivasertib; 3B: Capivasertib+Fulvestrant;
 AKT1	E17G	Breast Cancer   1: Capivasertib+Fulvestrant;
 FGFR3	Y373C	Bladder Cancer	1: Erdafitinib; 4: Fexagratinib;
-FGFR3	Y373G	Bladder Cancer	2: Erdafitinib; 4: Fexagratinib;
-EGFR	A750P	NSCLC
-EGFR	A750G	NSCLC
+FGFR3	Y373G	Bladder Cancer  2: Erdafitinib; 4: Fexagratinib;
+EGFR	A750P	NSCLC1  1: Datopotamab Deruxtecan;
+EGFR	A750G	NSCLC   1: Datopotamab Deruxtecan;
 MTOR	E2014K	Bladder Cancer	3A: Everolimus; 4: Temsirolimus;
 MTOR	E2014L	Bladder Cancer	4: Everolimus; 4: Temsirolimus;
 MTOR	E2014K	NSCLC	3B: Everolimus; 4: Temsirolimus;
@@ -178,11 +178,11 @@ ABL1	Y253H	TLL
 ABL1	Y253M	CML
 BRAF	L597R	Melanoma	3A: Trametinib; 4: Plixorafenib;
 BRAF	L597M	NSCLC	3B: Trametinib; 4: Plixorafenib;
-EGFR	L861Q	NSCLC	1: Afatinib; 2: Dacomitinib; 2: Erlotinib; 2: Osimertinib; 2: Gefitinib; 2: Amivantamab+Chemotherapy; 3A: Patritumab Deruxtecan; 3A: Amivantamab+Lazertinib;
-EGFR	L861R	NSCLC
-EGFR	L861M	NSCLC
-EGFR	G724S	NSCLC	3A: Afatinib; R2: Osimertinib;
-EGFR	G724S	MEL	3B: Afatinib;
+EGFR	L861Q	NSCLC	1: Afatinib; 1: Datopotamab Deruxtecan; 2: Dacomitinib; 2: Erlotinib; 2: Osimertinib; 2: Gefitinib; 2: Amivantamab+Chemotherapy; 3A: Patritumab Deruxtecan; 3A: Amivantamab+Lazertinib;
+EGFR	L861R	NSCLC   1: Datopotamab Deruxtecan;
+EGFR	L861M	NSCLC   1: Datopotamab Deruxtecan;
+EGFR	G724S	NSCLC	1: Datopotamab Deruxtecan; 3A: Afatinib; R2: Osimertinib;
+EGFR	G724S	MEL	3B: Afatinib; 3B: Datopotamab Deruxtecan;
 KRAS	G12C	NSCLC	1: Sotorasib; 1: Adagrasib; 3B: Adagrasib+Cetuximab; 3B: Adagrasib+Panitumumab; 3B: Avutometinib+Defactinib; 3B: Sotorasib+Cetuximab; 3B: Sotorasib+Panitumumab; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
 KRAS	G12C	Melanoma	3B: Adagrasib+Cetuximab; 3B: Adagrasib+Panitumumab; 3B: Avutometinib+Defactinib; 3B: Sotorasib; 3B: Adagrasib; 3B: Sotorasib+Cetuximab; 3B: Sotorasib+Panitumumab; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
 KRAS	G12A	NSCLC	3A: Daraxonrasib; 3B: Avutometinib+Defactinib; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;

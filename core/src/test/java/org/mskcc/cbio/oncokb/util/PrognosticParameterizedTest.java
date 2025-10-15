@@ -1,6 +1,5 @@
 package org.mskcc.cbio.oncokb.util;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -8,6 +7,9 @@ import org.mskcc.cbio.oncokb.apiModels.Implication;
 import org.mskcc.cbio.oncokb.model.IndicatorQueryResp;
 import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
 import org.mskcc.cbio.oncokb.model.Query;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -23,6 +25,7 @@ import static org.junit.Assert.assertEquals;
  */
 @RunWith(Parameterized.class)
 public class PrognosticParameterizedTest {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PrognosticParameterizedTest.class);
     private static String TUMOR_TYPE_SUMMARY_EXAMPLES_PATH = "src/test/resources/test_prognostic.tsv";
 
     private String gene;
@@ -67,7 +70,7 @@ public class PrognosticParameterizedTest {
 
     private static List<String[]> importer() throws IOException {
         if (TUMOR_TYPE_SUMMARY_EXAMPLES_PATH == null) {
-            System.out.println("Please specify the testing file path");
+            LOGGER.error("Please specify the testing file path");
             return null;
         }
 
@@ -95,13 +98,13 @@ public class PrognosticParameterizedTest {
                     queries.add(query);
                     count++;
                 } catch (Exception e) {
-                    System.err.println("Could not add line '" + line + "'. " + e);
+                    LOGGER.error("Could not add line '{}'. ", line, e);
                 }
             }
             line = buf.readLine();
         }
-        System.err.println("Contains " + count + " tumor type summary queries.");
-        System.err.println("Done.");
+        LOGGER.info("Contains {} tumor type summary queries.", count);
+        LOGGER.info("Done.");
 
         return queries;
     }

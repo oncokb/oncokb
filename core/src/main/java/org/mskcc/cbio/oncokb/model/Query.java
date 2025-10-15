@@ -2,12 +2,15 @@ package org.mskcc.cbio.oncokb.model;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.apiModels.annotation.*;
+import org.mskcc.cbio.oncokb.serializer.EntrezGeneIdConverter;
+import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.AminoAcidConverterUtils;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
 import org.mskcc.cbio.oncokb.util.QueryUtils;
@@ -32,6 +35,7 @@ public class Query implements java.io.Serializable {
     private String hugoSymbol;
 
     @ApiModelProperty(value = "(Nullable) Unique gene identifiers from NCBI. May be null if omitted from original query, otherwise filled in by OncoKB")
+    @JsonSerialize(converter = EntrezGeneIdConverter.class)
     private Integer entrezGeneId;
 
     @ApiModelProperty(value = "(Nullable) Alteration from original query or the resolved alteration from HGVS variant")
@@ -194,10 +198,7 @@ public class Query implements java.io.Serializable {
     }
 
     public void setAlteration(String alteration) {
-        if (alteration != null) {
-            alteration = alteration.replace("p.", "");
-        }
-        this.alteration = AminoAcidConverterUtils.resolveHgvspShortFromHgvsp(alteration);;
+        this.alteration =  AlterationUtils.resolveProteinAlterationShort(alteration);
     }
 
     public String getAlterationType() {

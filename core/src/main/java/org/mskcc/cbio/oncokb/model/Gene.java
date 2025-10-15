@@ -3,7 +3,8 @@ package org.mskcc.cbio.oncokb.model;
 
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import io.swagger.annotations.ApiModelProperty;
+
+import org.mskcc.cbio.oncokb.serializer.EntrezGeneIdConverter;
 import org.mskcc.cbio.oncokb.serializer.SetGenesetInGeneConverter;
 
 import javax.persistence.*;
@@ -32,6 +33,7 @@ public class Gene implements Serializable {
 
     @Id
     @Column(name = "entrez_gene_id")
+    @JsonSerialize(converter = EntrezGeneIdConverter.class)
     private Integer entrezGeneId;
 
     @Column(name = "hugo_symbol", length = 50, unique = true)

@@ -12,11 +12,13 @@ target
 dist
 *.iml
 core/src/main/resources/properties
+core/src/main/resources/schema-export.sql
 core/src/main/resources/certificate
 core/src/main/resources/log4j.properties
 web/src/main/resources/certificate
 web/src/main/resources/sentry.properties
 api_test/golang/output
+unit_test/mysql_dumps
 
 # These files are coming from VS CODE while setting up
 .project

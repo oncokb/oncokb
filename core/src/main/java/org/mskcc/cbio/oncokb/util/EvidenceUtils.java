@@ -14,6 +14,7 @@ import org.mskcc.cbio.oncokb.model.*;
 import javax.xml.parsers.ParserConfigurationException;
 import java.util.*;
 import java.util.stream.Collector;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.*;
@@ -732,7 +733,7 @@ public class EvidenceUtils {
         return levels;
     }
 
-    public static Set<Evidence> keepHighestLevelForSameTreatments(Set<Evidence> evidences, ReferenceGenome referenceGenome, Alteration exactMatch) {
+    public static Set<Evidence> keepHighestLevelForSameTreatments(Set<Evidence> evidences, ReferenceGenome referenceGenome, Alteration exactMatch, TumorType matchedTumorType) {
         Map<String, Set<Evidence>> maps = new HashedMap();
         Set<Evidence> filtered = new HashSet<>();
 
@@ -751,6 +752,30 @@ public class EvidenceUtils {
                 filtered.add(evidence);
             }
         }
+
+        // If an evidence has a tumor type that is same as query, prioritize it, but keep resistance evidence
+        if (matchedTumorType != null) {
+            for (Entry<String, Set<Evidence>> entry : maps.entrySet()) {
+                Set<Evidence> evidencesMatchingCancerType = new LinkedHashSet<>(); 
+
+                for (Evidence evidence : entry.getValue()) {
+                    for (TumorType tumorType : evidence.getCancerTypes()) {
+                        if (tumorType.equals(matchedTumorType) 
+                            || evidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_R1)
+                            || evidence.getLevelOfEvidence().equals(LevelOfEvidence.LEVEL_R2)
+                        ) {
+                            evidencesMatchingCancerType.add(evidence);
+                            break;
+                        }
+                    }
+                }
+
+                if (evidencesMatchingCancerType.size() > 0) {
+                    maps.put(entry.getKey(), evidencesMatchingCancerType);
+                }
+            }
+        }
+        
 
         TumorType tumorTypeNA = new TumorType();
         tumorTypeNA.setSubtype("NA");
@@ -1025,7 +1050,7 @@ public class EvidenceUtils {
                         );
                     }
                 }
-                query.setEvidences(new ArrayList<>(StringUtils.isEmpty(query.getQuery().getTumorType()) ? updatedEvidences : keepHighestLevelForSameTreatments(updatedEvidences, requestQuery.getReferenceGenome(), query.getExactMatchedAlteration())));
+                query.setEvidences(new ArrayList<>(StringUtils.isEmpty(query.getQuery().getTumorType()) ? updatedEvidences : keepHighestLevelForSameTreatments(updatedEvidences, requestQuery.getReferenceGenome(), query.getExactMatchedAlteration(), query.getExactMatchedTumorType())));
                 evidenceQueries.add(query);
             }
         }

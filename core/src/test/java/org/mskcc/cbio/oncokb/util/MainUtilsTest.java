@@ -40,17 +40,29 @@ public class MainUtilsTest extends TestCase {
     }
 
     public void testIsEGFRTruncatingVariants() throws Exception {
-        assertTrue(MainUtils.isEGFRTruncatingVariants("vIVa"));
-        assertTrue(MainUtils.isEGFRTruncatingVariants("vIVb"));
-        assertTrue(MainUtils.isEGFRTruncatingVariants("vIVc"));
-        assertTrue(MainUtils.isEGFRTruncatingVariants("vII"));
-        assertTrue(MainUtils.isEGFRTruncatingVariants("vIII"));
-        assertTrue(MainUtils.isEGFRTruncatingVariants("vV"));
-        assertFalse(MainUtils.isEGFRTruncatingVariants("vIIIa"));
-        assertFalse(MainUtils.isEGFRTruncatingVariants("vIVd"));
-        assertFalse(MainUtils.isEGFRTruncatingVariants("vVi"));
-        assertFalse(MainUtils.isEGFRTruncatingVariants("test"));
-        assertFalse(MainUtils.isEGFRTruncatingVariants("EGFRvIVa"));
+        assertTrue(MainUtils.isEGFRTruncatingVariants("vIVa", null));
+        assertTrue(MainUtils.isEGFRTruncatingVariants("vIVb", null));
+        assertTrue(MainUtils.isEGFRTruncatingVariants("vIVc", null));
+        assertTrue(MainUtils.isEGFRTruncatingVariants("vII", null));
+        assertTrue(MainUtils.isEGFRTruncatingVariants("vIII", null));
+        assertTrue(MainUtils.isEGFRTruncatingVariants("vV", null));
+        assertFalse(MainUtils.isEGFRTruncatingVariants("vIIIa", null));
+        assertFalse(MainUtils.isEGFRTruncatingVariants("vIVd", null));
+        assertFalse(MainUtils.isEGFRTruncatingVariants("vVi", null));
+        assertFalse(MainUtils.isEGFRTruncatingVariants("test", null));
+        assertFalse(MainUtils.isEGFRTruncatingVariants("EGFRvIVa", null));
+
+        assertTrue(MainUtils.isEGFRTruncatingVariants(null, "vIVa"));
+        assertTrue(MainUtils.isEGFRTruncatingVariants(null, "vIVb"));
+        assertTrue(MainUtils.isEGFRTruncatingVariants(null, "vIVc"));
+        assertTrue(MainUtils.isEGFRTruncatingVariants(null, "vII"));
+        assertTrue(MainUtils.isEGFRTruncatingVariants(null, "vIII"));
+        assertTrue(MainUtils.isEGFRTruncatingVariants(null, "vV"));
+        assertFalse(MainUtils.isEGFRTruncatingVariants(null, "vIIIa"));
+        assertFalse(MainUtils.isEGFRTruncatingVariants(null, "vIVd"));
+        assertFalse(MainUtils.isEGFRTruncatingVariants(null, "vVi"));
+        assertFalse(MainUtils.isEGFRTruncatingVariants(null, "test"));
+        assertFalse(MainUtils.isEGFRTruncatingVariants(null, "EGFRvIVa"));
     }
 
     public void testReplaceLast() {

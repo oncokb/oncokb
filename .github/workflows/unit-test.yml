@@ -4,7 +4,8 @@ name: Unit Tests
 
 on:
   push:
-    branches: [ master, refactor , next-minor-release ]
+    branches: [master, refactor, next-minor-release]
+  pull_request:
 
 jobs:
   main:
@@ -16,11 +17,12 @@ jobs:
         run: sudo service mysql stop # Shutdown the Default MySQL, "sudo" is necessary, please not remove it
 
       - name: Set up MySQL
-        uses: mirromutth/mysql-action@v1.1
+        uses: shogo82148/actions-setup-mysql@v1
         with:
-          mysql version: '5.7'
-          mysql database: 'test'
-          mysql root password: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+          mysql-version: "8.0"
+          root-password: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+          my-cnf: |
+            default-authentication-plugin=mysql_native_password
 
       - name: Wait for MySQL
         env:
@@ -46,16 +48,14 @@ jobs:
 
       - uses: actions/setup-java@v2
         with:
-          distribution: 'adopt'
+          distribution: "adopt"
           java-version: 8
 
       - name: Run unit tests
         env:
           MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
         run: |
-          mvn -ntp test \
-          -Djdbc.driverClassName=com.mysql.jdbc.Driver \
-          -Djdbc.url=jdbc:mysql://127.0.0.1:3306/test \
+          mvn -ntp test -Djdbc.driverClassName=com.mysql.jdbc.Driver \
+          -Djdbc.url='jdbc:mysql://127.0.0.1:3306/test?useUnicode=yes&characterEncoding=UTF-8' \
           -Djdbc.username=root \
           -Djdbc.password=${MYSQL_ROOT_PASSWORD}
-

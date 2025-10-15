@@ -16,13 +16,17 @@ The core of OncoKB Annotation service.
 
 Please confirm your running environment is:
 
--   **Java version: 8**
--   **MySQL version: 8.0.36**
+- **Java version: 8**
+- **MySQL version: 8.0.36**
 
 ## Prepare properties files
 
 ```
 cp -r core/src/main/resources/properties-EXAMPLE core/src/main/resources/properties
+# Otherwise you will not see logs
+# You can also do -Dlog4j.configuration=file:core/src/main/resources/properties/log4j.properties
+# if you want to skip this step
+cp core/src/main/resources/properties-EXAMPLE/log4j.properties core/src/main/resources/log4j.properties
 ```
 
 ### Properties file
@@ -42,7 +46,7 @@ cp -r core/src/main/resources/properties-EXAMPLE core/src/main/resources/propert
 2. `public-api`: includes only public API endpoints
 3. `image-build`: uses Jib to generate a docker image and push to DockerHub
 
-> **_NOTE:_**  We deprecated the legacy `public` and `curate` profiles.
+> **_NOTE:_** We deprecated the legacy `public` and `curate` profiles.
 
 `mvn clean install -P <profile(s)> -DskipTests=true`
 
@@ -56,8 +60,10 @@ The WAR file is under `/web/target/`
 4. Either download Tomcat 8 on local machine or let CSC download for you.
 5. Right click Tomcat server and choose `Add Deployment`. This is the WAR file generated in the previous step.
 6. Edit the Tomcat server and add `"vm.install.path": "/path/to/java8"`.
-7. Start Tomcat server. Make sure to `Publish Server (Full)` to keep server synchronized with WAR file (if changes were made).
-8. Test the endpoint by making a request to `http://localhost:8080/app/api/v1/info`
+7. Set `"args.override.boolean": "true"` to ensure VM override arguments are applied.
+8. Append `-Dlog4j.configuration=\"file:/path/to/log4j.properties\"` to `"args.vm.override.string"` so Tomcat loads the correct Log4j configuration.
+9. Start Tomcat server. Make sure to `Publish Server (Full)` to keep server synchronized with WAR file (if changes were made).
+10. Test the endpoint by making a request to `http://localhost:8080/app/api/v1/info`
 
 ## Run with Docker containers
 
@@ -65,18 +71,17 @@ OncoKB™ is a precision oncology knowledge base developed at Memorial Sloan Ket
 
 OncoKB docker compose file consists of the following services:
 
--   OncoKB: provides variant annotations
--   OncoKB Transcript: serves OncoKB metadata including gene, transcript, sequence, etc.
--   Genome Nexus: provides annotation and interpretation of genetic variants in cancer
-
-    -   GRCh37 (optional):
-        -   gn-spring-boot: the backend service responsible for aggregating variant annotations from various sources
-        -   gn-mongo: variants fetched from external resources and small static data are cached in the MongoDB database
-        -   gn-vep: is a spring boot REST wrapper service for [VEP](https://github.com/Ensembl/ensembl-vep) using GRCh37 data
-    -   GRCh38 (optional):
-        -   gn-spring-boot-grch38: same as `gn-spring-boot` service, however the VEP URL points to `gn-vep-grch38`
-        -   gn-mongo-grch38: contains static data relevant to GRCh38
-        -   gn-vep-grch38: a spring boot REST wrapper service for VEP using GRCh38 data
+- OncoKB: provides variant annotations
+- OncoKB Transcript: serves OncoKB metadata including gene, transcript, sequence, etc.
+- Genome Nexus: provides annotation and interpretation of genetic variants in cancer
+    - GRCh37 (optional):
+        - gn-spring-boot: the backend service responsible for aggregating variant annotations from various sources
+        - gn-mongo: variants fetched from external resources and small static data are cached in the MongoDB database
+        - gn-vep: is a spring boot REST wrapper service for [VEP](https://github.com/Ensembl/ensembl-vep) using GRCh37 data
+    - GRCh38 (optional):
+        - gn-spring-boot-grch38: same as `gn-spring-boot` service, however the VEP URL points to `gn-vep-grch38`
+        - gn-mongo-grch38: contains static data relevant to GRCh38
+        - gn-vep-grch38: a spring boot REST wrapper service for VEP using GRCh38 data
 
 ### Option A: With Local installation of Genome Nexus
 
@@ -84,7 +89,7 @@ For this option, you need to download the VEP cache, which is used in the `gn-ve
 
 1. OncoKB requires a MySQL server and the `oncokb` and `oncokb-transcript` databases imported. This step must be completed before continuing the installation process. Reach out to contact@oncokb.org to get access to the data dump. [How to setup MySQL Server](#how-to-setup-mysql-server)
 
-2. Follow the [Genome Nexus VEP instructions](https://github.com/genome-nexus/genome-nexus-vep) for downloading and setting up the VEP MySQL server. 
+2. Follow the [Genome Nexus VEP instructions](https://github.com/genome-nexus/genome-nexus-vep) for downloading and setting up the VEP MySQL server.
 
 3. Run docker-compose to create containers.
     ```
@@ -101,7 +106,32 @@ For this option, you need to download the VEP cache, which is used in the `gn-ve
     docker-compose up -d
     ```
 
+#### Compatibility Matrix
+
+> [!WARNING]
+> To reduce costs, future Docker Hub images for `oncokb` and `oncokb-transcript`
+> will be hosted under the MSKCC Docker Hub organization. You can find their
+> new locations here:
+>
+> - [mskcc/oncokb](https://hub.docker.com/repository/docker/mskcc/oncokb/general)
+> - [mskcc/oncokb-transcript](https://hub.docker.com/repository/docker/mskcc/oncokb-transcript/general)
+
+> [!WARNING]
+> OncoKB uses a native password for MySQL. If you use MySQL 8.1
+> or above you must configure native passwords enabled as they no longer are
+> enabled by default.
+
+| oncokb | oncokb-transcript | gn-spring-boot | gn-mongo | genome-nexus-vep | MySQL  | Redis  | Oncokb Data |
+| ------ | ----------------- | -------------- | -------- | ---------------- | ------ | ------ | ----------- |
+| v3.x.x | v0.9.4            | v1.x.x         | v0.x     | v0.0.1           | v8.0.x | v7.x.x | v4.x.x      |
+| v4.x.x | v0.9.4            | v1.x.x         | v0.x     | v0.0.1           | v8.0.x | v7.x.x | v5.x.x      |
+
 ### Additional Information
+
+#### Running unit tests
+
+1. Continue to use `mvn test` command that connects to a local MySQL server defined in database.properties file. Note that some test cases will insert dummy data, so make sure the database is not used for any downstream workflows.
+2. Run tests using docker-compose by running `sh unit_test/scripts/run_docker_test.sh`. Make sure to add a mysql data dump file under `unit_test/mysql_dumps`
 
 #### Generating oncokb-transcript token
 
@@ -177,7 +207,7 @@ VEP_FASTAFILERELATIVEPATH=homo_sapiens/98_GRCh38/Homo_sapiens.GRCh38.dna.topleve
 
 2. Run MySQL container and attach to the network
    `docker run --name my-mysql -e MYSQL_ROOT_PASSWORD=root -p 3307:3306 --network mysql-test-network -d mysql:8`
-   We suggest using MySQL 8 since that is what we use in production. Our README still says 5.7.28, but we will update that shortly.
+   We suggest using MySQL 8 since that is what we use in production.
 
 3. If you already have a MySQL Docker container running, follow the steps to add network (otherwise skip)
 

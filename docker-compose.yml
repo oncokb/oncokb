@@ -6,7 +6,7 @@ services:
   # oncokb requires that a MySQL server is started and has the the oncokb data imported into the database.
   # Reach out to contact@oncokb.org to get access to the data dump
   oncokb:
-    image: oncokb/oncokb:3.29.1
+    image: mskcc/oncokb:4.3.0
     ports:
       - "8080:8080"
     environment:
@@ -20,13 +20,17 @@ services:
         -Doncokb_transcript.token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYXV0aCI6IlJPTEVfQURNSU4iLCJpYXQiOjE1MTYyMzkwMjJ9.XHIcA76cAnkgEIeJhyK9hyOrTsQhP3B5aUkVa4fkO6s
         -Dgenome_nexus.grch37.url=http://gn-spring-boot:8888
         -Dgenome_nexus.grch38.url=http://gn-spring-boot-grch38:8888
+        -Dlog4j.configuration=file:/config/log4j.properties
+    volumes:
+      # Update this path to your log4j properties file
+      - /path/to/log4j.properties:/config/log4j.properties:ro
     depends_on:
       - "oncokb-transcript"
 
   # oncokb-transcript requires a MySQL server and oncokb-transcript data imported into the database.
   # Reach out to contact@oncokb.org to get access to the data dump
   oncokb-transcript:
-    image: oncokb/oncokb-transcript:0.9.4
+    image: mskcc/oncokb-transcript:0.9.4
     ports:
       - "9090:9090"
     environment:
@@ -45,12 +49,12 @@ services:
     environment:
       - SERVER_PORT=8888
     command: >
-      java 
-      -Dgn_vep.region.url=http://gn-vep:8080/vep/human/region/VARIANT 
-      -Dspring.data.mongodb.uri=mongodb://gn-mongo:27017/annotator 
+      java
+      -Dgn_vep.region.url=http://gn-vep:8080/vep/human/region/VARIANT
+      -Dspring.data.mongodb.uri=mongodb://gn-mongo:27017/annotator
       -Dcache.enabled=true
       -Dvep.static=true
-      -jar 
+      -jar
       /app.war
     links:
       - gn-mongo
@@ -85,12 +89,12 @@ services:
     environment:
       - SERVER_PORT=8888
     command: >
-      java 
+      java
       -Dspring.data.mongodb.uri=mongodb://gn-mongo-grch38:27017/annotator
       -Dgn_vep.region.url=http://gn-vep-grch38:8080/vep/human/region/VARIANT
       -Dcache.enabled=true
       -Dvep.static=true
-      -jar 
+      -jar
       /app.war
     links:
       - gn-mongo-grch38
