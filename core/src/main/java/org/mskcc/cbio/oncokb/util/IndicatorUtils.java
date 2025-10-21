@@ -82,7 +82,7 @@ public class IndicatorUtils {
                     query.setTumorType("DMG");
                     break;
                 case "gbm":
-                case "glioblastoma":
+                case "glioblastoma multiforme":
                     query.setTumorType("GB");
                     break;
                 default:
