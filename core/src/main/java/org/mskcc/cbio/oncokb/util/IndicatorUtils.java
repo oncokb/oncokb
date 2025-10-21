@@ -65,6 +65,7 @@ public class IndicatorUtils {
              switch (query.getTumorType().toLowerCase()) {
                 case "aastr":
                 case "anaplastic astrocytoma":
+                case "astrocytoma":
                     query.setTumorType("ASTR");
                     break;
                 case "aoast":
@@ -75,6 +76,7 @@ public class IndicatorUtils {
                     break;
                 case "anaplastic oligodendroglioma":
                 case "aodg":
+                case "oligodendroglioma":
                     query.setTumorType("ODG");
                     break;
                 case "dipg":
@@ -83,6 +85,7 @@ public class IndicatorUtils {
                     break;
                 case "gbm":
                 case "glioblastoma multiforme":
+                case "glioblastoma":
                     query.setTumorType("GB");
                     break;
                 default:
