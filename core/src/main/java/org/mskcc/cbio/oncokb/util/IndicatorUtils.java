@@ -26,24 +26,6 @@ public class IndicatorUtils {
     public static IndicatorQueryResp processQuery(Query query,
                                                   Set<LevelOfEvidence> levels, Boolean highestLevelOnly,
                                                   Set<EvidenceType> evidenceTypes, Boolean geneQueryOnly) {
-        // TODO: remove this, it's a hardcoded fix for oncotree migration
-        switch (query.getTumorType()) {
-            case "AASTR":
-                query.setTumorType("ASTR");
-                break;
-            case "AOAST":
-            case "OAST":
-                query.setTumorType("GNOS");
-            case "AODG":
-                query.setTumorType("ODG");
-            case "DIPG":
-                query.setTumorType("DMG");
-            case "GBM":
-                query.setTumorType("GB");
-            default:
-                break;
-        }
-
         highestLevelOnly = highestLevelOnly == null ? false : highestLevelOnly;
 
         levels = levels == null ? LevelUtils.getPublicLevels() :
@@ -76,6 +58,26 @@ public class IndicatorUtils {
 
         if (query == null) {
             return indicatorQuery;
+        }
+
+        // TODO: remove this, it's a hardcoded fix for oncotree migration
+        if (query.getTumorType() != null) {
+             switch (query.getTumorType()) {
+                case "AASTR":
+                    query.setTumorType("ASTR");
+                    break;
+                case "AOAST":
+                case "OAST":
+                    query.setTumorType("GNOS");
+                case "AODG":
+                    query.setTumorType("ODG");
+                case "DIPG":
+                    query.setTumorType("DMG");
+                case "GBM":
+                    query.setTumorType("GB");
+                default:
+                    break;
+            }
         }
 
         query.enrich();
