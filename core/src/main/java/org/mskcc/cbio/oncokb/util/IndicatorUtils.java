@@ -60,6 +60,30 @@ public class IndicatorUtils {
             return indicatorQuery;
         }
 
+        // TODO: remove this, it's a hardcoded fix for oncotree migration
+        if (query.getTumorType() != null) {
+             switch (query.getTumorType()) {
+                case "AASTR":
+                    query.setTumorType("ASTR");
+                    break;
+                case "AOAST":
+                case "OAST":
+                    query.setTumorType("GNOS");
+                    break;
+                case "AODG":
+                    query.setTumorType("ODG");
+                    break;
+                case "DIPG":
+                    query.setTumorType("DMG");
+                    break;
+                case "GBM":
+                    query.setTumorType("GB");
+                    break;
+                default:
+                    break;
+            }
+        }
+
         query.enrich();
 
         // Temporary forward previous production annotation
