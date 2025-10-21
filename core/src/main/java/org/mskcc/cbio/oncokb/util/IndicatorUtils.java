@@ -69,12 +69,16 @@ public class IndicatorUtils {
                 case "AOAST":
                 case "OAST":
                     query.setTumorType("GNOS");
+                    break;
                 case "AODG":
                     query.setTumorType("ODG");
+                    break;
                 case "DIPG":
                     query.setTumorType("DMG");
+                    break;
                 case "GBM":
                     query.setTumorType("GB");
+                    break;
                 default:
                     break;
             }
