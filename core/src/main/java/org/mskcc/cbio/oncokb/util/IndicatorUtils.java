@@ -256,6 +256,7 @@ public class IndicatorUtils {
                     if (!mutationEffectEvis.isEmpty()) {
                         Evidence mutationEffectEvi = mutationEffectEvis.iterator().next();
                         MutationEffectResp mutationEffectResp = new MutationEffectResp();
+                        mutationEffectResp.setKnownEffect(mutationEffectEvi.getKnownEffect());
                         mutationEffectResp.setDescription(CplUtils.annotate(
                             mutationEffectEvi.getDescription(),
                             query.getHugoSymbol(),
@@ -270,7 +271,7 @@ public class IndicatorUtils {
                         indicatorQuery.setMutationEffect(mutationEffectResp);
                     }
                     
-                }else{
+                } else {
                     if (hasOncogenicEvidence) {
                         IndicatorQueryOncogenicity indicatorQueryOncogenicity = getOncogenicity(matchedAlt, alleles, nonVUSRelevantAlts);
 
