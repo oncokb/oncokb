@@ -102,7 +102,7 @@ public class CacheController {
                     break;
             }
         } catch (Exception e) {
-            LOGGER.error("Cache operation failed for cmd={} (propagation={})", cmd, propagation);
+            LOGGER.error("Cache operation failed for cmd={} (propagation={})", cmd, propagation, e);
             result.put("status", "error");
             result.put("message", "Exception during cache operation: " + e.getMessage());
         }
