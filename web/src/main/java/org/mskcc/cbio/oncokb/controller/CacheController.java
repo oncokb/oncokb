@@ -5,12 +5,15 @@
  */
 package org.mskcc.cbio.oncokb.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.apache.commons.collections.map.HashedMap;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.*;
-import org.mskcc.cbio.oncokb.model.TumorType;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -24,6 +27,8 @@ import java.util.*;
  */
 @Controller
 public class CacheController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CacheController.class);
+
     @RequestMapping(value = "/legacy-api/cache/getGeneCache", method = RequestMethod.GET, produces = "application/json")
     public
     @ResponseBody
@@ -57,42 +62,51 @@ public class CacheController {
         return result;
     }
 
-    @RequestMapping(value = "/legacy-api/cache", method = RequestMethod.POST, produces = "application/json")
-    public
+    @PostMapping(value = "/legacy-api/cache", produces = "application/json")
     @ResponseBody
-    Map<String, String> postAlteration(
-        HttpMethod method,
-        @RequestParam(value = "cmd", required = false) String cmd,
+    public Map<String, String> handleCacheCommand(
+        @RequestParam(value = "cmd", required = true) String cmd,
         @RequestParam(value = "entrezGeneIds", required = false) Set<Integer> entrezGeneIds,
         @RequestParam(value = "propagation", required = false, defaultValue = "false") Boolean propagation
-    ) throws IOException {
-        Map<String, String> result = new HashMap<>();
-        if (cmd != null) {
+    ) {
+        Map<String, String> result = new LinkedHashMap<>();
+    
+        if (cmd == null || cmd.isEmpty()) {
+            result.put("status", "error");
+            result.put("message", "Missing 'cmd' parameter");
+            return result;
+        }
+    
+        try {
             switch (cmd) {
                 case "reset":
-                    resetCache(propagation);
+                    CacheUtils.resetAll(propagation);
+                    result.put("status", "success");
+                    result.put("message", "All in memory caches reset");
                     break;
+    
                 case "updateGene":
+                    if (entrezGeneIds == null || entrezGeneIds.isEmpty()) {
+                        result.put("status", "error");
+                        result.put("message", "Missing or empty 'entrezGeneIds' for updateGene");
+                        return result;
+                    }
                     CacheUtils.updateGene(entrezGeneIds, propagation);
+                    result.put("status", "success");
+                    result.put("message", "Updated in memory cache");
                     break;
-                case "updateAbbreviationOntology":
-                    NamingUtils.cacheAllAbbreviations();
-                    break;
+    
                 default:
+                    result.put("status", "error");
+                    result.put("message", "Invalid command: " + cmd);
                     break;
             }
-        }
-        result.put("status", "success");
-        return result;
-    }
-
-    private Boolean resetCache(Boolean propagation) {
-        Boolean operation = true;
-        try {
-            CacheUtils.resetAll(propagation);
         } catch (Exception e) {
-            operation = false;
+            LOGGER.error("Cache operation failed for cmd={} (propagation={})", cmd, propagation);
+            result.put("status", "error");
+            result.put("message", "Exception during cache operation: " + e.getMessage());
         }
-        return operation;
+    
+        return result;
     }
 }
