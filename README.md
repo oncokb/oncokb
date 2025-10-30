@@ -123,8 +123,8 @@ For this option, you need to download the VEP cache, which is used in the `gn-ve
 
 | oncokb | oncokb-transcript | gn-spring-boot | gn-mongo | genome-nexus-vep | MySQL  | Redis  | Oncokb Data |
 | ------ | ----------------- | -------------- | -------- | ---------------- | ------ | ------ | ----------- |
-| v3.x.x | v0.9.4            | >v1.x.x         | v0.x     | >v0.0.1           | v8.0.x | v7.x.x | v4.x.x      |
-| v4.x.x | v0.9.4            | >v1.x.x         | v0.x     | >v0.0.1           | v8.0.x | v7.x.x | v5.x.x      |
+| v3.x.x | v0.9.4            | >=v1.x.x         | v0.x     | >=v0.0.1           | v8.0.x | v7.x.x | v4.x.x      |
+| v4.x.x | v0.9.4            | >=v1.x.x         | v0.x     | >=v0.0.1           | v8.0.x | v7.x.x | v5.x.x      |
 
 ### Additional Information
 
