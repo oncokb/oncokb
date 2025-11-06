@@ -19,7 +19,7 @@ services:
     networks:
       - testnet
   maven:
-    image: maven:3.8.6-openjdk-8
+    image: 3.8.6-eclipse-temurin-8
     container_name: maven-test-runner
     depends_on:
       mysql:
