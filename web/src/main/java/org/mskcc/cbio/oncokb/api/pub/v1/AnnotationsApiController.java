@@ -14,6 +14,7 @@ import org.mskcc.cbio.oncokb.config.annotation.PremiumPublicApi;
 import org.mskcc.cbio.oncokb.config.annotation.PublicApi;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.genomeNexus.TranscriptSummaryAlterationResult;
+import org.mskcc.cbio.oncokb.service.JsonResultFactory;
 import org.mskcc.cbio.oncokb.util.*;
 import org.oncokb.oncokb_transcript.ApiException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,7 +93,7 @@ public class AnnotationsApiController {
             );
         }
 
-        return new ResponseEntity<>(indicatorQueryResp, HttpStatus.OK);
+        return new ResponseEntity<>(JsonResultFactory.getIndicatorQueryRespWithoutGermline(indicatorQueryResp), HttpStatus.OK);
     }
 
     @PublicApi
@@ -111,7 +112,7 @@ public class AnnotationsApiController {
         if (body == null) {
             throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         } 
-        return new ResponseEntity<>(annotateMutationsByProteinChange(body), HttpStatus.OK);
+        return new ResponseEntity<>(JsonResultFactory.getIndicatorQueryRespWithoutGermline(annotateMutationsByProteinChange(body)), HttpStatus.OK);
     }
 
     // Annotate mutations by genomic change
@@ -143,12 +144,13 @@ public class AnnotationsApiController {
         query.setGenomicLocation(genomicLocation);
         query.setReferenceGenome(matchedRG);
         query.setTumorType(tumorType);
-        query.getGermlineQuery().setGermline(germline);
+        query.getGermlineQuery().setGermline(false);
+        query.getGermlineQuery().setAlleleState(null);
         query.setEvidenceTypes(new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
 
         indicatorQueryResp = annotateMutationsByGenomicChange(Collections.singletonList(query)).get(0);
 
-        return new ResponseEntity<>(indicatorQueryResp, HttpStatus.OK);
+        return new ResponseEntity<>(JsonResultFactory.getIndicatorQueryRespWithoutGermline(indicatorQueryResp), HttpStatus.OK);
     }
 
     private ReferenceGenome resolveMatchedRG(String referenceGenome) throws ApiHttpErrorException {
@@ -178,7 +180,7 @@ public class AnnotationsApiController {
         if (body == null) {
             throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>(annotateMutationsByGenomicChange(body), HttpStatus.OK);
+        return new ResponseEntity<>(JsonResultFactory.getIndicatorQueryRespWithoutGermline(annotateMutationsByGenomicChange(body)), HttpStatus.OK);
     }
 
     // Annotate mutations by HGVSg
@@ -213,12 +215,13 @@ public class AnnotationsApiController {
             query.setHgvsg(hgvsg);
             query.setReferenceGenome(matchedRG);
             query.setTumorType(tumorType);
-            query.getGermlineQuery().setGermline(germline);
+            query.getGermlineQuery().setGermline(false);
+            query.getGermlineQuery().setAlleleState(null);
             query.setEvidenceTypes(new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
 
             indicatorQueryResp = annotateMutationsByHGVSg(Collections.singletonList(query)).get(0);
         }
-        return new ResponseEntity<>(indicatorQueryResp, HttpStatus.OK);
+        return new ResponseEntity<>(JsonResultFactory.getIndicatorQueryRespWithoutGermline(indicatorQueryResp), HttpStatus.OK);
     }
 
     @PublicApi
@@ -237,13 +240,13 @@ public class AnnotationsApiController {
         if (body == null) {
             throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>(annotateMutationsByHGVSg(body), HttpStatus.OK);
+        return new ResponseEntity<>(JsonResultFactory.getIndicatorQueryRespWithoutGermline(annotateMutationsByHGVSg(body)), HttpStatus.OK);
     }
 
     // Annotate mutations by HGVSc
     @PublicApi
     @PremiumPublicApi
-    @ApiOperation(value = "", notes = "Annotate mutation by HGVSc.", response = IndicatorQueryResp.class)
+    @ApiOperation(value = "", notes = "Annotate mutation by HGVSc.", response = IndicatorQueryResp.class, hidden = true)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = IndicatorQueryResp.class),
         @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiHttpError.class)})
@@ -280,7 +283,7 @@ public class AnnotationsApiController {
 
     @PublicApi
     @PremiumPublicApi
-    @ApiOperation(value = "", notes = "Annotate mutations by HGVSc.", response = IndicatorQueryResp.class, responseContainer = "List")
+    @ApiOperation(value = "", notes = "Annotate mutations by HGVSc.", response = IndicatorQueryResp.class, responseContainer = "List", hidden = true)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = IndicatorQueryResp.class, responseContainer = "List"),
         @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiHttpError.class)})
@@ -337,7 +340,7 @@ public class AnnotationsApiController {
                 null,
                 null,
                 null,
-                germline,
+                false,
                 null,
                 null,
                 null,
@@ -345,7 +348,7 @@ public class AnnotationsApiController {
                 new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")),
                 false);
         }
-        return new ResponseEntity<>(indicatorQueryResp, HttpStatus.OK);
+        return new ResponseEntity<>(JsonResultFactory.getIndicatorQueryRespWithoutGermline(indicatorQueryResp), HttpStatus.OK);
     }
 
     @PublicApi
@@ -364,7 +367,7 @@ public class AnnotationsApiController {
         if (body == null) {
             throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>(annotateCopyNumberAlterations(body), HttpStatus.OK);
+        return new ResponseEntity<>(JsonResultFactory.getIndicatorQueryRespWithoutGermline(annotateCopyNumberAlterations(body)), HttpStatus.OK);
     }
 
     // Annotate structural variants
@@ -431,9 +434,9 @@ public class AnnotationsApiController {
             String fusionName = FusionUtils.getFusionName(geneA, geneB);
             indicatorQueryResp = this.cacheFetcher.processQuery(
                 matchedRG, null, fusionName, null, AlterationType.STRUCTURAL_VARIANT.name(), tumorType, isFunctionalFusion ? "fusion" : null, null, null, structuralVariantType, null,
-                germline, null, null, null, false, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")), false);
+                false, null, null, null, false, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")), false);
         }
-        return new ResponseEntity<>(indicatorQueryResp, HttpStatus.OK);
+        return new ResponseEntity<>(JsonResultFactory.getIndicatorQueryRespWithoutGermline(indicatorQueryResp), HttpStatus.OK);
     }
 
     @PublicApi
@@ -452,7 +455,7 @@ public class AnnotationsApiController {
         if (body == null) {
             throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>(annotateStructuralVariants(body), HttpStatus.OK);
+        return new ResponseEntity<>(JsonResultFactory.getIndicatorQueryRespWithoutGermline(annotateStructuralVariants(body)), HttpStatus.OK);
     }
 
     @PremiumPublicApi
