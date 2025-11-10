@@ -61,6 +61,39 @@ public class IndicatorUtils {
             return indicatorQuery;
         }
 
+        // TODO: remove this, it's a hardcoded fix for oncotree migration
+        if (query.getTumorType() != null) {
+             switch (query.getTumorType().toLowerCase()) {
+                case "aastr":
+                case "anaplastic astrocytoma":
+                case "astrocytoma":
+                    query.setTumorType("ASTR");
+                    break;
+                case "aoast":
+                case "anaplastic oligoastrocytoma":
+                case "oast":
+                case "oligoastrocytoma":
+                    query.setTumorType("GNOS");
+                    break;
+                case "anaplastic oligodendroglioma":
+                case "aodg":
+                case "oligodendroglioma":
+                    query.setTumorType("ODG");
+                    break;
+                case "dipg":
+                case "diffuse intrinsic pontine glioma":
+                    query.setTumorType("DMG");
+                    break;
+                case "gbm":
+                case "glioblastoma multiforme":
+                case "glioblastoma":
+                    query.setTumorType("GB");
+                    break;
+                default:
+                    break;
+            }
+        }
+
         query.enrich();
 
         // Temporary forward previous production annotation

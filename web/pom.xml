@@ -9,7 +9,7 @@
         <version>4.5.0-germline.0</version>
     </parent>
     <artifactId>web</artifactId>
-    <version>4.5.0-germline.0</version>
+    <version>4.5.0</version>
     <packaging>war</packaging>
 
     <name>OncoKB Web</name>
@@ -54,7 +54,7 @@
                         <version>3.3.0</version>
                         <configuration>
                             <from>
-                                <image>openjdk:8-jre</image>
+                                <image>eclipse-temurin:8-jre</image>
                                 <platforms>
                                     <platform>
                                         <architecture>amd64</architecture>

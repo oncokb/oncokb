@@ -123,8 +123,8 @@ For this option, you need to download the VEP cache, which is used in the `gn-ve
 
 | oncokb | oncokb-transcript | gn-spring-boot | gn-mongo | genome-nexus-vep | MySQL  | Redis  | Oncokb Data |
 | ------ | ----------------- | -------------- | -------- | ---------------- | ------ | ------ | ----------- |
-| v3.x.x | v0.9.4            | v1.x.x         | v0.x     | v0.0.1           | v8.0.x | v7.x.x | v4.x.x      |
-| v4.x.x | v0.9.4            | v1.x.x         | v0.x     | v0.0.1           | v8.0.x | v7.x.x | v5.x.x      |
+| v3.x.x | v0.9.4            | >=v1.x.x         | v0.x     | >=v0.0.1           | v8.0.x | v7.x.x | v4.x.x      |
+| v4.x.x | v0.9.4            | >=v1.x.x         | v0.x     | >=v0.0.1           | v8.0.x | v7.x.x | v5.x.x      |
 
 ### Additional Information
 
@@ -151,6 +151,17 @@ The docker compose file has a pre-generated oncokb-transcript [JWT](https://jwt.
 3. Replace `-Doncokb_transcript.token` with the JWT token you generated.
 
 #### Generating new VEP data
+
+## Genome Nexus >=2.0.0
+
+1. Follow the instructions from [genome-nexus-vep](https://github.com/genome-nexus/genome-nexus-vep) to download the Ensembl Data and set up a MySQL database.
+2. Modify the following environment variables for your Genome Nexus VEP deployment to point to your newly created database:
+    * MYSQL_USER
+    * MYSQL_PASSWORD
+    * MYSQL_HOST
+    * MYSQL_PORT
+
+## Genome Nexus <2.0.0
 
 OncoKB predownloads VEP data and saves it to AWS S3 bucket. These steps are for OncoKB developers and show how to download and upload new Ensembl VEP data to S3. However, you can follow along and
 save VEP data to your own S3 bucket.
