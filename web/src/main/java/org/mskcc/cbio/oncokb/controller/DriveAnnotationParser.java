@@ -244,11 +244,6 @@ public class DriveAnnotationParser {
                         parseGenomicIndicator(geneInfo.getJSONArray(GENOMIC_INDICATORS_KEY), gene, allAlterations);
                     }
 
-                    String GENE_INHERITANCE_MECHANISM_KEY = "inheritanceMechanism";
-                    if (geneInfo.has(GENE_INHERITANCE_MECHANISM_KEY)) {
-                        parseInheritanceMechanism(gene, geneInfo.getString(GENE_INHERITANCE_MECHANISM_KEY), geneInfo.getString(GENE_INHERITANCE_MECHANISM_KEY+"_uuid"), null);
-                    }
-
                     String GENE_PENETRANCE_KEY = "penetrance";
                     if (geneInfo.has(GENE_PENETRANCE_KEY)) {
                         parsePenetrance(gene, geneInfo.getString(GENE_PENETRANCE_KEY), geneInfo.getString(GENE_PENETRANCE_KEY+"_uuid"), null);
@@ -420,23 +415,6 @@ public class DriveAnnotationParser {
         return object.has(key) ? (object.getString(key).trim().isEmpty() ? null : object.getString(key).trim()) : null;
     }
 
-    private void parseInheritanceMechanism(Gene gene, String inheritanceMechanism, String uuid, Set<Alteration> alterations) {
-        if (StringUtils.isNotEmpty(inheritanceMechanism)) {
-            Evidence evidence = new Evidence();
-            evidence.setUuid(uuid);
-            evidence.setKnownEffect(inheritanceMechanism);
-            evidence.setGene(gene);
-            evidence.setForGermline(true);
-            if (alterations == null || alterations.isEmpty()) {
-                evidence.setEvidenceType(EvidenceType.GENE_INHERITANCE_MECHANISM);
-            } else {
-                evidence.setAlterations(alterations);
-                evidence.setEvidenceType(EvidenceType.VARIANT_INHERITANCE_MECHANISM);
-            }
-            ApplicationContextSingleton.getEvidenceBo().save(evidence);
-        }
-    }
-
     private void parsePenetrance(Gene gene, String penetrance, String uuid, Set<Alteration> alterations) {
         if (StringUtils.isNotEmpty(penetrance)) {
             Evidence evidence = new Evidence();
@@ -476,6 +454,7 @@ public class DriveAnnotationParser {
             evidence.setName(genomicIndicator.getString("name"));
             evidence.setUuid(genomicIndicator.getString("name_uuid"));
             evidence.setDescription(genomicIndicator.has(DESC_KEY) ? genomicIndicator.getString(DESC_KEY) : "");
+            setDocuments(evidence.getDescription(), evidence);
 
             if (genomicIndicator.has(INHERITANCE_MECHANISM_KEY)) {
                 String inheritanceMechanism = genomicIndicator.getString(INHERITANCE_MECHANISM_KEY);
@@ -611,12 +590,6 @@ public class DriveAnnotationParser {
             if (mutationObj.has(MUTATION_PENETRANCE_KEY)) {
                 JSONObject mutationPenetrance = mutationObj.getJSONObject(MUTATION_PENETRANCE_KEY);
                 saveEffectDescriptionEvidence(Boolean.TRUE, gene, alterations, EvidenceType.VARIANT_PENETRANCE, getJsonStringVal(mutationPenetrance, "penetrance"), getJsonStringVal(mutationPenetrance, "description"));
-            }
-
-            // Save germline mechanism of inheritance
-            if (mutationObj.has(MUTATION_INHERITANCE_MECHANISM_KEY)) {
-                JSONObject mutationInheritanceMechanism = mutationObj.getJSONObject(MUTATION_INHERITANCE_MECHANISM_KEY);
-                saveEffectDescriptionEvidence(Boolean.TRUE, gene, alterations, EvidenceType.VARIANT_INHERITANCE_MECHANISM, getJsonStringVal(mutationInheritanceMechanism, "inheritanceMechanism"), getJsonStringVal(mutationInheritanceMechanism, "description"));
             }
 
             // Save germline cancer risk

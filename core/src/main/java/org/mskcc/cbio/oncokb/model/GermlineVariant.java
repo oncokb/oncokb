@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GermlineVariant {
+    // TODO: We may need to return a GI object instead of just the name
+    // Think about this when designing new API
     List<String> genomicIndicators = new ArrayList<>();
     String penetrance = "";
     String penetranceDescription = "";
     String pathogenic = "";
     String description = "";
-    String inheritanceMechanism = "";
-    String inheritanceMechanismDescription = "";
     String cancerRisk = "";
     String clinVarId = "";
 
@@ -36,14 +36,6 @@ public class GermlineVariant {
 
     public void setPathogenic(String pathogenic) {
         this.pathogenic = pathogenic;
-    }
-
-    public String getInheritanceMechanism() {
-        return inheritanceMechanism;
-    }
-
-    public void setInheritanceMechanism(String inheritanceMechanism) {
-        this.inheritanceMechanism = inheritanceMechanism;
     }
 
     public String getCancerRisk() {
@@ -76,13 +68,5 @@ public class GermlineVariant {
 
     public void setPenetranceDescription(String penetranceDescription) {
         this.penetranceDescription = penetranceDescription;
-    }
-
-    public String getInheritanceMechanismDescription() {
-        return inheritanceMechanismDescription;
-    }
-
-    public void setInheritanceMechanismDescription(String inheritanceMechanismDescription) {
-        this.inheritanceMechanismDescription = inheritanceMechanismDescription;
     }
 }

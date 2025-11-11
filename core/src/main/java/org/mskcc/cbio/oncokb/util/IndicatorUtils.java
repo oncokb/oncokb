@@ -650,19 +650,6 @@ public class IndicatorUtils {
             germlineVariant.setCancerRisk(cancerRiskEvis.stream().map(evidence -> StringUtils.capitalize(evidence.getKnownEffect()) + " " + matchedAlt.getGene().getHugoSymbol() + " mutation carriers: " + evidence.getDescription()).collect(Collectors.joining("\n\n")));
         }
 
-        // Get inheritance mechanism info
-        List<Evidence> inheritanceMechanismEvis = EvidenceUtils.getEvidence(Collections.singletonList(matchedAlt), Collections.singleton(EvidenceType.VARIANT_INHERITANCE_MECHANISM), null);
-        if (inheritanceMechanismEvis.isEmpty()) {
-            inheritanceMechanismEvis.addAll(EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(matchedAlt.getGene(), Collections.singleton(EvidenceType.GENE_INHERITANCE_MECHANISM)));
-        } else {
-            sortGermlineEvidenceByAlterationSize(inheritanceMechanismEvis);
-        }
-        if (!inheritanceMechanismEvis.isEmpty()) {
-            Evidence inheritanceMechanismEvi = inheritanceMechanismEvis.iterator().next();
-            germlineVariant.setInheritanceMechanism(inheritanceMechanismEvi.getKnownEffect());
-            germlineVariant.setInheritanceMechanismDescription(StringUtils.isEmpty(inheritanceMechanismEvi.getDescription()) ? "" : inheritanceMechanismEvi.getDescription());
-        }
-
         // Get genomic indicator
         List<Alteration> alts = new ArrayList<>();
         alts.add(matchedAlt);
