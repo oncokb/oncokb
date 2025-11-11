@@ -321,15 +321,15 @@ public class EvidenceUtils {
         return result;
     }
 
-    public static List<Evidence> getGenomicIndicatorsByAlteration(List<Alteration> alterations, String alleleState) {
+    public static List<Evidence> getGenomicIndicatorsByAlteration(List<Alteration> alterations, String inheritanceMechanism) {
         List<Evidence> genomicIndicatorEvis = EvidenceUtils.getEvidence(alterations, Collections.singleton(EvidenceType.GENOMIC_INDICATOR), null);
-        if (StringUtils.isNotEmpty(alleleState)) {
-            genomicIndicatorEvis = genomicIndicatorEvis.stream().filter(evidence -> StringUtils.isEmpty(evidence.getKnownEffect()) || evidence.getKnownEffect().toLowerCase().contains(alleleState)).collect(Collectors.toList());
+        if (StringUtils.isNotEmpty(inheritanceMechanism)) {
+            genomicIndicatorEvis = genomicIndicatorEvis.stream().filter(evidence -> StringUtils.isEmpty(evidence.getKnownEffect()) || evidence.getKnownEffect().toLowerCase().contains(inheritanceMechanism)).collect(Collectors.toList());
         }
         return genomicIndicatorEvis;
     }
 
-    public static List<Evidence> getGenomicIndicatorAssociatedWithPathogenicVariants(Gene gene, ReferenceGenome referenceGenome, String alleleState) {
+    public static List<Evidence> getGenomicIndicatorAssociatedWithPathogenicVariants(Gene gene, ReferenceGenome referenceGenome, String inheritanceMechanism) {
         List<Alteration> pathogenicAlterations = AlterationUtils
             .getAllAlterations(referenceGenome, gene)
             .stream().filter(alt -> {
@@ -337,8 +337,8 @@ public class EvidenceUtils {
             })
             .collect(Collectors.toList());
         List<Evidence> genomicIndicatorEvis = evidenceBo.findEvidencesByAlteration(pathogenicAlterations, Collections.singleton(EvidenceType.GENOMIC_INDICATOR));
-        if (StringUtils.isNotEmpty(alleleState)) {
-            genomicIndicatorEvis = genomicIndicatorEvis.stream().filter(evidence -> StringUtils.isEmpty(evidence.getKnownEffect()) || evidence.getKnownEffect().toLowerCase().contains(alleleState)).collect(Collectors.toList());
+        if (StringUtils.isNotEmpty(inheritanceMechanism)) {
+            genomicIndicatorEvis = genomicIndicatorEvis.stream().filter(evidence -> StringUtils.isEmpty(evidence.getKnownEffect()) || evidence.getKnownEffect().toLowerCase().contains(inheritanceMechanism)).collect(Collectors.toList());
         }
         return genomicIndicatorEvis;
     }

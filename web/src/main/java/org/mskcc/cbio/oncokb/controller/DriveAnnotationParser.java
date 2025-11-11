@@ -56,11 +56,11 @@ public class DriveAnnotationParser {
     private static final String FDA_LEVEL_KEY = "fdaLevel";
     private static final String EXCLUDED_RCTS_KEY = "excludedRCTs";
 
-    private static String ALLELE_STATES_BIALLELIC = "biallelic";
-    private static String ALLELE_STATES_MONOALLELIC = "monoallelic";
-    private static String ALLELE_STATES_MOSAIC = "mosaic";
-    private static String ALLELE_STATES_CARRIER = "carrier";
-    private static String[] ALLELE_STATE_CHECKS = new String[]{ALLELE_STATES_BIALLELIC, ALLELE_STATES_MONOALLELIC, ALLELE_STATES_MOSAIC, ALLELE_STATES_CARRIER};
+    private static String INHERITANCE_MECHANISM_AUTOSOMAL_DOMINANT = "autosomal dominant";
+    private static String INHERITANCE_MECHANISM_RECESSIVE = "autosomal recessive";
+    private static String INHERITANCE_MECHANISM_X_LINKED_RECESSIVE = "x-linked recessive";
+    private static String INHERITANCE_MECHANISM_CARRIER = "carrier";
+    private static String[] INHERITANCE_MECHANISM_CHECKS = new String[]{INHERITANCE_MECHANISM_AUTOSOMAL_DOMINANT, INHERITANCE_MECHANISM_RECESSIVE, INHERITANCE_MECHANISM_X_LINKED_RECESSIVE, INHERITANCE_MECHANISM_CARRIER};
 
     public void parseVUS(Boolean germline, Gene gene, JSONArray vus, Integer nestLevel) throws JSONException {
         LOGGER.info("{} Variants of unknown significance", spaceStrByNestLevel(nestLevel));
@@ -457,7 +457,7 @@ public class DriveAnnotationParser {
     private void parseGenomicIndicator(JSONArray genomicIndicators, Gene gene, Set<Alteration> fullAlterations) {
         String ASSO_VARS_KEY = "associationVariants";
         String DESC_KEY = "description";
-        String ALLELE_STATES_KEY = "allele_state";
+        String INHERITANCE_MECHANISM_KEY = "inheritanceMechanism";
 
         EvidenceBo evidenceBo = ApplicationContextSingleton.getEvidenceBo();
 
@@ -477,10 +477,20 @@ public class DriveAnnotationParser {
             evidence.setUuid(genomicIndicator.getString("name_uuid"));
             evidence.setDescription(genomicIndicator.has(DESC_KEY) ? genomicIndicator.getString(DESC_KEY) : "");
 
-            if (genomicIndicator.has(ALLELE_STATES_KEY)) {
-                JSONObject alleleStatesObject = genomicIndicator.getJSONObject(ALLELE_STATES_KEY);
-                evidence.setKnownEffect(Arrays.stream(ALLELE_STATE_CHECKS).filter(alleleState -> alleleStatesObject.has(alleleState) && StringUtils.isNotEmpty(alleleStatesObject.getString(alleleState))).collect(Collectors.joining(",")));
+            if (genomicIndicator.has(INHERITANCE_MECHANISM_KEY)) {
+                String inheritanceMechanism = genomicIndicator.getString(INHERITANCE_MECHANISM_KEY);
+                
+                if (StringUtils.isNotEmpty(inheritanceMechanism)) {
+                    boolean isValid = Arrays.stream(InheritanceMechanism.values())
+                        .anyMatch(mechanism -> mechanism.getValue().equalsIgnoreCase(inheritanceMechanism));
+                    if (isValid) {
+                        evidence.setKnownEffect(inheritanceMechanism);
+                    } else {
+                        LOGGER.info("Invalid inheritance mechanism");
+                    }
+                }
             }
+
             evidenceBo.save(evidence);
         }
     }
@@ -610,14 +620,15 @@ public class DriveAnnotationParser {
             }
 
             // Save germline cancer risk
-            if (mutationObj.has(MUTATION_CANCER_RISK_KEY)) {
-                JSONObject cancerRisk = mutationObj.getJSONObject(MUTATION_CANCER_RISK_KEY);
-                for (String cancerRiskKey : ALLELE_STATE_CHECKS) {
-                    if (StringUtils.isNotEmpty(getJsonStringVal(cancerRisk, cancerRiskKey))) {
-                        saveEffectDescriptionEvidence(Boolean.TRUE, gene, alterations, EvidenceType.VARIANT_CANCER_RISK, cancerRiskKey, getJsonStringVal(cancerRisk, cancerRiskKey));
-                    }
-                }
-            }
+            // Todo: Figure out what to do with allele state in cancer risk section
+            // if (mutationObj.has(MUTATION_CANCER_RISK_KEY)) {
+            //     JSONObject cancerRisk = mutationObj.getJSONObject(MUTATION_CANCER_RISK_KEY);
+            //     for (String cancerRiskKey : ALLELE_STATE_CHECKS) {
+            //         if (StringUtils.isNotEmpty(getJsonStringVal(cancerRisk, cancerRiskKey))) {
+            //             saveEffectDescriptionEvidence(Boolean.TRUE, gene, alterations, EvidenceType.VARIANT_CANCER_RISK, cancerRiskKey, getJsonStringVal(cancerRisk, cancerRiskKey));
+            //         }
+            //     }
+            // }
 
             // cancers
             if (mutationObj.has("tumors")) {
