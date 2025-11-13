@@ -263,7 +263,7 @@ public class CacheFetcher {
                                            StructuralVariantType svType,
                                            String hgvs,
                                            Boolean isGermline,
-                                           String alleleState,
+                                           String inheritanceMechanism,
                                            Pathogenicity pathogenicity,
                                            Set<LevelOfEvidence> levels,
                                            Boolean highestLevelOnly,
@@ -272,7 +272,7 @@ public class CacheFetcher {
         if (referenceGenome == null) {
             referenceGenome = DEFAULT_REFERENCE_GENOME;
         }
-        Query query = new Query(null, referenceGenome, entrezGeneId, hugoSymbol, alteration, alterationType, svType, tumorType, consequence, proteinStart, proteinEnd, hgvs, isGermline, alleleState, pathogenicity);
+        Query query = new Query(null, referenceGenome, entrezGeneId, hugoSymbol, alteration, alterationType, svType, tumorType, consequence, proteinStart, proteinEnd, hgvs, isGermline, inheritanceMechanism, pathogenicity);
         return IndicatorUtils.processQuery(
             query, levels, highestLevelOnly,
             evidenceTypes, geneQueryOnly

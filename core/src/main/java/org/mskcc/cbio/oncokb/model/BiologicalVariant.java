@@ -25,7 +25,6 @@ public class BiologicalVariant {
     private Set<String> pathogenicPmids = new HashSet<>();
     private Set<ArticleAbstract> pathogenicAbstracts = new HashSet<>();
     private String penetrance = null;
-    private String inheritanceMechanism = null;
     private String cancerRisk = null;
 
 
@@ -152,14 +151,6 @@ public class BiologicalVariant {
         this.penetrance = penetrance;
     }
 
-    public String getInheritanceMechanism() {
-        return inheritanceMechanism;
-    }
-
-    public void setInheritanceMechanism(String inheritanceMechanism) {
-        this.inheritanceMechanism = inheritanceMechanism;
-    }
-
     public String getCancerRisk() {
         return cancerRisk;
     }
@@ -195,7 +186,6 @@ public class BiologicalVariant {
         if (pathogenicAbstracts != null ? !pathogenicAbstracts.equals(that.pathogenicAbstracts) : that.pathogenicAbstracts != null)
             return false;
         if (penetrance != null ? !penetrance.equals(that.pathogenic) : that.penetrance != null) return false;
-        if (inheritanceMechanism != null ? !inheritanceMechanism.equals(that.inheritanceMechanism) : that.inheritanceMechanism != null) return false;
         if (cancerRisk != null ? !cancerRisk.equals(that.cancerRisk) : that.cancerRisk != null) return false;
 
         return true;
@@ -216,7 +206,6 @@ public class BiologicalVariant {
             ", pathogenicPmids=" + pathogenicPmids +
             ", pathogenicAbstracts=" + pathogenicAbstracts +
             ", penetrance=" + penetrance +
-            ", inheritanceMechanism=" + inheritanceMechanism +
             ", cancerRisk=" + cancerRisk +
             '}';
     }

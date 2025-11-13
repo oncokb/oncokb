@@ -61,8 +61,14 @@ public class Query implements java.io.Serializable {
 
     @ApiModelProperty(value = "(Nullable) The hgvsg or genomic location from original query")
     private String hgvs;
+
+    @ApiModelProperty(value = "Whether original query is marked as germline or somatic")
     private boolean isGermline = false;
-    private String alleleState;
+
+    @JsonIgnore
+    private String inheritanceMechanism;
+
+    @JsonIgnore
     private Pathogenicity pathogenicity;
 
     @ApiModelProperty(value = "(Nullable) Additional message for \"hgvs\" field. May indicate reason for failed hgvs annotation.")
@@ -141,7 +147,7 @@ public class Query implements java.io.Serializable {
     public Query(String id, ReferenceGenome referenceGenome, Integer entrezGeneId, String hugoSymbol,
                  String alteration, String alterationType, StructuralVariantType svType,
                  String tumorType, String consequence, Integer proteinStart, Integer proteinEnd, String hgvs,
-                 Boolean isGermline, String alleleState, Pathogenicity pathogenicity) {
+                 Boolean isGermline, String inheritanceMechanism, Pathogenicity pathogenicity) {
         this.id = id;
         this.referenceGenome = referenceGenome == null ? DEFAULT_REFERENCE_GENOME : referenceGenome;
         if (hugoSymbol != null && !hugoSymbol.isEmpty()) {
@@ -157,7 +163,7 @@ public class Query implements java.io.Serializable {
         this.proteinEnd = proteinEnd;
         this.setHgvs(hgvs);
         this.isGermline = isGermline == null ? false : isGermline;
-        this.alleleState = alleleState;
+        this.inheritanceMechanism = inheritanceMechanism;
         this.pathogenicity = pathogenicity;
     }
 
@@ -268,12 +274,12 @@ public class Query implements java.io.Serializable {
         isGermline = germline;
     }
 
-    public String getAlleleState() {
-        return alleleState;
+    public String getInheritanceMechanism() {
+        return inheritanceMechanism;
     }
 
-    public void setAlleleState(String alleleState) {
-        this.alleleState = alleleState;
+    public void setInheritanceMechanism(String inheritanceMechanism) {
+        this.inheritanceMechanism = inheritanceMechanism;
     }
 
     public Pathogenicity getPathogenicity() {
@@ -332,12 +338,12 @@ public class Query implements java.io.Serializable {
 
         this.setAlteration(QueryUtils.getAlterationName(this));
 
-        if (StringUtils.isNotEmpty(this.alleleState)) {
-            if (this.alleleState.toLowerCase().equals("heterozygous")) {
-                this.alleleState = "monoallelic";
+        if (StringUtils.isNotEmpty(this.inheritanceMechanism)) {
+            if (this.inheritanceMechanism.toLowerCase().equals("heterozygous")) {
+                this.inheritanceMechanism = "autosomal recessive";
             }
-            if (this.alleleState.toLowerCase().equals("homozygous")) {
-                this.alleleState = "biallelic";
+            if (this.inheritanceMechanism.toLowerCase().equals("homozygous")) {
+                this.inheritanceMechanism = "autosomal dominant";
             }
         }
     }
@@ -400,8 +406,8 @@ public class Query implements java.io.Serializable {
 
         content.add(Boolean.toString(this.isGermline));
 
-        if (this.alleleState != null) {
-            content.add(this.alleleState);
+        if (this.inheritanceMechanism != null) {
+            content.add(this.inheritanceMechanism);
         } else {
             content.add("");
         }

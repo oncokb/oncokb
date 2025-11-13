@@ -44,11 +44,8 @@ public class EvidenceTypeUtils {
         evidenceTypes.add(EvidenceType.MUTATION_EFFECT);
         evidenceTypes.add(EvidenceType.GENOMIC_INDICATOR);
         evidenceTypes.add(EvidenceType.GENE_PENETRANCE);
-        evidenceTypes.add(EvidenceType.GENE_CANCER_RISK);
-        evidenceTypes.add(EvidenceType.GENE_INHERITANCE_MECHANISM);
         evidenceTypes.add(EvidenceType.VARIANT_PENETRANCE);
         evidenceTypes.add(EvidenceType.VARIANT_CANCER_RISK);
-        evidenceTypes.add(EvidenceType.VARIANT_INHERITANCE_MECHANISM);
         return evidenceTypes;
     }
 

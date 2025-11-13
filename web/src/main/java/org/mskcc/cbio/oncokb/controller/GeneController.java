@@ -7,7 +7,6 @@ package org.mskcc.cbio.oncokb.controller;
 import io.swagger.annotations.ApiParam;
 import org.mskcc.cbio.oncokb.bo.GeneBo;
 import org.mskcc.cbio.oncokb.model.Gene;
-import org.mskcc.cbio.oncokb.model.Geneset;
 import org.mskcc.cbio.oncokb.model.GenomicIndicator;
 import org.mskcc.cbio.oncokb.service.JsonResultFactory;
 import org.mskcc.cbio.oncokb.util.*;

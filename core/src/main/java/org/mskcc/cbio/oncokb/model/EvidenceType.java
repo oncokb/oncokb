@@ -24,13 +24,9 @@ public enum EvidenceType {
 
     PATHOGENIC("Pathogenic"),
     GENOMIC_INDICATOR("Genomic Indicator"),
-    GENOMIC_INDICATOR_ALLELE_STATE("Genomic Indicator Allele State"),
     GENE_PENETRANCE("Gene Penetrance"),
-    GENE_INHERITANCE_MECHANISM("Gene Inheritance Mechanism"),
-    GENE_CANCER_RISK("Gene Cancer Risk"),
 
     VARIANT_PENETRANCE("Variant Penetrance"),
-    VARIANT_INHERITANCE_MECHANISM("Variant Inheritance Mechanism"),
     VARIANT_CANCER_RISK("Variant Cancer Risk");
 
     EvidenceType(String label) {

@@ -204,7 +204,7 @@ public class IndicatorUtils {
                 Query tmpQuery = new Query(query.getId(), query.getReferenceGenome(), tmpGene.getEntrezGeneId(),
                     tmpGene.getHugoSymbol(), query.getAlteration(), null, query.getSvType(),
                     query.getTumorType(), query.getConsequence(), query.getProteinStart(),
-                    query.getProteinEnd(), query.getHgvs(), query.isGermline(), query.getAlleleState(), query.getPathogenicity());
+                    query.getProteinEnd(), query.getHgvs(), query.isGermline(), query.getInheritanceMechanism(), query.getPathogenicity());
                 result.add(IndicatorUtils.processQuery(tmpQuery, levels, highestLevelOnly, evidenceTypes, geneQueryOnly));
             }
             return result.iterator().next();
@@ -282,7 +282,7 @@ public class IndicatorUtils {
 
                 // Add germline info
                 if(query.isGermline()){
-                    indicatorQuery.setGermline(getGermlineVariantInfo(matchedAlt, query.getAlleleState(), relevantAlterations));
+                    indicatorQuery.setGermline(getGermlineVariantInfo(matchedAlt, query.getInheritanceMechanism(), relevantAlterations));
 
                     // Get mutation effect description
                     List<Evidence> mutationEffectEvis = EvidenceUtils.getEvidence(Collections.singletonList(matchedAlt), Collections.singleton(EvidenceType.MUTATION_EFFECT), null);
@@ -385,7 +385,7 @@ public class IndicatorUtils {
             if (query.isGermline() && !indicatorQuery.getVariantExist() && query.getPathogenicity() != null) {
                 if (query.getPathogenicity().equals(Pathogenicity.YES) || query.getPathogenicity().equals(Pathogenicity.LIKELY)) {
                     GermlineVariant germlineVariant = new GermlineVariant();
-                    List<Evidence> genomicIndicatorEvis = EvidenceUtils.getGenomicIndicatorAssociatedWithPathogenicVariants(gene, query.getReferenceGenome(), query.getAlleleState());
+                    List<Evidence> genomicIndicatorEvis = EvidenceUtils.getGenomicIndicatorAssociatedWithPathogenicVariants(gene, query.getReferenceGenome(), query.getInheritanceMechanism());
                     germlineVariant.setGenomicIndicators(genomicIndicatorEvis.stream().map(Evidence::getName).collect(Collectors.toList()));
                     indicatorQuery.setGermline(germlineVariant);
                 }
@@ -586,7 +586,7 @@ public class IndicatorUtils {
             Query tmpQuery = new Query(null, originalQuery.getReferenceGenome(), alteration.getGene().getEntrezGeneId(),
                 alteration.getGene().getHugoSymbol(), alteration.getAlteration(), null, null,
                 originalQuery.getTumorType(), alteration.getConsequence().getTerm(), alteration.getProteinStart(),
-                alteration.getProteinEnd(), null, originalQuery.isGermline(), originalQuery.getAlleleState(), originalQuery.getPathogenicity());
+                alteration.getProteinEnd(), null, originalQuery.isGermline(), originalQuery.getInheritanceMechanism(), originalQuery.getPathogenicity());
 
             // Add oncogenicity
             IndicatorQueryOncogenicity indicatorQueryOncogenicity = getOncogenicity(alteration, new ArrayList<>(), new ArrayList<>());
@@ -614,7 +614,7 @@ public class IndicatorUtils {
         });
     }
 
-    private static GermlineVariant getGermlineVariantInfo(Alteration matchedAlt, String alleleState, List<Alteration> relevantAlterations) {
+    private static GermlineVariant getGermlineVariantInfo(Alteration matchedAlt, String inheritanceMechanism, List<Alteration> relevantAlterations) {
         GermlineVariant germlineVariant = new GermlineVariant();
 
         // Get pathogenic info
@@ -644,30 +644,17 @@ public class IndicatorUtils {
         cancerRiskEvis.sort(Comparator.comparing(Evidence::getKnownEffect));
 
         if (cancerRiskEvis.size() > 0) {
-            if (StringUtils.isNotEmpty(alleleState)) {
-                cancerRiskEvis = cancerRiskEvis.stream().filter(evidence -> alleleState.toLowerCase().equals(evidence.getKnownEffect().toLowerCase())).collect(Collectors.toList());
+            if (StringUtils.isNotEmpty(inheritanceMechanism)) {
+                cancerRiskEvis = cancerRiskEvis.stream().filter(evidence -> inheritanceMechanism.toLowerCase().equals(evidence.getKnownEffect().toLowerCase())).collect(Collectors.toList());
             }
             germlineVariant.setCancerRisk(cancerRiskEvis.stream().map(evidence -> StringUtils.capitalize(evidence.getKnownEffect()) + " " + matchedAlt.getGene().getHugoSymbol() + " mutation carriers: " + evidence.getDescription()).collect(Collectors.joining("\n\n")));
-        }
-
-        // Get inheritance mechanism info
-        List<Evidence> inheritanceMechanismEvis = EvidenceUtils.getEvidence(Collections.singletonList(matchedAlt), Collections.singleton(EvidenceType.VARIANT_INHERITANCE_MECHANISM), null);
-        if (inheritanceMechanismEvis.isEmpty()) {
-            inheritanceMechanismEvis.addAll(EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(matchedAlt.getGene(), Collections.singleton(EvidenceType.GENE_INHERITANCE_MECHANISM)));
-        } else {
-            sortGermlineEvidenceByAlterationSize(inheritanceMechanismEvis);
-        }
-        if (!inheritanceMechanismEvis.isEmpty()) {
-            Evidence inheritanceMechanismEvi = inheritanceMechanismEvis.iterator().next();
-            germlineVariant.setInheritanceMechanism(inheritanceMechanismEvi.getKnownEffect());
-            germlineVariant.setInheritanceMechanismDescription(StringUtils.isEmpty(inheritanceMechanismEvi.getDescription()) ? "" : inheritanceMechanismEvi.getDescription());
         }
 
         // Get genomic indicator
         List<Alteration> alts = new ArrayList<>();
         alts.add(matchedAlt);
         alts.addAll(relevantAlterations);
-        List<Evidence> genomicIndicatorEvis = EvidenceUtils.getGenomicIndicatorsByAlteration(alts, alleleState);
+        List<Evidence> genomicIndicatorEvis = EvidenceUtils.getGenomicIndicatorsByAlteration(alts, inheritanceMechanism);
         germlineVariant.setGenomicIndicators(genomicIndicatorEvis.stream().map(Evidence::getName).collect(Collectors.toList()));
         return germlineVariant;
     }

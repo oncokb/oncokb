@@ -63,9 +63,6 @@ public class NumberUtils {
             if (germline) {
                 Optional<Evidence> optionalPenetrance = pair.getValue().stream().filter(evidence -> EvidenceType.GENE_PENETRANCE.equals(evidence.getEvidenceType())).findFirst();
                 optionalPenetrance.ifPresent(evidence -> geneNumber.setPenetrance(evidence.getKnownEffect()));
-
-                Optional<Evidence> optionalInheritanceMechanism = pair.getValue().stream().filter(evidence -> EvidenceType.GENE_INHERITANCE_MECHANISM.equals(evidence.getEvidenceType())).findFirst();
-                optionalInheritanceMechanism.ifPresent(evidence -> geneNumber.setInheritanceMechanism(evidence.getKnownEffect()));
             }
 
             List<Alteration> alterations = AlterationUtils.getAllAlterations(null, pair.getKey());

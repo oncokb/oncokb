@@ -477,7 +477,6 @@ public class MainUtils {
             if(germline) {
                 evidenceTypes.add(EvidenceType.PATHOGENIC);
                 evidenceTypes.add(EvidenceType.VARIANT_PENETRANCE);
-                evidenceTypes.add(EvidenceType.VARIANT_INHERITANCE_MECHANISM);
                 evidenceTypes.add(EvidenceType.VARIANT_CANCER_RISK);
             } else {
                 evidenceTypes.add(EvidenceType.ONCOGENIC);
@@ -490,7 +489,6 @@ public class MainUtils {
                 if (germline) {
                     map.put(EvidenceType.PATHOGENIC, new HashSet<>());
                     map.put(EvidenceType.VARIANT_PENETRANCE, new HashSet<>());
-                    map.put(EvidenceType.VARIANT_INHERITANCE_MECHANISM, new HashSet<>());
                     map.put(EvidenceType.VARIANT_CANCER_RISK, new HashSet<>());
                 } else {
                     map.put(EvidenceType.ONCOGENIC, new HashSet<>());
@@ -544,17 +542,6 @@ public class MainUtils {
                                     ).stream().findFirst().orElse(null));
                             if (penetranceEvidence != null) {
                                 variant.setPenetrance(penetranceEvidence.getKnownEffect());
-                            }
-                        }
-
-                        Set<Evidence> variantInheritance = map.get(EvidenceType.VARIANT_INHERITANCE_MECHANISM);
-                        if (variantInheritance != null) {
-                            Evidence inheritanceEvidence = variantInheritance.stream().findFirst()
-                                .orElseGet(() -> EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(
-                                        gene, Collections.singleton(EvidenceType.VARIANT_INHERITANCE_MECHANISM)
-                                    ).stream().findFirst().orElse(null));
-                            if (inheritanceEvidence != null) {
-                                variant.setInheritanceMechanism(inheritanceEvidence.getKnownEffect());
                             }
                         }
 

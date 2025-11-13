@@ -19,7 +19,6 @@ public class GeneNumber {
     private String highestPrognosticImplicationLevel = null;
     private String highestFdaLevel = null;
     private String penetrance = null;
-    private String inheritanceMechanism = null;
 
     /**
      **/
@@ -107,14 +106,6 @@ public class GeneNumber {
         this.penetrance = penetrance;
     }
 
-    public String getInheritanceMechanism() {
-        return inheritanceMechanism;
-    }
-
-    public void setInheritanceMechanism(String inheritanceMechanism) {
-        this.inheritanceMechanism = inheritanceMechanism;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -128,13 +119,12 @@ public class GeneNumber {
             Objects.equals(getHighestDiagnosticImplicationLevel(), that.getHighestDiagnosticImplicationLevel()) &&
             Objects.equals(getHighestPrognosticImplicationLevel(), that.getHighestPrognosticImplicationLevel()) &&
             Objects.equals(getHighestFdaLevel(), that.getHighestFdaLevel()) &&
-            Objects.equals(getPenetrance(), that.getPenetrance()) &&
-            Objects.equals(getInheritanceMechanism(), that.getInheritanceMechanism());
+            Objects.equals(getPenetrance(), that.getPenetrance());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getGene(), getAlteration(), getTumorType(), getHighestSensitiveLevel(), getHighestResistanceLevel(), getHighestDiagnosticImplicationLevel(), getHighestPrognosticImplicationLevel(), getHighestFdaLevel(), getPenetrance(), getInheritanceMechanism());
+        return Objects.hash(getGene(), getAlteration(), getTumorType(), getHighestSensitiveLevel(), getHighestResistanceLevel(), getHighestDiagnosticImplicationLevel(), getHighestPrognosticImplicationLevel(), getHighestFdaLevel(), getPenetrance());
     }
 
     @Override
@@ -149,7 +139,6 @@ public class GeneNumber {
             ", highestPrognosticImplicationLevel='" + highestPrognosticImplicationLevel + '\'' +
             ", highestFdaLevel='" + highestFdaLevel + '\'' +
             ", penetrance='" + penetrance + '\'' +
-            ", inheritanceMechanism='" + inheritanceMechanism + '\'' +
             '}';
     }
 }
