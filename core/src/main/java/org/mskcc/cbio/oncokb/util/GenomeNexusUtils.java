@@ -327,7 +327,11 @@ public class GenomeNexusUtils {
                 
                 Integer entrezGeneId = null;
                 if (StringUtils.isNotEmpty(consequenceSummary.getEntrezGeneId())) {
-                    entrezGeneId = Integer.parseInt(consequenceSummary.getEntrezGeneId());
+                    try {
+                        entrezGeneId = Integer.parseInt(consequenceSummary.getEntrezGeneId());
+                    } catch(NumberFormatException ignored) {
+                        // sometimes we get NaN as the entrez gene ID
+                    }
                 }
                 String hugoSymbol = null;
                 if (StringUtils.isNotEmpty(consequenceSummary.getHugoGeneSymbol())) {
