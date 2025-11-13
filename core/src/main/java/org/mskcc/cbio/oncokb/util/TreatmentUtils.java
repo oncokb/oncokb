@@ -6,13 +6,12 @@
 
 package org.mskcc.cbio.oncokb.util;
 
+import java.util.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mskcc.cbio.oncokb.model.*;
 
 import com.google.gdata.util.common.base.StringUtil;
-
-import java.util.*;
 
 /**
  * @author zhangh2
@@ -22,7 +21,7 @@ public final class TreatmentUtils {
         throw new AssertionError();
     }
 
-    public static Set<Treatment> getTreatmentsByGene(Gene gene) {
+    public static Set<Treatment> getTreatmentsByGene(Gene gene, boolean germline) {
         if (gene == null) {
             return new HashSet<>();
         }
@@ -32,30 +31,17 @@ public final class TreatmentUtils {
         Set<Treatment> treatments = new HashSet<>();
 
         for (Evidence evidence : evidences) {
-            treatments.addAll(evidence.getTreatments());
+            if (evidence.getForGermline().equals(germline))
+                treatments.addAll(evidence.getTreatments());
         }
         return treatments;
     }
 
-    public static Set<Treatment> getTreatmentsByAlteration(Alteration alteration) {
-        if (alteration == null) {
-            return new HashSet<>();
-        }
-        List<Evidence> evidences = EvidenceUtils.getEvidence(Collections.singletonList(alteration),
-            EvidenceTypeUtils.getTreatmentEvidenceTypes(), null);
-        Set<Treatment> treatments = new HashSet<>();
-
-        for (Evidence evidence : evidences) {
-            treatments.addAll(evidence.getTreatments());
-        }
-        return treatments;
-    }
-
-    public static Set<Treatment> getTreatmentsByLevels(Set<LevelOfEvidence> levels) {
+    public static Set<Treatment> getTreatmentsByLevels(Set<LevelOfEvidence> levels, boolean germline) {
         if (levels == null || levels.size() == 0) {
             return new HashSet<>();
         }
-        return getTreatmentsByGenesAndLevels(CacheUtils.getAllGenes(), levels);
+        return getTreatmentsByGenesAndLevels(CacheUtils.getAllGenes(), levels, germline);
     }
 
     public static String getTreatmentName(Set<Treatment> treatments) {
@@ -130,17 +116,17 @@ public final class TreatmentUtils {
         return treatmentNames;
     }
 
-    public static Set<Treatment> getTreatmentsByGeneAndLevels(Gene gene, Set<LevelOfEvidence> levels) {
+    public static Set<Treatment> getTreatmentsByGeneAndLevels(Gene gene, Set<LevelOfEvidence> levels, boolean germline) {
         if (levels == null) {
-            return getTreatmentsByGene(gene);
+            return getTreatmentsByGene(gene, germline);
         }
         if (gene == null) {
-            getTreatmentsByLevels(levels);
+            getTreatmentsByLevels(levels, germline);
         }
-        return getTreatmentsByGenesAndLevels(Collections.singleton(gene), levels);
+        return getTreatmentsByGenesAndLevels(Collections.singleton(gene), levels, germline);
     }
 
-    private static Set<Treatment> getTreatmentsByGenesAndLevels(Set<Gene> genes, Set<LevelOfEvidence> levels) {
+    private static Set<Treatment> getTreatmentsByGenesAndLevels(Set<Gene> genes, Set<LevelOfEvidence> levels, boolean germline) {
         Map<Gene, Set<Evidence>> allEvidence = EvidenceUtils.getEvidenceByGenes(genes);
         Set<Treatment> treatments = new HashSet<>();
 

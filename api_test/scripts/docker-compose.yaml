@@ -2,7 +2,7 @@ services:
   mysql:
     image: mysql:8.0.36
     environment:
-      MYSQL_DATABASE: "oncokb_v5_0_demo"
+      MYSQL_DATABASE: "oncokb_v5_0_demo_germline"
       MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
       - type: bind
@@ -19,7 +19,7 @@ services:
     environment:
       JAVA_OPTS: |
         -Djdbc.driverClassName=com.mysql.jdbc.Driver
-        -Djdbc.url=jdbc:mysql://mysql:3306/oncokb_v5_0_demo?useUnicode=yes&characterEncoding=UTF-8
+        -Djdbc.url=jdbc:mysql://mysql:3306/oncokb_v5_0_demo_germline?useUnicode=yes&characterEncoding=UTF-8
         -Djdbc.username=root
         -Djdbc.password=${MYSQL_PASSWORD}
         -Dgenomenexus.api=https://www.genomenexus.org/
