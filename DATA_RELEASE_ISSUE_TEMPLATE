@@ -39,8 +39,3 @@ Checklist for deployment after curation team approves beta
     -   [ ] Generate versioned database (`oncokb_core_v4_15`)
     -   [ ] Update `-Djdbc.url` with latest versioned database in both [oncokb-core](https://github.com/knowledgesystems/knowledgesystems-k8s-deployment/blob/master/oncokb/oncokb-msk/prod/oncokb_core.yaml) and [oncokb-core-cbx](https://github.com/knowledgesystems/knowledgesystems-k8s-deployment/blob/master/oncokb/oncokb-msk/prod/oncokb_core_cbx.yaml)
     -   [ ] Update [oncokb-public](https://github.com/knowledgesystems/knowledgesystems-k8s-deployment/blob/master/oncokb/oncokb-msk/prod/oncokb_public.yaml) image
--   [ ] Update EU public site (https://eucentral.oncokb.org)
-    -   [ ] Update oncokb-transcript database and restart
-    -   [ ] Update database
-    -   [ ] Update [oncokb-core](https://github.com/knowledgesystems/knowledgesystems-k8s-deployment/blob/master/oncokb/oncokb-eu/oncokb_core.yaml) image
-    -   [ ] Update [oncokb-public](https://github.com/knowledgesystems/knowledgesystems-k8s-deployment/blob/master/oncokb/oncokb-eu/oncokb_public.yaml) image
