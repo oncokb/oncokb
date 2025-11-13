@@ -67,7 +67,7 @@ public class JsonResultFactory {
                     .exclude("germline"))
                 .onClass(Query.class, Match.match()
                     .include("*")
-                    .exclude("isGermline", "alleleState", "pathogenicity")))
+                    .exclude("isGermline", "inheritanceMechanism", "pathogenicity")))
                 .returnValue();
         } else {
             return null;
@@ -82,7 +82,7 @@ public class JsonResultFactory {
                 .exclude("germline"))
             .onClass(Query.class, Match.match()
                     .include("*")
-                    .exclude("isGermline", "alleleState", "pathogenicity")))
+                    .exclude("isGermline", "inheritanceMechanism", "pathogenicity")))
             .returnValue();
     }
 
