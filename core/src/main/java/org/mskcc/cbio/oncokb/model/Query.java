@@ -266,6 +266,7 @@ public class Query implements java.io.Serializable {
         this.hgvs = hgvs;
     }
 
+    @ApiModelProperty(hidden = true)
     public boolean isGermline() {
         return isGermline;
     }

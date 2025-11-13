@@ -24,6 +24,8 @@ public class IndicatorQueryResp implements java.io.Serializable {
     private String oncogenic;
 
     private MutationEffectResp mutationEffect;
+
+    @ApiModelProperty(hidden = true)
     private GermlineVariant germline = new GermlineVariant();
 
     @ApiModelProperty(value = "(Nullable) The highest sensitivity level from a list of therapeutic evidences.", allowableValues = "LEVEL_1, LEVEL_2, LEVEL_3A, LEVEL_3B, LEVEL_4")

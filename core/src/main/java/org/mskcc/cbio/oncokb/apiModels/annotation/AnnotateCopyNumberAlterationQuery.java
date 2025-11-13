@@ -2,6 +2,7 @@ package org.mskcc.cbio.oncokb.apiModels.annotation;
 
 import org.mskcc.cbio.oncokb.model.CopyNumberAlterationType;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
 import java.util.Objects;
@@ -13,7 +14,8 @@ import java.util.Objects;
 public class AnnotateCopyNumberAlterationQuery extends AnnotationQuery implements java.io.Serializable {
     private QueryGene gene;
     private CopyNumberAlterationType copyNameAlterationType;
-    @JsonUnwrapped
+    // @JsonUnwrapped
+    @JsonIgnore
     private GermlineQuery germlineQuery = new GermlineQuery();
 
     public QueryGene getGene() {

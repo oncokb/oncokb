@@ -14,6 +14,7 @@ import org.mskcc.cbio.oncokb.config.annotation.PremiumPublicApi;
 import org.mskcc.cbio.oncokb.config.annotation.PublicApi;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.genomeNexus.TranscriptSummaryAlterationResult;
+import org.mskcc.cbio.oncokb.service.JsonResultFactory;
 import org.mskcc.cbio.oncokb.util.*;
 import org.oncokb.oncokb_transcript.ApiException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,7 +93,7 @@ public class AnnotationsApiController {
             );
         }
 
-        return new ResponseEntity<>(indicatorQueryResp, HttpStatus.OK);
+        return new ResponseEntity<>(JsonResultFactory.getIndicatorQueryRespWithoutGermline(indicatorQueryResp), HttpStatus.OK);
     }
 
     @PublicApi
@@ -111,7 +112,7 @@ public class AnnotationsApiController {
         if (body == null) {
             throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         } 
-        return new ResponseEntity<>(annotateMutationsByProteinChange(body), HttpStatus.OK);
+        return new ResponseEntity<>(JsonResultFactory.getIndicatorQueryRespWithoutGermline(annotateMutationsByProteinChange(body)), HttpStatus.OK);
     }
 
     // Annotate mutations by genomic change
@@ -127,7 +128,7 @@ public class AnnotationsApiController {
     public ResponseEntity<IndicatorQueryResp> annotateMutationsByGenomicChangeGet(
         @ApiParam(value = "Genomic location following TCGA MAF format. Example: 7,140453136,140453136,A,T", required = true) @RequestParam(value = "genomicLocation", required = true) String genomicLocation
         , @ApiParam(value = "Reference genome, either GRCh37 or GRCh38. The default is GRCh37", required = false, defaultValue = "GRCh37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") String referenceGenome
-        , @ApiParam(value = "Whether is germline variant", required = false) @RequestParam(value = "germline", defaultValue = "FALSE", required = false) Boolean germline
+        // , @ApiParam(value = "Whether is germline variant", required = false) @RequestParam(value = "germline", defaultValue = "FALSE", required = false) Boolean germline
         , @ApiParam(value = "OncoTree(http://oncotree.info) tumor type name. The field supports OncoTree Code, OncoTree Name and OncoTree Main type. Example: Melanoma") @RequestParam(value = "tumorType", required = false) String tumorType
         , @ApiParam(value = EVIDENCE_TYPES_DESCRIPTION) @RequestParam(value = "evidenceType", required = false) String evidenceTypes
     ) throws ApiException, org.genome_nexus.ApiException, ApiHttpErrorException {
@@ -143,12 +144,12 @@ public class AnnotationsApiController {
         query.setGenomicLocation(genomicLocation);
         query.setReferenceGenome(matchedRG);
         query.setTumorType(tumorType);
-        query.getGermlineQuery().setGermline(germline);
+        query.getGermlineQuery().setGermline(false);
         query.setEvidenceTypes(new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
 
         indicatorQueryResp = annotateMutationsByGenomicChange(Collections.singletonList(query)).get(0);
 
-        return new ResponseEntity<>(indicatorQueryResp, HttpStatus.OK);
+        return new ResponseEntity<>(JsonResultFactory.getIndicatorQueryRespWithoutGermline(indicatorQueryResp), HttpStatus.OK);
     }
 
     private ReferenceGenome resolveMatchedRG(String referenceGenome) throws ApiHttpErrorException {
@@ -178,7 +179,7 @@ public class AnnotationsApiController {
         if (body == null) {
             throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>(annotateMutationsByGenomicChange(body), HttpStatus.OK);
+        return new ResponseEntity<>(JsonResultFactory.getIndicatorQueryRespWithoutGermline(annotateMutationsByGenomicChange(body)), HttpStatus.OK);
     }
 
     // Annotate mutations by HGVSg
@@ -195,7 +196,7 @@ public class AnnotationsApiController {
         @ApiParam(value = "HGVS genomic format following HGVS nomenclature. Example: 7:g.140453136A>T", required = true) @RequestParam(value = "hgvsg", required = true) String hgvsg
         , @ApiParam(value = "Reference genome, either GRCh37 or GRCh38. The default is GRCh37", required = false, defaultValue = "GRCh37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") String referenceGenome
         , @ApiParam(value = "OncoTree(http://oncotree.info) tumor type name. The field supports OncoTree Code, OncoTree Name and OncoTree Main type. Example: Melanoma") @RequestParam(value = "tumorType", required = false) String tumorType
-        , @ApiParam(value = "Whether is germline variant", required = false) @RequestParam(value = "germline", defaultValue = "FALSE", required = false) Boolean germline
+        // , @ApiParam(value = "Whether is germline variant", required = false) @RequestParam(value = "germline", defaultValue = "FALSE", required = false) Boolean germline
         , @ApiParam(value = EVIDENCE_TYPES_DESCRIPTION) @RequestParam(value = "evidenceType", required = false) String evidenceTypes
     ) throws ApiException, org.genome_nexus.ApiException, ApiHttpErrorException {
         IndicatorQueryResp indicatorQueryResp = null;
@@ -213,12 +214,12 @@ public class AnnotationsApiController {
             query.setHgvsg(hgvsg);
             query.setReferenceGenome(matchedRG);
             query.setTumorType(tumorType);
-            query.getGermlineQuery().setGermline(germline);
+            query.getGermlineQuery().setGermline(false);
             query.setEvidenceTypes(new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
 
             indicatorQueryResp = annotateMutationsByHGVSg(Collections.singletonList(query)).get(0);
         }
-        return new ResponseEntity<>(indicatorQueryResp, HttpStatus.OK);
+        return new ResponseEntity<>(JsonResultFactory.getIndicatorQueryRespWithoutGermline(indicatorQueryResp), HttpStatus.OK);
     }
 
     @PublicApi
@@ -237,13 +238,13 @@ public class AnnotationsApiController {
         if (body == null) {
             throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>(annotateMutationsByHGVSg(body), HttpStatus.OK);
+        return new ResponseEntity<>(JsonResultFactory.getIndicatorQueryRespWithoutGermline(annotateMutationsByHGVSg(body)), HttpStatus.OK);
     }
 
     // Annotate mutations by HGVSc
     @PublicApi
     @PremiumPublicApi
-    @ApiOperation(value = "", notes = "Annotate mutation by HGVSc.", response = IndicatorQueryResp.class)
+    @ApiOperation(value = "", notes = "Annotate mutation by HGVSc.", response = IndicatorQueryResp.class, hidden = true)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = IndicatorQueryResp.class),
         @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiHttpError.class)})
@@ -254,7 +255,7 @@ public class AnnotationsApiController {
         @ApiParam(value = "HGVS cDNA format following HGVS nomenclature. Example: EGFR:c.2369C>T", required = true) @RequestParam(value = "hgvsc", required = true) String hgvsc
         , @ApiParam(value = "Reference genome, either GRCh37 or GRCh38. The default is GRCh37", required = false, defaultValue = "GRCh37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") String referenceGenome
         , @ApiParam(value = "OncoTree(http://oncotree.info) tumor type name. The field supports OncoTree Code, OncoTree Name and OncoTree Main type. Example: Melanoma") @RequestParam(value = "tumorType", required = false) String tumorType
-        , @ApiParam(value = "Whether is germline variant", required = false) @RequestParam(value = "germline", defaultValue = "FALSE", required = false) Boolean germline
+        // , @ApiParam(value = "Whether is germline variant", required = false) @RequestParam(value = "germline", defaultValue = "FALSE", required = false) Boolean germline
     ) throws ApiException, org.genome_nexus.ApiException, ApiHttpErrorException {
         IndicatorQueryResp indicatorQueryResp = null;
 
@@ -271,7 +272,7 @@ public class AnnotationsApiController {
             query.setHgvsc(hgvsc);
             query.setReferenceGenome(matchedRG);
             query.setTumorType(tumorType);
-            query.getGermlineQuery().setGermline(germline);
+            query.getGermlineQuery().setGermline(false);
 
             indicatorQueryResp = annotateMutationsByHGVSc(Collections.singletonList(query)).get(0);
         }
@@ -280,7 +281,7 @@ public class AnnotationsApiController {
 
     @PublicApi
     @PremiumPublicApi
-    @ApiOperation(value = "", notes = "Annotate mutations by HGVSc.", response = IndicatorQueryResp.class, responseContainer = "List")
+    @ApiOperation(value = "", notes = "Annotate mutations by HGVSc.", response = IndicatorQueryResp.class, responseContainer = "List", hidden = true)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = IndicatorQueryResp.class, responseContainer = "List"),
         @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiHttpError.class)})
@@ -313,7 +314,7 @@ public class AnnotationsApiController {
         , @ApiParam(value = "Copy number alteration type", required = true) @RequestParam(value = "copyNameAlterationType", required = true) CopyNumberAlterationType copyNameAlterationType
         , @ApiParam(value = "Reference genome, either GRCh37 or GRCh38. The default is GRCh37", required = false, defaultValue = "GRCh37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") String referenceGenome
         , @ApiParam(value = "OncoTree(http://oncotree.info) tumor type name. The field supports OncoTree Code, OncoTree Name and OncoTree Main type. Example: Melanoma") @RequestParam(value = "tumorType", required = false) String tumorType
-        , @ApiParam(value = "Whether is germline variant", required = false) @RequestParam(value = "germline", defaultValue = "FALSE", required = false) Boolean germline
+        // , @ApiParam(value = "Whether is germline variant", required = false) @RequestParam(value = "germline", defaultValue = "FALSE", required = false) Boolean germline
         , @ApiParam(value = EVIDENCE_TYPES_DESCRIPTION) @RequestParam(value = "evidenceType", required = false) String evidenceTypes
     ) throws ApiHttpErrorException {
         IndicatorQueryResp indicatorQueryResp = null;
@@ -337,7 +338,7 @@ public class AnnotationsApiController {
                 null,
                 null,
                 null,
-                germline,
+                false,
                 null,
                 null,
                 null,
@@ -345,7 +346,7 @@ public class AnnotationsApiController {
                 new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")),
                 false);
         }
-        return new ResponseEntity<>(indicatorQueryResp, HttpStatus.OK);
+        return new ResponseEntity<>(JsonResultFactory.getIndicatorQueryRespWithoutGermline(indicatorQueryResp), HttpStatus.OK);
     }
 
     @PublicApi
@@ -364,7 +365,7 @@ public class AnnotationsApiController {
         if (body == null) {
             throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>(annotateCopyNumberAlterations(body), HttpStatus.OK);
+        return new ResponseEntity<>(JsonResultFactory.getIndicatorQueryRespWithoutGermline(annotateCopyNumberAlterations(body)), HttpStatus.OK);
     }
 
     // Annotate structural variants
@@ -384,7 +385,7 @@ public class AnnotationsApiController {
         , @ApiParam(value = "The entrez gene ID B. (Higher priority than hugoSymbolB) Example: 613") @RequestParam(value = "entrezGeneIdB", required = false) Integer entrezGeneIdB
         , @ApiParam(value = "Structural variant type", required = true) @RequestParam(value = "structuralVariantType", required = true) StructuralVariantType structuralVariantType
         , @ApiParam(value = "Whether is functional fusion", required = true) @RequestParam(value = "isFunctionalFusion", defaultValue = "FALSE", required = true) Boolean isFunctionalFusion
-        , @ApiParam(value = "Whether is germline variant", required = false) @RequestParam(value = "germline", defaultValue = "FALSE", required = false) Boolean germline
+        // , @ApiParam(value = "Whether is germline variant", required = false) @RequestParam(value = "germline", defaultValue = "FALSE", required = false) Boolean germline
         , @ApiParam(value = "Reference genome, either GRCh37 or GRCh38. The default is GRCh37", required = false, defaultValue = "GRCh37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") String referenceGenome
         , @ApiParam(value = "OncoTree(http://oncotree.info) tumor type name. The field supports OncoTree Code, OncoTree Name and OncoTree Main type. Example: Melanoma") @RequestParam(value = "tumorType", required = false) String tumorType
         , @ApiParam(value = EVIDENCE_TYPES_DESCRIPTION) @RequestParam(value = "evidenceType", required = false) String evidenceTypes
@@ -431,9 +432,9 @@ public class AnnotationsApiController {
             String fusionName = FusionUtils.getFusionName(geneA, geneB);
             indicatorQueryResp = this.cacheFetcher.processQuery(
                 matchedRG, null, fusionName, null, AlterationType.STRUCTURAL_VARIANT.name(), tumorType, isFunctionalFusion ? "fusion" : null, null, null, structuralVariantType, null,
-                germline, null, null, null, false, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")), false);
+                false, null, null, null, false, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")), false);
         }
-        return new ResponseEntity<>(indicatorQueryResp, HttpStatus.OK);
+        return new ResponseEntity<>(JsonResultFactory.getIndicatorQueryRespWithoutGermline(indicatorQueryResp), HttpStatus.OK);
     }
 
     @PublicApi
@@ -452,7 +453,7 @@ public class AnnotationsApiController {
         if (body == null) {
             throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>(annotateStructuralVariants(body), HttpStatus.OK);
+        return new ResponseEntity<>(JsonResultFactory.getIndicatorQueryRespWithoutGermline(annotateStructuralVariants(body)), HttpStatus.OK);
     }
 
     @PremiumPublicApi

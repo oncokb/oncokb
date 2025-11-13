@@ -2,6 +2,7 @@ package org.mskcc.cbio.oncokb.apiModels.annotation;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
 /**
@@ -9,7 +10,8 @@ import com.fasterxml.jackson.annotation.JsonUnwrapped;
  */
 public class AnnotateMutationByGenomicChangeQuery extends AnnotationQuery implements java.io.Serializable {
     private String genomicLocation;
-    @JsonUnwrapped
+    // @JsonUnwrapped
+    @JsonIgnore
     private GermlineQuery germlineQuery = new GermlineQuery();;
 
     public String getGenomicLocation() {
