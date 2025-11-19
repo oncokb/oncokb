@@ -370,6 +370,9 @@ public class CurationValidationApiController {
         List<Alteration> alterations = AlterationUtils.getAllAlterations();
         List<String> allowedOncogenicities = new ArrayList<>(Arrays.asList(Oncogenicity.YES.getOncogenic(), Oncogenicity.LIKELY.getOncogenic(), Oncogenicity.RESISTANCE.getOncogenic()));
         for (Alteration alteration : alterations) {
+            if (AlterationUtils.hasExclusionCriteria(alteration.getAlteration())) {
+                continue;
+            }
             Query query = new Query(
                 null,
                 DEFAULT_REFERENCE_GENOME,
@@ -389,26 +392,24 @@ public class CurationValidationApiController {
                     String hugoSymbol = alteration.getGene().getHugoSymbol();
                     List<IndicatorQueryTreatment> treatments = response.getTreatments();
                     for (IndicatorQueryTreatment treatment: treatments) {
-                        for (String altString: treatment.getAlterations()) {
-                            TumorType tumorTypeModel = new TumorType(treatment.getLevelAssociatedCancerType());
-                            Set<TumorType> excludedTumorTypeModels =  treatment.getLevelExcludedCancerTypes().stream().map(excludedTT -> {
-                                return new TumorType(excludedTT);
-                            }).collect(Collectors.toSet());
-                            String tumorName = TumorTypeUtils.getTumorTypesNameWithExclusion(Collections.singleton(tumorTypeModel), excludedTumorTypeModels);
+                        TumorType tumorTypeModel = new TumorType(treatment.getLevelAssociatedCancerType());
+                        Set<TumorType> excludedTumorTypeModels =  treatment.getLevelExcludedCancerTypes().stream().map(excludedTT -> {
+                            return new TumorType(excludedTT);
+                        }).collect(Collectors.toSet());
+                        String tumorName = TumorTypeUtils.getTumorTypesNameWithExclusion(Collections.singleton(tumorTypeModel), excludedTumorTypeModels);
 
-                            StringBuilder errorMessage = new StringBuilder();
-                            errorMessage.append("Is ");
-                            errorMessage.append(response.getOncogenic());
-                            errorMessage.append(", but has ");
-                            errorMessage.append(treatment.getLevel().toString());
-                            errorMessage.append(" treatment: ");
-                            List<String> drugList = treatment.getDrugs().stream().map(drug -> {
-                                return drug.getDrugName();
-                            }).collect(Collectors.toList());
-                            errorMessage.append(StringUtils.join(drugList, " + "));
+                        StringBuilder errorMessage = new StringBuilder();
+                        errorMessage.append("Is ");
+                        errorMessage.append(response.getOncogenic());
+                        errorMessage.append(", but has ");
+                        errorMessage.append(treatment.getLevel().toString());
+                        errorMessage.append(" treatment: ");
+                        List<String> drugList = treatment.getDrugs().stream().map(drug -> {
+                            return drug.getDrugName();
+                        }).collect(Collectors.toList());
+                        errorMessage.append(StringUtils.join(drugList, " + "));
 
-                            data.put(ValidationUtils.getErrorMessage(ValidationUtils.getTarget(hugoSymbol, altString, tumorName), errorMessage.toString()));
-                        }
+                        data.put(ValidationUtils.getErrorMessage(ValidationUtils.getTarget(hugoSymbol, alteration.getAlteration(), tumorName), errorMessage.toString()));
                     }
                 }
             }
