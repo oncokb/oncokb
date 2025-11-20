@@ -285,7 +285,7 @@ public class DriveAnnotationParser {
                         for (int j = 0; j < alterationsObj.length(); j++) {
                             JSONObject alteration = alterationsObj.getJSONObject(j);
                             if (alteration.has("alteration") && StringUtils.isNotEmpty(alteration.getString("alteration"))) {
-                                List<Alteration> alts = AlterationUtils.parseMutationString(alteration.getString("alteration"), ",");
+                                List<Alteration> alts = AlterationUtils.parseMutationString(alteration.getString("name"), ",");
                                 if (alteration.has("proteinChange") && StringUtils.isNotEmpty(alteration.getString("proteinChange"))) {
                                     String proteinChange = alteration.getString("proteinChange");
                                     for (Alteration alt : alts) {
@@ -314,14 +314,12 @@ public class DriveAnnotationParser {
                             alteration.setProteinChange(alt.getProteinChange());
                             alteration.setName(alt.getName());
                             alteration.setReferenceGenomes(alt.getReferenceGenomes());
-                            alteration.setForGermline(germline);
                             AlterationUtils.annotateAlteration(alteration, alt.getAlteration());
-                            alterationBo.save(alteration);
                         } else if (!alteration.getReferenceGenomes().equals(alt.getReferenceGenomes())) {
                             alteration.setReferenceGenomes(alt.getReferenceGenomes());
-                            alteration.setForGermline(germline);
-                            alterationBo.save(alteration);
                         }
+                        alteration.setForGermline(germline);
+                        alterationBo.saveOrUpdate(alteration);
                         savedAlts.add(alteration);
                     }
 
@@ -500,6 +498,7 @@ public class DriveAnnotationParser {
                 alteration.setGene(gene);
                 alteration.setAlterationType(AlterationType.MUTATION);
                 alteration.setAlteration(name);
+                alteration.setForGermline(true);
                 alteration.setName(name);
                 AlterationUtils.annotateAlteration(alteration, name);
                 ApplicationContextSingleton.getAlterationBo().save(alteration);
