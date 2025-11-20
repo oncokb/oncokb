@@ -7,5 +7,5 @@ AKT1	E17K	Breast Cancer	1: Capivasertib+Fulvestrant;
 AKT1	E17K	NSCLC	3B: Capivasertib; 3B: Capivasertib+Fulvestrant;
 AKT1	E17G	Breast Cancer   1: Capivasertib+Fulvestrant;
 FGFR3	Y373C	Bladder Cancer	1: Erdafitinib;
-RET	KIF5B-RET Fusion	NSCLC	1: Selpercatinib; 1: Pralsetinib;
+RET	KIF5B-RET Fusion	NSCLC	1: Pralsetinib; 1: Selpercatinib;
 RET	KIF5B-RET Fusion	Bladder Cancer	1: Selpercatinib;
