@@ -55,7 +55,7 @@ public class HealthController {
     }
 
     private Boolean checkActionableGenesResponse() {
-        List<ActionableGene> actionableVariants = AlterationUtils.getAllActionableVariants(false);
+        List<ActionableGene> actionableVariants = AlterationUtils.getAllActionableVariants(false, false);
         Boolean result = !actionableVariants.isEmpty();
         if (result == false) {
             LOGGER.debug("Failed get actionable genes check");
