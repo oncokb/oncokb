@@ -847,7 +847,11 @@ class GeneComp implements Comparator<TypeaheadSearchResp> {
         if (e2 == null || e2.getGene() == null) {
             return -1;
         }
-        return GeneUtils.compareGenesByKeyword(e1.getGene(), e2.getGene(), this.keyword);
+        int geneCompare = GeneUtils.compareGenesByKeyword(e1.getGene(), e2.getGene(), this.keyword);
+        if (e1.getGene().equals(e2.getGene())) {
+            return e1.getGeneticType().compareTo(e2.getGeneticType());
+        }
+        return geneCompare;
     }
 }
 
