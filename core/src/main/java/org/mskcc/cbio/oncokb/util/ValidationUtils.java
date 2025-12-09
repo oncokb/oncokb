@@ -25,7 +25,7 @@ public class ValidationUtils {
         final String NO_TREATMENT = "No treatment is specified";
         JSONArray data = new JSONArray();
         for (Gene gene : CacheUtils.getAllGenes()) {
-            Set<Evidence> evidences = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, EvidenceTypeUtils.getTreatmentEvidenceTypes());
+            Set<Evidence> evidences = filterSomaticEvidences(EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, EvidenceTypeUtils.getTreatmentEvidenceTypes()));
             for (Evidence evidence : evidences) {
                 String hugoSymbol = gene.getHugoSymbol();
                 String alterationsName = getEvidenceAlterationsName(evidence);
@@ -81,7 +81,7 @@ public class ValidationUtils {
                 continue;
             }
             // Summary
-            Set<Evidence> evidences = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Collections.singleton(EvidenceType.GENE_SUMMARY));
+            Set<Evidence> evidences = filterSomaticEvidences(EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Collections.singleton(EvidenceType.GENE_SUMMARY)));
             if (evidences.size() > 1) {
                 data.put(getErrorMessage(getTarget(gene.getHugoSymbol()), MULTIPLE_SUMMARY));
             } else if (evidences.size() == 0) {
@@ -89,7 +89,7 @@ public class ValidationUtils {
             }
 
             // Background
-            evidences = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Collections.singleton(EvidenceType.GENE_BACKGROUND));
+            evidences = filterSomaticEvidences(EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Collections.singleton(EvidenceType.GENE_BACKGROUND)));
             if (evidences.size() > 1) {
                 data.put(getErrorMessage(getTarget(gene.getHugoSymbol()), MULTIPLE_BACKGROUND));
             } else if (evidences.size() == 0) {
@@ -116,7 +116,7 @@ public class ValidationUtils {
         ArticleBo articleBo = ApplicationContextSingleton.getArticleBo();
         List<Article> allArticles = articleBo.findAll();
 
-        for (Evidence evidence : CacheUtils.getAllEvidences()) {
+        CacheUtils.getAllEvidences().stream().filter(evidence -> isSomaticEvidence(evidence)).forEach(evidence -> {
             if (evidence.getDescription() != null) {
                 Matcher matcher = reservedCharsRegex.matcher(evidence.getDescription());
                 if (matcher.find()) {
@@ -133,7 +133,7 @@ public class ValidationUtils {
                     data.put(getErrorMessage(getTarget(evidence.getGene().getHugoSymbol(), evidence.getEvidenceType(), getEvidenceAlterationsName(evidence), TumorTypeUtils.getEvidenceTumorTypesName(evidence), TreatmentUtils.getTreatmentName(evidence.getTreatments())), CANNOT_FIND_PMIDS + String.join(", ", incorrectPmids)));
                 }
             }
-        }
+        });
         return data;
     }
 
@@ -145,7 +145,7 @@ public class ValidationUtils {
 
         DrugBo drugBo = ApplicationContextSingleton.getDrugBo();
         Set<Drug> drugsWithEviAssoc = new HashSet<>();
-        CacheUtils.getAllEvidences().forEach(evidence -> evidence.getTreatments().forEach(treatment -> drugsWithEviAssoc.addAll(treatment.getDrugs())));
+        CacheUtils.getAllEvidences().stream().filter(evidence -> isSomaticEvidence(evidence)).forEach(evidence -> evidence.getTreatments().forEach(treatment -> drugsWithEviAssoc.addAll(treatment.getDrugs())));
 
         List<Drug> allDrugs = drugBo.findAll();
         Set<Drug> drugsWithoutEviAssoc = allDrugs.stream().filter(drug -> !drugsWithEviAssoc.contains(drug)).collect(Collectors.toSet());
@@ -161,7 +161,7 @@ public class ValidationUtils {
         evidenceTypesToCheck.addAll(EvidenceTypeUtils.getTreatmentEvidenceTypes());
 
         Set<String> finalDrugNameWithSynonyms = drugNameWithSynonyms.stream().map(String::toLowerCase).collect(Collectors.toSet());
-        CacheUtils.getAllEvidences().stream().filter(evidence -> evidenceTypesToCheck.contains(evidence.getEvidenceType())).forEach(evidence -> {
+        CacheUtils.getAllEvidences().stream().filter(evidence -> evidenceTypesToCheck.contains(evidence.getEvidenceType()) && isSomaticEvidence(evidence)).forEach(evidence -> {
             if (!StringUtils.isNullOrEmpty(evidence.getDescription())) {
                 finalDrugNameWithSynonyms.forEach(name -> {
                     if (evidence.getDescription().toLowerCase().contains(name)) {
@@ -214,6 +214,9 @@ public class ValidationUtils {
 
         Pattern unsupportedAlterationNameRegex = Pattern.compile("[^\\w\\s\\*-\\{\\};]");
         for (Alteration alteration : AlterationUtils.getAllAlterations()) {
+            if (!isSomaticAlteration(alteration)) {
+                continue;
+            }
             if (StringUtils.isNullOrEmpty(alteration.getAlteration())) {
                 data.put(getErrorMessage(getTarget(alteration.getGene().getHugoSymbol()), ALTERATION_NAME_IS_EMPTY));
             } else {
@@ -255,7 +258,7 @@ public class ValidationUtils {
         }
 
         Set<Evidence> latestTherapeuticEvidences = EvidenceUtils.getEvidenceByEvidenceTypesAndLevels(EvidenceTypeUtils.getTreatmentEvidenceTypes(), LevelUtils.getTherapeuticLevels());
-        Set<String> latestEvidenceStrings = latestTherapeuticEvidences.stream().map(evidence -> evidenceUniqueString(evidence)).collect(Collectors.toSet());
+        Set<String> latestEvidenceStrings = latestTherapeuticEvidences.stream().filter(evidence -> isSomaticEvidence(evidence)).map(evidence -> evidenceUniqueString(evidence)).collect(Collectors.toSet());
 
         Set<String> commons = new HashSet<>(Sets.intersection(latestEvidenceStrings, publicEvidenceStrings));
         publicEvidenceStrings.removeAll(commons);
@@ -362,6 +365,18 @@ public class ValidationUtils {
         } else {
             return alterationName+ " (" + alterationAlteration + ")";
         }
+    }
+
+    public static boolean isSomaticEvidence(Evidence evidence) {
+        return !Boolean.TRUE.equals(evidence.getForGermline());
+    }
+
+    public static boolean isSomaticAlteration(Alteration alteration) {
+        return !Boolean.TRUE.equals(alteration.getForGermline());
+    }
+
+    private static Set<Evidence> filterSomaticEvidences(Collection<Evidence> evidences) {
+        return evidences.stream().filter(evidence -> isSomaticEvidence(evidence)).collect(Collectors.toSet());
     }
 
     public static JSONObject getErrorMessage(String target, String reason) {
