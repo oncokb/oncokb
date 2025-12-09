@@ -299,6 +299,9 @@ public class CurationValidationApiController {
         List<org.oncokb.oncokb_transcript.client.Sequence> allGrch38Sequences = oncokbTranscriptService.getAllProteinSequences(ReferenceGenome.GRCh38);
 
         for (Alteration alteration : AlterationUtils.getAllAlterations()) {
+            if (!ValidationUtils.isSomaticAlteration(alteration)) {
+                continue;
+            }
             if (alteration.getGene().getEntrezGeneId() > 0 && alteration.getProteinStart() >= 0 && alteration.getReferenceGenomes() != null && alteration.getRefResidues() != null) {
                 String sequence = "";
                 ReferenceGenome referenceGenome = null;
@@ -337,7 +340,10 @@ public class CurationValidationApiController {
         JSONArray data = new JSONArray();
 
         for (Alteration alteration : AlterationUtils.getAllAlterations()) {
-            List<Evidence> evidences = EvidenceUtils.getAlterationEvidences(Collections.singletonList(alteration));
+            if (!ValidationUtils.isSomaticAlteration(alteration)) {
+                continue;
+            }
+            List<Evidence> evidences = EvidenceUtils.getAlterationEvidences(Collections.singletonList(alteration)).stream().filter(evidence -> ValidationUtils.isSomaticEvidence(evidence)).collect(Collectors.toList());
             List<Evidence> evidencesWithoutVus = evidences.stream().filter(evidence -> !EvidenceType.VUS.equals(evidence.getEvidenceType())).collect(Collectors.toList());
             if (evidences.size() != evidencesWithoutVus.size() && evidencesWithoutVus.size() > 0) {
                 data.put(ValidationUtils.getErrorMessage(ValidationUtils.getTarget(alteration.getGene().getHugoSymbol(), alteration.getAlteration()), "The alteration is in both mutation and VUS lists."));
@@ -352,7 +358,7 @@ public class CurationValidationApiController {
 
         Set<Gene> genes = new HashSet<>();
 
-        for (Alteration alteration : AlterationUtils.getAllAlterations().stream().filter(alt -> alt.getName().equals(TRUNCATING_MUTATIONS.getVariant())).collect(Collectors.toList())) {
+        for (Alteration alteration : AlterationUtils.getAllAlterations().stream().filter(alt -> alt.getName().equals(TRUNCATING_MUTATIONS.getVariant()) && ValidationUtils.isSomaticAlteration(alt)).collect(Collectors.toList())) {
             genes.add(alteration.getGene());
         }
 
@@ -367,7 +373,7 @@ public class CurationValidationApiController {
 
     public JSONArray getActionableVariantsNotOncogenic() throws ApiException {
         JSONArray data = new JSONArray();
-        List<Alteration> alterations = AlterationUtils.getAllAlterations();
+        List<Alteration> alterations = AlterationUtils.getAllAlterations().stream().filter(alteration -> ValidationUtils.isSomaticAlteration(alteration)).collect(Collectors.toList());
         List<String> allowedOncogenicities = new ArrayList<>(Arrays.asList(Oncogenicity.YES.getOncogenic(), Oncogenicity.LIKELY.getOncogenic(), Oncogenicity.RESISTANCE.getOncogenic()));
         for (Alteration alteration : alterations) {
             if (AlterationUtils.hasExclusionCriteria(alteration.getAlteration())) {
