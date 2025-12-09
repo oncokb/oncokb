@@ -262,7 +262,7 @@ public class SummaryUtils {
         // Germline variants do not have Mutation Summary field enable at this moment, so we are generating it for now.
         List<Evidence> pathogenicEvis = EvidenceUtils.getEvidence(Collections.singletonList(alteration), Collections.singleton(EvidenceType.PATHOGENIC), null);
         if (pathogenicEvis.size() > 0) {
-            sb.append("MSK Department of Molecular Genetics classifies ")
+            sb.append("The Germline Genetics Team of the MSK Molecular Diagnostics Service classifies ")
             .append(gene.getHugoSymbol()).append(" ")
             .append(alteration.getAlteration())
             .append(" as ").append(pathogenicEvis.get(0).getKnownEffect());
