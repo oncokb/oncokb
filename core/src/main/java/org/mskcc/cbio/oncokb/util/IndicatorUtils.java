@@ -14,8 +14,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.mskcc.cbio.oncokb.util.AlterationUtils.isValidHgvsc;
-import static org.mskcc.cbio.oncokb.util.AlterationUtils.isValidHgvsg;
 import static org.mskcc.cbio.oncokb.util.LevelUtils.getTherapeuticLevelsWithPriorityLIstIterator;
 import static org.mskcc.cbio.oncokb.util.SummaryUtils.allelesToStr;
 import static org.mskcc.cbio.oncokb.util.SummaryUtils.getVUSSummary;

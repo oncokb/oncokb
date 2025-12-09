@@ -7,7 +7,8 @@ public enum Pathogenicity {
     LIKELY("Likely Pathogenic"),
     LIKELY_BENIGN("Likely Benign"),
     BENIGN("Benign"),
-    UNKNOWN("Unknown");
+    UNKNOWN("Unknown"),
+    VUS_WITH_SPECIAL_INTERPRETATION("VUS with Special Interpretation");
 
     private Pathogenicity(String pathogenic) {
         this.pathogenic = pathogenic;
@@ -35,7 +36,7 @@ public enum Pathogenicity {
         //0 indicates o1 has the same pathogenicity with o2
         //positive number indicates o1 has higher pathogenicity than o2
         //negative number indicates o2 has higher pathogenicity than o1
-        List<Pathogenicity> pathogenicityValues = new ArrayList<>(Arrays.asList(BENIGN, LIKELY_BENIGN, UNKNOWN, LIKELY, YES));
+        List<Pathogenicity> pathogenicityValues = new ArrayList<>(Arrays.asList(VUS_WITH_SPECIAL_INTERPRETATION, BENIGN, LIKELY_BENIGN, UNKNOWN, LIKELY, YES));
         if (o1 == null && o2 == null) return 0;
         else if (o1 == null) return -1;
         else if (o2 == null) return 1;
