@@ -50,7 +50,7 @@ services:
       - SERVER_PORT=8888
     command: >
       java
-      -Dgn_vep.region.url=http://gn-vep:8080/vep/human/region/VARIANT
+      -Dgn_vep.url=http://gn-vep:8080/vep/human/hgvs/VARIANT
       -Dspring.data.mongodb.uri=mongodb://gn-mongo:27017/annotator
       -Dcache.enabled=true
       -Dvep.static=true
@@ -91,7 +91,7 @@ services:
     command: >
       java
       -Dspring.data.mongodb.uri=mongodb://gn-mongo-grch38:27017/annotator
-      -Dgn_vep.region.url=http://gn-vep-grch38:8080/vep/human/region/VARIANT
+      -Dvep.url=http://gn-vep-grch38:8080/vep/human/hgvs/VARIANT
       -Dcache.enabled=true
       -Dvep.static=true
       -jar
