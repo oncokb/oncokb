@@ -577,6 +577,10 @@ public class AnnotationSearchUtils {
             for (Gene gene : genes) {
                 // include germline/somatic links
                 for (GeneticType geneticType : new GeneticType[]{GeneticType.SOMATIC, GeneticType.GERMLINE}) {
+                    Set<Evidence> geneEvidences = evidences.getOrDefault(gene, Collections.emptySet());
+                    Boolean isGermline = geneticType.equals(GeneticType.GERMLINE);
+                    Boolean hasEviForType = geneEvidences.stream().anyMatch(evidence -> isGermline.equals(evidence.getForGermline()));
+                    if (!hasEviForType) continue;
                     TypeaheadSearchResp typeaheadSearchResp = new TypeaheadSearchResp();
                     typeaheadSearchResp.setGene(gene);
                     typeaheadSearchResp.setVariantExist(false);
@@ -585,8 +589,8 @@ public class AnnotationSearchUtils {
                     typeaheadSearchResp.setGeneticType(geneticType);
 
                     if (evidences.containsKey(gene)) {
-                        LevelOfEvidence highestSensitiveLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(evidences.get(gene), LevelUtils.getSensitiveLevels(), geneticType.equals(GeneticType.GERMLINE));
-                        LevelOfEvidence highestResistanceLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(evidences.get(gene), LevelUtils.getResistanceLevels(), geneticType.equals(GeneticType.GERMLINE));
+                        LevelOfEvidence highestSensitiveLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(geneEvidences, LevelUtils.getSensitiveLevels(), geneticType.equals(GeneticType.GERMLINE));
+                        LevelOfEvidence highestResistanceLevel = LevelUtils.getHighestLevelFromEvidenceByLevels(geneEvidences, LevelUtils.getResistanceLevels(), geneticType.equals(GeneticType.GERMLINE));
                         typeaheadSearchResp.setHighestSensitiveLevel(highestSensitiveLevel == null ? "" : highestSensitiveLevel.getLevel());
                         typeaheadSearchResp.setHighestResistanceLevel(highestResistanceLevel == null ? "" : highestResistanceLevel.getLevel());
                     }
