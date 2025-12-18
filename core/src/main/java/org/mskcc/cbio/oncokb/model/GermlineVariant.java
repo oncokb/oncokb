@@ -1,9 +1,10 @@
 package org.mskcc.cbio.oncokb.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GermlineVariant {
+public class GermlineVariant implements Serializable {
     // TODO: We may need to return a GI object instead of just the name
     // Think about this when designing new API
     List<String> genomicIndicators = new ArrayList<>();
