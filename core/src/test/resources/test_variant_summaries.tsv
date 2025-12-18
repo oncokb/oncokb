@@ -8,7 +8,7 @@ PIK3CB	A1048T	Likely Oncogenic	There is no available functional data about the P
 AKT2	R170L	Likely Oncogenic	There is no available functional data about the AKT2 R170L mutation (last reviewed on 04/18/2017). However, AKT2 R170W is likely oncogenic, and therefore AKT2 R170L is considered likely oncogenic.
 BRAF	R509Q	Unknown	There is no available functional data about the BRAF R509Q mutation (last reviewed on 04/04/2023). While BRAF R509H is likely neutral, the oncogenic effect of BRAF R509Q is unknown.
 AKT2	D324Y	Unknown	There is no available functional data about the AKT2 D324Y mutation (last reviewed on 08/05/2017), and therefore its biological significance is unknown.
-ERBB2	E717V	Likely Oncogenic	There is no available functional data about the ERBB2 E717V mutation (last reviewed on 06/20/2023). However, ERBB2 E717D is likely oncogenic and ERBB2 E717K has been found in the context of resistance to a targeted therapy(s); therefore ERBB2 E717V is considered likely oncogenic.
+ERBB2	E717V	Likely Oncogenic	There is no available functional data about the ERBB2 E717V mutation (last reviewed on 06/20/2023). However, ERBB2 E717D/K are likely oncogenic, and therefore ERBB2 E717V is considered likely oncogenic.
 
 ## Table 9.2b: Assigning an Oncogenic Effect and Creating Variant Summaries for Alternate Alleles When There is >1 Curated Reference Alleles with different oncogenic effect
 KLF5	E419G	Likely Oncogenic	There is no available functional data about the KLF5 E419G mutation (last reviewed on 10/16/2019). However, KLF5 E419Q is known to be oncogenic and KLF5 E419K is likely oncogenic; therefore KLF5 E419G is considered likely oncogenic.
