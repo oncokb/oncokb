@@ -928,7 +928,7 @@ public class EvidenceUtils {
         highestLevelOnly = highestLevelOnly == null ? false : highestLevelOnly;
 
         // when the LoE and ET are empty, no info should be returned
-        if ((levelOfEvidences != null && levelOfEvidences.size() == 0) || evidenceTypes.size() == 0) {
+        if ((levelOfEvidences != null && levelOfEvidences.size() == 0) || (evidenceTypes != null && evidenceTypes.size() == 0)) {
             if (requestQueries == null || requestQueries.size() == 0) {
                 EvidenceQueryRes query = new EvidenceQueryRes();
                 return Collections.singletonList(query);

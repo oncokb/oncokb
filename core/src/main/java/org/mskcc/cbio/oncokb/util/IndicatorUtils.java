@@ -128,7 +128,7 @@ public class IndicatorUtils {
                     Gene queryFusionGene = GeneUtils.getGeneByHugoSymbol(queryFusionGenes.iterator().next());
                     if (queryFusionGene != null) {
                         Alteration deletion = AlterationUtils.findAlteration(queryFusionGene, query.getReferenceGenome(), "Deletion");
-                        if (deletion != null) {
+                        if (deletion != null && !deletion.getForGermline()) {
                             query.setAlteration("deletion");
                             query.setConsequence("feature_truncation");
                             fusionGeneAltsMap = findFusionGeneAndRelevantAlts(query);
@@ -162,7 +162,7 @@ public class IndicatorUtils {
                         Gene queryFusionGene = GeneUtils.getGeneByHugoSymbol(queryFusionGenes.iterator().next());
                         if (queryFusionGene != null) {
                             Alteration deletion = AlterationUtils.findAlteration(queryFusionGene, query.getReferenceGenome(), "Deletion");
-                            if (deletion != null) {
+                            if (deletion != null && !deletion.getForGermline()) {
                                 query.setAlteration("deletion");
                                 fusionGeneAltsMap = findFusionGeneAndRelevantAlts(query);
                             }
