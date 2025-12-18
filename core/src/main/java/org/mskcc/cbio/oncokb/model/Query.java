@@ -62,6 +62,15 @@ public class Query implements java.io.Serializable {
     @ApiModelProperty(value = "(Nullable) The hgvsg or genomic location from original query")
     private String hgvs;
 
+    @ApiModelProperty(value = "Whether original query is marked as germline or somatic")
+    private boolean isGermline = false;
+
+    @JsonIgnore
+    private String inheritanceMechanism;
+
+    @JsonIgnore
+    private Pathogenicity pathogenicity;
+
     @ApiModelProperty(value = "(Nullable) Additional message for \"hgvs\" field. May indicate reason for failed hgvs annotation.")
     private String hgvsInfo;
 
@@ -85,6 +94,7 @@ public class Query implements java.io.Serializable {
         newQuery.setProteinStart(this.proteinStart);
         newQuery.setProteinEnd(this.proteinEnd);
         newQuery.setHgvs(this.hgvs);
+        newQuery.setGermline(this.isGermline());
         newQuery.setHgvsInfo(this.hgvsInfo);
         newQuery.setCanonicalTranscript(this.canonicalTranscript);
         return newQuery;
@@ -104,6 +114,7 @@ public class Query implements java.io.Serializable {
         this.proteinStart = mutationQuery.getProteinStart();
         this.proteinEnd = mutationQuery.getProteinEnd();
         this.referenceGenome = mutationQuery.getReferenceGenome();
+        this.isGermline = false;
         if (this.referenceGenome == null) {
             this.referenceGenome = DEFAULT_REFERENCE_GENOME;
         }
@@ -135,7 +146,8 @@ public class Query implements java.io.Serializable {
 
     public Query(String id, ReferenceGenome referenceGenome, Integer entrezGeneId, String hugoSymbol,
                  String alteration, String alterationType, StructuralVariantType svType,
-                 String tumorType, String consequence, Integer proteinStart, Integer proteinEnd, String hgvs) {
+                 String tumorType, String consequence, Integer proteinStart, Integer proteinEnd, String hgvs,
+                 Boolean isGermline, String inheritanceMechanism, Pathogenicity pathogenicity) {
         this.id = id;
         this.referenceGenome = referenceGenome == null ? DEFAULT_REFERENCE_GENOME : referenceGenome;
         if (hugoSymbol != null && !hugoSymbol.isEmpty()) {
@@ -150,6 +162,9 @@ public class Query implements java.io.Serializable {
         this.proteinStart = proteinStart;
         this.proteinEnd = proteinEnd;
         this.setHgvs(hgvs);
+        this.isGermline = isGermline == null ? false : isGermline;
+        this.inheritanceMechanism = inheritanceMechanism;
+        this.pathogenicity = pathogenicity;
     }
 
     public String getId() {
@@ -251,6 +266,31 @@ public class Query implements java.io.Serializable {
         this.hgvs = hgvs;
     }
 
+    @ApiModelProperty(hidden = true)
+    public boolean isGermline() {
+        return isGermline;
+    }
+
+    public void setGermline(boolean germline) {
+        isGermline = germline;
+    }
+
+    public String getInheritanceMechanism() {
+        return inheritanceMechanism;
+    }
+
+    public void setInheritanceMechanism(String inheritanceMechanism) {
+        this.inheritanceMechanism = inheritanceMechanism;
+    }
+
+    public Pathogenicity getPathogenicity() {
+        return this.pathogenicity;
+    }
+
+    public void setPathogenicity(Pathogenicity pathogenicity) {
+        this.pathogenicity = pathogenicity;
+    }
+
     public String getHgvsInfo() {
         return this.hgvsInfo;
     }
@@ -270,7 +310,7 @@ public class Query implements java.io.Serializable {
 
     public void enrich() {
         if (this.getEntrezGeneId() == null && this.getHugoSymbol() == null
-            && this.getAlteration() != null && !this.getAlteration().isEmpty()) {
+                && this.getAlteration() != null && !this.getAlteration().isEmpty()) {
             this.setEntrezGeneId(-2);
         }
 
@@ -278,15 +318,15 @@ public class Query implements java.io.Serializable {
         if (this.getAlterationType() != null) {
             AlterationType alterationType = AlterationType.getByName(this.getAlterationType());
             if (alterationType != null && (alterationType.equals(AlterationType.FUSION) ||
-                alterationType.equals(AlterationType.STRUCTURAL_VARIANT)) &&
-                this.getEntrezGeneId() != null) {
+                    alterationType.equals(AlterationType.STRUCTURAL_VARIANT)) &&
+                    this.getEntrezGeneId() != null) {
                 Gene entrezGeneIdGene = GeneUtils.getGeneByEntrezId(this.getEntrezGeneId());
                 this.setHugoSymbol(entrezGeneIdGene.getHugoSymbol());
             }
             if (this.getAlteration() != null &&
-                !this.getAlteration().toLowerCase().contains("fusion") &&
-                (!this.getAlteration().toLowerCase().contains(FUSION_SEPARATOR) && this.getAlteration().toLowerCase().contains(FUSION_ALTERNATIVE_SEPARATOR)) &&
-                (alterationType.equals(AlterationType.FUSION) || (this.consequence != null && this.consequence.toLowerCase().equals("fusion")))
+                    !this.getAlteration().toLowerCase().contains("fusion") &&
+                    (!this.getAlteration().toLowerCase().contains(FUSION_SEPARATOR) && this.getAlteration().toLowerCase().contains(FUSION_ALTERNATIVE_SEPARATOR)) &&
+                    (alterationType.equals(AlterationType.FUSION) || (this.consequence != null && this.consequence.toLowerCase().equals("fusion")))
             ) {
                 this.setAlteration(this.getAlteration() + " Fusion");
             }
@@ -298,6 +338,15 @@ public class Query implements java.io.Serializable {
         }
 
         this.setAlteration(QueryUtils.getAlterationName(this));
+
+        if (StringUtils.isNotEmpty(this.inheritanceMechanism)) {
+            if (this.inheritanceMechanism.toLowerCase().equals("heterozygous")) {
+                this.inheritanceMechanism = "autosomal recessive";
+            }
+            if (this.inheritanceMechanism.toLowerCase().equals("homozygous")) {
+                this.inheritanceMechanism = "autosomal dominant";
+            }
+        }
     }
 
     @JsonIgnore
@@ -352,6 +401,14 @@ public class Query implements java.io.Serializable {
 
         if (this.hgvs != null) {
             content.add(this.hgvs);
+        } else {
+            content.add("");
+        }
+
+        content.add(Boolean.toString(this.isGermline));
+
+        if (this.inheritanceMechanism != null) {
+            content.add(this.inheritanceMechanism);
         } else {
             content.add("");
         }

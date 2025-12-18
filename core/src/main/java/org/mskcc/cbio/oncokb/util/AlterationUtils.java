@@ -72,7 +72,7 @@ public final class AlterationUtils {
     // GenomeNexus will evaluate it further
     public static Pattern HGVSG_FORMAT = Pattern.compile("((grch37|grch38):)?((chr)?[\\dxy]+:g\\.\\d+.*)", Pattern.CASE_INSENSITIVE);
     public static Pattern HGVSP_FORMAT = Pattern.compile("((grch37|grch38):)?(.+:p\\..+)", Pattern.CASE_INSENSITIVE); 
-    public static Pattern HGVSC_FORMAT = Pattern.compile("((grch37|grch38):)?(ENST\\d+(\\.\\d+)?:c\\.\\d+.*)", Pattern.CASE_INSENSITIVE);
+    public static Pattern HGVSC_FORMAT = Pattern.compile("((grch37|grch38):)?([^:]+:c\\.\\d+.*)", Pattern.CASE_INSENSITIVE);
     public static Pattern GENOMIC_CHANGE_FORMAT = Pattern.compile("((grch37|grch38):)?([\\dxy]+,\\d+,\\d+,.*)", Pattern.CASE_INSENSITIVE);
 
     private static String EXCLUSION_SEPERATOR_REGEX = "\\s*;\\s*";
@@ -1380,7 +1380,12 @@ public final class AlterationUtils {
             return new ArrayList<>();
         }
         Gene gene = alteration.getGene();
-        return getRelevantAlterations(referenceGenome, alteration, getAllAlterations(referenceGenome, gene));
+
+        List<Alteration> allAlterations = getAllAlterations(referenceGenome, gene)
+            .stream()
+            .filter(alt -> alt.getForGermline() == alteration.getForGermline())
+            .collect(Collectors.toList());
+        return getRelevantAlterations(referenceGenome, alteration, allAlterations);
     }
 
     public static List<Alteration> getRelevantAlterations(ReferenceGenome referenceGenome, Alteration alteration, List<Alteration> fullAlterations) {
@@ -1435,11 +1440,15 @@ public final class AlterationUtils {
         return findAlterationsByStartWith(InferredMutation.ONCOGENIC_MUTATIONS.getVariant(), fullAlterations);
     }
 
+    public static List<Alteration> findPathogenicVariants(List<Alteration> fullAlterations) {
+        return findAlterationsByStartWith(InferredMutation.PATHOGENIC_VARIANTS.getVariant(), fullAlterations);
+    }
+
     public static List<Alteration> findFusions(List<Alteration> fullAlterations) {
         return findAlterationsByStartWith(StructuralAlteration.FUSIONS.getVariant(), fullAlterations);
     }
 
-    private static boolean startsWithIgnoreCase(String url, String param) {
+    public static boolean startsWithIgnoreCase(String url, String param) {
         return url.regionMatches(true, 0, param, 0, param.length());
     }
 
@@ -1552,13 +1561,17 @@ public final class AlterationUtils {
         return new ArrayList<>(result);
     }
     public static Alteration findAlteration(ReferenceGenome referenceGenome, String alteration, List<Alteration> fullAlterations) {
+        return findAlterationWithGeneticType(referenceGenome, alteration, fullAlterations, null);
+    }
+
+    public static Alteration findAlterationWithGeneticType(ReferenceGenome referenceGenome, String alteration, List<Alteration> fullAlterations, Boolean isGermline) {
         if (alteration == null) {
             return null;
         }
         // Implement the data access logic
         for (int i = 0; i < fullAlterations.size(); i++) {
             Alteration alt = fullAlterations.get(i);
-            if (alt.getAlteration() != null && alt.getAlteration().equalsIgnoreCase(alteration)) {
+            if (alt.getAlteration() != null && alt.getAlteration().equalsIgnoreCase(alteration) && (isGermline == null ||  alt.getForGermline() == isGermline)) {
                 if (referenceGenome == null) {
                     return alt;
                 } else if (alt.getReferenceGenomes().contains(referenceGenome)) {
@@ -1568,7 +1581,7 @@ public final class AlterationUtils {
         }
         for (int i = 0; i < fullAlterations.size(); i++) {
             Alteration alt = fullAlterations.get(i);
-            if (alt.getAlteration() != null && alt.getName().equalsIgnoreCase(alteration)) {
+            if (alt.getAlteration() != null && alt.getName().equalsIgnoreCase(alteration) && (isGermline == null ||  alt.getForGermline() == isGermline)) {
                 if (referenceGenome == null) {
                     return alt;
                 } else if (alt.getReferenceGenomes().contains(referenceGenome)) {
@@ -1578,7 +1591,7 @@ public final class AlterationUtils {
         }
 
         if (NamingUtils.hasAbbreviation(alteration)) {
-            return findAlteration(referenceGenome, NamingUtils.getFullName(alteration), fullAlterations);
+            return findAlterationWithGeneticType(referenceGenome, NamingUtils.getFullName(alteration), fullAlterations, isGermline);
         }
         return null;
     }
@@ -1723,13 +1736,13 @@ public final class AlterationUtils {
         return false;
     }
 
-    public static List<ActionableGene> getAllActionableVariants(Boolean isTextFile) {
+    public static List<ActionableGene> getAllActionableVariants(Boolean isTextFile, boolean germline) {
         List<ActionableGene> actionableGeneList = new ArrayList<>();
         Set<Gene> genes = CacheUtils.getAllGenes();
         Map<Gene, Set<ClinicalVariant>> map = new HashMap<>();
 
         for (Gene gene : genes) {
-            map.put(gene, MainUtils.getClinicalVariants(gene));
+            map.put(gene, MainUtils.getClinicalVariants(gene, germline));
         }
 
         Set<ActionableGene> actionableGenes = new HashSet<>();

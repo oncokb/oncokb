@@ -25,6 +25,7 @@ public class SummaryUtils {
     public static final String TERT_PROMOTER_MUTATION_SUMMARY = "Select hotspot mutations in the TERT promoter have been shown to be oncogenic.";
     public static final String TERT_PROMOTER_NO_THERAPY_TUMOR_TYPE_SUMMARY = "There are no FDA-approved or NCCN-compendium listed treatments specifically for patients with TERT promoter mutations in [[tumor type]].";
     public static final String ONCOGENIC_MUTATIONS_DEFAULT_SUMMARY = "\"Oncogenic Mutations\" includes all variants annotated as oncogenic and likely oncogenic.";
+    public static final String PATHOGENIC_MUTATIONS_DEFAULT_SUMMARY = "\"Pathogenic Mutations\" includes all variants annotated as pathogenic and likely pathogenic by MSK Department of Molecular Genetics.";
     public static final List<String> specialAlterations = Arrays.asList("mutation", "alteration", "insertion", "deletion", "duplication", "fusion", "deletion", "amplification");
 
     public static Map<String, Object> tumorTypeSummary(EvidenceType evidenceType, Gene gene, Query query, Alteration exactMatchedAlt, List<Alteration> alterations, TumorType matchedTumorType, List<TumorType> relevantTumorTypes) {
@@ -251,6 +252,23 @@ public class SummaryUtils {
 
     public static String synonymousSummary() {
         return "This is a synonymous mutation and is not annotated by OncoKB.";
+    }
+
+    public static String germlineVariantSummary(Gene gene, Alteration alteration) {
+        if (!StringUtils.isEmpty(alteration.getAlteration()) && alteration.getAlteration().toLowerCase().startsWith(InferredMutation.PATHOGENIC_VARIANTS.getVariant().toLowerCase())) {
+            return PATHOGENIC_MUTATIONS_DEFAULT_SUMMARY;
+        }
+        StringBuilder sb = new StringBuilder();
+        // Germline variants do not have Mutation Summary field enable at this moment, so we are generating it for now.
+        List<Evidence> pathogenicEvis = EvidenceUtils.getEvidence(Collections.singletonList(alteration), Collections.singleton(EvidenceType.PATHOGENIC), null);
+        if (pathogenicEvis.size() > 0) {
+            sb.append("The Germline Genetics Team of the MSK Molecular Diagnostics Service classifies ")
+            .append(gene.getHugoSymbol()).append(" ")
+            .append(alteration.getAlteration())
+            .append(" as ").append(pathogenicEvis.get(0).getKnownEffect());
+        }
+
+        return sb.toString();
     }
 
     public static String variantSummary(Gene gene, Alteration exactMatchAlteration, List<Alteration> alterations, Query query) {
@@ -526,24 +544,41 @@ public class SummaryUtils {
         return sb.toString();
     }
 
-    public static String geneSummary(Gene gene, String queryHugoSymbol) {
+    public static String geneSummary(Gene gene, String queryHugoSymbol, boolean isGermline) {
         if (gene != null && gene.getHugoSymbol().equals(SpecialStrings.OTHERBIOMARKERS)) {
             return "";
         }
-        return enrichGeneEvidenceDescription(EvidenceType.GENE_SUMMARY, gene, StringUtils.isEmpty(queryHugoSymbol) ? gene.getHugoSymbol() : queryHugoSymbol);
+        return enrichGeneEvidenceDescription(EvidenceType.GENE_SUMMARY, gene, StringUtils.isEmpty(queryHugoSymbol) ? gene.getHugoSymbol() : queryHugoSymbol, isGermline);
     }
 
     public static String geneBackground(Gene gene, String queryHugoSymbol) {
         if (gene != null && gene.getHugoSymbol().equals(SpecialStrings.OTHERBIOMARKERS)) {
             return "";
         }
-        return enrichGeneEvidenceDescription(EvidenceType.GENE_BACKGROUND, gene, StringUtils.isEmpty(queryHugoSymbol) ? gene.getHugoSymbol() : queryHugoSymbol);
+        return enrichGeneEvidenceDescription(EvidenceType.GENE_BACKGROUND, gene, StringUtils.isEmpty(queryHugoSymbol) ? gene.getHugoSymbol() : queryHugoSymbol, false);
     }
 
-    private static String enrichGeneEvidenceDescription(EvidenceType evidenceType, Gene gene, String hugoSymbol) {
+    private static String enrichGeneEvidenceDescription(EvidenceType evidenceType, Gene gene, String hugoSymbol, boolean isGermline) {
         Set<Evidence> geneBackgroundEvs = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Collections.singleton(evidenceType));
         String summary = "";
-        if (!geneBackgroundEvs.isEmpty()) {
+
+        if (evidenceType.equals(EvidenceType.GENE_SUMMARY) && geneBackgroundEvs.size() == 2) {
+            String somaticSummary = null;
+            String germlineSummary = null;
+            for (Evidence ev : geneBackgroundEvs) {
+                if (ev.getForGermline()) {
+                    germlineSummary = ev.getDescription();
+                } else {
+                    somaticSummary = ev.getDescription();
+                }
+            }
+
+            if (isGermline) {
+                summary = joinStringsWithSpace(somaticSummary, germlineSummary);
+            } else {
+                summary = somaticSummary;
+            }
+        } else if (!geneBackgroundEvs.isEmpty()) {
             Evidence ev = geneBackgroundEvs.iterator().next();
             if (ev != null) {
                 summary = ev.getDescription();
@@ -1085,5 +1120,16 @@ public class SummaryUtils {
             }
         }
         return isVowel ? "an" : "a";
+    }
+
+    private static String joinStringsWithSpace(String str1, String str2) {
+        if (str1 == null && str2 == null) {
+            return "";
+        } else if (str1 == null) {
+            return str2;
+        } else if (str2 == null) {
+            return str1;
+        }
+        return str1 + " " + str2;
     }
 }

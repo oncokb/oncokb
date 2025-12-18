@@ -181,7 +181,7 @@ public class CacheFetcher {
                     gene.getEntrezGeneId(), gene.getHugoSymbol(),
                     gene.getGeneType() != null ? gene.getGeneType() : GeneType.INSUFFICIENT_EVIDENCE,
                     highestSensitiveLevel, highestResistanceLevel,
-                    includeEvidence ? SummaryUtils.geneSummary(gene, gene.getHugoSymbol()) : "",
+                    includeEvidence ? SummaryUtils.geneSummary(gene, gene.getHugoSymbol(), false) : "",
                     includeEvidence ? SummaryUtils.geneBackground(gene, gene.getHugoSymbol()) : ""
                 )
             );
@@ -262,6 +262,9 @@ public class CacheFetcher {
                                            Integer proteinEnd,
                                            StructuralVariantType svType,
                                            String hgvs,
+                                           Boolean isGermline,
+                                           String inheritanceMechanism,
+                                           Pathogenicity pathogenicity,
                                            Set<LevelOfEvidence> levels,
                                            Boolean highestLevelOnly,
                                            Set<EvidenceType> evidenceTypes,
@@ -269,7 +272,7 @@ public class CacheFetcher {
         if (referenceGenome == null) {
             referenceGenome = DEFAULT_REFERENCE_GENOME;
         }
-        Query query = new Query(null, referenceGenome, entrezGeneId, hugoSymbol, alteration, alterationType, svType, tumorType, consequence, proteinStart, proteinEnd, hgvs);
+        Query query = new Query(null, referenceGenome, entrezGeneId, hugoSymbol, alteration, alterationType, svType, tumorType, consequence, proteinStart, proteinEnd, hgvs, isGermline, inheritanceMechanism, pathogenicity);
         return IndicatorUtils.processQuery(
             query, levels, highestLevelOnly,
             evidenceTypes, geneQueryOnly
@@ -381,6 +384,20 @@ public class CacheFetcher {
         }
 
         return false;
+    }
+
+    public boolean hgvscShouldBeAnnotated(String hgvsc) {
+        if (StringUtils.isEmpty(hgvsc)) {
+            return false;
+        }
+        hgvsc = hgvsc.trim();
+        if (StringUtils.isEmpty(hgvsc)) {
+            return false;
+        }
+        if (!AlterationUtils.isValidHgvsc(hgvsc)) {
+            return false;
+        }
+        return true;
     }
 
     private Boolean withinBuffer(EnsemblGene ensemblGene, GenomicLocation genomicLocation) {

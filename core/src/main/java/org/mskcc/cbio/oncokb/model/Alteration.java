@@ -77,9 +77,14 @@ public class Alteration implements java.io.Serializable {
     @JoinColumn(name = "consequence")
     private VariantConsequence consequence;
 
+    @Lob
     private String alteration;
 
-    @Column(length = 300, nullable = false)
+    @Lob
+    @Column(name = "protein_change")
+    private String proteinChange;
+
+    @Lob
     private String name;
 
     @Column(name = "ref_residues")
@@ -93,6 +98,10 @@ public class Alteration implements java.io.Serializable {
 
     @Column(name = "variant_residues")
     private String variantResidues;
+
+    @JsonIgnore
+    @Column(name = "for_germline")
+    private Boolean forGermline = false;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "alteration_reference_genome", joinColumns = @JoinColumn(name = "alteration_id", nullable = false))
@@ -153,6 +162,14 @@ public class Alteration implements java.io.Serializable {
         this.alteration = alteration;
     }
 
+    public String getProteinChange() {
+        return proteinChange;
+    }
+
+    public void setProteinChange(String proteinChange) {
+        this.proteinChange = proteinChange;
+    }
+
     public String getName() {
         return name;
     }
@@ -210,6 +227,14 @@ public class Alteration implements java.io.Serializable {
         this.variantResidues = variantResidues;
     }
 
+    public Boolean getForGermline() {
+        return forGermline;
+    }
+
+    public void setForGermline(Boolean forGermline) {
+        this.forGermline = forGermline;
+    }
+
     public Set<ReferenceGenome> getReferenceGenomes() {
         return referenceGenomes;
     }
@@ -239,6 +264,7 @@ public class Alteration implements java.io.Serializable {
             getAlterationType() == that.getAlterationType() &&
             Objects.equals(getConsequence(), that.getConsequence()) &&
             Objects.equals(getAlteration(), that.getAlteration()) &&
+            Objects.equals(getProteinChange(), that.getProteinChange()) &&
             Objects.equals(getName(), that.getName()) &&
             Objects.equals(getRefResidues(), that.getRefResidues()) &&
             Objects.equals(getProteinStart(), that.getProteinStart()) &&
@@ -264,6 +290,11 @@ public class Alteration implements java.io.Serializable {
         }
         if (this.alteration != null) {
             content.add(this.alteration);
+        } else {
+            content.add("");
+        }
+        if (this.proteinChange != null) {
+            content.add(this.proteinChange);
         } else {
             content.add("");
         }

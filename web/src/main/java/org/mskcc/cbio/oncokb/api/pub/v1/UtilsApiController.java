@@ -9,6 +9,7 @@ import org.mskcc.cbio.oncokb.apiModels.download.FileName;
 import org.mskcc.cbio.oncokb.apiModels.download.FileExtension;
 import org.mskcc.cbio.oncokb.cache.CacheFetcher;
 import org.mskcc.cbio.oncokb.model.*;
+import org.mskcc.cbio.oncokb.model.BiologicalVariant;
 import org.mskcc.cbio.oncokb.util.*;
 import org.oncokb.oncokb_transcript.ApiException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +41,7 @@ public class UtilsApiController implements UtilsApi {
         if (version != null) {
             return getDataDownloadResponseEntity(version, FileName.ALL_ANNOTATED_VARIANTS, FileExtension.JSON);
         }
-        return new ResponseEntity<>(getAllAnnotatedVariants(false), HttpStatus.OK);
+        return new ResponseEntity<>(getAllAnnotatedVariants(false, false), HttpStatus.OK);
     }
 
     @Override
@@ -72,7 +73,7 @@ public class UtilsApiController implements UtilsApi {
         sb.append(MainUtils.listToString(header, separator));
         sb.append(newLine);
 
-        for (AnnotatedVariant annotatedVariant : getAllAnnotatedVariants(true)) {
+        for (AnnotatedVariant annotatedVariant : getAllAnnotatedVariants(true, false)) {
             List<String> row = new ArrayList<>();
             row.add(annotatedVariant.getGrch37Isoform());
             row.add(annotatedVariant.getGrch37RefSeq());
@@ -123,13 +124,13 @@ public class UtilsApiController implements UtilsApi {
         return new ResponseEntity<>(sb.toString(), HttpStatus.OK);
     }
 
-    private List<AnnotatedVariant> getAllAnnotatedVariants(Boolean isTextFile) {
+    private List<AnnotatedVariant> getAllAnnotatedVariants(Boolean isTextFile, boolean germline) {
         List<AnnotatedVariant> annotatedVariantList = new ArrayList<>();
         Set<Gene> genes = CacheUtils.getAllGenes();
         Map<Gene, Set<BiologicalVariant>> map = new HashMap<>();
 
         for (Gene gene : genes) {
-            map.put(gene, MainUtils.getBiologicalVariants(gene));
+            map.put(gene, MainUtils.getBiologicalVariants(gene, germline));
         }
 
         Set<AnnotatedVariant> annotatedVariants = new HashSet<>();
@@ -204,7 +205,7 @@ public class UtilsApiController implements UtilsApi {
         if (version != null) {
             return getDataDownloadResponseEntity(version, FileName.ALL_ACTIONABLE_VARIANTS, FileExtension.JSON);
         }
-        return new ResponseEntity<>(AlterationUtils.getAllActionableVariants(false), HttpStatus.OK);
+        return new ResponseEntity<>(AlterationUtils.getAllActionableVariants(false, false), HttpStatus.OK);
     }
 
     @Override
@@ -238,7 +239,7 @@ public class UtilsApiController implements UtilsApi {
         sb.append(MainUtils.listToString(header, separator));
         sb.append(newLine);
 
-        for (ActionableGene actionableGene : AlterationUtils.getAllActionableVariants(true)) {
+        for (ActionableGene actionableGene : AlterationUtils.getAllActionableVariants(true, false)) {
             List<String> row = new ArrayList<>();
             row.add(actionableGene.getGrch37Isoform());
             row.add(actionableGene.getGrch37RefSeq());
@@ -263,6 +264,91 @@ public class UtilsApiController implements UtilsApi {
         return new ResponseEntity<>(sb.toString(), HttpStatus.OK);
     }
 
+    private List<ActionableGene> getAllActionableVariants(Boolean isTextFile) {
+        List<ActionableGene> actionableGeneList = new ArrayList<>();
+        Set<Gene> genes = CacheUtils.getAllGenes();
+        Map<Gene, Set<ClinicalVariant>> map = new HashMap<>();
+
+        for (Gene gene : genes) {
+            map.put(gene, MainUtils.getClinicalVariants(gene, false));
+        }
+
+        Set<ActionableGene> actionableGenes = new HashSet<>();
+        for (Map.Entry<Gene, Set<ClinicalVariant>> entry : map.entrySet()) {
+            Gene gene = entry.getKey();
+            for (ClinicalVariant clinicalVariant : entry.getValue()) {
+                Set<ArticleAbstract> articleAbstracts = clinicalVariant.getDrugAbstracts();
+                List<String> abstracts = new ArrayList<>();
+                for (ArticleAbstract articleAbstract : articleAbstracts) {
+                    abstracts.add(articleAbstract.getAbstractContent() + " " + articleAbstract.getLink());
+                }
+
+                if (clinicalVariant.getExcludedCancerTypes().size() > 0) {
+                    String cancerTypeName = TumorTypeUtils.getTumorTypesNameWithExclusion(clinicalVariant.getCancerTypes(), clinicalVariant.getExcludedCancerTypes());
+                    // for any clinical variant that has cancer type excluded, we no longer list the cancer types separately
+                    actionableGenes.add(new ActionableGene(
+                        gene.getGrch37Isoform(), gene.getGrch37RefSeq(),
+                        gene.getGrch38Isoform(), gene.getGrch38RefSeq(),
+                        gene.getEntrezGeneId(),
+                        gene.getHugoSymbol(),
+                        clinicalVariant.getVariant().getReferenceGenomes().stream().map(referenceGenome -> referenceGenome.name()).collect(Collectors.joining(", ")),
+                        clinicalVariant.getVariant().getName(),
+                        clinicalVariant.getVariant().getAlteration(),
+                        cancerTypeName,
+                        clinicalVariant.getLevel(),
+                        clinicalVariant.getSolidPropagationLevel(),
+                        clinicalVariant.getLiquidPropagationLevel(),
+                        MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrug()), ", ", true),
+                        MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrugPmids()), ", ", true),
+                        MainUtils.listToString(abstracts, "; ", true),
+                        CplUtils.annotate(
+                            clinicalVariant.getDrugDescription(),
+                            gene.getHugoSymbol(),
+                            clinicalVariant.getVariant().getName(),
+                            cancerTypeName,
+                            null,
+                            gene,
+                            null,
+                            isTextFile
+                        )
+                    ));
+                } else {
+                    for (TumorType tumorType : clinicalVariant.getCancerTypes()) {
+                        actionableGenes.add(new ActionableGene(
+                            gene.getGrch37Isoform(), gene.getGrch37RefSeq(),
+                            gene.getGrch38Isoform(), gene.getGrch38RefSeq(),
+                            gene.getEntrezGeneId(),
+                            gene.getHugoSymbol(),
+                            clinicalVariant.getVariant().getReferenceGenomes().stream().map(referenceGenome -> referenceGenome.name()).collect(Collectors.joining(", ")),
+                            clinicalVariant.getVariant().getName(),
+                            clinicalVariant.getVariant().getAlteration(),
+                            TumorTypeUtils.getTumorTypeName(tumorType),
+                            clinicalVariant.getLevel(),
+                            clinicalVariant.getSolidPropagationLevel(),
+                            clinicalVariant.getLiquidPropagationLevel(),
+                            MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrug()), ", ", true),
+                            MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrugPmids()), ", ", true),
+                            MainUtils.listToString(abstracts, "; ", true),
+                            CplUtils.annotate(
+                                clinicalVariant.getDrugDescription(),
+                                gene.getHugoSymbol(),
+                                clinicalVariant.getVariant().getName(),
+                                TumorTypeUtils.getTumorTypeName(tumorType),
+                                null,
+                                gene,
+                                tumorType,
+                                isTextFile
+                            )
+                        ));
+                    }
+                }
+            }
+        }
+
+        actionableGeneList.addAll(actionableGenes);
+        MainUtils.sortActionableVariants(actionableGeneList);
+        return actionableGeneList;
+    }
 
     @Override
     public ResponseEntity<List<CancerGene>> utilsCancerGeneListGet(

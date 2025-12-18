@@ -18,6 +18,7 @@ public class GeneNumber {
     private String highestDiagnosticImplicationLevel = null;
     private String highestPrognosticImplicationLevel = null;
     private String highestFdaLevel = null;
+    private String penetrance = null;
 
     /**
      **/
@@ -97,6 +98,14 @@ public class GeneNumber {
         this.highestFdaLevel = highestFdaLevel;
     }
 
+    public String getPenetrance() {
+        return penetrance;
+    }
+
+    public void setPenetrance(String penetrance) {
+        this.penetrance = penetrance;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -109,12 +118,13 @@ public class GeneNumber {
             Objects.equals(getHighestResistanceLevel(), that.getHighestResistanceLevel()) &&
             Objects.equals(getHighestDiagnosticImplicationLevel(), that.getHighestDiagnosticImplicationLevel()) &&
             Objects.equals(getHighestPrognosticImplicationLevel(), that.getHighestPrognosticImplicationLevel()) &&
-            Objects.equals(getHighestFdaLevel(), that.getHighestFdaLevel());
+            Objects.equals(getHighestFdaLevel(), that.getHighestFdaLevel()) &&
+            Objects.equals(getPenetrance(), that.getPenetrance());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getGene(), getAlteration(), getTumorType(), getHighestSensitiveLevel(), getHighestResistanceLevel(), getHighestDiagnosticImplicationLevel(), getHighestPrognosticImplicationLevel(), getHighestFdaLevel());
+        return Objects.hash(getGene(), getAlteration(), getTumorType(), getHighestSensitiveLevel(), getHighestResistanceLevel(), getHighestDiagnosticImplicationLevel(), getHighestPrognosticImplicationLevel(), getHighestFdaLevel(), getPenetrance());
     }
 
     @Override
@@ -128,6 +138,7 @@ public class GeneNumber {
             ", highestDiagnosticImplicationLevel='" + highestDiagnosticImplicationLevel + '\'' +
             ", highestPrognosticImplicationLevel='" + highestPrognosticImplicationLevel + '\'' +
             ", highestFdaLevel='" + highestFdaLevel + '\'' +
+            ", penetrance='" + penetrance + '\'' +
             '}';
     }
 }

@@ -4,7 +4,6 @@ import com.monitorjbl.json.JsonResult;
 import com.monitorjbl.json.JsonView;
 import com.monitorjbl.json.Match;
 import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.TumorType;
 
 import java.util.List;
 import java.util.Set;
@@ -57,6 +56,38 @@ public class JsonResultFactory {
         } else {
             return resp;
         }
+    }
+
+    public static IndicatorQueryResp getIndicatorQueryRespWithoutGermline(IndicatorQueryResp resp) {
+        if (resp != null) {
+            JsonResult json = JsonResult.instance();
+            return json.use(JsonView.with(resp)
+                .onClass(IndicatorQueryResp.class, Match.match()
+                    .include("*")
+                    .exclude("germline"))
+                .onClass(Drug.class, Match.match()
+                    .include("ncitCode", "drugName"))
+                .onClass(Query.class, Match.match()
+                    .include("*")
+                    .exclude("isGermline", "inheritanceMechanism", "pathogenicity")))
+                .returnValue();
+        } else {
+            return null;
+        }
+    }
+
+    public static List<IndicatorQueryResp> getIndicatorQueryRespWithoutGermline(List<IndicatorQueryResp> resp) {
+        JsonResult json = JsonResult.instance();
+        return json.use(JsonView.with(resp)
+            .onClass(IndicatorQueryResp.class, Match.match()
+                .include("*")
+                .exclude("germline"))
+            .onClass(Drug.class, Match.match()
+                .include("ncitCode", "drugName"))
+            .onClass(Query.class, Match.match()
+                    .include("*")
+                    .exclude("isGermline", "inheritanceMechanism", "pathogenicity")))
+            .returnValue();
     }
 
     public static Gene getGene(Gene gene, String fields) {

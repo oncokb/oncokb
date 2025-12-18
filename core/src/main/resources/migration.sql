@@ -197,6 +197,14 @@ alter table evidence
 update evidence set fda_level='LEVEL_Fda2' where level_of_evidence in ('LEVEL_1', 'LEVEL_R1', 'LEVEL_2');
 update evidence set fda_level='LEVEL_Fda3' where level_of_evidence in ('LEVEL_3A', 'LEVEL_4', 'LEVEL_R2');
 
+-- Update to v4
+alter table alteration
+    modify alteration longtext null;
+alter table alteration
+    add protein_change longtext null after alteration;
+alter table evidence
+    add name longtext null after known_effect;
+
 -- update to v4.30
 alter table gene
     add gene_type varchar(30) null,

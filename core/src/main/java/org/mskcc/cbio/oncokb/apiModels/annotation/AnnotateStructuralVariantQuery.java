@@ -3,6 +3,9 @@ package org.mskcc.cbio.oncokb.apiModels.annotation;
 import io.swagger.annotations.ApiModel;
 import org.mskcc.cbio.oncokb.model.StructuralVariantType;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
+
 import java.util.Objects;
 
 /**
@@ -13,6 +16,9 @@ public class AnnotateStructuralVariantQuery extends AnnotationQuery implements j
     private QueryGene geneB;
     private StructuralVariantType structuralVariantType;
     private Boolean isFunctionalFusion = false;
+    // @JsonUnwrapped
+    @JsonIgnore
+    private GermlineQuery germlineQuery = new GermlineQuery();;
 
     public QueryGene getGeneA() {
         return geneA;
@@ -44,6 +50,14 @@ public class AnnotateStructuralVariantQuery extends AnnotationQuery implements j
 
     public void setFunctionalFusion(Boolean functionalFusion) {
         isFunctionalFusion = functionalFusion;
+    }
+
+    public GermlineQuery getGermlineQuery() {
+        return germlineQuery;
+    }
+
+    public void setGermlineQuery(GermlineQuery germlineQuery) {
+        this.germlineQuery = germlineQuery;
     }
 
     @Override
