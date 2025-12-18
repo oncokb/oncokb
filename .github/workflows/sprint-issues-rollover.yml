@@ -1,23 +1,57 @@
-# This workflow will move all unfinish tickets to the next sprint
+# This workflow will move all unfinished tickets to the next sprint (or chosen iteration)
 
 name: "Sprint Issues Rollover"
 
 on:
   schedule:
-    # Runs every Wednesday at 6pm EST
+    # Runs every Wednesday at 6pm EST (22:00 UTC)
     - cron: "0 22 * * 3"
+  workflow_dispatch:
+    inputs:
+      iteration_field:
+        description: "Iteration field name in the Project (must match exactly)"
+        required: true
+        default: "2024 Week"
+        type: string
+      from_iteration:
+        description: "Move issues currently in this iteration"
+        required: true
+        default: "current"
+        type: choice
+        options:
+          - current
+          - last
+      to_iteration:
+        description: "Move issues to this iteration"
+        required: true
+        default: "next"
+        type: choice
+        options:
+          - current
+          - next
+      excluded_statuses:
+        description: "Comma-separated statuses to exclude"
+        required: true
+        default: "✅ Done"
+        type: string
 
 jobs:
   main:
-    name: Move to next week
+    name: Move to chosen iteration
     runs-on: ubuntu-latest
     steps:
       - uses: blombard/move-to-next-iteration@master
         with:
           owner: oncokb
           number: 3 # The project number as you see it in the URL
-          token: ${{secrets.PROJECT_PAT}} # Needs 'project' write perms
-          iteration-field: 2024 Week # https://github.com/blombard/move-to-next-iteration/issues/7
-          iteration: current
-          new-iteration: next
-          excluded-statuses: ✅ Done
+          token: ${{ secrets.PROJECT_PAT }} # Needs 'project' write perms
+
+          # NOTE:
+          # Defaults defined under `workflow_dispatch` ONLY apply to manual runs.
+          # For scheduled (cron) runs, `inputs.*` does not exist at all.
+          # The `||` fallback ensures the workflow behaves the same for both
+          # manual and scheduled executions.
+          iteration-field: ${{ inputs.iteration_field || '2024 Week' }}
+          iteration: ${{ inputs.from_iteration || 'current' }}
+          new-iteration: ${{ inputs.to_iteration || 'next' }}
+          excluded-statuses: ${{ inputs.excluded_statuses || '✅ Done' }}
