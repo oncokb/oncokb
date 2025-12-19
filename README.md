@@ -16,8 +16,8 @@ The core of OncoKB Annotation service.
 
 Please confirm your running environment is:
 
-- **Java version: 8**
-- **MySQL version: 8.0.36**
+-   **Java version: 8**
+-   **MySQL version: 8.0.36**
 
 ## Prepare properties files
 
@@ -71,17 +71,17 @@ OncoKB™ is a precision oncology knowledge base developed at Memorial Sloan Ket
 
 OncoKB docker compose file consists of the following services:
 
-- OncoKB: provides variant annotations
-- OncoKB Transcript: serves OncoKB metadata including gene, transcript, sequence, etc.
-- Genome Nexus: provides annotation and interpretation of genetic variants in cancer
-    - GRCh37 (optional):
-        - gn-spring-boot: the backend service responsible for aggregating variant annotations from various sources
-        - gn-mongo: variants fetched from external resources and small static data are cached in the MongoDB database
-        - gn-vep: is a spring boot REST wrapper service for [VEP](https://github.com/Ensembl/ensembl-vep) using GRCh37 data
-    - GRCh38 (optional):
-        - gn-spring-boot-grch38: same as `gn-spring-boot` service, however the VEP URL points to `gn-vep-grch38`
-        - gn-mongo-grch38: contains static data relevant to GRCh38
-        - gn-vep-grch38: a spring boot REST wrapper service for VEP using GRCh38 data
+-   OncoKB: provides variant annotations
+-   OncoKB Transcript: serves OncoKB metadata including gene, transcript, sequence, etc.
+-   Genome Nexus: provides annotation and interpretation of genetic variants in cancer
+    -   GRCh37 (optional):
+        -   gn-spring-boot: the backend service responsible for aggregating variant annotations from various sources
+        -   gn-mongo: variants fetched from external resources and small static data are cached in the MongoDB database
+        -   gn-vep: is a spring boot REST wrapper service for [VEP](https://github.com/Ensembl/ensembl-vep) using GRCh37 data
+    -   GRCh38 (optional):
+        -   gn-spring-boot-grch38: same as `gn-spring-boot` service, however the VEP URL points to `gn-vep-grch38`
+        -   gn-mongo-grch38: contains static data relevant to GRCh38
+        -   gn-vep-grch38: a spring boot REST wrapper service for VEP using GRCh38 data
 
 ### Option A: With Local installation of Genome Nexus
 
@@ -113,24 +113,44 @@ For this option, you need to download the VEP cache, which is used in the `gn-ve
 > will be hosted under the MSKCC Docker Hub organization. You can find their
 > new locations here:
 >
-> - [mskcc/oncokb](https://hub.docker.com/repository/docker/mskcc/oncokb/general)
-> - [mskcc/oncokb-transcript](https://hub.docker.com/repository/docker/mskcc/oncokb-transcript/general)
+> -   [mskcc/oncokb](https://hub.docker.com/repository/docker/mskcc/oncokb/general)
+> -   [mskcc/oncokb-transcript](https://hub.docker.com/repository/docker/mskcc/oncokb-transcript/general)
 
 > [!WARNING]
 > OncoKB uses a native password for MySQL. If you use MySQL 8.1
 > or above you must configure native passwords enabled as they no longer are
 > enabled by default.
 
-| oncokb | oncokb-transcript | gn-spring-boot | gn-mongo | genome-nexus-vep | MySQL  | Redis  | Oncokb Data |
-| ------ | ----------------- | -------------- | -------- | ---------------- | ------ | ------ | ----------- |
-| v3.x.x | v0.9.4            | >=v1.x.x         | v0.x     | >=v0.0.1           | v8.0.x | v7.x.x | v4.x.x      |
-| v4.x.x | v0.9.4            | >=v1.x.x         | v0.x     | >=v0.0.1           | v8.0.x | v7.x.x | v5.x.x      |
-| v5.0.0-rc | v0.9.4            | >=v1.x.x         | v0.x     | >=v0.0.1           | v8.0.x | v7.x.x | v6.x.x      |
+| oncokb    | oncokb-transcript | gn-spring-boot | gn-mongo | genome-nexus-vep | MySQL  | Redis  | Oncokb Data |
+| --------- | ----------------- | -------------- | -------- | ---------------- | ------ | ------ | ----------- |
+| v3.x.x    | v0.9.4            | >=v1.x.x       | v0.x     | >=v0.0.1         | v8.0.x | v7.x.x | v4.x.x      |
+| v4.x.x    | v0.9.4            | >=v1.x.x       | v0.x     | >=v0.0.1         | v8.0.x | v7.x.x | v5.x.x      |
+| v5.0.x-rc | v0.9.4            | >=v1.x.x       | v0.x     | >=v0.0.1         | v8.0.x | v7.x.x | v6.x.x      |
 
-> [!CAUTION]
-> `v5.0.0-rc` is a pre-release with known bugs. Do not deploy this version; stay on a stable release until a stable v5.x.x build is available.
+> [!CAUTION] > `v5.0.x-rc` is a pre-release with known bugs. Do not deploy this version; stay on a stable release until a stable v5.x.x build is available.
 
 ### Additional Information
+
+#### How to make software release
+
+1. Set the release bump in `.version-level` to one of `major`, `minor`, or `patch`, then push to `master`.
+2. The `after-master-commit` workflow will update `release-drafter.yml` and bump `pom.xml` to the next version accordingly.
+3. A draft release will be created by Release Drafter; when ready, publish the draft to cut the release and tag.
+
+Examples:
+
+-   `.version-level` = `major` → next major release (e.g., 6.0.0).
+-   `.version-level` = `minor` → next minor release (e.g., 5.1.0).
+-   `.version-level` = `patch` → next patch release (e.g., 5.0.1).
+
+Caveat for prereleases:
+If you use a prerelease value (e.g., `(major|minor|patch)-rc.1`), the workflows will append the suffix to `pom.xml` but the Release Drafter draft tag/name will not include the `-rc` suffix. You must manually adjust the draft tag/name when publishing the release.
+
+Examples with prerelease:
+
+-   `.version-level` = `major-rc.1` → pom bumps to next major with `-rc.1`; adjust the draft release tag/name manually to include `-rc.1`.
+-   `.version-level` = `minor-rc.1` → pom bumps to next minor with `-rc.1`; adjust the draft release tag/name manually to include `-rc.1`.
+-   `.version-level` = `patch-rc` → pom bumps to next patch with `-rc`; adjust the draft release tag/name manually.
 
 #### Running unit tests
 
@@ -160,10 +180,10 @@ The docker compose file has a pre-generated oncokb-transcript [JWT](https://jwt.
 
 1. Follow the instructions from [genome-nexus-vep](https://github.com/genome-nexus/genome-nexus-vep) to download the Ensembl Data and set up a MySQL database.
 2. Modify the following environment variables for your Genome Nexus VEP deployment to point to your newly created database:
-    * MYSQL_USER
-    * MYSQL_PASSWORD
-    * MYSQL_HOST
-    * MYSQL_PORT
+    - MYSQL_USER
+    - MYSQL_PASSWORD
+    - MYSQL_HOST
+    - MYSQL_PORT
 
 ## Genome Nexus <2.0.0
 
