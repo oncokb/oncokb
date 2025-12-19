@@ -16,18 +16,21 @@ jobs:
       - name: 'Update Version Level'
         run: |
           git pull
-          VERSION_LEVEL=$(cat .version-level | tr "[:upper:]" "[:lower:]")
-
-          RELEASE_DRAFTER_MINOR='NEXT_MINOR_VERSION'
-          RELEASE_DRAFTER_PATCH='NEXT_PATCH_VERSION'
-
-          if [[ $VERSION_LEVEL == 'minor' ]]; then
-          sed -i "s/$RELEASE_DRAFTER_PATCH/$RELEASE_DRAFTER_MINOR/gi" .github/release-drafter.yml
+          RAW_LEVEL=$(cat .version-level | tr "[:upper:]" "[:lower:]")
+          BASE_LEVEL=${RAW_LEVEL%%-*}
+          PRERELEASE_SUFFIX=""
+          if [[ "$RAW_LEVEL" != "$BASE_LEVEL" ]]; then
+            PRERELEASE_SUFFIX=${RAW_LEVEL#*-}
           fi
 
-          if [[ $VERSION_LEVEL == 'patch' ]]; then
-          sed -i "s/$RELEASE_DRAFTER_MINOR/$RELEASE_DRAFTER_PATCH/gi" .github/release-drafter.yml
+          TARGET_PLACEHOLDER='NEXT_MINOR_VERSION'
+          if [[ $BASE_LEVEL == 'major' ]]; then
+            TARGET_PLACEHOLDER='NEXT_MAJOR_VERSION'
+          elif [[ $BASE_LEVEL == 'patch' ]]; then
+            TARGET_PLACEHOLDER='NEXT_PATCH_VERSION'
           fi
+          # Normalize all NEXT_* placeholders to the selected target
+          sed -i -E "s/NEXT_(MAJOR|MINOR|PATCH)_VERSION/$TARGET_PLACEHOLDER/g" .github/release-drafter.yml
 
           CHANGED=$(git diff --name-only HEAD --)
           if [ -n "$CHANGED" ]
@@ -35,7 +38,7 @@ jobs:
             git config user.name oncokb-bot
             git config user.email dev.oncokb@gmail.com
             git add .
-            git commit -m "Update action files to align the version level to $VERSION_LEVEL"
+            git commit -m "Update action files to align the version level to $RAW_LEVEL"
             git push -f
           fi
 
@@ -69,13 +72,24 @@ jobs:
       - name: 'Get Current Version Level'
         id: 'version-level'
         run: |
-          VERSION_LEVEL=$(cat .version-level | tr "[:upper:]" "[:lower:]")
-          echo "::set-output name=VERSION_LEVEL::$VERSION_LEVEL"
+          RAW_LEVEL=$(cat .version-level | tr "[:upper:]" "[:lower:]")
+          BASE_LEVEL=${RAW_LEVEL%%-*}
+          PRERELEASE_SUFFIX=""
+          if [[ "$RAW_LEVEL" != "$BASE_LEVEL" ]]; then
+            PRERELEASE_SUFFIX=${RAW_LEVEL#*-}
+          fi
+          echo "::set-output name=BASE_LEVEL::$BASE_LEVEL"
+          echo "::set-output name=PRERELEASE_SUFFIX::$PRERELEASE_SUFFIX"
       - name: 'Update Pom'
         env:
-          NEW_VERSION: ${{ steps.version-level.outputs.VERSION_LEVEL == 'minor' && steps.semvers.outputs.minor || steps.semvers.outputs.patch}}
+          NEW_VERSION_BASE: ${{ steps.version-level.outputs.BASE_LEVEL == 'major' && steps.semvers.outputs.major || steps.version-level.outputs.BASE_LEVEL == 'minor' && steps.semvers.outputs.minor || steps.semvers.outputs.patch}}
+          PRERELEASE_SUFFIX: ${{ steps.version-level.outputs.PRERELEASE_SUFFIX }}
         run: |
           git pull
+          NEW_VERSION="$NEW_VERSION_BASE"
+          if [ -n "$PRERELEASE_SUFFIX" ]; then
+            NEW_VERSION="$NEW_VERSION-$PRERELEASE_SUFFIX"
+          fi
           mvn --batch-mode versions:set -DnewVersion=${NEW_VERSION} -DgenerateBackupPoms=false
 
           CHANGED=$(git diff --name-only HEAD --)
