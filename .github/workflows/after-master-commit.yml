@@ -23,6 +23,7 @@ jobs:
             PRERELEASE_SUFFIX=${RAW_LEVEL#*-}
           fi
 
+          # Defaulted to next minor version, so we don't have an explicit if check
           TARGET_PLACEHOLDER='NEXT_MINOR_VERSION'
           if [[ $BASE_LEVEL == 'major' ]]; then
             TARGET_PLACEHOLDER='NEXT_MAJOR_VERSION'

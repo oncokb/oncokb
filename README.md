@@ -139,8 +139,8 @@ For this option, you need to download the VEP cache, which is used in the `gn-ve
 
 Examples:
 
--   `.version-level` = `minor` → next minor release (e.g., 5.1.0).
 -   `.version-level` = `major` → next major release (e.g., 6.0.0).
+-   `.version-level` = `minor` → next minor release (e.g., 5.1.0).
 -   `.version-level` = `patch` → next patch release (e.g., 5.0.1).
 
 Caveat for prereleases:
