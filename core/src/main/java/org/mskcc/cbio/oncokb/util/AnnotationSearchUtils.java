@@ -408,7 +408,7 @@ public class AnnotationSearchUtils {
         }
 
         // conversion to desired list output
-        return cancerMatches.stream().map(cancerMatch -> newTypeaheadCancer(cancerMatch)).collect(Collectors.toList());
+        return cancerMatches.stream().map(cancerMatch -> newTypeaheadCancer(cancerMatch)).filter(resp -> resp != null).collect(Collectors.toList());
     }
 
     // we do not show parenthesis if it's in alteration name.
@@ -473,26 +473,26 @@ public class AnnotationSearchUtils {
         txLevels.addAll(THERAPEUTIC_RESISTANCE_LEVELS);
         txLevels.addAll(THERAPEUTIC_SENSITIVE_LEVELS);
 
-        if (cancerMatch.getAlterationsByLevel() != null && cancerMatch.findHighestLevel(txLevels) != null) {
-            LevelOfEvidence highestLevel = cancerMatch.findHighestLevel(txLevels);
-
-            if (LevelUtils.isSensitiveLevel(highestLevel)) {
-                typeaheadSearchResp.setHighestSensitiveLevel(highestLevel.getLevel());
-            } else {
-                typeaheadSearchResp.setHighestResistanceLevel(highestLevel.getLevel());
-            }
-
-            String cancerType = cancerMatch.getCancerType().getCode();
-            if (StringUtils.isEmpty(cancerType)) {
-                cancerType = cancerMatch.getCancerType().getSubtype();
-            }
-            if (StringUtils.isEmpty(cancerType)) {
-                cancerType = cancerMatch.getCancerType().getMainType();
-            }
-            typeaheadSearchResp.setLink("actionable-genes#sections=Tx&cancerType=" + cancerType);
-        } else {
-            typeaheadSearchResp.setLink("");
+        if (cancerMatch.getAlterationsByLevel() == null || cancerMatch.findHighestLevel(txLevels) == null) {
+            return null;
         }
+
+        LevelOfEvidence highestLevel = cancerMatch.findHighestLevel(txLevels);
+
+        if (LevelUtils.isSensitiveLevel(highestLevel)) {
+            typeaheadSearchResp.setHighestSensitiveLevel(highestLevel.getLevel());
+        } else {
+            typeaheadSearchResp.setHighestResistanceLevel(highestLevel.getLevel());
+        }
+
+        String cancerType = cancerMatch.getCancerType().getCode();
+        if (StringUtils.isEmpty(cancerType)) {
+            cancerType = cancerMatch.getCancerType().getSubtype();
+        }
+        if (StringUtils.isEmpty(cancerType)) {
+            cancerType = cancerMatch.getCancerType().getMainType();
+        }
+        typeaheadSearchResp.setLink("actionable-genes#sections=Tx&cancerType=" + cancerType);
 
         typeaheadSearchResp.setQueryType(TypeaheadQueryType.CANCER_TYPE);
 
