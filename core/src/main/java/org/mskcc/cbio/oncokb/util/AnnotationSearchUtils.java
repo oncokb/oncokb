@@ -153,7 +153,7 @@ public class AnnotationSearchUtils {
                             for (String keyword : keywords) {
                                 if (!keyword.equals(entry.getKey())) {
                                     Alteration alteration =
-                                            AlterationUtils.getAlteration(gene.getHugoSymbol(), keyword, null, null, null, null, null);
+                                            AlterationUtils.getAlteration(gene.getHugoSymbol(), keyword, null, null, null, null, null, false);
                                     TypeaheadSearchResp typeaheadSearchResp = newTypeaheadVariant(alteration);
                                     typeaheadSearchResp.setVariantExist(false);
                                     result.add(typeaheadSearchResp);

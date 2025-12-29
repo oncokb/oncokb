@@ -127,8 +127,8 @@ public class IndicatorUtils {
                 if (queryFusionGenes.size() == 1) {
                     Gene queryFusionGene = GeneUtils.getGeneByHugoSymbol(queryFusionGenes.iterator().next());
                     if (queryFusionGene != null) {
-                        Alteration deletion = AlterationUtils.findAlteration(queryFusionGene, query.getReferenceGenome(), "Deletion");
-                        if (deletion != null && !deletion.getForGermline()) {
+                        Alteration deletion = AlterationUtils.findAlteration(queryFusionGene, query.getReferenceGenome(), "Deletion", query.isGermline());
+                        if (deletion != null) {
                             query.setAlteration("deletion");
                             query.setConsequence("feature_truncation");
                             fusionGeneAltsMap = findFusionGeneAndRelevantAlts(query);
@@ -161,8 +161,8 @@ public class IndicatorUtils {
                     if (queryFusionGenes.size() == 1) {
                         Gene queryFusionGene = GeneUtils.getGeneByHugoSymbol(queryFusionGenes.iterator().next());
                         if (queryFusionGene != null) {
-                            Alteration deletion = AlterationUtils.findAlteration(queryFusionGene, query.getReferenceGenome(), "Deletion");
-                            if (deletion != null && !deletion.getForGermline()) {
+                            Alteration deletion = AlterationUtils.findAlteration(queryFusionGene, query.getReferenceGenome(), "Deletion", query.isGermline());
+                            if (deletion != null) {
                                 query.setAlteration("deletion");
                                 fusionGeneAltsMap = findFusionGeneAndRelevantAlts(query);
                             }
@@ -187,9 +187,8 @@ public class IndicatorUtils {
         } else {
             gene = GeneUtils.getGene(query.getEntrezGeneId(), query.getHugoSymbol());
             if (gene != null) {
-                Alteration alt = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getAlteration(), 
-                null, query.getConsequence(), query.getProteinStart(), query.getProteinEnd(), query.getReferenceGenome());
-                alt.setForGermline(query.isGermline());
+                Alteration alt = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getAlteration(),
+                    null, query.getConsequence(), query.getProteinStart(), query.getProteinEnd(), query.getReferenceGenome(), query.isGermline());
                 relevantAlterations = AlterationUtils.getRelevantAlterations(query.getReferenceGenome(), alt);
             }
         }
@@ -225,7 +224,7 @@ public class IndicatorUtils {
             }
 
             alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getAlteration(),
-                null, query.getConsequence(), query.getProteinStart(), query.getProteinEnd(), query.getReferenceGenome());
+                null, query.getConsequence(), query.getProteinStart(), query.getProteinEnd(), query.getReferenceGenome(), query.isGermline());
 
             List<Alteration> nonVUSRelevantAlts = AlterationUtils.excludeVUS(relevantAlterations);
             Map<String, LevelOfEvidence> highestLevels = new HashMap<>();
@@ -1063,10 +1062,10 @@ public class IndicatorUtils {
         return levels;
     }
 
-    private static List<Alteration> findRelevantAlts(Gene gene, ReferenceGenome referenceGenome, String alteration) {
+    private static List<Alteration> findRelevantAlts(Gene gene, ReferenceGenome referenceGenome, String alteration, Boolean isGermline) {
         Set<Alteration> relevantAlts = new LinkedHashSet<>();
         Alteration alt = AlterationUtils.getAlteration(gene.getHugoSymbol(), alteration,
-            null, null, null, null, referenceGenome);
+            null, null, null, null, referenceGenome, isGermline);
 
         relevantAlts.addAll(AlterationUtils.getRelevantAlterations(referenceGenome, alt));
 
@@ -1113,9 +1112,9 @@ public class IndicatorUtils {
                 for (Gene tmpGene : tmpGenes) {
                     List<Alteration> tmpRelevantAlts = new ArrayList<>();
                     if (!com.mysql.jdbc.StringUtils.isNullOrEmpty(query.getAlteration())) {
-                        tmpRelevantAlts = findRelevantAlts(tmpGene, query.getReferenceGenome(), query.getAlteration());
+                        tmpRelevantAlts = findRelevantAlts(tmpGene, query.getReferenceGenome(), query.getAlteration(), query.isGermline());
                     } else {
-                        tmpRelevantAlts = findRelevantAlts(tmpGene, query.getReferenceGenome(), query.getHugoSymbol() + " Fusion");
+                        tmpRelevantAlts = findRelevantAlts(tmpGene, query.getReferenceGenome(), query.getHugoSymbol() + " Fusion", query.isGermline());
                     }
                     if (tmpRelevantAlts != null && tmpRelevantAlts.size() > 0) {
                         hasRelevantAltsGenes.add(tmpGene);
@@ -1127,9 +1126,9 @@ public class IndicatorUtils {
                 } else if (hasRelevantAltsGenes.size() == 1) {
                     gene = hasRelevantAltsGenes.iterator().next();
                     if (!com.mysql.jdbc.StringUtils.isNullOrEmpty(query.getAlteration())) {
-                        relevantAlterations = findRelevantAlts(gene, query.getReferenceGenome(), query.getAlteration());
+                        relevantAlterations = findRelevantAlts(gene, query.getReferenceGenome(), query.getAlteration(), query.isGermline());
                     } else {
-                        relevantAlterations = findRelevantAlts(gene, query.getReferenceGenome(), query.getHugoSymbol() + " Fusion");
+                        relevantAlterations = findRelevantAlts(gene, query.getReferenceGenome(), query.getHugoSymbol() + " Fusion", query.isGermline());
                     }
                 }
 
@@ -1146,9 +1145,9 @@ public class IndicatorUtils {
                 if (tmpGene != null) {
                     gene = tmpGene;
                     Alteration alt = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getAlteration(),
-                        AlterationType.getByName(query.getAlterationType()), query.getConsequence(), null, null, query.getReferenceGenome());
+                        AlterationType.getByName(query.getAlterationType()), query.getConsequence(), null, null, query.getReferenceGenome(), query.isGermline());
                     if (!com.mysql.jdbc.StringUtils.isNullOrEmpty(query.getAlteration())) {
-                        relevantAlterations = findRelevantAlts(gene, query.getReferenceGenome(), query.getAlteration());
+                        relevantAlterations = findRelevantAlts(gene, query.getReferenceGenome(), query.getAlteration(), query.isGermline());
                     } else {
                         relevantAlterations = AlterationUtils.getRelevantAlterations(query.getReferenceGenome(), alt);
 

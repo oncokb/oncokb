@@ -113,7 +113,7 @@ public class VariantsApiController implements VariantsApi {
 
                             // If this variant is not annotated
                             if (alterations == null || alterations.isEmpty()) {
-                                Alteration alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getVariant(), AlterationType.getByName(query.getVariantType()), query.getConsequence(), query.getProteinStart(), query.getProteinEnd(), query.getReferenceGenome());
+                                Alteration alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getVariant(), AlterationType.getByName(query.getVariantType()), query.getConsequence(), query.getProteinStart(), query.getProteinEnd(), query.getReferenceGenome(), false);
                                 if (alteration != null) {
                                     alterations.add(alteration);
                                 }

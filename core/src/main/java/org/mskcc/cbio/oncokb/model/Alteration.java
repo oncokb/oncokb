@@ -21,19 +21,19 @@ import java.util.stream.Collectors;
     ),
     @NamedQuery(
         name = "findAlteration",
-        query = "select a from Alteration a where a.gene=? and a.alteration=?"
+        query = "select a from Alteration a where a.gene=? and a.alteration=? and a.forGermline=?"
     ),
     @NamedQuery(
         name = "findAlterationAndReferenceGenome",
-        query = "select a from Alteration a join a.referenceGenomes r where a.gene=? and a.alteration=? and r=?"
+        query = "select a from Alteration a join a.referenceGenomes r where a.gene=? and a.alteration=? and r=? and a.forGermline=?"
     ),
     @NamedQuery(
         name = "findAlterationByAlterationAndName",
-        query = "select a from Alteration a where a.gene=? and a.alteration=? and a.name=?"
+        query = "select a from Alteration a where a.gene=? and a.alteration=? and a.name=? and a.forGermline=?"
     ),
     @NamedQuery(
         name = "findAlterationByAlterationAndNameAndReferenceGenome",
-        query = "select a from Alteration a join a.referenceGenomes r where a.gene=? and a.alteration=? and a.name=? and r=?"
+        query = "select a from Alteration a join a.referenceGenomes r where a.gene=? and a.alteration=? and a.name=? and r=? and a.forGermline=?"
     ),
     @NamedQuery(
         name = "findMutationsByConsequence",
@@ -342,5 +342,4 @@ public class Alteration implements java.io.Serializable {
         return StringUtils.join(content.toArray(), "&");
     }
 }
-
 

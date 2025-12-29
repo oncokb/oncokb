@@ -132,7 +132,7 @@ public class EvidenceUtilsTest extends TestCase {
         Evidence e4 = new Evidence();
         Evidence e5 = new Evidence();
 
-        Alteration alteration = AlterationUtils.findAlteration(GeneUtils.getGeneByHugoSymbol("BRAF"), DEFAULT_REFERENCE_GENOME, "V600E");
+        Alteration alteration = AlterationUtils.findAlteration(GeneUtils.getGeneByHugoSymbol("BRAF"), DEFAULT_REFERENCE_GENOME, "V600E", false);
 
         e1.setAlterations(Collections.singleton(alteration));
         e2.setAlterations(Collections.singleton(alteration));

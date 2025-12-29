@@ -64,7 +64,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
 
         Boolean isHotspot = false;
 
-        Alteration alteration = AlterationUtils.getAlteration(hugoSymbol, variant, null, null, null, null, null);
+        Alteration alteration = AlterationUtils.getAlteration(hugoSymbol, variant, null, null, null, null, null, false);
 
         if (alteration != null) {
             isHotspot = HotspotUtils.isHotspot(alteration);
@@ -233,7 +233,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
 
                 // If the general alteration is not annotated system, at least we need to add
                 // it into the list for mapping.
-                Alteration exactMatch = AlterationUtils.findAlteration(gene, referenceGenome, variant);
+                Alteration exactMatch = AlterationUtils.findAlteration(gene, referenceGenome, variant, false);
                 if (exactMatch == null) {
                     allAlterations.add(oncokbVariant);
                 }
@@ -352,7 +352,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         if (gene == null) {
             return ResponseEntity.ok(new ArrayList<>());
         }
-        Alteration alt = AlterationUtils.getAlteration(gene.getHugoSymbol(), alteration, null, null, null, null, matchedRG);
+        Alteration alt = AlterationUtils.getAlteration(gene.getHugoSymbol(), alteration, null, null, null, null, matchedRG, false);
         Set<Alteration> relevantAlts = new LinkedHashSet<>();
         if (AlterationUtils.isCategoricalAlteration(alt.getAlteration())) {
             relevantAlts = ApplicationContextSingleton.getAlterationBo().findRelevantAlterationsForCategoricalAlt(matchedRG, alt, AlterationUtils.getAllAlterations(matchedRG, alt.getGene()));
@@ -401,7 +401,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             gene = GeneUtils.getGeneByEntrezId(query.getEntrezGeneId());
         } else {
             gene = GeneUtils.getGene(entrezGeneId, hugoSymbol);
-            Alteration alterationModel = AlterationUtils.findAlteration(gene, matchedRG, alteration);
+            Alteration alterationModel = AlterationUtils.findAlteration(gene, matchedRG, alteration, germline);
             if (alterationModel == null) {
                 alteration = AlterationUtils.resolveProteinAlterationShort(alteration);
                 if (gene == null) {
@@ -412,7 +412,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
                     alterationModel.setGene(gene);
                     alterationModel.setAlteration(alteration);
                 } else {
-                    alterationModel = AlterationUtils.getAlteration(gene.getHugoSymbol(), alteration, null, null, null, null, matchedRG);
+                    alterationModel = AlterationUtils.getAlteration(gene.getHugoSymbol(), alteration, null, null, null, null, matchedRG, germline);
                 }
             }
             query = new Query(alterationModel, matchedRG);

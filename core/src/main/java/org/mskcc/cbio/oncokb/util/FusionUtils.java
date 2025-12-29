@@ -104,9 +104,9 @@ public class FusionUtils {
 
     private static Alteration findAltByFusionName(String fusionName, Gene geneA, Gene geneB) {
         Alteration matchedAlteration = null;
-        matchedAlteration = AlterationUtils.findAlteration(geneA, ReferenceGenome.GRCh37, fusionName);
+        matchedAlteration = AlterationUtils.findAlteration(geneA, ReferenceGenome.GRCh37, fusionName, false);
         if (matchedAlteration == null) {
-            matchedAlteration = AlterationUtils.findAlteration(geneB, ReferenceGenome.GRCh37, fusionName);
+            matchedAlteration = AlterationUtils.findAlteration(geneB, ReferenceGenome.GRCh37, fusionName, false);
         }
         return matchedAlteration;
     }

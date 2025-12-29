@@ -205,40 +205,40 @@ public class AlterationUtilsTest extends TestCase {
     }
 
     public void testIsPositionVariant() throws Exception {
-        Alteration alteration = AlterationUtils.getAlteration("AKT1", "E17", null, "NA", null, null, null);
+        Alteration alteration = AlterationUtils.getAlteration("AKT1", "E17", null, "NA", null, null, null, false);
         assertTrue("This variant should be position variant.", AlterationUtils.isPositionedAlteration(alteration));
 
-        alteration = AlterationUtils.getAlteration("AKT1", "E17", null, null, null, null, null);
+        alteration = AlterationUtils.getAlteration("AKT1", "E17", null, null, null, null, null, false);
         assertTrue("This variant should be position variant.", AlterationUtils.isPositionedAlteration(alteration));
 
-        alteration = AlterationUtils.getAlteration("AKT1", "E17*", null, null, null, null, null);
+        alteration = AlterationUtils.getAlteration("AKT1", "E17*", null, null, null, null, null, false);
         assertFalse("This variant should NOT be position variant.", AlterationUtils.isPositionedAlteration(alteration));
 
-        alteration = AlterationUtils.getAlteration("AKT1", "EE17*", null, null, null, null, null);
+        alteration = AlterationUtils.getAlteration("AKT1", "EE17*", null, null, null, null, null, false);
         assertFalse("This variant should NOT be position variant.", AlterationUtils.isPositionedAlteration(alteration));
 
-        alteration = AlterationUtils.getAlteration("AKT1", "EE17", null, null, null, null, null);
+        alteration = AlterationUtils.getAlteration("AKT1", "EE17", null, null, null, null, null, false);
         assertFalse("This variant should NOT be position variant.", AlterationUtils.isPositionedAlteration(alteration));
 
-        alteration = AlterationUtils.getAlteration("AKT1", "17", null, null, null, null, null);
+        alteration = AlterationUtils.getAlteration("AKT1", "17", null, null, null, null, null, false);
         assertFalse("This variant should NOT be position variant.", AlterationUtils.isPositionedAlteration(alteration));
 
-        alteration = AlterationUtils.getAlteration("AKT1", "E", null, null, null, null, null);
+        alteration = AlterationUtils.getAlteration("AKT1", "E", null, null, null, null, null, false);
         assertFalse("This variant should NOT be position variant.", AlterationUtils.isPositionedAlteration(alteration));
 
-        alteration = AlterationUtils.getAlteration("AKT1", "", null, null, null, null, null);
+        alteration = AlterationUtils.getAlteration("AKT1", "", null, null, null, null, null, false);
         assertFalse("This variant should NOT be position variant.", AlterationUtils.isPositionedAlteration(alteration));
 
-        alteration = AlterationUtils.getAlteration("AKT1", "E17A", null, null, null, null, null);
+        alteration = AlterationUtils.getAlteration("AKT1", "E17A", null, null, null, null, null, false);
         assertFalse("This variant should NOT be position variant.", AlterationUtils.isPositionedAlteration(alteration));
 
-        alteration = AlterationUtils.getAlteration("AKT1", "E17AA", null, null, null, null, null);
+        alteration = AlterationUtils.getAlteration("AKT1", "E17AA", null, null, null, null, null, false);
         assertFalse("This variant should NOT be position variant.", AlterationUtils.isPositionedAlteration(alteration));
 
-        alteration = AlterationUtils.getAlteration("AKT1", "EE17AA", null, null, null, null, null);
+        alteration = AlterationUtils.getAlteration("AKT1", "EE17AA", null, null, null, null, null, false);
         assertFalse("This variant should NOT be position variant.", AlterationUtils.isPositionedAlteration(alteration));
 
-        alteration = AlterationUtils.getAlteration("EGFR", "L747Rfs*13", null, null, null, null, null);
+        alteration = AlterationUtils.getAlteration("EGFR", "L747Rfs*13", null, null, null, null, null, false);
         assertFalse("This variant should NOT be position variant.", AlterationUtils.isPositionedAlteration(alteration));
 
     }

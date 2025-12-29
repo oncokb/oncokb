@@ -72,7 +72,7 @@ public class EvidenceUtils {
                 (levelOfEvidences == null ? "" : ("&" + levelOfEvidences.toString()));
             if (matchedAlt == null) {
                 matchedAlt = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getAlteration(),
-                    AlterationType.getByName(query.getAlterationType()), query.getConsequence(), query.getProteinStart(), query.getProteinEnd(), query.getReferenceGenome());
+                    AlterationType.getByName(query.getAlterationType()), query.getConsequence(), query.getProteinStart(), query.getProteinEnd(), query.getReferenceGenome(), query.isGermline());
             }
 
             Set<Evidence> relevantEvidences;
@@ -972,13 +972,16 @@ public class EvidenceUtils {
                 if (query.getGene() != null) {
 
                     if (!com.mysql.jdbc.StringUtils.isNullOrEmpty(requestQuery.getAlteration())) {
-                        Alteration alt = AlterationUtils.findAlteration(query.getGene(), requestQuery.getReferenceGenome(), requestQuery.getAlteration());
+                        Alteration alt = AlterationUtils.findAlteration(query.getGene(), requestQuery.getReferenceGenome(), requestQuery.getAlteration(), requestQuery.isGermline());
 
                         if (alt == null) {
                             alt = AlterationUtils.getAlteration(query.getGene().getHugoSymbol(),
                                 requestQuery.getAlteration(), null, requestQuery.getConsequence(),
-                                requestQuery.getProteinStart(), requestQuery.getProteinEnd(), requestQuery.getReferenceGenome());
+                                requestQuery.getProteinStart(), requestQuery.getProteinEnd(), requestQuery.getReferenceGenome(), requestQuery.isGermline());
+                            alt.setForGermline(requestQuery.isGermline());
                             AlterationUtils.annotateAlteration(alt, alt.getAlteration());
+                        } else {
+                            alt.setForGermline(requestQuery.isGermline());
                         }
                         query.setExactMatchedAlteration(alt);
                         List<Alteration> relevantAlts = AlterationUtils.getRelevantAlterations(requestQuery.getReferenceGenome(), alt);
@@ -992,7 +995,7 @@ public class EvidenceUtils {
                             }
                         }
 
-                        Alteration alteration = AlterationUtils.getAlteration(query.getGene().getHugoSymbol(), requestQuery.getAlteration(), AlterationType.MUTATION, requestQuery.getConsequence(), requestQuery.getProteinStart(), requestQuery.getProteinEnd(), requestQuery.getReferenceGenome());
+                        Alteration alteration = AlterationUtils.getAlteration(query.getGene().getHugoSymbol(), requestQuery.getAlteration(), AlterationType.MUTATION, requestQuery.getConsequence(), requestQuery.getProteinStart(), requestQuery.getProteinEnd(), requestQuery.getReferenceGenome(), requestQuery.isGermline());
                         List<Alteration> allelesAlts = AlterationUtils.getAlleleAlterations(requestQuery.getReferenceGenome(), alteration);
                         relevantAlts.removeAll(allelesAlts);
                         query.setAlterations(relevantAlts);
@@ -1121,7 +1124,7 @@ public class EvidenceUtils {
             for (Alteration alt : parsedAlterations) {
                 String proteinChange = alt.getAlteration();
                 String displayName = alt.getName();
-                Alteration alteration = alterationBo.findAlterationFromDao(gene, type, referenceGenome, proteinChange, displayName);
+                Alteration alteration = alterationBo.findAlterationFromDao(gene, type, referenceGenome, proteinChange, displayName, evidence.getForGermline());
                 if (alteration == null) {
                     alteration = new Alteration();
                     alteration.setGene(gene);
@@ -1129,11 +1132,15 @@ public class EvidenceUtils {
                     alteration.setAlteration(proteinChange);
                     alteration.setName(displayName);
                     alteration.setReferenceGenomes(alt.getReferenceGenomes());
+                    alteration.setForGermline(evidence.getForGermline());
                     AlterationUtils.annotateAlteration(alteration, proteinChange);
                     alterationBo.save(alteration);
-                } else if (!alteration.getReferenceGenomes().equals(alt.getReferenceGenomes())) {
-                    alteration.setReferenceGenomes(alt.getReferenceGenomes());
-                    alterationBo.update(alteration);
+                } else {
+                    alteration.setForGermline(evidence.getForGermline());
+                    if (!alteration.getReferenceGenomes().equals(alt.getReferenceGenomes())) {
+                        alteration.setReferenceGenomes(alt.getReferenceGenomes());
+                        alterationBo.update(alteration);
+                    }
                 }
                 alterations.add(alteration);
             }

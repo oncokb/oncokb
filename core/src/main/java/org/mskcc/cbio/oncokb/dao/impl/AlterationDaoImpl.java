@@ -7,7 +7,6 @@ package org.mskcc.cbio.oncokb.dao.impl;
 import org.mskcc.cbio.oncokb.dao.AlterationDao;
 import org.mskcc.cbio.oncokb.model.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,19 +20,20 @@ public class AlterationDaoImpl extends GenericDaoImpl<Alteration, Integer> imple
     }
 
     @Override
-    public Alteration findAlteration(Gene gene, AlterationType alterationType, ReferenceGenome referenceGenome, String alteration) {
+    public Alteration findAlteration(Gene gene, AlterationType alterationType, ReferenceGenome referenceGenome, String alteration, Boolean isGermline) {
+        boolean germline = Boolean.TRUE.equals(isGermline);
         List<Alteration> alterations = referenceGenome == null ?
-            findByNamedQuery("findAlteration", gene, alteration) :
-            findByNamedQuery("findAlterationAndReferenceGenome", gene, alteration, referenceGenome);
+            findByNamedQuery("findAlteration", gene, alteration, germline) :
+            findByNamedQuery("findAlterationAndReferenceGenome", gene, alteration, referenceGenome, germline);
         return alterations.isEmpty() ? null : alterations.get(0);
     }
 
     @Override
-    public Alteration findAlteration(Gene gene, AlterationType alterationType, ReferenceGenome referenceGenome, String alteration, String name) {
-
+    public Alteration findAlteration(Gene gene, AlterationType alterationType, ReferenceGenome referenceGenome, String alteration, String name, Boolean isGermline) {
+        boolean germline = Boolean.TRUE.equals(isGermline);
         List<Alteration> alterations = referenceGenome == null ?
-            findByNamedQuery("findAlterationByAlterationAndName", gene, alteration, name) :
-            findByNamedQuery("findAlterationByAlterationAndNameAndReferenceGenome", gene, alteration, name, referenceGenome);
+            findByNamedQuery("findAlterationByAlterationAndName", gene, alteration, name, germline) :
+            findByNamedQuery("findAlterationByAlterationAndNameAndReferenceGenome", gene, alteration, name, referenceGenome, germline);
         return alterations.isEmpty() ? null : alterations.get(0);
     }
 
