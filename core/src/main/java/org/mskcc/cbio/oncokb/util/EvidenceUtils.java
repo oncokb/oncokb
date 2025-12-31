@@ -978,11 +978,9 @@ public class EvidenceUtils {
                             alt = AlterationUtils.getAlteration(query.getGene().getHugoSymbol(),
                                 requestQuery.getAlteration(), null, requestQuery.getConsequence(),
                                 requestQuery.getProteinStart(), requestQuery.getProteinEnd(), requestQuery.getReferenceGenome(), requestQuery.isGermline());
-                            alt.setForGermline(requestQuery.isGermline());
                             AlterationUtils.annotateAlteration(alt, alt.getAlteration());
-                        } else {
-                            alt.setForGermline(requestQuery.isGermline());
-                        }
+                        } 
+                        alt.setForGermline(requestQuery.isGermline());
                         query.setExactMatchedAlteration(alt);
                         List<Alteration> relevantAlts = AlterationUtils.getRelevantAlterations(requestQuery.getReferenceGenome(), alt);
 
@@ -1132,16 +1130,15 @@ public class EvidenceUtils {
                     alteration.setAlteration(proteinChange);
                     alteration.setName(displayName);
                     alteration.setReferenceGenomes(alt.getReferenceGenomes());
-                    alteration.setForGermline(evidence.getForGermline());
                     AlterationUtils.annotateAlteration(alteration, proteinChange);
                     alterationBo.save(alteration);
                 } else {
-                    alteration.setForGermline(evidence.getForGermline());
                     if (!alteration.getReferenceGenomes().equals(alt.getReferenceGenomes())) {
                         alteration.setReferenceGenomes(alt.getReferenceGenomes());
                         alterationBo.update(alteration);
                     }
                 }
+                alteration.setForGermline(evidence.getForGermline());
                 alterations.add(alteration);
             }
             evidence.setAlterations(alterations);
