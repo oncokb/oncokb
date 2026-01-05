@@ -41,7 +41,7 @@ jobs:
         run: |
           MYSQL_FILE_NAME=mysql.sql.gz
           if [ -z "${ONCOKB_OAUTH_TOKEN}" ]; then
-            echo "ONCOKB_OAUTH_TOKEN is not set; cannot download test data." >&2
+            echo "ONCOKB_OAUTH_TOKEN is not set. If this is a forked PR, GitHub does not pass base repo secrets to pull_request workflows." >&2
             exit 1
           fi
           curl -fsSL \
