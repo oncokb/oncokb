@@ -2,10 +2,9 @@
 
 name: Unit Tests
 
-on:
-  push:
-    branches: [master, refactor, next-minor-release]
-  pull_request:
+# Note: Secrets are not exposed to workflows triggered by forked pull_request events.
+# GitHub strips secrets for security (the workflow code comes from the fork)
+on: [push, pull_request]
 
 jobs:
   main:
@@ -41,10 +40,22 @@ jobs:
           MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
         run: |
           MYSQL_FILE_NAME=mysql.sql.gz
-          curl -s https://"${ONCOKB_OAUTH_TOKEN}"@raw.githubusercontent.com/knowledgesystems/oncokb-data/master/RELEASE/latest/"${MYSQL_FILE_NAME}" -O
+          if [ -z "${ONCOKB_OAUTH_TOKEN}" ]; then
+            echo "ONCOKB_OAUTH_TOKEN is not set. If this is a forked PR, GitHub does not pass base repo secrets to pull_request workflows." >&2
+            exit 1
+          fi
+          curl -fsSL \
+            -H "Authorization: token ${ONCOKB_OAUTH_TOKEN}" \
+            -o "${MYSQL_FILE_NAME}" \
+            "https://raw.githubusercontent.com/knowledgesystems/oncokb-data/master/RELEASE/latest/${MYSQL_FILE_NAME}"
+          if ! gzip -t "${MYSQL_FILE_NAME}"; then
+            echo "Downloaded ${MYSQL_FILE_NAME} is not a valid gzip. Check ONCOKB_OAUTH_TOKEN and URL." >&2
+            exit 1
+          fi
 
-          mysql --host=127.0.0.1 --user=root --password=${MYSQL_ROOT_PASSWORD} -e "CREATE DATABASE IF NOT EXISTS test"
-          zcat "${MYSQL_FILE_NAME}" | mysql --host=127.0.0.1 --user=root --password=${MYSQL_ROOT_PASSWORD} test
+          export MYSQL_PWD="${MYSQL_ROOT_PASSWORD}"
+          mysql --host=127.0.0.1 --user=root -e "CREATE DATABASE IF NOT EXISTS test"
+          zcat "${MYSQL_FILE_NAME}" | mysql --host=127.0.0.1 --user=root test
 
       - uses: actions/setup-java@v2
         with:
