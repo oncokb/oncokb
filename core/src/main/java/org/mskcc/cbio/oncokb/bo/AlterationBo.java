@@ -25,11 +25,11 @@ public interface AlterationBo extends GenericBo<Alteration> {
     List<Alteration> findAlterationsByGene(Collection<Gene> genes);
 
 
-    Alteration findAlteration(Gene gene, AlterationType alterationType, String alteration);
+    Alteration findAlteration(Gene gene, AlterationType alterationType, String alteration, Boolean isGermline);
 
-    Alteration findAlteration(Gene gene, AlterationType alterationType, ReferenceGenome referenceGenome, String alteration);
+    Alteration findAlteration(Gene gene, AlterationType alterationType, ReferenceGenome referenceGenome, String alteration, Boolean isGermline);
 
-    Alteration findAlteration(Gene gene, AlterationType alterationType, ReferenceGenome referenceGenome, String alteration, String name);
+    Alteration findAlteration(Gene gene, AlterationType alterationType, ReferenceGenome referenceGenome, String alteration, String name, Boolean isGermline);
 
     /**
      * @param gene
@@ -38,7 +38,7 @@ public interface AlterationBo extends GenericBo<Alteration> {
      * @param name
      * @return
      */
-    Alteration findAlterationFromDao(Gene gene, AlterationType alterationType, ReferenceGenome referenceGenome, String alteration, String name);
+    Alteration findAlterationFromDao(Gene gene, AlterationType alterationType, ReferenceGenome referenceGenome, String alteration, String name, Boolean isGermline);
 
     /**
      * @param gene

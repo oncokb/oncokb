@@ -52,8 +52,8 @@ public class CplUtils {
             queryCancerType = "";
 
 
-        String altName = getGeneMutationNameInTumorTypeSummary(gene, referenceGenome, queryHugoSymbol, queryAlteration);
-        String alterationName = getGeneMutationNameInVariantSummary(gene, referenceGenome, queryHugoSymbol, queryAlteration);
+        String altName = getGeneMutationNameInTumorTypeSummary(gene, referenceGenome, queryHugoSymbol, queryAlteration, false);
+        String alterationName = getGeneMutationNameInVariantSummary(gene, referenceGenome, queryHugoSymbol, queryAlteration, false);
         String tumorTypeName = convertTumorTypeNameInSummary(matchedTumorType == null ? queryCancerType : (StringUtils.isEmpty(matchedTumorType.getSubtype()) ? matchedTumorType.getMainType() : matchedTumorType.getSubtype()));
 
         if (tumorTypeName == null)

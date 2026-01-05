@@ -39,7 +39,7 @@ public class IsOncogenicAlterationTest {
     @Test
     public void test_is_oncogenic() {
         Gene gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
-        Alteration alteration = AlterationUtils.findAlteration(gene, DEFAULT_REFERENCE_GENOME, alterationName);
+        Alteration alteration = AlterationUtils.findAlteration(gene, DEFAULT_REFERENCE_GENOME, alterationName, false);
         assertEquals(isOncogenic, AlterationUtils.isOncogenicAlteration(alteration));
     }
 }

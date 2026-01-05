@@ -967,6 +967,35 @@ public class IndicatorUtilsTest {
         assertTrue("Highest resistance levels are not the same, but they should.", LevelUtils.areSameLevels(resp1.getHighestResistanceLevel(), resp2.getHighestResistanceLevel()));
     }
 
+    @Test
+    public void testProcessQueryForGermline() {
+        // Testing if a variant specifically associated with a genomic indicator is picked up
+        Query query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "FH", "c.2T>G", null, null, null, null, null, null, null, true, null, null);
+        IndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null, false);
+        assertTrue("FH c.2T>G should include Monoallelic FH (carrier) genomic indicator. Actual: " + indicatorQueryResp.getGermline().getGenomicIndicators(),
+            indicatorQueryResp.getGermline().getGenomicIndicators().contains("Monoallelic FH (carrier) "));
+
+        // Testing if a variant associated under "Pathogenic Variants" gets the correct genomic indicator
+        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "FH", "c.1020T>A", null, null, null, null, null, null, null, true, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null, false);
+        assertTrue("FH c.1020T>A should include HLRCC monoallelic genomic indicator. Actual: " + indicatorQueryResp.getGermline().getGenomicIndicators(),
+            indicatorQueryResp.getGermline().getGenomicIndicators().contains("Hereditary leiomyomatosis and renal cell cancer (HLRCC)(monoallelic)"));
+
+        // Testing whether a variant that is curated under both somatic and germline will be annotated correctly based on genetic type
+        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "EGFR", "Deletion", null, null, null, null, null, null, null, true, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null, false);
+        assertTrue("Germline EGFR Deletion should have pathogenicity. Actual: " + indicatorQueryResp.getGermline().getPathogenic(),
+            StringUtils.isNotEmpty(indicatorQueryResp.getGermline().getPathogenic()));
+        assertTrue("Germline EGFR Deletion should have mutation description. Actual: " + indicatorQueryResp.getGermline().getDescription(),
+            StringUtils.isNotEmpty(indicatorQueryResp.getMutationEffect().getDescription()));
+        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "EGFR", "Deletion", null, null, null, null, null, null, null, false, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null, false);
+        assertTrue("Somatic EGFR Deletion should not return germline pathogenicity. Actual: " + indicatorQueryResp.getGermline().getPathogenic(),
+            StringUtils.isEmpty(indicatorQueryResp.getGermline().getPathogenic()));
+        assertTrue("Somatic EGFR Deletion should not return germline mutation description. Actual: " + indicatorQueryResp.getGermline().getDescription(),
+            StringUtils.isEmpty(indicatorQueryResp.getMutationEffect().getDescription()));
+    }
+
     // Most of the annotation service should not have clinical implication returned when alteration is not available.
     // The only exception is when to do annotation/search where gene query is possible and clinical implications should be returned which we cover in AnnotationSearchUtilsTest.java
     @Test

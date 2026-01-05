@@ -32,23 +32,23 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
 
 
     @Override
-    public Alteration findAlteration(Gene gene, AlterationType alterationType, String alteration) {
-        return findAlteration(gene, alterationType, null, alteration);
+    public Alteration findAlteration(Gene gene, AlterationType alterationType, String alteration, Boolean isGermline) {
+        return findAlteration(gene, alterationType, null, alteration, isGermline);
     }
 
     @Override
-    public Alteration findAlteration(Gene gene, AlterationType alterationType, ReferenceGenome referenceGenome, String alteration) {
-        return AlterationUtils.findAlteration(referenceGenome, alteration, CacheUtils.getAlterations(gene.getEntrezGeneId(), referenceGenome));
+    public Alteration findAlteration(Gene gene, AlterationType alterationType, ReferenceGenome referenceGenome, String alteration, Boolean isGermline) {
+        return AlterationUtils.findAlteration(referenceGenome, alteration, CacheUtils.getAlterations(gene.getEntrezGeneId(), referenceGenome), isGermline);
     }
 
     @Override
-    public Alteration findAlteration(Gene gene, AlterationType alterationType, ReferenceGenome referenceGenome, String alteration, String name) {
-        return AlterationUtils.findAlteration(referenceGenome, alteration, name, CacheUtils.getAlterations(gene.getEntrezGeneId(), referenceGenome));
+    public Alteration findAlteration(Gene gene, AlterationType alterationType, ReferenceGenome referenceGenome, String alteration, String name, Boolean isGermline) {
+        return AlterationUtils.findAlteration(referenceGenome, alteration, name, CacheUtils.getAlterations(gene.getEntrezGeneId(), referenceGenome), isGermline);
     }
 
     @Override
-    public Alteration findAlterationFromDao(Gene gene, AlterationType alterationType, ReferenceGenome referenceGenome, String alteration, String name) {
-        return getDao().findAlteration(gene, alterationType, referenceGenome, alteration, name);
+    public Alteration findAlterationFromDao(Gene gene, AlterationType alterationType, ReferenceGenome referenceGenome, String alteration, String name, Boolean isGermline) {
+        return getDao().findAlteration(gene, alterationType, referenceGenome, alteration, name, isGermline);
     }
 
     @Override
@@ -216,14 +216,14 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
 
 
         if (addEGFRCTD(alteration)) {
-            Alteration alt = AlterationUtils.findAlteration(referenceGenome, "CTD", fullAlterations);
+            Alteration alt = AlterationUtils.findAlteration(referenceGenome, "CTD", fullAlterations, alteration.getForGermline());
             if (alt != null) {
                 alterations.add(alt);
             }
         }
 
         if (alteration.getGene().getHugoSymbol().equals("EGFR") && alteration.getAlteration().equals("CTD")) {
-            Alteration alt = AlterationUtils.findAlteration(referenceGenome, "CTD", fullAlterations);
+            Alteration alt = AlterationUtils.findAlteration(referenceGenome, "CTD", fullAlterations, alteration.getForGermline());
             if (alt != null && !alterations.contains(alt)) {
                 alterations.add(alt);
             }
@@ -319,7 +319,7 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         }
 
         if (addDeletion) {
-            Alteration deletion = AlterationUtils.findAlteration(referenceGenome, "Deletion", fullAlterations);
+            Alteration deletion = AlterationUtils.findAlteration(referenceGenome, "Deletion", fullAlterations, alteration.getForGermline());
             if (deletion != null) {
                 alterations.add(deletion);
 
@@ -369,14 +369,14 @@ public class AlterationBoImpl extends GenericBoImpl<Alteration, AlterationDao> i
         }
 
         for (String effect : effects) {
-            Alteration alt = AlterationUtils.findAlteration(referenceGenome, effect + " mutations", fullAlterations);
+            Alteration alt = AlterationUtils.findAlteration(referenceGenome, effect + " mutations", fullAlterations, alteration.getForGermline());
             if (alt != null) {
                 alterations.add(alt);
             }
         }
 
         if (!addOncogenicMutations(alteration, alternativeAlleles, new ArrayList<>(alterations)) && addVUSMutation(alteration, matchedAlt != null)) {
-            Alteration VUSMutation = AlterationUtils.findAlteration(referenceGenome, InferredMutation.VUS.getVariant(), fullAlterations);
+            Alteration VUSMutation = AlterationUtils.findAlteration(referenceGenome, InferredMutation.VUS.getVariant(), fullAlterations, alteration.getForGermline());
             if (VUSMutation != null) {
                 alterations.add(VUSMutation);
             }

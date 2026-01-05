@@ -662,7 +662,7 @@ public final class AlterationUtils {
 
     public static Alteration getRevertFusions(ReferenceGenome referenceGenome, Alteration alteration) {
         return alterationBo.findAlteration(alteration.getGene(),
-            alteration.getAlterationType(), referenceGenome, getRevertFusionName(alteration));
+            alteration.getAlterationType(), referenceGenome, getRevertFusionName(alteration), alteration.getForGermline());
     }
 
     public static String getRevertFusionName(Alteration alteration) {
@@ -684,7 +684,7 @@ public final class AlterationUtils {
     }
 
     public static Alteration getAlteration(String hugoSymbol, String alteration, AlterationType alterationType,
-                                           String consequence, Integer proteinStart, Integer proteinEnd, ReferenceGenome referenceGenome) {
+                                           String consequence, Integer proteinStart, Integer proteinEnd, ReferenceGenome referenceGenome, Boolean isGermline) {
         Alteration alt = new Alteration();
 
         if (alteration != null) {
@@ -728,6 +728,7 @@ public final class AlterationUtils {
         } else {
             alt.getReferenceGenomes().add(referenceGenome);
         }
+        alt.setForGermline(Boolean.TRUE.equals(isGermline));
         AlterationUtils.annotateAlteration(alt, alt.getAlteration());
         return alt;
     }
@@ -852,7 +853,7 @@ public final class AlterationUtils {
     }
 
     public static Alteration getTruncatingMutations(Gene gene) {
-        return findAlteration(gene, null, TRUNCATING_MUTATIONS.getVariant());
+        return findAlteration(gene, null, TRUNCATING_MUTATIONS.getVariant(), false);
     }
 
     public static Set<Alteration> findVUSFromEvidences(Set<Evidence> evidences) {
@@ -1009,61 +1010,52 @@ public final class AlterationUtils {
         return knownEffect;
     }
 
-    private static List<Alteration> getAlterations(Gene gene, ReferenceGenome referenceGenome, String alteration, AlterationType alterationType, String consequence, Integer proteinStart, Integer proteinEnd, List<Alteration> fullAlterations) {
+    private static List<Alteration> getAlterations(Alteration alteration, ReferenceGenome referenceGenome, List<Alteration> fullAlterations) {
         List<Alteration> alterations = new ArrayList<>();
-        VariantConsequence variantConsequence = null;
-
-        if (gene != null && alteration != null) {
-            if (consequence != null) {
-                Alteration alt = new Alteration();
-                alt.setAlteration(alteration);
-                variantConsequence = VariantConsequenceUtils.findVariantConsequenceByTerm(consequence);
-                if (variantConsequence == null) {
-                    variantConsequence = new VariantConsequence(consequence, null, false);
-                }
-                alt.setConsequence(variantConsequence);
-                alt.setAlterationType(alterationType == null ? AlterationType.MUTATION : alterationType);
-                alt.setGene(gene);
-                alt.setProteinStart(proteinStart);
-                alt.setProteinEnd(proteinEnd);
-                alt.getReferenceGenomes().add(referenceGenome);
-
-                AlterationUtils.annotateAlteration(alt, alt.getAlteration());
-
-                LinkedHashSet<Alteration> alts = alterationBo.findRelevantAlterations(referenceGenome, alt, fullAlterations, true);
-                if (!alts.isEmpty()) {
-                    alterations.addAll(alts);
-                }
-            } else {
-                Alteration alt = new Alteration();
-                alt.setAlteration(alteration);
-                alt.setAlterationType(alterationType == null ? AlterationType.MUTATION : alterationType);
-                alt.setGene(gene);
-                alt.setProteinStart(proteinStart);
-                alt.setProteinEnd(proteinEnd);
-                alt.getReferenceGenomes().add(referenceGenome);
-
-                AlterationUtils.annotateAlteration(alt, alt.getAlteration());
-
-                LinkedHashSet<Alteration> alts = alterationBo.findRelevantAlterations(referenceGenome, alt, fullAlterations, true);
-                if (!alts.isEmpty()) {
-                    alterations.addAll(alts);
-                }
-            }
+        if (alteration == null || alteration.getGene() == null || alteration.getAlteration() == null) {
+            return alterations;
         }
 
-        if (FusionUtils.isFusion(alteration)) {
-            Alteration alt = new Alteration();
-            alt.setAlteration(alteration);
-            alt.setAlterationType(alterationType == null ? AlterationType.MUTATION : alterationType);
-            alt.setGene(gene);
+        Alteration alt = new Alteration();
+        alt.setAlteration(alteration.getAlteration());
+        alt.setName(alteration.getName());
+        alt.setConsequence(alteration.getConsequence());
+        alt.setAlterationType(alteration.getAlterationType() == null ? AlterationType.MUTATION : alteration.getAlterationType());
+        alt.setGene(alteration.getGene());
+        alt.setProteinStart(alteration.getProteinStart());
+        alt.setProteinEnd(alteration.getProteinEnd());
+        alt.setForGermline(Boolean.TRUE.equals(alteration.getForGermline()));
+        if (referenceGenome == null) {
+            alt.getReferenceGenomes().add(DEFAULT_REFERENCE_GENOME);
+        } else {
+            alt.getReferenceGenomes().add(referenceGenome);
+        }
 
-            AlterationUtils.annotateAlteration(alt, alt.getAlteration());
-            Alteration revertFusion = getRevertFusions(referenceGenome, alt, fullAlterations);
+        AlterationUtils.annotateAlteration(alt, alt.getAlteration());
+
+        LinkedHashSet<Alteration> alts = alterationBo.findRelevantAlterations(referenceGenome, alt, fullAlterations, true);
+        if (!alts.isEmpty()) {
+            alterations.addAll(alts);
+        }
+
+        if (FusionUtils.isFusion(alteration.getAlteration())) {
+            Alteration fusionAlt = new Alteration();
+            fusionAlt.setAlteration(alteration.getAlteration());
+            fusionAlt.setAlterationType(alt.getAlterationType());
+            fusionAlt.setGene(alteration.getGene());
+            fusionAlt.setForGermline(Boolean.TRUE.equals(alteration.getForGermline()));
+            if (referenceGenome == null) {
+                fusionAlt.getReferenceGenomes().add(DEFAULT_REFERENCE_GENOME);
+            } else {
+                fusionAlt.getReferenceGenomes().add(referenceGenome);
+            }
+
+            AlterationUtils.annotateAlteration(fusionAlt, fusionAlt.getAlteration());
+            Alteration revertFusion = getRevertFusions(referenceGenome, fusionAlt, fullAlterations);
             if (revertFusion != null) {
-                LinkedHashSet<Alteration> alts = alterationBo.findRelevantAlterations(referenceGenome, revertFusion, fullAlterations, true);
-                if (alts != null) {
-                    alterations.addAll(alts);
+                LinkedHashSet<Alteration> revertAlts = alterationBo.findRelevantAlterations(referenceGenome, revertFusion, fullAlterations, true);
+                if (revertAlts != null) {
+                    alterations.addAll(revertAlts);
                 }
             }
         }
@@ -1201,7 +1193,7 @@ public final class AlterationUtils {
 
         // Special case for PDGFRA: don't match D842V as alternative allele to other alleles
         if (alteration.getGene() != null && alteration.getGene().getEntrezGeneId() == 5156 && !alteration.getAlteration().equals("D842V")) {
-            Alteration d842v = AlterationUtils.findAlteration(alteration.getGene(), referenceGenome, "D842V");
+            Alteration d842v = AlterationUtils.findAlteration(alteration.getGene(), referenceGenome, "D842V", alteration.getForGermline());
             alleles.remove(d842v);
         }
 
@@ -1392,16 +1384,7 @@ public final class AlterationUtils {
         if (alteration == null || alteration.getGene() == null) {
             return new ArrayList<>();
         }
-        Gene gene = alteration.getGene();
-        VariantConsequence consequence = alteration.getConsequence();
-        String term = consequence == null ? null : consequence.getTerm();
-        Integer proteinStart = alteration.getProteinStart();
-        Integer proteinEnd = alteration.getProteinEnd();
-
-        return getAlterations(
-            gene, referenceGenome, alteration.getAlteration(), alteration.getAlterationType(), term,
-            proteinStart, proteinEnd,
-            fullAlterations);
+        return getAlterations(alteration, referenceGenome, fullAlterations);
     }
 
     public static List<Alteration> removeAlterationsFromList(List<Alteration> list, List<Alteration> alterationsToBeRemoved) {
@@ -1415,13 +1398,17 @@ public final class AlterationUtils {
     }
 
     public static Alteration findAlteration(Gene gene, ReferenceGenome referenceGenome, String alteration) {
+        return findAlteration(gene, referenceGenome, alteration, null);
+    }
+
+    public static Alteration findAlteration(Gene gene, ReferenceGenome referenceGenome, String alteration, Boolean isGermline) {
         if (gene == null) {
             return null;
         }
         if (referenceGenome == null) {
-            return alterationBo.findAlteration(gene, AlterationType.MUTATION, alteration);
+            return alterationBo.findAlteration(gene, AlterationType.MUTATION, alteration, isGermline);
         } else {
-            return alterationBo.findAlteration(gene, AlterationType.MUTATION, referenceGenome, alteration);
+            return alterationBo.findAlteration(gene, AlterationType.MUTATION, referenceGenome, alteration, isGermline);
         }
     }
 
@@ -1474,7 +1461,7 @@ public final class AlterationUtils {
     }
 
     public static Alteration findExactlyMatchedAlteration(ReferenceGenome referenceGenome, Alteration alteration, List<Alteration> fullAlterations) {
-        Alteration matchedByAlteration = findAlteration(referenceGenome, alteration.getAlteration(), fullAlterations);
+        Alteration matchedByAlteration = findAlteration(referenceGenome, alteration.getAlteration(), fullAlterations, alteration.getForGermline());
         if (matchedByAlteration != null) {
             if (matchedByAlteration.getConsequence() == null
                 || alteration.getConsequence() == null
@@ -1561,7 +1548,11 @@ public final class AlterationUtils {
         return new ArrayList<>(result);
     }
     public static Alteration findAlteration(ReferenceGenome referenceGenome, String alteration, List<Alteration> fullAlterations) {
-        return findAlterationWithGeneticType(referenceGenome, alteration, fullAlterations, null);
+        return findAlteration(referenceGenome, alteration, fullAlterations, null);
+    }
+
+    public static Alteration findAlteration(ReferenceGenome referenceGenome, String alteration, List<Alteration> fullAlterations, Boolean isGermline) {
+        return findAlterationWithGeneticType(referenceGenome, alteration, fullAlterations, isGermline);
     }
 
     public static Alteration findAlterationWithGeneticType(ReferenceGenome referenceGenome, String alteration, List<Alteration> fullAlterations, Boolean isGermline) {
@@ -1597,14 +1588,18 @@ public final class AlterationUtils {
     }
 
     public static Alteration findAlteration(ReferenceGenome referenceGenome, String alteration, String name, List<Alteration> fullAlterations) {
+        return findAlteration(referenceGenome, alteration, name, fullAlterations, null);
+    }
+
+    public static Alteration findAlteration(ReferenceGenome referenceGenome, String alteration, String name, List<Alteration> fullAlterations, Boolean isGermline) {
         if (alteration == null) {
             return null;
         }
         for (Alteration alt : fullAlterations) {
-            if (alt.getAlteration() != null && alt.getAlteration().equalsIgnoreCase(alteration) && alt.getName().equalsIgnoreCase(name)) {
-                if (referenceGenome == null) {
-                    return alt;
-                } else if (alt.getReferenceGenomes().contains(referenceGenome)) {
+            if (alt.getAlteration() != null && alt.getAlteration().equalsIgnoreCase(alteration)
+                && alt.getName().equalsIgnoreCase(name)
+                && (isGermline == null || isGermline.equals(alt.getForGermline()))) {
+                if (referenceGenome == null || alt.getReferenceGenomes().contains(referenceGenome)) {
                     return alt;
                 }
             }

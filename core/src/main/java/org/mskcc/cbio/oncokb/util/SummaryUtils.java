@@ -52,7 +52,7 @@ public class SummaryUtils {
         if (exactMatchedAlt != null) {
             alteration = exactMatchedAlt;
         } else {
-            alteration = AlterationUtils.getAlteration(query.getHugoSymbol(), query.getAlteration(), AlterationType.getByName(query.getAlterationType()), query.getConsequence(), query.getProteinStart(), query.getProteinEnd(), query.getReferenceGenome());
+            alteration = AlterationUtils.getAlteration(query.getHugoSymbol(), query.getAlteration(), AlterationType.getByName(query.getAlterationType()), query.getConsequence(), query.getProteinStart(), query.getProteinEnd(), query.getReferenceGenome(), query.isGermline());
         }
 
         if (alteration.getConsequence().getTerm().equals("synonymous_variant")) {
@@ -245,7 +245,7 @@ public class SummaryUtils {
         if (addPrefixArticleToMutation(AlterationUtils.isPositionedAlteration(alteration), alteration.getAlteration())) {
             sb.append("The ");
         }
-        sb.append(gene == null ? "variant" : getGeneMutationNameInVariantSummary(gene, referenceGenome, query.getHugoSymbol(), query.getAlteration()));
+        sb.append(gene == null ? "variant" : getGeneMutationNameInVariantSummary(gene, referenceGenome, query.getHugoSymbol(), query.getAlteration(), query.isGermline()));
         sb.append(" has not specifically been reviewed by the OncoKB team, and therefore its biological significance is unknown.");
         return sb.toString();
     }
@@ -347,7 +347,7 @@ public class SummaryUtils {
             alteration = exactMatchAlteration;
         } else {
             alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getAlteration(),
-                AlterationType.getByName(query.getAlterationType()), query.getConsequence(), query.getProteinStart(), query.getProteinEnd(), query.getReferenceGenome());
+                AlterationType.getByName(query.getAlterationType()), query.getConsequence(), query.getProteinStart(), query.getProteinEnd(), query.getReferenceGenome(), query.isGermline());
         }
 
         if (oncogenic != null && !oncogenic.equals(Oncogenicity.UNKNOWN)) {
@@ -455,7 +455,7 @@ public class SummaryUtils {
 
     private static String getVUSOncogenicSummary(ReferenceGenome referenceGenome, Alteration alteration, Query query) {
         StringBuilder sb = new StringBuilder();
-        sb.append(getVUSSummary(alteration, getGeneMutationNameInVariantSummary(alteration.getGene(), referenceGenome, query.getHugoSymbol(), alteration.getAlteration()), false));
+        sb.append(getVUSSummary(alteration, getGeneMutationNameInVariantSummary(alteration.getGene(), referenceGenome, query.getHugoSymbol(), alteration.getAlteration(), query.isGermline()), false));
         sb.append(" and therefore its biological significance is unknown.");
         return sb.toString();
     }
@@ -480,7 +480,7 @@ public class SummaryUtils {
     private static String getOncogenicSummaryFromOncogenicity(Oncogenicity oncogenicity, Alteration alteration, Query query) {
         StringBuilder sb = new StringBuilder();
         String queryAlteration = query.getAlteration();
-        String altName = getGeneMutationNameInVariantSummary(alteration.getGene(), query.getReferenceGenome(), query.getHugoSymbol(), queryAlteration);
+        String altName = getGeneMutationNameInVariantSummary(alteration.getGene(), query.getReferenceGenome(), query.getHugoSymbol(), queryAlteration, query.isGermline());
         Boolean isPlural = false;
         if (specialAlterations.stream().anyMatch(sa -> altName.toLowerCase().contains(sa.toLowerCase() + "s"))) {
             isPlural = true;
@@ -697,7 +697,7 @@ public class SummaryUtils {
             .collect(Collectors.toList());
 
         if (oncogenicitySentences.size() > 0) {
-            String altStr = getGeneMutationNameInVariantSummary(alteration.getGene(), referenceGenome, queryHugoSymbol, alteration.getAlteration());
+            String altStr = getGeneMutationNameInVariantSummary(alteration.getGene(), referenceGenome, queryHugoSymbol, alteration.getAlteration(), Boolean.TRUE.equals(alteration.getForGermline()));
             Oncogenicity referredOncogenicity = getRefAlleleOncogenicityBasedOnAltAlleles(allelesOncogenicities);
             if (referredOncogenicity == null) {
                 referredOncogenicity = Oncogenicity.UNKNOWN;
@@ -755,7 +755,7 @@ public class SummaryUtils {
     public static String inconclusiveSummary(Gene gene, ReferenceGenome referenceGenome, Query query) {
         StringBuilder sb = new StringBuilder();
         sb.append("There is conflicting and/or weak data describing the biological significance of the ");
-        sb.append(getGeneMutationNameInVariantSummary(gene, referenceGenome, query.getHugoSymbol(), query.getAlteration()));
+        sb.append(getGeneMutationNameInVariantSummary(gene, referenceGenome, query.getHugoSymbol(), query.getAlteration(), query.isGermline()));
         sb.append(".");
         return sb.toString();
     }
@@ -796,7 +796,7 @@ public class SummaryUtils {
         if (isPositionalVariant) {
             altName = query.getHugoSymbol() + " " + query.getAlteration();
         } else {
-            altName = getGeneMutationNameInVariantSummary(alteration.getGene(), query.getReferenceGenome(), query.getHugoSymbol(), query.getAlteration());
+            altName = getGeneMutationNameInVariantSummary(alteration.getGene(), query.getReferenceGenome(), query.getHugoSymbol(), query.getAlteration(), query.isGermline());
         }
         if (usePronoun) {
             sb.append("It");
@@ -818,7 +818,7 @@ public class SummaryUtils {
 
     private static String vusAndHotspotSummary(Alteration alteration, Query query, Boolean isHotspot) {
         StringBuilder sb = new StringBuilder();
-        String altStr = getGeneMutationNameInVariantSummary(alteration.getGene(), query.getReferenceGenome(), query.getHugoSymbol(), alteration.getAlteration());
+        String altStr = getGeneMutationNameInVariantSummary(alteration.getGene(), query.getReferenceGenome(), query.getHugoSymbol(), alteration.getAlteration(), query.isGermline());
         sb.append(getVUSSummary(alteration, altStr, true));
 
         if (isHotspot) {
@@ -948,16 +948,16 @@ public class SummaryUtils {
         return summary;
     }
 
-    public static String getGeneMutationNameInVariantSummary(Gene gene, ReferenceGenome referenceGenome, String queryHugoSymbol, String queryAlteration) {
+    public static String getGeneMutationNameInVariantSummary(Gene gene, ReferenceGenome referenceGenome, String queryHugoSymbol, String queryAlteration, boolean isGermline) {
         StringBuilder sb = new StringBuilder();
         if (queryAlteration == null) {
             return "";
         } else {
             queryAlteration = queryAlteration.trim();
         }
-        Alteration alteration = AlterationUtils.findAlteration(gene, referenceGenome, queryAlteration);
+        Alteration alteration = AlterationUtils.findAlteration(gene, referenceGenome, queryAlteration, isGermline);
         if (alteration == null) {
-            alteration = AlterationUtils.getAlteration(gene == null ? null : gene.getHugoSymbol(), queryAlteration, null, null, null, null, referenceGenome);
+            alteration = AlterationUtils.getAlteration(gene == null ? null : gene.getHugoSymbol(), queryAlteration, null, null, null, null, referenceGenome, isGermline);
             AlterationUtils.annotateAlteration(alteration, queryAlteration);
         }
         if (AlterationUtils.isGeneralAlterations(queryAlteration, true)) {
@@ -1016,17 +1016,18 @@ public class SummaryUtils {
         return sb.toString();
     }
 
-    public static String getGeneMutationNameInTumorTypeSummary(Gene gene, ReferenceGenome referenceGenome, String queryHugoSymbol, String queryAlteration) {
+    public static String getGeneMutationNameInTumorTypeSummary(Gene gene, ReferenceGenome referenceGenome, String queryHugoSymbol, String queryAlteration, boolean isGermline) {
         StringBuilder sb = new StringBuilder();
         if (queryAlteration == null) {
             return "";
         } else {
             queryAlteration = queryAlteration.trim();
         }
-        Alteration alteration = AlterationUtils.findAlteration(gene, referenceGenome, queryAlteration);
+        Alteration alteration = AlterationUtils.findAlteration(gene, referenceGenome, queryAlteration, isGermline);
         if (alteration == null) {
-            alteration = AlterationUtils.getAlteration(queryHugoSymbol, queryAlteration, null, null, null, null, referenceGenome);
+            alteration = AlterationUtils.getAlteration(queryHugoSymbol, queryAlteration, null, null, null, null, referenceGenome, isGermline);
         }
+        alteration.setForGermline(isGermline);
         if (StringUtils.containsIgnoreCase(queryAlteration, "fusion")) {
             if (queryAlteration.toLowerCase().equals("fusions")) {
                 queryAlteration = queryHugoSymbol + " fusion";

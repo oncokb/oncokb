@@ -27,7 +27,7 @@ public interface AlterationDao extends GenericDao<Alteration, Integer> {
      * @param alteration
      * @return
      */
-    Alteration findAlteration(Gene gene, AlterationType alterationType, ReferenceGenome referenceGenome, String alteration);
+    Alteration findAlteration(Gene gene, AlterationType alterationType, ReferenceGenome referenceGenome, String alteration, Boolean isGermline);
 
 
     /**
@@ -37,7 +37,7 @@ public interface AlterationDao extends GenericDao<Alteration, Integer> {
      * @param name
      * @return
      */
-    Alteration findAlteration(Gene gene, AlterationType alterationType, ReferenceGenome referenceGenome, String alteration, String name);
+    Alteration findAlteration(Gene gene, AlterationType alterationType, ReferenceGenome referenceGenome, String alteration, String name, Boolean isGermline);
 
     /**
      * @param gene

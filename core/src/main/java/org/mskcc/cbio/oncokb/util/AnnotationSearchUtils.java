@@ -152,8 +152,10 @@ public class AnnotationSearchUtils {
                         for (Gene gene : entry.getValue()) {
                             for (String keyword : keywords) {
                                 if (!keyword.equals(entry.getKey())) {
+                                    // TODO: When germline has "relevant alterations", then we should consider not defaulting isGermline to false
+                                    // The search bar is able to show results for variants that do not exist in database based on rules, which germline does not support right now.
                                     Alteration alteration =
-                                            AlterationUtils.getAlteration(gene.getHugoSymbol(), keyword, null, null, null, null, null);
+                                            AlterationUtils.getAlteration(gene.getHugoSymbol(), keyword, null, null, null, null, null, false);
                                     TypeaheadSearchResp typeaheadSearchResp = newTypeaheadVariant(alteration);
                                     typeaheadSearchResp.setVariantExist(false);
                                     result.add(typeaheadSearchResp);
