@@ -456,7 +456,7 @@ public class SummaryUtils {
     private static String getVUSOncogenicSummary(ReferenceGenome referenceGenome, Alteration alteration, Query query) {
         StringBuilder sb = new StringBuilder();
         sb.append(
-            getVUSSummary(getGeneMutationNameInVariantSummary(alteration.getGene(), referenceGenome, query.getHugoSymbol(), alteration.getAlteration()),
+            getVUSSummary(getGeneMutationNameInVariantSummary(alteration.getGene(), referenceGenome, query.getHugoSymbol(), alteration.getAlteration(), query.isGermline()),
             getVusDate(alteration),
             false)
         );
@@ -823,7 +823,7 @@ public class SummaryUtils {
         StringBuilder sb = new StringBuilder();
         boolean isExactMatch = alteration.getAlteration().equals(query.getAlteration());
 
-        String altStr = getGeneMutationNameInVariantSummary(alteration.getGene(), query.getReferenceGenome(), query.getHugoSymbol(), query.getAlteration());
+        String altStr = getGeneMutationNameInVariantSummary(alteration.getGene(), query.getReferenceGenome(), query.getHugoSymbol(), query.getAlteration(), query.isGermline());
         sb.append(getVUSSummary(altStr, isExactMatch ? getVusDate(alteration) : null, true));
 
         if (isHotspot) {
