@@ -45,6 +45,67 @@ public class AlterationUtilsTest extends TestCase {
         return alteration;
     }
 
+    public void testAnnotateAlterationNormalization() {
+        Gene gene = GeneUtils.getGeneByHugoSymbol("BRAF");
+        String[][] cases = new String[][]{
+            {"v600_v601delinsEb", "V600_V601delinsEB"},
+            {"v600_v601DeLInSeb", "V600_V601delinsEB"},
+            {"a23INsbc", "A23insBC"},
+            {"v600_sPLIce", "V600_splice"},
+            {"v600_v601MIS", "V600_V601mis"},
+            {"l747rfs*13", "L747Rfs*13"},
+            {"v600dup", "V600dup"},
+            {"m1EXT-5", "M1ext-5"},
+            {"*327aext*?", "*327Aext*?"},
+            {"w24=", "W24="},
+            {"v600e", "V600E"},
+            {"v600 {excluding V600E; V600K}", "V600 {excluding V600E; V600K}"},
+            {"v600 (excluding V600E and V600K)", "V600 (excluding V600E and V600K)"},
+            {"Fusions", "Fusions"},
+
+        };
+
+        for (String[] testCase : cases) {
+            Alteration alteration = new Alteration();
+            alteration.setGene(gene);
+            alteration.setAlteration(testCase[0]);
+            alteration.setName(testCase[0]);
+            AlterationUtils.annotateAlteration(alteration, alteration.getAlteration());
+            assertEquals("Alteration not normalized for " + testCase[0], testCase[1], alteration.getAlteration());
+            assertEquals("Name not normalized for " + testCase[0], testCase[1], alteration.getName());
+        }
+    }
+
+    public void testAnnotateAlterationNormalizationKeepsDistinctName() {
+        Gene gene = GeneUtils.getGeneByHugoSymbol("BRAF");
+        Alteration alteration = new Alteration();
+        alteration.setGene(gene);
+        alteration.setAlteration("1_2772TRUNC");
+        alteration.setName("Truncating Mutations");
+        AlterationUtils.annotateAlteration(alteration, alteration.getAlteration());
+
+        assertEquals("1_2772trunc", alteration.getAlteration());
+        assertEquals("Truncating Mutations", alteration.getName());
+
+        alteration = new Alteration();
+        alteration.setGene(gene);
+        alteration.setAlteration("v600 {excluding V600E; V600K}");
+        alteration.setName("V600 (excluding V600E and V600K)");
+        AlterationUtils.annotateAlteration(alteration, alteration.getAlteration());
+
+        assertEquals("V600 {excluding V600E; V600K}", alteration.getAlteration());
+        assertEquals("V600 (excluding V600E and V600K)", alteration.getName());
+
+        alteration = new Alteration();
+        alteration.setGene(gene);
+        alteration.setAlteration("5:g.1295228G>A");
+        alteration.setName("5:g.1295228G>A {c.-124C>T}");
+        AlterationUtils.annotateAlteration(alteration, alteration.getAlteration());
+
+        assertEquals("5:g.1295228G>A", alteration.getAlteration());
+        assertEquals("5:g.1295228G>A {c.-124C>T}", alteration.getName());
+    }
+
     public void testGetPositionedAlterations() throws Exception {
         Alteration alteration = new Alteration();
         alteration.setGene(GeneUtils.getGeneByHugoSymbol("BRAF"));
