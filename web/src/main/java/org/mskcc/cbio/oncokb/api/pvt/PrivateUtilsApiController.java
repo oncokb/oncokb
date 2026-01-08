@@ -386,6 +386,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             }
         }
         if(germline == null) germline = false;
+        Alteration alterationModel = null;
         if (!StringUtils.isNullOrEmpty(hgvsg) || !StringUtils.isNullOrEmpty(genomicChange)) {
             TranscriptSummaryAlterationResult transcriptSummaryAlterationResult = null;
             if (!StringUtils.isNullOrEmpty(hgvsg)) {
@@ -401,7 +402,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             gene = GeneUtils.getGeneByEntrezId(query.getEntrezGeneId());
         } else {
             gene = GeneUtils.getGene(entrezGeneId, hugoSymbol);
-            Alteration alterationModel = AlterationUtils.findAlteration(gene, matchedRG, alteration, germline);
+            alterationModel = AlterationUtils.findAlteration(gene, matchedRG, alteration, germline);
             if (alterationModel == null) {
                 alteration = AlterationUtils.resolveProteinAlterationShort(alteration);
                 if (gene == null) {
@@ -425,6 +426,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         EvidenceQueryRes response = responses.iterator().next();
 
         VariantAnnotation annotation = new VariantAnnotation(indicatorQueryResp);
+        annotation.setAlteration(alterationModel);
 
         // for any hgvsg variant, we need to check whether it is VUE
         if(!StringUtils.isNullOrEmpty(hgvsg)) {

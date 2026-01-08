@@ -238,9 +238,10 @@ public class IndicatorUtils {
                 matchedAlt = AlterationUtils.getRevertFusions(query.getReferenceGenome(), alteration);
             }
 
-            indicatorQuery.setVariantExist(matchedAlt != null);
 
-            if(matchedAlt == null) {
+            Boolean variantExists = matchedAlt != null;
+            indicatorQuery.setVariantExist(variantExists);
+            if (!variantExists) {
                 matchedAlt = alteration;
             }
 
