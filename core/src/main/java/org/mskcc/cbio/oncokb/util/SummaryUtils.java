@@ -415,10 +415,10 @@ public class SummaryUtils {
         }
 
         if (query.getAlteration().toLowerCase().contains("truncating mutation") || (alteration.getConsequence() != null && alteration.getConsequence().getIsGenerallyTruncating()) && gene.getGeneType() != null) {
-            if (gene.getGeneType().equals(GeneType.ONCOGENE_AND_TSG) || gene.getGeneType().equals(GeneType.ONCOGENE)) {
+            if (gene.getGeneType().equals(GeneType.ONCOGENE)) {
                 return query.getHugoSymbol() + " is considered an oncogene and truncating mutations in oncogenes are typically nonfunctional.";
-            } else if (!gene.getGeneType().equals(GeneType.TSG) && oncogenic == null) {
-                return "It is unknown whether a truncating mutation in " + query.getHugoSymbol() + " is oncogenic.";
+            } else {
+                return unknownOncogenicSummary(gene, query.getReferenceGenome(), query, alteration).replace("[[gene]]", query.getHugoSymbol());
             }
         }
 
