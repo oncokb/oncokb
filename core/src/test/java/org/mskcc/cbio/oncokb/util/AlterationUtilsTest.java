@@ -8,6 +8,7 @@ import java.util.List;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.FrameshiftVariant;
 import org.mskcc.cbio.oncokb.model.Gene;
+import org.mskcc.cbio.oncokb.util.parser.ProteinChangeParser;
 
 import junit.framework.TestCase;
 
@@ -42,6 +43,67 @@ public class AlterationUtilsTest extends TestCase {
         alteration.setAlteration(alterationName);
         AlterationUtils.annotateAlteration(alteration, alteration.getAlteration());
         return alteration;
+    }
+
+    public void testAnnotateAlterationNormalization() {
+        Gene gene = GeneUtils.getGeneByHugoSymbol("BRAF");
+        String[][] cases = new String[][]{
+            {"v600_v601delinsEb", "V600_V601delinsEB"},
+            {"v600_v601DeLInSeb", "V600_V601delinsEB"},
+            {"a23INsbc", "A23insBC"},
+            {"v600_sPLIce", "V600_splice"},
+            {"v600_v601MIS", "V600_V601mis"},
+            {"l747rfs*13", "L747Rfs*13"},
+            {"v600dup", "V600dup"},
+            {"m1EXT-5", "M1ext-5"},
+            {"*327aext*?", "*327Aext*?"},
+            {"w24=", "W24="},
+            {"v600e", "V600E"},
+            {"v600 {excluding V600E; V600K}", "V600 {excluding V600E; V600K}"},
+            {"v600 (excluding V600E and V600K)", "V600 (excluding V600E and V600K)"},
+            {"Fusions", "Fusions"},
+
+        };
+
+        for (String[] testCase : cases) {
+            Alteration alteration = new Alteration();
+            alteration.setGene(gene);
+            alteration.setAlteration(testCase[0]);
+            alteration.setName(testCase[0]);
+            AlterationUtils.annotateAlteration(alteration, alteration.getAlteration());
+            assertEquals("Alteration not normalized for " + testCase[0], testCase[1], alteration.getAlteration());
+            assertEquals("Name not normalized for " + testCase[0], testCase[1], alteration.getName());
+        }
+    }
+
+    public void testAnnotateAlterationNormalizationKeepsDistinctName() {
+        Gene gene = GeneUtils.getGeneByHugoSymbol("BRAF");
+        Alteration alteration = new Alteration();
+        alteration.setGene(gene);
+        alteration.setAlteration("1_2772TRUNC");
+        alteration.setName("Truncating Mutations");
+        AlterationUtils.annotateAlteration(alteration, alteration.getAlteration());
+
+        assertEquals("1_2772trunc", alteration.getAlteration());
+        assertEquals("Truncating Mutations", alteration.getName());
+
+        alteration = new Alteration();
+        alteration.setGene(gene);
+        alteration.setAlteration("v600 {excluding V600E; V600K}");
+        alteration.setName("V600 (excluding V600E and V600K)");
+        AlterationUtils.annotateAlteration(alteration, alteration.getAlteration());
+
+        assertEquals("V600 {excluding V600E; V600K}", alteration.getAlteration());
+        assertEquals("V600 (excluding V600E and V600K)", alteration.getName());
+
+        alteration = new Alteration();
+        alteration.setGene(gene);
+        alteration.setAlteration("5:g.1295228G>A");
+        alteration.setName("5:g.1295228G>A {c.-124C>T}");
+        AlterationUtils.annotateAlteration(alteration, alteration.getAlteration());
+
+        assertEquals("5:g.1295228G>A", alteration.getAlteration());
+        assertEquals("5:g.1295228G>A {c.-124C>T}", alteration.getName());
     }
 
     public void testGetPositionedAlterations() throws Exception {
@@ -520,22 +582,22 @@ public class AlterationUtilsTest extends TestCase {
     }
 
     public void testParseFrameshiftVariant() {
-        assertNull(AlterationUtils.parseFrameshiftVariant(""));
-        assertNull(AlterationUtils.parseFrameshiftVariant(null));
-        assertNull(AlterationUtils.parseFrameshiftVariant("600"));
-        assertNull(AlterationUtils.parseFrameshiftVariant("V600E"));
-        assertNull(AlterationUtils.parseFrameshiftVariant("E17*"));
-        suiteNotNullFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("N105Efs*4"), "N", 105, 105, "E", "4");
-        suiteNotNullFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("N105Efs*"), "N", 105, 105, "E", "");
-        suiteNotNullFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("N105Efs*?"), "N", 105, 105, "E", "?");
-        suiteNotNullFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("105fs*4"), "", 105, 105, "", "4");
-        suiteNotNullFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("N105fs*4"), "N", 105, 105, "", "4");
-        suiteNotNullFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("105Efs*4"), "", 105, 105, "E", "4");
-        suiteNotNullFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("N105Efs"), "N", 105, 105, "E", "");
-        suiteNotNullFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("N105Efs*?"), "N", 105, 105, "E", "?");
-        suiteNotNullFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("EED153fs"), "EED", 153, 153, "", "");
-        suiteNotNullFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("*1069Ffs*5"), "*", 1069, 1069, "F", "5");
-        suiteNotNullFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("*1069Ffs*?"), "*", 1069, 1069, "F", "?");
+        assertNull(ProteinChangeParser.parseFrameshiftVariant(""));
+        assertNull(ProteinChangeParser.parseFrameshiftVariant(null));
+        assertNull(ProteinChangeParser.parseFrameshiftVariant("600"));
+        assertNull(ProteinChangeParser.parseFrameshiftVariant("V600E"));
+        assertNull(ProteinChangeParser.parseFrameshiftVariant("E17*"));
+        suiteNotNullFrameshiftVariant(ProteinChangeParser.parseFrameshiftVariant("N105Efs*4"), "N", 105, 105, "E", "4");
+        suiteNotNullFrameshiftVariant(ProteinChangeParser.parseFrameshiftVariant("N105Efs*"), "N", 105, 105, "E", "");
+        suiteNotNullFrameshiftVariant(ProteinChangeParser.parseFrameshiftVariant("N105Efs*?"), "N", 105, 105, "E", "?");
+        suiteNotNullFrameshiftVariant(ProteinChangeParser.parseFrameshiftVariant("105fs*4"), "", 105, 105, "", "4");
+        suiteNotNullFrameshiftVariant(ProteinChangeParser.parseFrameshiftVariant("N105fs*4"), "N", 105, 105, "", "4");
+        suiteNotNullFrameshiftVariant(ProteinChangeParser.parseFrameshiftVariant("105Efs*4"), "", 105, 105, "E", "4");
+        suiteNotNullFrameshiftVariant(ProteinChangeParser.parseFrameshiftVariant("N105Efs"), "N", 105, 105, "E", "");
+        suiteNotNullFrameshiftVariant(ProteinChangeParser.parseFrameshiftVariant("N105Efs*?"), "N", 105, 105, "E", "?");
+        suiteNotNullFrameshiftVariant(ProteinChangeParser.parseFrameshiftVariant("EED153fs"), "EED", 153, 153, "", "");
+        suiteNotNullFrameshiftVariant(ProteinChangeParser.parseFrameshiftVariant("*1069Ffs*5"), "*", 1069, 1069, "F", "5");
+        suiteNotNullFrameshiftVariant(ProteinChangeParser.parseFrameshiftVariant("*1069Ffs*?"), "*", 1069, 1069, "F", "?");
     }
 
     private void suiteNotNullFrameshiftVariant(FrameshiftVariant variant, String expectedRef, Integer expectedStart, Integer expectedEnd, String expectedVar, String expectedExtension) {
@@ -548,39 +610,39 @@ public class AlterationUtilsTest extends TestCase {
 
     public void testIsSameFrameshiftVariant() {
         // not equal when variant alleles are different
-        assertFalse(AlterationUtils.isSameFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("N105Efs*4"), AlterationUtils.parseFrameshiftVariant("N105Tfs*4")));
-        assertFalse(AlterationUtils.isSameFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("N105Tfs*4"), AlterationUtils.parseFrameshiftVariant("N105Efs*4")));
+        assertFalse(AlterationUtils.isSameFrameshiftVariant(ProteinChangeParser.parseFrameshiftVariant("N105Efs*4"), ProteinChangeParser.parseFrameshiftVariant("N105Tfs*4")));
+        assertFalse(AlterationUtils.isSameFrameshiftVariant(ProteinChangeParser.parseFrameshiftVariant("N105Tfs*4"), ProteinChangeParser.parseFrameshiftVariant("N105Efs*4")));
 
         // not equal when new frame does not have a stop codon
-        assertFalse(AlterationUtils.isSameFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("N105Efs*4"), AlterationUtils.parseFrameshiftVariant("N105fs*?")));
-        assertFalse(AlterationUtils.isSameFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("N105fs*?"), AlterationUtils.parseFrameshiftVariant("N105Efs*4")));
+        assertFalse(AlterationUtils.isSameFrameshiftVariant(ProteinChangeParser.parseFrameshiftVariant("N105Efs*4"), ProteinChangeParser.parseFrameshiftVariant("N105fs*?")));
+        assertFalse(AlterationUtils.isSameFrameshiftVariant(ProteinChangeParser.parseFrameshiftVariant("N105fs*?"), ProteinChangeParser.parseFrameshiftVariant("N105Efs*4")));
 
         // not equal when extension are different
-        assertFalse(AlterationUtils.isSameFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("N105Efs*4"), AlterationUtils.parseFrameshiftVariant("N105Efs*5")));
-        assertFalse(AlterationUtils.isSameFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("N105Efs*5"), AlterationUtils.parseFrameshiftVariant("N105Efs*4")));
+        assertFalse(AlterationUtils.isSameFrameshiftVariant(ProteinChangeParser.parseFrameshiftVariant("N105Efs*4"), ProteinChangeParser.parseFrameshiftVariant("N105Efs*5")));
+        assertFalse(AlterationUtils.isSameFrameshiftVariant(ProteinChangeParser.parseFrameshiftVariant("N105Efs*5"), ProteinChangeParser.parseFrameshiftVariant("N105Efs*4")));
 
         // not equal when reference alleles are different
-        assertFalse(AlterationUtils.isSameFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("N105Efs*4"), AlterationUtils.parseFrameshiftVariant("A105Efs*4")));
-        assertFalse(AlterationUtils.isSameFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("A105Efs*4"), AlterationUtils.parseFrameshiftVariant("N105Efs*4")));
+        assertFalse(AlterationUtils.isSameFrameshiftVariant(ProteinChangeParser.parseFrameshiftVariant("N105Efs*4"), ProteinChangeParser.parseFrameshiftVariant("A105Efs*4")));
+        assertFalse(AlterationUtils.isSameFrameshiftVariant(ProteinChangeParser.parseFrameshiftVariant("A105Efs*4"), ProteinChangeParser.parseFrameshiftVariant("N105Efs*4")));
 
         // not equal when protein start are different
-        assertFalse(AlterationUtils.isSameFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("N305Efs*4"), AlterationUtils.parseFrameshiftVariant("N306Efs*4")));
-        assertFalse(AlterationUtils.isSameFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("N306Efs*4"), AlterationUtils.parseFrameshiftVariant("N305Efs*4")));
+        assertFalse(AlterationUtils.isSameFrameshiftVariant(ProteinChangeParser.parseFrameshiftVariant("N305Efs*4"), ProteinChangeParser.parseFrameshiftVariant("N306Efs*4")));
+        assertFalse(AlterationUtils.isSameFrameshiftVariant(ProteinChangeParser.parseFrameshiftVariant("N306Efs*4"), ProteinChangeParser.parseFrameshiftVariant("N305Efs*4")));
 
         // equal when protein start are the same() -128~127 are cached Integer. We require to use .equal to compare. https://stackoverflow.com/questions/30840071/why-comparison-of-two-integer-using-sometimes-works-and-sometimes-not
-        assertTrue(AlterationUtils.isSameFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("N305Efs*4"), AlterationUtils.parseFrameshiftVariant("N305Efs*4")));
+        assertTrue(AlterationUtils.isSameFrameshiftVariant(ProteinChangeParser.parseFrameshiftVariant("N305Efs*4"), ProteinChangeParser.parseFrameshiftVariant("N305Efs*4")));
 
         // equal when one of reference alleles is missing
-        assertTrue(AlterationUtils.isSameFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("N105Efs*4"), AlterationUtils.parseFrameshiftVariant("105Efs*4")));
-        assertTrue(AlterationUtils.isSameFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("105Efs*4"), AlterationUtils.parseFrameshiftVariant("N105Efs*4")));
+        assertTrue(AlterationUtils.isSameFrameshiftVariant(ProteinChangeParser.parseFrameshiftVariant("N105Efs*4"), ProteinChangeParser.parseFrameshiftVariant("105Efs*4")));
+        assertTrue(AlterationUtils.isSameFrameshiftVariant(ProteinChangeParser.parseFrameshiftVariant("105Efs*4"), ProteinChangeParser.parseFrameshiftVariant("N105Efs*4")));
 
         // equal when one of reference and variant alleles are missing
-        assertTrue(AlterationUtils.isSameFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("N105Efs*4"), AlterationUtils.parseFrameshiftVariant("105fs*4")));
-        assertTrue(AlterationUtils.isSameFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("105Efs*4"), AlterationUtils.parseFrameshiftVariant("N105fs*4")));
+        assertTrue(AlterationUtils.isSameFrameshiftVariant(ProteinChangeParser.parseFrameshiftVariant("N105Efs*4"), ProteinChangeParser.parseFrameshiftVariant("105fs*4")));
+        assertTrue(AlterationUtils.isSameFrameshiftVariant(ProteinChangeParser.parseFrameshiftVariant("105Efs*4"), ProteinChangeParser.parseFrameshiftVariant("N105fs*4")));
 
         // equal when one of the variant alleles is missing
-        assertTrue(AlterationUtils.isSameFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("N105Efs*4"), AlterationUtils.parseFrameshiftVariant("N105fs*4")));
-        assertTrue(AlterationUtils.isSameFrameshiftVariant(AlterationUtils.parseFrameshiftVariant("N105fs*4"), AlterationUtils.parseFrameshiftVariant("N105Efs*4")));
+        assertTrue(AlterationUtils.isSameFrameshiftVariant(ProteinChangeParser.parseFrameshiftVariant("N105Efs*4"), ProteinChangeParser.parseFrameshiftVariant("N105fs*4")));
+        assertTrue(AlterationUtils.isSameFrameshiftVariant(ProteinChangeParser.parseFrameshiftVariant("N105fs*4"), ProteinChangeParser.parseFrameshiftVariant("N105Efs*4")));
 
     }
 

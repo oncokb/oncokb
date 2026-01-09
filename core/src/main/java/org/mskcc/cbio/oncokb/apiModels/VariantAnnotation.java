@@ -1,5 +1,6 @@
 package org.mskcc.cbio.oncokb.apiModels;
 
+import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.IndicatorQueryResp;
 
 import java.util.ArrayList;
@@ -10,6 +11,8 @@ import java.util.List;
  */
 public class VariantAnnotation extends IndicatorQueryResp {
     String background;
+
+    Alteration alteration;
 
     Boolean VUE = false;
     List<VariantAnnotationTumorType> tumorTypes = new ArrayList<>();
@@ -69,4 +72,14 @@ public class VariantAnnotation extends IndicatorQueryResp {
     public void setTumorTypes(List<VariantAnnotationTumorType> tumorTypes) {
         this.tumorTypes = tumorTypes;
     }
+
+
+    public Alteration getAlteration() {
+        return this.alteration;
+    }
+
+    public void setAlteration(Alteration alteration) {
+        this.alteration = alteration;
+    }
+
 }
