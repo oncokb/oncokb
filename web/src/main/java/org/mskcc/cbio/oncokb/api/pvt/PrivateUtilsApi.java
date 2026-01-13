@@ -172,13 +172,13 @@ public interface PrivateUtilsApi {
         , @ApiParam(value = "alteration") @RequestParam(value = "alteration") String alteration
     );
 
-    @ApiOperation(value = "", notes = "Get all the info for the query", response = VariantAnnotation.class)
+    @ApiOperation(value = "", notes = "Get all the info for the query", response = SomaticVariantAnnotation.class)
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "OK", response = VariantAnnotation.class)})
+        @ApiResponse(code = 200, message = "OK", response = SomaticVariantAnnotation.class)})
     @RequestMapping(value = "/utils/variantAnnotation",
         produces = {"application/json"},
         method = RequestMethod.GET)
-    ResponseEntity<VariantAnnotation> utilVariantAnnotationGet(
+    ResponseEntity<SomaticVariantAnnotation> utilVariantAnnotationGet(
         @ApiParam(value = "hugoSymbol") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
         , @ApiParam(value = "entrezGeneId") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
         , @ApiParam(value = "Reference genome, either GRCh37 or GRCh38. The default is GRCh37", required = false, defaultValue = "GRCh37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") String referenceGenome
@@ -186,7 +186,22 @@ public interface PrivateUtilsApi {
         , @ApiParam(value = "HGVS genomic format. Example: 7:g.140453136A>T") @RequestParam(value = "hgvsg", required = false) String hgvsg
         , @ApiParam(value = "Genomic change format. Example: 7,140453136,140453136,A,T") @RequestParam(value = "genomicChange", required = false) String genomicChange
         , @ApiParam(value = "OncoTree tumor type name/main type/code") @RequestParam(value = "tumorType", required = false) String tumorType
-        , @ApiParam(value = "false") @RequestParam(value = "germline", required = false) Boolean germline
+    ) throws ApiException, org.genome_nexus.ApiException;
+
+    @ApiOperation(value = "", notes = "Get all the info for the germline query", response = GermlineVariantAnnotation.class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK", response = GermlineVariantAnnotation.class)})
+    @RequestMapping(value = "/utils/variantAnnotation/germline",
+        produces = {"application/json"},
+        method = RequestMethod.GET)
+    ResponseEntity<GermlineVariantAnnotation> utilVariantAnnotationGermlineGet(
+        @ApiParam(value = "hugoSymbol") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
+        , @ApiParam(value = "entrezGeneId") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
+        , @ApiParam(value = "Reference genome, either GRCh37 or GRCh38. The default is GRCh37", required = false, defaultValue = "GRCh37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") String referenceGenome
+        , @ApiParam(value = "Alteration") @RequestParam(value = "alteration", required = false) String alteration
+        , @ApiParam(value = "HGVS genomic format. Example: 7:g.140453136A>T") @RequestParam(value = "hgvsg", required = false) String hgvsg
+        , @ApiParam(value = "Genomic change format. Example: 7,140453136,140453136,A,T") @RequestParam(value = "genomicChange", required = false) String genomicChange
+        , @ApiParam(value = "OncoTree tumor type name/main type/code") @RequestParam(value = "tumorType", required = false) String tumorType
     ) throws ApiException, org.genome_nexus.ApiException;
 
     @ApiOperation(value = "", notes = "", response = CancerTypeCount.class, responseContainer = "List")
