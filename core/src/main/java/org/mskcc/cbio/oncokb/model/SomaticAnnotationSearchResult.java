@@ -1,8 +1,8 @@
 package org.mskcc.cbio.oncokb.model;
 
-public class AnnotationSearchResult {
+public class SomaticAnnotationSearchResult {
     AnnotationSearchQueryType queryType;
-    IndicatorQueryResp indicatorQueryResp;
+    SomaticIndicatorQueryResp indicatorQueryResp;
 
 
     public AnnotationSearchQueryType getQueryType() {
@@ -13,11 +13,11 @@ public class AnnotationSearchResult {
         this.queryType = queryType;
     }
 
-    public IndicatorQueryResp getIndicatorQueryResp() {
+    public SomaticIndicatorQueryResp getSomaticIndicatorQueryResp() {
         return this.indicatorQueryResp;
     }
 
-    public void setIndicatorQueryResp(IndicatorQueryResp indicatorQueryResp) {
+    public void setSomaticIndicatorQueryResp(SomaticIndicatorQueryResp indicatorQueryResp) {
         this.indicatorQueryResp = indicatorQueryResp;
     }
 
