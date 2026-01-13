@@ -32,7 +32,7 @@ PPP2R2A	T100*	Likely Oncogenic	The PPP2R2A T100* is a truncating mutation in a t
 ### Truncating mutation in both
 PTPN1	T100*	Likely Oncogenic	The PTPN1 T100* is a truncating mutation; truncating mutations in this gene are considered likely oncogenic.
 ### Truncating mutation in neither
-GATA1	T100*	Unknown	It is unknown whether a truncating mutation in GATA1 is oncogenic.
+GATA1	T100*	Unknown	The GATA1 T100* mutation has not specifically been reviewed by the OncoKB team, and therefore its biological significance is unknown.
 
 ### Fusions
 ### Fusion in oncogene
