@@ -304,12 +304,15 @@ public class CurationValidationApiController {
             }
             if (alteration.getGene().getEntrezGeneId() > 0 && alteration.getProteinStart() >= 0 && alteration.getReferenceGenomes() != null && alteration.getRefResidues() != null) {
                 String sequence = "";
+                String isoform = "";
                 ReferenceGenome referenceGenome = null;
                 for (ReferenceGenome ref : alteration.getReferenceGenomes()) {
                     if (ref.equals(ReferenceGenome.GRCh37)) {
-                        sequence = getGeneSequenceFromPool(allGrch37Sequences, alteration.getGene().getGrch37Isoform());
+                        isoform = alteration.getGene().getGrch37Isoform();
+                        sequence = getGeneSequenceFromPool(allGrch37Sequences, isoform);
                     } else if (ref.equals(ReferenceGenome.GRCh38)) {
-                        sequence = getGeneSequenceFromPool(allGrch38Sequences, alteration.getGene().getGrch38Isoform());
+                        isoform = alteration.getGene().getGrch38Isoform();
+                        sequence = getGeneSequenceFromPool(allGrch38Sequences, isoform);
                     }
                     if (!StringUtils.isEmpty(sequence)) {
                         referenceGenome = ref;
@@ -317,17 +320,21 @@ public class CurationValidationApiController {
                     }
                 }
                 String altTargetName = alteration.getName() + " / " + (MainUtils.isVUS(alteration) ? "VUS" : "CURATED");
+                String targetHugoSymbol = alteration.getGene().getHugoSymbol();
+                if (StringUtils.isNotEmpty(isoform)) {
+                    targetHugoSymbol = targetHugoSymbol + " / Isoform: " + isoform;
+                }
                 if (StringUtils.isEmpty(sequence)) {
-                    data.put(ValidationUtils.getErrorMessage(ValidationUtils.getTarget(alteration.getGene().getHugoSymbol(), altTargetName), "No sequence available for " + alteration.getGene().getHugoSymbol()) + DEV_TEAM_ISSUE);
+                    data.put(ValidationUtils.getErrorMessage(ValidationUtils.getTarget(targetHugoSymbol, altTargetName), "No sequence available for " + alteration.getGene().getHugoSymbol()) + DEV_TEAM_ISSUE);
                 } else if (referenceGenome != null) {
                     if (sequence.length() < alteration.getProteinStart()) {
-                        data.put(ValidationUtils.getErrorMessage(ValidationUtils.getTarget(alteration.getGene().getHugoSymbol(), altTargetName), "The gene only has " + sequence.length() + " AAs. But the variant protein start is " + alteration.getProteinStart()));
+                        data.put(ValidationUtils.getErrorMessage(ValidationUtils.getTarget(targetHugoSymbol, altTargetName), "The gene only has " + sequence.length() + " AAs. But the variant protein start is " + alteration.getProteinStart()));
                     } else if (sequence.length() < alteration.getProteinEnd()) {
-                        data.put(ValidationUtils.getErrorMessage(ValidationUtils.getTarget(alteration.getGene().getHugoSymbol(), altTargetName), "The gene only has " + sequence.length() + " AAs. But the variant protein end is " + alteration.getProteinEnd()));
+                        data.put(ValidationUtils.getErrorMessage(ValidationUtils.getTarget(targetHugoSymbol, altTargetName), "The gene only has " + sequence.length() + " AAs. But the variant protein end is " + alteration.getProteinEnd()));
                     } else {
                         String referenceAA = sequence.substring(alteration.getProteinStart() - 1, alteration.getProteinStart() + alteration.getRefResidues().length() - 1);
                         if (!referenceAA.equals(alteration.getRefResidues())) {
-                            data.put(ValidationUtils.getErrorMessage(ValidationUtils.getTarget(alteration.getGene().getHugoSymbol(), altTargetName), "The reference amino acid does not match with the curated variant. The expected AA is " + referenceAA));
+                            data.put(ValidationUtils.getErrorMessage(ValidationUtils.getTarget(targetHugoSymbol, altTargetName), "The reference amino acid does not match with the curated variant. The expected AA is " + referenceAA));
                         }
                     }
                 }
