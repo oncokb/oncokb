@@ -787,8 +787,7 @@ public class IndicatorUtils2 {
             Set<Evidence> treatmentEvidences = new HashSet<>();
 
             if (nonVUSRelevantAlts.size() > 0) {
-                GermlineVariant germlineVariant = getGermlineVariantInfo(matchedAlt, query.getInheritanceMechanism(), relevantAlterations);
-                applyGermlineVariantInfo(indicatorQuery, germlineVariant, query.getInheritanceMechanism());
+                setGermlineVariantFields(indicatorQuery, matchedAlt, query.getInheritanceMechanism(), relevantAlterations);
 
                 // Get mutation effect description
                 List<Evidence> mutationEffectEvis = EvidenceUtils.getEvidence(Collections.singletonList(matchedAlt), Collections.singleton(EvidenceType.MUTATION_EFFECT), null);
@@ -848,7 +847,7 @@ public class IndicatorUtils2 {
             if (!indicatorQuery.getVariantExist() && query.getPathogenicity() != null) {
                 if (query.getPathogenicity().equals(Pathogenicity.YES) || query.getPathogenicity().equals(Pathogenicity.LIKELY)) {
                     List<Evidence> genomicIndicatorEvis = EvidenceUtils.getGenomicIndicatorAssociatedWithPathogenicVariants(gene, query.getReferenceGenome(), query.getInheritanceMechanism());
-                    indicatorQuery.setGenomicIndicators(toGenomicIndicatorsFromEvidence(genomicIndicatorEvis, query.getInheritanceMechanism()));
+                    indicatorQuery.setGenomicIndicators(toGenomicIndicatorsFromEvidence(genomicIndicatorEvis));
                 }
             }
 
@@ -1005,46 +1004,16 @@ public class IndicatorUtils2 {
         });
     }
 
-    private static void applyGermlineVariantInfo(GermlineIndicatorQueryResp indicatorQuery,
-                                                 GermlineVariant germlineVariant,
-                                                 String inheritanceMechanism) {
-        if (germlineVariant == null) {
-            return;
-        }
-        indicatorQuery.setPathogenic(germlineVariant.getPathogenic());
-        indicatorQuery.setPenetrance(germlineVariant.getPenetrance());
-        indicatorQuery.setClinVarId(germlineVariant.getClinVarId());
-        indicatorQuery.setGenomicIndicators(toGenomicIndicatorsFromNames(germlineVariant.getGenomicIndicators(), inheritanceMechanism));
-    }
-
-    private static List<org.mskcc.cbio.oncokb.apiModels.GenomicIndicator> toGenomicIndicatorsFromNames(List<String> indicatorNames,
-                                                                                                      String inheritanceMechanism) {
-        List<org.mskcc.cbio.oncokb.apiModels.GenomicIndicator> indicators = new ArrayList<>();
-        if (indicatorNames == null) {
-            return indicators;
-        }
-        InheritanceMechanism mechanism = toInheritanceMechanism(inheritanceMechanism);
-        for (String name : indicatorNames) {
-            org.mskcc.cbio.oncokb.apiModels.GenomicIndicator indicator = new org.mskcc.cbio.oncokb.apiModels.GenomicIndicator();
-            indicator.setName(name);
-            indicator.setInheritanceMechanism(mechanism);
-            indicators.add(indicator);
-        }
-        return indicators;
-    }
-
-    private static List<org.mskcc.cbio.oncokb.apiModels.GenomicIndicator> toGenomicIndicatorsFromEvidence(List<Evidence> evidences,
-                                                                                                         String inheritanceMechanism) {
+    private static List<org.mskcc.cbio.oncokb.apiModels.GenomicIndicator> toGenomicIndicatorsFromEvidence(List<Evidence> evidences) {
         List<org.mskcc.cbio.oncokb.apiModels.GenomicIndicator> indicators = new ArrayList<>();
         if (evidences == null) {
             return indicators;
         }
-        InheritanceMechanism mechanism = toInheritanceMechanism(inheritanceMechanism);
         for (Evidence evidence : evidences) {
             org.mskcc.cbio.oncokb.apiModels.GenomicIndicator indicator = new org.mskcc.cbio.oncokb.apiModels.GenomicIndicator();
             indicator.setName(evidence.getName());
             indicator.setDescription(evidence.getDescription());
-            indicator.setInheritanceMechanism(mechanism);
+            indicator.setInheritanceMechanism(toInheritanceMechanism(evidence.getKnownEffect()));
             indicators.add(indicator);
         }
         return indicators;
@@ -1063,16 +1032,16 @@ public class IndicatorUtils2 {
         return null;
     }
 
-    private static GermlineVariant getGermlineVariantInfo(Alteration matchedAlt, String inheritanceMechanism, List<Alteration> relevantAlterations) {
-        GermlineVariant germlineVariant = new GermlineVariant();
-
+    private static void setGermlineVariantFields(GermlineIndicatorQueryResp indicatorQuery,
+                                                 Alteration matchedAlt,
+                                                 String inheritanceMechanism,
+                                                 List<Alteration> relevantAlterations) {
         // Get pathogenic info
         List<Evidence> pathogenicEvis = EvidenceUtils.getEvidence(Collections.singletonList(matchedAlt), Collections.singleton(EvidenceType.PATHOGENIC), null);
-        if (pathogenicEvis.size() > 0) {
+        if (!pathogenicEvis.isEmpty()) {
             sortGermlineEvidenceByAlterationSize(pathogenicEvis);
             Evidence pathogenicEvi = pathogenicEvis.iterator().next();
-            germlineVariant.setPathogenic(pathogenicEvi.getKnownEffect());
-            germlineVariant.setDescription(StringUtils.isEmpty(pathogenicEvi.getDescription()) ? "" : pathogenicEvi.getDescription());
+            indicatorQuery.setPathogenic(pathogenicEvi.getKnownEffect());
         }
 
         // Get penetrance info
@@ -1084,19 +1053,7 @@ public class IndicatorUtils2 {
         }
         if (!penetranceEvis.isEmpty()) {
             Evidence penetranceEvi = penetranceEvis.iterator().next();
-            germlineVariant.setPenetrance(penetranceEvi.getKnownEffect());
-            germlineVariant.setPenetranceDescription(StringUtils.isEmpty(penetranceEvi.getDescription()) ? "" : penetranceEvi.getDescription());
-        }
-
-        // Get cancer risk info
-        List<Evidence> cancerRiskEvis = EvidenceUtils.getEvidence(Collections.singletonList(matchedAlt), Collections.singleton(EvidenceType.VARIANT_CANCER_RISK), null);
-        cancerRiskEvis.sort(Comparator.comparing(Evidence::getKnownEffect));
-
-        if (cancerRiskEvis.size() > 0) {
-            if (StringUtils.isNotEmpty(inheritanceMechanism)) {
-                cancerRiskEvis = cancerRiskEvis.stream().filter(evidence -> inheritanceMechanism.toLowerCase().equals(evidence.getKnownEffect().toLowerCase())).collect(Collectors.toList());
-            }
-            germlineVariant.setCancerRisk(cancerRiskEvis.stream().map(evidence -> StringUtils.capitalize(evidence.getKnownEffect()) + " " + matchedAlt.getGene().getHugoSymbol() + " mutation carriers: " + evidence.getDescription()).collect(Collectors.joining("\n\n")));
+            indicatorQuery.setPenetrance(penetranceEvi.getKnownEffect());
         }
 
         // Get genomic indicator
@@ -1104,8 +1061,7 @@ public class IndicatorUtils2 {
         alts.add(matchedAlt);
         alts.addAll(relevantAlterations);
         List<Evidence> genomicIndicatorEvis = EvidenceUtils.getGenomicIndicatorsByAlteration(alts, inheritanceMechanism);
-        germlineVariant.setGenomicIndicators(genomicIndicatorEvis.stream().map(Evidence::getName).collect(Collectors.toList()));
-        return germlineVariant;
+        indicatorQuery.setGenomicIndicators(toGenomicIndicatorsFromEvidence(genomicIndicatorEvis));
     }
 
     private static Set<Implication> getImplicationsFromEvidence(Evidence evidence, String queryHugoSymbol) {
