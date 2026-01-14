@@ -325,7 +325,7 @@ public class CurationValidationApiController {
                     targetHugoSymbol = targetHugoSymbol + " / Isoform: " + isoform;
                 }
                 if (StringUtils.isEmpty(sequence)) {
-                    data.put(ValidationUtils.getErrorMessage(ValidationUtils.getTarget(targetHugoSymbol, altTargetName), "No sequence available for " + alteration.getGene().getHugoSymbol()) + DEV_TEAM_ISSUE);
+                    data.put(ValidationUtils.getErrorMessage(ValidationUtils.getTarget(targetHugoSymbol, altTargetName), "No sequence available for " + alteration.getGene().getHugoSymbol() + DEV_TEAM_ISSUE));
                 } else if (referenceGenome != null) {
                     if (sequence.length() < alteration.getProteinStart()) {
                         data.put(ValidationUtils.getErrorMessage(ValidationUtils.getTarget(targetHugoSymbol, altTargetName), "The gene only has " + sequence.length() + " AAs. But the variant protein start is " + alteration.getProteinStart()));
