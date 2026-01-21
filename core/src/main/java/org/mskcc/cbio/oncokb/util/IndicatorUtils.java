@@ -204,7 +204,11 @@ public class IndicatorUtils {
                     query.getProteinEnd(), query.getHgvs(), query.isGermline(), query.getInheritanceMechanism(), query.getPathogenicity());
                 result.add(IndicatorUtils.processQuery(tmpQuery, levels, highestLevelOnly, evidenceTypes, geneQueryOnly));
             }
-            return result.iterator().next();
+            return result
+                .stream()
+                .sorted((a, b) -> b.getVariantExist().compareTo(a.getVariantExist()))
+                .findFirst()
+                .get();
         }
 
         if (gene != null) {
