@@ -251,7 +251,7 @@ public class CacheFetcher {
         cacheResolver = "generalCacheResolver",
         keyGenerator = "concatKeyGenerator"
     )
-    public IndicatorQueryResp processQuery(ReferenceGenome referenceGenome,
+    public SomaticIndicatorQueryResp processQuery(ReferenceGenome referenceGenome,
                                            Integer entrezGeneId,
                                            String hugoSymbol,
                                            String alteration,
@@ -274,6 +274,37 @@ public class CacheFetcher {
         }
         Query query = new Query(null, referenceGenome, entrezGeneId, hugoSymbol, alteration, alterationType, svType, tumorType, consequence, proteinStart, proteinEnd, hgvs, isGermline, inheritanceMechanism, pathogenicity);
         return IndicatorUtils.processQuery(
+            query, levels, highestLevelOnly,
+            evidenceTypes, geneQueryOnly
+        );
+    }
+
+    @Cacheable(
+        cacheResolver = "generalCacheResolver",
+        keyGenerator = "concatKeyGenerator"
+    )
+    public GermlineIndicatorQueryResp processQueryGermline(ReferenceGenome referenceGenome,
+                                           Integer entrezGeneId,
+                                           String hugoSymbol,
+                                           String alteration,
+                                           String alterationType,
+                                           String tumorType,
+                                           String consequence,
+                                           Integer proteinStart,
+                                           Integer proteinEnd,
+                                           StructuralVariantType svType,
+                                           String hgvs,
+                                           String inheritanceMechanism,
+                                           Pathogenicity pathogenicity,
+                                           Set<LevelOfEvidence> levels,
+                                           Boolean highestLevelOnly,
+                                           Set<EvidenceType> evidenceTypes,
+                                           Boolean geneQueryOnly) {
+        if (referenceGenome == null) {
+            referenceGenome = DEFAULT_REFERENCE_GENOME;
+        }
+        Query query = new Query(null, referenceGenome, entrezGeneId, hugoSymbol, alteration, alterationType, svType, tumorType, consequence, proteinStart, proteinEnd, hgvs, true, inheritanceMechanism, pathogenicity);
+        return IndicatorUtils.processQueryGermline(
             query, levels, highestLevelOnly,
             evidenceTypes, geneQueryOnly
         );

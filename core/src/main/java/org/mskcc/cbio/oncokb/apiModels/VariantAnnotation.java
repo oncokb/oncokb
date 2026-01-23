@@ -1,7 +1,7 @@
 package org.mskcc.cbio.oncokb.apiModels;
 
 import org.mskcc.cbio.oncokb.model.Alteration;
-import org.mskcc.cbio.oncokb.model.IndicatorQueryResp;
+import org.mskcc.cbio.oncokb.model.SomaticIndicatorQueryResp;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * Created by Hongxin Zhang on 2019-07-18.
  */
-public class VariantAnnotation extends IndicatorQueryResp {
+public class VariantAnnotation extends SomaticIndicatorQueryResp {
     String background;
 
     Alteration alteration;
@@ -20,7 +20,7 @@ public class VariantAnnotation extends IndicatorQueryResp {
     public VariantAnnotation() {
     }
 
-    public VariantAnnotation(IndicatorQueryResp indicatorQueryResp) {
+    public VariantAnnotation(SomaticIndicatorQueryResp indicatorQueryResp) {
         this.setQuery(indicatorQueryResp.getQuery());
         this.setGeneExist(indicatorQueryResp.getGeneExist());
         this.setVariantExist(indicatorQueryResp.getVariantExist());
@@ -46,7 +46,6 @@ public class VariantAnnotation extends IndicatorQueryResp {
         this.setTreatments(indicatorQueryResp.getTreatments());
         this.setDataVersion(indicatorQueryResp.getDataVersion());
         this.setLastUpdate(indicatorQueryResp.getLastUpdate());
-        this.setGermline(indicatorQueryResp.getGermline());
     }
 
     public String getBackground() {

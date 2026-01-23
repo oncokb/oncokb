@@ -421,7 +421,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         query.setTumorType(tumorType);
         query.setGermline(germline);
         List<EvidenceQueryRes> responses = EvidenceUtils.processRequest(Collections.singletonList(query), new HashSet<>(EvidenceTypeUtils.getAllEvidenceTypes(query.isGermline())), LevelUtils.getPublicLevels(), false, false);
-        IndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null, false);
+        SomaticIndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null, false);
 
         EvidenceQueryRes response = responses.iterator().next();
 

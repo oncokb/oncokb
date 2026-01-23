@@ -37,7 +37,7 @@ import org.mskcc.cbio.oncokb.model.AnnotationSearchResult;
 import org.mskcc.cbio.oncokb.model.Drug;
 import org.mskcc.cbio.oncokb.model.Evidence;
 import org.mskcc.cbio.oncokb.model.Gene;
-import org.mskcc.cbio.oncokb.model.IndicatorQueryResp;
+import org.mskcc.cbio.oncokb.model.SomaticIndicatorQueryResp;
 import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
 import org.mskcc.cbio.oncokb.model.Oncogenicity;
 import org.mskcc.cbio.oncokb.model.Query;
@@ -228,8 +228,8 @@ public class AnnotationSearchUtils {
                     }
                     AnnotationSearchResult annotationSearchResult = new AnnotationSearchResult();
                     annotationSearchResult.setQueryType(AnnotationSearchQueryType.VARIANT);
-                    annotationSearchResult.setIndicatorQueryResp(IndicatorUtils.processQuery(indicatorQuery, null, null, null, false));
-                    if (annotationSearchResult.getIndicatorQueryResp().getVariantExist()) {
+                    annotationSearchResult.setSomaticIndicatorQueryResp(IndicatorUtils.processQuery(indicatorQuery, null, null, null, false));
+                    if (annotationSearchResult.getSomaticIndicatorQueryResp().getVariantExist()) {
                         result.add(annotationSearchResult);
                     }
                 }
@@ -255,7 +255,7 @@ public class AnnotationSearchUtils {
             query.setHugoSymbol(gene.getHugoSymbol());
             AnnotationSearchResult annotationSearchResult = new AnnotationSearchResult();
             annotationSearchResult.setQueryType(AnnotationSearchQueryType.GENE);
-            annotationSearchResult.setIndicatorQueryResp(IndicatorUtils.processQuery(query, null, null, null, true));
+            annotationSearchResult.setSomaticIndicatorQueryResp(IndicatorUtils.processQuery(query, null, null, null, true));
             result.add(annotationSearchResult);
         }
         return result;
@@ -275,7 +275,7 @@ public class AnnotationSearchUtils {
             indicatorQuery.setHugoSymbol(alteration.getGene().getHugoSymbol());
             AnnotationSearchResult annotationSearchResult = new AnnotationSearchResult();
             annotationSearchResult.setQueryType(AnnotationSearchQueryType.VARIANT);
-            annotationSearchResult.setIndicatorQueryResp(IndicatorUtils.processQuery(indicatorQuery, null, null, null, false));
+            annotationSearchResult.setSomaticIndicatorQueryResp(IndicatorUtils.processQuery(indicatorQuery, null, null, null, false));
             result.add(annotationSearchResult);
         }
         return result;
@@ -340,7 +340,7 @@ public class AnnotationSearchUtils {
             }
             AnnotationSearchResult annotationSearchResult = new AnnotationSearchResult();
             annotationSearchResult.setQueryType(AnnotationSearchQueryType.CANCER_TYPE);
-            annotationSearchResult.setIndicatorQueryResp(IndicatorUtils.processQuery(indicatorQuery, null, null, null, true));
+            annotationSearchResult.setSomaticIndicatorQueryResp(IndicatorUtils.processQuery(indicatorQuery, null, null, null, true));
             result.add(annotationSearchResult);
         }
 
@@ -774,7 +774,7 @@ public class AnnotationSearchUtils {
             query.setReferenceGenome(referenceGenome);
         }
 
-        IndicatorQueryResp resp = IndicatorUtils.processQuery(query, null, false, null, false);
+        SomaticIndicatorQueryResp resp = IndicatorUtils.processQuery(query, null, false, null, false);
         typeaheadSearchResp.setOncogenicity(resp.getOncogenic());
         typeaheadSearchResp.setVUS(resp.getVUS());
         typeaheadSearchResp.setAnnotation(resp.getVariantSummary() + " Click here to see more annotation details.");
@@ -806,7 +806,7 @@ public class AnnotationSearchUtils {
         return typeaheadSearchResp;
     }
 
-    public static TypeaheadSearchResp newTypeaheadAnnotation(String query, GNVariantAnnotationType type, ReferenceGenome referenceGenome, Alteration alteration, IndicatorQueryResp queryResp) {
+    public static TypeaheadSearchResp newTypeaheadAnnotation(String query, GNVariantAnnotationType type, ReferenceGenome referenceGenome, Alteration alteration, SomaticIndicatorQueryResp queryResp) {
         TypeaheadSearchResp typeaheadSearchResp = new TypeaheadSearchResp();
         typeaheadSearchResp.setGene(alteration.getGene());
         typeaheadSearchResp.setVariants(Collections.singleton(alteration));
@@ -935,8 +935,8 @@ class AnnotationSearchResultComp implements Comparator<AnnotationSearchResult> {
 
     @Override
     public int compare(AnnotationSearchResult a1, AnnotationSearchResult a2) {
-        IndicatorQueryResp i1 = a1.getIndicatorQueryResp();
-        IndicatorQueryResp i2 = a2.getIndicatorQueryResp();
+        SomaticIndicatorQueryResp i1 = a1.getSomaticIndicatorQueryResp();
+        SomaticIndicatorQueryResp i2 = a2.getSomaticIndicatorQueryResp();
 
         // Compare by query type
         Integer result = MainUtils.compareAnnotationSearchQueryType(a1.getQueryType(), a2.getQueryType(), true);
@@ -973,7 +973,7 @@ class AnnotationSearchResultComp implements Comparator<AnnotationSearchResult> {
 
     }
 
-    private Integer compareLevel(IndicatorQueryResp i1, IndicatorQueryResp i2, String name1, String name2) {
+    private Integer compareLevel(SomaticIndicatorQueryResp i1, SomaticIndicatorQueryResp i2, String name1, String name2) {
         // Compare therapeutic levels
         LevelOfEvidence i1Level = i1.getHighestSensitiveLevel();
         LevelOfEvidence i2Level = i2.getHighestSensitiveLevel();

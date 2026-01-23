@@ -4,7 +4,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.mskcc.cbio.oncokb.model.Drug;
-import org.mskcc.cbio.oncokb.model.IndicatorQueryResp;
+import org.mskcc.cbio.oncokb.model.SomaticIndicatorQueryResp;
 import org.mskcc.cbio.oncokb.model.IndicatorQueryTreatment;
 import org.mskcc.cbio.oncokb.model.Query;
 
@@ -48,7 +48,7 @@ public class CancerTypeTreatmentHighestLevelParameterizedTest {
         query.setHugoSymbol(gene);
         query.setTumorType(tumorType);
 
-        IndicatorQueryResp resp = IndicatorUtils.processQuery(query, null, true, null, false);
+        SomaticIndicatorQueryResp resp = IndicatorUtils.processQuery(query, null, true, null, false);
         List<IndicatorQueryTreatment> resps = resp.getTreatments();
         StringBuilder stringBuilder = new StringBuilder();
         for (int i = 0; i < resps.size(); i++) {

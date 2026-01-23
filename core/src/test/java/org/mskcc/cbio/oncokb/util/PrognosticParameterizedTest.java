@@ -4,7 +4,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.mskcc.cbio.oncokb.apiModels.Implication;
-import org.mskcc.cbio.oncokb.model.IndicatorQueryResp;
+import org.mskcc.cbio.oncokb.model.SomaticIndicatorQueryResp;
 import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
 import org.mskcc.cbio.oncokb.model.Query;
 
@@ -52,7 +52,7 @@ public class PrognosticParameterizedTest {
         query.setHugoSymbol(gene);
         query.setTumorType(tumorType);
 
-        IndicatorQueryResp resp = IndicatorUtils.processQuery(query, null, false, null, false);
+        SomaticIndicatorQueryResp resp = IndicatorUtils.processQuery(query, null, false, null, false);
         String _query = gene + " " + variant + " " + tumorType;
         String _prognosticSummary = resp.getPrognosticSummary();
         LevelOfEvidence theHighestPrognosticImplicationLevel = resp.getHighestPrognosticImplicationLevel();
