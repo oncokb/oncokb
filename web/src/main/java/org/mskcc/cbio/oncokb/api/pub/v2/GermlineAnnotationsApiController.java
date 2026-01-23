@@ -29,7 +29,6 @@ import org.mskcc.cbio.oncokb.model.genomeNexus.TranscriptSummaryAlterationResult
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
 import org.mskcc.cbio.oncokb.util.GenomeNexusUtils;
-import org.mskcc.cbio.oncokb.util.IndicatorUtils2;
 import org.mskcc.cbio.oncokb.util.MainUtils;
 import org.mskcc.cbio.oncokb.util.QueryUtils;
 import org.oncokb.oncokb_transcript.ApiException;
@@ -52,7 +51,7 @@ import java.util.Set;
 
 @Api(tags = "Germline Annotations", description = "Providing germline annotations")
 @Controller
-@RequestMapping(value = "/api/v2")
+@RequestMapping(value = "/api/v1")
 public class GermlineAnnotationsApiController {
     @Autowired
     CacheFetcher cacheFetcher;
@@ -465,7 +464,25 @@ public class GermlineAnnotationsApiController {
                 null,
                 null
             );
-            return IndicatorUtils2.processQueryGermline(indicatorQuery, null, false, query.getEvidenceTypes(), false);
+            return this.cacheFetcher.processQueryGermline(
+                indicatorQuery.getReferenceGenome(),
+                indicatorQuery.getEntrezGeneId(),
+                indicatorQuery.getHugoSymbol(),
+                indicatorQuery.getAlteration(),
+                indicatorQuery.getAlterationType(),
+                indicatorQuery.getTumorType(),
+                indicatorQuery.getConsequence(),
+                indicatorQuery.getProteinStart(),
+                indicatorQuery.getProteinEnd(),
+                indicatorQuery.getSvType(),
+                indicatorQuery.getHgvs(),
+                indicatorQuery.getInheritanceMechanism(),
+                indicatorQuery.getPathogenicity(),
+                null,
+                false,
+                query.getEvidenceTypes(),
+                false
+            );
         }
 
         alteration = null;
@@ -504,7 +521,25 @@ public class GermlineAnnotationsApiController {
                 null,
                 null
             );
-            return IndicatorUtils2.processQueryGermline(indicatorQuery, null, false, query.getEvidenceTypes(), false);
+            return this.cacheFetcher.processQueryGermline(
+                indicatorQuery.getReferenceGenome(),
+                indicatorQuery.getEntrezGeneId(),
+                indicatorQuery.getHugoSymbol(),
+                indicatorQuery.getAlteration(),
+                indicatorQuery.getAlterationType(),
+                indicatorQuery.getTumorType(),
+                indicatorQuery.getConsequence(),
+                indicatorQuery.getProteinStart(),
+                indicatorQuery.getProteinEnd(),
+                indicatorQuery.getSvType(),
+                indicatorQuery.getHgvs(),
+                indicatorQuery.getInheritanceMechanism(),
+                indicatorQuery.getPathogenicity(),
+                null,
+                false,
+                query.getEvidenceTypes(),
+                false
+            );
         }
 
         return null;
@@ -584,8 +619,20 @@ public class GermlineAnnotationsApiController {
                         null,
                         null
                     );
-                    GermlineIndicatorQueryResp germlineResp = IndicatorUtils2.processQueryGermline(
-                        indicatorQuery,
+                    GermlineIndicatorQueryResp germlineResp = this.cacheFetcher.processQueryGermline(
+                        indicatorQuery.getReferenceGenome(),
+                        indicatorQuery.getEntrezGeneId(),
+                        indicatorQuery.getHugoSymbol(),
+                        indicatorQuery.getAlteration(),
+                        indicatorQuery.getAlterationType(),
+                        indicatorQuery.getTumorType(),
+                        indicatorQuery.getConsequence(),
+                        indicatorQuery.getProteinStart(),
+                        indicatorQuery.getProteinEnd(),
+                        indicatorQuery.getSvType(),
+                        indicatorQuery.getHgvs(),
+                        indicatorQuery.getInheritanceMechanism(),
+                        indicatorQuery.getPathogenicity(),
                         null,
                         false,
                         query.getEvidenceTypes(),
@@ -666,8 +713,20 @@ public class GermlineAnnotationsApiController {
         Query query = QueryUtils.getQueryFromAlteration(referenceGenome, tumorType, transcriptSummaryAlterationResult, hgvs);
         query.setGermline(Boolean.TRUE.equals(germline));
 
-        GermlineIndicatorQueryResp indicatorQueryResp = IndicatorUtils2.processQueryGermline(
-            query,
+        GermlineIndicatorQueryResp indicatorQueryResp = this.cacheFetcher.processQueryGermline(
+            query.getReferenceGenome(),
+            query.getEntrezGeneId(),
+            query.getHugoSymbol(),
+            query.getAlteration(),
+            query.getAlterationType(),
+            query.getTumorType(),
+            query.getConsequence(),
+            query.getProteinStart(),
+            query.getProteinEnd(),
+            query.getSvType(),
+            query.getHgvs(),
+            query.getInheritanceMechanism(),
+            query.getPathogenicity(),
             null,
             false,
             evidenceTypes,
@@ -692,8 +751,20 @@ public class GermlineAnnotationsApiController {
         Query query = QueryUtils.getQueryFromAlteration(referenceGenome, tumorType, transcriptSummaryAlterationResult, hgvs);
         query.setGermline(Boolean.TRUE.equals(germline));
 
-        GermlineIndicatorQueryResp indicatorQueryResp = IndicatorUtils2.processQueryGermline(
-            query,
+        GermlineIndicatorQueryResp indicatorQueryResp = this.cacheFetcher.processQueryGermline(
+            query.getReferenceGenome(),
+            query.getEntrezGeneId(),
+            query.getHugoSymbol(),
+            query.getAlteration(),
+            query.getAlterationType(),
+            query.getTumorType(),
+            query.getConsequence(),
+            query.getProteinStart(),
+            query.getProteinEnd(),
+            query.getSvType(),
+            query.getHgvs(),
+            query.getInheritanceMechanism(),
+            query.getPathogenicity(),
             null,
             false,
             evidenceTypes,
@@ -717,5 +788,6 @@ public class GermlineAnnotationsApiController {
             }
         }
     }
+
 
 }

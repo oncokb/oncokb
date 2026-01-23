@@ -2,6 +2,7 @@ package org.mskcc.cbio.oncokb.model;
 
 import org.mskcc.cbio.oncokb.apiModels.Implication;
 import org.mskcc.cbio.oncokb.apiModels.MutationEffectResp;
+import org.mskcc.cbio.oncokb.util.MainUtils;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -72,6 +73,7 @@ public class IndicatorQueryRespBase implements java.io.Serializable {
     private String lastUpdate;
 
     public IndicatorQueryRespBase() {
+        this.dataVersion = MainUtils.getDataVersion();
     }
 
     public IndicatorQueryRespBase copy() {

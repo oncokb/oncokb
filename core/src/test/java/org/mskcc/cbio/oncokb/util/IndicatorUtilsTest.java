@@ -28,7 +28,7 @@ public class IndicatorUtilsTest {
 
         // Gene not exists
         Query query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "TEST", "V123M", null, null, "Pancreatic Adenocarcinoma", null, null, null, null, false, null, null);
-        IndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null, false);
+        SomaticIndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null, false);
         assertTrue("The geneExist in the response is not false, but it should be.", indicatorQueryResp.getGeneExist() == false);
         assertEquals("The oncogenicity is not unknown, but it should.", Oncogenicity.UNKNOWN.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertTrue("There is treatment(s) in the response, but it should no have any.", indicatorQueryResp.getTreatments().size() == 0);
@@ -484,7 +484,7 @@ public class IndicatorUtilsTest {
          * Comparing between two queries
          */
         Query query1, query2;
-        IndicatorQueryResp resp1, resp2;
+        SomaticIndicatorQueryResp resp1, resp2;
 
         // Match Gain with Amplification
         query1 = new Query("PTEN", "Gain", null);
@@ -855,7 +855,7 @@ public class IndicatorUtilsTest {
         String hgvsg = "7:g.140453136A>T";
         TranscriptSummaryAlterationResult transcriptSummaryAlterationResult = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, DEFAULT_REFERENCE_GENOME, hgvsg);
         Query query = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", transcriptSummaryAlterationResult, hgvsg);
-        IndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null, false);
+        SomaticIndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null, false);
         assertTrue("The geneExist is not true, but it should be.", indicatorQueryResp.getGeneExist() == true);
         assertEquals("The oncogenicity is not Oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The highest sensitive level is not 1, but it should be.", LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
@@ -873,8 +873,8 @@ public class IndicatorUtilsTest {
         Query query1 = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", transcriptSummaryAlterationResult, hgvsg);
         Query query2 = new Query(null, DEFAULT_REFERENCE_GENOME, null, "BRAF", "V600E", null, null, "Melanoma", null, null, null, null, false, null , null);
 
-        IndicatorQueryResp resp1 = IndicatorUtils.processQuery(query1, null, false, null, false);
-        IndicatorQueryResp resp2 = IndicatorUtils.processQuery(query2, null, false, null, false);
+        SomaticIndicatorQueryResp resp1 = IndicatorUtils.processQuery(query1, null, false, null, false);
+        SomaticIndicatorQueryResp resp2 = IndicatorUtils.processQuery(query2, null, false, null, false);
 
         assertTrue("Genes are not the same, but they should.", resp1.getGeneSummary().equals(resp2.getGeneSummary()));
         assertTrue("Oncogenicities are not the same, but they should.", resp1.getOncogenic().equals(resp2.getOncogenic()));
@@ -971,29 +971,30 @@ public class IndicatorUtilsTest {
     public void testProcessQueryForGermline() {
         // Testing if a variant specifically associated with a genomic indicator is picked up
         Query query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "FH", "c.2T>G", null, null, null, null, null, null, null, true, null, null);
-        IndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null, false);
-        assertTrue("FH c.2T>G should include Monoallelic FH (carrier) genomic indicator. Actual: " + indicatorQueryResp.getGermline().getGenomicIndicators(),
-            indicatorQueryResp.getGermline().getGenomicIndicators().contains("Monoallelic FH (carrier) "));
+        GermlineIndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQueryGermline(query, null, true, null, false);
+        assertTrue("FH c.2T>G should include Monoallelic FH (carrier) genomic indicator. Actual: " + indicatorQueryResp.getGenomicIndicators(),
+            indicatorQueryResp.getGenomicIndicators().stream()
+                .anyMatch(indicator -> "Monoallelic FH (carrier) ".equals(indicator.getName())));
 
         // Testing if a variant associated under "Pathogenic Variants" gets the correct genomic indicator
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "FH", "c.1020T>A", null, null, null, null, null, null, null, true, null, null);
-        indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null, false);
-        assertTrue("FH c.1020T>A should include HLRCC monoallelic genomic indicator. Actual: " + indicatorQueryResp.getGermline().getGenomicIndicators(),
-            indicatorQueryResp.getGermline().getGenomicIndicators().contains("Hereditary leiomyomatosis and renal cell cancer (HLRCC)(monoallelic)"));
+        indicatorQueryResp = IndicatorUtils.processQueryGermline(query, null, true, null, false);
+        assertTrue("FH c.1020T>A should include HLRCC monoallelic genomic indicator. Actual: " + indicatorQueryResp.getGenomicIndicators(),
+            indicatorQueryResp.getGenomicIndicators().stream()
+                .anyMatch(indicator -> "Hereditary leiomyomatosis and renal cell cancer (HLRCC)(monoallelic)".equals(indicator.getName())));
 
         // Testing whether a variant that is curated under both somatic and germline will be annotated correctly based on genetic type
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "EGFR", "Deletion", null, null, null, null, null, null, null, true, null, null);
-        indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null, false);
-        assertTrue("Germline EGFR Deletion should have pathogenicity. Actual: " + indicatorQueryResp.getGermline().getPathogenic(),
-            StringUtils.isNotEmpty(indicatorQueryResp.getGermline().getPathogenic()));
-        assertTrue("Germline EGFR Deletion should have mutation description. Actual: " + indicatorQueryResp.getGermline().getDescription(),
+        indicatorQueryResp = IndicatorUtils.processQueryGermline(query, null, true, null, false);
+        assertTrue("Germline EGFR Deletion should have pathogenicity. Actual: " + indicatorQueryResp.getPathogenic(),
+            StringUtils.isNotEmpty(indicatorQueryResp.getPathogenic()));
+        assertTrue("Germline EGFR Deletion should have mutation description. Actual: " + indicatorQueryResp.getMutationEffect().getDescription(),
             StringUtils.isNotEmpty(indicatorQueryResp.getMutationEffect().getDescription()));
+
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "EGFR", "Deletion", null, null, null, null, null, null, null, false, null, null);
-        indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null, false);
-        assertTrue("Somatic EGFR Deletion should not return germline pathogenicity. Actual: " + indicatorQueryResp.getGermline().getPathogenic(),
-            StringUtils.isEmpty(indicatorQueryResp.getGermline().getPathogenic()));
-        assertTrue("Somatic EGFR Deletion should not return germline mutation description. Actual: " + indicatorQueryResp.getGermline().getDescription(),
-            StringUtils.isEmpty(indicatorQueryResp.getMutationEffect().getDescription()));
+        SomaticIndicatorQueryResp somaticIndicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null, false);
+        assertTrue("Somatic EGFR Deletion should not return germline mutation description. Actual: " + somaticIndicatorQueryResp.getMutationEffect().getDescription(),
+            StringUtils.isEmpty(somaticIndicatorQueryResp.getMutationEffect().getDescription()));
     }
 
     // Most of the annotation service should not have clinical implication returned when alteration is not available.
@@ -1022,8 +1023,8 @@ public class IndicatorUtilsTest {
     public void testProcessQueryGeneOnlyQuery() {
         // when alteration is specified in the query, the geneQueryOnly param doesn't make any difference
         Query queryWithAlt = new Query(null, DEFAULT_REFERENCE_GENOME, null, "BRAF", "V123M", null, null, null, null, null, null, null, false, null, null);
-        IndicatorQueryResp indicatorQueryRespGeneOnly = IndicatorUtils.processQuery(queryWithAlt, null, true, null, true);
-        IndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuery(queryWithAlt, null, true, null, false);
+        SomaticIndicatorQueryResp indicatorQueryRespGeneOnly = IndicatorUtils.processQuery(queryWithAlt, null, true, null, true);
+        SomaticIndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuery(queryWithAlt, null, true, null, false);
         pairComparison(indicatorQueryRespGeneOnly, indicatorQueryResp);
 
         // Test when alteration is empty string, different geneOnlyQuery will return different result
@@ -1120,7 +1121,7 @@ public class IndicatorUtilsTest {
         assertEquals(0, filteredImplications.size());
     }
 
-    private void shouldNotHaveClinicalImplication(IndicatorQueryResp resp) {
+    private void shouldNotHaveClinicalImplication(SomaticIndicatorQueryResp resp) {
         assertEquals("The highest sensitivity level of evidence should be empty, but it's not", resp.getHighestSensitiveLevel(), null);
         assertEquals("The highest resistance level of evidence should be empty, but it's not", resp.getHighestResistanceLevel(), null);
         assertEquals("The highest diagnostic level of evidence should be empty, but it's not", resp.getHighestDiagnosticImplicationLevel(), null);
@@ -1131,11 +1132,11 @@ public class IndicatorUtilsTest {
     }
 
 
-    private void pairComparison(IndicatorQueryResp resp1, IndicatorQueryResp resp2) {
+    private void pairComparison(SomaticIndicatorQueryResp resp1, SomaticIndicatorQueryResp resp2) {
         pairComparison(resp1, resp2, false);
     }
 
-    private void pairComparison(IndicatorQueryResp resp1, IndicatorQueryResp resp2, boolean skipSummary) {
+    private void pairComparison(SomaticIndicatorQueryResp resp1, SomaticIndicatorQueryResp resp2, boolean skipSummary) {
         assertTrue("The gene exist should be the same.", resp1.getGeneExist().equals(resp2.getGeneExist()));
         assertTrue("The variant exist should be the same.", resp1.getVariantExist().equals(resp2.getVariantExist()));
         assertTrue("The oncogenicity should be the same.", resp1.getOncogenic().equals(resp2.getOncogenic()));

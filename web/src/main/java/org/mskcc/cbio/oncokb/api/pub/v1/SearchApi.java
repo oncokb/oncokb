@@ -3,7 +3,7 @@ package org.mskcc.cbio.oncokb.api.pub.v1;
 import io.swagger.annotations.*;
 import org.mskcc.cbio.oncokb.config.annotation.PremiumPublicApi;
 import org.mskcc.cbio.oncokb.model.EvidenceQueries;
-import org.mskcc.cbio.oncokb.model.IndicatorQueryResp;
+import org.mskcc.cbio.oncokb.model.SomaticIndicatorQueryResp;
 import org.mskcc.cbio.oncokb.model.StructuralVariantType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,14 +19,14 @@ import java.util.List;
 public interface SearchApi {
 
     @PremiumPublicApi
-    @ApiOperation(value = "", notes = "General search for possible combinations.", response = IndicatorQueryResp.class)
+    @ApiOperation(value = "", notes = "General search for possible combinations.", response = SomaticIndicatorQueryResp.class)
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "OK", response = IndicatorQueryResp.class),
-        @ApiResponse(code = 400, message = "Error, error message will be given.", response = IndicatorQueryResp.class)})
+        @ApiResponse(code = 200, message = "OK", response = SomaticIndicatorQueryResp.class),
+        @ApiResponse(code = 400, message = "Error, error message will be given.", response = SomaticIndicatorQueryResp.class)})
     @RequestMapping(value = "/search",
         produces = {"application/json"},
         method = RequestMethod.GET)
-    ResponseEntity<IndicatorQueryResp> searchGet(
+    ResponseEntity<SomaticIndicatorQueryResp> searchGet(
         @ApiParam(value = "The query ID") @RequestParam(value = "id", required = false) String id
         , @ApiParam(value = "Reference genome, either GRCh37 or GRCh38. The default is GRCh37", required = false, defaultValue = "GRCh37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") String referenceGenome
         , @ApiParam(value = "The gene symbol used in Human Genome Organisation.") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
@@ -47,15 +47,15 @@ public interface SearchApi {
 
 
     @PremiumPublicApi
-    @ApiOperation(value = "", notes = "General search for possible combinations.", response = IndicatorQueryResp.class, responseContainer = "List")
+    @ApiOperation(value = "", notes = "General search for possible combinations.", response = SomaticIndicatorQueryResp.class, responseContainer = "List")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "OK", response = IndicatorQueryResp.class, responseContainer = "List"),
-        @ApiResponse(code = 400, message = "Error, error message will be given.", response = IndicatorQueryResp.class)})
+        @ApiResponse(code = 200, message = "OK", response = SomaticIndicatorQueryResp.class, responseContainer = "List"),
+        @ApiResponse(code = 400, message = "Error, error message will be given.", response = SomaticIndicatorQueryResp.class)})
     @RequestMapping(value = "/search",
         consumes = {"application/json"},
         produces = {"application/json"},
         method = RequestMethod.POST)
-    ResponseEntity<List<IndicatorQueryResp>> searchPost(
+    ResponseEntity<List<SomaticIndicatorQueryResp>> searchPost(
         @ApiParam(value = "List of queries. Please see swagger.json for request body format.", required = true) @RequestBody(required = true) EvidenceQueries body
         , @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
     );

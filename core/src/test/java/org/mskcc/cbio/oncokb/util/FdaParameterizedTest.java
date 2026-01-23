@@ -3,7 +3,7 @@ package org.mskcc.cbio.oncokb.util;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.mskcc.cbio.oncokb.model.IndicatorQueryResp;
+import org.mskcc.cbio.oncokb.model.SomaticIndicatorQueryResp;
 import org.mskcc.cbio.oncokb.model.Query;
 
 import java.io.BufferedReader;
@@ -46,7 +46,7 @@ public class FdaParameterizedTest {
         query.setHugoSymbol(hugoSymbol);
         query.setAlteration(variant);
         query.setTumorType(cancerType);
-        IndicatorQueryResp resp = IndicatorUtils.processQuery(query, null, true, null, false);
+        SomaticIndicatorQueryResp resp = IndicatorUtils.processQuery(query, null, true, null, false);
         assertEquals(fdaLevel, resp.getHighestFdaLevel().getLevel());
     }
 

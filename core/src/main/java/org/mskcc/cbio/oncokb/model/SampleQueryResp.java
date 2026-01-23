@@ -5,9 +5,9 @@ import java.util.List;
 public class SampleQueryResp implements java.io.Serializable {
     private String id;
     private String tumorType;
-    private List<IndicatorQueryResp> structuralVariants;
-    private List<IndicatorQueryResp> copyNumberAlterations;
-    private List<IndicatorQueryResp> mutations;
+    private List<SomaticIndicatorQueryResp> structuralVariants;
+    private List<SomaticIndicatorQueryResp> copyNumberAlterations;
+    private List<SomaticIndicatorQueryResp> mutations;
 
     public String getId() {
         return id;
@@ -25,27 +25,27 @@ public class SampleQueryResp implements java.io.Serializable {
         this.tumorType = tumorType;
     }
 
-    public List<IndicatorQueryResp> getStructuralVariants() {
+    public List<SomaticIndicatorQueryResp> getStructuralVariants() {
         return structuralVariants;
     }
 
-    public void setStructuralVariants(List<IndicatorQueryResp> structuralVariants) {
+    public void setStructuralVariants(List<SomaticIndicatorQueryResp> structuralVariants) {
         this.structuralVariants = structuralVariants;
     }
 
-    public List<IndicatorQueryResp> getCopyNumberAlterations() {
+    public List<SomaticIndicatorQueryResp> getCopyNumberAlterations() {
         return copyNumberAlterations;
     }
 
-    public void setCopyNumberAlterations(List<IndicatorQueryResp> copyNumberAlterations) {
+    public void setCopyNumberAlterations(List<SomaticIndicatorQueryResp> copyNumberAlterations) {
         this.copyNumberAlterations = copyNumberAlterations;
     }
 
-    public List<IndicatorQueryResp> getMutations() {
+    public List<SomaticIndicatorQueryResp> getMutations() {
         return mutations;
     }
 
-    public void setMutations(List<IndicatorQueryResp> mutations) {
+    public void setMutations(List<SomaticIndicatorQueryResp> mutations) {
         this.mutations = mutations;
     }
 }

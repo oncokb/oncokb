@@ -28,7 +28,7 @@ import static org.mskcc.cbio.oncokb.util.MainUtils.stringToEvidenceTypes;
 @Controller
 public class SearchApiController implements SearchApi {
 
-    public ResponseEntity<IndicatorQueryResp> searchGet(
+    public ResponseEntity<SomaticIndicatorQueryResp> searchGet(
         @ApiParam(value = "The query ID") @RequestParam(value = "id", required = false) String id
         , @ApiParam(value = "Reference genome, either GRCh37 or GRCh38. The default is GRCh37", required = false, defaultValue = "GRCh37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") String referenceGenome
         , @ApiParam(value = "The gene symbol used in Human Genome Organisation.") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
@@ -47,7 +47,7 @@ public class SearchApiController implements SearchApi {
         , @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
     ) {
         HttpStatus status = HttpStatus.OK;
-        IndicatorQueryResp indicatorQueryResp = null;
+        SomaticIndicatorQueryResp indicatorQueryResp = null;
 
         if (entrezGeneId != null && hugoSymbol != null && !GeneUtils.isSameGene(entrezGeneId, hugoSymbol)) {
             status = HttpStatus.BAD_REQUEST;
@@ -64,16 +64,16 @@ public class SearchApiController implements SearchApi {
             Set<LevelOfEvidence> levelOfEvidences = levels == null ? null : LevelUtils.parseStringLevelOfEvidences(levels);
             indicatorQueryResp = IndicatorUtils.processQuery(query, levelOfEvidences, highestLevelOnly, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceType, ",")), false);
         }
-        return ResponseEntity.status(status.value()).body(JsonResultFactory.getIndicatorQueryRespWithoutGermline(JsonResultFactory.getIndicatorQueryResp(indicatorQueryResp, fields)));
+        return ResponseEntity.status(status.value()).body(JsonResultFactory.getSomaticIndicatorQueryRespWithoutGermline(JsonResultFactory.getSomaticIndicatorQueryResp(indicatorQueryResp, fields)));
     }
 
-    public ResponseEntity<List<IndicatorQueryResp>> searchPost(
+    public ResponseEntity<List<SomaticIndicatorQueryResp>> searchPost(
         @ApiParam(value = "List of queries. Please see swagger.json for request body format.", required = true) @RequestBody(required = true) EvidenceQueries body
         , @ApiParam(value = "The fields to be returned.") @RequestParam(value = "fields", required = false) String fields
     ) {
         HttpStatus status = HttpStatus.OK;
 
-        List<IndicatorQueryResp> result = new ArrayList<>();
+        List<SomaticIndicatorQueryResp> result = new ArrayList<>();
 
         if (body == null || body.getQueries() == null) {
             status = HttpStatus.BAD_REQUEST;
@@ -84,6 +84,6 @@ public class SearchApiController implements SearchApi {
                     body.getHighestLevelOnly(), new HashSet<>(stringToEvidenceTypes(body.getEvidenceTypes(), ",")), false));
             }
         }
-        return ResponseEntity.status(status.value()).body(JsonResultFactory.getIndicatorQueryRespWithoutGermline(JsonResultFactory.getIndicatorQueryResp(result, fields)));
+        return ResponseEntity.status(status.value()).body(JsonResultFactory.getSomaticIndicatorQueryRespWithoutGermline(JsonResultFactory.getSomaticIndicatorQueryResp(result, fields)));
     }
 }
