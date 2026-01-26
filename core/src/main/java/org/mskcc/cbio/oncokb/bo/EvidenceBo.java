@@ -7,8 +7,7 @@ package org.mskcc.cbio.oncokb.bo;
 import java.util.Collection;
 import java.util.List;
 
-import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.TumorType;;
+import org.mskcc.cbio.oncokb.model.*;;
 
 /**
  *
@@ -128,4 +127,13 @@ public interface EvidenceBo extends GenericBo<Evidence> {
     List<Object> findSubtypesWithEvidencesForAlterations(List<Alteration> alterations);
 
     List<Evidence> findEvidenceByUUIDs(List<String> uuids);
+
+    List<Evidence> findEvidenceByTagCriteria(
+        int entrezGeneId,
+        int start, 
+        int end, 
+        Oncogenicity oncogenicity,
+        MutationType mutationType,
+        List<EvidenceType> evidenceTypes
+    );
 }

@@ -7,7 +7,6 @@ import org.mskcc.cbio.oncokb.dao.EvidenceDao;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.Tumor;
 import org.mskcc.cbio.oncokb.util.CacheUtils;
-import org.mskcc.cbio.oncokb.model.TumorType;
 import org.mskcc.cbio.oncokb.util.EvidenceUtils;
 import org.mskcc.cbio.oncokb.util.TumorTypeUtils;
 
@@ -74,42 +73,7 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
         }
 
         Set<Evidence> alterationEvidences = new HashSet<>(findEvidencesByAlteration(alterations, evidenceTypes));
-        List<Evidence> evidences = new ArrayList<>();
-        for (Evidence evidence : alterationEvidences) {
-            boolean hasJointOnSubtype = !Collections.disjoint(TumorTypeUtils.findEvidenceRelevantCancerTypes(evidence), matchedTumorType == null ? tumorTypes : Collections.singleton(matchedTumorType));
-            if (hasJointOnSubtype) {
-                evidences.add(evidence);
-            }
-        }
-
-        // Sort evidences based on number of alterations associated.
-        // Evidence with fewer alterations associated is put to the front
-        evidences.sort(Comparator.comparingInt(o -> o.getAlterations().size()));
-
-        // Now all evidences left are relevant to the matchedTumorType or tumorTypes.
-        // We need to rank the evidences based on cancer type relevancy
-        List<TumorType> relevantMatchedTumorTypes = new ArrayList<>();
-        if (matchedTumorType != null) {
-            relevantMatchedTumorTypes = TumorTypeUtils.findRelevantTumorTypes(
-                TumorTypeUtils.getTumorTypeName(matchedTumorType),
-                StringUtils.isEmpty(matchedTumorType.getSubtype()),
-                RelevantTumorTypeDirection.UPWARD
-            );
-        } else if (tumorTypes != null) {
-            relevantMatchedTumorTypes = tumorTypes;
-        }
-
-        Set<Evidence> sortedEvidences = new LinkedHashSet<>();
-        for (TumorType tumorType : relevantMatchedTumorTypes) {
-            for (int i = 0; i < evidences.size(); i++) {
-                Evidence evidence = evidences.get(i);
-                if (evidence.getCancerTypes().contains(tumorType)) {
-                    sortedEvidences.add(evidence);
-                }
-            }
-        }
-        sortedEvidences.addAll(evidences);
-        return sortedEvidences.stream().collect(Collectors.toList());
+        return EvidenceUtils.filterEvidencesByTumorType(alterationEvidences, matchedTumorType, tumorTypes);
     }
 
     @Override
@@ -208,5 +172,17 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
     @Override
     public List<Evidence> findEvidenceByUUIDs(List<String> uuids) {
         return new ArrayList<>(CacheUtils.getEvidencesByUUIDs(new HashSet<>(uuids)));
+    }
+
+    @Override
+    public List<Evidence> findEvidenceByTagCriteria(
+        int entrezGeneId,
+        int start, 
+        int end, 
+        Oncogenicity oncogenicity,
+        MutationType mutationType,
+        List<EvidenceType> evidenceTypes
+    ) {
+        return getDao().findEvidenceByTagCriteria(entrezGeneId, start, end, oncogenicity, mutationType, evidenceTypes);
     }
 }
