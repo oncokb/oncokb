@@ -20,5 +20,4 @@ http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 	<import resource="../beans/Geneset.xml"/>
 	<import resource="../beans/TumorType.xml"/>
 	<import resource="../beans/Info.xml"/>
-	<import resource="../beans/Tag.xml"/>
 </beans>
