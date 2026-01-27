@@ -131,10 +131,6 @@ public class Evidence implements java.io.Serializable {
     })
     private Set<Alteration> alterations;
 
-    @JsonIgnore
-    @ManyToMany(mappedBy = "evidences")
-    private Set<Tag> tags = new HashSet<>();
-
     @Lob
     private String name;
 
@@ -399,14 +395,6 @@ public class Evidence implements java.io.Serializable {
                 }
             }
         }
-    }
-
-    public Set<Tag> getTags() {
-        return tags;
-    }
-
-    public void setTags(Set<Tag> tags) {
-        this.tags = tags;
     }
 
     @Override
