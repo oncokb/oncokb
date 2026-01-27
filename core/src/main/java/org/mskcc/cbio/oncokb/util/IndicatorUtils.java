@@ -204,11 +204,7 @@ public class IndicatorUtils {
                     query.getProteinEnd(), query.getHgvs(), query.isGermline(), query.getInheritanceMechanism(), query.getPathogenicity());
                 result.add(IndicatorUtils.processQuery(tmpQuery, levels, highestLevelOnly, evidenceTypes, geneQueryOnly));
             }
-            return result
-                .stream()
-                .sorted((a, b) -> b.getVariantExist().compareTo(a.getVariantExist()))
-                .findFirst()
-                .get();
+            return result.iterator().next();
         }
 
         if (gene != null) {
@@ -1210,6 +1206,12 @@ class IndicatorQueryRespComp implements Comparator<IndicatorQueryResp> {
         if (e2.getGeneExist() == null || !e2.getGeneExist()) {
             return -1;
         }
+
+        result = e2.getVariantExist().compareTo(e1.getVariantExist());
+        if (result != 0) {
+            return result;
+        }
+
         return -1;
     }
 }
