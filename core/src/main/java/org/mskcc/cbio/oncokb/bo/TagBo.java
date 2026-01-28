@@ -6,4 +6,5 @@ import org.mskcc.cbio.oncokb.model.Tag;
 
 public interface TagBo extends GenericBo<Tag> {
     List<Tag> findTagsByEntrezGeneId(int entrezGeneId);
+    Tag findTagByHugoSymbolAndName(String hugoSymbol, String name) throws Exception;
 }

@@ -5,10 +5,15 @@
 package org.mskcc.cbio.oncokb.dao;
 
 import java.util.List;
-import java.util.Map;
 
-import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.Tumor;
+import org.mskcc.cbio.oncokb.model.Alteration;
+import org.mskcc.cbio.oncokb.model.Evidence;
+import org.mskcc.cbio.oncokb.model.EvidenceType;
+import org.mskcc.cbio.oncokb.model.Gene;
+import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
+import org.mskcc.cbio.oncokb.model.MutationType;
+import org.mskcc.cbio.oncokb.model.Oncogenicity;
+import org.mskcc.cbio.oncokb.model.TumorType;
 
 /**
  *
@@ -120,4 +125,13 @@ public interface EvidenceDao extends GenericDao<Evidence, Integer> {
     List<Object> findSubtypesWithEvidencesForAlterations(List<Alteration> alterations);
 
     List<Evidence> findEvidenceByUUIDs(List<String> uuids);
+
+    List<Evidence> findEvidenceByTagCriteria(
+        int entrezGeneId,
+        int start, 
+        int end, 
+        Oncogenicity oncogenicity,
+        MutationType mutationType,
+        List<EvidenceType> evidenceTypes
+    );
 }

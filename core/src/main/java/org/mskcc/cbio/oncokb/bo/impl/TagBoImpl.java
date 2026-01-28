@@ -11,4 +11,9 @@ public class TagBoImpl extends GenericBoImpl<Tag, TagDao> implements TagBo  {
     public List<Tag> findTagsByEntrezGeneId(int entrezGeneId) {
         return getDao().findTagsByEntrezGeneId(entrezGeneId);
     }
+
+    @Override
+    public Tag findTagByHugoSymbolAndName(String hugoSymbol, String name) throws Exception {
+        return getDao().findTagByHugoSymbolAndName(hugoSymbol, name);
+    }
 }

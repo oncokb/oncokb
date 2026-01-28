@@ -4,12 +4,18 @@
  */
 package org.mskcc.cbio.oncokb.dao.impl;
 
-import org.mskcc.cbio.oncokb.dao.EvidenceDao;
-import org.mskcc.cbio.oncokb.model.*;
-import org.mskcc.cbio.oncokb.model.clinicalTrialsMathcing.Tumor;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.mskcc.cbio.oncokb.dao.EvidenceDao;
+import org.mskcc.cbio.oncokb.model.Alteration;
+import org.mskcc.cbio.oncokb.model.Evidence;
+import org.mskcc.cbio.oncokb.model.EvidenceType;
+import org.mskcc.cbio.oncokb.model.Gene;
+import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
+import org.mskcc.cbio.oncokb.model.MutationType;
+import org.mskcc.cbio.oncokb.model.Oncogenicity;
+import org.mskcc.cbio.oncokb.model.TumorType;
 
 /**
  * @author jgao
@@ -130,4 +136,24 @@ public class EvidenceDaoImpl
         List[] values = {uuids};
         return (List<Evidence>) getHibernateTemplate().findByNamedQueryAndNamedParam("findEvidenceByUUIDs", params, values);
     }
+
+    @Override
+    public List<Evidence> findEvidenceByTagCriteria(
+        int entrezGeneId,
+        int start, 
+        int end, 
+        Oncogenicity oncogenicity,
+        MutationType mutationType,
+        List<EvidenceType> evidenceTypes
+    ) {
+        String[] params = {"entrezGeneId", "start", "end", "oncogenicity", "mutationType", "evidenceTypes"};
+        String mutationTypeString = null;
+        if (mutationType != null) {
+            mutationTypeString = mutationType.getMutationType();
+        }
+        Object[] values = {entrezGeneId, start, end, oncogenicity.getOncogenic(), mutationTypeString, evidenceTypes};
+        return (List<Evidence>) getHibernateTemplate().findByNamedQueryAndNamedParam("findEvidencesByTagCriteria", params, values);
+    }
+
+
 }
