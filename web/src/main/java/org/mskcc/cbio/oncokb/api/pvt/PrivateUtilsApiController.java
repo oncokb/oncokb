@@ -506,6 +506,8 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         , @ApiParam(value = "OncoTree tumor type name/main type/code") @RequestParam(value = "tumorType", required = false) String tumorType
     ) throws ApiException, org.genome_nexus.ApiException {
 
+        List<TumorType> relevantTumorTypes = TumorTypeUtils.findRelevantTumorTypes(tumorType);
+
         Query query;
         Gene gene;
         ReferenceGenome matchedRG = null;
@@ -531,7 +533,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             gene = GeneUtils.getGeneByEntrezId(query.getEntrezGeneId());
         } else {
             gene = GeneUtils.getGene(entrezGeneId, hugoSymbol);
-            alterationModel = AlterationUtils.findAlteration(gene, matchedRG, alteration, false);
+            alterationModel = AlterationUtils.findAlteration(gene, matchedRG, alteration, true);
             if (alterationModel == null) {
                 alteration = AlterationUtils.resolveProteinAlterationShort(alteration);
                 if (gene == null) {
@@ -542,17 +544,48 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
                     alterationModel.setGene(gene);
                     alterationModel.setAlteration(alteration);
                 } else {
-                    alterationModel = AlterationUtils.getAlteration(gene.getHugoSymbol(), alteration, null, null, null, null, matchedRG, false);
+                    alterationModel = AlterationUtils.getAlteration(gene.getHugoSymbol(), alteration, null, null, null, null, matchedRG, true);
                 }
             }
             query = new Query(alterationModel, matchedRG);
         }
         query.setTumorType(tumorType);
-        query.setGermline(false);
+        query.setGermline(true);
 
+        List<EvidenceQueryRes> responses = EvidenceUtils.processRequest(Collections.singletonList(query), new HashSet<>(EvidenceTypeUtils.getAllEvidenceTypes(query.isGermline())), LevelUtils.getPublicLevels(), false, false);
         GermlineIndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQueryGermline(query, null, false, null, false);
-        GermlineVariantAnnotation annotation = new GermlineVariantAnnotation();
-        org.springframework.beans.BeanUtils.copyProperties(indicatorQueryResp, annotation);
+        GermlineVariantAnnotation annotation = new GermlineVariantAnnotation(indicatorQueryResp);
+        EvidenceQueryRes response = responses.iterator().next();
+
+        for (TumorType uniqueTumorType : response.getEvidences().stream().filter(evidence -> !evidence.getCancerTypes().isEmpty()).map(evidence -> evidence.getCancerTypes()).flatMap(Collection::stream).collect(Collectors.toSet())) {
+            VariantAnnotationTumorType variantAnnotationTumorType = new VariantAnnotationTumorType();
+            variantAnnotationTumorType.setRelevantTumorType(relevantTumorTypes.contains(uniqueTumorType));
+            variantAnnotationTumorType.setTumorType(uniqueTumorType);
+
+            List<Evidence> updatedEvidences = new ArrayList<>();
+            Map<String, LevelOfEvidence> treatmentToHighestLevel = new HashMap<>();
+            response
+                .getEvidences()
+                .stream()
+                .filter(evidence -> !evidence.getCancerTypes().isEmpty() && evidence.getCancerTypes().contains(uniqueTumorType))
+                .forEach(evidence -> {
+                    String treatment = TreatmentUtils.getTreatmentName(evidence.getTreatments());       
+                    if (treatmentToHighestLevel.get(treatment) == null 
+                        || LevelUtils.compareLevel(evidence.getLevelOfEvidence(), treatmentToHighestLevel.get(treatment), LevelUtils.THERAPEUTIC_SENSITIVE_LEVELS) < 0
+                    ) {
+                        treatmentToHighestLevel.put(treatment, evidence.getLevelOfEvidence());
+                    }
+                    
+                    Evidence updatedEvidence = new Evidence(evidence, evidence.getId());
+                    if (updatedEvidence.getRelevantCancerTypes() == null || updatedEvidence.getRelevantCancerTypes().size() == 0) {
+                        updatedEvidence.setRelevantCancerTypes(TumorTypeUtils.findEvidenceRelevantCancerTypes(evidence));
+                    }
+                    updatedEvidences.add(updatedEvidence);
+                }
+            );
+
+            annotation.getTumorTypes().add(variantAnnotationTumorType);
+        }
         return new ResponseEntity<>(annotation, HttpStatus.OK);
     }
 
