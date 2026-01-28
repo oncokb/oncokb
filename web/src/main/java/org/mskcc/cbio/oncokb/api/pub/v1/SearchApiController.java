@@ -64,7 +64,7 @@ public class SearchApiController implements SearchApi {
             Set<LevelOfEvidence> levelOfEvidences = levels == null ? null : LevelUtils.parseStringLevelOfEvidences(levels);
             indicatorQueryResp = IndicatorUtils.processQuery(query, levelOfEvidences, highestLevelOnly, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceType, ",")), false);
         }
-        return ResponseEntity.status(status.value()).body(JsonResultFactory.getSomaticIndicatorQueryRespWithoutGermline(JsonResultFactory.getSomaticIndicatorQueryResp(indicatorQueryResp, fields)));
+        return ResponseEntity.status(status.value()).body(JsonResultFactory.getSomaticIndicatorQueryResp(indicatorQueryResp, fields));
     }
 
     public ResponseEntity<List<SomaticIndicatorQueryResp>> searchPost(
@@ -84,6 +84,6 @@ public class SearchApiController implements SearchApi {
                     body.getHighestLevelOnly(), new HashSet<>(stringToEvidenceTypes(body.getEvidenceTypes(), ",")), false));
             }
         }
-        return ResponseEntity.status(status.value()).body(JsonResultFactory.getSomaticIndicatorQueryRespWithoutGermline(JsonResultFactory.getSomaticIndicatorQueryResp(result, fields)));
+        return ResponseEntity.status(status.value()).body(JsonResultFactory.getSomaticIndicatorQueryResp(result, fields));
     }
 }

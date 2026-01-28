@@ -12,11 +12,11 @@ import java.util.Set;
  * Created by Hongxin Zhang on 11/7/17.
  */
 public class JsonResultFactory {
-    public static IndicatorQueryResp getIndicatorQueryResp(IndicatorQueryResp resp, String fields) {
+    public static SomaticIndicatorQueryResp getSomaticIndicatorQueryResp(SomaticIndicatorQueryResp resp, String fields) {
         if (fields != null && !fields.isEmpty()) {
             JsonResult json = JsonResult.instance();
             return json.use(JsonView.with(resp)
-                .onClass(IndicatorQueryResp.class, Match.match()
+                .onClass(SomaticIndicatorQueryResp.class, Match.match()
                     .exclude("*")
                     .include(fields.split("\\s*,\\s*")))
                 .onClass(LevelOfEvidence.class, Match.match()
@@ -35,11 +35,11 @@ public class JsonResultFactory {
         }
     }
 
-    public static List<IndicatorQueryResp> getIndicatorQueryResp(List<IndicatorQueryResp> resp, String fields) {
+    public static List<SomaticIndicatorQueryResp> getSomaticIndicatorQueryResp(List<SomaticIndicatorQueryResp> resp, String fields) {
         if (fields != null && !fields.isEmpty()) {
             JsonResult json = JsonResult.instance();
             return json.use(JsonView.with(resp)
-                .onClass(IndicatorQueryResp.class, Match.match()
+                .onClass(SomaticIndicatorQueryResp.class, Match.match()
                     .exclude("*")
                     .include(fields.split("\\s*,\\s*")))
                 .onClass(LevelOfEvidence.class, Match.match()

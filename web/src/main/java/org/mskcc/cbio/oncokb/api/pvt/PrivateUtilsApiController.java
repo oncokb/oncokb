@@ -363,15 +363,14 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     }
 
     @Override
-    public ResponseEntity<VariantAnnotation> utilVariantAnnotationGet(
+    public ResponseEntity<SomaticVariantAnnotation> utilVariantAnnotationGet(
         @ApiParam(value = "hugoSymbol") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
         , @ApiParam(value = "entrezGeneId") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
         , @ApiParam(value = "Reference genome, either GRCh37 or GRCh38. The default is GRCh37", defaultValue = "GRCh37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") String referenceGenome
         , @ApiParam(value = "Alteration") @RequestParam(value = "alteration", required = false) String alteration
         , @ApiParam(value = "HGVS genomic format. Example: 7:g.140453136A>T") @RequestParam(value = "hgvsg", required = false) String hgvsg
         , @ApiParam(value = "Genomic change format. Example: 7,140453136,140453136,A,T") @RequestParam(value = "genomicChange", required = false) String genomicChange
-        , @ApiParam(value = "OncoTree tumor type name/main type/code") @RequestParam(value = "tumorType", required = false) String tumorType
-        , @ApiParam(value = "false") @RequestParam(value = "germline", required = false) Boolean germline) throws ApiException, org.genome_nexus.ApiException {
+        , @ApiParam(value = "OncoTree tumor type name/main type/code") @RequestParam(value = "tumorType", required = false) String tumorType) throws ApiException, org.genome_nexus.ApiException {
 
 
         List<TumorType> relevantTumorTypes = TumorTypeUtils.findRelevantTumorTypes(tumorType);
@@ -385,7 +384,6 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
         }
-        if(germline == null) germline = false;
         Alteration alterationModel = null;
         if (!StringUtils.isNullOrEmpty(hgvsg) || !StringUtils.isNullOrEmpty(genomicChange)) {
             TranscriptSummaryAlterationResult transcriptSummaryAlterationResult = null;
@@ -402,7 +400,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             gene = GeneUtils.getGeneByEntrezId(query.getEntrezGeneId());
         } else {
             gene = GeneUtils.getGene(entrezGeneId, hugoSymbol);
-            alterationModel = AlterationUtils.findAlteration(gene, matchedRG, alteration, germline);
+            alterationModel = AlterationUtils.findAlteration(gene, matchedRG, alteration, false);
             if (alterationModel == null) {
                 alteration = AlterationUtils.resolveProteinAlterationShort(alteration);
                 if (gene == null) {
@@ -413,19 +411,19 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
                     alterationModel.setGene(gene);
                     alterationModel.setAlteration(alteration);
                 } else {
-                    alterationModel = AlterationUtils.getAlteration(gene.getHugoSymbol(), alteration, null, null, null, null, matchedRG, germline);
+                    alterationModel = AlterationUtils.getAlteration(gene.getHugoSymbol(), alteration, null, null, null, null, matchedRG, false);
                 }
             }
             query = new Query(alterationModel, matchedRG);
         }
         query.setTumorType(tumorType);
-        query.setGermline(germline);
+        query.setGermline(false);
         List<EvidenceQueryRes> responses = EvidenceUtils.processRequest(Collections.singletonList(query), new HashSet<>(EvidenceTypeUtils.getAllEvidenceTypes(query.isGermline())), LevelUtils.getPublicLevels(), false, false);
         SomaticIndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null, false);
 
         EvidenceQueryRes response = responses.iterator().next();
 
-        VariantAnnotation annotation = new VariantAnnotation(indicatorQueryResp);
+        SomaticVariantAnnotation annotation = new SomaticVariantAnnotation(indicatorQueryResp);
         annotation.setAlteration(alterationModel);
 
         // for any hgvsg variant, we need to check whether it is VUE
@@ -496,6 +494,68 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         }
         return new ResponseEntity<>(annotation, HttpStatus.OK);
     }
+
+    @Override
+    public ResponseEntity<GermlineVariantAnnotation> utilVariantAnnotationGermlineGet(
+        @ApiParam(value = "hugoSymbol") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
+        , @ApiParam(value = "entrezGeneId") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
+        , @ApiParam(value = "Reference genome, either GRCh37 or GRCh38. The default is GRCh37", defaultValue = "GRCh37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") String referenceGenome
+        , @ApiParam(value = "Alteration") @RequestParam(value = "alteration", required = false) String alteration
+        , @ApiParam(value = "HGVS genomic format. Example: 7:g.140453136A>T") @RequestParam(value = "hgvsg", required = false) String hgvsg
+        , @ApiParam(value = "Genomic change format. Example: 7,140453136,140453136,A,T") @RequestParam(value = "genomicChange", required = false) String genomicChange
+        , @ApiParam(value = "OncoTree tumor type name/main type/code") @RequestParam(value = "tumorType", required = false) String tumorType
+    ) throws ApiException, org.genome_nexus.ApiException {
+
+        Query query;
+        Gene gene;
+        ReferenceGenome matchedRG = null;
+        if (!org.apache.commons.lang3.StringUtils.isEmpty(referenceGenome)) {
+            matchedRG = MainUtils.searchEnum(ReferenceGenome.class, referenceGenome);
+            if (matchedRG == null) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+        }
+        Alteration alterationModel = null;
+        if (!StringUtils.isNullOrEmpty(hgvsg) || !StringUtils.isNullOrEmpty(genomicChange)) {
+            TranscriptSummaryAlterationResult transcriptSummaryAlterationResult = null;
+            if (!StringUtils.isNullOrEmpty(hgvsg)) {
+                if (this.cacheFetcher.hgvsgShouldBeAnnotated(hgvsg, matchedRG)) {
+                    transcriptSummaryAlterationResult = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, matchedRG, hgvsg);
+                }
+            } else {
+                if (this.cacheFetcher.genomicLocationShouldBeAnnotated(GenomeNexusUtils.convertGenomicLocation(genomicChange), matchedRG)) {
+                    transcriptSummaryAlterationResult = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, matchedRG, genomicChange);
+                }
+            }
+            query = QueryUtils.getQueryFromAlteration(matchedRG, tumorType, transcriptSummaryAlterationResult, hgvsg);
+            gene = GeneUtils.getGeneByEntrezId(query.getEntrezGeneId());
+        } else {
+            gene = GeneUtils.getGene(entrezGeneId, hugoSymbol);
+            alterationModel = AlterationUtils.findAlteration(gene, matchedRG, alteration, false);
+            if (alterationModel == null) {
+                alteration = AlterationUtils.resolveProteinAlterationShort(alteration);
+                if (gene == null) {
+                    alterationModel = new Alteration();
+                    gene = new Gene();
+                    gene.setHugoSymbol(hugoSymbol);
+                    gene.setEntrezGeneId(entrezGeneId);
+                    alterationModel.setGene(gene);
+                    alterationModel.setAlteration(alteration);
+                } else {
+                    alterationModel = AlterationUtils.getAlteration(gene.getHugoSymbol(), alteration, null, null, null, null, matchedRG, false);
+                }
+            }
+            query = new Query(alterationModel, matchedRG);
+        }
+        query.setTumorType(tumorType);
+        query.setGermline(false);
+
+        GermlineIndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQueryGermline(query, null, false, null, false);
+        GermlineVariantAnnotation annotation = new GermlineVariantAnnotation();
+        org.springframework.beans.BeanUtils.copyProperties(indicatorQueryResp, annotation);
+        return new ResponseEntity<>(annotation, HttpStatus.OK);
+    }
+
 
     @Override
     public ResponseEntity<List<CancerTypeCount>> utilPortalAlterationSampleCountGet(

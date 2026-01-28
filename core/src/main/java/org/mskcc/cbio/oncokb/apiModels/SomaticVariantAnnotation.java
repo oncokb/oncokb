@@ -9,18 +9,18 @@ import java.util.List;
 /**
  * Created by Hongxin Zhang on 2019-07-18.
  */
-public class VariantAnnotation extends SomaticIndicatorQueryResp {
-    String background;
+public class SomaticVariantAnnotation extends SomaticIndicatorQueryResp {
+    private String background;
 
-    Alteration alteration;
+    private Alteration alteration;
 
-    Boolean VUE = false;
-    List<VariantAnnotationTumorType> tumorTypes = new ArrayList<>();
+    private Boolean VUE = false;
+    private List<VariantAnnotationTumorType> tumorTypes = new ArrayList<>();
 
-    public VariantAnnotation() {
+    public SomaticVariantAnnotation() {
     }
 
-    public VariantAnnotation(SomaticIndicatorQueryResp indicatorQueryResp) {
+    public SomaticVariantAnnotation(SomaticIndicatorQueryResp indicatorQueryResp) {
         this.setQuery(indicatorQueryResp.getQuery());
         this.setGeneExist(indicatorQueryResp.getGeneExist());
         this.setVariantExist(indicatorQueryResp.getVariantExist());
@@ -80,5 +80,4 @@ public class VariantAnnotation extends SomaticIndicatorQueryResp {
     public void setAlteration(Alteration alteration) {
         this.alteration = alteration;
     }
-
 }
