@@ -14,7 +14,6 @@ import org.genome_nexus.client.EnsemblTranscript;
 import org.mskcc.cbio.oncokb.apiModels.TranscriptMatchResult;
 import org.mskcc.cbio.oncokb.apiModels.TranscriptPair;
 import org.mskcc.cbio.oncokb.apiModels.TranscriptResult;
-import org.mskcc.cbio.oncokb.apiModels.VariantAnnotation;
 import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotateMutationByGenomicChangeQuery;
 import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotateMutationByHGVSgQuery;
 import org.mskcc.cbio.oncokb.cache.CacheFetcher;

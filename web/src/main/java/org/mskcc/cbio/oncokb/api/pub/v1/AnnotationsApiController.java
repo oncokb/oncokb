@@ -93,7 +93,7 @@ public class AnnotationsApiController {
             );
         }
 
-        return new ResponseEntity<>(JsonResultFactory.getSomaticIndicatorQueryRespWithoutGermline(indicatorQueryResp), HttpStatus.OK);
+        return new ResponseEntity<>(indicatorQueryResp, HttpStatus.OK);
     }
 
     @PublicApi
@@ -112,7 +112,7 @@ public class AnnotationsApiController {
         if (body == null) {
             throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         } 
-        return new ResponseEntity<>(JsonResultFactory.getSomaticIndicatorQueryRespWithoutGermline(annotateMutationsByProteinChange(body)), HttpStatus.OK);
+        return new ResponseEntity<>(annotateMutationsByProteinChange(body), HttpStatus.OK);
     }
 
     // Annotate mutations by genomic change
@@ -149,7 +149,7 @@ public class AnnotationsApiController {
 
         indicatorQueryResp = annotateMutationsByGenomicChange(Collections.singletonList(query)).get(0);
 
-        return new ResponseEntity<>(JsonResultFactory.getSomaticIndicatorQueryRespWithoutGermline(indicatorQueryResp), HttpStatus.OK);
+        return new ResponseEntity<>(indicatorQueryResp, HttpStatus.OK);
     }
 
     private ReferenceGenome resolveMatchedRG(String referenceGenome) throws ApiHttpErrorException {
@@ -179,7 +179,7 @@ public class AnnotationsApiController {
         if (body == null) {
             throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>(JsonResultFactory.getSomaticIndicatorQueryRespWithoutGermline(annotateMutationsByGenomicChange(body)), HttpStatus.OK);
+        return new ResponseEntity<>(annotateMutationsByGenomicChange(body), HttpStatus.OK);
     }
 
     // Annotate mutations by HGVSg
@@ -219,7 +219,7 @@ public class AnnotationsApiController {
 
             indicatorQueryResp = annotateMutationsByHGVSg(Collections.singletonList(query)).get(0);
         }
-        return new ResponseEntity<>(JsonResultFactory.getSomaticIndicatorQueryRespWithoutGermline(indicatorQueryResp), HttpStatus.OK);
+        return new ResponseEntity<>(indicatorQueryResp, HttpStatus.OK);
     }
 
     @PublicApi
@@ -238,7 +238,7 @@ public class AnnotationsApiController {
         if (body == null) {
             throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>(JsonResultFactory.getSomaticIndicatorQueryRespWithoutGermline(annotateMutationsByHGVSg(body)), HttpStatus.OK);
+        return new ResponseEntity<>(annotateMutationsByHGVSg(body), HttpStatus.OK);
     }
 
     // Annotate mutations by HGVSc
@@ -346,7 +346,7 @@ public class AnnotationsApiController {
                 new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")),
                 false);
         }
-        return new ResponseEntity<>(JsonResultFactory.getSomaticIndicatorQueryRespWithoutGermline(indicatorQueryResp), HttpStatus.OK);
+        return new ResponseEntity<>(indicatorQueryResp, HttpStatus.OK);
     }
 
     @PublicApi
@@ -365,7 +365,7 @@ public class AnnotationsApiController {
         if (body == null) {
             throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>(JsonResultFactory.getSomaticIndicatorQueryRespWithoutGermline(annotateCopyNumberAlterations(body)), HttpStatus.OK);
+        return new ResponseEntity<>(annotateCopyNumberAlterations(body), HttpStatus.OK);
     }
 
     // Annotate structural variants
@@ -434,7 +434,7 @@ public class AnnotationsApiController {
                 matchedRG, null, fusionName, null, AlterationType.STRUCTURAL_VARIANT.name(), tumorType, isFunctionalFusion ? "fusion" : null, null, null, structuralVariantType, null,
                 false, null, null, null, false, new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")), false);
         }
-        return new ResponseEntity<>(JsonResultFactory.getSomaticIndicatorQueryRespWithoutGermline(indicatorQueryResp), HttpStatus.OK);
+        return new ResponseEntity<>(indicatorQueryResp, HttpStatus.OK);
     }
 
     @PublicApi
@@ -453,7 +453,7 @@ public class AnnotationsApiController {
         if (body == null) {
             throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>(JsonResultFactory.getSomaticIndicatorQueryRespWithoutGermline(annotateStructuralVariants(body)), HttpStatus.OK);
+        return new ResponseEntity<>(annotateStructuralVariants(body), HttpStatus.OK);
     }
 
     @PremiumPublicApi
