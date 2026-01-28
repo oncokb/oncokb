@@ -126,6 +126,7 @@ For this option, you need to download the VEP cache, which is used in the `gn-ve
 | v3.x.x    | v0.9.4            | >=v1.x.x       | v0.x     | >=v0.0.1         | v8.0.x | v7.x.x | v4.x.x      |
 | v4.x.x    | v0.9.4            | >=v1.x.x       | v0.x     | >=v0.0.1         | v8.0.x | v7.x.x | v5.x.x      |
 | v5.0.x-rc | v0.9.4            | >=v1.x.x       | v0.x     | >=v0.0.1         | v8.0.x | v7.x.x | v6.x.x      |
+| v5.x.x    | v0.9.4            | >=v1.x.x       | v0.x     | >=v0.0.1         | v8.0.x | v7.x.x | v6.x.x      |
 
 > [!CAUTION] > `v5.0.x-rc` is a pre-release with known bugs. Do not deploy this version; stay on a stable release until a stable v5.x.x build is available.
 
