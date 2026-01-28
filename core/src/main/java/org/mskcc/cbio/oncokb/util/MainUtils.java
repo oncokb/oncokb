@@ -675,6 +675,7 @@ public class MainUtils {
                             null,
                             false
                         ));
+                        variant.setEvidenceId(evidence.getId());
                         variants.add(variant);
                     }
                 }

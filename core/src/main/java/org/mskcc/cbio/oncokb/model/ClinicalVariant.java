@@ -25,7 +25,7 @@ public class ClinicalVariant {
     private Set<String> drugPmids = new HashSet<>();
     private Set<ArticleAbstract> drugAbstracts = new HashSet<>();
     private String drugDescription = "";
-
+    private Integer evidenceId = null;
 
     /**
      **/
@@ -159,6 +159,14 @@ public class ClinicalVariant {
         this.drugDescription = drugDescription;
     }
 
+    public Integer getEvidenceId() {
+        return evidenceId;
+    }
+
+    public void setEvidenceId(Integer evidenceId) {
+        this.evidenceId = evidenceId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -174,12 +182,13 @@ public class ClinicalVariant {
             Objects.equals(getDrug(), that.getDrug()) &&
             Objects.equals(getDrugPmids(), that.getDrugPmids()) &&
             Objects.equals(getDrugAbstracts(), that.getDrugAbstracts()) &&
-            Objects.equals(getDrugDescription(), that.getDrugDescription());
+            Objects.equals(getDrugDescription(), that.getDrugDescription()) &&
+            getEvidenceId().equals(that.getEvidenceId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getCancerTypes(), getVariant(), getOncogenic(), getLevel(), getDrug(), getDrugPmids(), getDrugAbstracts(), getDrugDescription());
+        return Objects.hash(getCancerTypes(), getVariant(), getOncogenic(), getLevel(), getDrug(), getDrugPmids(), getDrugAbstracts(), getDrugDescription(), getEvidenceId());
     }
 
     @Override
@@ -196,6 +205,7 @@ public class ClinicalVariant {
             ", drugPmids=" + drugPmids +
             ", drugAbstracts=" + drugAbstracts +
             ", drugDescription=" + drugDescription +
+            ", evidenceId=" + evidenceId +
             '}';
     }
 }
