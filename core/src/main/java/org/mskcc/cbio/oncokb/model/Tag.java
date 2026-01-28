@@ -26,6 +26,8 @@ public class Tag implements java.io.Serializable {
 
     private String name;
 
+    private String description;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "evidence_tag", 
@@ -54,6 +56,14 @@ public class Tag implements java.io.Serializable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public Set<Evidence> getEvidences() {
