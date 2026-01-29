@@ -314,6 +314,39 @@ public class Query implements java.io.Serializable {
             this.setEntrezGeneId(-2);
         }
 
+        // TODO: remove this, it's a hardcoded fix for oncotree migration
+        if (this.getTumorType() != null) {
+            switch (this.getTumorType().toLowerCase()) {
+                case "aastr":
+                case "anaplastic astrocytoma":
+                case "astrocytoma":
+                    this.setTumorType("ASTR");
+                    break;
+                case "aoast":
+                case "anaplastic oligoastrocytoma":
+                case "oast":
+                case "oligoastrocytoma":
+                    this.setTumorType("GNOS");
+                    break;
+                case "anaplastic oligodendroglioma":
+                case "aodg":
+                case "oligodendroglioma":
+                    this.setTumorType("ODG");
+                    break;
+                case "dipg":
+                case "diffuse intrinsic pontine glioma":
+                    this.setTumorType("DMG");
+                    break;
+                case "gbm":
+                case "glioblastoma multiforme":
+                case "glioblastoma":
+                    this.setTumorType("GB");
+                    break;
+                default:
+                    break;
+            }
+        }
+
         // For structural variant, if the entrezGeneId is specified which means this is probably a intragenic event. In this case, the hugoSymbol should be ignore.
         if (this.getAlterationType() != null) {
             AlterationType alterationType = AlterationType.getByName(this.getAlterationType());
@@ -416,5 +449,4 @@ public class Query implements java.io.Serializable {
         return StringUtils.join(content.toArray(), "&");
     }
 }
-
 

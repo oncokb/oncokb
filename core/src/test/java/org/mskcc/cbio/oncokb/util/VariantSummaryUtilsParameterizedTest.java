@@ -3,7 +3,7 @@ package org.mskcc.cbio.oncokb.util;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.mskcc.cbio.oncokb.model.IndicatorQueryResp;
+import org.mskcc.cbio.oncokb.model.SomaticIndicatorQueryResp;
 import org.mskcc.cbio.oncokb.model.Query;
 
 import org.slf4j.Logger;
@@ -42,7 +42,7 @@ public class VariantSummaryUtilsParameterizedTest {
         query.setHugoSymbol(gene);
         query.setAlteration(variant);
 
-        IndicatorQueryResp resp = IndicatorUtils.processQuery(query, null, false, null, false);
+        SomaticIndicatorQueryResp resp = IndicatorUtils.processQuery(query, null, false, null, false);
         String _query = gene + " " + variant;
         String _oncogenicity = resp.getOncogenic();
         String _variantSummary = resp.getVariantSummary();
