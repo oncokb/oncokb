@@ -3,10 +3,18 @@ package org.mskcc.cbio.oncokb.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.swagger.annotations.ApiModelProperty;
+
 public class GermlineIndicatorQueryResp extends IndicatorQueryRespBase {
     private List<org.mskcc.cbio.oncokb.apiModels.GenomicIndicator> genomicIndicators = new ArrayList<>();
+
+    @ApiModelProperty(value = "(Nullable) The likelihood that individuals with a specific variant will become affected")
     private String penetrance = "";
+
+    @ApiModelProperty(value = "(Nullable) The classification of the likelihood that a germline variant will cause disease.")
     private String pathogenic = "";
+
+    @ApiModelProperty(value = "(Nullable) The unique identifier for a variant record in the ClinVar database")
     private String clinVarId = "";
 
     public GermlineIndicatorQueryResp() {

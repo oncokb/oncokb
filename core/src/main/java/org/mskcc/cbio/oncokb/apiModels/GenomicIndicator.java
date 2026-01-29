@@ -7,15 +7,15 @@ import org.mskcc.cbio.oncokb.model.InheritanceMechanism;
 
 import java.io.Serializable;
 
-@ApiModel(description = "")
+@ApiModel(description = "clinical syndromes associated with specific germline variants/alleles that describe the clinical consequences associated with that variant")
 public class GenomicIndicator implements Serializable {
-    @ApiModelProperty(value = "")
+    @ApiModelProperty(value = "Name of the clinical syndrome")
     private String name;
 
-    @ApiModelProperty(value = "")
+    @ApiModelProperty(value = "Description of the genomic indicator")
     private String description;
     
-    @ApiModelProperty(value = "")
+    @ApiModelProperty(value = "Describes how a genetic trait/allele may be passed to offspring")
     private InheritanceMechanism inheritanceMechanism;
 
     public String getName() {
