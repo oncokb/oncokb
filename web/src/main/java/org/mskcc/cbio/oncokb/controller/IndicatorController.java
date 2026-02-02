@@ -53,7 +53,7 @@ public class IndicatorController {
     ) {
         Query query = new Query(id, referenceGenome, entrezGeneId, hugoSymbol, alteration, alterationType, svType, tumorType, consequence, proteinStart, proteinEnd, hgvs, germline, alleleState, pathogenicity);
         Set<LevelOfEvidence> levelOfEvidences = levels == null ? null : LevelUtils.parseStringLevelOfEvidences(levels);
-        SomaticIndicatorQueryResp resp = IndicatorUtils.processQuery(query, levelOfEvidences, highestLevelOnly, null, false);
+        SomaticIndicatorQueryResp resp = IndicatorUtils.processQuerySomatic(query, levelOfEvidences, highestLevelOnly, null, false);
 
         return JsonResultFactory.getSomaticIndicatorQueryResp(resp, fields);
     }
@@ -73,7 +73,7 @@ public class IndicatorController {
         }
 
         for (Query query : body.getQueries()) {
-            result.add(IndicatorUtils.processQuery(query,
+            result.add(IndicatorUtils.processQuerySomatic(query,
                 body.getLevels() == null ? null : body.getLevels(),
                 body.getHighestLevelOnly(),  new HashSet<>(stringToEvidenceTypes(body.getEvidenceTypes(), ",")), false));
         }

@@ -387,14 +387,10 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         Alteration alterationModel = null;
         if (!StringUtils.isNullOrEmpty(hgvsg) || !StringUtils.isNullOrEmpty(genomicChange)) {
             TranscriptSummaryAlterationResult transcriptSummaryAlterationResult = null;
-            if (!StringUtils.isNullOrEmpty(hgvsg)) {
-                if (this.cacheFetcher.hgvsgShouldBeAnnotated(hgvsg, matchedRG)) {
-                    transcriptSummaryAlterationResult = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, matchedRG, hgvsg);
-                }
-            } else {
-                if (this.cacheFetcher.genomicLocationShouldBeAnnotated(GenomeNexusUtils.convertGenomicLocation(genomicChange), matchedRG)) {
-                    transcriptSummaryAlterationResult = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, matchedRG, genomicChange);
-                }
+            if (!StringUtils.isNullOrEmpty(hgvsg) && this.cacheFetcher.hgvsgShouldBeAnnotated(hgvsg, matchedRG)) {
+                transcriptSummaryAlterationResult = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, matchedRG, hgvsg);
+            } else if (this.cacheFetcher.genomicLocationShouldBeAnnotated(GenomeNexusUtils.convertGenomicLocation(genomicChange), matchedRG)) {
+                transcriptSummaryAlterationResult = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, matchedRG, genomicChange);
             }
             query = QueryUtils.getQueryFromAlteration(matchedRG, tumorType, transcriptSummaryAlterationResult, hgvsg);
             gene = GeneUtils.getGeneByEntrezId(query.getEntrezGeneId());
@@ -419,7 +415,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         query.setTumorType(tumorType);
         query.setGermline(false);
         List<EvidenceQueryRes> responses = EvidenceUtils.processRequest(Collections.singletonList(query), new HashSet<>(EvidenceTypeUtils.getAllEvidenceTypes(query.isGermline())), LevelUtils.getPublicLevels(), false, false);
-        SomaticIndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null, false);
+        SomaticIndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuerySomatic(query, null, false, null, false);
 
         EvidenceQueryRes response = responses.iterator().next();
 
@@ -520,14 +516,10 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         Alteration alterationModel = null;
         if (!StringUtils.isNullOrEmpty(hgvsg) || !StringUtils.isNullOrEmpty(genomicChange)) {
             TranscriptSummaryAlterationResult transcriptSummaryAlterationResult = null;
-            if (!StringUtils.isNullOrEmpty(hgvsg)) {
-                if (this.cacheFetcher.hgvsgShouldBeAnnotated(hgvsg, matchedRG)) {
-                    transcriptSummaryAlterationResult = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, matchedRG, hgvsg);
-                }
-            } else {
-                if (this.cacheFetcher.genomicLocationShouldBeAnnotated(GenomeNexusUtils.convertGenomicLocation(genomicChange), matchedRG)) {
-                    transcriptSummaryAlterationResult = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, matchedRG, genomicChange);
-                }
+            if (!StringUtils.isNullOrEmpty(hgvsg) && this.cacheFetcher.hgvsgShouldBeAnnotated(hgvsg, matchedRG)) {
+                transcriptSummaryAlterationResult = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, matchedRG, hgvsg);
+            } else if (this.cacheFetcher.genomicLocationShouldBeAnnotated(GenomeNexusUtils.convertGenomicLocation(genomicChange), matchedRG)) {
+                transcriptSummaryAlterationResult = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, matchedRG, genomicChange);
             }
             query = QueryUtils.getQueryFromAlteration(matchedRG, tumorType, transcriptSummaryAlterationResult, hgvsg);
             gene = GeneUtils.getGeneByEntrezId(query.getEntrezGeneId());

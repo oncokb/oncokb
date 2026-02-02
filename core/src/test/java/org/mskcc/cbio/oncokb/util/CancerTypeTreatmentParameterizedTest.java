@@ -48,7 +48,7 @@ public class CancerTypeTreatmentParameterizedTest {
         query.setHugoSymbol(gene);
         query.setTumorType(tumorType);
 
-        SomaticIndicatorQueryResp resp = IndicatorUtils.processQuery(query, null, false, null, false);
+        SomaticIndicatorQueryResp resp = IndicatorUtils.processQuerySomatic(query, null, false, null, false);
         List<IndicatorQueryTreatment> resps = resp.getTreatments();
         StringBuilder stringBuilder = new StringBuilder();
         for (int i = 0; i < resps.size(); i++) {

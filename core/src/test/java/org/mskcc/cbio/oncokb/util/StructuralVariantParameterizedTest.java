@@ -71,8 +71,8 @@ public class StructuralVariantParameterizedTest {
             query2.setSvType(StructuralVariantType.valueOf(svClass));
 
             // if it is functional fusion. The result should be the same as passing as fusion
-            SomaticIndicatorQueryResp resp1 = IndicatorUtils.processQuery(query1, null, true, null, false);
-            SomaticIndicatorQueryResp resp2 = IndicatorUtils.processQuery(query2, null, false, null, false);
+            SomaticIndicatorQueryResp resp1 = IndicatorUtils.processQuerySomatic(query1, null, true, null, false);
+            SomaticIndicatorQueryResp resp2 = IndicatorUtils.processQuerySomatic(query2, null, false, null, false);
 
             assertEquals("Oncogenicities are not matched. Query: " + _query, resp1.getOncogenic(), resp2.getOncogenic());
             assertEquals("Highest sensitive levels are not matched. Query: " + _query, resp1.getHighestSensitiveLevel(), resp2.getHighestSensitiveLevel());
@@ -89,7 +89,7 @@ public class StructuralVariantParameterizedTest {
         if (isFunctionalFusion) {
             query.setConsequence("fusion");
         }
-        SomaticIndicatorQueryResp resp = IndicatorUtils.processQuery(query, null, true, null, false);
+        SomaticIndicatorQueryResp resp = IndicatorUtils.processQuerySomatic(query, null, true, null, false);
 
         assertEquals("Oncogenicities are not matched. Query: " + _query, oncogenicity, resp.getOncogenic());
         assertEquals("Gene summaries are not matched. Query: " + _query, geneSummary, resp.getGeneSummary());

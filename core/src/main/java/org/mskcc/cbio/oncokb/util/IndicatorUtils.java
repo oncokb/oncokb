@@ -19,7 +19,7 @@ import static org.mskcc.cbio.oncokb.util.SummaryUtils.getVUSSummary;
 
 
 public class IndicatorUtils {
-    public static SomaticIndicatorQueryResp processQuery(
+    public static SomaticIndicatorQueryResp processQuerySomatic(
         Query query,
         Set<LevelOfEvidence> levels, Boolean highestLevelOnly,
         Set<EvidenceType> evidenceTypes, Boolean geneQueryOnly
@@ -171,7 +171,7 @@ public class IndicatorUtils {
                     tmpGene.getHugoSymbol(), query.getAlteration(), null, query.getSvType(),
                     query.getTumorType(), query.getConsequence(), query.getProteinStart(),
                     query.getProteinEnd(), query.getHgvs(), query.isGermline(), query.getInheritanceMechanism(), query.getPathogenicity());
-                result.add(IndicatorUtils.processQuery(tmpQuery, levels, highestLevelOnly, evidenceTypes, geneQueryOnly));
+                result.add(IndicatorUtils.processQuerySomatic(tmpQuery, levels, highestLevelOnly, evidenceTypes, geneQueryOnly));
             }
             return result.iterator().next();
         }

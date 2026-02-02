@@ -145,7 +145,7 @@ public class PrivateSearchApiController implements PrivateSearchApi {
                         transcriptSummaryAlterationResult = AlterationUtils.getAlterationFromGenomeNexus(type, referenceGenome, trimmedQuery);
                         if (transcriptSummaryAlterationResult.getAlteration().getGene() != null) {
                             Query annotationQuery = QueryUtils.getQueryFromAlteration(referenceGenome, "", transcriptSummaryAlterationResult, HGVSG_FORMAT.equals(type) ? trimmedQuery : "");
-                            SomaticIndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuery(annotationQuery, null, false, null, true);
+                            SomaticIndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuerySomatic(annotationQuery, null, false, null, true);
                             result.add(newTypeaheadAnnotation(trimmedQuery, type, referenceGenome, transcriptSummaryAlterationResult.getAlteration(), indicatorQueryResp));
                         }
                     } catch (org.genome_nexus.ApiException e) {

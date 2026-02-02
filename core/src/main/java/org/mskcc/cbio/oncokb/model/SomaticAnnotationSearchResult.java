@@ -1,6 +1,6 @@
 package org.mskcc.cbio.oncokb.model;
 
-public class AnnotationSearchResult {
+public class SomaticAnnotationSearchResult {
     AnnotationSearchQueryType queryType;
     SomaticIndicatorQueryResp indicatorQueryResp;
 

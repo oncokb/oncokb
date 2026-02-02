@@ -6,7 +6,7 @@ import static org.mskcc.cbio.oncokb.util.AnnotationSearchUtils.searchCuratedAnno
 import java.util.Set;
 import junit.framework.TestCase;
 import org.mskcc.cbio.oncokb.model.AnnotationSearchQueryType;
-import org.mskcc.cbio.oncokb.model.AnnotationSearchResult;
+import org.mskcc.cbio.oncokb.model.SomaticAnnotationSearchResult;
 import org.mskcc.cbio.oncokb.model.TypeaheadQueryType;
 import org.mskcc.cbio.oncokb.model.TypeaheadSearchResp;
 
@@ -61,7 +61,7 @@ public class AnnotationSearchUtilsTest extends TestCase {
 
     public void testAnnotationSearch() {
         // test gene query
-        Set<AnnotationSearchResult> respSet = annotationSearch("BRAF");
+        Set<SomaticAnnotationSearchResult> respSet = annotationSearch("BRAF");
         // This is a gene search, there should be a gene search result
         assertTrue(respSet.stream().filter(resp -> AnnotationSearchQueryType.GENE.equals(resp.getQueryType())).count() > 0);
         // Since BRAF is mentioned in multiple alterations, variant search result should be available

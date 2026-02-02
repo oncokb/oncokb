@@ -46,7 +46,7 @@ public class FdaParameterizedTest {
         query.setHugoSymbol(hugoSymbol);
         query.setAlteration(variant);
         query.setTumorType(cancerType);
-        SomaticIndicatorQueryResp resp = IndicatorUtils.processQuery(query, null, true, null, false);
+        SomaticIndicatorQueryResp resp = IndicatorUtils.processQuerySomatic(query, null, true, null, false);
         assertEquals(fdaLevel, resp.getHighestFdaLevel().getLevel());
     }
 

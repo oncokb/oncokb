@@ -42,7 +42,7 @@ public class MutationEffectParameterizedTest {
         query.setHugoSymbol(gene);
         query.setAlteration(variant);
 
-        SomaticIndicatorQueryResp resp = IndicatorUtils.processQuery(query, null, false, null, false);
+        SomaticIndicatorQueryResp resp = IndicatorUtils.processQuerySomatic(query, null, false, null, false);
         String _query = gene + " " + variant;
         String _mutationEffect = resp.getMutationEffect().getKnownEffect();
         String _description = resp.getMutationEffect().getDescription();

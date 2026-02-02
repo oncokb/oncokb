@@ -33,7 +33,7 @@ import org.mskcc.cbio.oncokb.apiModels.LevelsOfEvidenceMatch;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.AnnotationSearchQueryType;
-import org.mskcc.cbio.oncokb.model.AnnotationSearchResult;
+import org.mskcc.cbio.oncokb.model.SomaticAnnotationSearchResult;
 import org.mskcc.cbio.oncokb.model.Drug;
 import org.mskcc.cbio.oncokb.model.Evidence;
 import org.mskcc.cbio.oncokb.model.Gene;
@@ -177,8 +177,8 @@ public class AnnotationSearchUtils {
         return result;
     }
 
-    public static TreeSet<AnnotationSearchResult> annotationSearch(String query){
-        TreeSet<AnnotationSearchResult> result = new TreeSet<>(new AnnotationSearchResultComp(query));
+    public static TreeSet<SomaticAnnotationSearchResult> annotationSearch(String query){
+        TreeSet<SomaticAnnotationSearchResult> result = new TreeSet<>(new SomaticAnnotationSearchResultComp(query));
         List<String> keywords = Arrays.asList(query.trim().split("\\s+"));
 
         if (keywords.size() == 1) {
@@ -226,9 +226,9 @@ public class AnnotationSearchUtils {
                     } else {
                         indicatorQuery.setAlteration((alteration.getAlteration()));
                     }
-                    AnnotationSearchResult annotationSearchResult = new AnnotationSearchResult();
+                    SomaticAnnotationSearchResult annotationSearchResult = new SomaticAnnotationSearchResult();
                     annotationSearchResult.setQueryType(AnnotationSearchQueryType.VARIANT);
-                    annotationSearchResult.setSomaticIndicatorQueryResp(IndicatorUtils.processQuery(indicatorQuery, null, null, null, false));
+                    annotationSearchResult.setSomaticIndicatorQueryResp(IndicatorUtils.processQuerySomatic(indicatorQuery, null, null, null, false));
                     if (annotationSearchResult.getSomaticIndicatorQueryResp().getVariantExist()) {
                         result.add(annotationSearchResult);
                     }
@@ -246,23 +246,23 @@ public class AnnotationSearchUtils {
         return result;
     }
 
-    private static LinkedHashSet<AnnotationSearchResult> findActionableGenesByGeneSearch(String keyword) {
-        LinkedHashSet<AnnotationSearchResult> result = new LinkedHashSet<>();
+    private static LinkedHashSet<SomaticAnnotationSearchResult> findActionableGenesByGeneSearch(String keyword) {
+        LinkedHashSet<SomaticAnnotationSearchResult> result = new LinkedHashSet<>();
         Set<Gene> geneMatches = GeneUtils.searchGene(keyword, false);
         for (Gene gene: geneMatches) {
             Query query = new Query();
             query.setEntrezGeneId(gene.getEntrezGeneId());
             query.setHugoSymbol(gene.getHugoSymbol());
-            AnnotationSearchResult annotationSearchResult = new AnnotationSearchResult();
+            SomaticAnnotationSearchResult annotationSearchResult = new SomaticAnnotationSearchResult();
             annotationSearchResult.setQueryType(AnnotationSearchQueryType.GENE);
-            annotationSearchResult.setSomaticIndicatorQueryResp(IndicatorUtils.processQuery(query, null, null, null, true));
+            annotationSearchResult.setSomaticIndicatorQueryResp(IndicatorUtils.processQuerySomatic(query, null, null, null, true));
             result.add(annotationSearchResult);
         }
         return result;
     }
 
-    private static LinkedHashSet<AnnotationSearchResult> findActionableGenesByAlterationSearch(String keyword) {
-        LinkedHashSet<AnnotationSearchResult> result = new LinkedHashSet<>();
+    private static LinkedHashSet<SomaticAnnotationSearchResult> findActionableGenesByAlterationSearch(String keyword) {
+        LinkedHashSet<SomaticAnnotationSearchResult> result = new LinkedHashSet<>();
         List<Alteration> altMatches = AlterationUtils.lookupVariant(keyword, false, true, AlterationUtils.getAllAlterations());
         for (Alteration alteration: altMatches) {
             Query indicatorQuery = new Query();
@@ -273,15 +273,15 @@ public class AnnotationSearchUtils {
             }
             indicatorQuery.setEntrezGeneId(alteration.getGene().getEntrezGeneId());
             indicatorQuery.setHugoSymbol(alteration.getGene().getHugoSymbol());
-            AnnotationSearchResult annotationSearchResult = new AnnotationSearchResult();
+            SomaticAnnotationSearchResult annotationSearchResult = new SomaticAnnotationSearchResult();
             annotationSearchResult.setQueryType(AnnotationSearchQueryType.VARIANT);
-            annotationSearchResult.setSomaticIndicatorQueryResp(IndicatorUtils.processQuery(indicatorQuery, null, null, null, false));
+            annotationSearchResult.setSomaticIndicatorQueryResp(IndicatorUtils.processQuerySomatic(indicatorQuery, null, null, null, false));
             result.add(annotationSearchResult);
         }
         return result;
     }
 
-    private static LinkedHashSet<AnnotationSearchResult> findActionableGenesByCancerType(String query) {
+    private static LinkedHashSet<SomaticAnnotationSearchResult> findActionableGenesByCancerType(String query) {
 
         Set<Evidence> allImplicationEvidences = EvidenceUtils.getEvidenceByEvidenceTypesAndLevels(EvidenceTypeUtils.getImplicationEvidenceTypes(), LevelUtils.getPublicLevels());
 
@@ -312,7 +312,7 @@ public class AnnotationSearchUtils {
             return new LinkedHashSet<>();
         }
 
-        LinkedHashSet<AnnotationSearchResult> result = new LinkedHashSet<>();
+        LinkedHashSet<SomaticAnnotationSearchResult> result = new LinkedHashSet<>();
         Set<SearchObject> searchObjects = new HashSet<>();
         for (TumorType tumorType : tumorTypeMatches) {
             for (Evidence evidence : allImplicationEvidences) {
@@ -338,9 +338,9 @@ public class AnnotationSearchUtils {
             } else {
                 indicatorQuery.setTumorType(searchObject.getTumorType().getMainType());
             }
-            AnnotationSearchResult annotationSearchResult = new AnnotationSearchResult();
+            SomaticAnnotationSearchResult annotationSearchResult = new SomaticAnnotationSearchResult();
             annotationSearchResult.setQueryType(AnnotationSearchQueryType.CANCER_TYPE);
-            annotationSearchResult.setSomaticIndicatorQueryResp(IndicatorUtils.processQuery(indicatorQuery, null, null, null, true));
+            annotationSearchResult.setSomaticIndicatorQueryResp(IndicatorUtils.processQuerySomatic(indicatorQuery, null, null, null, true));
             result.add(annotationSearchResult);
         }
 
@@ -774,7 +774,7 @@ public class AnnotationSearchUtils {
             query.setReferenceGenome(referenceGenome);
         }
 
-        SomaticIndicatorQueryResp resp = IndicatorUtils.processQuery(query, null, false, null, false);
+        SomaticIndicatorQueryResp resp = IndicatorUtils.processQuerySomatic(query, null, false, null, false);
         typeaheadSearchResp.setOncogenicity(resp.getOncogenic());
         typeaheadSearchResp.setVUS(resp.getVUS());
         typeaheadSearchResp.setAnnotation(resp.getVariantSummary() + " Click here to see more annotation details.");
@@ -926,15 +926,15 @@ class VariantComp implements Comparator<TypeaheadSearchResp> {
     }
 }
 
-class AnnotationSearchResultComp implements Comparator<AnnotationSearchResult> {
+class SomaticAnnotationSearchResultComp implements Comparator<SomaticAnnotationSearchResult> {
     private String keyword;
 
-    public AnnotationSearchResultComp(String keyword) {
+    public SomaticAnnotationSearchResultComp(String keyword) {
         this.keyword = keyword.toLowerCase();
     }
 
     @Override
-    public int compare(AnnotationSearchResult a1, AnnotationSearchResult a2) {
+    public int compare(SomaticAnnotationSearchResult a1, SomaticAnnotationSearchResult a2) {
         SomaticIndicatorQueryResp i1 = a1.getSomaticIndicatorQueryResp();
         SomaticIndicatorQueryResp i2 = a2.getSomaticIndicatorQueryResp();
 
