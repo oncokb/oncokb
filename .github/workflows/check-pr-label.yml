@@ -1,0 +1,24 @@
+name: Check PR Label
+
+on:
+  pull_request:
+    types: [opened, labeled, unlabeled, synchronize]
+
+jobs:
+  check-label:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Validate required label
+        run: |
+          labels="${{ join(github.event.pull_request.labels.*.name, ',') }}"
+
+          echo "Labels: $labels"
+
+          if echo "$labels" | grep -qE "(^|,)(bug|feature|documentation)(,|$)"; then
+            echo "✅ Required label found"
+            exit 0
+          else
+            echo "❌ PR must have one of: bug, feature, documentation"
+            exit 1
+          fi
