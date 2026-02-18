@@ -50,7 +50,6 @@ import java.util.Set;
 
 @Api(tags = "Germline Annotations", description = "Providing germline annotations")
 @Controller
-@RequestMapping(value = "/api/v1")
 public class GermlineAnnotationsApiController {
     @Autowired
     CacheFetcher cacheFetcher;
