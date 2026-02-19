@@ -15,10 +15,10 @@ jobs:
 
           echo "Labels: $labels"
 
-          if echo "$labels" | grep -qE "(^|,)(bug|feature|documentation)(,|$)"; then
+          if echo "$labels" | grep -qE "(^|,)(fix|feature|documentation)(,|$)"; then
             echo "✅ Required label found"
             exit 0
           else
-            echo "❌ PR must have one of: bug, feature, documentation"
+            echo "❌ PR must have one of: fix, feature, documentation"
             exit 1
           fi
