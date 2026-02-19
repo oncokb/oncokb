@@ -16,6 +16,8 @@ public class AnnotationQuery implements java.io.Serializable{
     private String tumorType;
     private Set<EvidenceType> evidenceTypes = new HashSet<>();
 
+    private Boolean germline = false;
+
     public String getId() {
         return id;
     }
@@ -46,6 +48,18 @@ public class AnnotationQuery implements java.io.Serializable{
 
     public void setEvidenceTypes(Set<EvidenceType> evidenceTypes) {
         this.evidenceTypes = evidenceTypes;
+    }
+
+    public Boolean isGermline() {
+        return germline;
+    }
+
+    public Boolean getGermline() {
+        return germline;
+    }
+
+    public void setGermline(Boolean germline) {
+        this.germline = germline;
     }
 
     @Override

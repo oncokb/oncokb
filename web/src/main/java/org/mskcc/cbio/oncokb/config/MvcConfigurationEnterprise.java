@@ -38,7 +38,7 @@ import java.util.Optional;
 import static org.mskcc.cbio.oncokb.Constants.*;
 
 @Configuration
-@ComponentScan(basePackages = {"org.mskcc.cbio.oncokb.api.pub.v1", "org.mskcc.cbio.oncokb.api.pvt", "org.mskcc.cbio.oncokb.controller", "org.mskcc.cbio.oncokb.cache", "org.mskcc.cbio.oncokb.bo"})
+@ComponentScan(basePackages = {"org.mskcc.cbio.oncokb.api.pub.v1", "org.mskcc.cbio.oncokb.api.pub.v2", "org.mskcc.cbio.oncokb.api.pvt", "org.mskcc.cbio.oncokb.controller", "org.mskcc.cbio.oncokb.cache", "org.mskcc.cbio.oncokb.bo"})
 @EnableWebMvc
 @EnableSwagger2
 public class MvcConfigurationEnterprise extends WebMvcConfigurerAdapter {
