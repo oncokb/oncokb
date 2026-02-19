@@ -63,6 +63,9 @@ public class TumorType implements Serializable {
     @JsonIgnore
     private Set<TumorType> children;
 
+    @OneToMany(mappedBy = "tumorType", fetch = FetchType.EAGER)
+    private List<TumorTypeSynonym> synonyms;
+
     public Integer getId() {
         return id;
     }

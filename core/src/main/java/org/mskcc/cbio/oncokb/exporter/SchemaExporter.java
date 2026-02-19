@@ -20,6 +20,7 @@ public class SchemaExporter {
             cfg.addAnnotatedClass(org.mskcc.cbio.oncokb.model.TumorType.class);
             cfg.addAnnotatedClass(org.mskcc.cbio.oncokb.model.Info.class);
             cfg.addAnnotatedClass(org.mskcc.cbio.oncokb.model.Drug.class);
+            cfg.addAnnotatedClass(org.mskcc.cbio.oncokb.model.TumorTypeSynonym.class);
             
             cfg.setProperty("hibernate.connection.driver_class", "com.mysql.jdbc.Driver");
             cfg.setProperty("hibernate.dialect", "org.hibernate.dialect.MySQLDialect");
