@@ -147,11 +147,15 @@ public class EvidenceDaoImpl
         List<EvidenceType> evidenceTypes
     ) {
         String[] params = {"entrezGeneId", "start", "end", "oncogenicity", "mutationType", "evidenceTypes"};
+        String oncogenicityString = null;
+        if (oncogenicity != null) {
+            oncogenicityString = oncogenicity.getOncogenic();
+        }
         String mutationTypeString = null;
         if (mutationType != null) {
             mutationTypeString = mutationType.getMutationType();
         }
-        Object[] values = {entrezGeneId, start, end, oncogenicity.getOncogenic(), mutationTypeString, evidenceTypes};
+        Object[] values = {entrezGeneId, start, end, oncogenicityString, mutationTypeString, evidenceTypes};
         return (List<Evidence>) getHibernateTemplate().findByNamedQueryAndNamedParam("findEvidencesByTagCriteria", params, values);
     }
 
