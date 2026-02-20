@@ -13,7 +13,6 @@ import org.mskcc.cbio.oncokb.model.*;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.util.*;
-import java.util.stream.Collector;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
@@ -61,15 +60,12 @@ public class EvidenceUtils {
 
     public static Set<Evidence> getRelevantEvidences(
         Query query, Alteration matchedAlt,
-        Set<EvidenceType> evidenceTypes, Set<LevelOfEvidence> levelOfEvidences, List<Alteration> relevantAlterations, List<Alteration> alternativeAlleles, Boolean geneQueryOnly) {
+        Set<EvidenceType> evidenceTypes, Set<LevelOfEvidence> levelOfEvidences, List<Alteration> relevantAlterations, List<Alteration> alternativeAlleles, Boolean geneQueryOnly, Optional<Oncogenicity> matchedAltOncogenicity) {
         if (query == null) {
             return new HashSet<>();
         }
         Gene gene = GeneUtils.getGene(query.getEntrezGeneId(), query.getHugoSymbol());
         if (gene != null) {
-            String variantId = query.getQueryId() +
-                "&" + evidenceTypes.toString() +
-                (levelOfEvidences == null ? "" : ("&" + levelOfEvidences.toString()));
             if (matchedAlt == null) {
                 matchedAlt = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getAlteration(),
                     AlterationType.getByName(query.getAlterationType()), query.getConsequence(), query.getProteinStart(), query.getProteinEnd(), query.getReferenceGenome(), query.isGermline());
@@ -91,11 +87,70 @@ public class EvidenceUtils {
             evidenceQueryRes.setLevelOfEvidences(levelOfEvidences == null ? null : new ArrayList<>(levelOfEvidences));
 
             relevantEvidences = getEvidence(query.getReferenceGenome(), evidenceQueryRes, evidenceTypes, levelOfEvidences);
+            if (matchedAltOncogenicity.isPresent()) {
+                relevantEvidences.addAll(EvidenceUtils.getTagEvidences(matchedAlt, matchedAltOncogenicity.get(), evidenceTypes));
+            }
 
             return filterEvidence(relevantEvidences, evidenceQueryRes, geneQueryOnly);
         } else {
             return new HashSet<>();
         }
+    }
+
+    public static List<Evidence> getTagEvidences(Alteration alt, Oncogenicity altOncogenicity, Set<EvidenceType> evidenceTypes) {
+        List<Evidence> evidences = new ArrayList<>();
+        if (!isValidTagParams(alt, altOncogenicity)) {
+            return evidences;
+        }
+
+        if (alt.getConsequence() == null) {
+            return evidences;
+        }
+
+        evidences = ApplicationContextSingleton.getEvidenceBo().findEvidenceByTagCriteria(
+            alt.getGene().getEntrezGeneId(), 
+            alt.getProteinStart(), 
+            alt.getProteinEnd(),
+            altOncogenicity, 
+            MutationType.fromVariantConsequence(alt.getConsequence()), 
+            new ArrayList<>(evidenceTypes)
+        );
+        return evidences;
+    }
+
+    public static List<Evidence> getTagEvidences(Alteration alt, Oncogenicity altOncogenicity, Set<EvidenceType> evidenceTypes, TumorType matchedTumorType, List<TumorType> tumorTypes, Set<LevelOfEvidence> levelOfEvidences) {
+        List<Evidence> evidences = new ArrayList<>();
+        if (!isValidTagParams(alt, altOncogenicity)) {
+            return evidences;
+        }
+
+        evidences = ApplicationContextSingleton.getEvidenceBo().findEvidenceByTagCriteria(
+            alt.getGene().getEntrezGeneId(), 
+            alt.getProteinStart(), 
+            alt.getProteinEnd(),
+            altOncogenicity, 
+            MutationType.fromVariantConsequence(alt.getConsequence()), 
+            new ArrayList<>(evidenceTypes)
+        );
+
+        if (tumorTypes != null && tumorTypes.size() > 0) {
+            evidences = filterEvidencesByTumorType(new HashSet<>(evidences), matchedTumorType, tumorTypes);
+        }
+
+        if (levelOfEvidences!= null && levelOfEvidences.size() > 0) {
+            evidences = evidences
+                .stream()
+                .filter(evidence -> levelOfEvidences.contains(evidence.getLevelOfEvidence())).collect(Collectors.toList());
+        }
+
+        return evidences;
+    }
+
+    private static boolean isValidTagParams(Alteration alt, Oncogenicity altOncogenicity) {
+        if (altOncogenicity == null || alt.getConsequence() == null) {
+            return false;
+        }
+        return true;
     }
 
     public static Set<Evidence> getEvidenceByEvidenceTypesAndLevels(Set<EvidenceType> types, Set<LevelOfEvidence> levels) {
@@ -372,7 +427,7 @@ public class EvidenceUtils {
         return tmpEvidences;
     }
 
-    private static Set<Evidence> filterEvidence(Set<Evidence> evidences, EvidenceQueryRes evidenceQuery, Boolean geneQueryOnly) {
+    public static Set<Evidence> filterEvidence(Set<Evidence> evidences, EvidenceQueryRes evidenceQuery, Boolean geneQueryOnly) {
         Set<Evidence> filtered = new HashSet<>();
 
         // Logic step 1, liquid therapies will not be propagated to solid
@@ -389,7 +444,7 @@ public class EvidenceUtils {
 
                 if (evidence.getGene().equals(evidenceQuery.getGene())) {
                     //Add all gene specific evidences
-                    if (evidence.getAlterations().isEmpty()) {
+                    if (evidence.getAlterations().isEmpty() && evidence.getTags().isEmpty()) {
                         filtered.add(evidence);
                     } else if (evidenceQuery.getExactMatchedAlteration() != null && StringUtils.isEmpty(evidenceQuery.getExactMatchedAlteration().getAlteration()) && geneQueryOnly) {
                         filtered.add(evidence);
@@ -398,7 +453,7 @@ public class EvidenceUtils {
                         if (!hasjointed) {
                             hasjointed = !Collections.disjoint(evidence.getAlterations(), evidenceQuery.getAlleles());
                         }
-                        if (hasjointed) {
+                        if (hasjointed || (evidence.getAlterations().isEmpty() && !evidence.getTags().isEmpty())) {
                             if (evidence.getCancerTypes().isEmpty()) {
                                 if (evidence.getEvidenceType().equals(EvidenceType.ONCOGENIC)) {
                                     if (evidence.getDescription() == null) {
@@ -919,7 +974,7 @@ public class EvidenceUtils {
 
     // Temporary move evidence process methods here in order to share the code between new APIs and legacies
     public static List<EvidenceQueryRes> processRequest(List<Query> requestQueries, Set<EvidenceType> evidenceTypes,
-                                                        Set<LevelOfEvidence> levelOfEvidences, Boolean highestLevelOnly, Boolean geneQueryOnly) {
+                                                        Set<LevelOfEvidence> levelOfEvidences, Boolean highestLevelOnly, Boolean geneQueryOnly, Optional<Oncogenicity> oncogenicity) {
         List<EvidenceQueryRes> evidenceQueries = new ArrayList<>();
 
         levelOfEvidences = levelOfEvidences == null ? levelOfEvidences :
@@ -1007,7 +1062,7 @@ public class EvidenceUtils {
                 query.setLevelOfEvidences(levelOfEvidences == null ? null : new ArrayList<>(levelOfEvidences));
                 Set<Evidence> relevantEvidences = new HashSet<>();
                 if (query.getExactMatchedAlteration() != null) {
-                    relevantEvidences = getRelevantEvidences(query.getQuery(), query.getExactMatchedAlteration(), evidenceTypes, levelOfEvidences, AlterationUtils.getRelevantAlterations(requestQuery.getReferenceGenome(), query.getExactMatchedAlteration()), query.getAlleles(), geneQueryOnly);
+                    relevantEvidences = getRelevantEvidences(query.getQuery(), query.getExactMatchedAlteration(), evidenceTypes, levelOfEvidences, AlterationUtils.getRelevantAlterations(requestQuery.getReferenceGenome(), query.getExactMatchedAlteration()), query.getAlleles(), geneQueryOnly, oncogenicity);
                 } else {
                     relevantEvidences = getEvidence(requestQuery.getReferenceGenome(), query, evidenceTypes, levelOfEvidences);
                 }
@@ -1235,5 +1290,45 @@ public class EvidenceUtils {
             }
         }
         return evidences;
+    }
+
+    public static List<Evidence> filterEvidencesByTumorType(Set<Evidence> evidences, TumorType matchedTumorType, List<TumorType> tumorTypes) {
+        List<Evidence> filteredEvidences = new ArrayList<>();
+        for (Evidence evidence : evidences) {
+            Set<TumorType> relevantTumorTypes = TumorTypeUtils.findEvidenceRelevantCancerTypes(evidence);
+            boolean hasJointOnSubtype = !Collections.disjoint(relevantTumorTypes, matchedTumorType == null ? tumorTypes : Collections.singleton(matchedTumorType));
+            if (hasJointOnSubtype) {
+                filteredEvidences.add(evidence);
+            }
+        }
+
+        // Sort evidences based on number of alterations associated.
+        // Evidence with fewer alterations associated is put to the front
+        filteredEvidences.sort(Comparator.comparingInt(o -> o.getAlterations().size()));
+
+        // Now all evidences left are relevant to the matchedTumorType or tumorTypes.
+        // We need to rank the evidences based on cancer type relevancy
+        List<TumorType> relevantMatchedTumorTypes = new ArrayList<>();
+        if (matchedTumorType != null) {
+            relevantMatchedTumorTypes = TumorTypeUtils.findRelevantTumorTypes(
+                TumorTypeUtils.getTumorTypeName(matchedTumorType),
+                StringUtils.isEmpty(matchedTumorType.getSubtype()),
+                RelevantTumorTypeDirection.UPWARD
+            );
+        } else if (tumorTypes != null) {
+            relevantMatchedTumorTypes = tumorTypes;
+        }
+
+        Set<Evidence> sortedEvidences = new LinkedHashSet<>();
+        for (TumorType tumorType : relevantMatchedTumorTypes) {
+            for (int i = 0; i < filteredEvidences.size(); i++) {
+                Evidence evidence = filteredEvidences.get(i);
+                if (evidence.getCancerTypes().contains(tumorType)) {
+                    sortedEvidences.add(evidence);
+                }
+            }
+        }
+        sortedEvidences.addAll(filteredEvidences);
+        return sortedEvidences.stream().collect(Collectors.toList());
     }
 }
