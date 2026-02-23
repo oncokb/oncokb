@@ -31,6 +31,15 @@ public class AnnotationSearchUtilsTest extends TestCase {
         // This is a variant search, the cancer type search result should not be available
         assertTrue(respSet.stream().filter(resp -> TypeaheadQueryType.CANCER_TYPE.equals(resp.getQueryType())).count() == 0);
 
+        // test three-letter amino acid variant query
+        respSet = searchCuratedAnnotation("Val600Glu");
+        // This is a variant search, there should not be any gene query search result
+        assertTrue(respSet.stream().filter(resp -> TypeaheadQueryType.GENE.equals(resp.getQueryType())).count() == 0);
+        // This is a variant search, variant search result should be available
+        assertTrue(respSet.stream().filter(resp -> TypeaheadQueryType.VARIANT.equals(resp.getQueryType())).count() > 0);
+        // This is a variant search, the cancer type search result should not be available
+        assertTrue(respSet.stream().filter(resp -> TypeaheadQueryType.CANCER_TYPE.equals(resp.getQueryType())).count() == 0);
+
         // test fusion query
         respSet = searchCuratedAnnotation("BCR-ABL1");
         // This query contains gene names
@@ -71,6 +80,15 @@ public class AnnotationSearchUtilsTest extends TestCase {
 
         // test variant query
         respSet = annotationSearch("V600E");
+        // This is a variant search, there should not be any gene query search result
+        assertTrue(respSet.stream().filter(resp -> AnnotationSearchQueryType.GENE.equals(resp.getQueryType())).count() == 0);
+        // This is a variant search, variant search result should be available
+        assertTrue(respSet.stream().filter(resp -> AnnotationSearchQueryType.VARIANT.equals(resp.getQueryType())).count() > 0);
+        // This is a variant search, the cancer type search result should not be available
+        assertTrue(respSet.stream().filter(resp -> AnnotationSearchQueryType.CANCER_TYPE.equals(resp.getQueryType())).count() == 0);
+
+        // test three-letter amino acid variant query
+        respSet = annotationSearch("Val600Glu");
         // This is a variant search, there should not be any gene query search result
         assertTrue(respSet.stream().filter(resp -> AnnotationSearchQueryType.GENE.equals(resp.getQueryType())).count() == 0);
         // This is a variant search, variant search result should be available
