@@ -40,6 +40,9 @@ http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
                 <value>org.mskcc.cbio.oncokb.model.Geneset</value>
                 <value>org.mskcc.cbio.oncokb.model.TumorType</value>
                 <value>org.mskcc.cbio.oncokb.model.Info</value>
+                <value>org.mskcc.cbio.oncokb.model.Tag</value>
+                <value>org.mskcc.cbio.oncokb.model.OncogenicityEntity</value>
+                <value>org.mskcc.cbio.oncokb.model.MutationTypeEntity</value>
             </list>
         </property>
     </bean>

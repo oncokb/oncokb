@@ -25,7 +25,7 @@ public class ClinicalVariant {
     private Set<String> drugPmids = new HashSet<>();
     private Set<ArticleAbstract> drugAbstracts = new HashSet<>();
     private String drugDescription = "";
-
+    private Tag tag = null;
 
     /**
      **/
@@ -157,6 +157,14 @@ public class ClinicalVariant {
 
     public void setDrugDescription(String drugDescription) {
         this.drugDescription = drugDescription;
+    }
+
+    public Tag getTag() {
+        return tag;
+    }
+
+    public void setTag(Tag tag) {
+        this.tag = tag;
     }
 
     @Override

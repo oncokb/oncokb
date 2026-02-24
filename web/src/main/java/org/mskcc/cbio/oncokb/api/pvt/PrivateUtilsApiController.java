@@ -420,9 +420,12 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         }
         query.setTumorType(tumorType);
         query.setGermline(germline);
-        List<EvidenceQueryRes> responses = EvidenceUtils.processRequest(Collections.singletonList(query), new HashSet<>(EvidenceTypeUtils.getAllEvidenceTypes(query.isGermline())), LevelUtils.getPublicLevels(), false, false);
-        IndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null, false);
 
+        IndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null, false);
+        Oncogenicity oncogenicity = Oncogenicity.getByEffect(indicatorQueryResp.getOncogenic());
+
+        Set<EvidenceType> evidenceTypes = new HashSet<>(EvidenceTypeUtils.getAllEvidenceTypes(query.isGermline()));
+        List<EvidenceQueryRes> responses = EvidenceUtils.processRequest(Collections.singletonList(query), evidenceTypes, LevelUtils.getPublicLevels(), false, false, Optional.of(oncogenicity));
         EvidenceQueryRes response = responses.iterator().next();
 
         VariantAnnotation annotation = new VariantAnnotation(indicatorQueryResp);
@@ -480,10 +483,16 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
                     continue;
                 }
 
-                Alteration alt = (Alteration) evidence.getAlterations().iterator().next();
-                if (!alt.getAlteration().equals(InferredMutation.ONCOGENIC_MUTATIONS.getVariant())) {
-                    filteredEvidences.add(evidence);
-                    continue;
+                try {
+                    Alteration alt = (Alteration) evidence.getAlterations().iterator().next();
+                    if (!alt.getAlteration().equals(InferredMutation.ONCOGENIC_MUTATIONS.getVariant())) {
+                        filteredEvidences.add(evidence);
+                        continue;
+                    }
+                } catch (NoSuchElementException e) {
+                    if (evidence.getTags().isEmpty()) {
+                        throw e;
+                    }
                 }
 
                 if (LevelUtils.compareLevel(evidence.getLevelOfEvidence(), treatmentToHighestLevel.get(TreatmentUtils.getTreatmentName(evidence.getTreatments())), LevelUtils.THERAPEUTIC_SENSITIVE_LEVELS) <= 0) {

@@ -78,8 +78,26 @@ import java.util.*;
         name = "findEvidenceByUUIDs",
         query = "select e from Evidence e where e.uuid in (:uuids)"
     ),
+    @NamedQuery(
+        name = "findEvidencesByTagCriteria",
+        query = "select distinct e from Evidence e " +
+            "join e.tags t " +
+            "where t.gene.entrezGeneId = (:entrezGeneId) " +
+            "and t.start <= (:start) " +
+            "and t.end >= (:end) " +
+            "and (size(t.oncogenicities) = 0 or exists (" +
+            "  select 1 from OncogenicityEntity o " +
+            "  where o member of t.oncogenicities " +
+            "  and o.oncogenicity = (:oncogenicity)" +
+            ")) " +
+            "and (size(t.mutationTypes) = 0 or exists (" +
+            "  select 1 from MutationTypeEntity mt " +
+            "  where mt member of t.mutationTypes " +
+            "  and mt.mutationType = (:mutationType)" +
+            ")) " +
+            "and e.evidenceType in (:evidenceTypes)"
+    )
 })
-
 @Entity
 @Table(name = "evidence")
 public class Evidence implements java.io.Serializable {
@@ -130,6 +148,9 @@ public class Evidence implements java.io.Serializable {
         @JoinColumn(name = "alteration_id", updatable = false, nullable = false)
     })
     private Set<Alteration> alterations;
+
+    @ManyToMany(mappedBy = "evidences", fetch = FetchType.EAGER)
+    private Set<Tag> tags = new HashSet<>();
 
     @Lob
     private String name;
@@ -397,6 +418,14 @@ public class Evidence implements java.io.Serializable {
         }
     }
 
+    public Set<Tag> getTags() {
+        return tags;
+    }
+
+    public void setTags(Set<Tag> tags) {
+        this.tags = tags;
+    }
+
     @Override
     public int hashCode() {
         int hash = 7;
@@ -444,6 +473,7 @@ public class Evidence implements java.io.Serializable {
         this.alterations = new HashSet<>(e.alterations);
         this.setTreatments(new ArrayList<>(e.treatments));
         this.articles = new HashSet<>(e.articles);
+        this.tags = new HashSet<>(e.tags);
     }
 
     public Evidence(String uuid, EvidenceType evidenceType, Set<TumorType> cancerTypes, Set<TumorType> excludedCancerTypes, Set<TumorType> relevantCancerTypes, Gene gene, Set<Alteration> alterations, String description, String additionalInfo, List<Treatment> treatments,
@@ -451,7 +481,7 @@ public class Evidence implements java.io.Serializable {
                     LevelOfEvidence levelOfEvidence,
                     LevelOfEvidence fdaLevel,
                     LevelOfEvidence solidPropagationLevel, LevelOfEvidence liquidPropagationLevel,
-                    Set<Article> articles) {
+                    Set<Article> articles, Set<Tag> tags) {
         this.uuid = uuid;
         this.evidenceType = evidenceType;
         this.cancerTypes = cancerTypes;
@@ -473,6 +503,7 @@ public class Evidence implements java.io.Serializable {
         if (treatments != null) {
             this.setTreatments(treatments);
         }
+        this.setTags(tags);
     }
 }
 
