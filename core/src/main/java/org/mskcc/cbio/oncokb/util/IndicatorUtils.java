@@ -351,7 +351,7 @@ public class IndicatorUtils {
             // Set implications
             if (hasTreatmentEvidence) {
                 treatmentEvidences = EvidenceUtils.getRelevantEvidences(query, matchedAlt,
-                        selectedTreatmentEvidence, levels, relevantAlterationsWithoutAlternativeAlleles, alleles, geneQueryOnly, Optional.of(oncogenicity));
+                        selectedTreatmentEvidence, levels, relevantAlterationsWithoutAlternativeAlleles, alleles, geneQueryOnly, Optional.ofNullable(oncogenicity));
                 if (StringUtils.isNotEmpty(query.getTumorType())) {
                     treatmentEvidences = EvidenceUtils.keepHighestLevelForSameTreatments(treatmentEvidences, query.getReferenceGenome(), matchedAlt, matchedTumorType);
                 }
