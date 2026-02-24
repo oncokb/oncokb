@@ -402,7 +402,8 @@ public class CurationValidationApiController {
                 false,
                 "",
                 null);
-            IndicatorQueryResp response = IndicatorUtils.processQuery(query, null, false,null, false);
+            // Curation validation currently only checks against somatic variants
+            SomaticIndicatorQueryResp response = IndicatorUtils.processQuerySomatic(query, null, false,null, false);
             if (!allowedOncogenicities.contains(response.getOncogenic())) {
                 if (response.getHighestSensitiveLevel() != null || response.getHighestResistanceLevel() != null) {
                     String hugoSymbol = alteration.getGene().getHugoSymbol();

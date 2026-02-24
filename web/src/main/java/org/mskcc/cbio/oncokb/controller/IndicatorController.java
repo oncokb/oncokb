@@ -30,7 +30,7 @@ public class IndicatorController {
     @RequestMapping(method = RequestMethod.GET)
     public
     @ResponseBody
-    IndicatorQueryResp getEvidence(
+    SomaticIndicatorQueryResp getEvidence(
         HttpMethod method,
         @RequestParam(value = "id", required = false) String id,
         @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") ReferenceGenome referenceGenome,
@@ -53,32 +53,32 @@ public class IndicatorController {
     ) {
         Query query = new Query(id, referenceGenome, entrezGeneId, hugoSymbol, alteration, alterationType, svType, tumorType, consequence, proteinStart, proteinEnd, hgvs, germline, alleleState, pathogenicity);
         Set<LevelOfEvidence> levelOfEvidences = levels == null ? null : LevelUtils.parseStringLevelOfEvidences(levels);
-        IndicatorQueryResp resp = IndicatorUtils.processQuery(query, levelOfEvidences, highestLevelOnly, null, false);
+        SomaticIndicatorQueryResp resp = IndicatorUtils.processQuerySomatic(query, levelOfEvidences, highestLevelOnly, null, false);
 
-        return JsonResultFactory.getIndicatorQueryResp(resp, fields);
+        return JsonResultFactory.getSomaticIndicatorQueryResp(resp, fields);
     }
 
     @RequestMapping(method = RequestMethod.POST)
     public
     @ResponseBody
-    List<IndicatorQueryResp> getResult(
+    List<SomaticIndicatorQueryResp> getResult(
         @RequestBody EvidenceQueries body,
         @RequestParam(value = "fields", required = false) String fields
     ) {
 
-        List<IndicatorQueryResp> result = new ArrayList<>();
+        List<SomaticIndicatorQueryResp> result = new ArrayList<>();
 
         if (body == null || body.getQueries() == null || body.getQueries().size() == 0) {
             return result;
         }
 
         for (Query query : body.getQueries()) {
-            result.add(IndicatorUtils.processQuery(query,
+            result.add(IndicatorUtils.processQuerySomatic(query,
                 body.getLevels() == null ? null : body.getLevels(),
                 body.getHighestLevelOnly(),  new HashSet<>(stringToEvidenceTypes(body.getEvidenceTypes(), ",")), false));
         }
 
-        return JsonResultFactory.getIndicatorQueryResp(result, fields);
+        return JsonResultFactory.getSomaticIndicatorQueryResp(result, fields);
     }
 
 

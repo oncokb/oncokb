@@ -12,11 +12,11 @@ import java.util.Set;
  * Created by Hongxin Zhang on 11/7/17.
  */
 public class JsonResultFactory {
-    public static IndicatorQueryResp getIndicatorQueryResp(IndicatorQueryResp resp, String fields) {
+    public static SomaticIndicatorQueryResp getSomaticIndicatorQueryResp(SomaticIndicatorQueryResp resp, String fields) {
         if (fields != null && !fields.isEmpty()) {
             JsonResult json = JsonResult.instance();
             return json.use(JsonView.with(resp)
-                .onClass(IndicatorQueryResp.class, Match.match()
+                .onClass(SomaticIndicatorQueryResp.class, Match.match()
                     .exclude("*")
                     .include(fields.split("\\s*,\\s*")))
                 .onClass(LevelOfEvidence.class, Match.match()
@@ -35,11 +35,11 @@ public class JsonResultFactory {
         }
     }
 
-    public static List<IndicatorQueryResp> getIndicatorQueryResp(List<IndicatorQueryResp> resp, String fields) {
+    public static List<SomaticIndicatorQueryResp> getSomaticIndicatorQueryResp(List<SomaticIndicatorQueryResp> resp, String fields) {
         if (fields != null && !fields.isEmpty()) {
             JsonResult json = JsonResult.instance();
             return json.use(JsonView.with(resp)
-                .onClass(IndicatorQueryResp.class, Match.match()
+                .onClass(SomaticIndicatorQueryResp.class, Match.match()
                     .exclude("*")
                     .include(fields.split("\\s*,\\s*")))
                 .onClass(LevelOfEvidence.class, Match.match()
@@ -56,38 +56,6 @@ public class JsonResultFactory {
         } else {
             return resp;
         }
-    }
-
-    public static IndicatorQueryResp getIndicatorQueryRespWithoutGermline(IndicatorQueryResp resp) {
-        if (resp != null) {
-            JsonResult json = JsonResult.instance();
-            return json.use(JsonView.with(resp)
-                .onClass(IndicatorQueryResp.class, Match.match()
-                    .include("*")
-                    .exclude("germline"))
-                .onClass(Drug.class, Match.match()
-                    .include("ncitCode", "drugName"))
-                .onClass(Query.class, Match.match()
-                    .include("*")
-                    .exclude("isGermline", "inheritanceMechanism", "pathogenicity")))
-                .returnValue();
-        } else {
-            return null;
-        }
-    }
-
-    public static List<IndicatorQueryResp> getIndicatorQueryRespWithoutGermline(List<IndicatorQueryResp> resp) {
-        JsonResult json = JsonResult.instance();
-        return json.use(JsonView.with(resp)
-            .onClass(IndicatorQueryResp.class, Match.match()
-                .include("*")
-                .exclude("germline"))
-            .onClass(Drug.class, Match.match()
-                .include("ncitCode", "drugName"))
-            .onClass(Query.class, Match.match()
-                    .include("*")
-                    .exclude("isGermline", "inheritanceMechanism", "pathogenicity")))
-            .returnValue();
     }
 
     public static Gene getGene(Gene gene, String fields) {
@@ -303,4 +271,3 @@ public class JsonResultFactory {
         }
     }
 }
-
