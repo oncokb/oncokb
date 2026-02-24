@@ -4,14 +4,12 @@ import org.mskcc.cbio.oncokb.apiModels.Implication;
 import org.mskcc.cbio.oncokb.apiModels.MutationEffectResp;
 import org.mskcc.cbio.oncokb.util.MainUtils;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import io.swagger.annotations.ApiModelProperty;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class IndicatorQueryRespBase implements java.io.Serializable {
+abstract class IndicatorQueryRespBase implements java.io.Serializable {
     private Query query;
 
     @ApiModelProperty(value = "Indicates whether the gene is curated by OncoKB")
@@ -78,36 +76,7 @@ public class IndicatorQueryRespBase implements java.io.Serializable {
         this.dataVersion = MainUtils.getDataVersion();
     }
 
-    public IndicatorQueryRespBase copy() {
-        IndicatorQueryRespBase newResp = new IndicatorQueryRespBase();
-        if (this.query != null) {
-            newResp.setQuery(this.query.copy());
-        }
-        newResp.setGeneExist(this.geneExist);
-        newResp.setVariantExist(this.variantExist);
-        newResp.setAlleleExist(this.alleleExist);
-        newResp.setMutationEffect(this.mutationEffect);
-        newResp.setHighestSensitiveLevel(this.highestSensitiveLevel);
-        newResp.setHighestResistanceLevel(this.highestResistanceLevel);
-        newResp.setHighestDiagnosticImplicationLevel(this.highestDiagnosticImplicationLevel);
-        newResp.setHighestPrognosticImplicationLevel(this.highestPrognosticImplicationLevel);
-        newResp.setHighestFdaLevel(this.highestFdaLevel);
-        newResp.setOtherSignificantSensitiveLevels(new ArrayList<>(this.otherSignificantSensitiveLevels));
-        newResp.setOtherSignificantResistanceLevels(new ArrayList<>(this.otherSignificantResistanceLevels));
-        newResp.setVUS(this.VUS);
-        newResp.setExon(this.exon);
-        newResp.setGeneSummary(this.geneSummary);
-        newResp.setVariantSummary(this.variantSummary);
-        newResp.setTumorTypeSummary(this.tumorTypeSummary);
-        newResp.setPrognosticSummary(this.prognosticSummary);
-        newResp.setDiagnosticSummary(this.diagnosticSummary);
-        newResp.setDiagnosticImplications(new ArrayList<>(diagnosticImplications));
-        newResp.setPrognosticImplications(new ArrayList<>(prognosticImplications));
-        newResp.setTreatments(new ArrayList<>(treatments));
-        newResp.setDataVersion(dataVersion);
-        newResp.setLastUpdate(lastUpdate);
-        return newResp;
-    }
+    public abstract IndicatorQueryRespBase copy();
 
     public Query getQuery() {
         return query;

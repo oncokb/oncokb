@@ -69,7 +69,7 @@ public class AnnotationsApiController {
         if (entrezGeneId != null && hugoSymbol != null && !GeneUtils.isSameGene(entrezGeneId, hugoSymbol)) {
             throw new ApiHttpErrorException("entrezGeneId \"" + entrezGeneId + "\"" + " and hugoSymbol \"" + hugoSymbol + "\" are not the same gene.", HttpStatus.BAD_REQUEST);
         } else {
-            ReferenceGenome matchedRG = resolveMatchedRG(referenceGenome);
+            ReferenceGenome matchedRG = ApiControllerUtils.resolveMatchedRG(referenceGenome);
             Query query = new Query(null, matchedRG, entrezGeneId, hugoSymbol, proteinChange, null, null, tumorType, consequence, proteinStart, proteinEnd, null, false, null, null);
             indicatorQueryResp = this.cacheFetcher.processQuerySomatic(
                 query.getReferenceGenome(),
@@ -137,7 +137,7 @@ public class AnnotationsApiController {
             throw new ApiHttpErrorException("genomicLocation is missing.", HttpStatus.BAD_REQUEST);
         }
 
-        ReferenceGenome matchedRG = resolveMatchedRG(referenceGenome);
+        ReferenceGenome matchedRG = ApiControllerUtils.resolveMatchedRG(referenceGenome);
         
         AnnotateMutationByGenomicChangeQuery query = new AnnotateMutationByGenomicChangeQuery();
         query.setGenomicLocation(genomicLocation);
@@ -149,17 +149,6 @@ public class AnnotationsApiController {
         indicatorQueryResp = annotateMutationsByGenomicChange(Collections.singletonList(query)).get(0);
 
         return new ResponseEntity<>(indicatorQueryResp, HttpStatus.OK);
-    }
-
-    private ReferenceGenome resolveMatchedRG(String referenceGenome) throws ApiHttpErrorException {
-        ReferenceGenome matchedRG = null;
-        if (!StringUtils.isEmpty(referenceGenome)) {
-            matchedRG = MainUtils.searchEnum(ReferenceGenome.class, referenceGenome);
-            if (matchedRG == null) {
-                throw new ApiHttpErrorException("referenceGenome \"" + referenceGenome + "\" is an invalid Reference Genome value.", HttpStatus.BAD_REQUEST);
-            }
-        }
-        return matchedRG;
     }
 
     @PublicApi
@@ -203,7 +192,7 @@ public class AnnotationsApiController {
         if (StringUtils.isEmpty(hgvsg)) {
             throw new ApiHttpErrorException("hgvsg is missing.", HttpStatus.BAD_REQUEST);
         } else {
-            ReferenceGenome matchedRG = resolveMatchedRG(referenceGenome);
+            ReferenceGenome matchedRG = ApiControllerUtils.resolveMatchedRG(referenceGenome);
 
             if (!AlterationUtils.isValidHgvsg(hgvsg)) {
                 throw new ApiHttpErrorException("hgvsg is invalid.", HttpStatus.BAD_REQUEST);
@@ -261,7 +250,7 @@ public class AnnotationsApiController {
         if (StringUtils.isEmpty(hgvsc)) {
             throw new ApiHttpErrorException("hgvsc is missing.", HttpStatus.BAD_REQUEST);
         } else {
-            ReferenceGenome matchedRG = resolveMatchedRG(referenceGenome);
+            ReferenceGenome matchedRG = ApiControllerUtils.resolveMatchedRG(referenceGenome);
 
             if (!AlterationUtils.isValidHgvsc(hgvsc)) {
                 throw new ApiHttpErrorException("hgvsc is invalid.", HttpStatus.BAD_REQUEST);
@@ -324,7 +313,7 @@ public class AnnotationsApiController {
             if (copyNameAlterationType == null) {
                 throw new ApiHttpErrorException("copyNameAlterationType is missing.", HttpStatus.BAD_REQUEST);
             }
-            ReferenceGenome matchedRG = resolveMatchedRG(referenceGenome);
+            ReferenceGenome matchedRG = ApiControllerUtils.resolveMatchedRG(referenceGenome);
             indicatorQueryResp = this.cacheFetcher.processQuerySomatic(
                 matchedRG,
                 entrezGeneId,
@@ -425,7 +414,7 @@ public class AnnotationsApiController {
                 geneB.setHugoSymbol(hugoSymbolB == null ? "" : hugoSymbolB);
             }
 
-            ReferenceGenome matchedRG = resolveMatchedRG(referenceGenome);
+            ReferenceGenome matchedRG = ApiControllerUtils.resolveMatchedRG(referenceGenome);
 
             String fusionName = FusionUtils.getFusionName(geneA, geneB);
             indicatorQueryResp = this.cacheFetcher.processQuerySomatic(

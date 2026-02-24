@@ -28,7 +28,6 @@ import org.mskcc.cbio.oncokb.model.genomeNexus.TranscriptSummaryAlterationResult
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
 import org.mskcc.cbio.oncokb.util.GenomeNexusUtils;
-import org.mskcc.cbio.oncokb.util.MainUtils;
 import org.mskcc.cbio.oncokb.util.QueryUtils;
 import org.oncokb.oncokb_transcript.ApiException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,7 +72,7 @@ public class GermlineAnnotationsApiController {
             throw new ApiHttpErrorException("genomicLocation is missing.", HttpStatus.BAD_REQUEST);
         }
 
-        ReferenceGenome matchedRG = resolveMatchedRG(referenceGenome);
+        ReferenceGenome matchedRG = ApiControllerUtils.resolveMatchedRG(referenceGenome);
 
         AnnotateMutationByGenomicChangeQuery query = new AnnotateMutationByGenomicChangeQuery();
         query.setGenomicLocation(genomicLocation);
@@ -123,7 +122,7 @@ public class GermlineAnnotationsApiController {
             throw new ApiHttpErrorException("hgvsg is missing.", HttpStatus.BAD_REQUEST);
         }
 
-        ReferenceGenome matchedRG = resolveMatchedRG(referenceGenome);
+        ReferenceGenome matchedRG = ApiControllerUtils.resolveMatchedRG(referenceGenome);
 
         if (!AlterationUtils.isValidHgvsg(hgvsg)) {
             throw new ApiHttpErrorException("hgvsg is invalid.", HttpStatus.BAD_REQUEST);
@@ -176,7 +175,7 @@ public class GermlineAnnotationsApiController {
             throw new ApiHttpErrorException("hgvsc is missing.", HttpStatus.BAD_REQUEST);
         }
 
-        ReferenceGenome matchedRG = resolveMatchedRG(referenceGenome);
+        ReferenceGenome matchedRG = ApiControllerUtils.resolveMatchedRG(referenceGenome);
 
         if (!AlterationUtils.isValidHgvsc(hgvsc)) {
             throw new ApiHttpErrorException("hgvsc is invalid.", HttpStatus.BAD_REQUEST);
@@ -209,17 +208,6 @@ public class GermlineAnnotationsApiController {
             throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<>(annotateMutationsByHGVSc(body), HttpStatus.OK);
-    }
-
-    private ReferenceGenome resolveMatchedRG(String referenceGenome) throws ApiHttpErrorException {
-        ReferenceGenome matchedRG = null;
-        if (!StringUtils.isEmpty(referenceGenome)) {
-            matchedRG = MainUtils.searchEnum(ReferenceGenome.class, referenceGenome);
-            if (matchedRG == null) {
-                throw new ApiHttpErrorException("referenceGenome \"" + referenceGenome + "\" is an invalid Reference Genome value.", HttpStatus.BAD_REQUEST);
-            }
-        }
-        return matchedRG;
     }
 
     private List<GermlineIndicatorQueryResp> annotateMutationsByGenomicChange(List<AnnotateMutationByGenomicChangeQuery> mutations) throws ApiException, org.genome_nexus.ApiException {
@@ -775,7 +763,6 @@ public class GermlineAnnotationsApiController {
         indicatorQueryResp.getQuery().setHgvsInfo(transcriptSummaryAlterationResult.getMessage());
         return indicatorQueryResp;
     }
-
     private void addTranscriptAndExonToResponse(GermlineIndicatorQueryResp response, TranscriptConsequenceSummary summary) {
         if (summary != null) {
             if (StringUtils.isNotEmpty(summary.getTranscriptId())) {
