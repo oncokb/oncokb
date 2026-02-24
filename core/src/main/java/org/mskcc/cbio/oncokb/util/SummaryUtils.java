@@ -435,7 +435,7 @@ public class SummaryUtils {
      * @param alteration Variant of significance.
      * @return last edit in format MM/dd/YYY (01/01/2020). If VUS does not have a date, null is returned
      */
-    private static String getVusDate(Alteration alteration) {
+    public static String getVusDate(Alteration alteration) {
         List<Evidence> evidences = EvidenceUtils.getEvidence(Collections.singletonList(alteration), Collections.singleton(EvidenceType.VUS), null);
         Date lastEdit = null;
         for (Evidence evidence : evidences) {
@@ -457,14 +457,17 @@ public class SummaryUtils {
 
     private static String getVUSOncogenicSummary(ReferenceGenome referenceGenome, Alteration alteration, Query query) {
         StringBuilder sb = new StringBuilder();
-        sb.append(getVUSSummary(alteration, getGeneMutationNameInVariantSummary(alteration.getGene(), referenceGenome, query.getHugoSymbol(), alteration.getAlteration(), query.isGermline()), false));
+        sb.append(
+            getVUSSummary(getGeneMutationNameInVariantSummary(alteration.getGene(), referenceGenome, query.getHugoSymbol(), alteration.getAlteration(), query.isGermline()),
+            getVusDate(alteration),
+            false)
+        );
         sb.append(" and therefore its biological significance is unknown.");
         return sb.toString();
     }
 
-    public static String getVUSSummary(Alteration vus, String altStr, boolean fullSentence) {
+    public static String getVUSSummary(String altStr, String lastEdit, boolean fullSentence) {
         StringBuilder sb = new StringBuilder();
-        String lastEdit = getVusDate(vus);
         sb.append("There is no available functional data about the " + altStr);
         if (lastEdit != null) {
             sb.append(" (last reviewed on ");
@@ -705,7 +708,7 @@ public class SummaryUtils {
                 referredOncogenicity = Oncogenicity.UNKNOWN;
             }
             if (isVus) {
-                sb.append(getVUSSummary(alteration, altStr, true));
+                sb.append(getVUSSummary(altStr, getVusDate(alteration), true));
             } else {
                 sb.append("The " + altStr + " has not specifically been reviewed by the OncoKB team.");
             }
@@ -820,8 +823,10 @@ public class SummaryUtils {
 
     private static String vusAndHotspotSummary(Alteration alteration, Query query, Boolean isHotspot) {
         StringBuilder sb = new StringBuilder();
-        String altStr = getGeneMutationNameInVariantSummary(alteration.getGene(), query.getReferenceGenome(), query.getHugoSymbol(), alteration.getAlteration(), query.isGermline());
-        sb.append(getVUSSummary(alteration, altStr, true));
+        boolean isExactMatch = alteration.getAlteration().equals(query.getAlteration());
+
+        String altStr = getGeneMutationNameInVariantSummary(alteration.getGene(), query.getReferenceGenome(), query.getHugoSymbol(), query.getAlteration(), query.isGermline());
+        sb.append(getVUSSummary(altStr, isExactMatch ? getVusDate(alteration) : null, true));
 
         if (isHotspot) {
             sb.append(" However, it has been identified as a statistically significant hotspot and is likely to be oncogenic.");

@@ -17,6 +17,7 @@ import java.util.stream.Stream;
 import static org.mskcc.cbio.oncokb.util.LevelUtils.getTherapeuticLevelsWithPriorityLIstIterator;
 import static org.mskcc.cbio.oncokb.util.SummaryUtils.allelesToStr;
 import static org.mskcc.cbio.oncokb.util.SummaryUtils.getVUSSummary;
+import static org.mskcc.cbio.oncokb.util.SummaryUtils.getVusDate;
 
 /**
  * Created by hongxinzhang on 4/5/16.
@@ -391,7 +392,7 @@ public class IndicatorUtils {
 
             Boolean isValidHotspotOncogenicity = MainUtils.isValidHotspotOncogenicity(Oncogenicity.getByEffect(indicatorQuery.getOncogenic()));
             if (indicatorQuery.getHotspot()) {
-                if (isValidHotspotOncogenicity && !indicatorQuery.getVariantExist()) {
+                if (isValidHotspotOncogenicity && (!indicatorQuery.getVariantExist() || indicatorQuery.getVUS())) {
                     // The oncogenicity of an uncurated variant can be Oncogenic if it has a relevant alteration that is Oncogenic
                     // For uncurated hotspot mutations, we want to cap it at Likely Oncogenic
                     if (Oncogenicity.YES.getOncogenic().equals(indicatorQuery.getOncogenic())) {
@@ -815,7 +816,7 @@ public class IndicatorUtils {
         StringBuilder sb = new StringBuilder("");
         boolean isVus = MainUtils.isVUS(alteration);
         if (isVus) {
-            sb.append(getVUSSummary(alteration, "[[gene]] [[mutation]] [[[mutation]]]", true));
+            sb.append(getVUSSummary("[[gene]] [[mutation]] [[[mutation]]]", getVusDate(alteration), true));
         } else {
             sb.append("The [[gene]] [[mutation]] [[[mutation]]] has not specifically been reviewed by the OncoKB team.");
         }
