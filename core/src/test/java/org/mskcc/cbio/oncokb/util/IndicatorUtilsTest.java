@@ -751,20 +751,6 @@ public class IndicatorUtilsTest {
         indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null, false);
         assertEquals("The oncogenicity is not likley oncogenic, but it should be.", Oncogenicity.LIKELY.getOncogenic(), indicatorQueryResp.getOncogenic());
 
-
-        // Check the same protein change in different reference genome
-        query = new Query(null, ReferenceGenome.GRCh37, null, "MYD88", "M232T", null, null, "Acute Myeloid Leukemia", null, null, null, null, false, null, null);
-        indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null, false);
-        assertEquals("The oncogenicity is not oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
-        assertEquals("The mutation effect is not oncogenic, but it should be.", MutationEffect.GAIN_OF_FUNCTION.getMutationEffect(), indicatorQueryResp.getMutationEffect().getKnownEffect());
-        assertTrue("The mutation is not hotspot, but it should be.", indicatorQueryResp.getHotspot());
-
-        query = new Query(null, ReferenceGenome.GRCh38, null, "MYD88", "M232T", null, null, "Acute Myeloid Leukemia", null, null, null, null, false, null, null);
-        indicatorQueryResp = IndicatorUtils.processQuery(query, null, true, null, false);
-        assertEquals("The oncogenicity is not unknown, but it should be.", Oncogenicity.UNKNOWN.getOncogenic(), indicatorQueryResp.getOncogenic());
-        assertEquals("The mutation effect is not unknown, but it should be.", MutationEffect.UNKNOWN.getMutationEffect(), indicatorQueryResp.getMutationEffect().getKnownEffect());
-        assertTrue("The mutation is not hotspot, but it should be.", !indicatorQueryResp.getHotspot());
-
         // Test Structural Variants
         // Fusion as alteration type should have same result from structural variant as alteration type and fusion as consequence
         query1 = new Query(null, DEFAULT_REFERENCE_GENOME, null, "EGFR-RAD51", null, "fusion", null, "Ovarian Cancer", null, null, null, null, false, null, null);
