@@ -30,7 +30,7 @@ BRCA1	T100*	Likely Oncogenic	The BRCA1 T100* is a truncating mutation in a tumor
 ### Truncating mutations in TSG that are not curated
 PPP2R2A	T100*	Likely Oncogenic	The PPP2R2A T100* is a truncating mutation in a tumor suppressor gene, and therefore is likely oncogenic.
 ### Truncating mutation in both
-PTPN1	T100*	Likely Oncogenic	The PTPN1 T100* is a truncating mutation; truncating mutations in this gene are considered likely oncogenic.
+PTPN1	T100*	Likely Oncogenic	The PTPN1 T100* is a truncating mutation in a tumor suppressor gene, and therefore is likely oncogenic.
 ### Truncating mutation in neither
 GATA1	T100*	Unknown	The GATA1 T100* mutation has not specifically been reviewed by the OncoKB team, and therefore its biological significance is unknown.
 
@@ -48,4 +48,4 @@ GATA1	Test-GATA1 fusion	Unknown	The Test-GATA1 fusion has not specifically been 
 
 ### Plural mutation
 TP53	DNA binding domain deletions	Likely Oncogenic	TP53 DNA binding domain deletions are likely oncogenic.
-MED12	Exon 1 mutations	Oncogenic	MED12 exon 1 mutations are known to be oncogenic.
+MED12	Exon 1 mutations	Unknown	The MED12 exon 1 mutations has not specifically been reviewed by the OncoKB team, and therefore its biological significance is unknown.
