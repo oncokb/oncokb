@@ -55,6 +55,9 @@ public class AnnotationSearchUtils {
         String trimmedQuery = query.trim().replaceAll(" ", "");
 
         List<String> keywords = Arrays.asList(query.trim().split("\\s+"));
+        List<String> resolvedKeywords = keywords.stream()
+            .map(AlterationUtils::resolveProteinAlterationShort)
+            .collect(Collectors.toList());
 
         if (keywords.size() == 1) {
             // Blur search gene
@@ -108,7 +111,7 @@ public class AnnotationSearchUtils {
             if (result.size() == 0 && keywords.size() == 2) {
                 try {
                     List<VariantAnnotation> annotations =  GenomeNexusUtils.getHgvsVariantsAnnotation(
-                        Arrays.asList((keywords.get(0) + ":p." + keywords.get(1)).toUpperCase()),
+                        Arrays.asList((keywords.get(0) + ":p." + resolvedKeywords.get(1)).toUpperCase()),
                         DEFAULT_REFERENCE_GENOME
                     );
 
@@ -122,7 +125,7 @@ public class AnnotationSearchUtils {
                             if (foundAlteration != null) {
                                 String oncokbVariant = foundAlteration.getAlteration();
                                 String oncokbTranscript  = genomeNexusAnnotation.getAnnotationSummary().getTranscriptConsequenceSummary().getTranscriptId();   
-                                String inputVariant = keywords.get(1).toUpperCase();
+                                String inputVariant = resolvedKeywords.get(1).toUpperCase();
                                 String gene = foundAlteration.getGene().getHugoSymbol();
 
                                 TypeaheadSearchResp response = newTypeaheadVariant(foundAlteration);
@@ -150,12 +153,14 @@ public class AnnotationSearchUtils {
                 for (Map.Entry<String, Set<Gene>> entry : map.entrySet()) {
                     if (entry.getValue().size() > 0) {
                         for (Gene gene : entry.getValue()) {
-                            for (String keyword : keywords) {
+                            for (int i = 0; i < keywords.size(); i++) {
+                                String keyword = keywords.get(i);
+                                String resolvedKeyword = resolvedKeywords.get(i);
                                 if (!keyword.equals(entry.getKey())) {
                                     // TODO: When germline has "relevant alterations", then we should consider not defaulting isGermline to false
                                     // The search bar is able to show results for variants that do not exist in database based on rules, which germline does not support right now.
                                     Alteration alteration =
-                                            AlterationUtils.getAlteration(gene.getHugoSymbol(), keyword, null, null, null, null, null, false);
+                                            AlterationUtils.getAlteration(gene.getHugoSymbol(), resolvedKeyword, null, null, null, null, null, false);
                                     TypeaheadSearchResp typeaheadSearchResp = newTypeaheadVariant(alteration);
                                     typeaheadSearchResp.setVariantExist(false);
                                     result.add(typeaheadSearchResp);

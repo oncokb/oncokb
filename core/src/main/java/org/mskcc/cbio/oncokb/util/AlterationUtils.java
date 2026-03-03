@@ -427,7 +427,7 @@ public final class AlterationUtils {
             }
         }
 
-        if (com.mysql.jdbc.StringUtils.isNullOrEmpty(alteration.getName()) && alteration.getAlteration() != null) {
+        if (StringUtils.isEmpty(alteration.getName()) && alteration.getAlteration() != null) {
             // Change the positional name
             if (isPositionedAlteration(alteration)) {
                 if (StringUtils.isEmpty(excludedAltStr)) {
@@ -1094,28 +1094,31 @@ public final class AlterationUtils {
     public static List<Alteration> lookupVariant(String query, Boolean exactMatch, Boolean omitExclusion, List<Alteration> alterations) {
         List<Alteration> alterationList = new ArrayList<>();
         // Only support columns(alteration/name) blur search.
-        query = query.toLowerCase().trim();
         if (exactMatch == null)
             exactMatch = false;
-        if (com.mysql.jdbc.StringUtils.isNullOrEmpty(query))
+        if (StringUtils.isEmpty(query))
             return alterationList;
-        query = query.trim().toLowerCase();
+        String trimmedQuery = query.trim();
+        if (StringUtils.isEmpty(trimmedQuery)) {
+            return alterationList;
+        }
+        String resolvedLower = resolveProteinAlterationShort(trimmedQuery).toLowerCase();
         for (Alteration alteration : alterations) {
             // since we are doing string search, we should remove the exclusion clause to prevent the clause been matched
-            if (isMatch(exactMatch, query, removeExclusionCriteria(alteration.getAlteration()))) {
+            if (isMatch(exactMatch, resolvedLower, removeExclusionCriteria(alteration.getAlteration()))) {
                 alterationList.add(alteration);
                 continue;
             }
 
-            if (isMatch(exactMatch, query, removeExclusionCriteria(alteration.getName()))) {
+            if (isMatch(exactMatch, resolvedLower, removeExclusionCriteria(alteration.getName()))) {
                 alterationList.add(alteration);
                 continue;
             }
         }
 
         // if the query is part of the abbreviation list, the corresponding full name should be indexed.
-        if (NamingUtils.hasAbbreviation(query)) {
-            String fullName = NamingUtils.getFullName(query);
+        if (NamingUtils.hasAbbreviation(resolvedLower)) {
+            String fullName = NamingUtils.getFullName(resolvedLower);
             if (fullName != null) {
                 for (Alteration alteration : alterations) {
                     if (isMatch(exactMatch, fullName, alteration.getName())) {
@@ -1307,8 +1310,8 @@ public final class AlterationUtils {
                         missenseConsequence.equals(alt.getConsequence()) &&
                         alteration.getProteinStart().equals(alt.getProteinStart()) &&
                         alteration.getProteinEnd().equals(alt.getProteinEnd()) &&
-                        (com.mysql.jdbc.StringUtils.isNullOrEmpty(alteration.getRefResidues()) || alteration.getRefResidues().equals(alt.getRefResidues())) &&
-                        (com.mysql.jdbc.StringUtils.isNullOrEmpty(alteration.getVariantResidues()) || alteration.getVariantResidues().equals(alt.getVariantResidues()))
+                        (StringUtils.isEmpty(alteration.getRefResidues()) || alteration.getRefResidues().equals(alt.getRefResidues())) &&
+                        (StringUtils.isEmpty(alteration.getVariantResidues()) || alteration.getVariantResidues().equals(alt.getVariantResidues()))
                 ).findAny();
                 if (match.isPresent()) {
                     return match.get();
