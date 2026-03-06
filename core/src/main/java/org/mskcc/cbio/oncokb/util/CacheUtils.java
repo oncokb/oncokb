@@ -221,6 +221,9 @@ public class CacheUtils {
 
         try {
             cacheAllGenes();
+            cacheOncokbInfo();
+            cacheAbbreviations();
+            cacheDownloadAvailability();
             LOGGER.info("Cache initialization parallelism={}", getInitializationParallelism());
             Map<String, CompletableFuture<?>> tasks = new LinkedHashMap<>();
 
@@ -248,9 +251,6 @@ public class CacheUtils {
 
             tasks.put("drugs", submitWithTransaction(executor, "drugs", CacheUtils::cacheAllDrugs));
             tasks.put("tumorTypes", submitWithTransaction(executor, "tumorTypes", CacheUtils::cacheAllTumorTypes));
-            tasks.put("oncokbInfo", submitWithTransaction(executor, "oncokbInfo", CacheUtils::cacheOncokbInfo));
-            tasks.put("abbreviations", submitTask(executor, "abbreviations", CacheUtils::cacheAbbreviations));
-            tasks.put("downloadAvailability", submitTask(executor, "downloadAvailability", CacheUtils::cacheDownloadAvailabilityTask));
             tasks.put("registerOtherServices", submitTask(executor, "registerOtherServices", CacheUtils::registerOtherServicesTask));
 
             CompletableFuture<Void> all =
