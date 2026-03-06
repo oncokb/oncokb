@@ -6,6 +6,7 @@ http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 	<!-- Hibernate Configuration -->
 	<import resource="../beans/DataSource.xml"/>
 	<import resource="../beans/Hibernate.xml"/>
+	<import resource="../beans/Transactions.xml"/>
 
 	<!-- Beans Declaration -->
 	<import resource="../beans/Gene.xml"/>

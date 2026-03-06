@@ -8,9 +8,13 @@ import org.mskcc.cbio.oncokb.model.health.InMemoryCacheSizes;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.orm.hibernate3.HibernateTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 
@@ -136,6 +140,31 @@ public class CacheUtils {
         }
     };
 
+    static {
+        try {
+            Long current = MainUtils.getCurrentTimestamp();
+            GeneObservable.getInstance().addObserver(alterationsObserver);
+            GeneObservable.getInstance().addObserver(genesObserver);
+            GeneObservable.getInstance().addObserver(evidencesObserver);
+            GeneObservable.getInstance().addObserver(VUSObserver);
+            GeneObservable.getInstance().addObserver(numbersObserver);
+            GeneObservable.getInstance().addObserver(drugsObserver);
+            LOGGER.info("Add observers {}", getCacheCompletionMessage(current));
+        } catch (Exception e) {
+            LOGGER.error("Unexpected Error", e);
+        }
+    }
+
+    public static void initializeCaches() {
+        // NOTE: This assumes a single caller at startup. If multiple callers are introduced,
+        // add a guard to prevent concurrent initialization.
+        try {
+            initializeCachesInternal();
+        } catch (Exception e) {
+            LOGGER.error("Cache initialization failed", e);
+        }
+    }
+
     public static InMemoryCacheSizes getCurrentCacheSizes() {
 
         return new InMemoryCacheSizes(
@@ -177,77 +206,250 @@ public class CacheUtils {
         }
     }
 
-    static {
-        try {
-            Long current = MainUtils.getCurrentTimestamp();
-            GeneObservable.getInstance().addObserver(alterationsObserver);
-            GeneObservable.getInstance().addObserver(genesObserver);
-            GeneObservable.getInstance().addObserver(evidencesObserver);
-            GeneObservable.getInstance().addObserver(VUSObserver);
-            GeneObservable.getInstance().addObserver(numbersObserver);
-            GeneObservable.getInstance().addObserver(drugsObserver);
+    private static void initializeCachesInternal() {
+        LOGGER.info("Cache initialization starting");
 
-            LOGGER.info("Add observers {}", getCacheCompletionMessage(current));
-
-            cacheAllGenes();
-
-            setAllAlterations();
-
-            current = MainUtils.getCurrentTimestamp();
-            drugs = new HashSet<>(ApplicationContextSingleton.getDrugBo().findAll());
-            LOGGER.info("Cached {} drugs {}", drugs.size(), CacheUtils.getCacheCompletionMessage(current));
-            current = MainUtils.getCurrentTimestamp();
-
-            cancerTypes = ApplicationContextSingleton.getTumorTypeBo().findAll();
-            cancerTypes.stream().forEach(ct -> {
-                if (!StringUtils.isNullOrEmpty(ct.getCode())) {
-                    cancerTypesByCode.put(ct.getCode(), ct);
-                }
-                if (StringUtils.isNullOrEmpty(ct.getCode()) && !StringUtils.isNullOrEmpty(ct.getMainType())) {
-                    cancerTypesByMainType.put(ct.getMainType().toLowerCase(), ct);
-                }
-                if (!StringUtils.isNullOrEmpty(ct.getSubtype())) {
-                    cancerTypesByLowercaseSubtype.put(ct.getSubtype().toLowerCase(), ct);
-                }
-            });
-            LOGGER.info("Cached {} tumor types {}", cancerTypes.size(), CacheUtils.getCacheCompletionMessage(current));
-            subtypes = cancerTypes.stream().filter(tumorType -> org.apache.commons.lang3.StringUtils.isNotEmpty(tumorType.getCode()) && tumorType.getLevel() > 0).collect(Collectors.toList());
-            LOGGER.info("Cached {} tumor sub types {}", subtypes.size(), CacheUtils.getCacheCompletionMessage(current));
-            mainTypes = cancerTypes.stream().filter(tumorType -> org.apache.commons.lang3.StringUtils.isEmpty(tumorType.getCode()) || tumorType.getLevel() > 0).collect(Collectors.toList());
-            LOGGER.info("Cached {} tumor main types {}", mainTypes.size(), CacheUtils.getCacheCompletionMessage(current));
-            current = MainUtils.getCurrentTimestamp();
-
-            specialCancerTypes = Arrays.stream(SpecialTumorType.values()).map(specialTumorType -> cancerTypes.stream().filter(cancerType -> !StringUtils.isNullOrEmpty(cancerType.getMainType()) && cancerType.getMainType().equals(specialTumorType.getTumorType())).findAny().orElse(null)).filter(cancerType -> cancerType != null).collect(Collectors.toList());
-            LOGGER.info("Cached {} special tumor types {}", specialCancerTypes.size(), CacheUtils.getCacheCompletionMessage(current));
-
-            current = MainUtils.getCurrentTimestamp();
-            synEvidences();
-            LOGGER.info("Cached {} evidences {}", allEvidencesSize, CacheUtils.getCacheCompletionMessage(current));
-            current = MainUtils.getCurrentTimestamp();
-
-            for (Map.Entry<Integer, List<Evidence>> entry : evidences.entrySet()) {
-                setVUS(entry.getKey(), new HashSet<>(entry.getValue()));
+        AtomicInteger count = new AtomicInteger();
+        ExecutorService executor = Executors.newFixedThreadPool(
+            getInitializationParallelism(),
+            r -> {
+                Thread t = Executors.defaultThreadFactory().newThread(r);
+                t.setName("cache-init-" + count.incrementAndGet());
+                return t;
             }
-            LOGGER.info("Cached {} VUSs {}", VUS.size(), CacheUtils.getCacheCompletionMessage(current));
-            current = MainUtils.getCurrentTimestamp();
+        );
 
+        try {
+            cacheAllGenes();
+            LOGGER.info("Cache initialization parallelism={}", getInitializationParallelism());
+            Map<String, CompletableFuture<?>> tasks = new LinkedHashMap<>();
+
+            tasks.put("alterations", submitWithTransaction(executor, "alterations", CacheUtils::setAllAlterations));
+
+            CompletableFuture<Void> evidencesFuture =
+                    submitWithTransaction(executor, "evidences", CacheUtils::cacheAllEvidencesByGenes);
+            tasks.put("evidences", evidencesFuture);
+            tasks.put("VUS",
+                    evidencesFuture.thenRunAsync(() -> {
+                        LOGGER.info("Initialization task 'VUS' starting");
+                        cacheVusFromEvidences();
+                        LOGGER.info("Initialization task 'VUS' completed");
+                    }, executor).whenComplete((ignored, ex) -> {
+                        if (ex != null) {
+                            Throwable unwrapped = unwrapCompletionException(ex);
+                            if (unwrapped instanceof CancellationException) {
+                                LOGGER.info("Initialization task 'VUS' cancelled");
+                            } else {
+                                LOGGER.error("Initialization task 'VUS' failed", unwrapped);
+                            }
+                        }
+                    })
+            );
+
+            tasks.put("drugs", submitWithTransaction(executor, "drugs", CacheUtils::cacheAllDrugs));
+            tasks.put("tumorTypes", submitWithTransaction(executor, "tumorTypes", CacheUtils::cacheAllTumorTypes));
+            tasks.put("oncokbInfo", submitWithTransaction(executor, "oncokbInfo", CacheUtils::cacheOncokbInfo));
+            tasks.put("abbreviations", submitTask(executor, "abbreviations", CacheUtils::cacheAbbreviations));
+            tasks.put("downloadAvailability", submitTask(executor, "downloadAvailability", CacheUtils::cacheDownloadAvailabilityTask));
+            tasks.put("registerOtherServices", submitTask(executor, "registerOtherServices", CacheUtils::registerOtherServicesTask));
+
+            CompletableFuture<Void> all =
+                    CompletableFuture.allOf(tasks.values().toArray(new CompletableFuture[0]));
+
+            waitForFuture("cacheInitializationAll", all);
+
+            boolean hasFailure = tasks.values().stream().anyMatch(CompletableFuture::isCompletedExceptionally);
+
+            if (!hasFailure) {
+                LOGGER.info("Cache initialization completed");
+            } else {
+                LOGGER.error("Cache initialization completed with failures");
+            }
+        } finally {
+            executor.shutdown();
+        }
+    }
+
+    private static int getInitializationParallelism() {
+        String configured = PropertiesUtils.getProperties("cache.initialization.parallelism");
+        if (configured != null) {
+            try {
+                int parsed = Integer.parseInt(configured);
+                if (parsed > 0) {
+                    return parsed;
+                }
+            } catch (NumberFormatException e) {
+                LOGGER.warn("Invalid cache.initialization.parallelism value: {}", configured);
+            }
+        }
+        int cpu = Runtime.getRuntime().availableProcessors();
+        return Math.max(2, Math.min(4, cpu));
+    }
+
+    private static CompletableFuture<Void> submitWithTransaction(Executor executor, String taskName, Runnable task) {
+        LOGGER.info("Initialization task '{}' scheduled", taskName);
+        return CompletableFuture.runAsync(() -> {
+            LOGGER.info("Initialization task '{}' starting", taskName);
+            runInTransaction(taskName, task);
+            LOGGER.info("Initialization task '{}' completed", taskName);
+        }, executor).whenComplete((ignored, ex) -> {
+            if (ex != null) {
+                Throwable unwrapped = unwrapCompletionException(ex);
+                if (unwrapped instanceof CancellationException) {
+                    LOGGER.info("Initialization task '{}' cancelled", taskName);
+                } else {
+                    LOGGER.error("Initialization task '{}' failed", taskName, unwrapped);
+                }
+            }
+        });
+    }
+
+    private static CompletableFuture<Void> submitTask(Executor executor, String taskName, Runnable task) {
+        LOGGER.info("Initialization task '{}' scheduled", taskName);
+        return CompletableFuture.runAsync(() -> {
+            LOGGER.info("Initialization task '{}' starting", taskName);
+            task.run();
+            LOGGER.info("Initialization task '{}' completed", taskName);
+        }, executor).whenComplete((ignored, ex) -> {
+            if (ex != null) {
+                Throwable unwrapped = unwrapCompletionException(ex);
+                if (unwrapped instanceof CancellationException) {
+                    LOGGER.info("Initialization task '{}' cancelled", taskName);
+                } else {
+                    LOGGER.error("Initialization task '{}' failed", taskName, unwrapped);
+                }
+            }
+        });
+    }
+
+    private static void runInTransaction(String taskName, Runnable task) {
+        HibernateTransactionManager txManager = null;
+        try {
+            txManager = ApplicationContextSingleton.getTransactionManager();
+        } catch (Exception e) {
+            LOGGER.warn("Transaction manager not available for task '{}'", taskName);
+        }
+
+        if (txManager == null) {
+            task.run();
+            return;
+        }
+
+        TransactionTemplate txTemplate = new TransactionTemplate(txManager);
+        txTemplate.setReadOnly(true);
+        txTemplate.execute(status -> {
+            task.run();
+            return null;
+        });
+    }
+
+    private static void waitForFuture(String taskName, Future<?> future) {
+        if (future == null) {
+            return;
+        }
+        try {
+            future.get();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            LOGGER.error("Initialization interrupted while waiting for {}", taskName, e);
+        } catch (CancellationException e) {
+            LOGGER.error("Initialization task '{}' was cancelled", taskName, e);
+        } catch (ExecutionException e) {
+            // CompletableFuture-based tasks log failures via whenComplete to avoid waiting-order artifacts.
+            if (!(future instanceof CompletableFuture)) {
+                LOGGER.error("Initialization task '{}' failed", taskName, e.getCause());
+            } else {
+                LOGGER.debug("Initialization task '{}' failed (already logged)", taskName, e.getCause());
+            }
+        }
+    }
+
+    private static Throwable unwrapCompletionException(Throwable ex) {
+        if (ex instanceof CompletionException && ex.getCause() != null) {
+            return ex.getCause();
+        }
+        return ex;
+    }
+
+    private static void cacheAllDrugs() {
+        Long current = MainUtils.getCurrentTimestamp();
+        drugs = new HashSet<>(ApplicationContextSingleton.getDrugBo().findAll());
+        LOGGER.info("Cached {} drugs {}", drugs.size(), CacheUtils.getCacheCompletionMessage(current));
+    }
+
+    private static void cacheAllTumorTypes() {
+        Long current = MainUtils.getCurrentTimestamp();
+        cancerTypes = ApplicationContextSingleton.getTumorTypeBo().findAll();
+        cancerTypesByCode = new HashMap<>();
+        cancerTypesByMainType = new HashMap<>();
+        cancerTypesByLowercaseSubtype = new HashMap<>();
+
+        cancerTypes.stream().forEach(ct -> {
+            if (!StringUtils.isNullOrEmpty(ct.getCode())) {
+                cancerTypesByCode.put(ct.getCode(), ct);
+            }
+            if (StringUtils.isNullOrEmpty(ct.getCode()) && !StringUtils.isNullOrEmpty(ct.getMainType())) {
+                cancerTypesByMainType.put(ct.getMainType().toLowerCase(), ct);
+            }
+            if (!StringUtils.isNullOrEmpty(ct.getSubtype())) {
+                cancerTypesByLowercaseSubtype.put(ct.getSubtype().toLowerCase(), ct);
+            }
+        });
+        LOGGER.info("Cached {} tumor types {}", cancerTypes.size(), CacheUtils.getCacheCompletionMessage(current));
+
+        subtypes = cancerTypes.stream().filter(tumorType -> org.apache.commons.lang3.StringUtils.isNotEmpty(tumorType.getCode()) && tumorType.getLevel() > 0).collect(Collectors.toList());
+        LOGGER.info("Cached {} tumor sub types {}", subtypes.size(), CacheUtils.getCacheCompletionMessage(current));
+        mainTypes = cancerTypes.stream().filter(tumorType -> org.apache.commons.lang3.StringUtils.isEmpty(tumorType.getCode()) || tumorType.getLevel() > 0).collect(Collectors.toList());
+        LOGGER.info("Cached {} tumor main types {}", mainTypes.size(), CacheUtils.getCacheCompletionMessage(current));
+
+        current = MainUtils.getCurrentTimestamp();
+        specialCancerTypes = Arrays.stream(SpecialTumorType.values())
+            .map(specialTumorType -> cancerTypes.stream()
+                .filter(cancerType -> !StringUtils.isNullOrEmpty(cancerType.getMainType()) && cancerType.getMainType().equals(specialTumorType.getTumorType()))
+                .findAny().orElse(null))
+            .filter(cancerType -> cancerType != null)
+            .collect(Collectors.toList());
+        LOGGER.info("Cached {} special tumor types {}", specialCancerTypes.size(), CacheUtils.getCacheCompletionMessage(current));
+    }
+
+    private static void cacheOncokbInfo() {
+        Long current = MainUtils.getCurrentTimestamp();
+        oncokbInfo = ApplicationContextSingleton.getInfoBo().get();
+        LOGGER.info("Cached oncokb info {}", CacheUtils.getCacheCompletionMessage(current));
+    }
+
+    private static void cacheAbbreviations() {
+        Long current = MainUtils.getCurrentTimestamp();
+        try {
             NamingUtils.cacheAllAbbreviations();
             LOGGER.info("Cached abbreviation ontology {}", CacheUtils.getCacheCompletionMessage(current));
-            current = MainUtils.getCurrentTimestamp();
+        } catch (IOException e) {
+            LOGGER.error("Cached abbreviation ontology failed", e);
+        }
+    }
 
-            cacheDownloadAvailability();
-            LOGGER.info("Cached downloadable files availability on github {}", CacheUtils.getCacheCompletionMessage(current));
+    private static void cacheDownloadAvailabilityTask() {
+        Long current = MainUtils.getCurrentTimestamp();
+        cacheDownloadAvailability();
+        LOGGER.info("Cached downloadable files availability on github {}", CacheUtils.getCacheCompletionMessage(current));
+    }
 
-            oncokbInfo = ApplicationContextSingleton.getInfoBo().get();
-            LOGGER.info("Cached oncokb info {}", CacheUtils.getCacheCompletionMessage(current));
-
+    private static void registerOtherServicesTask() {
+        Long current = MainUtils.getCurrentTimestamp();
+        try {
             registerOtherServices();
             LOGGER.info("Register other services {}", CacheUtils.getCacheCompletionMessage(current));
-            current = MainUtils.getCurrentTimestamp();
-
-        } catch (Exception e) {
-            LOGGER.error("Unexpected Error", e);
+        } catch (IOException e) {
+            LOGGER.error("Register other services failed", e);
         }
+    }
+
+    private static void cacheVusFromEvidences() {
+        Long current = MainUtils.getCurrentTimestamp();
+        for (Map.Entry<Integer, List<Evidence>> entry : evidences.entrySet()) {
+            setVUS(entry.getKey(), new HashSet<>(entry.getValue()));
+        }
+        LOGGER.info("Cached {} VUSs {}", VUS.size(), CacheUtils.getCacheCompletionMessage(current));
     }
 
     private static void registerOtherServices() throws IOException {
@@ -660,7 +862,7 @@ public class CacheUtils {
             evidences.put(entrezGeneId, pair.getValue());
             updateEvidenceRelevantCancerTypes(entrezGeneId, pair.getValue());
         }
-        LOGGER.info("Cached all evidences of {} genes {}",mappedEvidence.size(), CacheUtils.getCacheCompletionMessage(current));
+        LOGGER.info("Cached {} evidences across {} genes {}", allEvidencesSize, mappedEvidence.size(), CacheUtils.getCacheCompletionMessage(current));
     }
 
     public static void updateEvidenceRelevantCancerTypes(Integer entrezGeneId, List<Evidence> geneEvidences) {

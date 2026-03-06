@@ -5,6 +5,7 @@
 package org.mskcc.cbio.oncokb.util;
 
 import org.mskcc.cbio.oncokb.bo.*;
+import org.springframework.orm.hibernate3.HibernateTransactionManager;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -70,5 +71,9 @@ public final class ApplicationContextSingleton {
 
     public static InfoBo getInfoBo() {
         return InfoBo.class.cast(getApplicationContext().getBean("infoBo"));
+    }
+
+    public static HibernateTransactionManager getTransactionManager() {
+        return HibernateTransactionManager.class.cast(getApplicationContext().getBean("transactionManager"));
     }
 }
