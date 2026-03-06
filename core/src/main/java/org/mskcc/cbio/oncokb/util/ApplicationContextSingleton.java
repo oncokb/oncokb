@@ -11,6 +11,8 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.sql.DataSource;
+
 /**
  * @author jgao
  */
@@ -70,5 +72,9 @@ public final class ApplicationContextSingleton {
 
     public static InfoBo getInfoBo() {
         return InfoBo.class.cast(getApplicationContext().getBean("infoBo"));
+    }
+
+    public static DataSource getDataSource() {
+        return DataSource.class.cast(getApplicationContext().getBean("dataSource"));
     }
 }

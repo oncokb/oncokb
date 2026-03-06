@@ -10,6 +10,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -415,10 +420,22 @@ public class CacheUtils {
 
     private static void setAllAlterations() {
         Long current = MainUtils.getCurrentTimestamp();
-        List<Alteration> allAlterations = ApplicationContextSingleton.getAlterationBo().findAll();
+        List<Alteration> allAlterations;
+        alterations.clear();
+        alterationsByReferenceGenome.clear();
+        try {
+            allAlterations = loadAllAlterationsFromTables();
+            LOGGER.info("Loaded alterations via SQL table mapping.");
+        } catch (Exception exception) {
+            LOGGER.warn("Failed to load alterations via SQL mapping. Falling back to DAO findAll().", exception);
+            allAlterations = ApplicationContextSingleton.getAlterationBo().findAll();
+        }
 
         for (Alteration alteration : allAlterations) {
             Gene gene = alteration.getGene();
+            if (gene == null || gene.getEntrezGeneId() == null) {
+                continue;
+            }
             if (!alterations.containsKey(gene.getEntrezGeneId())) {
                 alterations.put(gene.getEntrezGeneId(), new ArrayList<>());
             }
@@ -649,7 +666,16 @@ public class CacheUtils {
 
     private static void cacheAllEvidencesByGenes() {
         Long current = MainUtils.getCurrentTimestamp();
-        List<Evidence> allEvidences = ApplicationContextSingleton.getEvidenceBo().findAll();
+        List<Evidence> allEvidences;
+        evidences.clear();
+        evidenceRelevantCancerTypes.clear();
+        try {
+            allEvidences = loadAllEvidencesFromTables();
+            LOGGER.info("Loaded evidences via SQL table mapping.");
+        } catch (Exception exception) {
+            LOGGER.warn("Failed to load evidences via SQL mapping. Falling back to DAO findAll().", exception);
+            allEvidences = ApplicationContextSingleton.getEvidenceBo().findAll();
+        }
         allEvidencesSize = allEvidences.size();
 
         Map<Gene, List<Evidence>> mappedEvidence = EvidenceUtils.separateEvidencesByGene(genes, new HashSet<>(allEvidences));
@@ -661,6 +687,339 @@ public class CacheUtils {
             updateEvidenceRelevantCancerTypes(entrezGeneId, pair.getValue());
         }
         LOGGER.info("Cached all evidences of {} genes {}",mappedEvidence.size(), CacheUtils.getCacheCompletionMessage(current));
+    }
+
+    private static List<Alteration> loadAllAlterationsFromTables() throws SQLException {
+        Map<Integer, Alteration> alterationsById = new LinkedHashMap<>();
+        Map<Integer, PortalAlteration> portalAlterationsById = new HashMap<>();
+        Map<String, VariantConsequence> variantConsequencesByTerm = ApplicationContextSingleton.getVariantConsequenceBo().findAll().stream()
+            .collect(Collectors.toMap(VariantConsequence::getTerm, variantConsequence -> variantConsequence));
+
+        try (Connection connection = ApplicationContextSingleton.getDataSource().getConnection()) {
+            try (
+                PreparedStatement statement = connection.prepareStatement(
+                    "SELECT id, uuid, entrez_gene_id, alteration_type, consequence, alteration, protein_change, name, ref_residues, protein_start, protein_end, variant_residues, for_germline FROM alteration");
+                ResultSet resultSet = statement.executeQuery()
+            ) {
+                while (resultSet.next()) {
+                    Integer id = resultSet.getInt("id");
+                    Alteration alteration = new Alteration();
+                    alteration.setId(id);
+                    alteration.setUuid(resultSet.getString("uuid"));
+                    alteration.setGene(genesByEntrezId.get(resultSet.getInt("entrez_gene_id")));
+                    alteration.setAlterationType(toEnum(AlterationType.class, resultSet.getString("alteration_type")));
+                    alteration.setConsequence(variantConsequencesByTerm.get(resultSet.getString("consequence")));
+                    alteration.setAlteration(resultSet.getString("alteration"));
+                    alteration.setProteinChange(resultSet.getString("protein_change"));
+                    alteration.setName(resultSet.getString("name"));
+                    alteration.setRefResidues(resultSet.getString("ref_residues"));
+                    Integer proteinStart = resultSet.getInt("protein_start");
+                    alteration.setProteinStart(resultSet.wasNull() ? null : proteinStart);
+                    Integer proteinEnd = resultSet.getInt("protein_end");
+                    alteration.setProteinEnd(resultSet.wasNull() ? null : proteinEnd);
+                    alteration.setVariantResidues(resultSet.getString("variant_residues"));
+                    Boolean forGermline = getNullableBoolean(resultSet, "for_germline");
+                    alteration.setForGermline(Boolean.TRUE.equals(forGermline));
+                    alteration.setReferenceGenomes(new HashSet<>());
+                    alteration.setPortalAlterations(new HashSet<>());
+                    alterationsById.put(id, alteration);
+                }
+            }
+
+            try (
+                PreparedStatement statement = connection.prepareStatement(
+                    "SELECT alteration_id, reference_genome FROM alteration_reference_genome");
+                ResultSet resultSet = statement.executeQuery()
+            ) {
+                while (resultSet.next()) {
+                    Alteration alteration = alterationsById.get(resultSet.getInt("alteration_id"));
+                    if (alteration != null) {
+                        ReferenceGenome referenceGenome = toEnum(ReferenceGenome.class, resultSet.getString("reference_genome"));
+                        if (referenceGenome != null) {
+                            alteration.getReferenceGenomes().add(referenceGenome);
+                        }
+                    }
+                }
+            }
+
+            try (
+                PreparedStatement statement = connection.prepareStatement(
+                    "SELECT id, cancer_type, cancer_study, sample_id, entrez_gene_id, protein_change, protein_start, protein_end, alteration_type FROM portal_alteration");
+                ResultSet resultSet = statement.executeQuery()
+            ) {
+                while (resultSet.next()) {
+                    Integer id = resultSet.getInt("id");
+                    PortalAlteration portalAlteration = new PortalAlteration();
+                    portalAlteration.setId(id);
+                    portalAlteration.setCancerType(resultSet.getString("cancer_type"));
+                    portalAlteration.setCancerStudy(resultSet.getString("cancer_study"));
+                    portalAlteration.setSampleId(resultSet.getString("sample_id"));
+                    portalAlteration.setGene(genesByEntrezId.get(resultSet.getInt("entrez_gene_id")));
+                    portalAlteration.setProteinChange(resultSet.getString("protein_change"));
+                    Integer proteinStart = resultSet.getInt("protein_start");
+                    portalAlteration.setProteinStartPosition(resultSet.wasNull() ? null : proteinStart);
+                    Integer proteinEnd = resultSet.getInt("protein_end");
+                    portalAlteration.setProteinEndPosition(resultSet.wasNull() ? null : proteinEnd);
+                    portalAlteration.setAlterationType(resultSet.getString("alteration_type"));
+                    portalAlterationsById.put(id, portalAlteration);
+                }
+            }
+
+            try (
+                PreparedStatement statement = connection.prepareStatement(
+                    "SELECT oncokb_alteration_id, portal_alteration_id FROM portal_alteration_oncokb_alteration");
+                ResultSet resultSet = statement.executeQuery()
+            ) {
+                while (resultSet.next()) {
+                    Alteration alteration = alterationsById.get(resultSet.getInt("oncokb_alteration_id"));
+                    PortalAlteration portalAlteration = portalAlterationsById.get(resultSet.getInt("portal_alteration_id"));
+                    if (alteration != null && portalAlteration != null) {
+                        alteration.getPortalAlterations().add(portalAlteration);
+                    }
+                }
+            }
+        }
+
+        return new ArrayList<>(alterationsById.values());
+    }
+
+    private static List<Evidence> loadAllEvidencesFromTables() throws SQLException {
+        Map<Integer, Evidence> evidencesById = new LinkedHashMap<>();
+        Map<Integer, Article> articlesById = new HashMap<>();
+        Map<Integer, Treatment> treatmentsById = new HashMap<>();
+
+        Map<Integer, Alteration> alterationsById = getCachedAlterationsById();
+        Map<Integer, TumorType> tumorTypesById = cancerTypes.stream()
+            .collect(Collectors.toMap(TumorType::getId, tumorType -> tumorType));
+        Map<Integer, Drug> drugsById = drugs.stream()
+            .collect(Collectors.toMap(Drug::getId, drug -> drug));
+
+        try (Connection connection = ApplicationContextSingleton.getDataSource().getConnection()) {
+            try (
+                PreparedStatement statement = connection.prepareStatement(
+                    "SELECT id, uuid, evidence_type, for_germline, entrez_gene_id, name, description, additional_info, known_effect, last_edit, last_review, level_of_evidence, fda_level, solid_propagation_level, liquid_propagation_level FROM evidence");
+                ResultSet resultSet = statement.executeQuery()
+            ) {
+                while (resultSet.next()) {
+                    Integer id = resultSet.getInt("id");
+                    Evidence evidence = new Evidence();
+                    evidence.setId(id);
+                    evidence.setUuid(resultSet.getString("uuid"));
+                    evidence.setEvidenceType(toEnum(EvidenceType.class, resultSet.getString("evidence_type")));
+                    Boolean forGermline = getNullableBoolean(resultSet, "for_germline");
+                    evidence.setForGermline(Boolean.TRUE.equals(forGermline));
+                    evidence.setGene(genesByEntrezId.get(resultSet.getInt("entrez_gene_id")));
+                    evidence.setName(resultSet.getString("name"));
+                    evidence.setDescription(resultSet.getString("description"));
+                    evidence.setAdditionalInfo(resultSet.getString("additional_info"));
+                    evidence.setKnownEffect(resultSet.getString("known_effect"));
+                    Timestamp lastEdit = resultSet.getTimestamp("last_edit");
+                    evidence.setLastEdit(lastEdit == null ? null : new Date(lastEdit.getTime()));
+                    Timestamp lastReview = resultSet.getTimestamp("last_review");
+                    evidence.setLastReview(lastReview == null ? null : new Date(lastReview.getTime()));
+                    evidence.setLevelOfEvidence(toEnum(LevelOfEvidence.class, resultSet.getString("level_of_evidence")));
+                    evidence.setFdaLevel(toEnum(LevelOfEvidence.class, resultSet.getString("fda_level")));
+                    evidence.setSolidPropagationLevel(toEnum(LevelOfEvidence.class, resultSet.getString("solid_propagation_level")));
+                    evidence.setLiquidPropagationLevel(toEnum(LevelOfEvidence.class, resultSet.getString("liquid_propagation_level")));
+                    evidence.setCancerTypes(new HashSet<>());
+                    evidence.setExcludedCancerTypes(new HashSet<>());
+                    evidence.setRelevantCancerTypes(new HashSet<>());
+                    evidence.setAlterations(new HashSet<>());
+                    evidence.setArticles(new HashSet<>());
+                    evidence.setTreatments(new ArrayList<>());
+                    evidencesById.put(id, evidence);
+                }
+            }
+
+            try (
+                PreparedStatement statement = connection.prepareStatement(
+                    "SELECT evidence_id, alteration_id FROM evidence_alteration");
+                ResultSet resultSet = statement.executeQuery()
+            ) {
+                while (resultSet.next()) {
+                    Evidence evidence = evidencesById.get(resultSet.getInt("evidence_id"));
+                    Alteration alteration = alterationsById.get(resultSet.getInt("alteration_id"));
+                    if (evidence != null && alteration != null) {
+                        evidence.getAlterations().add(alteration);
+                    }
+                }
+            }
+
+            try (
+                PreparedStatement statement = connection.prepareStatement(
+                    "SELECT evidence_id, cancer_type_id FROM evidence_cancer_type");
+                ResultSet resultSet = statement.executeQuery()
+            ) {
+                while (resultSet.next()) {
+                    Evidence evidence = evidencesById.get(resultSet.getInt("evidence_id"));
+                    TumorType tumorType = tumorTypesById.get(resultSet.getInt("cancer_type_id"));
+                    if (evidence != null && tumorType != null) {
+                        evidence.getCancerTypes().add(tumorType);
+                    }
+                }
+            }
+
+            try (
+                PreparedStatement statement = connection.prepareStatement(
+                    "SELECT evidence_id, cancer_type_id FROM evidence_excluded_cancer_type");
+                ResultSet resultSet = statement.executeQuery()
+            ) {
+                while (resultSet.next()) {
+                    Evidence evidence = evidencesById.get(resultSet.getInt("evidence_id"));
+                    TumorType tumorType = tumorTypesById.get(resultSet.getInt("cancer_type_id"));
+                    if (evidence != null && tumorType != null) {
+                        evidence.getExcludedCancerTypes().add(tumorType);
+                    }
+                }
+            }
+
+            try (
+                PreparedStatement statement = connection.prepareStatement(
+                    "SELECT evidence_id, cancer_type_id FROM evidence_relevant_cancer_type");
+                ResultSet resultSet = statement.executeQuery()
+            ) {
+                while (resultSet.next()) {
+                    Evidence evidence = evidencesById.get(resultSet.getInt("evidence_id"));
+                    TumorType tumorType = tumorTypesById.get(resultSet.getInt("cancer_type_id"));
+                    if (evidence != null && tumorType != null) {
+                        evidence.getRelevantCancerTypes().add(tumorType);
+                    }
+                }
+            }
+
+            try (
+                PreparedStatement statement = connection.prepareStatement(
+                    "SELECT id, uuid, pmid, title, journal, pub_date, volume, issue, pages, authors, elocationId AS elocation_id, abstract_content, link FROM article");
+                ResultSet resultSet = statement.executeQuery()
+            ) {
+                while (resultSet.next()) {
+                    Integer id = resultSet.getInt("id");
+                    Article article = new Article();
+                    article.setId(id);
+                    article.setUuid(resultSet.getString("uuid"));
+                    article.setPmid(resultSet.getString("pmid"));
+                    article.setTitle(resultSet.getString("title"));
+                    article.setJournal(resultSet.getString("journal"));
+                    article.setPubDate(resultSet.getString("pub_date"));
+                    article.setVolume(resultSet.getString("volume"));
+                    article.setIssue(resultSet.getString("issue"));
+                    article.setPages(resultSet.getString("pages"));
+                    article.setAuthors(resultSet.getString("authors"));
+                    article.setElocationId(resultSet.getString("elocation_id"));
+                    article.setAbstractContent(resultSet.getString("abstract_content"));
+                    article.setLink(resultSet.getString("link"));
+                    articlesById.put(id, article);
+                }
+            }
+
+            try (
+                PreparedStatement statement = connection.prepareStatement(
+                    "SELECT evidence_id, article_id FROM evidence_article");
+                ResultSet resultSet = statement.executeQuery()
+            ) {
+                while (resultSet.next()) {
+                    Evidence evidence = evidencesById.get(resultSet.getInt("evidence_id"));
+                    Article article = articlesById.get(resultSet.getInt("article_id"));
+                    if (evidence != null && article != null) {
+                        evidence.getArticles().add(article);
+                    }
+                }
+            }
+
+            try (
+                PreparedStatement statement = connection.prepareStatement(
+                    "SELECT id, uuid, priority, evidence_id FROM treatment");
+                ResultSet resultSet = statement.executeQuery()
+            ) {
+                while (resultSet.next()) {
+                    Integer id = resultSet.getInt("id");
+                    Treatment treatment = new Treatment();
+                    treatment.setId(id);
+                    treatment.setUuid(resultSet.getString("uuid"));
+                    Integer priority = resultSet.getInt("priority");
+                    treatment.setPriority(resultSet.wasNull() ? null : priority);
+                    treatment.setApprovedIndications(new HashSet<>());
+                    Evidence evidence = evidencesById.get(resultSet.getInt("evidence_id"));
+                    treatment.setEvidence(evidence);
+                    if (evidence != null) {
+                        evidence.getTreatments().add(treatment);
+                    }
+                    treatmentsById.put(id, treatment);
+                }
+            }
+
+            try (
+                PreparedStatement statement = connection.prepareStatement(
+                    "SELECT treatment_id, approved_indications FROM treatment_approved_indications");
+                ResultSet resultSet = statement.executeQuery()
+            ) {
+                while (resultSet.next()) {
+                    Treatment treatment = treatmentsById.get(resultSet.getInt("treatment_id"));
+                    if (treatment != null) {
+                        treatment.getApprovedIndications().add(resultSet.getString("approved_indications"));
+                    }
+                }
+            }
+
+            try (
+                PreparedStatement statement = connection.prepareStatement(
+                    "SELECT treatment_id, drug_id, priority FROM treatment_drug");
+                ResultSet resultSet = statement.executeQuery()
+            ) {
+                while (resultSet.next()) {
+                    Treatment treatment = treatmentsById.get(resultSet.getInt("treatment_id"));
+                    Drug drug = drugsById.get(resultSet.getInt("drug_id"));
+                    if (treatment != null && drug != null) {
+                        TreatmentDrug treatmentDrug = new TreatmentDrug();
+                        treatmentDrug.setTreatment(treatment);
+                        treatmentDrug.setDrug(drug);
+                        Integer priority = resultSet.getInt("priority");
+                        treatmentDrug.setPriority(resultSet.wasNull() ? null : priority);
+                        treatment.getTreatmentDrugs().add(treatmentDrug);
+                    }
+                }
+            }
+        }
+
+        return new ArrayList<>(evidencesById.values());
+    }
+
+    private static Map<Integer, Alteration> getCachedAlterationsById() {
+        Map<Integer, Alteration> alterationsById = new HashMap<>();
+        for (List<Alteration> mappedAlterations : alterations.values()) {
+            for (Alteration alteration : mappedAlterations) {
+                if (alteration != null && alteration.getId() != null) {
+                    alterationsById.put(alteration.getId(), alteration);
+                }
+            }
+        }
+        return alterationsById;
+    }
+
+    private static <T extends Enum<T>> T toEnum(Class<T> enumType, String value) {
+        if (org.apache.commons.lang3.StringUtils.isBlank(value)) {
+            return null;
+        }
+        try {
+            return Enum.valueOf(enumType, value);
+        } catch (IllegalArgumentException exception) {
+            LOGGER.warn("Unable to map enum value '{}' for type '{}'", value, enumType.getSimpleName());
+            return null;
+        }
+    }
+
+    private static Boolean getNullableBoolean(ResultSet resultSet, String columnName) throws SQLException {
+        Object value = resultSet.getObject(columnName);
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof Boolean) {
+            return (Boolean) value;
+        }
+        if (value instanceof Number) {
+            return ((Number) value).intValue() != 0;
+        }
+        return Boolean.parseBoolean(value.toString());
     }
 
     public static void updateEvidenceRelevantCancerTypes(Integer entrezGeneId, List<Evidence> geneEvidences) {
