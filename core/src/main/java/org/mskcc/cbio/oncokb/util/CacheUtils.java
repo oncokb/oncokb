@@ -25,9 +25,6 @@ import java.util.stream.Collectors;
  * CacheUtils is used to manage cached variant summaries, relevant alterations, alterations which all gene based.
  * It also includes mapped tumor types which is based on query tumor type name.
  *
- * The GeneObservable manages all gene based caches. Any updates happen on gene will automatically trigger
- * GeneObservable to notify all observers to update relative cache.
- *
  * TODO:
  * Ideally, we should place cache functions in the cache BAO with a factory which controls the source of data.
  * In this way, user can easily to choose to get data from cache or database directly.
@@ -70,76 +67,6 @@ public class CacheUtils {
     private static Map<String, Long> recordTime = new HashedMap();
 
     private static Info oncokbInfo;
-
-    private static Observer numbersObserver = new Observer() {
-        @Override
-        public void update(Observable o, Object arg) {
-            numbers.clear();
-        }
-    };
-
-    private static Observer VUSObserver = new Observer() {
-        @Override
-        public void update(Observable o, Object arg) {
-            Map<String, String> operation = (Map<String, String>) arg;
-            if (operation.get("cmd") == "update") {
-                Integer entrezGeneId = Integer.parseInt(operation.get("val"));
-                VUS.remove(entrezGeneId);
-            } else if (operation.get("cmd") == "reset") {
-                VUS.clear();
-            }
-        }
-    };
-
-    private static Observer alterationsObserver = new Observer() {
-        @Override
-        public void update(Observable o, Object arg) {
-            Map<String, String> operation = (Map<String, String>) arg;
-            if (operation.get("cmd") == "update") {
-                Integer entrezGeneId = Integer.parseInt(operation.get("val"));
-                alterations.remove(entrezGeneId);
-                alterationsByReferenceGenome.remove(entrezGeneId);
-            } else if (operation.get("cmd") == "reset") {
-                alterations.clear();
-                alterationsByReferenceGenome.clear();
-            }
-        }
-    };
-
-    // Always update genes since everything is relying on this.
-    private static Observer genesObserver = new Observer() {
-        @Override
-        public void update(Observable o, Object arg) {
-            cacheAllGenes();
-        }
-    };
-
-    private static Observer drugsObserver = new Observer() {
-        @Override
-        public void update(Observable o, Object arg) {
-            drugs = new HashSet<>(ApplicationContextSingleton.getDrugBo().findAll());
-        }
-    };
-
-    private static Observer evidencesObserver = new Observer() {
-        @Override
-        public void update(Observable o, Object arg) {
-            Map<String, String> operation = (Map<String, String>) arg;
-            if (operation.get("cmd") == "update") {
-                Integer entrezGeneId = Integer.parseInt(operation.get("val"));
-                evidences.remove(entrezGeneId);
-                evidenceRelevantCancerTypes.remove(entrezGeneId);
-                Gene gene = ApplicationContextSingleton.getGeneBo().findGeneByEntrezGeneId(entrezGeneId);
-                if (gene != null) {
-                    setEvidences(gene);
-                }
-            } else if (operation.get("cmd") == "reset") {
-                evidences.clear();
-                evidenceRelevantCancerTypes.clear();
-                cacheAllEvidencesByGenes();
-            }
-        }
-    };
 
     public static InMemoryCacheSizes getCurrentCacheSizes() {
 
@@ -184,82 +111,91 @@ public class CacheUtils {
 
     static {
         try {
-            Long current = MainUtils.getCurrentTimestamp();
-            GeneObservable.getInstance().addObserver(alterationsObserver);
-            GeneObservable.getInstance().addObserver(genesObserver);
-            GeneObservable.getInstance().addObserver(evidencesObserver);
-            GeneObservable.getInstance().addObserver(VUSObserver);
-            GeneObservable.getInstance().addObserver(numbersObserver);
-            GeneObservable.getInstance().addObserver(drugsObserver);
-
-            LOGGER.info("Add observers {}", getCacheCompletionMessage(current));
-
-            cacheAllGenes();
-
-            setAllAlterations();
-
-            current = MainUtils.getCurrentTimestamp();
-            drugs = new HashSet<>(ApplicationContextSingleton.getDrugBo().findAll());
-            LOGGER.info("Cached {} drugs {}", drugs.size(), CacheUtils.getCacheCompletionMessage(current));
-            current = MainUtils.getCurrentTimestamp();
-
-            cancerTypes = ApplicationContextSingleton.getTumorTypeBo().findAll();
-            cancerTypes.stream().forEach(ct -> {
-                if (!StringUtils.isNullOrEmpty(ct.getCode())) {
-                    cancerTypesByCode.put(ct.getCode(), ct);
-                }
-                if (StringUtils.isNullOrEmpty(ct.getCode()) && !StringUtils.isNullOrEmpty(ct.getMainType())) {
-                    cancerTypesByMainType.put(ct.getMainType().toLowerCase(), ct);
-                }
-                if (!StringUtils.isNullOrEmpty(ct.getSubtype())) {
-                    cancerTypesByLowercaseSubtype.put(ct.getSubtype().toLowerCase(), ct);
-                }
-            });
-            LOGGER.info("Cached {} tumor types {}", cancerTypes.size(), CacheUtils.getCacheCompletionMessage(current));
-            subtypes = cancerTypes.stream().filter(tumorType -> org.apache.commons.lang3.StringUtils.isNotEmpty(tumorType.getCode()) && tumorType.getLevel() > 0).collect(Collectors.toList());
-            LOGGER.info("Cached {} tumor sub types {}", subtypes.size(), CacheUtils.getCacheCompletionMessage(current));
-            mainTypes = cancerTypes.stream().filter(tumorType -> org.apache.commons.lang3.StringUtils.isEmpty(tumorType.getCode()) || tumorType.getLevel() > 0).collect(Collectors.toList());
-            LOGGER.info("Cached {} tumor main types {}", mainTypes.size(), CacheUtils.getCacheCompletionMessage(current));
-            current = MainUtils.getCurrentTimestamp();
-
-            specialCancerTypes = Arrays.stream(SpecialTumorType.values()).map(specialTumorType -> cancerTypes.stream().filter(cancerType -> !StringUtils.isNullOrEmpty(cancerType.getMainType()) && cancerType.getMainType().equals(specialTumorType.getTumorType())).findAny().orElse(null)).filter(cancerType -> cancerType != null).collect(Collectors.toList());
-            LOGGER.info("Cached {} special tumor types {}", specialCancerTypes.size(), CacheUtils.getCacheCompletionMessage(current));
-
-            current = MainUtils.getCurrentTimestamp();
-            synEvidences();
-            LOGGER.info("Cached {} evidences {}", allEvidencesSize, CacheUtils.getCacheCompletionMessage(current));
-            current = MainUtils.getCurrentTimestamp();
-
-            for (Map.Entry<Integer, List<Evidence>> entry : evidences.entrySet()) {
-                setVUS(entry.getKey(), new HashSet<>(entry.getValue()));
-            }
-            LOGGER.info("Cached {} VUSs {}", VUS.size(), CacheUtils.getCacheCompletionMessage(current));
-            current = MainUtils.getCurrentTimestamp();
-
-            NamingUtils.cacheAllAbbreviations();
-            LOGGER.info("Cached abbreviation ontology {}", CacheUtils.getCacheCompletionMessage(current));
-            current = MainUtils.getCurrentTimestamp();
-
-            cacheDownloadAvailability();
-            LOGGER.info("Cached downloadable files availability on github {}", CacheUtils.getCacheCompletionMessage(current));
-
-            oncokbInfo = ApplicationContextSingleton.getInfoBo().get();
-            LOGGER.info("Cached oncokb info {}", CacheUtils.getCacheCompletionMessage(current));
-
             registerOtherServices();
-            LOGGER.info("Register other services {}", CacheUtils.getCacheCompletionMessage(current));
-            current = MainUtils.getCurrentTimestamp();
-
+            refreshAllCaches();
         } catch (Exception e) {
             LOGGER.error("Unexpected Error", e);
         }
     }
 
     private static void registerOtherServices() throws IOException {
+        Long current = MainUtils.getCurrentTimestamp();
         String services = PropertiesUtils.getProperties("cache.update");
         if (services != null) {
             otherServices = Arrays.asList(services.split(","));
         }
+        LOGGER.info("Register other services {}", CacheUtils.getCacheCompletionMessage(current));
+    }
+
+    private static void cacheAllTumorTypes() {
+        Long current = MainUtils.getCurrentTimestamp();
+        cancerTypes = ApplicationContextSingleton.getTumorTypeBo().findAll();
+        cancerTypesByCode.clear();
+        cancerTypesByMainType.clear();
+        cancerTypesByLowercaseSubtype.clear();
+        cancerTypes.forEach(ct -> {
+            if (!StringUtils.isNullOrEmpty(ct.getCode())) {
+                cancerTypesByCode.put(ct.getCode(), ct);
+            }
+            if (StringUtils.isNullOrEmpty(ct.getCode()) && !StringUtils.isNullOrEmpty(ct.getMainType())) {
+                cancerTypesByMainType.put(ct.getMainType().toLowerCase(), ct);
+            }
+            if (!StringUtils.isNullOrEmpty(ct.getSubtype())) {
+                cancerTypesByLowercaseSubtype.put(ct.getSubtype().toLowerCase(), ct);
+            }
+        });
+        LOGGER.info("Cached {} tumor types {}", cancerTypes.size(), CacheUtils.getCacheCompletionMessage(current));
+        subtypes = cancerTypes.stream().filter(tumorType -> org.apache.commons.lang3.StringUtils.isNotEmpty(tumorType.getCode()) && tumorType.getLevel() > 0).collect(Collectors.toList());
+        LOGGER.info("Cached {} tumor sub types {}", subtypes.size(), CacheUtils.getCacheCompletionMessage(current));
+        mainTypes = cancerTypes.stream().filter(tumorType -> org.apache.commons.lang3.StringUtils.isEmpty(tumorType.getCode()) || tumorType.getLevel() > 0).collect(Collectors.toList());
+        LOGGER.info("Cached {} tumor main types {}", mainTypes.size(), CacheUtils.getCacheCompletionMessage(current));
+        specialCancerTypes = Arrays.stream(SpecialTumorType.values())
+            .map(specialTumorType -> cancerTypes.stream()
+                .filter(cancerType -> !StringUtils.isNullOrEmpty(cancerType.getMainType()) && cancerType.getMainType().equals(specialTumorType.getTumorType()))
+                .findAny()
+                .orElse(null))
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
+        LOGGER.info("Cached {} special tumor types {}", specialCancerTypes.size(), CacheUtils.getCacheCompletionMessage(current));
+    }
+
+    private static synchronized void refreshAllCaches() throws IOException {
+        Long current = MainUtils.getCurrentTimestamp();
+        LOGGER.info("Refreshing in memory caches");
+
+        numbers.clear();
+        VUS.clear();
+
+        cacheAllGenes();
+        setAllAlterations();
+
+        current = MainUtils.getCurrentTimestamp();
+        drugs = new HashSet<>(ApplicationContextSingleton.getDrugBo().findAll());
+        LOGGER.info("Cached {} drugs {}", drugs.size(), CacheUtils.getCacheCompletionMessage(current));
+
+        cacheAllTumorTypes();
+
+        current = MainUtils.getCurrentTimestamp();
+        cacheAllEvidencesByGenes();
+        LOGGER.info("Cached {} evidences {}", allEvidencesSize, CacheUtils.getCacheCompletionMessage(current));
+
+        current = MainUtils.getCurrentTimestamp();
+        for (Map.Entry<Integer, List<Evidence>> entry : evidences.entrySet()) {
+            setVUS(entry.getKey(), new HashSet<>(entry.getValue()));
+        }
+        LOGGER.info("Cached {} VUSs {}", VUS.size(), CacheUtils.getCacheCompletionMessage(current));
+
+        current = MainUtils.getCurrentTimestamp();
+        NamingUtils.cacheAllAbbreviations();
+        LOGGER.info("Cached abbreviation ontology {}", CacheUtils.getCacheCompletionMessage(current));
+
+        current = MainUtils.getCurrentTimestamp();
+        cacheDownloadAvailability();
+        LOGGER.info("Cached downloadable files availability on github {}", CacheUtils.getCacheCompletionMessage(current));
+
+        current = MainUtils.getCurrentTimestamp();
+        oncokbInfo = ApplicationContextSingleton.getInfoBo().get();
+        LOGGER.info("Cached oncokb info {}", CacheUtils.getCacheCompletionMessage(current));
     }
 
     public static Gene getGeneByEntrezId(Integer entrezId) {
@@ -638,7 +574,8 @@ public class CacheUtils {
             LOGGER.info("There is no entrez gene ids specified.");
             return;
         }
-        entrezGeneIds.forEach(entrezGeneId -> GeneObservable.getInstance().update("update", entrezGeneId.toString()));
+        LOGGER.info("updateGene compatibility path now performs a full cache refresh.");
+        refreshAllCaches();
         if (propagate) {
             notifyOtherServices("update", entrezGeneIds);
         }else{
@@ -647,14 +584,12 @@ public class CacheUtils {
     }
 
     public static void resetAll() throws IOException {
-        LOGGER.info("Reset all genes cache on instance {}", PropertiesUtils.getProperties("app.name"));
-        GeneObservable.getInstance().update("reset", null);
-        notifyOtherServices("reset", null);
+        resetAll(true);
     }
 
     public static void resetAll(Boolean propagate) throws IOException {
         LOGGER.info("Reset all genes cache on instance {}", PropertiesUtils.getProperties("app.name"));
-        GeneObservable.getInstance().update("reset", null);
+        refreshAllCaches();
         if (propagate == null) {
             propagate = false;
         }
