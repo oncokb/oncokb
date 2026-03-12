@@ -26,12 +26,18 @@ public class HealthController {
      */
     @GetMapping
     public ResponseEntity<Void> systemHealthCheck() {
-        Boolean memoryCacheSizeCheckPassed = checkInMemoryCacheSizeConsistency();
-        Boolean successfullyFetchedActionableVariants = checkActionableGenesResponse();
-        if (!memoryCacheSizeCheckPassed || !successfullyFetchedActionableVariants) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        if (CacheUtils.isCacheRefreshInProgress()) {
+            LOGGER.info("Cache refresh is in progress, skipping health checks.");
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
         }
-        return ResponseEntity.ok().build();
+        synchronized (CacheUtils.class) {
+            Boolean memoryCacheSizeCheckPassed = checkInMemoryCacheSizeConsistency();
+            Boolean successfullyFetchedActionableVariants = checkActionableGenesResponse();
+            if (!memoryCacheSizeCheckPassed || !successfullyFetchedActionableVariants) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
+            return ResponseEntity.ok().build();
+        }
     }
 
     private Boolean checkInMemoryCacheSizeConsistency() {

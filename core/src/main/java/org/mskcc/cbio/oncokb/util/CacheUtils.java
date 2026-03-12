@@ -16,6 +16,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 
@@ -67,6 +68,7 @@ public class CacheUtils {
     private static Map<String, Long> recordTime = new HashedMap();
 
     private static Info oncokbInfo;
+    private static final AtomicBoolean cacheRefreshInProgress = new AtomicBoolean(false);
 
     public static InMemoryCacheSizes getCurrentCacheSizes() {
 
@@ -77,6 +79,10 @@ public class CacheUtils {
             cancerTypes.size(),
             allEvidencesSize
         );
+    }
+
+    public static boolean isCacheRefreshInProgress() {
+        return cacheRefreshInProgress.get();
     }
 
     private static String getCacheCompletionMessage(Long startTime) {
@@ -129,7 +135,13 @@ public class CacheUtils {
 
     private static void cacheAllTumorTypes() {
         Long current = MainUtils.getCurrentTimestamp();
-        cancerTypes = ApplicationContextSingleton.getTumorTypeBo().findAll();
+        try {
+            cancerTypes = loadAllTumorTypesFromTables();
+            LOGGER.info("Loaded tumor types via SQL table mapping.");
+        } catch (Exception exception) {
+            LOGGER.warn("Failed to load tumor types via SQL mapping. Falling back to DAO findAll().", exception);
+            cancerTypes = ApplicationContextSingleton.getTumorTypeBo().findAll();
+        }
         cancerTypesByCode.clear();
         cancerTypesByMainType.clear();
         cancerTypesByLowercaseSubtype.clear();
@@ -159,43 +171,106 @@ public class CacheUtils {
         LOGGER.info("Cached {} special tumor types {}", specialCancerTypes.size(), CacheUtils.getCacheCompletionMessage(current));
     }
 
-    private static synchronized void refreshAllCaches() throws IOException {
-        Long current = MainUtils.getCurrentTimestamp();
-        LOGGER.info("Refreshing in memory caches");
+    private static List<TumorType> loadAllTumorTypesFromTables() throws SQLException {
+        Map<Integer, TumorType> tumorTypesById = new LinkedHashMap<>();
+        Map<Integer, Integer> parentByTumorTypeId = new HashMap<>();
 
-        numbers.clear();
-        VUS.clear();
+        try (Connection connection = ApplicationContextSingleton.getDataSource().getConnection()) {
+            try (
+                PreparedStatement statement = connection.prepareStatement(
+                    "SELECT id, subtype, code, color, main_type, level, tissue, parent, tumor_form FROM cancer_type");
+                ResultSet resultSet = statement.executeQuery()
+            ) {
+                while (resultSet.next()) {
+                    Integer id = resultSet.getInt("id");
+                    TumorType tumorType = new TumorType();
+                    tumorType.setId(id);
+                    tumorType.setSubtype(resultSet.getString("subtype"));
+                    tumorType.setCode(resultSet.getString("code"));
+                    tumorType.setColor(resultSet.getString("color"));
+                    tumorType.setMainType(resultSet.getString("main_type"));
+                    Integer level = resultSet.getInt("level");
+                    tumorType.setLevel(resultSet.wasNull() ? null : level);
+                    tumorType.setTissue(resultSet.getString("tissue"));
+                    tumorType.setTumorForm(toEnum(TumorForm.class, resultSet.getString("tumor_form")));
+                    tumorType.setChildren(new HashSet<>());
+                    tumorTypesById.put(id, tumorType);
 
-        cacheAllGenes();
-        setAllAlterations();
+                    Integer parentId = resultSet.getInt("parent");
+                    if (!resultSet.wasNull()) {
+                        parentByTumorTypeId.put(id, parentId);
+                    }
+                }
+            }
 
-        current = MainUtils.getCurrentTimestamp();
-        drugs = new HashSet<>(ApplicationContextSingleton.getDrugBo().findAll());
-        LOGGER.info("Cached {} drugs {}", drugs.size(), CacheUtils.getCacheCompletionMessage(current));
+            for (Map.Entry<Integer, Integer> entry : parentByTumorTypeId.entrySet()) {
+                TumorType tumorType = tumorTypesById.get(entry.getKey());
+                TumorType parent = tumorTypesById.get(entry.getValue());
+                if (tumorType != null) {
+                    tumorType.setParent(parent);
+                }
+            }
 
-        cacheAllTumorTypes();
-
-        current = MainUtils.getCurrentTimestamp();
-        cacheAllEvidencesByGenes();
-        LOGGER.info("Cached {} evidences {}", allEvidencesSize, CacheUtils.getCacheCompletionMessage(current));
-
-        current = MainUtils.getCurrentTimestamp();
-        for (Map.Entry<Integer, List<Evidence>> entry : evidences.entrySet()) {
-            setVUS(entry.getKey(), new HashSet<>(entry.getValue()));
+            try (
+                PreparedStatement statement = connection.prepareStatement(
+                    "SELECT cancer_type_id, cancer_type_child_id FROM cancer_type_child");
+                ResultSet resultSet = statement.executeQuery()
+            ) {
+                while (resultSet.next()) {
+                    TumorType parent = tumorTypesById.get(resultSet.getInt("cancer_type_id"));
+                    TumorType child = tumorTypesById.get(resultSet.getInt("cancer_type_child_id"));
+                    if (parent != null && child != null && parent.getChildren() != null) {
+                        parent.getChildren().add(child);
+                    }
+                }
+            }
         }
-        LOGGER.info("Cached {} VUSs {}", VUS.size(), CacheUtils.getCacheCompletionMessage(current));
 
-        current = MainUtils.getCurrentTimestamp();
-        NamingUtils.cacheAllAbbreviations();
-        LOGGER.info("Cached abbreviation ontology {}", CacheUtils.getCacheCompletionMessage(current));
+        return new ArrayList<>(tumorTypesById.values());
+    }
 
-        current = MainUtils.getCurrentTimestamp();
-        cacheDownloadAvailability();
-        LOGGER.info("Cached downloadable files availability on github {}", CacheUtils.getCacheCompletionMessage(current));
+    private static synchronized void refreshAllCaches() throws IOException {
+        cacheRefreshInProgress.set(true);
+        try {
+            Long current = MainUtils.getCurrentTimestamp();
+            LOGGER.info("Refreshing in memory caches");
 
-        current = MainUtils.getCurrentTimestamp();
-        oncokbInfo = ApplicationContextSingleton.getInfoBo().get();
-        LOGGER.info("Cached oncokb info {}", CacheUtils.getCacheCompletionMessage(current));
+            numbers.clear();
+            VUS.clear();
+
+            cacheAllGenes();
+            setAllAlterations();
+
+            current = MainUtils.getCurrentTimestamp();
+            drugs = new HashSet<>(ApplicationContextSingleton.getDrugBo().findAll());
+            LOGGER.info("Cached {} drugs {}", drugs.size(), CacheUtils.getCacheCompletionMessage(current));
+
+            cacheAllTumorTypes();
+
+            current = MainUtils.getCurrentTimestamp();
+            cacheAllEvidencesByGenes();
+            LOGGER.info("Cached {} evidences {}", allEvidencesSize, CacheUtils.getCacheCompletionMessage(current));
+
+            current = MainUtils.getCurrentTimestamp();
+            for (Map.Entry<Integer, List<Evidence>> entry : evidences.entrySet()) {
+                setVUS(entry.getKey(), new HashSet<>(entry.getValue()));
+            }
+            LOGGER.info("Cached {} VUSs {}", VUS.size(), CacheUtils.getCacheCompletionMessage(current));
+
+            current = MainUtils.getCurrentTimestamp();
+            NamingUtils.cacheAllAbbreviations();
+            LOGGER.info("Cached abbreviation ontology {}", CacheUtils.getCacheCompletionMessage(current));
+
+            current = MainUtils.getCurrentTimestamp();
+            cacheDownloadAvailability();
+            LOGGER.info("Cached downloadable files availability on github {}", CacheUtils.getCacheCompletionMessage(current));
+
+            current = MainUtils.getCurrentTimestamp();
+            oncokbInfo = ApplicationContextSingleton.getInfoBo().get();
+            LOGGER.info("Cached oncokb info {}", CacheUtils.getCacheCompletionMessage(current));
+        } finally {
+            cacheRefreshInProgress.set(false);
+        }
     }
 
     public static Gene getGeneByEntrezId(Integer entrezId) {
@@ -224,9 +299,18 @@ public class CacheUtils {
     private static void cacheAllGenes() {
         Long current = MainUtils.getCurrentTimestamp();
 
-        genes = new HashSet<>(ApplicationContextSingleton.getGeneBo().findAll());
-        genesByEntrezId = new HashedMap();
-        hugoSymbolToEntrez = new HashedMap();
+        List<Gene> allGenes;
+        try {
+            allGenes = loadAllGenesFromTables();
+            LOGGER.info("Loaded genes via SQL table mapping.");
+        } catch (Exception exception) {
+            LOGGER.warn("Failed to load genes via SQL mapping. Falling back to DAO findAll().", exception);
+            allGenes = ApplicationContextSingleton.getGeneBo().findAll();
+        }
+
+        genes = new HashSet<>(allGenes);
+        genesByEntrezId = new HashMap<>();
+        hugoSymbolToEntrez = new HashMap<>();
         for (Gene gene : genes) {
             genesByEntrezId.put(gene.getEntrezGeneId(), gene);
             hugoSymbolToEntrez.put(gene.getHugoSymbol(), gene.getEntrezGeneId());
@@ -349,7 +433,7 @@ public class CacheUtils {
 
     public static Set<Gene> getAllGenes() {
         if (genes.size() == 0) {
-            genes = new HashSet<>(ApplicationContextSingleton.getGeneBo().findAll());
+            cacheAllGenes();
         }
         return genes;
     }
@@ -716,6 +800,51 @@ public class CacheUtils {
         }
 
         return new ArrayList<>(alterationsById.values());
+    }
+
+    private static List<Gene> loadAllGenesFromTables() throws SQLException {
+        Map<Integer, Gene> genesById = new LinkedHashMap<>();
+
+        try (Connection connection = ApplicationContextSingleton.getDataSource().getConnection()) {
+            try (
+                PreparedStatement statement = connection.prepareStatement(
+                    "SELECT entrez_gene_id, hugo_symbol, gene_type, grch37_isoform, grch37_ref_seq, grch38_isoform, grch38_ref_seq FROM gene");
+                ResultSet resultSet = statement.executeQuery()
+            ) {
+                while (resultSet.next()) {
+                    Integer entrezGeneId = resultSet.getInt("entrez_gene_id");
+                    Gene gene = new Gene();
+                    gene.setEntrezGeneId(entrezGeneId);
+                    gene.setHugoSymbol(resultSet.getString("hugo_symbol"));
+                    gene.setGeneType(toEnum(GeneType.class, resultSet.getString("gene_type")));
+                    gene.setGrch37Isoform(resultSet.getString("grch37_isoform"));
+                    gene.setGrch37RefSeq(resultSet.getString("grch37_ref_seq"));
+                    gene.setGrch38Isoform(resultSet.getString("grch38_isoform"));
+                    gene.setGrch38RefSeq(resultSet.getString("grch38_ref_seq"));
+                    gene.setGeneAliases(new HashSet<>());
+                    gene.setGenesets(new HashSet<>());
+                    genesById.put(entrezGeneId, gene);
+                }
+            }
+
+            try (
+                PreparedStatement statement = connection.prepareStatement(
+                    "SELECT entrez_gene_id, alias FROM gene_alias");
+                ResultSet resultSet = statement.executeQuery()
+            ) {
+                while (resultSet.next()) {
+                    Gene gene = genesById.get(resultSet.getInt("entrez_gene_id"));
+                    if (gene != null) {
+                        String alias = resultSet.getString("alias");
+                        if (alias != null) {
+                            gene.getGeneAliases().add(alias);
+                        }
+                    }
+                }
+            }
+        }
+
+        return new ArrayList<>(genesById.values());
     }
 
     private static List<Evidence> loadAllEvidencesFromTables() throws SQLException {
