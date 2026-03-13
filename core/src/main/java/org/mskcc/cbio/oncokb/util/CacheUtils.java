@@ -851,6 +851,9 @@ public class CacheUtils {
         Map<Integer, Evidence> evidencesById = new LinkedHashMap<>();
         Map<Integer, Article> articlesById = new HashMap<>();
         Map<Integer, Treatment> treatmentsById = new HashMap<>();
+        Map<Integer, Tag> tagsById = new HashMap<>();
+        Map<Integer, OncogenicityEntity> oncogenicitiesById = new HashMap<>();
+        Map<Integer, MutationTypeEntity> mutationTypesById = new HashMap<>();
 
         Map<Integer, Alteration> alterationsById = getCachedAlterationsById();
         Map<Integer, TumorType> tumorTypesById = cancerTypes.stream()
@@ -889,6 +892,7 @@ public class CacheUtils {
                     evidence.setExcludedCancerTypes(new HashSet<>());
                     evidence.setRelevantCancerTypes(new HashSet<>());
                     evidence.setAlterations(new HashSet<>());
+                    evidence.setTags(new HashSet<>());
                     evidence.setArticles(new HashSet<>());
                     evidence.setTreatments(new ArrayList<>());
                     evidencesById.put(id, evidence);
@@ -947,6 +951,113 @@ public class CacheUtils {
                     TumorType tumorType = tumorTypesById.get(resultSet.getInt("cancer_type_id"));
                     if (evidence != null && tumorType != null) {
                         evidence.getRelevantCancerTypes().add(tumorType);
+                    }
+                }
+            }
+
+            try (
+                PreparedStatement statement = connection.prepareStatement(
+                    "SELECT id, name, description, start AS start_position, end AS end_position, entrez_gene_id FROM tag");
+                ResultSet resultSet = statement.executeQuery()
+            ) {
+                while (resultSet.next()) {
+                    Integer id = resultSet.getInt("id");
+                    Tag tag = new Tag();
+                    tag.setId(id);
+                    tag.setName(resultSet.getString("name"));
+                    tag.setDescription(resultSet.getString("description"));
+                    Integer start = resultSet.getInt("start_position");
+                    tag.setStart(resultSet.wasNull() ? null : start);
+                    Integer end = resultSet.getInt("end_position");
+                    tag.setEnd(resultSet.wasNull() ? null : end);
+                    Integer entrezGeneId = resultSet.getInt("entrez_gene_id");
+                    if (!resultSet.wasNull()) {
+                        tag.setGene(genesByEntrezId.get(entrezGeneId));
+                    }
+                    tag.setOncogenicities(new HashSet<>());
+                    tag.setMutationTypes(new HashSet<>());
+                    tag.setEvidences(new HashSet<>());
+                    tagsById.put(id, tag);
+                }
+            }
+
+            try (
+                PreparedStatement statement = connection.prepareStatement(
+                    "SELECT id, oncogenicity FROM oncogenicity");
+                ResultSet resultSet = statement.executeQuery()
+            ) {
+                while (resultSet.next()) {
+                    Integer id = resultSet.getInt("id");
+                    OncogenicityEntity oncogenicityEntity = new OncogenicityEntity();
+                    oncogenicityEntity.setId(id);
+                    Oncogenicity oncogenicity = Oncogenicity.getByEffect(resultSet.getString("oncogenicity"));
+                    if (oncogenicity != null) {
+                        oncogenicityEntity.setOncogenicity(oncogenicity);
+                    }
+                    oncogenicityEntity.setTags(new HashSet<>());
+                    oncogenicitiesById.put(id, oncogenicityEntity);
+                }
+            }
+
+            try (
+                PreparedStatement statement = connection.prepareStatement(
+                    "SELECT id, mutation_type FROM mutation_type");
+                ResultSet resultSet = statement.executeQuery()
+            ) {
+                while (resultSet.next()) {
+                    Integer id = resultSet.getInt("id");
+                    MutationTypeEntity mutationTypeEntity = new MutationTypeEntity();
+                    mutationTypeEntity.setId(id);
+                    MutationType mutationType = MutationType.fromString(resultSet.getString("mutation_type"));
+                    if (mutationType != null) {
+                        mutationTypeEntity.setMutationType(mutationType);
+                    }
+                    mutationTypeEntity.setTags(new HashSet<>());
+                    mutationTypesById.put(id, mutationTypeEntity);
+                }
+            }
+
+            try (
+                PreparedStatement statement = connection.prepareStatement(
+                    "SELECT tag_id, oncogenicity_id FROM oncogenicity_tag");
+                ResultSet resultSet = statement.executeQuery()
+            ) {
+                while (resultSet.next()) {
+                    Tag tag = tagsById.get(resultSet.getInt("tag_id"));
+                    OncogenicityEntity oncogenicityEntity = oncogenicitiesById.get(resultSet.getInt("oncogenicity_id"));
+                    if (tag != null && oncogenicityEntity != null) {
+                        tag.getOncogenicities().add(oncogenicityEntity);
+                        oncogenicityEntity.getTags().add(tag);
+                    }
+                }
+            }
+
+            try (
+                PreparedStatement statement = connection.prepareStatement(
+                    "SELECT tag_id, mutation_type_id FROM mutation_type_tag");
+                ResultSet resultSet = statement.executeQuery()
+            ) {
+                while (resultSet.next()) {
+                    Tag tag = tagsById.get(resultSet.getInt("tag_id"));
+                    MutationTypeEntity mutationTypeEntity = mutationTypesById.get(resultSet.getInt("mutation_type_id"));
+                    if (tag != null && mutationTypeEntity != null) {
+                        tag.getMutationTypes().add(mutationTypeEntity);
+                        mutationTypeEntity.getTags().add(tag);
+                    }
+                }
+            }
+
+            try (
+                PreparedStatement statement = connection.prepareStatement(
+                    "SELECT evidence_id, tag_id FROM evidence_tag");
+                ResultSet resultSet = statement.executeQuery()
+            ) {
+                while (resultSet.next()) {
+                    Evidence evidence = evidencesById.get(resultSet.getInt("evidence_id"));
+                    Tag tag = tagsById.get(resultSet.getInt("tag_id"));
+                    if (evidence != null && tag != null) {
+                        evidence.getTags().add(tag);
+                        tag.getEvidences().add(evidence);
                     }
                 }
             }
