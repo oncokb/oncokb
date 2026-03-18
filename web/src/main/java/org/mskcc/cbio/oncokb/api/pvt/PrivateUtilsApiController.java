@@ -375,6 +375,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
 
 
         List<TumorType> relevantTumorTypes = TumorTypeUtils.findRelevantTumorTypes(tumorType);
+        TumorType matchedTumorType = ApplicationContextSingleton.getTumorTypeBo().getByName(tumorType);
 
         Query query;
         Gene gene;
@@ -467,6 +468,24 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
                     }
                     if (updatedEvidence.getRelevantCancerTypes() == null || updatedEvidence.getRelevantCancerTypes().size() == 0) {
                         updatedEvidence.setRelevantCancerTypes(TumorTypeUtils.findEvidenceRelevantCancerTypes(evidence));
+                    }
+
+                    // Update tumorTypes[].evidences[] with addendum. Before it was just raw Evidence from SQL
+                    if (EvidenceTypeUtils.getTreatmentEvidenceTypes().contains(updatedEvidence.getEvidenceType())
+                        && updatedEvidence.getTreatments() != null
+                        && !updatedEvidence.getTreatments().isEmpty()
+                    ) {
+                        TumorType addendumTumorType = matchedTumorType == null ? uniqueTumorType : matchedTumorType;
+                        List<Treatment> treatmentList = new ArrayList<>(updatedEvidence.getTreatments());
+                        for (Treatment treatmentEntity : treatmentList) {
+                            String updatedDescription = IndicatorUtils.getTherapeuticDescriptionWithAddendum(
+                                updatedEvidence,
+                                treatmentEntity,
+                                addendumTumorType,
+                                updatedEvidence.getDescription()
+                            );
+                            updatedEvidence.setDescription(updatedDescription);
+                        }
                     }
                     updatedEvidences.add(updatedEvidence);
                 }

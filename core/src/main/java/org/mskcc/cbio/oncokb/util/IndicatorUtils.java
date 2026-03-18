@@ -432,7 +432,12 @@ public class IndicatorUtils {
                     treatmentEvidences = filteredEvis;
                 }
                 if (!treatmentEvidences.isEmpty()) {
-                    List<IndicatorQueryTreatment> treatments = getIndicatorQueryTreatments(treatmentEvidences, query.getHugoSymbol(), StringUtils.isEmpty(query.getTumorType()) ? false : true);
+                    List<IndicatorQueryTreatment> treatments = getIndicatorQueryTreatments(
+                        treatmentEvidences,
+                        query.getHugoSymbol(),
+                        StringUtils.isEmpty(query.getTumorType()) ? false : true,
+                        matchedTumorType
+                    );
 
                     // Make sure the treatment in KIT is always sorted.
                     if (gene.getHugoSymbol().equals("KIT")) {
@@ -922,7 +927,7 @@ public class IndicatorUtils {
         return date;
     }
 
-    private static List<IndicatorQueryTreatment> getIndicatorQueryTreatments(Set<Evidence> evidences, String queryHugoSymbol, Boolean filterSameTreatment) {
+    private static List<IndicatorQueryTreatment> getIndicatorQueryTreatments(Set<Evidence> evidences, String queryHugoSymbol, Boolean filterSameTreatment, TumorType matchedTumorType) {
         List<IndicatorQueryTreatment> treatments = new ArrayList<>();
         if (evidences != null) {
             Map<LevelOfEvidence, Set<Evidence>> evidenceSetMap = EvidenceUtils.separateEvidencesByLevel(evidences);
@@ -992,7 +997,13 @@ public class IndicatorUtils {
                                     Set<org.mskcc.cbio.oncokb.apiModels.TumorType> excludedCancerTypes = evidence.getExcludedCancerTypes().stream().filter(ect -> relevantTumorTypes.contains(ect)).map(ect -> new org.mskcc.cbio.oncokb.apiModels.TumorType(ect)).collect(Collectors.toSet());
                                     indicatorQueryTreatment.setLevelExcludedCancerTypes(excludedCancerTypes);
                                 }
-                                indicatorQueryTreatment.setDescription(CplUtils.annotateGene(descriptionMap.get(treatment), queryHugoSymbol));
+                                String therapeuticDescription = getTherapeuticDescriptionWithAddendum(
+                                    evidence,
+                                    treatment,
+                                    matchedTumorType,
+                                    descriptionMap.get(treatment)
+                                );
+                                indicatorQueryTreatment.setDescription(CplUtils.annotateGene(therapeuticDescription, queryHugoSymbol));
                                 treatments.add(indicatorQueryTreatment);
                             }
                         }
@@ -1001,6 +1012,92 @@ public class IndicatorUtils {
             }
         }
         return treatments;
+    }
+
+    public static String getTherapeuticDescriptionWithAddendum(Evidence therapeuticEvidence, Treatment treatment, TumorType matchedTumorType, String defaultDescription) {
+        if (therapeuticEvidence == null || therapeuticEvidence.getGene() == null || matchedTumorType == null) {
+            return defaultDescription;
+        }
+
+        Set<Evidence> addendumEvidences = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(
+            therapeuticEvidence.getGene(),
+            Collections.singleton(EvidenceType.TX_ADDENDUM)
+        );
+        return getTherapeuticDescriptionWithAddendum(therapeuticEvidence, treatment, matchedTumorType, defaultDescription, addendumEvidences);
+    }
+
+    static String getTherapeuticDescriptionWithAddendum(Evidence therapeuticEvidence, Treatment treatment, TumorType matchedTumorType, String defaultDescription, Set<Evidence> addendumEvidences) {
+        if (addendumEvidences == null || addendumEvidences.isEmpty()) {
+            return defaultDescription;
+        }
+
+        for (Evidence addendumEvidence : addendumEvidences) {
+            if (!isMatchingAddendum(addendumEvidence, therapeuticEvidence, treatment, matchedTumorType)) {
+                continue;
+            }
+            if (StringUtils.isNotEmpty(addendumEvidence.getDescription())) {
+                return addendumEvidence.getDescription();
+            }
+        }
+
+        return defaultDescription;
+    }
+
+    private static boolean isMatchingAddendum(Evidence addendumEvidence, Evidence therapeuticEvidence, Treatment treatment, TumorType matchedTumorType) {
+        if (addendumEvidence == null || matchedTumorType == null || !EvidenceType.TX_ADDENDUM.equals(addendumEvidence.getEvidenceType())) {
+            return false;
+        }
+
+        if (!isMatchingCancerType(addendumEvidence, matchedTumorType)) {
+            return false;
+        }
+        if (!hasMatchingAlteration(addendumEvidence, therapeuticEvidence)) {
+            return false;
+        }
+        return hasMatchingTreatment(addendumEvidence, treatment);
+    }
+
+    private static boolean isMatchingCancerType(Evidence addendumEvidence, TumorType matchedTumorType) {
+        if (addendumEvidence == null
+            || matchedTumorType == null
+            || addendumEvidence.getCancerTypes() == null
+            || addendumEvidence.getCancerTypes().isEmpty()) {
+            return false;
+        }
+
+        return addendumEvidence.getCancerTypes().contains(matchedTumorType);
+    }
+
+    private static boolean hasMatchingAlteration(Evidence addendumEvidence, Evidence therapeuticEvidence) {
+        if (addendumEvidence == null) {
+            return false;
+        }
+        if (addendumEvidence.getAlterations() == null || addendumEvidence.getAlterations().isEmpty()) {
+            return true;
+        }
+        if (therapeuticEvidence == null || therapeuticEvidence.getAlterations() == null || therapeuticEvidence.getAlterations().isEmpty()) {
+            return false;
+        }
+        return !Collections.disjoint(addendumEvidence.getAlterations(), therapeuticEvidence.getAlterations());
+    }
+
+    private static boolean hasMatchingTreatment(Evidence addendumEvidence, Treatment treatment) {
+        if (addendumEvidence == null) {
+            return false;
+        }
+        if (addendumEvidence.getTreatments() == null || addendumEvidence.getTreatments().isEmpty()) {
+            return false;
+        }
+        if (treatment == null || treatment.getDrugs() == null || treatment.getDrugs().isEmpty()) {
+            return false;
+        }
+        String treatmentKey = getSortedTreatmentName(treatment.getDrugs());
+        return addendumEvidence.getTreatments().stream().anyMatch(addendumTreatment ->
+            addendumTreatment != null
+                && addendumTreatment.getDrugs() != null
+                && !addendumTreatment.getDrugs().isEmpty()
+                && treatmentKey.equals(getSortedTreatmentName(addendumTreatment.getDrugs()))
+        );
     }
 
     private static boolean treatmentExist(List<IndicatorQueryTreatment> treatments, LevelOfEvidence newTreatmentLevel,  List<Drug> newTreatment) {
