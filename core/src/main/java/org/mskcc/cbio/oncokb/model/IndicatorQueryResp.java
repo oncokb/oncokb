@@ -2,11 +2,14 @@ package org.mskcc.cbio.oncokb.model;
 
 import org.mskcc.cbio.oncokb.apiModels.Implication;
 import org.mskcc.cbio.oncokb.apiModels.MutationEffectResp;
+import org.mskcc.cbio.oncokb.util.LevelUtils;
 
 import io.swagger.annotations.ApiModelProperty;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class IndicatorQueryResp implements java.io.Serializable {
     private Query query;
@@ -325,6 +328,52 @@ public class IndicatorQueryResp implements java.io.Serializable {
 
     public void setLastUpdate(String lastUpdate) {
         this.lastUpdate = lastUpdate;
+    }
+
+    public static IndicatorQueryResp combine(List<IndicatorQueryResp> responses) {
+        if (responses.size() == 0) {
+            return null;
+        }
+
+        Set<LevelOfEvidence> sensitiveLevels = new HashSet<>();
+        Set<LevelOfEvidence> resistanceLevels = new HashSet<>();
+        Set<LevelOfEvidence> diagnosticLevels = new HashSet<>();
+        Set<LevelOfEvidence> prognosticLevels = new HashSet<>();
+        Set<LevelOfEvidence> fdaLevels = new HashSet<>();
+        Set<LevelOfEvidence> otherSignificantSensitiveLevels = new HashSet<>();
+        Set<LevelOfEvidence> otherSignificantResistanceLevels = new HashSet<>();
+        
+        List<IndicatorQueryTreatment> treatments = new ArrayList<>();
+        List<Implication> diagnosticImplications = new ArrayList<>();
+        List<Implication> prognosticImplications = new ArrayList<>();
+        for (IndicatorQueryResp resp : responses) {
+            sensitiveLevels.add(resp.getHighestSensitiveLevel());
+            resistanceLevels.add(resp.getHighestResistanceLevel());
+            diagnosticLevels.add(resp.getHighestDiagnosticImplicationLevel());
+            prognosticLevels.add(resp.getHighestPrognosticImplicationLevel());
+            fdaLevels.add(resp.getHighestFdaLevel());
+            otherSignificantSensitiveLevels.addAll(resp.getOtherSignificantSensitiveLevels());
+            otherSignificantResistanceLevels.addAll(resp.getOtherSignificantResistanceLevels());
+
+            treatments.addAll(resp.getTreatments());
+            diagnosticImplications.addAll(resp.getDiagnosticImplications());
+            prognosticImplications.addAll(resp.getPrognosticImplications());
+        }
+
+        IndicatorQueryResp result = responses.get(0).copy();
+        result.highestSensitiveLevel = LevelUtils.getHighestSensitiveLevel(sensitiveLevels);
+        result.highestResistanceLevel = LevelUtils.getHighestResistanceLevel(resistanceLevels);
+        result.highestDiagnosticImplicationLevel = LevelUtils.getHighestDiagnosticImplicationLevel(diagnosticLevels);
+        result.highestPrognosticImplicationLevel = LevelUtils.getHighestPrognosticImplicationLevel(prognosticLevels);
+        result.highestFdaLevel = LevelUtils.getHighestFdaLevel(fdaLevels);
+        result.otherSignificantSensitiveLevels = new ArrayList<>(otherSignificantSensitiveLevels); // TODO: sort these two?
+        result.otherSignificantResistanceLevels = new ArrayList<>(otherSignificantResistanceLevels);
+
+        result.treatments = treatments; // TODO: sort here,
+        result.diagnosticImplications = diagnosticImplications;
+        result.prognosticImplications = prognosticImplications;
+
+        return result;
     }
 }
 

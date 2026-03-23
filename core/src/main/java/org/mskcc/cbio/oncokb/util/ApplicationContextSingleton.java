@@ -70,6 +70,10 @@ public final class ApplicationContextSingleton {
         return TumorTypeBo.class.cast(getApplicationContext().getBean("tumorTypeBo"));
     }
 
+     public static TumorTypeSynonymBo getTumorTypeSynonymBo() {
+        return TumorTypeSynonymBo.class.cast(getApplicationContext().getBean("tumorTypeSynonymBo"));
+    }
+
     public static InfoBo getInfoBo() {
         return InfoBo.class.cast(getApplicationContext().getBean("infoBo"));
     }

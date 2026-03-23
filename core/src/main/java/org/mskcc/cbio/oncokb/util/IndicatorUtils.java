@@ -22,9 +22,19 @@ import static org.mskcc.cbio.oncokb.util.SummaryUtils.getVUSSummary;
  * Created by hongxinzhang on 4/5/16.
  */
 public class IndicatorUtils {
-    public static IndicatorQueryResp processQuery(Query query,
+    public static IndicatorQueryResp processQuery(
+        Query query,
+        Set<LevelOfEvidence> levels, 
+        Boolean highestLevelOnly,
+        Set<EvidenceType> evidenceTypes, 
+        Boolean geneQueryOnly
+    ) {
+        return processQueryForSynoynm(query, levels, highestLevelOnly, evidenceTypes, geneQueryOnly, false);
+    }
+
+    public static IndicatorQueryResp processQueryForSynoynm(Query query,
                                                   Set<LevelOfEvidence> levels, Boolean highestLevelOnly,
-                                                  Set<EvidenceType> evidenceTypes, Boolean geneQueryOnly) {
+                                                  Set<EvidenceType> evidenceTypes, Boolean geneQueryOnly, Boolean isSynonym) {
         highestLevelOnly = highestLevelOnly == null ? false : highestLevelOnly;
 
         levels = levels == null ? LevelUtils.getPublicLevels() :
@@ -59,8 +69,38 @@ public class IndicatorUtils {
             return indicatorQuery;
         }
 
+        if (query.getTumorType() != null && !isSynonym) {
+            TumorType tt = ApplicationContextSingleton.getTumorTypeBo().getByName(query.getTumorType());
+            if (tt == null) {
+                List<TumorTypeSynonym> synonyms = ApplicationContextSingleton.getTumorTypeSynonymBo().findByName(query.getTumorType());
+                final Set<LevelOfEvidence> immutableLevels = levels;
+                final Boolean immutableHighestLevelOnly = highestLevelOnly;
+                final Set<EvidenceType> immutableEvidenceTypes = evidenceTypes;
+                if (synonyms.size() != 0) {
+                    List<IndicatorQueryResp> responses = synonyms.stream()
+                        .map(synonym -> {
+                            Query newQuery = query.copy();
+                            newQuery.setTumorType(synonym.getTumorType().getCode());
+                            return processQuery(
+                                newQuery, 
+                                immutableLevels, 
+                                immutableHighestLevelOnly, 
+                                immutableEvidenceTypes, 
+                                geneQueryOnly
+                            );
+                        })
+                        .collect(Collectors.toList());
+                    IndicatorQueryResp response = IndicatorQueryResp.combine(responses);
+                    response.getQuery().setTumorType(query.getTumorType());
+                    return response;
+                }
+            }
+        }
+
+        // TODO: this will likely not be covered by the mapping - look into how to deal with this
         // TODO: remove this, it's a hardcoded fix for oncotree migration
         if (query.getTumorType() != null) {
+                            
              switch (query.getTumorType().toLowerCase()) {
                 case "aastr":
                 case "anaplastic astrocytoma":
