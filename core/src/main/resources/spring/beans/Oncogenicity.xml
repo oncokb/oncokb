@@ -1,0 +1,14 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+    <bean id="oncogenicityBo" class="org.mskcc.cbio.oncokb.bo.impl.oncogenicityBoImpl">
+        <property name="dao" ref="oncogenicityDao"/>
+    </bean>
+
+    <bean id="oncogenicityDao" class="org.mskcc.cbio.oncokb.dao.impl.oncogenicityDaoImpl">
+        <property name="sessionFactory" ref="sessionFactory"></property>
+    </bean>
+
+</beans>

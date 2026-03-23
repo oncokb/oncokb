@@ -88,6 +88,25 @@ public class LevelUtils {
         return levels.indexOf(b) - levels.indexOf(a);
     }
 
+    /**
+     * Returns the highest priority level of evidence between two levels.
+     *
+     * @param a the first level of evidence to compare
+     * @param b the second level of evidence to compare
+     * @return the level with higher priority; if both levels are equal or both are
+     *         not in the PUBLIC_LEVELS list, returns {@code a}
+     */
+    public static LevelOfEvidence getHighestLevel(LevelOfEvidence a, LevelOfEvidence b) {
+        int comparison = compareLevel(a, b);
+        if (comparison < 0) {
+            return a;
+        }
+        if (comparison > 0) {
+            return b;
+        }
+        return a;
+    }
+
     public static LevelOfEvidence getHighestLevelFromEvidence(Set<Evidence> evidences) {
         if (evidences != null) {
             Integer highestLevelIndex = -1;
@@ -230,6 +249,22 @@ public class LevelUtils {
     public static Boolean isResistanceLevel(LevelOfEvidence levelOfEvidence) {
         Boolean flag = false;
         if (levelOfEvidence != null && THERAPEUTIC_RESISTANCE_LEVELS.contains(levelOfEvidence)) {
+            flag = true;
+        }
+        return flag;
+    }
+
+    public static Boolean isDiagnosticLevel(LevelOfEvidence levelOfEvidence) {
+        Boolean flag = false;
+        if (levelOfEvidence != null && DIAGNOSTIC_LEVELS.contains(levelOfEvidence)) {
+            flag = true;
+        }
+        return flag;
+    }
+
+    public static Boolean isPrognosticLevel(LevelOfEvidence levelOfEvidence) {
+        Boolean flag = false;
+        if (levelOfEvidence != null && PROGNOSTIC_LEVELS.contains(levelOfEvidence)) {
             flag = true;
         }
         return flag;

@@ -74,6 +74,10 @@ public final class ApplicationContextSingleton {
         return InfoBo.class.cast(getApplicationContext().getBean("infoBo"));
     }
 
+    public static TagBo getTagBo() {
+        return TagBo.class.cast(getApplicationContext().getBean("tagBo"));
+    }
+
     public static DataSource getDataSource() {
         return DataSource.class.cast(getApplicationContext().getBean("dataSource"));
     }
