@@ -1179,24 +1179,28 @@ public class IndicatorUtils {
                             for (TumorType tumorType :  pickedCancerTypes) {
                                 List<TumorType> relevantTumorTypes = TumorTypeUtils.findRelevantTumorTypes(TumorTypeUtils.getTumorTypeName(tumorType), StringUtils.isEmpty(tumorType.getSubtype()), RelevantTumorTypeDirection.DOWNWARD);
                                 IndicatorQueryTreatment indicatorQueryTreatment = new IndicatorQueryTreatment();
+                                Evidence evidenceForDisplay = getTherapeuticEvidenceWithAddendum(evidence, treatment, matchedTumorType);
                                 indicatorQueryTreatment.setDrugs(treatment.getDrugs());
                                 indicatorQueryTreatment.setApprovedIndications(treatment.getApprovedIndications().stream().map(indication -> CplUtils.annotateGene(indication, hugoSymbol)).collect(Collectors.toSet()));
                                 indicatorQueryTreatment.setLevel(level);
                                 indicatorQueryTreatment.setFdaLevel(LevelUtils.getHighestFdaLevel(fdaLevelMap.get(treatment)));
-                                indicatorQueryTreatment.setPmids(pmidsMap.get(treatment));
-                                indicatorQueryTreatment.setAbstracts(abstractsMap.get(treatment));
+                                if (evidenceForDisplay != evidence) {
+                                    Citations citations = MainUtils.getCitationsByEvidence(evidenceForDisplay);
+                                    indicatorQueryTreatment.setPmids(citations.getPmids());
+                                    indicatorQueryTreatment.setAbstracts(citations.getAbstracts());
+                                } else {
+                                    indicatorQueryTreatment.setPmids(pmidsMap.get(treatment));
+                                    indicatorQueryTreatment.setAbstracts(abstractsMap.get(treatment));
+                                }
                                 indicatorQueryTreatment.setAlterations(alterationsMap.get(treatment));
                                 indicatorQueryTreatment.setLevelAssociatedCancerType(new org.mskcc.cbio.oncokb.apiModels.TumorType(tumorType));
                                 if (evidence.getExcludedCancerTypes().size() > 0) {
                                     Set<org.mskcc.cbio.oncokb.apiModels.TumorType> excludedCancerTypes = evidence.getExcludedCancerTypes().stream().filter(ect -> relevantTumorTypes.contains(ect)).map(ect -> new org.mskcc.cbio.oncokb.apiModels.TumorType(ect)).collect(Collectors.toSet());
                                     indicatorQueryTreatment.setLevelExcludedCancerTypes(excludedCancerTypes);
                                 }
-                                String therapeuticDescription = getTherapeuticDescriptionWithAddendum(
-                                    evidence,
-                                    treatment,
-                                    matchedTumorType,
-                                    descriptionMap.get(treatment)
-                                );
+                                String therapeuticDescription = evidenceForDisplay != evidence && StringUtils.isNotEmpty(evidenceForDisplay.getDescription())
+                                    ? evidenceForDisplay.getDescription()
+                                    : descriptionMap.get(treatment);
                                 indicatorQueryTreatment.setDescription(CplUtils.annotateGene(therapeuticDescription, queryHugoSymbol));
                                 treatments.add(indicatorQueryTreatment);
                             }
@@ -1220,9 +1224,21 @@ public class IndicatorUtils {
         return getTherapeuticDescriptionWithAddendum(therapeuticEvidence, treatment, matchedTumorType, defaultDescription, addendumEvidences);
     }
 
-    static String getTherapeuticDescriptionWithAddendum(Evidence therapeuticEvidence, Treatment treatment, TumorType matchedTumorType, String defaultDescription, Set<Evidence> addendumEvidences) {
+    static Evidence getTherapeuticEvidenceWithAddendum(Evidence therapeuticEvidence, Treatment treatment, TumorType matchedTumorType) {
+        if (therapeuticEvidence == null || therapeuticEvidence.getGene() == null || matchedTumorType == null) {
+            return therapeuticEvidence;
+        }
+
+        Set<Evidence> addendumEvidences = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(
+            therapeuticEvidence.getGene(),
+            Collections.singleton(EvidenceType.TX_ADDENDUM)
+        );
+        return getTherapeuticEvidenceWithAddendum(therapeuticEvidence, treatment, matchedTumorType, addendumEvidences);
+    }
+
+    static Evidence getTherapeuticEvidenceWithAddendum(Evidence therapeuticEvidence, Treatment treatment, TumorType matchedTumorType, Set<Evidence> addendumEvidences) {
         if (addendumEvidences == null || addendumEvidences.isEmpty()) {
-            return defaultDescription;
+            return therapeuticEvidence;
         }
 
         for (Evidence addendumEvidence : addendumEvidences) {
@@ -1230,8 +1246,17 @@ public class IndicatorUtils {
                 continue;
             }
             if (StringUtils.isNotEmpty(addendumEvidence.getDescription())) {
-                return addendumEvidence.getDescription();
+                return addendumEvidence;
             }
+        }
+
+        return therapeuticEvidence;
+    }
+
+    static String getTherapeuticDescriptionWithAddendum(Evidence therapeuticEvidence, Treatment treatment, TumorType matchedTumorType, String defaultDescription, Set<Evidence> addendumEvidences) {
+        Evidence evidenceForDisplay = getTherapeuticEvidenceWithAddendum(therapeuticEvidence, treatment, matchedTumorType, addendumEvidences);
+        if (evidenceForDisplay != therapeuticEvidence && evidenceForDisplay != null && StringUtils.isNotEmpty(evidenceForDisplay.getDescription())) {
+            return evidenceForDisplay.getDescription();
         }
 
         return defaultDescription;

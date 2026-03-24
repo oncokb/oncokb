@@ -54,6 +54,39 @@ public class IndicatorUtilsTest {
     }
 
     @Test
+    public void testTherapeuticEvidenceAddendumOverrideUsesAddendumCitations() {
+        org.mskcc.cbio.oncokb.model.TumorType lowGradeGlioma = new org.mskcc.cbio.oncokb.model.TumorType();
+        lowGradeGlioma.setSubtype("Low Grade Glioma");
+
+        Alteration v600e = new Alteration();
+        v600e.setAlteration("V600E");
+
+        Treatment queryTreatment = buildTreatmentWithDrugs("Dabrafenib", "Trametinib");
+
+        Evidence therapeuticEvidence = new Evidence();
+        therapeuticEvidence.setAlterations(Collections.singleton(v600e));
+        therapeuticEvidence.setArticles(Collections.singleton(buildArticle("1000", "Base abstract", "https://base")));
+
+        Evidence addendumEvidence = new Evidence();
+        addendumEvidence.setEvidenceType(EvidenceType.TX_ADDENDUM);
+        addendumEvidence.setDescription("LGG-specific description");
+        addendumEvidence.setCancerTypes(Collections.singleton(lowGradeGlioma));
+        addendumEvidence.setAlterations(Collections.singleton(v600e));
+        addendumEvidence.setArticles(Collections.singleton(buildArticle("2000", "Addendum abstract", "https://addendum")));
+        setEvidenceTreatments(addendumEvidence, buildTreatmentWithDrugs("Dabrafenib", "Trametinib"));
+
+        Evidence evidenceForDisplay = IndicatorUtils.getTherapeuticEvidenceWithAddendum(
+            therapeuticEvidence,
+            queryTreatment,
+            lowGradeGlioma,
+            Collections.singleton(addendumEvidence)
+        );
+
+        assertSame(addendumEvidence, evidenceForDisplay);
+        assertEquals(Collections.singleton("2000"), MainUtils.getCitationsByEvidence(evidenceForDisplay).getPmids());
+    }
+
+    @Test
     public void testTherapeuticDescriptionAddendumFallbackWhenTreatmentNotMatched() {
         org.mskcc.cbio.oncokb.model.TumorType melanoma = new org.mskcc.cbio.oncokb.model.TumorType();
         melanoma.setSubtype("Melanoma");
@@ -201,6 +234,14 @@ public class IndicatorUtilsTest {
 
     private void setEvidenceTreatments(Evidence evidence, Treatment... treatments) {
         evidence.setTreatments(Arrays.asList(treatments));
+    }
+
+    private Article buildArticle(String pmid, String abstractContent, String link) {
+        Article article = new Article();
+        article.setPmid(pmid);
+        article.setAbstractContent(abstractContent);
+        article.setLink(link);
+        return article;
     }
 
     @Test
