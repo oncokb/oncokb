@@ -28,7 +28,7 @@ public class SummaryUtils {
     public static final String PATHOGENIC_MUTATIONS_DEFAULT_SUMMARY = "\"Pathogenic Mutations\" includes all variants annotated as pathogenic and likely pathogenic by MSK Department of Molecular Genetics.";
     public static final List<String> specialAlterations = Arrays.asList("mutation", "alteration", "insertion", "deletion", "duplication", "fusion", "deletion", "amplification");
 
-    public static Map<String, Object> tumorTypeSummary(EvidenceType evidenceType, Gene gene, Query query, Alteration exactMatchedAlt, List<Alteration> alterations, TumorType matchedTumorType, List<TumorType> relevantTumorTypes) {
+    public static Map<String, Object> tumorTypeSummary(EvidenceType evidenceType, Gene gene, Query query, Alteration exactMatchedAlt, List<Alteration> alterations, TumorType matchedTumorType, List<TumorType> relevantTumorTypes, Oncogenicity oncogenicity) {
         Map<String, Object> tumorTypeSummary = newTumorTypeSummary();
         String queryTumorType = query.getTumorType();
         String key = query.getQueryId();
@@ -40,12 +40,12 @@ public class SummaryUtils {
         }
 
         query.setTumorType(queryTumorType);
-        tumorTypeSummary = getTumorTypeSummarySubFunc(evidenceType, gene, query, exactMatchedAlt, alterations, matchedTumorType, relevantTumorTypes);
+        tumorTypeSummary = getTumorTypeSummarySubFunc(evidenceType, gene, query, exactMatchedAlt, alterations, matchedTumorType, relevantTumorTypes, oncogenicity);
 
         return tumorTypeSummary;
     }
 
-    private static Map<String, Object> getTumorTypeSummarySubFunc(EvidenceType evidenceType, Gene gene, Query query, Alteration exactMatchedAlt, List<Alteration> relevantAlterations, TumorType matchedTumorType, List<TumorType> relevantTumorTypes) {
+    private static Map<String, Object> getTumorTypeSummarySubFunc(EvidenceType evidenceType, Gene gene, Query query, Alteration exactMatchedAlt, List<Alteration> relevantAlterations, TumorType matchedTumorType, List<TumorType> relevantTumorTypes, Oncogenicity oncogenicity) {
         Map<String, Object> tumorTypeSummary = newTumorTypeSummary();
         Alteration alteration = null;
 
@@ -72,6 +72,11 @@ public class SummaryUtils {
         matchedAlterations.addAll(relevantAlterations.stream().filter(alt -> matchedAltStr.equals(AlterationUtils.removeExclusionCriteria(alt.getAlteration()))).collect(Collectors.toList()));
         if (tumorTypeSummary == null) {
             tumorTypeSummary = getRelevantTumorTypeSummaryByAlt(evidenceType, matchedAlterations, matchedTumorType, relevantTumorTypes);
+        }
+
+        List<Evidence> tagEvidences = EvidenceUtils.getTagEvidences(alteration, oncogenicity, Collections.singleton(evidenceType));
+        if (tagEvidences.size() > 0) {
+            tumorTypeSummary = getTumorTypeSummaryFromEvidences(tagEvidences);
         }
 
         List<Alteration> alternativeAlleles = new ArrayList<>();
