@@ -413,11 +413,9 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             query = new Query(alterationModel, matchedRG);
         }
         query.setTumorType(tumorType);
-        query.setGermline(false);
-        List<EvidenceQueryRes> responses = EvidenceUtils.processRequest(Collections.singletonList(query), new HashSet<>(EvidenceTypeUtils.getAllEvidenceTypes(query.isGermline())), LevelUtils.getPublicLevels(), false, false);
-        SomaticIndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuerySomatic(query, null, false, null, false);
 
-        IndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuery(query, null, false, null, false);
+        query.setGermline(false);
+        SomaticIndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuerySomatic(query, null, false, null, false);
         Oncogenicity oncogenicity = Oncogenicity.getByEffect(indicatorQueryResp.getOncogenic());
 
         Set<EvidenceType> evidenceTypes = new HashSet<>(EvidenceTypeUtils.getAllEvidenceTypes(query.isGermline()));
@@ -555,7 +553,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         query.setTumorType(tumorType);
         query.setGermline(true);
 
-        List<EvidenceQueryRes> responses = EvidenceUtils.processRequest(Collections.singletonList(query), new HashSet<>(EvidenceTypeUtils.getAllEvidenceTypes(query.isGermline())), LevelUtils.getPublicLevels(), false, false);
+        List<EvidenceQueryRes> responses = EvidenceUtils.processRequest(Collections.singletonList(query), new HashSet<>(EvidenceTypeUtils.getAllEvidenceTypes(query.isGermline())), LevelUtils.getPublicLevels(), false, false, Optional.empty());
         GermlineIndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQueryGermline(query, null, false, null, false);
         GermlineVariantAnnotation annotation = new GermlineVariantAnnotation(indicatorQueryResp);
         EvidenceQueryRes response = responses.iterator().next();
