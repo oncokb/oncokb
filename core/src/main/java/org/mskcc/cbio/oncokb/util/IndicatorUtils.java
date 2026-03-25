@@ -463,7 +463,9 @@ public class IndicatorUtils {
                 Map<String, Object> tumorTypeSummary = SummaryUtils.tumorTypeSummary(EvidenceType.TUMOR_TYPE_SUMMARY, gene, query, matchedAlt,
                     new ArrayList<>(relevantAlterationsWithoutAlternativeAlleles),
                     matchedTumorType,
-                    relevantUpwardTumorTypes);
+                    relevantUpwardTumorTypes,
+                    oncogenicity
+                );
                 if (tumorTypeSummary != null) {
                     indicatorQuery.setTumorTypeSummary((String) tumorTypeSummary.get("summary"));
                     Date lateEdit = tumorTypeSummary.get("lastEdit") == null ? null : (Date) tumorTypeSummary.get("lastEdit");
@@ -492,13 +494,17 @@ public class IndicatorUtils {
                     diagnosticSummary = SummaryUtils.tumorTypeSummary(EvidenceType.DIAGNOSTIC_SUMMARY, gene, query, matchedAlt,
                         new ArrayList<>(relevantAlterationsWithoutAlternativeAlleles),
                         matchedTumorType,
-                        relevantDownwardTumorTypes);
+                        relevantDownwardTumorTypes,
+                        oncogenicity
+                    );
                 }
                 if (StringUtils.isEmpty((String) diagnosticSummary.get("summary"))) {
                     diagnosticSummary = SummaryUtils.tumorTypeSummary(EvidenceType.DIAGNOSTIC_SUMMARY, gene, query, matchedAlt,
                         new ArrayList<>(relevantAlterationsWithoutAlternativeAlleles),
                         matchedTumorType,
-                        relevantUpwardTumorTypes);
+                        relevantUpwardTumorTypes,
+                        oncogenicity
+                    );
                 }
 
                 if(StringUtils.isEmpty((String) diagnosticSummary.get("summary"))) {
@@ -519,7 +525,9 @@ public class IndicatorUtils {
                 Map<String, Object> prognosticSummary = SummaryUtils.tumorTypeSummary(EvidenceType.PROGNOSTIC_SUMMARY, gene, query, matchedAlt,
                     new ArrayList<>(relevantAlterationsWithoutAlternativeAlleles),
                     matchedTumorType,
-                    relevantUpwardTumorTypes);
+                    relevantUpwardTumorTypes,
+                    oncogenicity
+                );
                 if (prognosticSummary != null) {
                     indicatorQuery.setPrognosticSummary((String) prognosticSummary.get("summary"));
                     Date lateEdit = prognosticSummary.get("lastEdit") == null ? null : (Date) prognosticSummary.get("lastEdit");
