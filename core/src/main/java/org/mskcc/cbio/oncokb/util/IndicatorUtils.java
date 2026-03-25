@@ -613,11 +613,11 @@ public class IndicatorUtils {
             if (hasTreatmentEvidence) {
                 if (StringUtils.isEmpty(query.getTumorType())) {
                     treatmentEvidences = EvidenceUtils.getRelevantEvidences(query, matchedAlt,
-                        selectedTreatmentEvidence, levels, relevantAlterations, Collections.emptyList(), geneQueryOnly);
+                        selectedTreatmentEvidence, levels, relevantAlterations, Collections.emptyList(), geneQueryOnly, Optional.empty());
                 } else {
                     treatmentEvidences = EvidenceUtils.keepHighestLevelForSameTreatments(
                         EvidenceUtils.getRelevantEvidences(query, matchedAlt,
-                            selectedTreatmentEvidence, levels, relevantAlterations, Collections.emptyList(), geneQueryOnly), query.getReferenceGenome(), matchedAlt, matchedTumorType);
+                            selectedTreatmentEvidence, levels, relevantAlterations, Collections.emptyList(), geneQueryOnly, Optional.empty()), query.getReferenceGenome(), matchedAlt, matchedTumorType);
                 }
             }
 
