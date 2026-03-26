@@ -83,21 +83,6 @@ public class SummaryUtils {
             }
         }
 
-        // Special Tumor Type match
-        if (tumorTypeSummary == null) {
-            List<SpecialTumorType> specialTumorTypes = getSpecialTumorTypesFromRelevantTumorTypes(new HashSet<>(relevantTumorTypes));
-            for (SpecialTumorType specialTumorType : specialTumorTypes) {
-                List<Evidence> fileredTagEvidences = tagEvidences
-                    .stream()
-                    .filter(evi -> evi.getCancerTypes().contains(ApplicationContextSingleton.getTumorTypeBo().getBySpecialTumor(specialTumorType)))
-                    .collect(Collectors.toList());
-                if (fileredTagEvidences.size() > 0) {
-                    tumorTypeSummary = getTumorTypeSummaryFromEvidences(fileredTagEvidences);
-                    break;
-                }
-            }
-        }
-
         List<Alteration> alternativeAlleles = new ArrayList<>();
         alternativeAlleles.addAll(AlterationUtils.getPositionedAlterations(query.getReferenceGenome(), alteration));
         alternativeAlleles = ListUtils.intersection(alternativeAlleles, relevantAlterations);
@@ -187,11 +172,33 @@ public class SummaryUtils {
                 if (tumorTypeSummary != null) {
                     break;
                 }
+            }
 
-                for (Alteration alt : groupedRelevantAlterations.get(uniqRelevantAlt)) {
-                    // Get Other Tumor Types summary
-                    for (TumorType tumorType : relevantTumorTypes) {
-                        tumorTypeSummary = getOtherTumorTypeSummaryByAlt(evidenceType, alt, Collections.singleton(tumorType));
+            // Special Tumor Type match
+            if (tumorTypeSummary == null) {
+                List<SpecialTumorType> specialTumorTypes = getSpecialTumorTypesFromRelevantTumorTypes(new HashSet<>(relevantTumorTypes));
+                for (SpecialTumorType specialTumorType : specialTumorTypes) {
+                    List<Evidence> fileredTagEvidences = tagEvidences
+                        .stream()
+                        .filter(evi -> evi.getCancerTypes().contains(ApplicationContextSingleton.getTumorTypeBo().getBySpecialTumor(specialTumorType)))
+                        .collect(Collectors.toList());
+                    if (fileredTagEvidences.size() > 0) {
+                        tumorTypeSummary = getTumorTypeSummaryFromEvidences(fileredTagEvidences);
+                        break;
+                    }
+                }
+            }
+
+            if (tumorTypeSummary == null) {
+                for (String uniqRelevantAlt : uniqRelevantAlts) {
+                    for (Alteration alt : groupedRelevantAlterations.get(uniqRelevantAlt)) {
+                        // Get Other Tumor Types summary
+                        for (TumorType tumorType : relevantTumorTypes) {
+                            tumorTypeSummary = getOtherTumorTypeSummaryByAlt(evidenceType, alt, Collections.singleton(tumorType));
+                            if (tumorTypeSummary != null) {
+                                break;
+                            }
+                        }
                         if (tumorTypeSummary != null) {
                             break;
                         }
@@ -199,9 +206,6 @@ public class SummaryUtils {
                     if (tumorTypeSummary != null) {
                         break;
                     }
-                }
-                if (tumorTypeSummary != null) {
-                    break;
                 }
             }
         }
