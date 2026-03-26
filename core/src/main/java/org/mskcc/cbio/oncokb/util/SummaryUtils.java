@@ -76,21 +76,25 @@ public class SummaryUtils {
 
         // Exact match tag
         List<Evidence> tagEvidences = EvidenceUtils.getTagEvidences(alteration, oncogenicity, Collections.singleton(evidenceType));
-        List<Evidence> fileredTagEvidences = EvidenceUtils.filterEvidencesByTumorType(new HashSet<>(tagEvidences), matchedTumorType, relevantTumorTypes);
-        if (tagEvidences.size() > 0) {
-            tumorTypeSummary = getTumorTypeSummaryFromEvidences(tagEvidences);
+        if (tumorTypeSummary == null) {
+            List<Evidence> fileredTagEvidences = EvidenceUtils.filterEvidencesByTumorType(new HashSet<>(tagEvidences), matchedTumorType, relevantTumorTypes);
+            if (fileredTagEvidences.size() > 0) {
+                tumorTypeSummary = getTumorTypeSummaryFromEvidences(fileredTagEvidences);
+            }
         }
 
         // Special Tumor Type match
-        List<SpecialTumorType> specialTumorTypes = getSpecialTumorTypesFromRelevantTumorTypes(new HashSet<>(relevantTumorTypes));
-        for (SpecialTumorType specialTumorType : specialTumorTypes) {
-            fileredTagEvidences = tagEvidences
-                .stream()
-                .filter(evi -> evi.getCancerTypes().contains(ApplicationContextSingleton.getTumorTypeBo().getBySpecialTumor(specialTumorType)))
-                .collect(Collectors.toList());
-            if (fileredTagEvidences.size() > 0) {
-                tumorTypeSummary = getTumorTypeSummaryFromEvidences(fileredTagEvidences);
-                break;
+        if (tumorTypeSummary == null) {
+            List<SpecialTumorType> specialTumorTypes = getSpecialTumorTypesFromRelevantTumorTypes(new HashSet<>(relevantTumorTypes));
+            for (SpecialTumorType specialTumorType : specialTumorTypes) {
+                List<Evidence> fileredTagEvidences = tagEvidences
+                    .stream()
+                    .filter(evi -> evi.getCancerTypes().contains(ApplicationContextSingleton.getTumorTypeBo().getBySpecialTumor(specialTumorType)))
+                    .collect(Collectors.toList());
+                if (fileredTagEvidences.size() > 0) {
+                    tumorTypeSummary = getTumorTypeSummaryFromEvidences(fileredTagEvidences);
+                    break;
+                }
             }
         }
 
