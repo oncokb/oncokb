@@ -584,6 +584,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
                     updatedEvidences.add(updatedEvidence);
                 }
             );
+            variantAnnotationTumorType.setEvidences(updatedEvidences);
 
             annotation.getTumorTypes().add(variantAnnotationTumorType);
         }

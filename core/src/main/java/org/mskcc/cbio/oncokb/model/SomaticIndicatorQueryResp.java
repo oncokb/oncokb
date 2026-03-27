@@ -2,12 +2,28 @@ package org.mskcc.cbio.oncokb.model;
 
 import io.swagger.annotations.ApiModelProperty;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class SomaticIndicatorQueryResp extends IndicatorQueryRespBase {
     @ApiModelProperty(value = "The oncogenicity status of the variant. Defaulted to \"Unknown\".", allowableValues = "Oncogenic, Likely Oncogenic, Likely Neutral, Inconclusive, Resistance, Unknown")
     private String oncogenic;
 
     @ApiModelProperty(value = "Whether variant is recurrently found in cancer with statistical significance, as defined in Chang et al. (2017). See SOP Protocol 9.2")
     private Boolean hotspot = false;
+
+    @ApiModelProperty(value = "(Nullable) The highest FDA level from a list of therapeutic evidences.", allowableValues = "LEVEL_Fda1, LEVEL_Fda2, LEVEL_Fda3")
+    private LevelOfEvidence highestFdaLevel;
+
+    @ApiModelProperty(value = "DEPRECATED", allowableValues = "")
+    private List<LevelOfEvidence> otherSignificantSensitiveLevels = new ArrayList<>();
+
+    @ApiModelProperty(value = "DEPRECATED", allowableValues = "")
+    private List<LevelOfEvidence> otherSignificantResistanceLevels = new ArrayList<>();
+
+    @Deprecated
+    @ApiModelProperty(value = "DEPRECATED. (Nullable) The affected exon of this variant, if applicable (currently only supported when annotating via HGVSg or Genomic Location)")
+    private String exon;
 
     public SomaticIndicatorQueryResp() {
         super();
@@ -59,5 +75,39 @@ public class SomaticIndicatorQueryResp extends IndicatorQueryRespBase {
 
     public void setHotspot(Boolean hotspot) {
         this.hotspot = hotspot;
+    }
+
+    public LevelOfEvidence getHighestFdaLevel() {
+        return highestFdaLevel;
+    }
+
+    public void setHighestFdaLevel(LevelOfEvidence highestFdaLevel) {
+        this.highestFdaLevel = highestFdaLevel;
+    }
+
+    public List<LevelOfEvidence> getOtherSignificantSensitiveLevels() {
+        return otherSignificantSensitiveLevels;
+    }
+
+    public void setOtherSignificantSensitiveLevels(List<LevelOfEvidence> otherSignificantSensitiveLevels) {
+        this.otherSignificantSensitiveLevels = otherSignificantSensitiveLevels;
+    }
+
+    public List<LevelOfEvidence> getOtherSignificantResistanceLevels() {
+        return otherSignificantResistanceLevels;
+    }
+
+    public void setOtherSignificantResistanceLevels(List<LevelOfEvidence> otherSignificantResistanceLevels) {
+        this.otherSignificantResistanceLevels = otherSignificantResistanceLevels;
+    }
+
+    @Deprecated
+    public String getExon() {
+        return exon;
+    }
+
+    @Deprecated
+    public void setExon(String exon) {
+        this.exon = exon;
     }
 }

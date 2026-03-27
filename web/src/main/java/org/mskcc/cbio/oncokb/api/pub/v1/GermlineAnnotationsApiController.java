@@ -768,9 +768,6 @@ public class GermlineAnnotationsApiController {
             if (StringUtils.isNotEmpty(summary.getTranscriptId())) {
                 response.getQuery().setCanonicalTranscript(summary.getTranscriptId());
             }
-            if (StringUtils.isNotEmpty(summary.getExon())) {
-                response.setExon(StringUtils.substringBefore(summary.getExon(), "/"));
-            }
         }
     }
 

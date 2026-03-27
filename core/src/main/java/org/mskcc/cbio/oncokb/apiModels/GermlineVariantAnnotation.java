@@ -22,9 +22,7 @@ public class GermlineVariantAnnotation extends GermlineIndicatorQueryResp {
         this.setHighestResistanceLevel(indicatorQueryResp.getHighestResistanceLevel());
         this.setHighestDiagnosticImplicationLevel(indicatorQueryResp.getHighestDiagnosticImplicationLevel());
         this.setHighestPrognosticImplicationLevel(indicatorQueryResp.getHighestPrognosticImplicationLevel());
-        this.setHighestFdaLevel(indicatorQueryResp.getHighestFdaLevel());
         this.setVUS(indicatorQueryResp.getVUS());
-        this.setExon(indicatorQueryResp.getExon());
         this.setGeneSummary(indicatorQueryResp.getGeneSummary());
         this.setVariantSummary(indicatorQueryResp.getVariantSummary());
         this.setTumorTypeSummary(indicatorQueryResp.getTumorTypeSummary());

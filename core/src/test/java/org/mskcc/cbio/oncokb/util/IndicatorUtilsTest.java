@@ -983,6 +983,34 @@ public class IndicatorUtilsTest {
             StringUtils.isEmpty(somaticIndicatorQueryResp.getMutationEffect().getDescription()));
     }
 
+    @Test
+    public void testGetRelevantAlterationsForGermline() {
+        Gene gene = GeneUtils.getGeneByHugoSymbol("FH");
+        assertNotNull("FH should exist in test data.", gene);
+
+        Alteration alteration = AlterationUtils.getAlteration("FH", "c.1020T>A",
+            null, null, null, null, DEFAULT_REFERENCE_GENOME, true);
+        assertNotNull("FH c.1020T>A should resolve to an alteration.", alteration);
+
+        Alteration matchedAlt = AlterationUtils.findExactlyMatchedAlteration(
+            DEFAULT_REFERENCE_GENOME,
+            alteration,
+            AlterationUtils.getAllAlterations(DEFAULT_REFERENCE_GENOME, gene)
+        );
+        assertNotNull("FH c.1020T>A should have an exact germline match.", matchedAlt);
+
+        List<Alteration> relevantAlterations = IndicatorUtils.getRelevantAlterationsForGermline(
+            Collections.emptyList(),
+            matchedAlt,
+            DEFAULT_REFERENCE_GENOME,
+            Pathogenicity.YES.getPathogenic()
+        );
+
+        assertTrue("FH c.1020T>A should add the germline Pathogenic Variants alteration. Actual: " + relevantAlterations,
+            relevantAlterations.stream().anyMatch(alt -> alt.getAlteration() != null
+                && alt.getAlteration().startsWith(InferredMutation.PATHOGENIC_VARIANTS.getVariant())));
+    }
+
     // Most of the annotation service should not have clinical implication returned when alteration is not available.
     // The only exception is when to do annotation/search where gene query is possible and clinical implications should be returned which we cover in AnnotationSearchUtilsTest.java
     @Test
