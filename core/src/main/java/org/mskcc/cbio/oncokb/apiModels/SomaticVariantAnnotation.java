@@ -35,6 +35,7 @@ public class SomaticVariantAnnotation extends SomaticIndicatorQueryResp {
         this.setOtherSignificantSensitiveLevels(indicatorQueryResp.getOtherSignificantSensitiveLevels());
         this.setOtherSignificantResistanceLevels(indicatorQueryResp.getOtherSignificantResistanceLevels());
         this.setVUS(indicatorQueryResp.getVUS());
+        this.setExon(indicatorQueryResp.getExon());
         this.setHotspot(indicatorQueryResp.getHotspot());
         this.setGeneSummary(indicatorQueryResp.getGeneSummary());
         this.setVariantSummary(indicatorQueryResp.getVariantSummary());

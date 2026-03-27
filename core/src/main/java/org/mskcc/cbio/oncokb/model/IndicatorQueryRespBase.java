@@ -38,17 +38,6 @@ abstract class IndicatorQueryRespBase implements java.io.Serializable {
     @ApiModelProperty(value = "(Nullable) The highest prognostic level from a list of prognostic evidences.", allowableValues = "LEVEL_Px1, LEVEL_Px2, LEVEL_Px3")
     private LevelOfEvidence highestPrognosticImplicationLevel;
 
-    @ApiModelProperty(value = "(Nullable) The highest FDA level from a list of therapeutic evidences.", allowableValues = "LEVEL_Fda1, LEVEL_Fda2, LEVEL_Fda3")
-    private LevelOfEvidence highestFdaLevel;
-
-    @ApiModelProperty(value = "DEPRECATED", allowableValues = "")
-    private List<LevelOfEvidence> otherSignificantSensitiveLevels = new ArrayList<>();
-    @ApiModelProperty(value = "DEPRECATED", allowableValues = "")
-    private List<LevelOfEvidence> otherSignificantResistanceLevels = new ArrayList<>();
-
-    @ApiModelProperty(value = "(Nullable) The affected exon of this variant, if applicable (currently only supported when annotating via HGVSg or Genomic Location)")
-    private String exon;
-
     @ApiModelProperty(value = "Gene summary. Defaulted to \"\"")
     private String geneSummary = "";
     @ApiModelProperty(value = "Variant summary. Defaulted to \"\"")
@@ -102,14 +91,6 @@ abstract class IndicatorQueryRespBase implements java.io.Serializable {
         this.variantExist = variantExist;
     }
 
-    public String getExon() {
-        return exon;
-    }
-
-    public void setExon(String exon) {
-        this.exon = exon;
-    }
-
     public Boolean getAlleleExist() {
         return alleleExist;
     }
@@ -156,30 +137,6 @@ abstract class IndicatorQueryRespBase implements java.io.Serializable {
 
     public void setHighestPrognosticImplicationLevel(LevelOfEvidence highestPrognosticImplicationLevel) {
         this.highestPrognosticImplicationLevel = highestPrognosticImplicationLevel;
-    }
-
-    public LevelOfEvidence getHighestFdaLevel() {
-        return highestFdaLevel;
-    }
-
-    public void setHighestFdaLevel(LevelOfEvidence highestFdaLevel) {
-        this.highestFdaLevel = highestFdaLevel;
-    }
-
-    public List<LevelOfEvidence> getOtherSignificantSensitiveLevels() {
-        return otherSignificantSensitiveLevels;
-    }
-
-    public void setOtherSignificantSensitiveLevels(List<LevelOfEvidence> otherSignificantSensitiveLevels) {
-        this.otherSignificantSensitiveLevels = otherSignificantSensitiveLevels;
-    }
-
-    public List<LevelOfEvidence> getOtherSignificantResistanceLevels() {
-        return otherSignificantResistanceLevels;
-    }
-
-    public void setOtherSignificantResistanceLevels(List<LevelOfEvidence> otherSignificantResistanceLevels) {
-        this.otherSignificantResistanceLevels = otherSignificantResistanceLevels;
     }
 
     public Boolean getVUS() {

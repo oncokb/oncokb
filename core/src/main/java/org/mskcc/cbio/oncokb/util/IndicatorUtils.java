@@ -535,9 +535,6 @@ public class IndicatorUtils {
         gene = GeneUtils.getGene(query.getEntrezGeneId(), query.getHugoSymbol());
 
         if (gene != null) {
-            Alteration alt = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getAlteration(),
-                null, query.getConsequence(), query.getProteinStart(), query.getProteinEnd(), query.getReferenceGenome(), query.isGermline());
-            relevantAlterations = AlterationUtils.getRelevantAlterations(query.getReferenceGenome(), alt);
             // we replace hugo symbol with matched gene when queries hugo symbol is not available
             if (StringUtils.isEmpty(query.getHugoSymbol())) {
                 query.setHugoSymbol(gene.getHugoSymbol());
@@ -561,9 +558,8 @@ public class IndicatorUtils {
             TumorType matchedTumorType = ApplicationContextSingleton.getTumorTypeBo().getByName(query.getTumorType());
             List<TumorType> relevantUpwardTumorTypes = new ArrayList<>();
 
-            Alteration matchedAlt = AlterationUtils.findExactlyMatchedAlteration(query.getReferenceGenome(), alteration, AlterationUtils.getAllAlterations(query.getReferenceGenome(), gene));
-
-
+            // For germline, we should find the exact alteration (there are no rules yet)
+            Alteration matchedAlt = AlterationUtils.findAlteration(query.getReferenceGenome(), alteration.getAlteration(), AlterationUtils.getAllAlterations(query.getReferenceGenome(), gene), query.isGermline());
             Boolean variantExists = matchedAlt != null;
             indicatorQuery.setVariantExist(variantExists);
             if (!variantExists) {
@@ -607,6 +603,14 @@ public class IndicatorUtils {
                     mutationEffectResp.setCitations(MainUtils.getCitationsByEvidence(mutationEffectEvi));
                     indicatorQuery.setMutationEffect(mutationEffectResp);
                 }
+
+                // The only rule currently is to associate "Pathogenic Variants" with variants curated as P/LP
+                relevantAlterations = getRelevantAlterationsForGermline(
+                    relevantAlterations,
+                    matchedAlt,
+                    query.getReferenceGenome(),
+                    indicatorQuery.getPathogenic()
+                );
             }
 
             // Set implications
@@ -637,10 +641,6 @@ public class IndicatorUtils {
                     Set<Evidence> sensitiveEvidences = EvidenceUtils.getSensitiveEvidences(treatmentEvidences);
                     filteredEvis.addAll(EvidenceUtils.getOnlySignificantLevelsEvidences(sensitiveEvidences));
 
-                    // Get highest resistance evidences
-                    Set<Evidence> resistanceEvidences = EvidenceUtils.getResistanceEvidences(treatmentEvidences);
-                    filteredEvis.addAll(EvidenceUtils.getOnlyHighestLevelEvidences(resistanceEvidences, query.getReferenceGenome(), matchedAlt));
-
                     treatmentEvidences = filteredEvis;
                 }
                 if (!treatmentEvidences.isEmpty()) {
@@ -660,8 +660,7 @@ public class IndicatorUtils {
                     indicatorQuery.setTreatments(treatments);
                     highestLevels = findHighestLevel(new HashSet<>(treatments));
                     indicatorQuery.setHighestSensitiveLevel(highestLevels.get("sensitive"));
-                    indicatorQuery.setHighestResistanceLevel(highestLevels.get("resistant"));
-                    indicatorQuery.setHighestFdaLevel(LevelUtils.getHighestFdaLevel(treatments.stream().filter(t -> t.getFdaLevel() != null).map(t -> t.getFdaLevel()).collect(Collectors.toSet())));
+            
                     latestEvidenceDate = updateLatestEvidenceDate(latestEvidenceDate, treatmentEvidences);
                 }
             }
@@ -765,6 +764,33 @@ public class IndicatorUtils {
         alts.addAll(relevantAlterations);
         List<Evidence> genomicIndicatorEvis = EvidenceUtils.getGenomicIndicatorsByAlteration(alts, inheritanceMechanism);
         indicatorQuery.setGenomicIndicators(toGenomicIndicatorsFromEvidence(genomicIndicatorEvis));
+    }
+
+    static List<Alteration> getRelevantAlterationsForGermline(List<Alteration> relevantAlterations,
+                                                              Alteration matchedAlt,
+                                                              ReferenceGenome referenceGenome,
+                                                              String pathogenicity) {
+        List<Alteration> updatedRelevantAlterations = new ArrayList<>(relevantAlterations);
+        if (matchedAlt == null || matchedAlt.getGene() == null) {
+            return updatedRelevantAlterations;
+        }
+        if (!MainUtils.isPathogenic(Pathogenicity.getByEffect(pathogenicity))) {
+            return updatedRelevantAlterations;
+        }
+
+        List<Alteration> pathogenicVariants = AlterationUtils.findPathogenicVariants(
+            AlterationUtils.getAllAlterations(referenceGenome, matchedAlt.getGene())
+                .stream()
+                .filter(alt -> Objects.equals(alt.getForGermline(), matchedAlt.getForGermline()))
+                .collect(Collectors.toList())
+        );
+
+        for (Alteration pathogenicVariant : pathogenicVariants) {
+            if (!updatedRelevantAlterations.contains(pathogenicVariant)) {
+                updatedRelevantAlterations.add(pathogenicVariant);
+            }
+        }
+        return updatedRelevantAlterations;
     }
 
     private static Set<Implication> getImplicationsFromEvidence(Evidence evidence, String queryHugoSymbol) {

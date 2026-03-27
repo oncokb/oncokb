@@ -1048,6 +1048,18 @@ public class EvidenceUtils {
                             }
                         }
 
+                        if (requestQuery.isGermline()) {
+                            IndicatorQueryPathogenicity indicatorQueryPathogenicity = IndicatorUtils.getPathogenicity(alt, relevantAlts);
+                            if (indicatorQueryPathogenicity.getPathogenicity() != null) {
+                                relevantAlts = IndicatorUtils.getRelevantAlterationsForGermline(
+                                    relevantAlts,
+                                    alt,
+                                    requestQuery.getReferenceGenome(),
+                                    indicatorQueryPathogenicity.getPathogenicity().getPathogenic()
+                                );
+                            }
+                        }
+
                         Alteration alteration = AlterationUtils.getAlteration(query.getGene().getHugoSymbol(), requestQuery.getAlteration(), AlterationType.MUTATION, requestQuery.getConsequence(), requestQuery.getProteinStart(), requestQuery.getProteinEnd(), requestQuery.getReferenceGenome(), requestQuery.isGermline());
                         List<Alteration> allelesAlts = AlterationUtils.getAlleleAlterations(requestQuery.getReferenceGenome(), alteration);
                         relevantAlts.removeAll(allelesAlts);
@@ -1062,7 +1074,7 @@ public class EvidenceUtils {
                 query.setLevelOfEvidences(levelOfEvidences == null ? null : new ArrayList<>(levelOfEvidences));
                 Set<Evidence> relevantEvidences = new HashSet<>();
                 if (query.getExactMatchedAlteration() != null) {
-                    relevantEvidences = getRelevantEvidences(query.getQuery(), query.getExactMatchedAlteration(), evidenceTypes, levelOfEvidences, AlterationUtils.getRelevantAlterations(requestQuery.getReferenceGenome(), query.getExactMatchedAlteration()), query.getAlleles(), geneQueryOnly, oncogenicity);
+                    relevantEvidences = getRelevantEvidences(query.getQuery(), query.getExactMatchedAlteration(), evidenceTypes, levelOfEvidences, query.getAlterations(), query.getAlleles(), geneQueryOnly, oncogenicity);
                 } else {
                     relevantEvidences = getEvidence(requestQuery.getReferenceGenome(), query, evidenceTypes, levelOfEvidences);
                 }

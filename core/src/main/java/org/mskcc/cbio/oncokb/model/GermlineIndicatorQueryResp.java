@@ -33,11 +33,7 @@ public class GermlineIndicatorQueryResp extends IndicatorQueryRespBase {
         newResp.setHighestResistanceLevel(this.getHighestResistanceLevel());
         newResp.setHighestDiagnosticImplicationLevel(this.getHighestDiagnosticImplicationLevel());
         newResp.setHighestPrognosticImplicationLevel(this.getHighestPrognosticImplicationLevel());
-        newResp.setHighestFdaLevel(this.getHighestFdaLevel());
-        newResp.setOtherSignificantSensitiveLevels(new java.util.ArrayList<>(this.getOtherSignificantSensitiveLevels()));
-        newResp.setOtherSignificantResistanceLevels(new java.util.ArrayList<>(this.getOtherSignificantResistanceLevels()));
         newResp.setVUS(this.getVUS());
-        newResp.setExon(this.getExon());
         newResp.setGeneSummary(this.getGeneSummary());
         newResp.setVariantSummary(this.getVariantSummary());
         newResp.setTumorTypeSummary(this.getTumorTypeSummary());
