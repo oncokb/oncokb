@@ -161,50 +161,41 @@ public class SummaryUtils {
                 groupedRelevantAlterations.get(uniqRelevantAlt).add(alt);
             }
 
+            Map<String, Object> specialTumorTypeSummary = null;
+            List<SpecialTumorType> specialTumorTypes = getSpecialTumorTypesFromRelevantTumorTypes(new HashSet<>(relevantTumorTypes));
+            for (SpecialTumorType specialTumorType : specialTumorTypes) {
+                List<Evidence> fileredTagEvidences = tagEvidences
+                    .stream()
+                    .filter(evi -> evi.getCancerTypes().contains(ApplicationContextSingleton.getTumorTypeBo().getBySpecialTumor(specialTumorType)))
+                    .collect(Collectors.toList());
+                if (!fileredTagEvidences.isEmpty()) {
+                    specialTumorTypeSummary = getTumorTypeSummaryFromEvidences(fileredTagEvidences);
+                    break;
+                }
+            }
             // Base on the priority of relevant alterations
+            // Base on the priority of relevant alterations
+            outer:
             for (String uniqRelevantAlt : uniqRelevantAlts) {
                 for (Alteration alt : groupedRelevantAlterations.get(uniqRelevantAlt)) {
                     tumorTypeSummary = getRelevantTumorTypeSummaryByAlt(evidenceType, Collections.singletonList(alt), matchedTumorType, relevantTumorTypes);
                     if (tumorTypeSummary != null) {
-                        break;
+                        break outer;
                     }
                 }
-                if (tumorTypeSummary != null) {
+
+                if (specialTumorTypeSummary != null) {
+                    tumorTypeSummary = specialTumorTypeSummary;
                     break;
                 }
-            }
 
-            // Special Tumor Type match
-            if (tumorTypeSummary == null) {
-                List<SpecialTumorType> specialTumorTypes = getSpecialTumorTypesFromRelevantTumorTypes(new HashSet<>(relevantTumorTypes));
-                for (SpecialTumorType specialTumorType : specialTumorTypes) {
-                    List<Evidence> fileredTagEvidences = tagEvidences
-                        .stream()
-                        .filter(evi -> evi.getCancerTypes().contains(ApplicationContextSingleton.getTumorTypeBo().getBySpecialTumor(specialTumorType)))
-                        .collect(Collectors.toList());
-                    if (fileredTagEvidences.size() > 0) {
-                        tumorTypeSummary = getTumorTypeSummaryFromEvidences(fileredTagEvidences);
-                        break;
-                    }
-                }
-            }
-
-            if (tumorTypeSummary == null) {
-                for (String uniqRelevantAlt : uniqRelevantAlts) {
-                    for (Alteration alt : groupedRelevantAlterations.get(uniqRelevantAlt)) {
-                        // Get Other Tumor Types summary
-                        for (TumorType tumorType : relevantTumorTypes) {
-                            tumorTypeSummary = getOtherTumorTypeSummaryByAlt(evidenceType, alt, Collections.singleton(tumorType));
-                            if (tumorTypeSummary != null) {
-                                break;
-                            }
-                        }
+                for (Alteration alt : groupedRelevantAlterations.get(uniqRelevantAlt)) {
+                    // Get Other Tumor Types summary
+                    for (TumorType tumorType : relevantTumorTypes) {
+                        tumorTypeSummary = getOtherTumorTypeSummaryByAlt(evidenceType, alt, Collections.singleton(tumorType));
                         if (tumorTypeSummary != null) {
-                            break;
+                            break outer;
                         }
-                    }
-                    if (tumorTypeSummary != null) {
-                        break;
                     }
                 }
             }
