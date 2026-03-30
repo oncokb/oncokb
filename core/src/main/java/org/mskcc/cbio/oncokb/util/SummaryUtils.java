@@ -74,9 +74,13 @@ public class SummaryUtils {
             tumorTypeSummary = getRelevantTumorTypeSummaryByAlt(evidenceType, matchedAlterations, matchedTumorType, relevantTumorTypes);
         }
 
+        // Exact match tag
         List<Evidence> tagEvidences = EvidenceUtils.getTagEvidences(alteration, oncogenicity, Collections.singleton(evidenceType));
-        if (tagEvidences.size() > 0) {
-            tumorTypeSummary = getTumorTypeSummaryFromEvidences(tagEvidences);
+        if (tumorTypeSummary == null) {
+            List<Evidence> fileredTagEvidences = EvidenceUtils.filterEvidencesByTumorType(new HashSet<>(tagEvidences), matchedTumorType, relevantTumorTypes);
+            if (fileredTagEvidences.size() > 0) {
+                tumorTypeSummary = getTumorTypeSummaryFromEvidences(fileredTagEvidences);
+            }
         }
 
         List<Alteration> alternativeAlleles = new ArrayList<>();
@@ -157,15 +161,31 @@ public class SummaryUtils {
                 groupedRelevantAlterations.get(uniqRelevantAlt).add(alt);
             }
 
+            Map<String, Object> specialTumorTypeSummary = null;
+            List<SpecialTumorType> specialTumorTypes = getSpecialTumorTypesFromRelevantTumorTypes(new HashSet<>(relevantTumorTypes));
+            for (SpecialTumorType specialTumorType : specialTumorTypes) {
+                List<Evidence> fileredTagEvidences = tagEvidences
+                    .stream()
+                    .filter(evi -> evi.getCancerTypes().contains(ApplicationContextSingleton.getTumorTypeBo().getBySpecialTumor(specialTumorType)))
+                    .collect(Collectors.toList());
+                if (!fileredTagEvidences.isEmpty()) {
+                    specialTumorTypeSummary = getTumorTypeSummaryFromEvidences(fileredTagEvidences);
+                    break;
+                }
+            }
             // Base on the priority of relevant alterations
+            // Base on the priority of relevant alterations
+            outer:
             for (String uniqRelevantAlt : uniqRelevantAlts) {
                 for (Alteration alt : groupedRelevantAlterations.get(uniqRelevantAlt)) {
                     tumorTypeSummary = getRelevantTumorTypeSummaryByAlt(evidenceType, Collections.singletonList(alt), matchedTumorType, relevantTumorTypes);
                     if (tumorTypeSummary != null) {
-                        break;
+                        break outer;
                     }
                 }
-                if (tumorTypeSummary != null) {
+
+                if (specialTumorTypeSummary != null) {
+                    tumorTypeSummary = specialTumorTypeSummary;
                     break;
                 }
 
@@ -174,15 +194,9 @@ public class SummaryUtils {
                     for (TumorType tumorType : relevantTumorTypes) {
                         tumorTypeSummary = getOtherTumorTypeSummaryByAlt(evidenceType, alt, Collections.singleton(tumorType));
                         if (tumorTypeSummary != null) {
-                            break;
+                            break outer;
                         }
                     }
-                    if (tumorTypeSummary != null) {
-                        break;
-                    }
-                }
-                if (tumorTypeSummary != null) {
-                    break;
                 }
             }
         }
@@ -222,14 +236,7 @@ public class SummaryUtils {
 
     private static Map<String, Object> getOtherTumorTypeSummaryByAlt(EvidenceType evidenceType, Alteration alteration, Set<TumorType> relevantTumorTypes) {
         // Check other tumor types summary based on tumor form
-        List<SpecialTumorType> specialTumorTypes = new ArrayList<>();
-        TumorForm tumorForm = TumorTypeUtils.checkTumorForm(relevantTumorTypes);
-        if (tumorForm != null) {
-            specialTumorTypes.add(tumorForm.equals(TumorForm.SOLID) ?
-                SpecialTumorType.OTHER_SOLID_TUMOR_TYPES : SpecialTumorType.OTHER_LIQUID_TUMOR_TYPES);
-        }
-
-        specialTumorTypes.add(SpecialTumorType.OTHER_TUMOR_TYPES);
+        List<SpecialTumorType> specialTumorTypes = getSpecialTumorTypesFromRelevantTumorTypes(relevantTumorTypes);
 
         for (SpecialTumorType specialTumorType : specialTumorTypes) {
 
@@ -243,6 +250,18 @@ public class SummaryUtils {
             }
         }
         return null;
+    }
+
+    private static List<SpecialTumorType> getSpecialTumorTypesFromRelevantTumorTypes(Set<TumorType> relevantTumorTypes) {
+        List<SpecialTumorType> specialTumorTypes = new ArrayList<>();
+        TumorForm tumorForm = TumorTypeUtils.checkTumorForm(relevantTumorTypes);
+        if (tumorForm != null) {
+            specialTumorTypes.add(tumorForm.equals(TumorForm.SOLID) ?
+                SpecialTumorType.OTHER_SOLID_TUMOR_TYPES : SpecialTumorType.OTHER_LIQUID_TUMOR_TYPES);
+        }
+
+        specialTumorTypes.add(SpecialTumorType.OTHER_TUMOR_TYPES);
+        return specialTumorTypes;
     }
 
     public static String unknownOncogenicSummary(Gene gene, ReferenceGenome referenceGenome, Query query, Alteration alteration) {
