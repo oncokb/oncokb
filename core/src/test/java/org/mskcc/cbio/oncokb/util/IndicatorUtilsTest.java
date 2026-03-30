@@ -1002,8 +1002,7 @@ public class IndicatorUtilsTest {
         List<Alteration> relevantAlterations = IndicatorUtils.getRelevantAlterationsForGermline(
             Collections.emptyList(),
             matchedAlt,
-            DEFAULT_REFERENCE_GENOME,
-            Pathogenicity.YES.getPathogenic()
+            DEFAULT_REFERENCE_GENOME
         );
 
         assertTrue("FH c.1020T>A should add the germline Pathogenic Variants alteration. Actual: " + relevantAlterations,

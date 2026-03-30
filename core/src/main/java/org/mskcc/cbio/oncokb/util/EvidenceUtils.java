@@ -1054,8 +1054,7 @@ public class EvidenceUtils {
                                 relevantAlts = IndicatorUtils.getRelevantAlterationsForGermline(
                                     relevantAlts,
                                     alt,
-                                    requestQuery.getReferenceGenome(),
-                                    indicatorQueryPathogenicity.getPathogenicity().getPathogenic()
+                                    requestQuery.getReferenceGenome()
                                 );
                             }
                         }
