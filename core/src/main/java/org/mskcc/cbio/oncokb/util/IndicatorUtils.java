@@ -579,6 +579,13 @@ public class IndicatorUtils {
                 }
             }
 
+            // The only rule currently is to associate "Pathogenic Variants" with variants curated as P/LP
+            relevantAlterations = getRelevantAlterationsForGermline(
+                relevantAlterations,
+                matchedAlt,
+                query.getReferenceGenome()
+            );
+
             Set<Evidence> treatmentEvidences = new HashSet<>();
 
             if (variantExists) {
@@ -603,14 +610,6 @@ public class IndicatorUtils {
                     mutationEffectResp.setCitations(MainUtils.getCitationsByEvidence(mutationEffectEvi));
                     indicatorQuery.setMutationEffect(mutationEffectResp);
                 }
-
-                // The only rule currently is to associate "Pathogenic Variants" with variants curated as P/LP
-                relevantAlterations = getRelevantAlterationsForGermline(
-                    relevantAlterations,
-                    matchedAlt,
-                    query.getReferenceGenome(),
-                    indicatorQuery.getPathogenic()
-                );
             }
 
             // Set implications
@@ -770,11 +769,17 @@ public class IndicatorUtils {
 
     static List<Alteration> getRelevantAlterationsForGermline(List<Alteration> relevantAlterations,
                                                               Alteration matchedAlt,
-                                                              ReferenceGenome referenceGenome,
-                                                              String pathogenicity) {
+                                                              ReferenceGenome referenceGenome) {
         List<Alteration> updatedRelevantAlterations = new ArrayList<>(relevantAlterations);
         if (matchedAlt == null || matchedAlt.getGene() == null) {
             return updatedRelevantAlterations;
+        }
+
+        String pathogenicity = "";
+        List<Evidence> pathogenicEvis = EvidenceUtils.getEvidence(Collections.singletonList(matchedAlt), Collections.singleton(EvidenceType.PATHOGENIC), null);
+        if (!pathogenicEvis.isEmpty()) {
+            Evidence pathogenicEvi = pathogenicEvis.iterator().next();
+            pathogenicity = pathogenicEvi.getKnownEffect();
         }
         if (!MainUtils.isPathogenic(Pathogenicity.getByEffect(pathogenicity))) {
             return updatedRelevantAlterations;
