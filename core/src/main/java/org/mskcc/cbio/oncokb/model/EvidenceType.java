@@ -21,6 +21,7 @@ public enum EvidenceType {
     STANDARD_THERAPEUTIC_IMPLICATIONS_FOR_DRUG_RESISTANCE("Standard therapeutic implications for drug resistance"),
     INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_SENSITIVITY("Investigational therapeutic implications for drug sensitivity"),
     INVESTIGATIONAL_THERAPEUTIC_IMPLICATIONS_DRUG_RESISTANCE("Investigational therapeutic implications for drug resistance"),
+    TX_ADDENDUM("Therapeutic addendum"),
 
     PATHOGENIC("Pathogenic"),
     GENOMIC_INDICATOR("Genomic Indicator"),

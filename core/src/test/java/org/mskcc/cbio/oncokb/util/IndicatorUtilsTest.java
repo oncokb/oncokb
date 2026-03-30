@@ -23,6 +23,187 @@ import static org.mskcc.cbio.oncokb.util.SummaryUtils.ONCOGENIC_MUTATIONS_DEFAUL
  */
 public class IndicatorUtilsTest {
     @Test
+    public void testTherapeuticDescriptionAddendumOverrideWhenTreatmentMatched() {
+        org.mskcc.cbio.oncokb.model.TumorType lowGradeGlioma = new org.mskcc.cbio.oncokb.model.TumorType();
+        lowGradeGlioma.setSubtype("Low Grade Glioma");
+
+        Alteration v600e = new Alteration();
+        v600e.setAlteration("V600E");
+
+        Treatment queryTreatment = buildTreatmentWithDrugs("Dabrafenib", "Trametinib");
+
+        Evidence therapeuticEvidence = new Evidence();
+        therapeuticEvidence.setAlterations(Collections.singleton(v600e));
+
+        Evidence addendumEvidence = new Evidence();
+        addendumEvidence.setEvidenceType(EvidenceType.TX_ADDENDUM);
+        addendumEvidence.setDescription("LGG-specific description");
+        addendumEvidence.setCancerTypes(Collections.singleton(lowGradeGlioma));
+        addendumEvidence.setAlterations(Collections.singleton(v600e));
+        setEvidenceTreatments(addendumEvidence, buildTreatmentWithDrugs("Dabrafenib", "Trametinib"));
+
+        String description = IndicatorUtils.getTherapeuticDescriptionWithAddendum(
+            therapeuticEvidence,
+            queryTreatment,
+            lowGradeGlioma,
+            "Base description",
+            Collections.singleton(addendumEvidence)
+        );
+
+        assertEquals("LGG-specific description", description);
+    }
+
+    @Test
+    public void testTherapeuticDescriptionAddendumFallbackWhenTreatmentNotMatched() {
+        org.mskcc.cbio.oncokb.model.TumorType melanoma = new org.mskcc.cbio.oncokb.model.TumorType();
+        melanoma.setSubtype("Melanoma");
+
+        Treatment queryTreatment = buildTreatmentWithDrugs("Dabrafenib", "Trametinib");
+
+        Evidence addendumEvidence = new Evidence();
+        addendumEvidence.setEvidenceType(EvidenceType.TX_ADDENDUM);
+        addendumEvidence.setDescription("Treatment-specific description");
+        addendumEvidence.setCancerTypes(Collections.singleton(melanoma));
+        setEvidenceTreatments(addendumEvidence, buildTreatmentWithDrugs("Vemurafenib"));
+
+        String description = IndicatorUtils.getTherapeuticDescriptionWithAddendum(
+            new Evidence(),
+            queryTreatment,
+            melanoma,
+            "Base description",
+            Collections.singleton(addendumEvidence)
+        );
+
+        assertEquals("Base description", description);
+    }
+
+    @Test
+    public void testTherapeuticDescriptionAddendumFallbackWhenAddendumHasNoTreatment() {
+        org.mskcc.cbio.oncokb.model.TumorType melanoma = new org.mskcc.cbio.oncokb.model.TumorType();
+        melanoma.setSubtype("Melanoma");
+
+        Treatment queryTreatment = buildTreatmentWithDrugs("Dabrafenib", "Trametinib");
+
+        Evidence addendumEvidence = new Evidence();
+        addendumEvidence.setEvidenceType(EvidenceType.TX_ADDENDUM);
+        addendumEvidence.setDescription("Untargeted addendum");
+        addendumEvidence.setCancerTypes(Collections.singleton(melanoma));
+
+        String description = IndicatorUtils.getTherapeuticDescriptionWithAddendum(
+            new Evidence(),
+            queryTreatment,
+            melanoma,
+            "Base description",
+            Collections.singleton(addendumEvidence)
+        );
+
+        assertEquals("Base description", description);
+    }
+
+    @Test
+    public void testTherapeuticDescriptionAddendumRequiresExactCancerTypeMatch() {
+        org.mskcc.cbio.oncokb.model.TumorType allSolidTumors = new org.mskcc.cbio.oncokb.model.TumorType();
+        allSolidTumors.setMainType("All Solid Tumors");
+        org.mskcc.cbio.oncokb.model.TumorType lowGradeGlioma = new org.mskcc.cbio.oncokb.model.TumorType();
+        lowGradeGlioma.setCode("LGGNOS");
+        lowGradeGlioma.setSubtype("Low-Grade Glioma, NOS");
+
+        Treatment queryTreatment = buildTreatmentWithDrugs("Zurletrectinib");
+
+        Evidence addendumEvidence = new Evidence();
+        addendumEvidence.setEvidenceType(EvidenceType.TX_ADDENDUM);
+        addendumEvidence.setDescription("All solid tumors addendum");
+        addendumEvidence.setCancerTypes(Collections.singleton(allSolidTumors));
+        setEvidenceTreatments(addendumEvidence, buildTreatmentWithDrugs("Zurletrectinib"));
+
+        String description = IndicatorUtils.getTherapeuticDescriptionWithAddendum(
+            new Evidence(),
+            queryTreatment,
+            lowGradeGlioma,
+            "Base description",
+            Collections.singleton(addendumEvidence)
+        );
+
+        assertEquals("Base description", description);
+    }
+
+    @Test
+    public void testTherapeuticDescriptionAddendumFallbackWhenCancerTypeNotMatched() {
+        org.mskcc.cbio.oncokb.model.TumorType lowGradeGlioma = new org.mskcc.cbio.oncokb.model.TumorType();
+        lowGradeGlioma.setCode("LGGNOS");
+        lowGradeGlioma.setSubtype("Low-Grade Glioma, NOS");
+        org.mskcc.cbio.oncokb.model.TumorType melanoma = new org.mskcc.cbio.oncokb.model.TumorType();
+        melanoma.setCode("MEL");
+        melanoma.setSubtype("Melanoma");
+
+        Treatment queryTreatment = buildTreatmentWithDrugs("Zurletrectinib");
+
+        Evidence addendumEvidence = new Evidence();
+        addendumEvidence.setEvidenceType(EvidenceType.TX_ADDENDUM);
+        addendumEvidence.setDescription("Melanoma addendum");
+        addendumEvidence.setCancerTypes(Collections.singleton(melanoma));
+        setEvidenceTreatments(addendumEvidence, buildTreatmentWithDrugs("Zurletrectinib"));
+
+        String description = IndicatorUtils.getTherapeuticDescriptionWithAddendum(
+            new Evidence(),
+            queryTreatment,
+            lowGradeGlioma,
+            "Base description",
+            Collections.singleton(addendumEvidence)
+        );
+
+        assertEquals("Base description", description);
+    }
+
+    @Test
+    public void testTherapeuticDescriptionAddendumFallbackWhenAlterationNotMatched() {
+        org.mskcc.cbio.oncokb.model.TumorType melanoma = new org.mskcc.cbio.oncokb.model.TumorType();
+        melanoma.setSubtype("Melanoma");
+
+        Alteration v600e = new Alteration();
+        v600e.setAlteration("V600E");
+        Alteration g469a = new Alteration();
+        g469a.setAlteration("G469A");
+        Treatment queryTreatment = buildTreatmentWithDrugs("Dabrafenib", "Trametinib");
+
+        Evidence therapeuticEvidence = new Evidence();
+        therapeuticEvidence.setAlterations(Collections.singleton(v600e));
+
+        Evidence addendum = new Evidence();
+        addendum.setEvidenceType(EvidenceType.TX_ADDENDUM);
+        addendum.setDescription("Non-V600E melanoma description");
+        addendum.setCancerTypes(Collections.singleton(melanoma));
+        addendum.setAlterations(Collections.singleton(g469a));
+        setEvidenceTreatments(addendum, buildTreatmentWithDrugs("Dabrafenib", "Trametinib"));
+
+        String description = IndicatorUtils.getTherapeuticDescriptionWithAddendum(
+            therapeuticEvidence,
+            queryTreatment,
+            melanoma,
+            "Base description",
+            Collections.singleton(addendum)
+        );
+
+        assertEquals("Base description", description);
+    }
+
+    private Treatment buildTreatmentWithDrugs(String... drugNames) {
+        Treatment treatment = new Treatment();
+        List<Drug> drugs = new ArrayList<>();
+        for (String drugName : drugNames) {
+            Drug drug = new Drug();
+            drug.setDrugName(drugName);
+            drugs.add(drug);
+        }
+        treatment.setDrugs(drugs);
+        return treatment;
+    }
+
+    private void setEvidenceTreatments(Evidence evidence, Treatment... treatments) {
+        evidence.setTreatments(Arrays.asList(treatments));
+    }
+
+    @Test
     public void testProcessQuery() throws Exception {
         // We do not check gene/variant/tumor type summaries here. The test will be done in SummaryUtilsTest.
 
