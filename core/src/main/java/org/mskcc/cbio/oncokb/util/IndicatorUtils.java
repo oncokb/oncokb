@@ -670,7 +670,9 @@ public class IndicatorUtils {
                 Map<String, Object> tumorTypeSummary = SummaryUtils.tumorTypeSummary(EvidenceType.TUMOR_TYPE_SUMMARY, gene, query, matchedAlt,
                     new ArrayList<>(relevantAlterations),
                     matchedTumorType,
-                    relevantUpwardTumorTypes);
+                    relevantUpwardTumorTypes,
+                    null
+                );
                 if (tumorTypeSummary != null) {
                     indicatorQuery.setTumorTypeSummary((String) tumorTypeSummary.get("summary"));
                     latestEvidenceDate = updateLatestEvidenceDate(latestEvidenceDate, (Date) tumorTypeSummary.get("lastEdit"));
