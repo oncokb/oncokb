@@ -3,11 +3,14 @@ package org.mskcc.cbio.oncokb.util;
 import static org.mskcc.cbio.oncokb.util.AnnotationSearchUtils.annotationSearch;
 import static org.mskcc.cbio.oncokb.util.AnnotationSearchUtils.searchCuratedAnnotation;
 
+import java.util.Collections;
 import java.util.Set;
 import junit.framework.TestCase;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.apiModels.GeneticType;
+import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.AnnotationSearchQueryType;
+import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.InferredMutation;
 import org.mskcc.cbio.oncokb.model.Pathogenicity;
 import org.mskcc.cbio.oncokb.model.SomaticAnnotationSearchResult;
@@ -15,6 +18,34 @@ import org.mskcc.cbio.oncokb.model.TypeaheadQueryType;
 import org.mskcc.cbio.oncokb.model.TypeaheadSearchResp;
 
 public class AnnotationSearchUtilsTest extends TestCase {
+
+    public void testVariantComparatorPrioritizesSomaticOverGermline() {
+        Gene gene = new Gene(672, "BRCA1");
+
+        Alteration somaticAlt = new Alteration();
+        somaticAlt.setGene(gene);
+        somaticAlt.setAlteration("c.1A>G");
+
+        TypeaheadSearchResp somatic = new TypeaheadSearchResp();
+        somatic.setGene(gene);
+        somatic.setVariants(Collections.singleton(somaticAlt));
+        somatic.setGeneticType(GeneticType.SOMATIC);
+        somatic.setOncogenicity("Unknown");
+
+        Alteration germlineAlt = new Alteration();
+        germlineAlt.setGene(gene);
+        germlineAlt.setAlteration("c.1A>G");
+
+        TypeaheadSearchResp germline = new TypeaheadSearchResp();
+        germline.setGene(gene);
+        germline.setVariants(Collections.singleton(germlineAlt));
+        germline.setGeneticType(GeneticType.GERMLINE);
+        germline.setPathogenicity(Pathogenicity.YES.getPathogenic());
+
+        VariantComp comparator = new VariantComp("c.");
+        assertTrue("Somatic results should sort ahead of germline results for the same variant match.", comparator.compare(somatic, germline) < 0);
+        assertTrue("Germline results should sort after somatic results for the same variant match.", comparator.compare(germline, somatic) > 0);
+    }
 
     public void testSearchNonHgvsAnnotation() {
         // test gene query

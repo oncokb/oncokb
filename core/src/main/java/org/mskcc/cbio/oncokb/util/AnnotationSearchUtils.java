@@ -914,6 +914,9 @@ class VariantComp implements Comparator<TypeaheadSearchResp> {
         Integer index1 = name1.indexOf(this.keyword);
         Integer index2 = name2.indexOf(this.keyword);
         if (index1.equals(index2)) {
+            if (!e1.getGeneticType().equals(e2.getGeneticType())) {
+                return e1.getGeneticType().compareTo(e2.getGeneticType());
+            }
             Integer result;
             if ((e1.getPathogenicity() != null && !e1.getPathogenicity().isEmpty())
                 || (e2.getPathogenicity() != null && !e2.getPathogenicity().isEmpty())) {
