@@ -5,7 +5,11 @@ import static org.mskcc.cbio.oncokb.util.AnnotationSearchUtils.searchCuratedAnno
 
 import java.util.Set;
 import junit.framework.TestCase;
+import org.apache.commons.lang3.StringUtils;
+import org.mskcc.cbio.oncokb.apiModels.GeneticType;
 import org.mskcc.cbio.oncokb.model.AnnotationSearchQueryType;
+import org.mskcc.cbio.oncokb.model.InferredMutation;
+import org.mskcc.cbio.oncokb.model.Pathogenicity;
 import org.mskcc.cbio.oncokb.model.SomaticAnnotationSearchResult;
 import org.mskcc.cbio.oncokb.model.TypeaheadQueryType;
 import org.mskcc.cbio.oncokb.model.TypeaheadSearchResp;
@@ -66,6 +70,20 @@ public class AnnotationSearchUtilsTest extends TestCase {
         assertTrue(respSet.stream().filter(resp -> TypeaheadQueryType.VARIANT.equals(resp.getQueryType())).count() > 0);
         // This is a variant search, the cancer type search result should not be available
         assertTrue(respSet.stream().filter(resp -> TypeaheadQueryType.CANCER_TYPE.equals(resp.getQueryType())).count() == 0);
+
+        respSet = searchCuratedAnnotation("BRCA1 patho");
+        TypeaheadSearchResp germlinePathogenicVariants = respSet.stream()
+            .filter(resp -> TypeaheadQueryType.VARIANT.equals(resp.getQueryType()))
+            .filter(resp -> GeneticType.GERMLINE.equals(resp.getGeneticType()))
+            .filter(resp -> resp.getGene() != null && "BRCA1".equals(resp.getGene().getHugoSymbol()))
+            .filter(resp -> resp.getVariants() != null
+                && resp.getVariants().stream().anyMatch(alt -> InferredMutation.PATHOGENIC_VARIANTS.getVariant().equals(alt.getAlteration())))
+            .findFirst()
+            .orElse(null);
+        assertNotNull("BRCA1 germline Pathogenic Variants should be returned by typeahead.", germlinePathogenicVariants);
+        assertTrue("BRCA1 germline Pathogenic Variants should include treatment levels. Actual: " + germlinePathogenicVariants.getHighestSensitiveLevel(),
+            StringUtils.isNotEmpty(germlinePathogenicVariants.getHighestSensitiveLevel()));
+        assertEquals("BRCA1 germline Pathogenic Variants should expose pathogenicity in typeahead.", Pathogenicity.YES.getPathogenic(), germlinePathogenicVariants.getPathogenicity());
     }
 
     public void testAnnotationSearch() {

@@ -15,6 +15,7 @@ public class TypeaheadSearchResp {
     private Set<TumorType> tumorTypes;
     private Drug drug;
     private String oncogenicity;
+    private String pathogenicity;
     private String highestSensitiveLevel;
     private String highestResistanceLevel;
     private Boolean variantExist;
@@ -63,6 +64,14 @@ public class TypeaheadSearchResp {
 
     public void setOncogenicity(String oncogenicity) {
         this.oncogenicity = oncogenicity;
+    }
+
+    public String getPathogenicity() {
+        return pathogenicity;
+    }
+
+    public void setPathogenicity(String pathogenicity) {
+        this.pathogenicity = pathogenicity;
     }
 
     public String getHighestSensitiveLevel() {
@@ -147,6 +156,7 @@ public class TypeaheadSearchResp {
             Objects.equals(getTumorTypes(), that.getTumorTypes()) &&
             Objects.equals(getDrug(), that.getDrug()) &&
             Objects.equals(getOncogenicity(), that.getOncogenicity()) &&
+            Objects.equals(getPathogenicity(), that.getPathogenicity()) &&
             Objects.equals(getHighestSensitiveLevel(), that.getHighestSensitiveLevel()) &&
             Objects.equals(getHighestResistanceLevel(), that.getHighestResistanceLevel()) &&
             Objects.equals(getVariantExist(), that.getVariantExist()) &&
@@ -159,6 +169,6 @@ public class TypeaheadSearchResp {
 
     @Override
     public int hashCode() {
-        return Objects.hash(getGene(), getVariants(), getTumorTypes(), getDrug(), getOncogenicity(), getHighestSensitiveLevel(), getHighestResistanceLevel(), getVariantExist(), isVUS, getAnnotation(), getQueryType(), getLink(), getGeneticType());
+        return Objects.hash(getGene(), getVariants(), getTumorTypes(), getDrug(), getOncogenicity(), getPathogenicity(), getHighestSensitiveLevel(), getHighestResistanceLevel(), getVariantExist(), isVUS, getAnnotation(), getQueryType(), getLink(), getGeneticType());
     }
 }

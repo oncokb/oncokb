@@ -740,11 +740,15 @@ public class IndicatorUtils {
                                                  String inheritanceMechanism,
                                                  List<Alteration> relevantAlterations) {
         // Get pathogenic info
-        List<Evidence> pathogenicEvis = EvidenceUtils.getEvidence(Collections.singletonList(matchedAlt), Collections.singleton(EvidenceType.PATHOGENIC), null);
-        if (!pathogenicEvis.isEmpty()) {
-            sortGermlineEvidenceByAlterationSize(pathogenicEvis);
-            Evidence pathogenicEvi = pathogenicEvis.iterator().next();
-            indicatorQuery.setPathogenic(pathogenicEvi.getKnownEffect());
+        if (AlterationUtils.startsWithIgnoreCase(matchedAlt.getAlteration(), InferredMutation.PATHOGENIC_VARIANTS.getVariant())) {
+            indicatorQuery.setPathogenic(Pathogenicity.YES.getPathogenic());
+        } else {
+            List<Evidence> pathogenicEvis = EvidenceUtils.getEvidence(Collections.singletonList(matchedAlt), Collections.singleton(EvidenceType.PATHOGENIC), null);
+            if (!pathogenicEvis.isEmpty()) {
+                sortGermlineEvidenceByAlterationSize(pathogenicEvis);
+                Evidence pathogenicEvi = pathogenicEvis.iterator().next();
+                indicatorQuery.setPathogenic(pathogenicEvi.getKnownEffect());
+            }
         }
 
         // Get penetrance info
@@ -772,6 +776,10 @@ public class IndicatorUtils {
                                                               ReferenceGenome referenceGenome) {
         List<Alteration> updatedRelevantAlterations = new ArrayList<>(relevantAlterations);
         if (matchedAlt == null || matchedAlt.getGene() == null) {
+            return updatedRelevantAlterations;
+        }
+        if (AlterationUtils.startsWithIgnoreCase(matchedAlt.getAlteration(), InferredMutation.PATHOGENIC_VARIANTS.getVariant())) {
+            updatedRelevantAlterations.add(matchedAlt);
             return updatedRelevantAlterations;
         }
 

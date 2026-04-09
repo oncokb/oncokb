@@ -969,6 +969,10 @@ public class IndicatorUtilsTest {
             indicatorQueryResp.getGenomicIndicators().stream()
                 .anyMatch(indicator -> "Hereditary leiomyomatosis and renal cell cancer (HLRCC)(monoallelic)".equals(indicator.getName())));
 
+        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "FH", InferredMutation.PATHOGENIC_VARIANTS.getVariant(), null, null, null, null, null, null, null, true, null, null);
+        indicatorQueryResp = IndicatorUtils.processQueryGermline(query, null, true, null, false);
+        assertEquals("Germline FH Pathogenic Variants should set pathogenic explicitly.", Pathogenicity.YES.getPathogenic(), indicatorQueryResp.getPathogenic());
+
         // Testing whether a variant that is curated under both somatic and germline will be annotated correctly based on genetic type
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "EGFR", "Deletion", null, null, null, null, null, null, null, true, null, null);
         indicatorQueryResp = IndicatorUtils.processQueryGermline(query, null, true, null, false);
@@ -1008,6 +1012,23 @@ public class IndicatorUtilsTest {
         assertTrue("FH c.1020T>A should add the germline Pathogenic Variants alteration. Actual: " + relevantAlterations,
             relevantAlterations.stream().anyMatch(alt -> alt.getAlteration() != null
                 && alt.getAlteration().startsWith(InferredMutation.PATHOGENIC_VARIANTS.getVariant())));
+
+        Alteration pathogenicVariantsAlt = AlterationUtils.findAlteration(
+            DEFAULT_REFERENCE_GENOME,
+            InferredMutation.PATHOGENIC_VARIANTS.getVariant(),
+            AlterationUtils.getAllAlterations(DEFAULT_REFERENCE_GENOME, gene),
+            true
+        );
+        assertNotNull("FH Pathogenic Variants should have a germline match.", pathogenicVariantsAlt);
+
+        relevantAlterations = IndicatorUtils.getRelevantAlterationsForGermline(
+            Collections.emptyList(),
+            pathogenicVariantsAlt,
+            DEFAULT_REFERENCE_GENOME
+        );
+
+        assertTrue("FH Pathogenic Variants should include itself as a relevant alteration. Actual: " + relevantAlterations,
+            relevantAlterations.stream().anyMatch(alt -> alt.equals(pathogenicVariantsAlt)));
     }
 
     // Most of the annotation service should not have clinical implication returned when alteration is not available.

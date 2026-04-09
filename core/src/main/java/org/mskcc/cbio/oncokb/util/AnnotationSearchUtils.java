@@ -37,9 +37,11 @@ import org.mskcc.cbio.oncokb.model.SomaticAnnotationSearchResult;
 import org.mskcc.cbio.oncokb.model.Drug;
 import org.mskcc.cbio.oncokb.model.Evidence;
 import org.mskcc.cbio.oncokb.model.Gene;
+import org.mskcc.cbio.oncokb.model.GermlineIndicatorQueryResp;
 import org.mskcc.cbio.oncokb.model.SomaticIndicatorQueryResp;
 import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
 import org.mskcc.cbio.oncokb.model.Oncogenicity;
+import org.mskcc.cbio.oncokb.model.Pathogenicity;
 import org.mskcc.cbio.oncokb.model.Query;
 import org.mskcc.cbio.oncokb.model.ReferenceGenome;
 import org.mskcc.cbio.oncokb.model.Treatment;
@@ -148,7 +150,7 @@ public class AnnotationSearchUtils {
             }
 
             // If there is no match in OncoKB database, still try to annotate variant
-            // Only when the oncogenicity is not empty
+            // Only when the status field is not empty
             if (result.size() == 0) {
                 for (Map.Entry<String, Set<Gene>> entry : map.entrySet()) {
                     if (entry.getValue().size() > 0) {
@@ -164,8 +166,10 @@ public class AnnotationSearchUtils {
                                     TypeaheadSearchResp typeaheadSearchResp = newTypeaheadVariant(alteration);
                                     typeaheadSearchResp.setVariantExist(false);
                                     result.add(typeaheadSearchResp);
-                                    if (typeaheadSearchResp.getOncogenicity() == null
-                                            || typeaheadSearchResp.getOncogenicity().isEmpty()) {
+                                    if ((typeaheadSearchResp.getOncogenicity() == null
+                                            || typeaheadSearchResp.getOncogenicity().isEmpty())
+                                        && (typeaheadSearchResp.getPathogenicity() == null
+                                            || typeaheadSearchResp.getPathogenicity().isEmpty())) {
                                         String annotation = "Please make sure your query is valid.";
                                         if (typeaheadSearchResp.getAnnotation() != null) {
                                             annotation = typeaheadSearchResp.getAnnotation() + " " + annotation;
@@ -779,20 +783,38 @@ public class AnnotationSearchUtils {
             query.setReferenceGenome(referenceGenome);
         }
 
-        SomaticIndicatorQueryResp resp = IndicatorUtils.processQuerySomatic(query, null, false, null, false);
-        typeaheadSearchResp.setOncogenicity(resp.getOncogenic());
-        typeaheadSearchResp.setVUS(resp.getVUS());
-        typeaheadSearchResp.setAnnotation(resp.getVariantSummary() + " Click here to see more annotation details.");
+        if (alteration.getForGermline()) {
+            GermlineIndicatorQueryResp resp = IndicatorUtils.processQueryGermline(query, null, false, null, false);
+            typeaheadSearchResp.setPathogenicity(resp.getPathogenic());
+            typeaheadSearchResp.setVUS(resp.getVUS());
+            typeaheadSearchResp.setAnnotation(resp.getVariantSummary() + " Click here to see more annotation details.");
 
-        if (resp.getHighestSensitiveLevel() != null) {
-            typeaheadSearchResp.setHighestSensitiveLevel(resp.getHighestSensitiveLevel().getLevel());
-        }
-        if (resp.getHighestResistanceLevel() != null) {
-            typeaheadSearchResp.setHighestResistanceLevel(resp.getHighestResistanceLevel().getLevel());
-        }
+            if (resp.getHighestSensitiveLevel() != null) {
+                typeaheadSearchResp.setHighestSensitiveLevel(resp.getHighestSensitiveLevel().getLevel());
+            }
+            if (resp.getHighestResistanceLevel() != null) {
+                typeaheadSearchResp.setHighestResistanceLevel(resp.getHighestResistanceLevel().getLevel());
+            }
 
-        if (alteration.getAlteration() != null && alteration.getAlteration().equalsIgnoreCase("oncogenic mutations")) {
-            typeaheadSearchResp.setOncogenicity(Oncogenicity.YES.getOncogenic());
+            if (alteration.getAlteration() != null && alteration.getAlteration().equalsIgnoreCase("pathogenic variants")) {
+                typeaheadSearchResp.setPathogenicity(Pathogenicity.YES.getPathogenic());
+            }
+        } else {
+            SomaticIndicatorQueryResp resp = IndicatorUtils.processQuerySomatic(query, null, false, null, false);
+            typeaheadSearchResp.setOncogenicity(resp.getOncogenic());
+            typeaheadSearchResp.setVUS(resp.getVUS());
+            typeaheadSearchResp.setAnnotation(resp.getVariantSummary() + " Click here to see more annotation details.");
+
+            if (resp.getHighestSensitiveLevel() != null) {
+                typeaheadSearchResp.setHighestSensitiveLevel(resp.getHighestSensitiveLevel().getLevel());
+            }
+            if (resp.getHighestResistanceLevel() != null) {
+                typeaheadSearchResp.setHighestResistanceLevel(resp.getHighestResistanceLevel().getLevel());
+            }
+
+            if (alteration.getAlteration() != null && alteration.getAlteration().equalsIgnoreCase("oncogenic mutations")) {
+                typeaheadSearchResp.setOncogenicity(Oncogenicity.YES.getOncogenic());
+            }
         }
 
         typeaheadSearchResp.setQueryType(TypeaheadQueryType.VARIANT);
@@ -892,16 +914,30 @@ class VariantComp implements Comparator<TypeaheadSearchResp> {
         Integer index1 = name1.indexOf(this.keyword);
         Integer index2 = name2.indexOf(this.keyword);
         if (index1.equals(index2)) {
-            //Compare Oncogenicity. Treat YES, LIKELY as the same
-            Oncogenicity o1 = Oncogenicity.getByEffect(e1.getOncogenicity());
-            Oncogenicity o2 = Oncogenicity.getByEffect(e2.getOncogenicity());
-            if (o1 != null && o1.equals(Oncogenicity.LIKELY)) {
-                o1 = Oncogenicity.YES;
+            Integer result;
+            if ((e1.getPathogenicity() != null && !e1.getPathogenicity().isEmpty())
+                || (e2.getPathogenicity() != null && !e2.getPathogenicity().isEmpty())) {
+                Pathogenicity p1 = Pathogenicity.getByEffect(e1.getPathogenicity());
+                Pathogenicity p2 = Pathogenicity.getByEffect(e2.getPathogenicity());
+                if (p1 != null && p1.equals(Pathogenicity.LIKELY)) {
+                    p1 = Pathogenicity.YES;
+                }
+                if (p2 != null && p2.equals(Pathogenicity.LIKELY)) {
+                    p2 = Pathogenicity.YES;
+                }
+                result = Pathogenicity.compare(p1, p2);
+            } else {
+                //Compare Oncogenicity. Treat YES, LIKELY as the same
+                Oncogenicity o1 = Oncogenicity.getByEffect(e1.getOncogenicity());
+                Oncogenicity o2 = Oncogenicity.getByEffect(e2.getOncogenicity());
+                if (o1 != null && o1.equals(Oncogenicity.LIKELY)) {
+                    o1 = Oncogenicity.YES;
+                }
+                if (o2 != null && o2.equals(Oncogenicity.LIKELY)) {
+                    o2 = Oncogenicity.YES;
+                }
+                result = MainUtils.compareOncogenicity(o1, o2, true);
             }
-            if (o2 != null && o2.equals(Oncogenicity.LIKELY)) {
-                o2 = Oncogenicity.YES;
-            }
-            Integer result = MainUtils.compareOncogenicity(o1, o2, true);
             if (result == 0) {
                 // Compare highest sensitive level
                 result = LevelUtils.compareLevel(LevelOfEvidence.getByLevel(e1.getHighestSensitiveLevel()), LevelOfEvidence.getByLevel(e2.getHighestSensitiveLevel()));

@@ -25,7 +25,7 @@ public class SummaryUtils {
     public static final String TERT_PROMOTER_MUTATION_SUMMARY = "Select hotspot mutations in the TERT promoter have been shown to be oncogenic.";
     public static final String TERT_PROMOTER_NO_THERAPY_TUMOR_TYPE_SUMMARY = "There are no FDA-approved or NCCN-compendium listed treatments specifically for patients with TERT promoter mutations in [[tumor type]].";
     public static final String ONCOGENIC_MUTATIONS_DEFAULT_SUMMARY = "\"Oncogenic Mutations\" includes all variants annotated as oncogenic and likely oncogenic.";
-    public static final String PATHOGENIC_MUTATIONS_DEFAULT_SUMMARY = "\"Pathogenic Mutations\" includes all variants annotated as pathogenic and likely pathogenic by MSK Department of Molecular Genetics.";
+    public static final String PATHOGENIC_MUTATIONS_DEFAULT_SUMMARY = "\"Pathogenic Variants\" includes all variants annotated as pathogenic and likely pathogenic by MSK Department of Molecular Genetics.";
     public static final List<String> specialAlterations = Arrays.asList("mutation", "alteration", "insertion", "deletion", "duplication", "fusion", "deletion", "amplification");
 
     public static Map<String, Object> tumorTypeSummary(EvidenceType evidenceType, Gene gene, Query query, Alteration exactMatchedAlt, List<Alteration> alterations, TumorType matchedTumorType, List<TumorType> relevantTumorTypes, Oncogenicity oncogenicity) {
@@ -289,7 +289,8 @@ public class SummaryUtils {
             sb.append("The Germline Genetics Team of the MSK Molecular Diagnostics Service classifies ")
             .append(gene.getHugoSymbol()).append(" ")
             .append(alteration.getAlteration())
-            .append(" as ").append(pathogenicEvis.get(0).getKnownEffect());
+            .append(" as ").append(pathogenicEvis.get(0).getKnownEffect())
+            .append(".");
         }
 
         return sb.toString();
