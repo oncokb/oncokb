@@ -805,7 +805,45 @@ public class IndicatorUtils {
                 updatedRelevantAlterations.add(pathogenicVariant);
             }
         }
-        return updatedRelevantAlterations;
+        return applyGermlineExclusionRules(matchedAlt, updatedRelevantAlterations);
+    }
+
+    static List<Alteration> applyGermlineExclusionRules(Alteration matchedAlt,
+                                                        List<Alteration> relevantAlterations) {
+        List<Alteration> filteredRelevantAlterations = new ArrayList<>(relevantAlterations);
+        if (matchedAlt == null || filteredRelevantAlterations.isEmpty()) {
+            return filteredRelevantAlterations;
+        }
+
+        if (AlterationUtils.hasExclusionCriteria(matchedAlt.getAlteration())) {
+            Set<String> excludedAlterationNames = new HashSet<>();
+            AlterationUtils.getExclusionAlterations(matchedAlt.getAlteration()).forEach(excludedAlt -> {
+                if (StringUtils.isNotBlank(excludedAlt.getAlteration())) {
+                    excludedAlterationNames.add(excludedAlt.getAlteration());
+                }
+                if (StringUtils.isNotBlank(excludedAlt.getName())) {
+                    excludedAlterationNames.add(excludedAlt.getName());
+                }
+            });
+            filteredRelevantAlterations.removeIf(alt ->
+                excludedAlterationNames.contains(alt.getAlteration()) || excludedAlterationNames.contains(alt.getName()));
+        }
+
+        Set<String> matchedAlterationNames = new HashSet<>();
+        if (StringUtils.isNotBlank(matchedAlt.getAlteration())) {
+            matchedAlterationNames.add(matchedAlt.getAlteration());
+        }
+        if (StringUtils.isNotBlank(matchedAlt.getName())) {
+            matchedAlterationNames.add(matchedAlt.getName());
+        }
+
+        filteredRelevantAlterations.removeIf(alt ->
+            AlterationUtils.hasExclusionCriteria(alt.getAlteration())
+                && AlterationUtils.getExclusionAlterations(alt.getAlteration()).stream().anyMatch(excludedAlt ->
+                matchedAlterationNames.contains(excludedAlt.getAlteration()) || matchedAlterationNames.contains(excludedAlt.getName()))
+        );
+
+        return filteredRelevantAlterations;
     }
 
     private static Set<Implication> getImplicationsFromEvidence(Evidence evidence, String queryHugoSymbol) {

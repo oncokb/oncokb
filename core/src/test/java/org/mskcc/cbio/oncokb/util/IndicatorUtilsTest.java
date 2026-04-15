@@ -1031,6 +1031,32 @@ public class IndicatorUtilsTest {
             relevantAlterations.stream().anyMatch(alt -> alt.equals(pathogenicVariantsAlt)));
     }
 
+    @Test
+    public void testGetRelevantAlterationsForGermlineHonorsExclusionRule() {
+        Gene gene = GeneUtils.getGeneByHugoSymbol("FH");
+        assertNotNull("FH should exist in test data.", gene);
+
+        Alteration matchedAlt = generateAlteration(gene, "c.1020T>A");
+        matchedAlt.setForGermline(true);
+
+        Alteration pathogenicVariants = generateAlteration(gene, InferredMutation.PATHOGENIC_VARIANTS.getVariant());
+        pathogenicVariants.setForGermline(true);
+
+        Alteration pathogenicVariantsExcludingMatchedAlt = generateAlteration(gene,
+            InferredMutation.PATHOGENIC_VARIANTS.getVariant() + " {excluding c.1020T>A}");
+        pathogenicVariantsExcludingMatchedAlt.setForGermline(true);
+
+        List<Alteration> relevantAlterations = IndicatorUtils.applyGermlineExclusionRules(
+            matchedAlt,
+            Arrays.asList(pathogenicVariants, pathogenicVariantsExcludingMatchedAlt)
+        );
+
+        assertTrue("Pathogenic Variants should still be relevant. Actual: " + relevantAlterations,
+            relevantAlterations.contains(pathogenicVariants));
+        assertFalse("Pathogenic Variants {excluding c.1020T>A} should be excluded. Actual: " + relevantAlterations,
+            relevantAlterations.contains(pathogenicVariantsExcludingMatchedAlt));
+    }
+
     // Most of the annotation service should not have clinical implication returned when alteration is not available.
     // The only exception is when to do annotation/search where gene query is possible and clinical implications should be returned which we cover in AnnotationSearchUtilsTest.java
     @Test
@@ -1206,5 +1232,13 @@ public class IndicatorUtilsTest {
             }
         }
         return false;
+    }
+
+    private Alteration generateAlteration(Gene gene, String proteinChange) {
+        Alteration alteration = new Alteration();
+        alteration.setAlteration(proteinChange);
+        alteration.setGene(gene);
+        AlterationUtils.annotateAlteration(alteration, alteration.getAlteration());
+        return alteration;
     }
 }
