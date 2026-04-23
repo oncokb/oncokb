@@ -47,7 +47,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-@Api(tags = "Germline Annotations", description = "Providing germline annotations")
+@Api(tags = "Annotations for Germline", description = "Germline endpoints")
 @Controller
 public class GermlineAnnotationsApiController {
     @Autowired
