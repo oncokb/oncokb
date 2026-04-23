@@ -259,17 +259,22 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     }
 
     @Override
-    public ResponseEntity<Map<LevelOfEvidence, Set<Evidence>>> utilsEvidencesByLevelsGet() {
-        return new ResponseEntity<>(getEvidencesByLevels(), HttpStatus.OK);
+    public ResponseEntity<Map<LevelOfEvidence, Set<Evidence>>> utilsEvidencesByLevelsGet(
+        @ApiParam(value = "false") @RequestParam(value = "germline", required = false) Boolean germline
+    ) {
+        return new ResponseEntity<>(getEvidencesByLevels(germline), HttpStatus.OK);
     }
 
-    private Map<LevelOfEvidence, Set<Evidence>> getEvidencesByLevels() {
+    private Map<LevelOfEvidence, Set<Evidence>> getEvidencesByLevels(Boolean germline) {
         Map<Gene, Set<Evidence>> evidences = EvidenceUtils.getAllGeneBasedEvidences();
 
         Map<LevelOfEvidence, Set<Evidence>> result = new HashMap<>();
 
         for (Map.Entry<Gene, Set<Evidence>> entry : evidences.entrySet()) {
             for (Evidence evidence : entry.getValue()) {
+                if (germline != null && !germline.equals(evidence.getForGermline())) {
+                    continue;
+                }
                 LevelOfEvidence level = evidence.getLevelOfEvidence();
                 if (level != null && LevelUtils.getPublicLevels().contains(level)) {
                     if (!result.containsKey(level)) {
