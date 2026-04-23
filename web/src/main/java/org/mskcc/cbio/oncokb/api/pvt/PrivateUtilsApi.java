@@ -136,7 +136,9 @@ public interface PrivateUtilsApi {
     @RequestMapping(value = "/utils/evidences/levels",
         produces = {"application/json"},
         method = RequestMethod.GET)
-    ResponseEntity<Map<LevelOfEvidence, Set<Evidence>>> utilsEvidencesByLevelsGet();
+    ResponseEntity<Map<LevelOfEvidence, Set<Evidence>>> utilsEvidencesByLevelsGet(
+        @ApiParam(value = "false") @RequestParam(value = "germline", required = false) Boolean germline
+    );
 
     @ApiOperation(value = "", notes = "Get the list of relevant tumor types.", response = TumorType.class, responseContainer = "List")
     @ApiResponses(value = {
