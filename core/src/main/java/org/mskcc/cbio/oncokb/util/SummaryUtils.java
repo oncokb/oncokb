@@ -2,8 +2,11 @@ package org.mskcc.cbio.oncokb.util;
 
 import org.apache.commons.collections.ListUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.mskcc.cbio.oncokb.apiModels.AlternativeOncoKbVariant;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.model.*;
+import org.mskcc.cbio.oncokb.util.parser.ParseAlterationResult;
+import org.mskcc.cbio.oncokb.util.parser.ProteinChangeParser;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -27,6 +30,23 @@ public class SummaryUtils {
     public static final String ONCOGENIC_MUTATIONS_DEFAULT_SUMMARY = "\"Oncogenic Mutations\" includes all variants annotated as oncogenic and likely oncogenic.";
     public static final String PATHOGENIC_MUTATIONS_DEFAULT_SUMMARY = "\"Pathogenic Mutations\" includes all variants annotated as pathogenic and likely pathogenic by MSK Department of Molecular Genetics.";
     public static final List<String> specialAlterations = Arrays.asList("mutation", "alteration", "insertion", "deletion", "duplication", "fusion", "deletion", "amplification");
+
+    public static AlternativeOncoKbVariant alternativeOncoKbVariant(Query query, Boolean variantExists) {
+        if (Boolean.TRUE.equals(variantExists) || query == null || StringUtils.isAnyEmpty(query.getHugoSymbol(), query.getAlteration())) {
+            return null;
+        }
+
+        ParseAlterationResult parsedAlteration = ProteinChangeParser.parseAlteration(query.getAlteration());
+        if (parsedAlteration == null || !Boolean.TRUE.equals(parsedAlteration.getIsParsed())) {
+            return null;
+        }
+
+        return AlterationUtils.findAlternativeOncoKbVariant(
+            query.getHugoSymbol(),
+            query.getAlteration(),
+            query.getReferenceGenome()
+        );
+    }
 
     public static Map<String, Object> tumorTypeSummary(EvidenceType evidenceType, Gene gene, Query query, Alteration exactMatchedAlt, List<Alteration> alterations, TumorType matchedTumorType, List<TumorType> relevantTumorTypes, Oncogenicity oncogenicity) {
         Map<String, Object> tumorTypeSummary = newTumorTypeSummary();
