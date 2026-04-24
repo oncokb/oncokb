@@ -11,6 +11,7 @@ import java.util.List;
  */
 public class VariantAnnotation extends IndicatorQueryResp {
     String background;
+    AlternativeOncoKbVariant alternativeOncoKbVariant;
 
     Alteration alteration;
 
@@ -55,6 +56,14 @@ public class VariantAnnotation extends IndicatorQueryResp {
 
     public void setBackground(String background) {
         this.background = background;
+    }
+
+    public AlternativeOncoKbVariant getAlternativeOncoKbVariant() {
+        return alternativeOncoKbVariant;
+    }
+
+    public void setAlternativeOncoKbVariant(AlternativeOncoKbVariant alternativeOncoKbVariant) {
+        this.alternativeOncoKbVariant = alternativeOncoKbVariant;
     }
 
     public Boolean getVUE() {

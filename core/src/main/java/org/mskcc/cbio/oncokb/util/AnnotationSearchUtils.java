@@ -24,8 +24,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
-import org.genome_nexus.ApiException;
-import org.genome_nexus.client.VariantAnnotation;
+import org.mskcc.cbio.oncokb.apiModels.AlternativeOncoKbVariant;
 import org.mskcc.cbio.oncokb.apiModels.CancerTypeMatch;
 import org.mskcc.cbio.oncokb.apiModels.DrugMatch;
 import org.mskcc.cbio.oncokb.apiModels.GeneticType;
@@ -109,42 +108,23 @@ public class AnnotationSearchUtils {
 
             // If there is no match in OncoKB database, assume the format is gene:alteration (i.e BRAF V600E) and see if is on a different transcript
             if (result.size() == 0 && keywords.size() == 2) {
-                try {
-                    List<VariantAnnotation> annotations =  GenomeNexusUtils.getHgvsVariantsAnnotation(
-                        Arrays.asList((keywords.get(0) + ":p." + resolvedKeywords.get(1)).toUpperCase()),
-                        DEFAULT_REFERENCE_GENOME
+                AlternativeOncoKbVariant alternativeOncoKbVariant = AlterationUtils.findAlternativeOncoKbVariant(keywords.get(0), keywords.get(1), DEFAULT_REFERENCE_GENOME);
+                if (alternativeOncoKbVariant != null) {
+                    Alteration foundAlteration = alternativeOncoKbVariant.getFoundAlteration();
+                    TypeaheadSearchResp response = newTypeaheadVariant(foundAlteration);
+                    response.setAnnotation(alternativeOncoKbVariant.getGene()
+                        + " "
+                        + alternativeOncoKbVariant.getInputVariant()
+                        + " is based on a transcript not used by OncoKB. The equivalent mutation "
+                        + alternativeOncoKbVariant.getGene()
+                        + " "
+                        + foundAlteration.getAlteration()
+                        + " is annotated on OncoKB transcript "
+                        + alternativeOncoKbVariant.getTranscriptId()
+                        + "."
                     );
-
-                    if (annotations.size() == 1) {
-                        VariantAnnotation genomeNexusAnnotation = annotations.get(0);
-
-                        if (genomeNexusAnnotation.getAnnotationSummary() != null && genomeNexusAnnotation.getAnnotationSummary().getTranscriptConsequenceSummary() != null) {
-                            Alteration oncokbAnnotation = AlterationUtils.convertTranscriptConsequenceSummaryToAlteration(genomeNexusAnnotation.getAnnotationSummary().getTranscriptConsequenceSummary());
-                            Alteration foundAlteration = AlterationUtils.findAlteration(oncokbAnnotation.getGene(), DEFAULT_REFERENCE_GENOME, oncokbAnnotation.getAlteration());
-
-                            if (foundAlteration != null) {
-                                String oncokbVariant = foundAlteration.getAlteration();
-                                String oncokbTranscript  = genomeNexusAnnotation.getAnnotationSummary().getTranscriptConsequenceSummary().getTranscriptId();   
-                                String inputVariant = resolvedKeywords.get(1).toUpperCase();
-                                String gene = foundAlteration.getGene().getHugoSymbol();
-
-                                TypeaheadSearchResp response = newTypeaheadVariant(foundAlteration);
-                                response.setAnnotation(gene 
-                                    + " " 
-                                    + inputVariant  
-                                    + " is based on a transcript not used by OncoKB. The equivalent mutation " 
-                                    + gene
-                                    + " "
-                                    + oncokbVariant
-                                    + " is annotated on OncoKB transcript "
-                                    + oncokbTranscript
-                                    + "."
-                                );
-                                result.add(response);
-                            }
-                        }                        
-                    }
-                } catch (ApiException e) {}
+                    result.add(response);
+                }
             }
 
             // If there is no match in OncoKB database, still try to annotate variant
