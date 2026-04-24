@@ -431,6 +431,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
 
         SomaticVariantAnnotation annotation = new SomaticVariantAnnotation(indicatorQueryResp);
         annotation.setAlteration(alterationModel);
+        annotation.setAlternativeOncoKbVariant(SummaryUtils.alternativeOncoKbVariant(query, indicatorQueryResp.getVariantExist()));
 
         // for any hgvsg variant, we need to check whether it is VUE
         if(!StringUtils.isNullOrEmpty(hgvsg)) {

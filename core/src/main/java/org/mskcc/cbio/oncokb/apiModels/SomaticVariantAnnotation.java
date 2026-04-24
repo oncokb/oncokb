@@ -11,6 +11,7 @@ import java.util.List;
  */
 public class SomaticVariantAnnotation extends SomaticIndicatorQueryResp {
     private String background;
+    private AlternativeOncoKbVariant alternativeOncoKbVariant;
 
     private Alteration alteration;
 
@@ -55,6 +56,14 @@ public class SomaticVariantAnnotation extends SomaticIndicatorQueryResp {
 
     public void setBackground(String background) {
         this.background = background;
+    }
+
+    public AlternativeOncoKbVariant getAlternativeOncoKbVariant() {
+        return alternativeOncoKbVariant;
+    }
+
+    public void setAlternativeOncoKbVariant(AlternativeOncoKbVariant alternativeOncoKbVariant) {
+        this.alternativeOncoKbVariant = alternativeOncoKbVariant;
     }
 
     public Boolean getVUE() {
