@@ -450,7 +450,7 @@ public class GermlineAnnotationsApiController {
                 null,
                 null
             );
-            return this.cacheFetcher.processQueryGermline(
+            GermlineIndicatorQueryResp response = this.cacheFetcher.processQueryGermline(
                 indicatorQuery.getReferenceGenome(),
                 indicatorQuery.getEntrezGeneId(),
                 indicatorQuery.getHugoSymbol(),
@@ -469,6 +469,8 @@ public class GermlineAnnotationsApiController {
                 query.getEvidenceTypes(),
                 false
             );
+            addTranscriptAndExonToResponse(response, selectedAnnotatedAlteration.getTranscriptConsequenceSummary());
+            return response;
         }
 
         alteration = null;
@@ -507,7 +509,7 @@ public class GermlineAnnotationsApiController {
                 null,
                 null
             );
-            return this.cacheFetcher.processQueryGermline(
+            GermlineIndicatorQueryResp response = this.cacheFetcher.processQueryGermline(
                 indicatorQuery.getReferenceGenome(),
                 indicatorQuery.getEntrezGeneId(),
                 indicatorQuery.getHugoSymbol(),
@@ -526,6 +528,8 @@ public class GermlineAnnotationsApiController {
                 query.getEvidenceTypes(),
                 false
             );
+            addTranscriptAndExonToResponse(response, selectedAnnotatedAlteration.getTranscriptConsequenceSummary());
+            return response;
         }
 
         return null;
@@ -624,6 +628,14 @@ public class GermlineAnnotationsApiController {
                         query.getEvidenceTypes(),
                         false
                     );
+                    Gene matchedGene = GeneUtils.getGene(germlineResp.getQuery().getEntrezGeneId(), germlineResp.getQuery().getHugoSymbol());
+                    if (matchedGene != null) {
+                        if (ReferenceGenome.GRCh38.equals(germlineResp.getQuery().getReferenceGenome())) {
+                            germlineResp.getQuery().setCanonicalTranscript(matchedGene.getGrch38Isoform());
+                        } else {
+                            germlineResp.getQuery().setCanonicalTranscript(matchedGene.getGrch37Isoform());
+                        }
+                    }
                     germlineResp.getQuery().setId(query.getId());
                     result.add(germlineResp);
                 } else {
