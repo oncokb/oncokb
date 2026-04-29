@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.mskcc.cbio.oncokb.util.GitHubUtils.getOncoKBSqlDumpFileName;
 import static org.mskcc.cbio.oncokb.util.GitHubUtils.getOncoKBTranscriptSqlDumpFileName;
 import static org.mskcc.cbio.oncokb.util.HttpUtils.getDataDownloadResponseEntity;
@@ -194,7 +195,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     public ResponseEntity<Map<String, Boolean>> validateVariantExampleGet(String hugoSymbol, String referenceGenome, String variant, String examples) throws ParserConfigurationException, SAXException, IOException {
         Map<String, Boolean> validation = new HashMap<>();
         ReferenceGenome matchedRG = null;
-        if (!org.apache.commons.lang3.StringUtils.isEmpty(referenceGenome)) {
+        if (!isEmpty(referenceGenome)) {
             matchedRG = MainUtils.searchEnum(ReferenceGenome.class, referenceGenome);
             if (matchedRG == null) {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -347,7 +348,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         , @ApiParam(value = "alteration") @RequestParam(value = "alteration") String alteration
     ) {
         ReferenceGenome matchedRG = null;
-        if (!org.apache.commons.lang3.StringUtils.isEmpty(referenceGenome)) {
+        if (!isEmpty(referenceGenome)) {
             matchedRG = MainUtils.searchEnum(ReferenceGenome.class, referenceGenome);
             if (matchedRG == null) {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -383,7 +384,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         Query query;
         Gene gene;
         ReferenceGenome matchedRG = null;
-        if (!org.apache.commons.lang3.StringUtils.isEmpty(referenceGenome)) {
+        if (!isEmpty(referenceGenome)) {
             matchedRG = MainUtils.searchEnum(ReferenceGenome.class, referenceGenome);
             if (matchedRG == null) {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -521,7 +522,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         Query query;
         Gene gene;
         ReferenceGenome matchedRG = null;
-        if (!org.apache.commons.lang3.StringUtils.isEmpty(referenceGenome)) {
+        if (!isEmpty(referenceGenome)) {
             matchedRG = MainUtils.searchEnum(ReferenceGenome.class, referenceGenome);
             if (matchedRG == null) {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -560,6 +561,11 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
 
         List<EvidenceQueryRes> responses = EvidenceUtils.processRequest(Collections.singletonList(query), new HashSet<>(EvidenceTypeUtils.getAllEvidenceTypes(query.isGermline())), LevelUtils.getPublicLevels(), false, false, Optional.empty());
         GermlineIndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQueryGermline(query, null, false, null, false);
+        if (indicatorQueryResp.getVariantExist()) {
+            Alteration matchedAlt = AlterationUtils.findAlteration(gene, matchedRG, query.getAlteration(), true);
+            // Team wants to have MSK-credited variant summary only on public website.
+            indicatorQueryResp.setVariantSummary(SummaryUtils.websiteGermlineVariantSummary(gene, matchedAlt));
+        }
         GermlineVariantAnnotation annotation = new GermlineVariantAnnotation(indicatorQueryResp);
         EvidenceQueryRes response = responses.iterator().next();
 
