@@ -34,13 +34,13 @@ public enum Pathogenicity {
 
     public static int compare(Pathogenicity o1, Pathogenicity o2) {
         //0 indicates o1 has the same pathogenicity with o2
-        //positive number indicates o1 has higher pathogenicity than o2
-        //negative number indicates o2 has higher pathogenicity than o1
+        //negative number indicates o1 has higher pathogenicity than o2
+        //positive number indicates o2 has higher pathogenicity than o1
         List<Pathogenicity> pathogenicityValues = new ArrayList<>(Arrays.asList(VUS_WITH_SPECIAL_INTERPRETATION, BENIGN, LIKELY_BENIGN, UNKNOWN, LIKELY, YES));
         if (o1 == null && o2 == null) return 0;
-        else if (o1 == null) return -1;
-        else if (o2 == null) return 1;
-        else return pathogenicityValues.indexOf(o1) - pathogenicityValues.indexOf(o2);
+        else if (o1 == null) return 1;
+        else if (o2 == null) return -1;
+        else return pathogenicityValues.indexOf(o2) - pathogenicityValues.indexOf(o1);
     }
 
     public static Pathogenicity getByEvidence(Evidence evidence) {

@@ -13,8 +13,6 @@ public class GermlineVariant implements Serializable {
     String pathogenic = "";
     String description = "";
     String cancerRisk = "";
-    String clinVarId = "";
-
     public List<String> getGenomicIndicators() {
         return genomicIndicators;
     }
@@ -53,14 +51,6 @@ public class GermlineVariant implements Serializable {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public String getClinVarId() {
-        return clinVarId;
-    }
-
-    public void setClinVarId(String clinVarId) {
-        this.clinVarId = clinVarId;
     }
 
     public String getPenetranceDescription() {

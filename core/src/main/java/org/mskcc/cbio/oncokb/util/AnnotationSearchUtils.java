@@ -33,13 +33,15 @@ import org.mskcc.cbio.oncokb.apiModels.LevelsOfEvidenceMatch;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.AnnotationSearchQueryType;
-import org.mskcc.cbio.oncokb.model.AnnotationSearchResult;
+import org.mskcc.cbio.oncokb.model.SomaticAnnotationSearchResult;
 import org.mskcc.cbio.oncokb.model.Drug;
 import org.mskcc.cbio.oncokb.model.Evidence;
 import org.mskcc.cbio.oncokb.model.Gene;
-import org.mskcc.cbio.oncokb.model.IndicatorQueryResp;
+import org.mskcc.cbio.oncokb.model.GermlineIndicatorQueryResp;
+import org.mskcc.cbio.oncokb.model.SomaticIndicatorQueryResp;
 import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
 import org.mskcc.cbio.oncokb.model.Oncogenicity;
+import org.mskcc.cbio.oncokb.model.Pathogenicity;
 import org.mskcc.cbio.oncokb.model.Query;
 import org.mskcc.cbio.oncokb.model.ReferenceGenome;
 import org.mskcc.cbio.oncokb.model.Treatment;
@@ -148,7 +150,7 @@ public class AnnotationSearchUtils {
             }
 
             // If there is no match in OncoKB database, still try to annotate variant
-            // Only when the oncogenicity is not empty
+            // Only when the status field is not empty
             if (result.size() == 0) {
                 for (Map.Entry<String, Set<Gene>> entry : map.entrySet()) {
                     if (entry.getValue().size() > 0) {
@@ -164,8 +166,10 @@ public class AnnotationSearchUtils {
                                     TypeaheadSearchResp typeaheadSearchResp = newTypeaheadVariant(alteration);
                                     typeaheadSearchResp.setVariantExist(false);
                                     result.add(typeaheadSearchResp);
-                                    if (typeaheadSearchResp.getOncogenicity() == null
-                                            || typeaheadSearchResp.getOncogenicity().isEmpty()) {
+                                    if ((typeaheadSearchResp.getOncogenicity() == null
+                                            || typeaheadSearchResp.getOncogenicity().isEmpty())
+                                        && (typeaheadSearchResp.getPathogenicity() == null
+                                            || typeaheadSearchResp.getPathogenicity().isEmpty())) {
                                         String annotation = "Please make sure your query is valid.";
                                         if (typeaheadSearchResp.getAnnotation() != null) {
                                             annotation = typeaheadSearchResp.getAnnotation() + " " + annotation;
@@ -182,8 +186,8 @@ public class AnnotationSearchUtils {
         return result;
     }
 
-    public static TreeSet<AnnotationSearchResult> annotationSearch(String query){
-        TreeSet<AnnotationSearchResult> result = new TreeSet<>(new AnnotationSearchResultComp(query));
+    public static TreeSet<SomaticAnnotationSearchResult> annotationSearch(String query){
+        TreeSet<SomaticAnnotationSearchResult> result = new TreeSet<>(new SomaticAnnotationSearchResultComp(query));
         List<String> keywords = Arrays.asList(query.trim().split("\\s+"));
 
         if (keywords.size() == 1) {
@@ -231,10 +235,10 @@ public class AnnotationSearchUtils {
                     } else {
                         indicatorQuery.setAlteration((alteration.getAlteration()));
                     }
-                    AnnotationSearchResult annotationSearchResult = new AnnotationSearchResult();
+                    SomaticAnnotationSearchResult annotationSearchResult = new SomaticAnnotationSearchResult();
                     annotationSearchResult.setQueryType(AnnotationSearchQueryType.VARIANT);
-                    annotationSearchResult.setIndicatorQueryResp(IndicatorUtils.processQuery(indicatorQuery, null, null, null, false));
-                    if (annotationSearchResult.getIndicatorQueryResp().getVariantExist()) {
+                    annotationSearchResult.setSomaticIndicatorQueryResp(IndicatorUtils.processQuerySomatic(indicatorQuery, null, null, null, false));
+                    if (annotationSearchResult.getSomaticIndicatorQueryResp().getVariantExist()) {
                         result.add(annotationSearchResult);
                     }
                 }
@@ -251,23 +255,23 @@ public class AnnotationSearchUtils {
         return result;
     }
 
-    private static LinkedHashSet<AnnotationSearchResult> findActionableGenesByGeneSearch(String keyword) {
-        LinkedHashSet<AnnotationSearchResult> result = new LinkedHashSet<>();
+    private static LinkedHashSet<SomaticAnnotationSearchResult> findActionableGenesByGeneSearch(String keyword) {
+        LinkedHashSet<SomaticAnnotationSearchResult> result = new LinkedHashSet<>();
         Set<Gene> geneMatches = GeneUtils.searchGene(keyword, false);
         for (Gene gene: geneMatches) {
             Query query = new Query();
             query.setEntrezGeneId(gene.getEntrezGeneId());
             query.setHugoSymbol(gene.getHugoSymbol());
-            AnnotationSearchResult annotationSearchResult = new AnnotationSearchResult();
+            SomaticAnnotationSearchResult annotationSearchResult = new SomaticAnnotationSearchResult();
             annotationSearchResult.setQueryType(AnnotationSearchQueryType.GENE);
-            annotationSearchResult.setIndicatorQueryResp(IndicatorUtils.processQuery(query, null, null, null, true));
+            annotationSearchResult.setSomaticIndicatorQueryResp(IndicatorUtils.processQuerySomatic(query, null, null, null, true));
             result.add(annotationSearchResult);
         }
         return result;
     }
 
-    private static LinkedHashSet<AnnotationSearchResult> findActionableGenesByAlterationSearch(String keyword) {
-        LinkedHashSet<AnnotationSearchResult> result = new LinkedHashSet<>();
+    private static LinkedHashSet<SomaticAnnotationSearchResult> findActionableGenesByAlterationSearch(String keyword) {
+        LinkedHashSet<SomaticAnnotationSearchResult> result = new LinkedHashSet<>();
         List<Alteration> altMatches = AlterationUtils.lookupVariant(keyword, false, true, AlterationUtils.getAllAlterations());
         for (Alteration alteration: altMatches) {
             Query indicatorQuery = new Query();
@@ -278,15 +282,15 @@ public class AnnotationSearchUtils {
             }
             indicatorQuery.setEntrezGeneId(alteration.getGene().getEntrezGeneId());
             indicatorQuery.setHugoSymbol(alteration.getGene().getHugoSymbol());
-            AnnotationSearchResult annotationSearchResult = new AnnotationSearchResult();
+            SomaticAnnotationSearchResult annotationSearchResult = new SomaticAnnotationSearchResult();
             annotationSearchResult.setQueryType(AnnotationSearchQueryType.VARIANT);
-            annotationSearchResult.setIndicatorQueryResp(IndicatorUtils.processQuery(indicatorQuery, null, null, null, false));
+            annotationSearchResult.setSomaticIndicatorQueryResp(IndicatorUtils.processQuerySomatic(indicatorQuery, null, null, null, false));
             result.add(annotationSearchResult);
         }
         return result;
     }
 
-    private static LinkedHashSet<AnnotationSearchResult> findActionableGenesByCancerType(String query) {
+    private static LinkedHashSet<SomaticAnnotationSearchResult> findActionableGenesByCancerType(String query) {
 
         Set<Evidence> allImplicationEvidences = EvidenceUtils.getEvidenceByEvidenceTypesAndLevels(EvidenceTypeUtils.getImplicationEvidenceTypes(), LevelUtils.getPublicLevels());
 
@@ -317,7 +321,7 @@ public class AnnotationSearchUtils {
             return new LinkedHashSet<>();
         }
 
-        LinkedHashSet<AnnotationSearchResult> result = new LinkedHashSet<>();
+        LinkedHashSet<SomaticAnnotationSearchResult> result = new LinkedHashSet<>();
         Set<SearchObject> searchObjects = new HashSet<>();
         for (TumorType tumorType : tumorTypeMatches) {
             for (Evidence evidence : allImplicationEvidences) {
@@ -343,9 +347,9 @@ public class AnnotationSearchUtils {
             } else {
                 indicatorQuery.setTumorType(searchObject.getTumorType().getMainType());
             }
-            AnnotationSearchResult annotationSearchResult = new AnnotationSearchResult();
+            SomaticAnnotationSearchResult annotationSearchResult = new SomaticAnnotationSearchResult();
             annotationSearchResult.setQueryType(AnnotationSearchQueryType.CANCER_TYPE);
-            annotationSearchResult.setIndicatorQueryResp(IndicatorUtils.processQuery(indicatorQuery, null, null, null, true));
+            annotationSearchResult.setSomaticIndicatorQueryResp(IndicatorUtils.processQuerySomatic(indicatorQuery, null, null, null, true));
             result.add(annotationSearchResult);
         }
 
@@ -779,20 +783,38 @@ public class AnnotationSearchUtils {
             query.setReferenceGenome(referenceGenome);
         }
 
-        IndicatorQueryResp resp = IndicatorUtils.processQuery(query, null, false, null, false);
-        typeaheadSearchResp.setOncogenicity(resp.getOncogenic());
-        typeaheadSearchResp.setVUS(resp.getVUS());
-        typeaheadSearchResp.setAnnotation(resp.getVariantSummary() + " Click here to see more annotation details.");
+        if (alteration.getForGermline()) {
+            GermlineIndicatorQueryResp resp = IndicatorUtils.processQueryGermline(query, null, false, null, false);
+            typeaheadSearchResp.setPathogenicity(resp.getPathogenic());
+            typeaheadSearchResp.setVUS(resp.getVUS());
+            typeaheadSearchResp.setAnnotation(resp.getVariantSummary() + " Click here to see more annotation details.");
 
-        if (resp.getHighestSensitiveLevel() != null) {
-            typeaheadSearchResp.setHighestSensitiveLevel(resp.getHighestSensitiveLevel().getLevel());
-        }
-        if (resp.getHighestResistanceLevel() != null) {
-            typeaheadSearchResp.setHighestResistanceLevel(resp.getHighestResistanceLevel().getLevel());
-        }
+            if (resp.getHighestSensitiveLevel() != null) {
+                typeaheadSearchResp.setHighestSensitiveLevel(resp.getHighestSensitiveLevel().getLevel());
+            }
+            if (resp.getHighestResistanceLevel() != null) {
+                typeaheadSearchResp.setHighestResistanceLevel(resp.getHighestResistanceLevel().getLevel());
+            }
 
-        if (alteration.getAlteration() != null && alteration.getAlteration().equalsIgnoreCase("oncogenic mutations")) {
-            typeaheadSearchResp.setOncogenicity(Oncogenicity.YES.getOncogenic());
+            if (alteration.getAlteration() != null && alteration.getAlteration().equalsIgnoreCase("pathogenic variants")) {
+                typeaheadSearchResp.setPathogenicity(Pathogenicity.YES.getPathogenic());
+            }
+        } else {
+            SomaticIndicatorQueryResp resp = IndicatorUtils.processQuerySomatic(query, null, false, null, false);
+            typeaheadSearchResp.setOncogenicity(resp.getOncogenic());
+            typeaheadSearchResp.setVUS(resp.getVUS());
+            typeaheadSearchResp.setAnnotation(resp.getVariantSummary() + " Click here to see more annotation details.");
+
+            if (resp.getHighestSensitiveLevel() != null) {
+                typeaheadSearchResp.setHighestSensitiveLevel(resp.getHighestSensitiveLevel().getLevel());
+            }
+            if (resp.getHighestResistanceLevel() != null) {
+                typeaheadSearchResp.setHighestResistanceLevel(resp.getHighestResistanceLevel().getLevel());
+            }
+
+            if (alteration.getAlteration() != null && alteration.getAlteration().equalsIgnoreCase("oncogenic mutations")) {
+                typeaheadSearchResp.setOncogenicity(Oncogenicity.YES.getOncogenic());
+            }
         }
 
         typeaheadSearchResp.setQueryType(TypeaheadQueryType.VARIANT);
@@ -811,7 +833,7 @@ public class AnnotationSearchUtils {
         return typeaheadSearchResp;
     }
 
-    public static TypeaheadSearchResp newTypeaheadAnnotation(String query, GNVariantAnnotationType type, ReferenceGenome referenceGenome, Alteration alteration, IndicatorQueryResp queryResp) {
+    public static TypeaheadSearchResp newTypeaheadAnnotation(String query, GNVariantAnnotationType type, ReferenceGenome referenceGenome, Alteration alteration, SomaticIndicatorQueryResp queryResp) {
         TypeaheadSearchResp typeaheadSearchResp = new TypeaheadSearchResp();
         typeaheadSearchResp.setGene(alteration.getGene());
         typeaheadSearchResp.setVariants(Collections.singleton(alteration));
@@ -892,16 +914,33 @@ class VariantComp implements Comparator<TypeaheadSearchResp> {
         Integer index1 = name1.indexOf(this.keyword);
         Integer index2 = name2.indexOf(this.keyword);
         if (index1.equals(index2)) {
-            //Compare Oncogenicity. Treat YES, LIKELY as the same
-            Oncogenicity o1 = Oncogenicity.getByEffect(e1.getOncogenicity());
-            Oncogenicity o2 = Oncogenicity.getByEffect(e2.getOncogenicity());
-            if (o1 != null && o1.equals(Oncogenicity.LIKELY)) {
-                o1 = Oncogenicity.YES;
+            if (!e1.getGeneticType().equals(e2.getGeneticType())) {
+                return e1.getGeneticType().compareTo(e2.getGeneticType());
             }
-            if (o2 != null && o2.equals(Oncogenicity.LIKELY)) {
-                o2 = Oncogenicity.YES;
+            Integer result;
+            if ((e1.getPathogenicity() != null && !e1.getPathogenicity().isEmpty())
+                || (e2.getPathogenicity() != null && !e2.getPathogenicity().isEmpty())) {
+                Pathogenicity p1 = Pathogenicity.getByEffect(e1.getPathogenicity());
+                Pathogenicity p2 = Pathogenicity.getByEffect(e2.getPathogenicity());
+                if (p1 != null && p1.equals(Pathogenicity.LIKELY)) {
+                    p1 = Pathogenicity.YES;
+                }
+                if (p2 != null && p2.equals(Pathogenicity.LIKELY)) {
+                    p2 = Pathogenicity.YES;
+                }
+                result = Pathogenicity.compare(p1, p2);
+            } else {
+                //Compare Oncogenicity. Treat YES, LIKELY as the same
+                Oncogenicity o1 = Oncogenicity.getByEffect(e1.getOncogenicity());
+                Oncogenicity o2 = Oncogenicity.getByEffect(e2.getOncogenicity());
+                if (o1 != null && o1.equals(Oncogenicity.LIKELY)) {
+                    o1 = Oncogenicity.YES;
+                }
+                if (o2 != null && o2.equals(Oncogenicity.LIKELY)) {
+                    o2 = Oncogenicity.YES;
+                }
+                result = MainUtils.compareOncogenicity(o1, o2, true);
             }
-            Integer result = MainUtils.compareOncogenicity(o1, o2, true);
             if (result == 0) {
                 // Compare highest sensitive level
                 result = LevelUtils.compareLevel(LevelOfEvidence.getByLevel(e1.getHighestSensitiveLevel()), LevelOfEvidence.getByLevel(e2.getHighestSensitiveLevel()));
@@ -931,17 +970,17 @@ class VariantComp implements Comparator<TypeaheadSearchResp> {
     }
 }
 
-class AnnotationSearchResultComp implements Comparator<AnnotationSearchResult> {
+class SomaticAnnotationSearchResultComp implements Comparator<SomaticAnnotationSearchResult> {
     private String keyword;
 
-    public AnnotationSearchResultComp(String keyword) {
+    public SomaticAnnotationSearchResultComp(String keyword) {
         this.keyword = keyword.toLowerCase();
     }
 
     @Override
-    public int compare(AnnotationSearchResult a1, AnnotationSearchResult a2) {
-        IndicatorQueryResp i1 = a1.getIndicatorQueryResp();
-        IndicatorQueryResp i2 = a2.getIndicatorQueryResp();
+    public int compare(SomaticAnnotationSearchResult a1, SomaticAnnotationSearchResult a2) {
+        SomaticIndicatorQueryResp i1 = a1.getSomaticIndicatorQueryResp();
+        SomaticIndicatorQueryResp i2 = a2.getSomaticIndicatorQueryResp();
 
         // Compare by query type
         Integer result = MainUtils.compareAnnotationSearchQueryType(a1.getQueryType(), a2.getQueryType(), true);
@@ -978,7 +1017,7 @@ class AnnotationSearchResultComp implements Comparator<AnnotationSearchResult> {
 
     }
 
-    private Integer compareLevel(IndicatorQueryResp i1, IndicatorQueryResp i2, String name1, String name2) {
+    private Integer compareLevel(SomaticIndicatorQueryResp i1, SomaticIndicatorQueryResp i2, String name1, String name2) {
         // Compare therapeutic levels
         LevelOfEvidence i1Level = i1.getHighestSensitiveLevel();
         LevelOfEvidence i2Level = i2.getHighestSensitiveLevel();
