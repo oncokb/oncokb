@@ -16,7 +16,6 @@ public class GermlineVariantAnnotation extends GermlineIndicatorQueryResp {
         this.setQuery(indicatorQueryResp.getQuery());
         this.setGeneExist(indicatorQueryResp.getGeneExist());
         this.setVariantExist(indicatorQueryResp.getVariantExist());
-        this.setAlleleExist(indicatorQueryResp.getAlleleExist());
         this.setMutationEffect(indicatorQueryResp.getMutationEffect());
         this.setHighestSensitiveLevel(indicatorQueryResp.getHighestSensitiveLevel());
         this.setHighestResistanceLevel(indicatorQueryResp.getHighestResistanceLevel());
@@ -36,7 +35,6 @@ public class GermlineVariantAnnotation extends GermlineIndicatorQueryResp {
         this.setGenomicIndicators(indicatorQueryResp.getGenomicIndicators());
         this.setPenetrance(indicatorQueryResp.getPenetrance());
         this.setPathogenic(indicatorQueryResp.getPathogenic());
-        this.setClinVarId(indicatorQueryResp.getClinVarId());
     }
 
     public List<VariantAnnotationTumorType> getTumorTypes() {

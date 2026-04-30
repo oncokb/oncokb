@@ -18,9 +18,6 @@ abstract class IndicatorQueryRespBase implements java.io.Serializable {
     @ApiModelProperty(value = "Indicates whether an exact match for the queried variant is curated")
     private Boolean variantExist = false;
 
-    @ApiModelProperty(value = "Indicates whether the alternate allele has been curated. See SOP Protocol 9.1")
-    private Boolean alleleExist = false;
-
     @ApiModelProperty(value = "Indicated whether it is a variant of unknown significance (investigated and data not found). See SOP Sub-Protocol 3.2")
     private Boolean VUS = false;
 
@@ -89,14 +86,6 @@ abstract class IndicatorQueryRespBase implements java.io.Serializable {
 
     public void setVariantExist(Boolean variantExist) {
         this.variantExist = variantExist;
-    }
-
-    public Boolean getAlleleExist() {
-        return alleleExist;
-    }
-
-    public void setAlleleExist(Boolean alleleExist) {
-        this.alleleExist = alleleExist;
     }
 
     public MutationEffectResp getMutationEffect() {

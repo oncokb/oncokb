@@ -14,9 +14,6 @@ public class GermlineIndicatorQueryResp extends IndicatorQueryRespBase {
     @ApiModelProperty(value = "(Nullable) The classification of the likelihood that a germline variant will cause disease.")
     private String pathogenic = "";
 
-    @ApiModelProperty(value = "(Nullable) The unique identifier for a variant record in the ClinVar database")
-    private String clinVarId = "";
-
     public GermlineIndicatorQueryResp() {
         super();
     }
@@ -27,7 +24,6 @@ public class GermlineIndicatorQueryResp extends IndicatorQueryRespBase {
         newResp.setQuery(this.getQuery() == null ? null : this.getQuery().copy());
         newResp.setGeneExist(this.getGeneExist());
         newResp.setVariantExist(this.getVariantExist());
-        newResp.setAlleleExist(this.getAlleleExist());
         newResp.setMutationEffect(this.getMutationEffect());
         newResp.setHighestSensitiveLevel(this.getHighestSensitiveLevel());
         newResp.setHighestResistanceLevel(this.getHighestResistanceLevel());
@@ -47,7 +43,6 @@ public class GermlineIndicatorQueryResp extends IndicatorQueryRespBase {
         newResp.setGenomicIndicators(new ArrayList<>(this.genomicIndicators));
         newResp.setPenetrance(this.penetrance);
         newResp.setPathogenic(this.pathogenic);
-        newResp.setClinVarId(this.clinVarId);
         return newResp;
     }
 
@@ -75,11 +70,4 @@ public class GermlineIndicatorQueryResp extends IndicatorQueryRespBase {
         this.pathogenic = pathogenic;
     }
 
-    public String getClinVarId() {
-        return clinVarId;
-    }
-
-    public void setClinVarId(String clinVarId) {
-        this.clinVarId = clinVarId;
-    }
 }

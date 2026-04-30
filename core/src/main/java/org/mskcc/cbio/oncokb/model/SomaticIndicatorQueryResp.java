@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SomaticIndicatorQueryResp extends IndicatorQueryRespBase {
+    @ApiModelProperty(value = "Indicates whether the alternate allele has been curated. See SOP Protocol 9.1")
+    private Boolean alleleExist = false;
+
     @ApiModelProperty(value = "The oncogenicity status of the variant. Defaulted to \"Unknown\".", allowableValues = "Oncogenic, Likely Oncogenic, Likely Neutral, Inconclusive, Resistance, Unknown")
     private String oncogenic;
 
@@ -59,6 +62,14 @@ public class SomaticIndicatorQueryResp extends IndicatorQueryRespBase {
         newResp.setOncogenic(this.oncogenic);
         newResp.setHotspot(this.hotspot);
         return newResp;
+    }
+
+    public Boolean getAlleleExist() {
+        return alleleExist;
+    }
+
+    public void setAlleleExist(Boolean alleleExist) {
+        this.alleleExist = alleleExist;
     }
 
     public String getOncogenic() {
