@@ -10,14 +10,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.mskcc.cbio.oncokb.model.CancerGene;
+import org.mskcc.cbio.oncokb.model.Evidence;
 import org.mskcc.cbio.oncokb.model.Gene;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Created by jiaojiao on 6/9/17.
@@ -51,7 +48,18 @@ public class CancerGeneUtils {
                     cancerGene.setGrch37RefSeq(gene.getGrch37RefSeq());
                     cancerGene.setGrch38Isoform(gene.getGrch38Isoform());
                     cancerGene.setGrch38RefSeq(gene.getGrch38RefSeq());
-                    cancerGene.setOncokbAnnotated(true);
+                    boolean hasSomaticEvidence = false;
+                    boolean hasGermlineEvidence = false;
+                    for (Evidence evidence : CacheUtils.getEvidences(gene)) {
+                        if (Boolean.TRUE.equals(evidence.getForGermline())) {
+                            hasGermlineEvidence = true;
+                        } else {
+                            hasSomaticEvidence = true;
+                        }
+                        if (hasSomaticEvidence && hasGermlineEvidence) break;
+                    }
+                    cancerGene.setOncokbAnnotated(hasSomaticEvidence);
+                    cancerGene.setOncokbAnnotatedInGermline(hasGermlineEvidence);
                     cancerGene.setOccurrenceCount(1);
                     cancerGene.setGeneType(gene.getGeneType());
                     cancerGene.setGeneAliases(gene.getGeneAliases());

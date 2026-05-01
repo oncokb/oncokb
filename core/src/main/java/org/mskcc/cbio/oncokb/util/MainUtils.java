@@ -61,6 +61,23 @@ public class MainUtils {
         )
     );
 
+    public static int compareDataVersions(String left, String right) {
+        if (left == null && right == null) return 0;
+        if (left == null) return -1;
+        if (right == null) return 1;
+        String[] leftParts = left.trim().split("\\.");
+        String[] rightParts = right.trim().split("\\.");
+        int len = Math.max(leftParts.length, rightParts.length);
+        for (int i = 0; i < len; i++) {
+            int leftPart = i < leftParts.length ? Integer.parseInt(leftParts[i]) : 0;
+            int rightPart = i < rightParts.length ? Integer.parseInt(rightParts[i]) : 0;
+            if (leftPart != rightPart) {
+                return Integer.compare(leftPart, rightPart);
+            }
+        }
+        return 0;
+    }
+
     public static Oncogenicity getCuratedAlterationOncogenicity(Alteration alteration) {
         List<Evidence> selfAltOncogenicEvis = EvidenceUtils.getEvidence(Collections.singletonList(alteration),
             Collections.singleton(EvidenceType.ONCOGENIC), null);

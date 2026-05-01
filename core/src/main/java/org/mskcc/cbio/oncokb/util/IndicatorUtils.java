@@ -188,7 +188,7 @@ public class IndicatorUtils {
 
             // Gene summary
             if (evidenceTypes.contains(EvidenceType.GENE_SUMMARY)) {
-                indicatorQuery.setGeneSummary(SummaryUtils.geneSummary(gene, query.getHugoSymbol(), query.isGermline()));
+                indicatorQuery.setGeneSummary(SummaryUtils.getGeneSummaryByGeneticType(gene, query.getHugoSymbol(), query.isGermline()));
                 latestEvidenceDate = updateLatestEvidenceDate(latestEvidenceDate,
                     EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Collections.singleton(EvidenceType.GENE_SUMMARY)));
             }
@@ -546,7 +546,7 @@ public class IndicatorUtils {
 
             // Gene summary
             if (evidenceTypes.contains(EvidenceType.GENE_SUMMARY)) {
-                indicatorQuery.setGeneSummary(SummaryUtils.geneSummary(gene, query.getHugoSymbol(), query.isGermline()));
+                indicatorQuery.setGeneSummary(SummaryUtils.getGeneSummaryByGeneticType(gene, query.getHugoSymbol(), query.isGermline()));
                 latestEvidenceDate = updateLatestEvidenceDate(latestEvidenceDate,
                     EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Collections.singleton(EvidenceType.GENE_SUMMARY)));
             }

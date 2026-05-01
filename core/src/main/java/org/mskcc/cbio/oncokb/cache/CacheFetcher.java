@@ -65,8 +65,9 @@ public class CacheFetcher {
         header.add("GRCh38 Isoform");
         header.add("GRCh38 RefSeq");
         header.add("Gene Type");
-        header.add("# of occurrence within resources (Column J-P)");
-        header.add("OncoKB Annotated");
+        header.add("# of occurrence within resources (Column K-P)");
+        header.add("OncoKB Annotated in Somatic");
+        header.add("OncoKB Annotated in Germline");
         header.add("MSK-IMPACT");
         header.add("MSK-HEME");
         header.add("FOUNDATION ONE");
@@ -92,6 +93,7 @@ public class CacheFetcher {
             }
             row.add(String.valueOf(cancerGene.getOccurrenceCount()));
             row.add(getStringByBoolean(cancerGene.getOncokbAnnotated()));
+            row.add(getStringByBoolean(cancerGene.getOncokbAnnotatedInGermline()));
             row.add(getStringByBoolean(cancerGene.getmSKImpact()));
             row.add(getStringByBoolean(cancerGene.getmSKHeme()));
             row.add(getStringByBoolean(cancerGene.getFoundation()));
@@ -154,7 +156,7 @@ public class CacheFetcher {
     }
 
     @Cacheable(cacheResolver = "generalCacheResolver")
-    public List<CuratedGene> getCuratedGenes(boolean includeEvidence) {
+    public List<CuratedGene> getCuratedGenes(boolean includeEvidence, boolean germline) {
         List<CuratedGene> genes = new ArrayList<>();
         for (Gene gene : CacheUtils.getAllGenes()) {
             // Skip all genes without entrez gene id
@@ -162,9 +164,17 @@ public class CacheFetcher {
                 continue;
             }
 
+            // Skip genes that have no germline evidence when building the germline list
+            if (germline && CacheUtils.getEvidences(gene).stream().noneMatch(e -> Boolean.TRUE.equals(e.getForGermline()))) {
+                continue;
+            }
+
             String highestSensitiveLevel = "";
             String highestResistanceLevel = "";
-            Set<Evidence> therapeuticEvidences = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, EvidenceTypeUtils.getTreatmentEvidenceTypes());
+            Set<Evidence> therapeuticEvidences = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, EvidenceTypeUtils.getTreatmentEvidenceTypes())
+                .stream()
+                .filter(evidence -> Boolean.TRUE.equals(evidence.getForGermline()) == germline)
+                .collect(Collectors.toSet());
             Set<Evidence> highestSensitiveLevelEvidences = EvidenceUtils.getOnlyHighestLevelEvidences(EvidenceUtils.getSensitiveEvidences(therapeuticEvidences), null, null);
             Set<Evidence> highestResistanceLevelEvidences = EvidenceUtils.getOnlyHighestLevelEvidences(EvidenceUtils.getResistanceEvidences(therapeuticEvidences), null, null);
             if (!highestSensitiveLevelEvidences.isEmpty()) {
@@ -181,8 +191,8 @@ public class CacheFetcher {
                     gene.getEntrezGeneId(), gene.getHugoSymbol(),
                     gene.getGeneType() != null ? gene.getGeneType() : GeneType.INSUFFICIENT_EVIDENCE,
                     highestSensitiveLevel, highestResistanceLevel,
-                    includeEvidence ? SummaryUtils.geneSummary(gene, gene.getHugoSymbol(), false) : "",
-                    includeEvidence ? SummaryUtils.geneBackground(gene, gene.getHugoSymbol()) : ""
+                    includeEvidence ? SummaryUtils.getGeneSummaryByGeneticType(gene, gene.getHugoSymbol(), germline) : "",
+                    includeEvidence ? SummaryUtils.getGeneBackgroundByGeneticType(gene, gene.getHugoSymbol(), germline) : ""
                 )
             );
         }
@@ -212,7 +222,7 @@ public class CacheFetcher {
         sb.append(MainUtils.listToString(header, separator));
         sb.append(newLine);
 
-        List<CuratedGene> genes = this.getCuratedGenes(includeEvidence == Boolean.TRUE);
+        List<CuratedGene> genes = this.getCuratedGenes(includeEvidence == Boolean.TRUE, false);
         for (CuratedGene gene : genes) {
             List<String> row = new ArrayList<>();
             row.add(gene.getGrch37Isoform());
@@ -228,6 +238,52 @@ public class CacheFetcher {
             }
             row.add(gene.getHighestSensitiveLevel());
             row.add(gene.getHighestResistancLevel());
+            if (includeEvidence == Boolean.TRUE) {
+                row.add(gene.getSummary());
+                row.add(gene.getBackground());
+            }
+            sb.append(MainUtils.listToString(row, separator));
+            sb.append(newLine);
+        }
+        return sb.toString();
+    }
+
+    @Cacheable(cacheResolver = "generalCacheResolver")
+    public String getCuratedGenesGermlineTxt(boolean includeEvidence) {
+        String separator = "\t";
+        String newLine = "\n";
+        StringBuilder sb = new StringBuilder();
+        List<String> header = new ArrayList<>();
+        header.add("GRCh37 Isoform");
+        header.add("GRCh37 RefSeq");
+        header.add("GRCh38 Isoform");
+        header.add("GRCh38 RefSeq");
+        header.add("Entrez Gene ID");
+        header.add("Hugo Symbol");
+        header.add("Gene Type");
+        header.add("Highest Level of Evidence(sensitivity)");
+        if (includeEvidence == Boolean.TRUE) {
+            header.add("Summary");
+            header.add("Background");
+        }
+        sb.append(MainUtils.listToString(header, separator));
+        sb.append(newLine);
+
+        List<CuratedGene> genes = this.getCuratedGenes(includeEvidence == Boolean.TRUE, true);
+        for (CuratedGene gene : genes) {
+            List<String> row = new ArrayList<>();
+            row.add(gene.getGrch37Isoform());
+            row.add(gene.getGrch37RefSeq());
+            row.add(gene.getGrch38Isoform());
+            row.add(gene.getGrch38RefSeq());
+            row.add(String.valueOf(gene.getEntrezGeneId()));
+            row.add(gene.getHugoSymbol());
+            if (gene.getGeneType() != null) {
+                row.add(gene.getGeneType().toString());
+            } else {
+                row.add("");
+            }
+            row.add(gene.getHighestSensitiveLevel());
             if (includeEvidence == Boolean.TRUE) {
                 row.add(gene.getSummary());
                 row.add(gene.getBackground());

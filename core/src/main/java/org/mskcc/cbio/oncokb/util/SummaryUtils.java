@@ -590,43 +590,32 @@ public class SummaryUtils {
         return sb.toString();
     }
 
-    public static String geneSummary(Gene gene, String queryHugoSymbol, boolean isGermline) {
+    public static String getGeneSummaryByGeneticType(Gene gene, String queryHugoSymbol, boolean isGermline) {
         if (gene != null && gene.getHugoSymbol().equals(SpecialStrings.OTHERBIOMARKERS)) {
             return "";
         }
-        return enrichGeneEvidenceDescription(EvidenceType.GENE_SUMMARY, gene, StringUtils.isEmpty(queryHugoSymbol) ? gene.getHugoSymbol() : queryHugoSymbol, isGermline);
+        return enrichGeneSummaryDescription(gene, StringUtils.isEmpty(queryHugoSymbol) ? gene.getHugoSymbol() : queryHugoSymbol, isGermline);
     }
 
-    public static String geneBackground(Gene gene, String queryHugoSymbol) {
-        if (gene != null && gene.getHugoSymbol().equals(SpecialStrings.OTHERBIOMARKERS)) {
-            return "";
-        }
-        return enrichGeneEvidenceDescription(EvidenceType.GENE_BACKGROUND, gene, StringUtils.isEmpty(queryHugoSymbol) ? gene.getHugoSymbol() : queryHugoSymbol, false);
-    }
-
-    private static String enrichGeneEvidenceDescription(EvidenceType evidenceType, Gene gene, String hugoSymbol, boolean isGermline) {
-        Set<Evidence> geneBackgroundEvs = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Collections.singleton(evidenceType));
+    private static String enrichGeneSummaryDescription(Gene gene, String hugoSymbol, boolean isGermline) {
+        Set<Evidence> evidences = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Collections.singleton(EvidenceType.GENE_SUMMARY));
         String summary = "";
 
-        if (evidenceType.equals(EvidenceType.GENE_SUMMARY) && geneBackgroundEvs.size() == 2) {
+        if (evidences.size() == 2) {
+            // For germline gene summary, we need to combine somatic and germline summary together.
             String somaticSummary = null;
             String germlineSummary = null;
-            for (Evidence ev : geneBackgroundEvs) {
+            for (Evidence ev : evidences) {
                 if (ev.getForGermline()) {
                     germlineSummary = ev.getDescription();
                 } else {
                     somaticSummary = ev.getDescription();
                 }
             }
-
-            if (isGermline) {
-                summary = joinStringsWithSpace(somaticSummary, germlineSummary);
-            } else {
-                summary = somaticSummary;
-            }
-        } else if (!geneBackgroundEvs.isEmpty()) {
-            Evidence ev = geneBackgroundEvs.iterator().next();
-            if (ev != null) {
+            summary = isGermline ? joinStringsWithSpace(somaticSummary, germlineSummary) : somaticSummary;
+        } else if (!evidences.isEmpty()) {
+            Evidence ev = evidences.iterator().next();
+            if (ev != null && Boolean.TRUE.equals(ev.getForGermline()) == isGermline) {
                 summary = ev.getDescription();
             }
         }
@@ -635,9 +624,38 @@ public class SummaryUtils {
             summary = "";
         }
         summary = summary.trim();
-        summary = summary.endsWith(".") ? summary : summary + ".";
-        summary = CplUtils.annotateGene(summary, hugoSymbol);
-        return summary;
+        if (!summary.isEmpty()) {
+            summary = summary.endsWith(".") ? summary : summary + ".";
+        }
+        return CplUtils.annotateGene(summary, hugoSymbol);
+    }
+
+    public static String getGeneBackgroundByGeneticType(Gene gene, String queryHugoSymbol, Boolean isGermline) {
+        if (gene != null && gene.getHugoSymbol().equals(SpecialStrings.OTHERBIOMARKERS)) {
+            return "";
+        }
+        return enrichGeneBackgroundDescription(gene, StringUtils.isEmpty(queryHugoSymbol) ? gene.getHugoSymbol() : queryHugoSymbol, isGermline);
+    }
+
+    private static String enrichGeneBackgroundDescription(Gene gene, String hugoSymbol, Boolean isGermline) {
+        Set<Evidence> evidences = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Collections.singleton(EvidenceType.GENE_BACKGROUND));
+        String summary = "";
+
+        for (Evidence ev : evidences) {
+            if (Boolean.TRUE.equals(ev.getForGermline()) == (Boolean.TRUE.equals(isGermline))) {
+                summary = ev.getDescription();
+                break;
+            }
+        }
+
+        if (summary == null) {
+            summary = "";
+        }
+        summary = summary.trim();
+        if (!summary.isEmpty()) {
+            summary = summary.endsWith(".") ? summary : summary + ".";
+        }
+        return CplUtils.annotateGene(summary, hugoSymbol);
     }
 
     public static String variantSummaryForTruncatingMutation(String altQuery, Alteration alteration, Oncogenicity oncogenicity) {
