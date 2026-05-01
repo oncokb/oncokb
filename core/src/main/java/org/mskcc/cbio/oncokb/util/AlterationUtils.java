@@ -1550,6 +1550,14 @@ public final class AlterationUtils {
 
     public static List<ActionableGene> getAllActionableVariants(Boolean isTextFile, boolean germline) {
         List<ActionableGene> actionableGeneList = new ArrayList<>();
+        actionableGeneList.addAll(getActionableVariantsForSetting(isTextFile, false));
+        actionableGeneList.addAll(getActionableVariantsForSetting(isTextFile, true));
+        MainUtils.sortActionableVariants(actionableGeneList);
+        return actionableGeneList;
+    }
+
+    private static Set<ActionableGene> getActionableVariantsForSetting(Boolean isTextFile, boolean germline) {
+        String setting = germline ? "Germline" : "Somatic";
         Set<Gene> genes = CacheUtils.getAllGenes();
         Map<Gene, Set<ClinicalVariant>> map = new HashMap<>();
 
@@ -1566,6 +1574,7 @@ public final class AlterationUtils {
                 for (ArticleAbstract articleAbstract : articleAbstracts) {
                     abstracts.add(articleAbstract.getAbstractContent() + " " + articleAbstract.getLink());
                 }
+                String proteinChange = germline ? clinicalVariant.getVariant().getProteinChange() : clinicalVariant.getVariant().getAlteration();
 
                 if (clinicalVariant.getExcludedCancerTypes().size() > 0) {
                     String cancerTypeName = TumorTypeUtils.getTumorTypesNameWithExclusion(clinicalVariant.getCancerTypes(), clinicalVariant.getExcludedCancerTypes());
@@ -1576,8 +1585,9 @@ public final class AlterationUtils {
                         gene.getEntrezGeneId(),
                         gene.getHugoSymbol(),
                         clinicalVariant.getVariant().getReferenceGenomes().stream().map(referenceGenome -> referenceGenome.name()).collect(Collectors.joining(", ")),
+                        setting,
                         clinicalVariant.getVariant().getName(),
-                        clinicalVariant.getVariant().getAlteration(),
+                        proteinChange,
                         cancerTypeName,
                         clinicalVariant.getLevel(),
                         clinicalVariant.getSolidPropagationLevel(),
@@ -1604,8 +1614,9 @@ public final class AlterationUtils {
                             gene.getEntrezGeneId(),
                             gene.getHugoSymbol(),
                             clinicalVariant.getVariant().getReferenceGenomes().stream().map(referenceGenome -> referenceGenome.name()).collect(Collectors.joining(", ")),
+                            setting,
                             clinicalVariant.getVariant().getName(),
-                            clinicalVariant.getVariant().getAlteration(),
+                            proteinChange,
                             TumorTypeUtils.getTumorTypeName(tumorType),
                             clinicalVariant.getLevel(),
                             clinicalVariant.getSolidPropagationLevel(),
@@ -1628,10 +1639,7 @@ public final class AlterationUtils {
                 }
             }
         }
-
-        actionableGeneList.addAll(actionableGenes);
-        MainUtils.sortActionableVariants(actionableGeneList);
-        return actionableGeneList;
+        return actionableGenes;
     }
 
     public static String resolveProteinAlterationShort(String alteration) {

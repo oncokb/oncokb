@@ -2,6 +2,7 @@ package org.mskcc.cbio.oncokb.api.pub.v1;
 
 import io.swagger.annotations.ApiParam;
 import org.mskcc.cbio.oncokb.apiModels.ActionableGene;
+import org.mskcc.cbio.oncokb.serializer.EntrezGeneIdConverter;
 import org.mskcc.cbio.oncokb.apiModels.AnnotatedVariant;
 import org.mskcc.cbio.oncokb.apiModels.CuratedGene;
 import org.mskcc.cbio.oncokb.apiModels.VariantOfUnknownSignificance;
@@ -31,6 +32,8 @@ import static org.mskcc.cbio.oncokb.util.HttpUtils.getDataDownloadResponseEntity
  */
 @Controller
 public class UtilsApiController implements UtilsApi {
+    private static final EntrezGeneIdConverter ENTREZ_ID_CONVERTER = new EntrezGeneIdConverter();
+    
     @Autowired
     CacheFetcher cacheFetcher;
 
@@ -41,7 +44,7 @@ public class UtilsApiController implements UtilsApi {
         if (version != null) {
             return getDataDownloadResponseEntity(version, FileName.ALL_ANNOTATED_VARIANTS, FileExtension.JSON);
         }
-        return new ResponseEntity<>(getAllAnnotatedVariants(false, false), HttpStatus.OK);
+        return new ResponseEntity<>(getAllAnnotatedVariants(false), HttpStatus.OK);
     }
 
     @Override
@@ -63,6 +66,7 @@ public class UtilsApiController implements UtilsApi {
         header.add("Entrez Gene ID");
         header.add("Hugo Symbol");
         header.add("Reference Genome");
+        header.add("Setting");
         header.add("Alteration");
         header.add("Protein Change");
         header.add("Oncogenicity");
@@ -73,22 +77,23 @@ public class UtilsApiController implements UtilsApi {
         sb.append(MainUtils.listToString(header, separator));
         sb.append(newLine);
 
-        for (AnnotatedVariant annotatedVariant : getAllAnnotatedVariants(true, false)) {
+        for (AnnotatedVariant annotatedVariant : getAllAnnotatedVariants(true)) {
             List<String> row = new ArrayList<>();
-            row.add(annotatedVariant.getGrch37Isoform());
-            row.add(annotatedVariant.getGrch37RefSeq());
-            row.add(annotatedVariant.getGrch38Isoform());
-            row.add(annotatedVariant.getGrch38RefSeq());
-            row.add(String.valueOf(annotatedVariant.getEntrezGeneId()));
-            row.add(annotatedVariant.getGene());
-            row.add(annotatedVariant.getReferenceGenome());
-            row.add(annotatedVariant.getVariant());
-            row.add(annotatedVariant.getProteinChange());
-            row.add(annotatedVariant.getOncogenicity());
-            row.add(annotatedVariant.getMutationEffect());
-            row.add(annotatedVariant.getMutationEffectPmids());
-            row.add(annotatedVariant.getMutationEffectAbstracts());
-            row.add(annotatedVariant.getDescription());
+            row.add(nullToEmpty(annotatedVariant.getGrch37Isoform()));
+            row.add(nullToEmpty(annotatedVariant.getGrch37RefSeq()));
+            row.add(nullToEmpty(annotatedVariant.getGrch38Isoform()));
+            row.add(nullToEmpty(annotatedVariant.getGrch38RefSeq()));
+            row.add(annotatedVariant.getEntrezGeneId() == null ? "" : String.valueOf(annotatedVariant.getEntrezGeneId()));
+            row.add(nullToEmpty(annotatedVariant.getGene()));
+            row.add(nullToEmpty(annotatedVariant.getReferenceGenome()));
+            row.add(nullToEmpty(annotatedVariant.getSetting()));
+            row.add(nullToEmpty(annotatedVariant.getVariant()));
+            row.add(nullToEmpty(annotatedVariant.getProteinChange()));
+            row.add(nullToEmpty(annotatedVariant.getOncogenicity()));
+            row.add(nullToEmpty(annotatedVariant.getMutationEffect()));
+            row.add(nullToEmpty(annotatedVariant.getMutationEffectPmids()));
+            row.add(nullToEmpty(annotatedVariant.getMutationEffectAbstracts()));
+            row.add(nullToEmpty(annotatedVariant.getDescription()));
             sb.append(MainUtils.listToString(row, separator));
             sb.append(newLine);
         }
@@ -124,8 +129,16 @@ public class UtilsApiController implements UtilsApi {
         return new ResponseEntity<>(sb.toString(), HttpStatus.OK);
     }
 
-    private List<AnnotatedVariant> getAllAnnotatedVariants(Boolean isTextFile, boolean germline) {
+    private List<AnnotatedVariant> getAllAnnotatedVariants(Boolean isTextFile) {
         List<AnnotatedVariant> annotatedVariantList = new ArrayList<>();
+        annotatedVariantList.addAll(getAnnotatedVariantsForSetting(isTextFile, false));
+        annotatedVariantList.addAll(getAnnotatedVariantsForSetting(isTextFile, true));
+        MainUtils.sortAnnotatedVariants(annotatedVariantList);
+        return annotatedVariantList;
+    }
+
+    private Set<AnnotatedVariant> getAnnotatedVariantsForSetting(Boolean isTextFile, boolean germline) {
+        String setting = germline ? "Germline" : "Somatic";
         Set<Gene> genes = CacheUtils.getAllGenes();
         Map<Gene, Set<BiologicalVariant>> map = new HashMap<>();
 
@@ -142,17 +155,19 @@ public class UtilsApiController implements UtilsApi {
                 for (ArticleAbstract articleAbstract : articleAbstracts) {
                     abstracts.add(articleAbstract.getAbstractContent() + " " + articleAbstract.getLink());
                 }
+                String oncogenicity = resolveDownloadOncogenicity(biologicalVariant);
                 annotatedVariants.add(new AnnotatedVariant(
                     gene.getGrch37Isoform(),
                     gene.getGrch37RefSeq(),
                     gene.getGrch38Isoform(),
                     gene.getGrch38RefSeq(),
-                    gene.getEntrezGeneId(),
+                    ENTREZ_ID_CONVERTER.convert(gene.getEntrezGeneId()),
                     gene.getHugoSymbol(),
                     biologicalVariant.getVariant().getReferenceGenomes().stream().map(referenceGenome -> referenceGenome.name()).collect(Collectors.joining(", ")),
+                    setting,
                     biologicalVariant.getVariant().getName(),
-                    biologicalVariant.getVariant().getAlteration(),
-                    biologicalVariant.getOncogenic(),
+                    germline ? biologicalVariant.getVariant().getProteinChange() : biologicalVariant.getVariant().getAlteration(),
+                    oncogenicity,
                     biologicalVariant.getMutationEffect(),
                     MainUtils.listToString(new ArrayList<>(biologicalVariant.getMutationEffectPmids()), ", ", true),
                     MainUtils.listToString(abstracts, "; ", true),
@@ -169,10 +184,18 @@ public class UtilsApiController implements UtilsApi {
                 ));
             }
         }
+        return annotatedVariants;
+    }
 
-        annotatedVariantList.addAll(annotatedVariants);
-        MainUtils.sortAnnotatedVariants(annotatedVariantList);
-        return annotatedVariantList;
+    private static String resolveDownloadOncogenicity(BiologicalVariant biologicalVariant) {
+        if (biologicalVariant.getPathogenic() != null && !biologicalVariant.getPathogenic().isEmpty()) {
+            return biologicalVariant.getPathogenic();
+        }
+        return biologicalVariant.getOncogenic();
+    }
+
+    private static String nullToEmpty(String s) {
+        return s == null ? "" : s;
     }
 
     private List<VariantOfUnknownSignificance> getAllVus() {
@@ -226,6 +249,7 @@ public class UtilsApiController implements UtilsApi {
         header.add("Entrez Gene ID");
         header.add("Hugo Symbol");
         header.add("Reference Genome");
+        header.add("Setting");
         header.add("Alteration");
         header.add("Protein Change");
         header.add("Cancer Type");
@@ -241,113 +265,28 @@ public class UtilsApiController implements UtilsApi {
 
         for (ActionableGene actionableGene : AlterationUtils.getAllActionableVariants(true, false)) {
             List<String> row = new ArrayList<>();
-            row.add(actionableGene.getGrch37Isoform());
-            row.add(actionableGene.getGrch37RefSeq());
-            row.add(actionableGene.getGrch38Isoform());
-            row.add(actionableGene.getGrch38RefSeq());
-            row.add(String.valueOf(actionableGene.getEntrezGeneId()));
-            row.add(actionableGene.getGene());
-            row.add(actionableGene.getReferenceGenome());
-            row.add(actionableGene.getVariant());
-            row.add(actionableGene.getProteinChange());
-            row.add(actionableGene.getCancerType());
-            row.add(actionableGene.getLevel());
-            row.add(actionableGene.getSolidPropagationLevel());
-            row.add(actionableGene.getLiquidPropagationLevel());
-            row.add(actionableGene.getDrugs());
-            row.add(actionableGene.getPmids());
-            row.add(actionableGene.getAbstracts());
-            row.add(actionableGene.getDescription());
+            row.add(nullToEmpty(actionableGene.getGrch37Isoform()));
+            row.add(nullToEmpty(actionableGene.getGrch37RefSeq()));
+            row.add(nullToEmpty(actionableGene.getGrch38Isoform()));
+            row.add(nullToEmpty(actionableGene.getGrch38RefSeq()));
+            row.add(actionableGene.getEntrezGeneId() == null ? "" : String.valueOf(actionableGene.getEntrezGeneId()));
+            row.add(nullToEmpty(actionableGene.getGene()));
+            row.add(nullToEmpty(actionableGene.getReferenceGenome()));
+            row.add(nullToEmpty(actionableGene.getSetting()));
+            row.add(nullToEmpty(actionableGene.getVariant()));
+            row.add(nullToEmpty(actionableGene.getProteinChange()));
+            row.add(nullToEmpty(actionableGene.getCancerType()));
+            row.add(nullToEmpty(actionableGene.getLevel()));
+            row.add(nullToEmpty(actionableGene.getSolidPropagationLevel()));
+            row.add(nullToEmpty(actionableGene.getLiquidPropagationLevel()));
+            row.add(nullToEmpty(actionableGene.getDrugs()));
+            row.add(nullToEmpty(actionableGene.getPmids()));
+            row.add(nullToEmpty(actionableGene.getAbstracts()));
+            row.add(nullToEmpty(actionableGene.getDescription()));
             sb.append(MainUtils.listToString(row, separator));
             sb.append(newLine);
         }
         return new ResponseEntity<>(sb.toString(), HttpStatus.OK);
-    }
-
-    private List<ActionableGene> getAllActionableVariants(Boolean isTextFile) {
-        List<ActionableGene> actionableGeneList = new ArrayList<>();
-        Set<Gene> genes = CacheUtils.getAllGenes();
-        Map<Gene, Set<ClinicalVariant>> map = new HashMap<>();
-
-        for (Gene gene : genes) {
-            map.put(gene, MainUtils.getClinicalVariants(gene, false));
-        }
-
-        Set<ActionableGene> actionableGenes = new HashSet<>();
-        for (Map.Entry<Gene, Set<ClinicalVariant>> entry : map.entrySet()) {
-            Gene gene = entry.getKey();
-            for (ClinicalVariant clinicalVariant : entry.getValue()) {
-                Set<ArticleAbstract> articleAbstracts = clinicalVariant.getDrugAbstracts();
-                List<String> abstracts = new ArrayList<>();
-                for (ArticleAbstract articleAbstract : articleAbstracts) {
-                    abstracts.add(articleAbstract.getAbstractContent() + " " + articleAbstract.getLink());
-                }
-
-                if (clinicalVariant.getExcludedCancerTypes().size() > 0) {
-                    String cancerTypeName = TumorTypeUtils.getTumorTypesNameWithExclusion(clinicalVariant.getCancerTypes(), clinicalVariant.getExcludedCancerTypes());
-                    // for any clinical variant that has cancer type excluded, we no longer list the cancer types separately
-                    actionableGenes.add(new ActionableGene(
-                        gene.getGrch37Isoform(), gene.getGrch37RefSeq(),
-                        gene.getGrch38Isoform(), gene.getGrch38RefSeq(),
-                        gene.getEntrezGeneId(),
-                        gene.getHugoSymbol(),
-                        clinicalVariant.getVariant().getReferenceGenomes().stream().map(referenceGenome -> referenceGenome.name()).collect(Collectors.joining(", ")),
-                        clinicalVariant.getVariant().getName(),
-                        clinicalVariant.getVariant().getAlteration(),
-                        cancerTypeName,
-                        clinicalVariant.getLevel(),
-                        clinicalVariant.getSolidPropagationLevel(),
-                        clinicalVariant.getLiquidPropagationLevel(),
-                        MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrug()), ", ", true),
-                        MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrugPmids()), ", ", true),
-                        MainUtils.listToString(abstracts, "; ", true),
-                        CplUtils.annotate(
-                            clinicalVariant.getDrugDescription(),
-                            gene.getHugoSymbol(),
-                            clinicalVariant.getVariant().getName(),
-                            cancerTypeName,
-                            null,
-                            gene,
-                            null,
-                            isTextFile
-                        )
-                    ));
-                } else {
-                    for (TumorType tumorType : clinicalVariant.getCancerTypes()) {
-                        actionableGenes.add(new ActionableGene(
-                            gene.getGrch37Isoform(), gene.getGrch37RefSeq(),
-                            gene.getGrch38Isoform(), gene.getGrch38RefSeq(),
-                            gene.getEntrezGeneId(),
-                            gene.getHugoSymbol(),
-                            clinicalVariant.getVariant().getReferenceGenomes().stream().map(referenceGenome -> referenceGenome.name()).collect(Collectors.joining(", ")),
-                            clinicalVariant.getVariant().getName(),
-                            clinicalVariant.getVariant().getAlteration(),
-                            TumorTypeUtils.getTumorTypeName(tumorType),
-                            clinicalVariant.getLevel(),
-                            clinicalVariant.getSolidPropagationLevel(),
-                            clinicalVariant.getLiquidPropagationLevel(),
-                            MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrug()), ", ", true),
-                            MainUtils.listToString(new ArrayList<>(clinicalVariant.getDrugPmids()), ", ", true),
-                            MainUtils.listToString(abstracts, "; ", true),
-                            CplUtils.annotate(
-                                clinicalVariant.getDrugDescription(),
-                                gene.getHugoSymbol(),
-                                clinicalVariant.getVariant().getName(),
-                                TumorTypeUtils.getTumorTypeName(tumorType),
-                                null,
-                                gene,
-                                tumorType,
-                                isTextFile
-                            )
-                        ));
-                    }
-                }
-            }
-        }
-
-        actionableGeneList.addAll(actionableGenes);
-        MainUtils.sortActionableVariants(actionableGeneList);
-        return actionableGeneList;
     }
 
     @Override
@@ -380,7 +319,7 @@ public class UtilsApiController implements UtilsApi {
         if (version != null) {
             return getDataDownloadResponseEntity(version, FileName.ALL_CURATED_GENES, FileExtension.JSON);
         }
-        return new ResponseEntity<>(this.cacheFetcher.getCuratedGenes(includeEvidence), HttpStatus.OK);
+        return new ResponseEntity<>(this.cacheFetcher.getCuratedGenesAll(includeEvidence), HttpStatus.OK);
     }
 
     @Override

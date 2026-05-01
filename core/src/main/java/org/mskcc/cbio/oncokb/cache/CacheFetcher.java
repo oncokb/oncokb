@@ -65,7 +65,7 @@ public class CacheFetcher {
         header.add("GRCh38 Isoform");
         header.add("GRCh38 RefSeq");
         header.add("Gene Type");
-        header.add("# of occurrence within resources (Column J-P)");
+        header.add("# of occurrence within resources (Column K-P)");
         header.add("OncoKB Annotated");
         header.add("MSK-IMPACT");
         header.add("MSK-HEME");
@@ -154,7 +154,7 @@ public class CacheFetcher {
     }
 
     @Cacheable(cacheResolver = "generalCacheResolver")
-    public List<CuratedGene> getCuratedGenes(boolean includeEvidence) {
+    public List<CuratedGene> getCuratedGenes(boolean includeEvidence, boolean germline) {
         List<CuratedGene> genes = new ArrayList<>();
         for (Gene gene : CacheUtils.getAllGenes()) {
             // Skip all genes without entrez gene id
@@ -162,9 +162,17 @@ public class CacheFetcher {
                 continue;
             }
 
+            // Skip genes that have no germline evidence when building the germline list
+            if (germline && CacheUtils.getEvidences(gene).stream().noneMatch(e -> Boolean.TRUE.equals(e.getForGermline()))) {
+                continue;
+            }
+
             String highestSensitiveLevel = "";
             String highestResistanceLevel = "";
-            Set<Evidence> therapeuticEvidences = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, EvidenceTypeUtils.getTreatmentEvidenceTypes());
+            Set<Evidence> therapeuticEvidences = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, EvidenceTypeUtils.getTreatmentEvidenceTypes())
+                .stream()
+                .filter(evidence -> Boolean.TRUE.equals(evidence.getForGermline()) == germline)
+                .collect(Collectors.toSet());
             Set<Evidence> highestSensitiveLevelEvidences = EvidenceUtils.getOnlyHighestLevelEvidences(EvidenceUtils.getSensitiveEvidences(therapeuticEvidences), null, null);
             Set<Evidence> highestResistanceLevelEvidences = EvidenceUtils.getOnlyHighestLevelEvidences(EvidenceUtils.getResistanceEvidences(therapeuticEvidences), null, null);
             if (!highestSensitiveLevelEvidences.isEmpty()) {
@@ -180,14 +188,30 @@ public class CacheFetcher {
                     gene.getGrch38Isoform(), gene.getGrch38RefSeq(),
                     gene.getEntrezGeneId(), gene.getHugoSymbol(),
                     gene.getGeneType() != null ? gene.getGeneType() : GeneType.INSUFFICIENT_EVIDENCE,
+                    germline ? "Germline" : "Somatic",
                     highestSensitiveLevel, highestResistanceLevel,
-                    includeEvidence ? SummaryUtils.geneSummary(gene, gene.getHugoSymbol(), false) : "",
-                    includeEvidence ? SummaryUtils.geneBackground(gene, gene.getHugoSymbol()) : ""
+                    includeEvidence ? SummaryUtils.getGeneSummaryByGeneticType(gene, gene.getHugoSymbol(), germline) : "",
+                    includeEvidence ? SummaryUtils.getGeneBackgroundByGeneticType(gene, gene.getHugoSymbol(), germline) : ""
                 )
             );
         }
         MainUtils.sortCuratedGenes(genes);
         return genes;
+    }
+
+    @Cacheable(cacheResolver = "generalCacheResolver")
+    public List<CuratedGene> getCuratedGenesAll(boolean includeEvidence) {
+        List<CuratedGene> result = new ArrayList<>();
+        List<CuratedGene> somaticGenes = this.getCuratedGenes(includeEvidence, false);
+        Map<String, CuratedGene> germlineBySymbol = this.getCuratedGenes(includeEvidence, true).stream()
+            .collect(Collectors.toMap(CuratedGene::getHugoSymbol, g -> g));
+        for (CuratedGene gene : somaticGenes) {
+            result.add(gene);
+            if (germlineBySymbol.containsKey(gene.getHugoSymbol())) {
+                result.add(germlineBySymbol.get(gene.getHugoSymbol()));
+            }
+        }
+        return result;
     }
 
     @Cacheable(cacheResolver = "generalCacheResolver")
@@ -203,6 +227,7 @@ public class CacheFetcher {
         header.add("Entrez Gene ID");
         header.add("Hugo Symbol");
         header.add("Gene Type");
+        header.add("Setting");
         header.add("Highest Level of Evidence(sensitivity)");
         header.add("Highest Level of Evidence(resistance)");
         if (includeEvidence == Boolean.TRUE) {
@@ -212,30 +237,38 @@ public class CacheFetcher {
         sb.append(MainUtils.listToString(header, separator));
         sb.append(newLine);
 
-        List<CuratedGene> genes = this.getCuratedGenes(includeEvidence == Boolean.TRUE);
-        for (CuratedGene gene : genes) {
-            List<String> row = new ArrayList<>();
-            row.add(gene.getGrch37Isoform());
-            row.add(gene.getGrch37RefSeq());
-            row.add(gene.getGrch38Isoform());
-            row.add(gene.getGrch38RefSeq());
-            row.add(String.valueOf(gene.getEntrezGeneId()));
-            row.add(gene.getHugoSymbol());
-            if (gene.getGeneType() != null) {
-                row.add(gene.getGeneType().toString());
-            } else {
-                row.add("");
+        List<CuratedGene> somaticGenes = this.getCuratedGenes(includeEvidence == Boolean.TRUE, false);
+        List<CuratedGene> germlineGenes = this.getCuratedGenes(includeEvidence == Boolean.TRUE, true);
+        Map<String, CuratedGene> germlineBySymbol = germlineGenes.stream()
+            .collect(Collectors.toMap(CuratedGene::getHugoSymbol, g -> g));
+
+        for (CuratedGene gene : somaticGenes) {
+            appendCuratedGeneRow(sb, gene, includeEvidence, separator, newLine);
+            if (germlineBySymbol.containsKey(gene.getHugoSymbol())) {
+                appendCuratedGeneRow(sb, germlineBySymbol.get(gene.getHugoSymbol()), includeEvidence, separator, newLine);
             }
-            row.add(gene.getHighestSensitiveLevel());
-            row.add(gene.getHighestResistancLevel());
-            if (includeEvidence == Boolean.TRUE) {
-                row.add(gene.getSummary());
-                row.add(gene.getBackground());
-            }
-            sb.append(MainUtils.listToString(row, separator));
-            sb.append(newLine);
         }
         return sb.toString();
+    }
+
+    private void appendCuratedGeneRow(StringBuilder sb, CuratedGene gene, boolean includeEvidence, String separator, String newLine) {
+        List<String> row = new ArrayList<>();
+        row.add(gene.getGrch37Isoform());
+        row.add(gene.getGrch37RefSeq());
+        row.add(gene.getGrch38Isoform());
+        row.add(gene.getGrch38RefSeq());
+        row.add(String.valueOf(gene.getEntrezGeneId()));
+        row.add(gene.getHugoSymbol());
+        row.add(gene.getGeneType() != null ? gene.getGeneType().toString() : "");
+        row.add(gene.getSetting());
+        row.add(gene.getHighestSensitiveLevel());
+        row.add(gene.getHighestResistancLevel());
+        if (includeEvidence == Boolean.TRUE) {
+            row.add(gene.getSummary());
+            row.add(gene.getBackground());
+        }
+        sb.append(MainUtils.listToString(row, separator));
+        sb.append(newLine);
     }
 
     private String getStringByBoolean(Boolean val) {

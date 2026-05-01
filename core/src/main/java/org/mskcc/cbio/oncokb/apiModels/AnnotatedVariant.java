@@ -13,6 +13,7 @@ public class AnnotatedVariant {
     Integer entrezGeneId;
     String gene;
     String referenceGenome;
+    String setting;
     String variant;
     String proteinChange;
     String oncogenicity;
@@ -77,6 +78,14 @@ public class AnnotatedVariant {
         this.referenceGenome = referenceGenome;
     }
 
+    public String getSetting() {
+        return setting;
+    }
+
+    public void setSetting(String setting) {
+        this.setting = setting;
+    }
+
     public String getVariant() {
         return variant;
     }
@@ -133,7 +142,7 @@ public class AnnotatedVariant {
         this.mutationEffectAbstracts = mutationEffectAbstracts;
     }
 
-    public AnnotatedVariant(String grch37Isoform, String grch37RefSeq, String grch38Isoform, String grch38RefSeq, Integer entrezGeneId, String gene, String referenceGenome, String variant, String proteinChange, String oncogenicity, String mutationEffect, String mutationEffectPmids, String mutationEffectAbstracts, String description) {
+    public AnnotatedVariant(String grch37Isoform, String grch37RefSeq, String grch38Isoform, String grch38RefSeq, Integer entrezGeneId, String gene, String referenceGenome, String setting, String variant, String proteinChange, String oncogenicity, String mutationEffect, String mutationEffectPmids, String mutationEffectAbstracts, String description) {
         this.grch37Isoform = grch37Isoform;
         this.grch37RefSeq = grch37RefSeq;
         this.grch38Isoform = grch38Isoform;
@@ -141,6 +150,7 @@ public class AnnotatedVariant {
         this.entrezGeneId = entrezGeneId;
         this.gene = gene;
         this.referenceGenome = referenceGenome;
+        this.setting = setting;
         this.variant = variant;
         this.proteinChange = proteinChange;
         this.oncogenicity = oncogenicity;

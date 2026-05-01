@@ -13,6 +13,7 @@ public class ActionableGene {
     Integer entrezGeneId;
     String gene;
     String referenceGenome;
+    String setting;
     String variant;
     String proteinChange;
     String cancerType;
@@ -78,6 +79,14 @@ public class ActionableGene {
 
     public void setReferenceGenome(String referenceGenome) {
         this.referenceGenome = referenceGenome;
+    }
+
+    public String getSetting() {
+        return setting;
+    }
+
+    public void setSetting(String setting) {
+        this.setting = setting;
     }
 
     public String getVariant() {
@@ -160,7 +169,7 @@ public class ActionableGene {
         this.description = description;
     }
 
-    public ActionableGene(String grch37Isoform, String grch37RefSeq, String grch38Isoform, String grch38RefSeq, Integer entrezGeneId, String gene, String referenceGenome, String variant, String proteinChange, String cancerType, String level, String solidPropagationLevel, String liquidPropagationLevel, String drugs, String pmids, String abstracts, String description) {
+    public ActionableGene(String grch37Isoform, String grch37RefSeq, String grch38Isoform, String grch38RefSeq, Integer entrezGeneId, String gene, String referenceGenome, String setting, String variant, String proteinChange, String cancerType, String level, String solidPropagationLevel, String liquidPropagationLevel, String drugs, String pmids, String abstracts, String description) {
         this.grch37Isoform = grch37Isoform;
         this.grch37RefSeq = grch37RefSeq;
         this.grch38Isoform = grch38Isoform;
@@ -168,6 +177,7 @@ public class ActionableGene {
         this.entrezGeneId = entrezGeneId;
         this.gene = gene;
         this.referenceGenome = referenceGenome;
+        this.setting = setting;
         this.variant = variant;
         this.proteinChange = proteinChange;
         this.cancerType = cancerType;
