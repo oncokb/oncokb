@@ -58,8 +58,7 @@ public class CancerGeneUtils {
                         }
                         if (hasSomaticEvidence && hasGermlineEvidence) break;
                     }
-                    cancerGene.setOncokbAnnotated(hasSomaticEvidence);
-                    cancerGene.setOncokbAnnotatedInGermline(hasGermlineEvidence);
+                    cancerGene.setOncokbAnnotated(hasSomaticEvidence || hasGermlineEvidence);
                     cancerGene.setOccurrenceCount(1);
                     cancerGene.setGeneType(gene.getGeneType());
                     cancerGene.setGeneAliases(gene.getGeneAliases());

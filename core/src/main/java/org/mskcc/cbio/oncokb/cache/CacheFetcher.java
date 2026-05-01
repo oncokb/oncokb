@@ -66,8 +66,7 @@ public class CacheFetcher {
         header.add("GRCh38 RefSeq");
         header.add("Gene Type");
         header.add("# of occurrence within resources (Column K-P)");
-        header.add("OncoKB Annotated in Somatic");
-        header.add("OncoKB Annotated in Germline");
+        header.add("OncoKB Annotated");
         header.add("MSK-IMPACT");
         header.add("MSK-HEME");
         header.add("FOUNDATION ONE");
@@ -93,7 +92,6 @@ public class CacheFetcher {
             }
             row.add(String.valueOf(cancerGene.getOccurrenceCount()));
             row.add(getStringByBoolean(cancerGene.getOncokbAnnotated()));
-            row.add(getStringByBoolean(cancerGene.getOncokbAnnotatedInGermline()));
             row.add(getStringByBoolean(cancerGene.getmSKImpact()));
             row.add(getStringByBoolean(cancerGene.getmSKHeme()));
             row.add(getStringByBoolean(cancerGene.getFoundation()));

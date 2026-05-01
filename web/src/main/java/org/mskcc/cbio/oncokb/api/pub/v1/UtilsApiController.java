@@ -70,7 +70,6 @@ public class UtilsApiController implements UtilsApi {
         header.add("Alteration");
         header.add("Protein Change");
         header.add("Oncogenicity");
-        header.add("Pathogenicity");
         header.add("Mutation Effect");
         header.add("PMIDs");
         header.add("Abstracts");
@@ -91,7 +90,6 @@ public class UtilsApiController implements UtilsApi {
             row.add(nullToEmpty(annotatedVariant.getVariant()));
             row.add(nullToEmpty(annotatedVariant.getProteinChange()));
             row.add(nullToEmpty(annotatedVariant.getOncogenicity()));
-            row.add(nullToEmpty(annotatedVariant.getPathogenicity()));
             row.add(nullToEmpty(annotatedVariant.getMutationEffect()));
             row.add(nullToEmpty(annotatedVariant.getMutationEffectPmids()));
             row.add(nullToEmpty(annotatedVariant.getMutationEffectAbstracts()));
@@ -157,6 +155,7 @@ public class UtilsApiController implements UtilsApi {
                 for (ArticleAbstract articleAbstract : articleAbstracts) {
                     abstracts.add(articleAbstract.getAbstractContent() + " " + articleAbstract.getLink());
                 }
+                String oncogenicity = resolveDownloadOncogenicity(biologicalVariant);
                 annotatedVariants.add(new AnnotatedVariant(
                     gene.getGrch37Isoform(),
                     gene.getGrch37RefSeq(),
@@ -168,8 +167,7 @@ public class UtilsApiController implements UtilsApi {
                     setting,
                     biologicalVariant.getVariant().getName(),
                     germline ? biologicalVariant.getVariant().getProteinChange() : biologicalVariant.getVariant().getAlteration(),
-                    biologicalVariant.getOncogenic(),
-                    biologicalVariant.getPathogenic(),
+                    oncogenicity,
                     biologicalVariant.getMutationEffect(),
                     MainUtils.listToString(new ArrayList<>(biologicalVariant.getMutationEffectPmids()), ", ", true),
                     MainUtils.listToString(abstracts, "; ", true),
@@ -187,6 +185,13 @@ public class UtilsApiController implements UtilsApi {
             }
         }
         return annotatedVariants;
+    }
+
+    private static String resolveDownloadOncogenicity(BiologicalVariant biologicalVariant) {
+        if (biologicalVariant.getPathogenic() != null && !biologicalVariant.getPathogenic().isEmpty()) {
+            return biologicalVariant.getPathogenic();
+        }
+        return biologicalVariant.getOncogenic();
     }
 
     private static String nullToEmpty(String s) {

@@ -17,7 +17,6 @@ public class AnnotatedVariant {
     String variant;
     String proteinChange;
     String oncogenicity;
-    String pathogenicity;
     String mutationEffect;
     String mutationEffectPmids;
     String mutationEffectAbstracts;
@@ -111,14 +110,6 @@ public class AnnotatedVariant {
         this.oncogenicity = oncogenicity;
     }
 
-    public String getPathogenicity() {
-        return pathogenicity;
-    }
-
-    public void setPathogenicity(String pathogenicity) {
-        this.pathogenicity = pathogenicity;
-    }
-
     public String getMutationEffect() {
         return mutationEffect;
     }
@@ -151,7 +142,7 @@ public class AnnotatedVariant {
         this.mutationEffectAbstracts = mutationEffectAbstracts;
     }
 
-    public AnnotatedVariant(String grch37Isoform, String grch37RefSeq, String grch38Isoform, String grch38RefSeq, Integer entrezGeneId, String gene, String referenceGenome, String setting, String variant, String proteinChange, String oncogenicity, String pathogenicity, String mutationEffect, String mutationEffectPmids, String mutationEffectAbstracts, String description) {
+    public AnnotatedVariant(String grch37Isoform, String grch37RefSeq, String grch38Isoform, String grch38RefSeq, Integer entrezGeneId, String gene, String referenceGenome, String setting, String variant, String proteinChange, String oncogenicity, String mutationEffect, String mutationEffectPmids, String mutationEffectAbstracts, String description) {
         this.grch37Isoform = grch37Isoform;
         this.grch37RefSeq = grch37RefSeq;
         this.grch38Isoform = grch38Isoform;
@@ -163,7 +154,6 @@ public class AnnotatedVariant {
         this.variant = variant;
         this.proteinChange = proteinChange;
         this.oncogenicity = oncogenicity;
-        this.pathogenicity = pathogenicity;
         this.mutationEffect = mutationEffect;
         this.mutationEffectPmids = mutationEffectPmids;
         this.mutationEffectAbstracts = mutationEffectAbstracts;

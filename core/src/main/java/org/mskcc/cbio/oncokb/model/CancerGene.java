@@ -14,7 +14,6 @@ public class CancerGene implements Serializable {
     private String grch38Isoform = "";
     private String grch38RefSeq = "";
     private Boolean oncokbAnnotated = false;
-    private Boolean oncokbAnnotatedInGermline = false;
     private Integer occurrenceCount = 0;
     private Boolean mSKImpact = false;
     private Boolean mSKHeme = false;
@@ -79,14 +78,6 @@ public class CancerGene implements Serializable {
 
     public void setOncokbAnnotated(Boolean oncokbAnnotated) {
         this.oncokbAnnotated = oncokbAnnotated;
-    }
-
-    public Boolean getOncokbAnnotatedInGermline() {
-        return oncokbAnnotatedInGermline;
-    }
-
-    public void setOncokbAnnotatedInGermline(Boolean oncokbAnnotatedInGermline) {
-        this.oncokbAnnotatedInGermline = oncokbAnnotatedInGermline;
     }
 
     public Integer getOccurrenceCount() {
