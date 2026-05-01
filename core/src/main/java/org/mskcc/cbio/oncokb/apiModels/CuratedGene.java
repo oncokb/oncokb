@@ -15,6 +15,7 @@ public class CuratedGene implements Serializable {
     Integer entrezGeneId;
     String hugoSymbol;
     GeneType geneType;
+    String setting;
     String highestSensitiveLevel;
     String highestResistanceLevel;
     String summary;
@@ -84,6 +85,14 @@ public class CuratedGene implements Serializable {
         this.geneType = geneType;
     }
 
+    public String getSetting() {
+        return setting;
+    }
+
+    public void setSetting(String setting) {
+        this.setting = setting;
+    }
+
     public String getHighestSensitiveLevel() {
         return highestSensitiveLevel;
     }
@@ -116,7 +125,7 @@ public class CuratedGene implements Serializable {
         this.background = background;
     }
 
-    public CuratedGene(String grch37Isoform, String grch37RefSeq, String grch38Isoform, String grch38RefSeq, Integer entrezGeneId, String hugoSymbol, GeneType geneType, String highestSensitiveLevel, String highestResistanceLevel, String summary, String background) {
+    public CuratedGene(String grch37Isoform, String grch37RefSeq, String grch38Isoform, String grch38RefSeq, Integer entrezGeneId, String hugoSymbol, GeneType geneType, String setting, String highestSensitiveLevel, String highestResistanceLevel, String summary, String background) {
         this.grch37Isoform = grch37Isoform;
         this.grch37RefSeq = grch37RefSeq;
         this.grch38Isoform = grch38Isoform;
@@ -124,6 +133,7 @@ public class CuratedGene implements Serializable {
         this.entrezGeneId = entrezGeneId;
         this.hugoSymbol = hugoSymbol;
         this.geneType = geneType;
+        this.setting = setting;
         this.highestSensitiveLevel = highestSensitiveLevel;
         this.highestResistanceLevel = highestResistanceLevel;
         this.summary = summary;

@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.io.IOException;
 import java.util.List;
 
-import static org.mskcc.cbio.oncokb.api.pub.v1.Constants.GERMLINE_VERSION;
 import static org.mskcc.cbio.oncokb.api.pub.v1.Constants.INCLUDE_EVIDENCE;
 import static org.mskcc.cbio.oncokb.api.pub.v1.Constants.VERSION;
 
@@ -164,35 +163,5 @@ public interface UtilsApi {
         , @ApiParam(value = INCLUDE_EVIDENCE, defaultValue = "TRUE") @RequestParam(value = "includeEvidence", required = false, defaultValue = "TRUE") Boolean includeEvidence
     );
 
-    @PublicApi
-    @PremiumPublicApi
-    @ApiOperation(value = "", notes = "Get list of genes OncoKB curated for germline.", tags = {"Cancer Genes"})
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "OK"),
-        @ApiResponse(code = 404, message = "Not Found"),
-        @ApiResponse(code = 503, message = "Service Unavailable")
-    })
-    @RequestMapping(value = "/utils/germline/allCuratedGenes",
-        produces = {"application/json"},
-        method = RequestMethod.GET)
-    ResponseEntity<List<CuratedGene>> utilsAllCuratedGenesGermlineGet(
-        @ApiParam(value = GERMLINE_VERSION) @RequestParam(value = "version", required = false) String version
-        , @ApiParam(value = INCLUDE_EVIDENCE, defaultValue = "TRUE") @RequestParam(value = "includeEvidence", required = false, defaultValue = "TRUE") Boolean includeEvidence
-    );
 
-    @PublicApi
-    @PremiumPublicApi
-    @ApiOperation(value = "", notes = "Get list of genes OncoKB curated for germline in text file.", tags = {"Cancer Genes"})
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "OK"),
-        @ApiResponse(code = 404, message = "Not Found"),
-        @ApiResponse(code = 503, message = "Service Unavailable")
-    })
-    @RequestMapping(value = "/utils/allCuratedGermlineGenes.txt",
-        produces = "text/plain; charset=UTF-8",
-        method = RequestMethod.GET)
-    ResponseEntity<String> utilsAllCuratedGenesGermlineTxtGet(
-        @ApiParam(value = GERMLINE_VERSION) @RequestParam(value = "version", required = false) String version
-        , @ApiParam(value = INCLUDE_EVIDENCE, defaultValue = "TRUE") @RequestParam(value = "includeEvidence", required = false, defaultValue = "TRUE") Boolean includeEvidence
-    );
 }

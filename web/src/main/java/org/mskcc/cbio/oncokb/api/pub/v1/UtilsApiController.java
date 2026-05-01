@@ -314,7 +314,7 @@ public class UtilsApiController implements UtilsApi {
         if (version != null) {
             return getDataDownloadResponseEntity(version, FileName.ALL_CURATED_GENES, FileExtension.JSON);
         }
-        return new ResponseEntity<>(this.cacheFetcher.getCuratedGenes(includeEvidence, false), HttpStatus.OK);
+        return new ResponseEntity<>(this.cacheFetcher.getCuratedGenesAll(includeEvidence), HttpStatus.OK);
     }
 
     @Override
@@ -326,28 +326,6 @@ public class UtilsApiController implements UtilsApi {
             return getDataDownloadResponseEntity(version, FileName.ALL_CURATED_GENES, FileExtension.TEXT);
         }
         return new ResponseEntity<>(this.cacheFetcher.getCuratedGenesTxt(includeEvidence), HttpStatus.OK);
-    }
-
-    @Override
-    public ResponseEntity<List<CuratedGene>> utilsAllCuratedGenesGermlineGet(
-        @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
-        , @ApiParam(value = INCLUDE_EVIDENCE, defaultValue = "TRUE") @RequestParam(value = "includeEvidence", required = false, defaultValue = "TRUE") Boolean includeEvidence
-    ) {
-        if (version != null) {
-            return getDataDownloadResponseEntity(version, FileName.ALL_CURATED_GENES_GERMLINE, FileExtension.JSON);
-        }
-        return new ResponseEntity<>(this.cacheFetcher.getCuratedGenes(includeEvidence, true), HttpStatus.OK);
-    }
-
-    @Override
-    public ResponseEntity<String> utilsAllCuratedGenesGermlineTxtGet(
-        @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
-        , @ApiParam(value = INCLUDE_EVIDENCE, defaultValue = "TRUE") @RequestParam(value = "includeEvidence", required = false, defaultValue = "TRUE") Boolean includeEvidence
-    ) {
-        if (version != null) {
-            return getDataDownloadResponseEntity(version, FileName.ALL_CURATED_GENES_GERMLINE, FileExtension.TEXT);
-        }
-        return new ResponseEntity<>(this.cacheFetcher.getCuratedGenesGermlineTxt(includeEvidence), HttpStatus.OK);
     }
 
 }
