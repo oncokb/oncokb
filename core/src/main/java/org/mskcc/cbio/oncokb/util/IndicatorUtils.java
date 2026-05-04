@@ -648,7 +648,7 @@ public class IndicatorUtils {
                     treatmentEvidences = filteredEvis;
                 }
                 if (!treatmentEvidences.isEmpty()) {
-                    List<IndicatorQueryTreatment> treatments = getIndicatorQueryTreatments(treatmentEvidences, query.getHugoSymbol(), StringUtils.isEmpty(query.getTumorType()) ? false : true);
+                    List<IndicatorQueryTreatment> treatments = getIndicatorQueryTreatments(treatmentEvidences, query.getHugoSymbol(), StringUtils.isEmpty(query.getTumorType()) ? false : true, matchedTumorType);
                     for (IndicatorQueryTreatment treatment : treatments) {
                         treatment.setDescription(CplUtils.annotate(
                             treatment.getDescription(),
@@ -1103,22 +1103,6 @@ public class IndicatorUtils {
             }
         }
         return indicatorQueryMutationEffect;
-    }
-
-    private static Date getLatestDateFromEvidences(Set<Evidence> evidences) {
-        Date date = null;
-        if (evidences != null) {
-            for (Evidence evidence : evidences) {
-                if (evidence.getLastEdit() != null) {
-                    if (date == null) {
-                        date = evidence.getLastEdit();
-                    } else if (date.before(evidence.getLastEdit())) {
-                        date = evidence.getLastEdit();
-                    }
-                }
-            }
-        }
-        return date;
     }
 
     private static List<IndicatorQueryTreatment> getIndicatorQueryTreatments(Set<Evidence> evidences, String queryHugoSymbol, Boolean filterSameTreatment, TumorType matchedTumorType) {
