@@ -57,16 +57,16 @@ public class ProteinChangeParser {
 
         result = parseSplice(proteinChange);
         if (result.isParsed) return result;
-        
+
         result = parseRange(proteinChange);
         if (result.isParsed) return result;
-        
+
         result = parseFrameshift(proteinChange);
         if (result.isParsed) return result;
 
         result = parsePoint(proteinChange);
         if (result.isParsed)  return result;
-        
+
         result = parseExtension(proteinChange);
         if (result.isParsed) return result;
 
@@ -114,7 +114,7 @@ public class ProteinChangeParser {
 
                 if (groupSixWithoutDigits.contains("*")) {
                     result.consequence = "stop_gained";
-                } 
+                }
                 else if (groupSixWithoutDigits.length() != groupSix.length() && groupSixWithoutDigits.length() > 0) {
                     if (groupSixWithoutDigits.length() > deletion) {
                         result.consequence = IN_FRAME_INSERTION;
@@ -145,7 +145,7 @@ public class ProteinChangeParser {
         ParseAlterationResult result = new ParseAlterationResult();
         Matcher m = SPLICE_PATTERN.matcher(proteinChange);
         if (m.matches()) {
-            
+
             result.isParsed = true;
             String[] parts = m.group(0).toLowerCase().split("splice", 2);
             result.normalizedProteinChange = parts[0].toUpperCase() + "splice";
@@ -276,7 +276,7 @@ public class ProteinChangeParser {
             result.normalizedProteinChange = (m.group(1) == null ? "" : "M")
                 + "1ext"
                 + (m.group(2) == null ? "" : m.group(2));
-            
+
             result.start = 1;
             result.end = result.start;
             result.consequence = IN_FRAME_INSERTION;
@@ -299,7 +299,7 @@ public class ProteinChangeParser {
                 result.end = result.start;
                 result.consequence = "stop_lost";
             }
-        } 
+        }
         return result;
     }
 
@@ -332,7 +332,12 @@ public class ProteinChangeParser {
             result.normalizedProteinChange = proteinChange.toUpperCase();
 
             ref = m.group(1) == null ? "" : m.group(1).toUpperCase();
-            start = Integer.valueOf(m.group(2));
+            try {
+                start = Integer.valueOf(m.group(2));
+            } catch (NumberFormatException e) {
+                result.setIsParsed(false);
+                return result;
+            }
             end = start;
             var = m.group(3).toUpperCase();
 
@@ -372,7 +377,7 @@ public class ProteinChangeParser {
         result.var = var;
         result.start = start;
         result.end = end;
-        return result;                       
+        return result;
     }
 
 }
