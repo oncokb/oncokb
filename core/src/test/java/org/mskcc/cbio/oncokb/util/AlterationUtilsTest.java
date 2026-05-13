@@ -8,6 +8,7 @@ import java.util.List;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.FrameshiftVariant;
 import org.mskcc.cbio.oncokb.model.Gene;
+import org.mskcc.cbio.oncokb.util.parser.ParseAlterationResult;
 import org.mskcc.cbio.oncokb.util.parser.ProteinChangeParser;
 
 import junit.framework.TestCase;
@@ -600,12 +601,26 @@ public class AlterationUtilsTest extends TestCase {
         suiteNotNullFrameshiftVariant(ProteinChangeParser.parseFrameshiftVariant("*1069Ffs*?"), "*", 1069, 1069, "F", "?");
     }
 
+    public void testParseAlterationReturnsNotParsedOnInvalidProteinPositions() {
+        suiteParseAlterationNotParsed("V2147483648E");
+        suiteParseAlterationNotParsed("V2147483648_splice");
+        suiteParseAlterationNotParsed("V2147483648_V2147483649del");
+        suiteParseAlterationNotParsed("V2147483648fs*4");
+        suiteParseAlterationNotParsed("*2147483648Aext*?");
+    }
+
     private void suiteNotNullFrameshiftVariant(FrameshiftVariant variant, String expectedRef, Integer expectedStart, Integer expectedEnd, String expectedVar, String expectedExtension) {
         assertEquals(expectedRef, variant.getRefResidues());
         assertEquals(expectedStart, variant.getProteinStart());
         assertEquals(expectedEnd, variant.getProteinEnd());
         assertEquals(expectedVar, variant.getVariantResidues());
         assertEquals(expectedExtension, variant.getExtension());
+    }
+
+    private void suiteParseAlterationNotParsed(String proteinChange) {
+        ParseAlterationResult result = ProteinChangeParser.parseAlteration(proteinChange);
+        assertNotNull(result);
+        assertFalse("Expected not parsed for " + proteinChange, result.getIsParsed());
     }
 
     public void testIsSameFrameshiftVariant() {
