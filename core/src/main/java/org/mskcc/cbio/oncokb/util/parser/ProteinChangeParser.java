@@ -52,31 +52,37 @@ public class ProteinChangeParser {
     );
 
     public static ParseAlterationResult parseAlteration(String proteinChange) {
-        ParseAlterationResult result = parseInframe(proteinChange);
-        if (result.isParsed) return result;
+        try {
+            ParseAlterationResult result = parseInframe(proteinChange);
+            if (result.isParsed) return result;
 
-        result = parseSplice(proteinChange);
-        if (result.isParsed) return result;
-        
-        result = parseRange(proteinChange);
-        if (result.isParsed) return result;
-        
-        result = parseFrameshift(proteinChange);
-        if (result.isParsed) return result;
+            result = parseSplice(proteinChange);
+            if (result.isParsed) return result;
 
-        result = parsePoint(proteinChange);
-        if (result.isParsed)  return result;
-        
-        result = parseExtension(proteinChange);
-        if (result.isParsed) return result;
+            result = parseRange(proteinChange);
+            if (result.isParsed) return result;
 
-        result = parseSynonymous(proteinChange);
-        if (result.isParsed) return result;
+            result = parseFrameshift(proteinChange);
+            if (result.isParsed) return result;
 
-        result =  parseGeneral(proteinChange);
-        if (result.isParsed) return result;
+            result = parsePoint(proteinChange);
+            if (result.isParsed)  return result;
 
-        return result;
+            result = parseExtension(proteinChange);
+            if (result.isParsed) return result;
+
+            result = parseSynonymous(proteinChange);
+            if (result.isParsed) return result;
+
+            result = parseGeneral(proteinChange);
+            if (result.isParsed) return result;
+
+            return result;
+        } catch (NumberFormatException exception) {
+            ParseAlterationResult result = new ParseAlterationResult();
+            result.setIsParsed(false);
+            return result;
+        }
     }
 
     public static ParseAlterationResult parseInframe(String proteinChange) {
