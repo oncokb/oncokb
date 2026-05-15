@@ -33,8 +33,11 @@ public class SummaryUtils {
     }
     public static final List<String> specialAlterations = Arrays.asList("mutation", "alteration", "insertion", "deletion", "duplication", "fusion", "deletion", "amplification");
 
-    public static AlternativeOncoKbVariant alternativeOncoKbVariant(Query query, Boolean variantExists) {
-        if (Boolean.TRUE.equals(variantExists) || query == null || StringUtils.isAnyEmpty(query.getHugoSymbol(), query.getAlteration())) {
+    public static AlternativeOncoKbVariant alternativeOncoKbVariant(Query query, Boolean variantExists, Boolean hasVariantEvidence) {
+        if (Boolean.TRUE.equals(variantExists)
+            || Boolean.TRUE.equals(hasVariantEvidence)
+            || query == null
+            || StringUtils.isAnyEmpty(query.getHugoSymbol(), query.getAlteration())) {
             return null;
         }
 

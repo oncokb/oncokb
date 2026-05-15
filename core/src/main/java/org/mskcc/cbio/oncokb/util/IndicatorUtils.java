@@ -496,6 +496,18 @@ public class IndicatorUtils {
 
         indicatorQuery.setLastUpdate(latestEvidenceDate == null ? MainUtils.getDataVersionDate() :
             new SimpleDateFormat("MM/dd/yyy").format(latestEvidenceDate));
+        indicatorQuery.setDataVersion(MainUtils.getDataVersion());
+
+        // TODO: evidence check
+        Date lastUpdate = getLatestDateFromEvidences(allQueryRelatedEvidences);
+        // Determine if variant has evidence we care about (excluding gene summary)
+        Set<EvidenceType> treatmentEvidenceTypes = EvidenceTypeUtils.getTreatmentEvidenceTypes();
+        boolean hasVariantEvidence = allQueryRelatedEvidences.stream()
+            .map(Evidence::getEvidenceType)
+            .anyMatch(type -> type == EvidenceType.ONCOGENIC
+                || type == EvidenceType.MUTATION_EFFECT
+                || treatmentEvidenceTypes.contains(type));
+        indicatorQuery.setHasVariantEvidence(hasVariantEvidence);
 
         // Give default oncogenicity if no data has been assigned.
         if (indicatorQuery.getOncogenic() == null) {
