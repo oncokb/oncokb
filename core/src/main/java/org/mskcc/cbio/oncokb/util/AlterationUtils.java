@@ -38,6 +38,7 @@ import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotateMutationByHGVSgQuery;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
+import org.mskcc.cbio.oncokb.importer.VariantConsequenceImporter;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.AlterationPositionBoundary;
 import org.mskcc.cbio.oncokb.model.AlterationType;
@@ -57,11 +58,14 @@ import org.mskcc.cbio.oncokb.model.VariantConsequence;
 import org.mskcc.cbio.oncokb.model.genomeNexus.TranscriptSummaryAlterationResult;
 import org.mskcc.cbio.oncokb.util.parser.ParseAlterationResult;
 import org.mskcc.cbio.oncokb.util.parser.ProteinChangeParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author jgao, Hongxin Zhang
  */
 public final class AlterationUtils {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AlterationUtils.class);
     private static List<String> oncogenicList = Arrays.asList(new String[]{
         "", Oncogenicity.INCONCLUSIVE.getOncogenic(), Oncogenicity.LIKELY_NEUTRAL.getOncogenic(),
         Oncogenicity.LIKELY.getOncogenic(), Oncogenicity.YES.getOncogenic()});
@@ -1399,7 +1403,8 @@ public final class AlterationUtils {
 
     private static boolean matchesGene(Alteration alt, Gene gene) {
         if (gene == null) {
-            return true;
+            LOGGER.error("Invalid gene provided");
+            return false;
         }
         return gene.equals(alt.getGene());
     }

@@ -484,10 +484,9 @@ public class GermlineAnnotationsApiController {
             String[] hgvscParts = hgvsc.split(":");
             if (hgvscParts.length == 2) {
                 hgvsc = hgvscParts[1];
-                Gene gene = GeneUtils.getGene(selectedAnnotatedAlteration.getTranscriptConsequenceSummary().getHugoGeneSymbol());
                 alteration = AlterationUtils.findAlterationWithGeneticType(
                     referenceGenome,
-                    gene,
+                    selectedAnnotatedAlteration.getAlteration().getGene(),
                     hgvsc,
                     allAlterations,
                     germline
