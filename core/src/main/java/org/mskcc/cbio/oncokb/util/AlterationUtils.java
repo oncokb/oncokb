@@ -38,6 +38,7 @@ import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotateMutationByHGVSgQuery;
 import org.mskcc.cbio.oncokb.bo.AlterationBo;
 import org.mskcc.cbio.oncokb.bo.EvidenceBo;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
+import org.mskcc.cbio.oncokb.importer.VariantConsequenceImporter;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.AlterationPositionBoundary;
 import org.mskcc.cbio.oncokb.model.AlterationType;
@@ -57,11 +58,14 @@ import org.mskcc.cbio.oncokb.model.VariantConsequence;
 import org.mskcc.cbio.oncokb.model.genomeNexus.TranscriptSummaryAlterationResult;
 import org.mskcc.cbio.oncokb.util.parser.ParseAlterationResult;
 import org.mskcc.cbio.oncokb.util.parser.ProteinChangeParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author jgao, Hongxin Zhang
  */
 public final class AlterationUtils {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AlterationUtils.class);
     private static List<String> oncogenicList = Arrays.asList(new String[]{
         "", Oncogenicity.INCONCLUSIVE.getOncogenic(), Oncogenicity.LIKELY_NEUTRAL.getOncogenic(),
         Oncogenicity.LIKELY.getOncogenic(), Oncogenicity.YES.getOncogenic()});
@@ -1277,7 +1281,7 @@ public final class AlterationUtils {
     }
 
     public static Alteration findExactlyMatchedAlteration(ReferenceGenome referenceGenome, Alteration alteration, List<Alteration> fullAlterations) {
-        Alteration matchedByAlteration = findAlteration(referenceGenome, alteration.getAlteration(), fullAlterations, alteration.getForGermline());
+        Alteration matchedByAlteration = findAlterationWithGeneticType(referenceGenome, alteration.getGene(), alteration.getAlteration(), fullAlterations, alteration.getForGermline());
         if (matchedByAlteration != null) {
             if (matchedByAlteration.getConsequence() == null
                 || alteration.getConsequence() == null
@@ -1364,22 +1368,15 @@ public final class AlterationUtils {
 
         return new ArrayList<>(result);
     }
-    public static Alteration findAlteration(ReferenceGenome referenceGenome, String alteration, List<Alteration> fullAlterations) {
-        return findAlteration(referenceGenome, alteration, fullAlterations, null);
-    }
 
-    public static Alteration findAlteration(ReferenceGenome referenceGenome, String alteration, List<Alteration> fullAlterations, Boolean isGermline) {
-        return findAlterationWithGeneticType(referenceGenome, alteration, fullAlterations, isGermline);
-    }
-
-    public static Alteration findAlterationWithGeneticType(ReferenceGenome referenceGenome, String alteration, List<Alteration> fullAlterations, Boolean isGermline) {
+    public static Alteration findAlterationWithGeneticType(ReferenceGenome referenceGenome, Gene gene, String alteration, List<Alteration> fullAlterations, Boolean isGermline) {
         if (alteration == null) {
             return null;
         }
         // Implement the data access logic
         for (int i = 0; i < fullAlterations.size(); i++) {
             Alteration alt = fullAlterations.get(i);
-            if (alt.getAlteration() != null && alt.getAlteration().equalsIgnoreCase(alteration) && (isGermline == null ||  alt.getForGermline() == isGermline)) {
+            if (alt.getAlteration() != null && alt.getAlteration().equalsIgnoreCase(alteration) && (isGermline == null ||  alt.getForGermline() == isGermline) && matchesGene(alt, gene)) {
                 if (referenceGenome == null) {
                     return alt;
                 } else if (alt.getReferenceGenomes().contains(referenceGenome)) {
@@ -1389,7 +1386,7 @@ public final class AlterationUtils {
         }
         for (int i = 0; i < fullAlterations.size(); i++) {
             Alteration alt = fullAlterations.get(i);
-            if (alt.getAlteration() != null && alt.getName().equalsIgnoreCase(alteration) && (isGermline == null ||  alt.getForGermline() == isGermline)) {
+            if (alt.getAlteration() != null && alt.getName().equalsIgnoreCase(alteration) && (isGermline == null ||  alt.getForGermline() == isGermline) && matchesGene(alt, gene)) {
                 if (referenceGenome == null) {
                     return alt;
                 } else if (alt.getReferenceGenomes().contains(referenceGenome)) {
@@ -1399,9 +1396,17 @@ public final class AlterationUtils {
         }
 
         if (NamingUtils.hasAbbreviation(alteration)) {
-            return findAlterationWithGeneticType(referenceGenome, NamingUtils.getFullName(alteration), fullAlterations, isGermline);
+            return findAlterationWithGeneticType(referenceGenome, gene, NamingUtils.getFullName(alteration), fullAlterations, isGermline);
         }
         return null;
+    }
+
+    private static boolean matchesGene(Alteration alt, Gene gene) {
+        if (gene == null) {
+            LOGGER.error("Invalid gene provided");
+            return false;
+        }
+        return gene.equals(alt.getGene());
     }
 
     public static Alteration findAlteration(ReferenceGenome referenceGenome, String alteration, String name, List<Alteration> fullAlterations) {

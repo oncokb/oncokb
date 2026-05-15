@@ -564,7 +564,7 @@ public class IndicatorUtils {
             List<TumorType> relevantUpwardTumorTypes = new ArrayList<>();
 
             // For germline, we should find the exact alteration (there are no rules yet)
-            Alteration matchedAlt = AlterationUtils.findAlteration(query.getReferenceGenome(), alteration.getAlteration(), AlterationUtils.getAllAlterations(query.getReferenceGenome(), gene), query.isGermline());
+            Alteration matchedAlt = AlterationUtils.findAlterationWithGeneticType(query.getReferenceGenome(), gene, alteration.getAlteration(), AlterationUtils.getAllAlterations(query.getReferenceGenome(), gene), query.isGermline());
             Boolean variantExists = matchedAlt != null;
             indicatorQuery.setVariantExist(variantExists);
             if (!variantExists) {
