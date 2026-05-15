@@ -980,6 +980,7 @@ public class AnnotationsApiController {
     ) throws org.genome_nexus.ApiException {
         Alteration alteration = AlterationUtils.findAlterationWithGeneticType(
             referenceGenome,
+            selectedAnnotatedAlteration.getAlteration().getGene(),
             hgvsg,
             allAlterations,
             germline
@@ -1018,6 +1019,7 @@ public class AnnotationsApiController {
                 hgvsc = hgvscParts[1];
                 alteration = AlterationUtils.findAlterationWithGeneticType(
                     referenceGenome,
+                    selectedAnnotatedAlteration.getAlteration().getGene(),
                     hgvsc,
                     allAlterations,
                     germline
@@ -1098,6 +1100,7 @@ public class AnnotationsApiController {
             if (this.cacheFetcher.hgvscShouldBeAnnotated(hgvsc)) {
                 Alteration alteration = AlterationUtils.findAlterationWithGeneticType(
                     referenceGenome,
+                    GeneUtils.getGeneByHugoSymbol(query.getGene()),
                     query.getAlteration(),
                     allAlterations,
                     query.isGermline()

@@ -1277,7 +1277,7 @@ public final class AlterationUtils {
     }
 
     public static Alteration findExactlyMatchedAlteration(ReferenceGenome referenceGenome, Alteration alteration, List<Alteration> fullAlterations) {
-        Alteration matchedByAlteration = findAlteration(referenceGenome, alteration.getAlteration(), fullAlterations, alteration.getForGermline());
+        Alteration matchedByAlteration = findAlterationWithGeneticType(referenceGenome, alteration.getGene(), alteration.getAlteration(), fullAlterations, alteration.getForGermline());
         if (matchedByAlteration != null) {
             if (matchedByAlteration.getConsequence() == null
                 || alteration.getConsequence() == null
@@ -1364,22 +1364,15 @@ public final class AlterationUtils {
 
         return new ArrayList<>(result);
     }
-    public static Alteration findAlteration(ReferenceGenome referenceGenome, String alteration, List<Alteration> fullAlterations) {
-        return findAlteration(referenceGenome, alteration, fullAlterations, null);
-    }
 
-    public static Alteration findAlteration(ReferenceGenome referenceGenome, String alteration, List<Alteration> fullAlterations, Boolean isGermline) {
-        return findAlterationWithGeneticType(referenceGenome, alteration, fullAlterations, isGermline);
-    }
-
-    public static Alteration findAlterationWithGeneticType(ReferenceGenome referenceGenome, String alteration, List<Alteration> fullAlterations, Boolean isGermline) {
+    public static Alteration findAlterationWithGeneticType(ReferenceGenome referenceGenome, Gene gene, String alteration, List<Alteration> fullAlterations, Boolean isGermline) {
         if (alteration == null) {
             return null;
         }
         // Implement the data access logic
         for (int i = 0; i < fullAlterations.size(); i++) {
             Alteration alt = fullAlterations.get(i);
-            if (alt.getAlteration() != null && alt.getAlteration().equalsIgnoreCase(alteration) && (isGermline == null ||  alt.getForGermline() == isGermline)) {
+            if (alt.getAlteration() != null && alt.getAlteration().equalsIgnoreCase(alteration) && (isGermline == null ||  alt.getForGermline() == isGermline) && matchesGene(alt, gene)) {
                 if (referenceGenome == null) {
                     return alt;
                 } else if (alt.getReferenceGenomes().contains(referenceGenome)) {
@@ -1389,7 +1382,7 @@ public final class AlterationUtils {
         }
         for (int i = 0; i < fullAlterations.size(); i++) {
             Alteration alt = fullAlterations.get(i);
-            if (alt.getAlteration() != null && alt.getName().equalsIgnoreCase(alteration) && (isGermline == null ||  alt.getForGermline() == isGermline)) {
+            if (alt.getAlteration() != null && alt.getName().equalsIgnoreCase(alteration) && (isGermline == null ||  alt.getForGermline() == isGermline) && matchesGene(alt, gene)) {
                 if (referenceGenome == null) {
                     return alt;
                 } else if (alt.getReferenceGenomes().contains(referenceGenome)) {
@@ -1399,9 +1392,16 @@ public final class AlterationUtils {
         }
 
         if (NamingUtils.hasAbbreviation(alteration)) {
-            return findAlterationWithGeneticType(referenceGenome, NamingUtils.getFullName(alteration), fullAlterations, isGermline);
+            return findAlterationWithGeneticType(referenceGenome, gene, NamingUtils.getFullName(alteration), fullAlterations, isGermline);
         }
         return null;
+    }
+
+    private static boolean matchesGene(Alteration alt, Gene gene) {
+        if (gene == null) {
+            return true;
+        }
+        return gene.equals(alt.getGene());
     }
 
     public static Alteration findAlteration(ReferenceGenome referenceGenome, String alteration, String name, List<Alteration> fullAlterations) {

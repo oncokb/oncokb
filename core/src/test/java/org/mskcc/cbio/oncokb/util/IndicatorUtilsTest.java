@@ -1235,8 +1235,9 @@ public class IndicatorUtilsTest {
             relevantAlterations.stream().anyMatch(alt -> alt.getAlteration() != null
                 && alt.getAlteration().startsWith(InferredMutation.PATHOGENIC_VARIANTS.getVariant())));
 
-        Alteration pathogenicVariantsAlt = AlterationUtils.findAlteration(
+        Alteration pathogenicVariantsAlt = AlterationUtils.findAlterationWithGeneticType(
             DEFAULT_REFERENCE_GENOME,
+            gene,
             InferredMutation.PATHOGENIC_VARIANTS.getVariant(),
             AlterationUtils.getAllAlterations(DEFAULT_REFERENCE_GENOME, gene),
             true

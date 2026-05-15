@@ -428,6 +428,7 @@ public class GermlineAnnotationsApiController {
     ) throws org.genome_nexus.ApiException {
         Alteration alteration = AlterationUtils.findAlterationWithGeneticType(
             referenceGenome,
+            selectedAnnotatedAlteration.getAlteration().getGene(),
             hgvsg,
             allAlterations,
             germline
@@ -483,8 +484,10 @@ public class GermlineAnnotationsApiController {
             String[] hgvscParts = hgvsc.split(":");
             if (hgvscParts.length == 2) {
                 hgvsc = hgvscParts[1];
+                Gene gene = GeneUtils.getGene(selectedAnnotatedAlteration.getTranscriptConsequenceSummary().getHugoGeneSymbol());
                 alteration = AlterationUtils.findAlterationWithGeneticType(
                     referenceGenome,
+                    gene,
                     hgvsc,
                     allAlterations,
                     germline
@@ -586,6 +589,7 @@ public class GermlineAnnotationsApiController {
             if (this.cacheFetcher.hgvscShouldBeAnnotated(hgvsc)) {
                 Alteration alteration = AlterationUtils.findAlterationWithGeneticType(
                     referenceGenome,
+                    GeneUtils.getGeneByHugoSymbol(query.getGene()),
                     query.getAlteration(),
                     allAlterations,
                     query.isGermline()
