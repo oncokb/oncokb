@@ -1,9 +1,14 @@
-# Fix Gene-Specific Alteration Matching For Hgvs Annotation Queries
+# Fix Gene-Specific Alteration Matching Bug For Hgvs Annotation Queries
 
 ## What's New
 
-Updated somatic and germline annotation lookup to attach the resolved gene when matching curated alterations from HGVSg and HGVSc inputs.
-This fixes cases where annotation queries could miss the intended curated alteration or match an alteration from the wrong gene when the alteration string was not unique by itself.
+Fixed a bug in somatic and germline annotation lookup where the resolved gene was not always attached when matching curated alterations from HGVSg and HGVSc inputs.
+This could cause annotation queries to miss the intended curated alteration or match an alteration from the wrong gene when the alteration string was not unique by itself.
+
+The following germline annotation endpoints were impacted by this bug:
+
+- `/annotate/germline/mutations/byHGVSg` (GET and POST)
+- `/annotate/germline/mutations/byGenomicChange` (GET and POST)
 
 ## Impact
 
@@ -15,7 +20,7 @@ None.
 
 | Parameter/Field Path | Change (Added/Edit/Removed) | Endpoints |
 | --- | --- | --- |
-| None | None | None |
+| None | None | `/annotate/germline/mutations/byHGVSg` (GET, POST), `/annotate/germline/mutations/byGenomicChange` (GET, POST) |
 
 ## Migration / Action Required
 
