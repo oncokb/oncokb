@@ -1,6 +1,4 @@
-# Title
-
-Fix gene-specific alteration matching for HGVS annotation queries.
+# Fix Gene-Specific Alteration Matching For Hgvs Annotation Queries
 
 ## What's New
 
