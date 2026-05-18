@@ -1403,7 +1403,7 @@ public final class AlterationUtils {
 
     private static boolean matchesGene(Alteration alt, Gene gene) {
         if (gene == null) {
-            LOGGER.error("Invalid gene provided");
+            // TODO: figure out why this is logging a lot
             return false;
         }
         return gene.equals(alt.getGene());
