@@ -1014,7 +1014,7 @@ public class AnnotationsApiController {
         if (StringUtils.isNotEmpty(hgvsc)) {
             alteration = AlterationUtils.findAlterationWithGeneticType(
                 referenceGenome,
-                selectedAnnotatedAlteration.getHgvspAlteration().getGene(),
+                selectedAnnotatedAlteration.getHgvscAlteration().getGene(),
                 hgvsc,
                 allAlterations,
                 germline
