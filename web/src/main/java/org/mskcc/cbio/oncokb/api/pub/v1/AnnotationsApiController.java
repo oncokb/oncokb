@@ -501,7 +501,7 @@ public class AnnotationsApiController {
         Boolean germline,
         Set<EvidenceType> evidenceTypes
     ) {
-        Query query = QueryUtils.getQueryFromAlteration(referenceGenome, tumorType, transcriptSummaryAlterationResult, hgvs);
+        Query query = QueryUtils.getQueryFromAlteration(referenceGenome, tumorType, transcriptSummaryAlterationResult, hgvs, false);
 
         SomaticIndicatorQueryResp indicatorQueryResp = this.cacheFetcher.processQuerySomatic(
             referenceGenome,
@@ -538,7 +538,7 @@ public class AnnotationsApiController {
         Boolean germline,
         Set<EvidenceType> evidenceTypes
     ) {
-        Query query = QueryUtils.getQueryFromAlteration(referenceGenome, tumorType, transcriptSummaryAlterationResult, hgvs);
+        Query query = QueryUtils.getQueryFromAlteration(referenceGenome, tumorType, transcriptSummaryAlterationResult, hgvs, false);
 
         SomaticIndicatorQueryResp indicatorQueryResp = this.cacheFetcher.processQuerySomatic(
             referenceGenome,
@@ -796,7 +796,8 @@ public class AnnotationsApiController {
                 VariantAnnotation variantAnnotation = variantAnnotations.get(queryIndexMap.get(query.getGenomicLocation()));
                 List<TranscriptSummaryAlterationResult> annotatedAlteration = AlterationUtils.getAlterationsFromGenomeNexus(
                     Collections.singletonList(variantAnnotation), 
-                    referenceGenome
+                    referenceGenome,
+                    query.isGermline()
                 );
                 TranscriptSummaryAlterationResult selectedAnnotatedAlteration = annotatedAlteration.isEmpty() 
                     ? new TranscriptSummaryAlterationResult() 
@@ -927,7 +928,8 @@ public class AnnotationsApiController {
                 VariantAnnotation variantAnnotation = variantAnnotations.get(queryIndexMap.get(query.getHgvsg()));
                 List<TranscriptSummaryAlterationResult> annotatedAlteration = AlterationUtils.getAlterationsFromGenomeNexus(
                     Collections.singletonList(variantAnnotation), 
-                    referenceGenome
+                    referenceGenome,
+                    query.isGermline()
                 );
                 TranscriptSummaryAlterationResult selectedAnnotatedAlteration = annotatedAlteration.isEmpty() 
                     ? new TranscriptSummaryAlterationResult() 
@@ -980,7 +982,7 @@ public class AnnotationsApiController {
     ) throws org.genome_nexus.ApiException {
         Alteration alteration = AlterationUtils.findAlterationWithGeneticType(
             referenceGenome,
-            selectedAnnotatedAlteration.getAlteration().getGene(),
+            selectedAnnotatedAlteration.getHgvspAlteration().getGene(),
             hgvsg,
             allAlterations,
             germline
@@ -1008,23 +1010,15 @@ public class AnnotationsApiController {
         }
 
         alteration = null;
-        String hgvsc = null;
-        if (selectedAnnotatedAlteration.getTranscriptConsequenceSummary() != null) {
-            hgvsc = selectedAnnotatedAlteration.getTranscriptConsequenceSummary().getHgvsc();
-        }
+        String hgvsc = selectedAnnotatedAlteration.getHgvscAlteration().getAlteration();
         if (StringUtils.isNotEmpty(hgvsc)) {
-            alteration = null;
-            String[] hgvscParts = hgvsc.split(":");
-            if (hgvscParts.length == 2) {
-                hgvsc = hgvscParts[1];
-                alteration = AlterationUtils.findAlterationWithGeneticType(
-                    referenceGenome,
-                    selectedAnnotatedAlteration.getAlteration().getGene(),
-                    hgvsc,
-                    allAlterations,
-                    germline
-                );
-            }
+            alteration = AlterationUtils.findAlterationWithGeneticType(
+                referenceGenome,
+                selectedAnnotatedAlteration.getHgvspAlteration().getGene(),
+                hgvsc,
+                allAlterations,
+                germline
+            );
         }
         if (alteration != null && alteration.getForGermline() == germline) {
             return this.cacheFetcher.processQuerySomatic(
@@ -1168,7 +1162,8 @@ public class AnnotationsApiController {
                     VariantAnnotation variantAnnotation = variantAnnotations.get(queryToGNIndexMap.get(query.getHgvsc()));
                     List<TranscriptSummaryAlterationResult> annotatedAlteration = AlterationUtils.getAlterationsFromGenomeNexus(
                         Collections.singletonList(variantAnnotation), 
-                        referenceGenome
+                        referenceGenome,
+                        query.isGermline()
                     );
                     TranscriptSummaryAlterationResult selectedAnnotatedAlteration = annotatedAlteration.isEmpty() 
                         ? new TranscriptSummaryAlterationResult() 

@@ -10,7 +10,8 @@ import org.mskcc.cbio.oncokb.model.Alteration;
  */
 public class TranscriptSummaryAlterationResult {
     private TranscriptConsequenceSummary transcriptConsequenceSummary;  // the summary where transcriptId matches an oncokb canonical transcript
-    private Alteration alteration = new Alteration();  // the Alteration model generated using the transcript summary; empty alteration by default
+    private Alteration hgvspAlteration = new Alteration();  // the p. Alteration generated using the transcript summary; empty alteration by default
+    private Alteration hgvscAlteration = new Alteration();  // the c. Alteration generated using the transcript summary; empty alteration by default
     private String message; // optional message for this annotation
 
 
@@ -18,12 +19,6 @@ public class TranscriptSummaryAlterationResult {
 
     public TranscriptSummaryAlterationResult(TranscriptConsequenceSummary transcriptConsequenceSummary) {
         this.transcriptConsequenceSummary = transcriptConsequenceSummary;
-    }
-
-
-    public TranscriptSummaryAlterationResult(TranscriptConsequenceSummary transcriptConsequenceSummary, Alteration alteration) {
-        this.transcriptConsequenceSummary = transcriptConsequenceSummary;
-        this.alteration = alteration;
     }
 
     public TranscriptConsequenceSummary getTranscriptConsequenceSummary() {
@@ -34,12 +29,20 @@ public class TranscriptSummaryAlterationResult {
         this.transcriptConsequenceSummary = transcriptConsequenceSummary;
     }
 
-    public Alteration getAlteration() {
-        return this.alteration;
+    public Alteration getHgvspAlteration() {
+        return this.hgvspAlteration;
     }
 
-    public void setAlteration(Alteration alteration) {
-        this.alteration = alteration;
+    public void setHgvspAlteration(Alteration hgvspAlteration) {
+        this.hgvspAlteration = hgvspAlteration;
+    }
+
+    public Alteration getHgvscAlteration() {
+        return this.hgvscAlteration;
+    }
+
+    public void setHgvscAlteration(Alteration hgvscAlteration) {
+        this.hgvscAlteration = hgvscAlteration;
     }
 
     public String getMessage() {

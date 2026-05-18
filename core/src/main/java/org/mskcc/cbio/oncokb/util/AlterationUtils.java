@@ -550,19 +550,11 @@ public final class AlterationUtils {
         return alt;
     }
 
-    private static Alteration convertTranscriptSummaryAlterationResultToAlteration(TranscriptSummaryAlterationResult transcriptSummaryAlterationResult) {
-        if (transcriptSummaryAlterationResult != null) {
-            return convertTranscriptConsequenceSummaryToAlteration(transcriptSummaryAlterationResult.getTranscriptConsequenceSummary());
-        } else {
-            return null;
-        }
-    }
-
     public static Alteration convertTranscriptConsequenceSummaryToAlteration(TranscriptConsequenceSummary transcriptConsequenceSummary) {
         if (transcriptConsequenceSummary == null) {
             return null;
         }
-        
+
         Alteration alteration = new Alteration();
         String hugoSymbol = transcriptConsequenceSummary.getHugoGeneSymbol();
         Integer entrezGeneId = StringUtils.isNumeric(transcriptConsequenceSummary.getEntrezGeneId()) ? Integer.parseInt(transcriptConsequenceSummary.getEntrezGeneId()) : null;
@@ -595,6 +587,41 @@ public final class AlterationUtils {
         return alteration;
     }
 
+    public static Alteration convertTranscriptConsequenceSummaryToCdnaAlteration(TranscriptConsequenceSummary transcriptConsequenceSummary) {
+        if (transcriptConsequenceSummary == null) {
+            return null;
+        }
+
+        Alteration alteration = new Alteration();
+        String hugoSymbol = transcriptConsequenceSummary.getHugoGeneSymbol();
+        Integer entrezGeneId = StringUtils.isNumeric(transcriptConsequenceSummary.getEntrezGeneId()) ? Integer.parseInt(transcriptConsequenceSummary.getEntrezGeneId()) : null;
+        if (StringUtils.isNotEmpty(transcriptConsequenceSummary.getHugoGeneSymbol())) {
+            Gene gene = GeneUtils.getGene(hugoSymbol);
+            if (gene == null) {
+                gene = new Gene();
+                gene.setHugoSymbol(transcriptConsequenceSummary.getHugoGeneSymbol());
+                gene.setEntrezGeneId(entrezGeneId);
+            }
+            alteration.setGene(gene);
+        }
+
+        if (StringUtils.isNotEmpty(transcriptConsequenceSummary.getHgvspShort())) {
+            String hgvspShort = transcriptConsequenceSummary.getHgvspShort().trim().replace("p.", "");
+            alteration.setProteinChange(hgvspShort);
+        }
+
+        if (StringUtils.isNotEmpty(transcriptConsequenceSummary.getHgvsc())) {
+            String hgvsc = transcriptConsequenceSummary.getHgvsc().trim();
+            String[] hgvscParts = hgvsc.split(":");
+            if (hgvscParts.length == 2) {
+                hgvsc = hgvscParts[1];
+            }
+            alteration.setAlteration(hgvsc);
+            alteration.setName(hgvsc);
+        }
+        return alteration;
+    }
+
     public static List<VariantAnnotation> getHgvsgVariantsAnnotationWithQueries(List<AnnotateMutationByHGVSgQuery> queries, ReferenceGenome referenceGenome) throws ApiException {
         return GenomeNexusUtils.getHgvsVariantsAnnotation(queries.stream().map(AnnotateMutationByHGVSgQuery::getHgvsg).collect(Collectors.toList()), referenceGenome);
     }
@@ -603,7 +630,7 @@ public final class AlterationUtils {
         return GenomeNexusUtils.getGenomicLocationVariantsAnnotation(queries.stream().map(query -> GenomeNexusUtils.convertGenomicLocation(query.getGenomicLocation())).collect(Collectors.toList()), referenceGenome);
     }
 
-    public static TranscriptSummaryAlterationResult getAlterationFromGenomeNexus(GNVariantAnnotationType type, ReferenceGenome referenceGenome, String query) throws ApiException {
+    public static TranscriptSummaryAlterationResult getAlterationFromGenomeNexus(GNVariantAnnotationType type, ReferenceGenome referenceGenome, String query, boolean isGermline) throws ApiException {
         List<VariantAnnotation> variantAnnotations = new ArrayList<>();
         if (GNVariantAnnotationType.HGVS_G == type) {
             variantAnnotations = GenomeNexusUtils.getHgvsVariantsAnnotation(Collections.singletonList(query), referenceGenome);
@@ -613,24 +640,29 @@ public final class AlterationUtils {
         if (variantAnnotations.isEmpty()) {
             return null;
         } else {
-            List<TranscriptSummaryAlterationResult> alterationInfos = getAlterationsFromGenomeNexus(variantAnnotations, referenceGenome);
+            List<TranscriptSummaryAlterationResult> alterationInfos = getAlterationsFromGenomeNexus(variantAnnotations, referenceGenome, isGermline);
             return alterationInfos.isEmpty() ? null : alterationInfos.get(0);
         }
     }
 
-    public static List<TranscriptSummaryAlterationResult> getAlterationsFromGenomeNexus(List<VariantAnnotation> variantAnnotations, ReferenceGenome referenceGenome) throws ApiException {
+    public static List<TranscriptSummaryAlterationResult> getAlterationsFromGenomeNexus(List<VariantAnnotation> variantAnnotations, ReferenceGenome referenceGenome, boolean isGermline) throws ApiException {
         List<TranscriptSummaryAlterationResult> annotationResult = GenomeNexusUtils.getTranscriptsConsequence(variantAnnotations, referenceGenome);
         // Use the transcript consequence summary from GN to generate a corresponding Alteration model
         for (TranscriptSummaryAlterationResult result : annotationResult) {
             if (result == null) {
                 result = new TranscriptSummaryAlterationResult();
             }
-            Alteration alteration = convertTranscriptSummaryAlterationResultToAlteration(result);
-            if (alteration != null) {
-                result.setAlteration(alteration);
-            } else {
-                result.setAlteration(new Alteration());
+            TranscriptConsequenceSummary summary = result.getTranscriptConsequenceSummary();
+            Alteration hgvspAlteration = convertTranscriptConsequenceSummaryToAlteration(summary);
+            if (hgvspAlteration != null) {
+                hgvspAlteration.setForGermline(isGermline);
             }
+            result.setHgvspAlteration(hgvspAlteration != null ? hgvspAlteration : new Alteration());
+            Alteration hgvscAlteration = convertTranscriptConsequenceSummaryToCdnaAlteration(summary);
+            if (hgvscAlteration != null) {
+                hgvscAlteration.setForGermline(isGermline);
+            }
+            result.setHgvscAlteration(hgvscAlteration != null ? hgvscAlteration : new Alteration());
         }
         return annotationResult;
     }

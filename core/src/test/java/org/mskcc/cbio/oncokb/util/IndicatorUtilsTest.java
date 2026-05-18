@@ -2,6 +2,7 @@ package org.mskcc.cbio.oncokb.util;
 
 import java.util.*;
 import org.apache.commons.lang3.StringUtils;
+import org.genome_nexus.ApiException;
 import org.genome_nexus.client.VariantAnnotation;
 import org.junit.Test;
 import org.mskcc.cbio.oncokb.apiModels.Implication;
@@ -911,16 +912,16 @@ public class IndicatorUtilsTest {
 
         // Test indicator endpoint supports HGVS
         String hgvsg = "7:g.140453136A>T";
-        TranscriptSummaryAlterationResult transcriptSummaryAlterationResult = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, DEFAULT_REFERENCE_GENOME, hgvsg);
-        query = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", transcriptSummaryAlterationResult, hgvsg);
+        TranscriptSummaryAlterationResult transcriptSummaryAlterationResult = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, DEFAULT_REFERENCE_GENOME, hgvsg, false);
+        query = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", transcriptSummaryAlterationResult, hgvsg, false);
         indicatorQueryResp = IndicatorUtils.processQuerySomatic(query, null, true, null, false);
         assertTrue("The geneExist is not true, but it should be.", indicatorQueryResp.getGeneExist() == true);
         assertEquals("The oncogenicity is not Oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The highest sensitive level is not 1, but it should be.", LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
 
         hgvsg = "7:g.140453136A>T";
-        transcriptSummaryAlterationResult = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, DEFAULT_REFERENCE_GENOME, hgvsg);
-        query1 = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", transcriptSummaryAlterationResult, hgvsg);
+        transcriptSummaryAlterationResult = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, DEFAULT_REFERENCE_GENOME, hgvsg, false);
+        query1 = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", transcriptSummaryAlterationResult, hgvsg, false);
         query2 = new Query(null, DEFAULT_REFERENCE_GENOME, null, "BRAF", "V600E", null, null, "Melanoma", null, null, null, null, false, null, null);
 
         resp1 = IndicatorUtils.processQuerySomatic(query1, null, false, null, false);
@@ -1061,24 +1062,24 @@ public class IndicatorUtilsTest {
     @Test
     public void testProcessQueryWithGenomicChange() throws Exception {
         String hgvsg = "7:g.140453136A>T";
-        TranscriptSummaryAlterationResult transcriptSummaryAlterationResult = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, DEFAULT_REFERENCE_GENOME, hgvsg);
-        Query query = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", transcriptSummaryAlterationResult, hgvsg);
+        TranscriptSummaryAlterationResult transcriptSummaryAlterationResult = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, DEFAULT_REFERENCE_GENOME, hgvsg, false);
+        Query query = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", transcriptSummaryAlterationResult, hgvsg, false);
         SomaticIndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuerySomatic(query, null, true, null, false);
         assertTrue("The geneExist is not true, but it should be.", indicatorQueryResp.getGeneExist() == true);
         assertEquals("The oncogenicity is not Oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The highest sensitive level is not 1, but it should be.", LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
 
         hgvsg = ":g.140453136A>T";
-        transcriptSummaryAlterationResult = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, DEFAULT_REFERENCE_GENOME, hgvsg);
-        query = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", transcriptSummaryAlterationResult, hgvsg);
+        transcriptSummaryAlterationResult = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, DEFAULT_REFERENCE_GENOME, hgvsg, false);
+        query = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", transcriptSummaryAlterationResult, hgvsg, false);
         indicatorQueryResp = IndicatorUtils.processQuerySomatic(query, null, true, null, false);
         assertTrue("The geneExist is not false, but it should be.", indicatorQueryResp.getGeneExist() == false);
         assertEquals("The oncogenicity is not Unknown, but it should be.", Oncogenicity.UNKNOWN.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The highest sensitive level is not null, but it should be.", null, indicatorQueryResp.getHighestSensitiveLevel());
 
         hgvsg = "7:g.140453136A>T";
-        transcriptSummaryAlterationResult = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, DEFAULT_REFERENCE_GENOME, hgvsg);
-        Query query1 = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", transcriptSummaryAlterationResult, hgvsg);
+        transcriptSummaryAlterationResult = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, DEFAULT_REFERENCE_GENOME, hgvsg, false);
+        Query query1 = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", transcriptSummaryAlterationResult, hgvsg, false);
         Query query2 = new Query(null, DEFAULT_REFERENCE_GENOME, null, "BRAF", "V600E", null, null, "Melanoma", null, null, null, null, false, null , null);
 
         SomaticIndicatorQueryResp resp1 = IndicatorUtils.processQuerySomatic(query1, null, false, null, false);
@@ -1093,10 +1094,10 @@ public class IndicatorUtilsTest {
         // different format of chromosome should have the same annotation
         String hgvsg1 = "23:g.100611185G>A";
         String hgvsg2 = "X:g.100611185G>A";
-        TranscriptSummaryAlterationResult transcriptSummaryAlterationResult1 = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, DEFAULT_REFERENCE_GENOME, hgvsg1);
-        TranscriptSummaryAlterationResult transcriptSummaryAlterationResult2 = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, DEFAULT_REFERENCE_GENOME, hgvsg2);
-        query1 = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", transcriptSummaryAlterationResult1, hgvsg1);
-        query2 = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", transcriptSummaryAlterationResult2, hgvsg2);
+        TranscriptSummaryAlterationResult transcriptSummaryAlterationResult1 = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, DEFAULT_REFERENCE_GENOME, hgvsg1, false);
+        TranscriptSummaryAlterationResult transcriptSummaryAlterationResult2 = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, DEFAULT_REFERENCE_GENOME, hgvsg2, false);
+        query1 = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", transcriptSummaryAlterationResult1, hgvsg1, false);
+        query2 = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", transcriptSummaryAlterationResult2, hgvsg2, false);
 
         resp1 = IndicatorUtils.processQuerySomatic(query1, null, false, null, false);
         resp2 = IndicatorUtils.processQuerySomatic(query2, null, false, null, false);
@@ -1110,24 +1111,24 @@ public class IndicatorUtilsTest {
 
         // Test indicator endpoint supports genomic location
         String genomicLocation = "7,140453136,140453136,A,T";
-        transcriptSummaryAlterationResult = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, DEFAULT_REFERENCE_GENOME, genomicLocation);
-        query = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", transcriptSummaryAlterationResult, genomicLocation);
+        transcriptSummaryAlterationResult = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, DEFAULT_REFERENCE_GENOME, genomicLocation, false);
+        query = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", transcriptSummaryAlterationResult, genomicLocation, false);
         indicatorQueryResp = IndicatorUtils.processQuerySomatic(query, null, true, null, false);
         assertTrue("The geneExist is not true, but it should be.", indicatorQueryResp.getGeneExist() == true);
         assertEquals("The oncogenicity is not Oncogenic, but it should be.", Oncogenicity.YES.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The highest sensitive level is not 1, but it should be.", LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
 
         hgvsg = ",140453136,140453136,A,T";
-        transcriptSummaryAlterationResult = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, DEFAULT_REFERENCE_GENOME, hgvsg);
-        query = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", transcriptSummaryAlterationResult, hgvsg);
+        transcriptSummaryAlterationResult = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, DEFAULT_REFERENCE_GENOME, hgvsg, false);
+        query = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", transcriptSummaryAlterationResult, hgvsg, false);
         indicatorQueryResp = IndicatorUtils.processQuerySomatic(query, null, true, null, false);
         assertTrue("The geneExist is not false, but it should be.", indicatorQueryResp.getGeneExist() == false);
         assertEquals("The oncogenicity is not Unknown, but it should be.", Oncogenicity.UNKNOWN.getOncogenic(), indicatorQueryResp.getOncogenic());
         assertEquals("The highest sensitive level is not null, but it should be.", null, indicatorQueryResp.getHighestSensitiveLevel());
 
         genomicLocation = "7,140453136,140453136,A,T";
-        transcriptSummaryAlterationResult = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, DEFAULT_REFERENCE_GENOME, genomicLocation);
-        query1 = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", transcriptSummaryAlterationResult, genomicLocation);
+        transcriptSummaryAlterationResult = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, DEFAULT_REFERENCE_GENOME, genomicLocation, false);
+        query1 = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", transcriptSummaryAlterationResult, genomicLocation, false);
         query2 = new Query(null, DEFAULT_REFERENCE_GENOME, null, "BRAF", "V600E", null, null, "Melanoma", null, null, null, null, false, null, null);
 
         resp1 = IndicatorUtils.processQuerySomatic(query1, null, false, null, false);
@@ -1142,10 +1143,10 @@ public class IndicatorUtilsTest {
         // different format of chromosome should have the same annotation
         String genomicLocation1 = "23,100611185,100611185,G,A";
         String genomicLocation2 = "X,100611185,100611185,G,A";
-        transcriptSummaryAlterationResult1 = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, DEFAULT_REFERENCE_GENOME, genomicLocation1);
-        transcriptSummaryAlterationResult2 = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, DEFAULT_REFERENCE_GENOME, genomicLocation2);
-        query1 = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", transcriptSummaryAlterationResult1, genomicLocation1);
-        query2 = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", transcriptSummaryAlterationResult2, genomicLocation2);
+        transcriptSummaryAlterationResult1 = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, DEFAULT_REFERENCE_GENOME, genomicLocation1, false);
+        transcriptSummaryAlterationResult2 = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, DEFAULT_REFERENCE_GENOME, genomicLocation2, false);
+        query1 = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", transcriptSummaryAlterationResult1, genomicLocation1, false);
+        query2 = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", transcriptSummaryAlterationResult2, genomicLocation2, false);
 
         resp1 = IndicatorUtils.processQuerySomatic(query1, null, false, null, false);
         resp2 = IndicatorUtils.processQuerySomatic(query2, null, false, null, false);
@@ -1158,12 +1159,12 @@ public class IndicatorUtilsTest {
 
         // String query vs List GenomicLocation should have the same response
         genomicLocation = "23,100611185,100611185,G,A";
-        transcriptSummaryAlterationResult1 = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, DEFAULT_REFERENCE_GENOME, genomicLocation);
+        transcriptSummaryAlterationResult1 = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, DEFAULT_REFERENCE_GENOME, genomicLocation, false);
         List<VariantAnnotation> annotations = GenomeNexusUtils.getGenomicLocationVariantsAnnotation(Collections.singletonList(GenomeNexusUtils.convertGenomicLocation(genomicLocation)), DEFAULT_REFERENCE_GENOME);
-        List<TranscriptSummaryAlterationResult> map = AlterationUtils.getAlterationsFromGenomeNexus(annotations, DEFAULT_REFERENCE_GENOME);
+        List<TranscriptSummaryAlterationResult> map = AlterationUtils.getAlterationsFromGenomeNexus(annotations, DEFAULT_REFERENCE_GENOME, false);
         transcriptSummaryAlterationResult2 = map.get(0);
-        query1 = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", transcriptSummaryAlterationResult1, genomicLocation1);
-        query2 = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", transcriptSummaryAlterationResult2, genomicLocation2);
+        query1 = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", transcriptSummaryAlterationResult1, genomicLocation1, false);
+        query2 = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Melanoma", transcriptSummaryAlterationResult2, genomicLocation2, false);
 
         resp1 = IndicatorUtils.processQuerySomatic(query1, null, false, null, false);
         resp2 = IndicatorUtils.processQuerySomatic(query2, null, false, null, false);
@@ -1173,6 +1174,58 @@ public class IndicatorUtilsTest {
         assertTrue("Treatments are not the same, but they should.", resp1.getTreatments().equals(resp2.getTreatments()));
         assertTrue("Highest sensitive levels are not the same, but they should.", LevelUtils.areSameLevels(resp1.getHighestSensitiveLevel(), resp2.getHighestSensitiveLevel()));
         assertTrue("Highest resistance levels are not the same, but they should.", LevelUtils.areSameLevels(resp1.getHighestResistanceLevel(), resp2.getHighestResistanceLevel()));
+    }
+
+    @Test
+    public void testProcessQueryWithGenomicLocationForGermline() throws ApiException {
+        // This is a curated variant
+        String hgvsg = "17:g.41246044_41246048del";
+        TranscriptSummaryAlterationResult transcriptSummaryAlterationResult = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, DEFAULT_REFERENCE_GENOME, hgvsg, true);
+        Query query = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "Breast Cancer", transcriptSummaryAlterationResult, hgvsg, true);
+        GermlineIndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQueryGermline(query, null, false, null, false);
+        assertTrue("The geneExist is not true, but it should be.", indicatorQueryResp.getGeneExist() == true);
+        assertTrue("The variantExist is not true, but it should be", indicatorQueryResp.getVariantExist() == true);
+        assertEquals("The pathogenicity is not Pathogenic, but it should be.", Pathogenicity.YES.getPathogenic(), indicatorQueryResp.getPathogenic());
+        assertEquals("The highest sensitive level is not 1, but it should be.", LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
+        assertEquals("The resolved query alteration should be c.1504_1508del", "c.1504_1508del", indicatorQueryResp.getQuery().getAlteration());
+
+        // We have c.460C>T curated for ERCC3, but the query is for IL74. Make sure we don't pick up another gene's variant.
+        hgvsg = "5:g.35871238C>T";
+        transcriptSummaryAlterationResult = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, DEFAULT_REFERENCE_GENOME, hgvsg, true);
+        query = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "", transcriptSummaryAlterationResult, hgvsg, true);
+        indicatorQueryResp = IndicatorUtils.processQueryGermline(query, null, false, null, false);
+        assertEquals("The resolved query hugo symbol should be IL7R", "IL7R", indicatorQueryResp.getQuery().getHugoSymbol());
+        assertEquals("The resolved query alteration should be c.460C>T", "c.460C>T", indicatorQueryResp.getQuery().getAlteration());
+        assertTrue("The variantExist is not false, but it should be", indicatorQueryResp.getVariantExist() == false);
+
+        // Make sure we resolved the query alteration correctly even if the variant does not exist
+        hgvsg = "17:g.41209136C>A";
+        transcriptSummaryAlterationResult = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.HGVS_G, DEFAULT_REFERENCE_GENOME, hgvsg, true);
+        query = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "", transcriptSummaryAlterationResult, hgvsg, true);
+        indicatorQueryResp = IndicatorUtils.processQueryGermline(query, null, false, null, false);
+        assertTrue("The geneExist is not true, but it should be.", indicatorQueryResp.getGeneExist() == true);
+        assertTrue("The variantExist is not false, but it should be", indicatorQueryResp.getVariantExist() == false);
+        assertEquals("The resolved query alteration should be c.5210G>T", "c.5210G>T", indicatorQueryResp.getQuery().getAlteration());
+
+        // This is a curated variant but with a different format of genomic location. Make sure it can be resolved and annotated correctly.
+        String genomicLocation = "17,41258545,41258545,C,A";
+        transcriptSummaryAlterationResult = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, DEFAULT_REFERENCE_GENOME, genomicLocation, true);
+        query = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "", transcriptSummaryAlterationResult, genomicLocation, true);
+        indicatorQueryResp = IndicatorUtils.processQueryGermline(query, null, false, null, false);
+        assertTrue("The geneExist is not true, but it should be.", indicatorQueryResp.getGeneExist() == true);
+        assertTrue("The variantExist is not true, but it should be", indicatorQueryResp.getVariantExist() == true);
+        assertEquals("The pathogenicity is not Likely Pathogenic, but it should be.", Pathogenicity.LIKELY.getPathogenic(), indicatorQueryResp.getPathogenic());
+        assertEquals("The highest sensitive level is not 1, but it should be.", LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
+        assertEquals("The resolved query alteration should be c.140G>T", "c.140G>T", indicatorQueryResp.getQuery().getAlteration());
+
+        // We have c.460C>T curated for ERCC3, but the query is for IL74. Make sure we don't pick up another gene's variant even if the query is in genomic location format.
+        genomicLocation = "5,35871238,35871238,C,T";
+        transcriptSummaryAlterationResult = AlterationUtils.getAlterationFromGenomeNexus(GNVariantAnnotationType.GENOMIC_LOCATION, DEFAULT_REFERENCE_GENOME, genomicLocation, true);
+        query = QueryUtils.getQueryFromAlteration(DEFAULT_REFERENCE_GENOME, "", transcriptSummaryAlterationResult, genomicLocation, true);
+        indicatorQueryResp = IndicatorUtils.processQueryGermline(query, null, false, null, false);
+        assertTrue("The geneExist is not true, but it should be.", indicatorQueryResp.getGeneExist() == true);
+        assertTrue("The variantExist is not false, but it should be", indicatorQueryResp.getVariantExist() == false);
+        assertEquals("The resolved query alteration should be c.460C>T", "c.460C>T", indicatorQueryResp.getQuery().getAlteration());
     }
 
     @Test
