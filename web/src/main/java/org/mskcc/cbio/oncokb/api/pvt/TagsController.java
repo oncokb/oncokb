@@ -1,18 +1,19 @@
 package org.mskcc.cbio.oncokb.api.pvt;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.Evidence;
 import org.mskcc.cbio.oncokb.model.EvidenceQueryRes;
+import org.mskcc.cbio.oncokb.model.Oncogenicity;
+import org.mskcc.cbio.oncokb.model.OncogenicityEntity;
 import org.mskcc.cbio.oncokb.model.Query;
 import org.mskcc.cbio.oncokb.model.Tag;
 import org.mskcc.cbio.oncokb.model.TumorType;
+import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.ApplicationContextSingleton;
-import org.mskcc.cbio.oncokb.util.EvidenceTypeUtils;
 import org.mskcc.cbio.oncokb.util.EvidenceUtils;
-import org.mskcc.cbio.oncokb.util.LevelUtils;
 import org.mskcc.cbio.oncokb.util.TumorTypeUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -26,14 +27,27 @@ public class TagsController {
         produces = {"application/json"},
         method = RequestMethod.GET)
     public ResponseEntity<List<Tag>> getTagsByEntrezGeneId(@PathVariable int entrezGeneId) {
-        return ResponseEntity.ok().body(ApplicationContextSingleton.getTagBo().findTagsByEntrezGeneId(entrezGeneId));
+        List<Tag> tags = ApplicationContextSingleton.getTagBo().findTagsByEntrezGeneId(entrezGeneId);
+        for (Tag tag : tags) {
+            EvidenceQueryRes evidenceQuery = new EvidenceQueryRes();
+            evidenceQuery.setQuery(new Query());
+            evidenceQuery.setGene(tag.getGene());
+            addOncogenicMutationsEvidenceIfApplicable(tag, evidenceQuery);
+        }
+        return ResponseEntity.ok().body(tags);
     }
 
     @RequestMapping(value = "/tags/{hugoSymbol}/{name}",
         produces = {"application/json"},
         method = RequestMethod.GET)
     public ResponseEntity<Tag> getTagByHugoSymbolAndName(@PathVariable String hugoSymbol, @PathVariable String name) throws Exception {
-        return ResponseEntity.ok().body(ApplicationContextSingleton.getTagBo().findTagByHugoSymbolAndName(hugoSymbol, name));
+        Tag tag = ApplicationContextSingleton.getTagBo().findTagByHugoSymbolAndName(hugoSymbol, name);
+        EvidenceQueryRes evidenceQuery = new EvidenceQueryRes();
+        evidenceQuery.setQuery(new Query());
+        evidenceQuery.setGene(tag.getGene());
+        addOncogenicMutationsEvidenceIfApplicable(tag, evidenceQuery);
+
+        return ResponseEntity.ok().body(tag);
     }
 
     @RequestMapping(value = "/tags/{hugoSymbol}/{name}/{tumorType}",
@@ -50,23 +64,27 @@ public class TagsController {
         evidenceQuery.setGene(tag.getGene());
         evidenceQuery.setExactMatchedTumorType(matchedTumorType);
         evidenceQuery.setOncoTreeTypes(relevantTumorTypes);
+        addOncogenicMutationsEvidenceIfApplicable(tag, evidenceQuery);
 
-        Set<Evidence> treatmentEvidences = new HashSet<>();
-        Set<Evidence> diagnosticEvidences = new HashSet<>();
-        Set<Evidence> prognosticEvidences = new HashSet<>();
-        for (Evidence evidence : tag.getEvidences()) {
-            if (EvidenceTypeUtils.getTreatmentEvidenceTypes().contains(evidence.getEvidenceType())) {
-                treatmentEvidences.add(evidence);
-            } else if (LevelUtils.isPrognosticLevel(evidence.getLevelOfEvidence())) {
-                prognosticEvidences.add(evidence);
-            } else if (LevelUtils.isDiagnosticLevel(evidence.getLevelOfEvidence())) {
-                diagnosticEvidences.add(evidence);
-            }
-        }
-
-        Set<Evidence> evidences = EvidenceUtils.filterEvidence(tag.getEvidences(), evidenceQuery, false);
-
-        tag.setEvidences(new HashSet<>(evidences));
         return ResponseEntity.ok().body(tag);
+    }
+
+    private static void addOncogenicMutationsEvidenceIfApplicable(Tag tag, EvidenceQueryRes evidenceQuery) {
+        boolean addOncogenicMutations = false;
+        for (OncogenicityEntity oncogenicityEntity : tag.getOncogenicities()) {
+            if (oncogenicityEntity.getOncogenicity().equals(Oncogenicity.YES) || oncogenicityEntity.getOncogenicity().equals(Oncogenicity.LIKELY)) {
+                addOncogenicMutations = true;
+                break;
+            }
+        }        
+        if (addOncogenicMutations) {
+            List<Alteration> oncogenicMutations = AlterationUtils.findOncogenicMutations(
+                AlterationUtils.getAllAlterations(null, tag.getGene())
+            );
+            evidenceQuery.setAlterations(oncogenicMutations);
+            tag.getEvidences().addAll(EvidenceUtils.getAlterationEvidences(oncogenicMutations));
+        }
+        Set<Evidence> evidences = EvidenceUtils.filterEvidence(tag.getEvidences(), evidenceQuery, false);
+        tag.setEvidences(evidences);
     }
 }
