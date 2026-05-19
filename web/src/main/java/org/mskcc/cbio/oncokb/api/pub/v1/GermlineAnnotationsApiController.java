@@ -119,6 +119,8 @@ public class GermlineAnnotationsApiController {
         , @ApiParam(value = "Reference genome, either GRCh37 or GRCh38. The default is GRCh37", required = false, defaultValue = "GRCh37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") String referenceGenome
         , @ApiParam(value = "OncoTree(http://oncotree.info) tumor type name. The field supports OncoTree Code, OncoTree Name and OncoTree Main type. Example: Melanoma") @RequestParam(value = "tumorType", required = false) String tumorType
     ) throws ApiException, org.genome_nexus.ApiException, ApiHttpErrorException {
+        hgvsg = StringUtils.trim(hgvsg);
+
         if (StringUtils.isEmpty(hgvsg)) {
             throw new ApiHttpErrorException("hgvsg is missing.", HttpStatus.BAD_REQUEST);
         }
@@ -171,6 +173,8 @@ public class GermlineAnnotationsApiController {
         , @ApiParam(value = "Reference genome, either GRCh37 or GRCh38. The default is GRCh37", required = false, defaultValue = "GRCh37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") String referenceGenome
         , @ApiParam(value = "OncoTree(http://oncotree.info) tumor type name. The field supports OncoTree Code, OncoTree Name and OncoTree Main type. Example: Melanoma") @RequestParam(value = "tumorType", required = false) String tumorType
     ) throws ApiException, org.genome_nexus.ApiException, ApiHttpErrorException {
+        hgvsc = StringUtils.trim(hgvsc);
+
         if (StringUtils.isEmpty(hgvsc)) {
             throw new ApiHttpErrorException("hgvsc is missing.", HttpStatus.BAD_REQUEST);
         }
@@ -319,6 +323,7 @@ public class GermlineAnnotationsApiController {
 
         for (int i = 0; i < mutations.size(); i++) {
             AnnotateMutationByHGVSgQuery query = mutations.get(i);
+            query.setHgvsg(StringUtils.trim(query.getHgvsg()));
             query.setGermline(GERMLINE);
             ReferenceGenome referenceGenome = query.getReferenceGenome();
             if (referenceGenome == null) {
@@ -530,6 +535,7 @@ public class GermlineAnnotationsApiController {
 
         for (int i = 0; i < mutations.size(); i++) {
             AnnotateMutationByHGVScQuery query = mutations.get(i);
+            query.setHgvsc(StringUtils.trim(query.getHgvsc()));
             query.setGermline(GERMLINE);
             ReferenceGenome referenceGenome = query.getReferenceGenome();
             if (referenceGenome == null) {

@@ -189,6 +189,7 @@ public class AnnotationsApiController {
         , @ApiParam(value = EVIDENCE_TYPES_DESCRIPTION) @RequestParam(value = "evidenceType", required = false) String evidenceTypes
     ) throws ApiException, org.genome_nexus.ApiException, ApiHttpErrorException {
         SomaticIndicatorQueryResp indicatorQueryResp = null;
+        hgvsg = StringUtils.trim(hgvsg);
 
         if (StringUtils.isEmpty(hgvsg)) {
             throw new ApiHttpErrorException("hgvsg is missing.", HttpStatus.BAD_REQUEST);
@@ -247,6 +248,7 @@ public class AnnotationsApiController {
         // , @ApiParam(value = "Whether is germline variant", required = false) @RequestParam(value = "germline", defaultValue = "FALSE", required = false) Boolean germline
     ) throws ApiException, org.genome_nexus.ApiException, ApiHttpErrorException {
         SomaticIndicatorQueryResp indicatorQueryResp = null;
+        hgvsc = StringUtils.trim(hgvsc);
 
         if (StringUtils.isEmpty(hgvsc)) {
             throw new ApiHttpErrorException("hgvsc is missing.", HttpStatus.BAD_REQUEST);
@@ -881,6 +883,7 @@ public class AnnotationsApiController {
 
         for (int i = 0; i < mutations.size(); i++) {
             AnnotateMutationByHGVSgQuery query = mutations.get(i);
+            query.setHgvsg(StringUtils.trim(query.getHgvsg()));
             query.setGermline(SOMATIC);
             ReferenceGenome referenceGenome = query.getReferenceGenome();
             if (referenceGenome == null) {
@@ -1054,6 +1057,7 @@ public class AnnotationsApiController {
 
         for (int i = 0; i < mutations.size(); i++) {
             AnnotateMutationByHGVScQuery query = mutations.get(i);
+            query.setHgvsc(StringUtils.trim(query.getHgvsc()));
             query.setGermline(SOMATIC);
             ReferenceGenome referenceGenome = query.getReferenceGenome();
             if (referenceGenome == null) {
