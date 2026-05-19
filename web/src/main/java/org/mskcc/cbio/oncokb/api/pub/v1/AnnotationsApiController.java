@@ -37,6 +37,8 @@ import java.util.stream.Stream;
 @Api(tags = "Annotations for Somatic", description = "Somatic endpoints")
 @Controller
 public class AnnotationsApiController {
+    private static final boolean SOMATIC = false;
+
     final String EVIDENCE_TYPES_DESCRIPTION = "DEPRECATED. We do not recommend using this parameter and it will eventually be removed.";
 
     @Autowired
@@ -69,7 +71,7 @@ public class AnnotationsApiController {
             throw new ApiHttpErrorException("entrezGeneId \"" + entrezGeneId + "\"" + " and hugoSymbol \"" + hugoSymbol + "\" are not the same gene.", HttpStatus.BAD_REQUEST);
         } else {
             ReferenceGenome matchedRG = ApiControllerUtils.resolveMatchedRG(referenceGenome);
-            Query query = new Query(null, matchedRG, entrezGeneId, hugoSymbol, proteinChange, null, null, tumorType, consequence, proteinStart, proteinEnd, null, false, null, null);
+            Query query = new Query(null, matchedRG, entrezGeneId, hugoSymbol, proteinChange, null, null, tumorType, consequence, proteinStart, proteinEnd, null, SOMATIC, null, null);
             indicatorQueryResp = this.cacheFetcher.processQuerySomatic(
                 query.getReferenceGenome(),
                 query.getEntrezGeneId(),
@@ -142,7 +144,7 @@ public class AnnotationsApiController {
         query.setGenomicLocation(genomicLocation);
         query.setReferenceGenome(matchedRG);
         query.setTumorType(tumorType);
-        query.setGermline(false);
+        query.setGermline(SOMATIC);
         query.setEvidenceTypes(new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
 
         indicatorQueryResp = annotateMutationsByGenomicChange(Collections.singletonList(query)).get(0);
@@ -201,7 +203,7 @@ public class AnnotationsApiController {
             query.setHgvsg(hgvsg);
             query.setReferenceGenome(matchedRG);
             query.setTumorType(tumorType);
-            query.setGermline(false);
+            query.setGermline(SOMATIC);
             query.setEvidenceTypes(new HashSet<>(MainUtils.stringToEvidenceTypes(evidenceTypes, ",")));
 
             indicatorQueryResp = annotateMutationsByHGVSg(Collections.singletonList(query)).get(0);
@@ -259,7 +261,7 @@ public class AnnotationsApiController {
             query.setHgvsc(hgvsc);
             query.setReferenceGenome(matchedRG);
             query.setTumorType(tumorType);
-            query.setGermline(false);
+            query.setGermline(SOMATIC);
 
             indicatorQueryResp = annotateMutationsByHGVSc(Collections.singletonList(query)).get(0);
         }
@@ -498,10 +500,10 @@ public class AnnotationsApiController {
         TranscriptSummaryAlterationResult transcriptSummaryAlterationResult,
         String hgvs,
         String tumorType,
-        Boolean germline,
         Set<EvidenceType> evidenceTypes
     ) {
-        Query query = QueryUtils.getQueryFromAlteration(referenceGenome, tumorType, transcriptSummaryAlterationResult, hgvs, false);
+        Query query = QueryUtils.getQueryFromAlteration(referenceGenome, tumorType, transcriptSummaryAlterationResult, hgvs, SOMATIC);
+        query.setGermline(SOMATIC);
 
         SomaticIndicatorQueryResp indicatorQueryResp = this.cacheFetcher.processQuerySomatic(
             referenceGenome,
@@ -535,10 +537,10 @@ public class AnnotationsApiController {
         TranscriptSummaryAlterationResult transcriptSummaryAlterationResult,
         String hgvs,
         String tumorType,
-        Boolean germline,
         Set<EvidenceType> evidenceTypes
     ) {
-        Query query = QueryUtils.getQueryFromAlteration(referenceGenome, tumorType, transcriptSummaryAlterationResult, hgvs, false);
+        Query query = QueryUtils.getQueryFromAlteration(referenceGenome, tumorType, transcriptSummaryAlterationResult, hgvs, SOMATIC);
+        query.setGermline(SOMATIC);
 
         SomaticIndicatorQueryResp indicatorQueryResp = this.cacheFetcher.processQuerySomatic(
             referenceGenome,
@@ -629,6 +631,7 @@ public class AnnotationsApiController {
     private List<SomaticIndicatorQueryResp> annotateStructuralVariants(List<AnnotateStructuralVariantQuery> structuralVariants) {
         List<SomaticIndicatorQueryResp> result = new ArrayList<>();
         for (AnnotateStructuralVariantQuery query : structuralVariants) {
+            query.setGermline(SOMATIC);
             Gene geneA = new Gene();
             if (query.getGeneA() != null) {
                 try {
@@ -697,6 +700,7 @@ public class AnnotationsApiController {
     private List<SomaticIndicatorQueryResp> annotateCopyNumberAlterations(List<AnnotateCopyNumberAlterationQuery> copyNumberAlterations) {
         List<SomaticIndicatorQueryResp> result = new ArrayList<>();
         for (AnnotateCopyNumberAlterationQuery query : copyNumberAlterations) {
+            query.setGermline(SOMATIC);
             Gene gene = new Gene();
             if (query.getGene() != null) {
                 try {
@@ -747,6 +751,7 @@ public class AnnotationsApiController {
 
         for (int i = 0; i < mutations.size(); i++) {
             AnnotateMutationByGenomicChangeQuery query = mutations.get(i);
+            query.setGermline(SOMATIC);
             ReferenceGenome referenceGenome = query.getReferenceGenome();
             if (referenceGenome == null) {
                 query.setReferenceGenome(ReferenceGenome.GRCh37);
@@ -797,27 +802,25 @@ public class AnnotationsApiController {
                 List<TranscriptSummaryAlterationResult> annotatedAlteration = AlterationUtils.getAlterationsFromGenomeNexus(
                     Collections.singletonList(variantAnnotation), 
                     referenceGenome,
-                    query.isGermline()
+                    SOMATIC
                 );
                 TranscriptSummaryAlterationResult selectedAnnotatedAlteration = annotatedAlteration.isEmpty() 
                     ? new TranscriptSummaryAlterationResult() 
                     : annotatedAlteration.get(0);
                 indicatorQueryResp = getIndicatorQueryForCuratedHgvs(
                     query, 
-                    query.isGermline(),
                     variantAnnotation.getHgvsg(), 
                     selectedAnnotatedAlteration, 
                     referenceGenome, 
                     allAlterations
                 );
                 
-                if (indicatorQueryResp == null && !query.isGermline()) {
+                if (indicatorQueryResp == null) {
                     indicatorQueryResp = this.getIndicatorQueryFromGenomicLocation(
                         query.getReferenceGenome(),
                         selectedAnnotatedAlteration,
                         query.getGenomicLocation(),
                         query.getTumorType(),
-                        query.getGermline(),
                         new HashSet<>(query.getEvidenceTypes())
                     );
                     indicatorQueryResp.getQuery().setHgvsInfo(selectedAnnotatedAlteration.getMessage());   
@@ -830,7 +833,6 @@ public class AnnotationsApiController {
                     new TranscriptSummaryAlterationResult(),
                     query.getGenomicLocation(),
                     query.getTumorType(),
-                    query.getGermline(),
                     query.getEvidenceTypes()
                 );
             }
@@ -844,6 +846,7 @@ public class AnnotationsApiController {
     private List<SomaticIndicatorQueryResp> annotateMutationsByProteinChange(List<AnnotateMutationByProteinChangeQuery> mutations) {
         List<SomaticIndicatorQueryResp> result = new ArrayList<>();
         for (AnnotateMutationByProteinChangeQuery query : mutations) {
+            query.setGermline(SOMATIC);
             SomaticIndicatorQueryResp resp = this.cacheFetcher.processQuerySomatic(
                 query.getReferenceGenome(),
                 query.getGene() == null ? null : query.getGene().getEntrezGeneId(),
@@ -878,6 +881,7 @@ public class AnnotationsApiController {
 
         for (int i = 0; i < mutations.size(); i++) {
             AnnotateMutationByHGVSgQuery query = mutations.get(i);
+            query.setGermline(SOMATIC);
             ReferenceGenome referenceGenome = query.getReferenceGenome();
             if (referenceGenome == null) {
                 referenceGenome = ReferenceGenome.GRCh37;
@@ -929,27 +933,25 @@ public class AnnotationsApiController {
                 List<TranscriptSummaryAlterationResult> annotatedAlteration = AlterationUtils.getAlterationsFromGenomeNexus(
                     Collections.singletonList(variantAnnotation), 
                     referenceGenome,
-                    query.isGermline()
+                    SOMATIC
                 );
                 TranscriptSummaryAlterationResult selectedAnnotatedAlteration = annotatedAlteration.isEmpty() 
                     ? new TranscriptSummaryAlterationResult() 
                     : annotatedAlteration.get(0);
                 indicatorQueryResp = getIndicatorQueryForCuratedHgvs(
                     query, 
-                    query.isGermline(),
                     variantAnnotation.getHgvsg(), 
                     selectedAnnotatedAlteration, 
                     referenceGenome, 
                     allAlterations
                 );
 
-                if (indicatorQueryResp == null && !query.isGermline()) {
+                if (indicatorQueryResp == null) {
                     indicatorQueryResp = this.getIndicatorQueryFromHGVS(
                         query.getReferenceGenome(),
                         selectedAnnotatedAlteration,
                         variantAnnotation.getHgvsg(),
                         query.getTumorType(),
-                        query.getGermline(),
                         new HashSet<>(query.getEvidenceTypes())
                     );
                     indicatorQueryResp.getQuery().setHgvsInfo(selectedAnnotatedAlteration.getMessage());
@@ -962,7 +964,6 @@ public class AnnotationsApiController {
                     new TranscriptSummaryAlterationResult(),
                     query.getHgvsg(),
                     query.getTumorType(),
-                    query.getGermline(),
                     query.getEvidenceTypes()
                 );
             }
@@ -974,7 +975,6 @@ public class AnnotationsApiController {
 
     private SomaticIndicatorQueryResp getIndicatorQueryForCuratedHgvs(
         AnnotationQuery query,
-        Boolean germline,
         String hgvsg,
         TranscriptSummaryAlterationResult selectedAnnotatedAlteration,
         ReferenceGenome referenceGenome, 
@@ -985,9 +985,9 @@ public class AnnotationsApiController {
             selectedAnnotatedAlteration.getHgvspAlteration().getGene(),
             hgvsg,
             allAlterations,
-            germline
+            SOMATIC
         );
-        if (alteration != null && alteration.getForGermline() == germline) {
+        if (alteration != null) {
             return this.cacheFetcher.processQuerySomatic(
                 query.getReferenceGenome(),
                 null,
@@ -1017,10 +1017,10 @@ public class AnnotationsApiController {
                 selectedAnnotatedAlteration.getHgvscAlteration().getGene(),
                 hgvsc,
                 allAlterations,
-                germline
+                SOMATIC
             );
         }
-        if (alteration != null && alteration.getForGermline() == germline) {
+        if (alteration != null) {
             return this.cacheFetcher.processQuerySomatic(
                 query.getReferenceGenome(),
                 null,
@@ -1054,6 +1054,7 @@ public class AnnotationsApiController {
 
         for (int i = 0; i < mutations.size(); i++) {
             AnnotateMutationByHGVScQuery query = mutations.get(i);
+            query.setGermline(SOMATIC);
             ReferenceGenome referenceGenome = query.getReferenceGenome();
             if (referenceGenome == null) {
                 referenceGenome = ReferenceGenome.GRCh37;
@@ -1097,10 +1098,11 @@ public class AnnotationsApiController {
                     GeneUtils.getGeneByHugoSymbol(query.getGene()),
                     query.getAlteration(),
                     allAlterations,
-                    query.isGermline()
+                    SOMATIC
                 );
 
-                if (query.isGermline() || (alteration != null && alteration.getForGermline() == false)) {
+                if (alteration != null) {
+                    // If we found hgvsc in database, then we should skip using GN to resolve
                     SomaticIndicatorQueryResp resp = this.cacheFetcher.processQuerySomatic(
                         query.getReferenceGenome(),
                         null,
@@ -1141,7 +1143,6 @@ public class AnnotationsApiController {
                     new TranscriptSummaryAlterationResult(),
                     query.getHgvsc(),
                     query.getTumorType(),
-                    query.getGermline(),
                     query.getEvidenceTypes()
                 );
                 resp.getQuery().setId(query.getId());
@@ -1163,7 +1164,7 @@ public class AnnotationsApiController {
                     List<TranscriptSummaryAlterationResult> annotatedAlteration = AlterationUtils.getAlterationsFromGenomeNexus(
                         Collections.singletonList(variantAnnotation), 
                         referenceGenome,
-                        query.isGermline()
+                        SOMATIC
                     );
                     TranscriptSummaryAlterationResult selectedAnnotatedAlteration = annotatedAlteration.isEmpty() 
                         ? new TranscriptSummaryAlterationResult() 
@@ -1173,7 +1174,6 @@ public class AnnotationsApiController {
                         selectedAnnotatedAlteration,
                         variantAnnotation.getHgvsg(),
                         query.getTumorType(),
-                        query.getGermline(),
                         new HashSet<>(query.getEvidenceTypes())
                     );
                     indicatorQueryResp.getQuery().setHgvsInfo(selectedAnnotatedAlteration.getMessage());

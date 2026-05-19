@@ -45,11 +45,12 @@ public class QueryUtils {
         return name;
     }
 
-    public static Query getQueryFromAlteration(ReferenceGenome referenceGenome, String tumorType, TranscriptSummaryAlterationResult transcriptSummaryAlterationResult, String hgvs, boolean germline) {
+    public static Query getQueryFromAlteration(ReferenceGenome referenceGenome, String tumorType, TranscriptSummaryAlterationResult transcriptSummaryAlterationResult, String hgvs, Boolean germline) {
         Query query = new Query();
         query.setReferenceGenome(referenceGenome);
         query.setHgvs(hgvs);
         query.setTumorType(tumorType);
+        query.setGermline(germline);
 
         if (transcriptSummaryAlterationResult != null) {
             Alteration alteration = germline ? transcriptSummaryAlterationResult.getHgvscAlteration() : transcriptSummaryAlterationResult.getHgvspAlteration();
