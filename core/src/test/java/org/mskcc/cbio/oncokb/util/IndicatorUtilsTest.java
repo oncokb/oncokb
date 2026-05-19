@@ -1229,6 +1229,33 @@ public class IndicatorUtilsTest {
     }
 
     @Test
+    public void testProcessQueryWithHGVScForGermline() throws ApiException {
+        // Make sure that our special hugo CDKN2A (p14) can be resolved and annotated correctly
+        Query query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "CDKN2A (p14)", "c.292C>T", null, null, null, null, null, null, "CDKN2A (p14):c.292C>T", true, null, null);
+        GermlineIndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQueryGermline(query, null, true, null, false);
+        assertTrue("CDKN2A (p14):c.292C>T geneExist is not true, but it should be.", indicatorQueryResp.getGeneExist());
+        assertTrue("CDKN2A (p14):c.292C>T variantExist is not true, but it should be.", indicatorQueryResp.getVariantExist());
+        
+        // Make sure that CDKN2A (p14) gene aliases "p14ARF" is still working
+        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "p14ARF", "c.292C>T", null, null, null, null, null, null, "p14ARF:c.292C>T", true, null, null);
+        indicatorQueryResp = IndicatorUtils.processQueryGermline(query, null, true, null, false);
+        assertTrue("p14ARF:c.292C>T geneExist is not true, but it should be.", indicatorQueryResp.getGeneExist());
+        assertTrue("p14ARF:c.292C>T variantExist is not true, but it should be.", indicatorQueryResp.getVariantExist());
+
+        // Check if other CDKN2A isoform (p16) is annotated
+        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "CDKN2A", "c.106del", null, null, null, null, null, null, "CDKN2A (p16):c.292C>T", true, null, null);
+        indicatorQueryResp = IndicatorUtils.processQueryGermline(query, null, true, null, false);
+        assertTrue("CDKN2A:c.292C>T geneExist is not true, but it should be.", indicatorQueryResp.getGeneExist());
+        assertTrue("CDKN2A:c.292C>T variantExist is not true, but it should be.", indicatorQueryResp.getVariantExist());
+
+        // Make sure CDKN2A (p16) gene aliases still work
+        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "p16", "c.106del", null, null, null, null, null, null, "p16INK4A:c.292C>T", true, null, null);
+        indicatorQueryResp = IndicatorUtils.processQueryGermline(query, null, true, null, false);
+        assertTrue("p16INK4A:c.292C>T geneExist is not true, but it should be.", indicatorQueryResp.getGeneExist());
+        assertTrue("p16INK4A:c.292C>T variantExist is not true, but it should be.", indicatorQueryResp.getVariantExist());
+    }
+
+    @Test
     public void testProcessQueryForGermline() {
         // Testing if a variant specifically associated with a genomic indicator is picked up
         Query query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "FH", "c.2T>G", null, null, null, null, null, null, null, true, null, null);
