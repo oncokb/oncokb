@@ -547,7 +547,10 @@ public class IndicatorUtils {
             query.setEntrezGeneId(gene.getEntrezGeneId());
 
             // Gene exist should only be set to true if entrezGeneId is bigger than 0
-            indicatorQuery.setGeneExist(gene.getEntrezGeneId() > 0);
+            // Also set to true for -1029 for CDKN2A (p14)
+            if (gene.getEntrezGeneId() > 0 || gene.getEntrezGeneId() == -1029) {
+                indicatorQuery.setGeneExist(true);
+            }
 
             // Gene summary
             if (evidenceTypes.contains(EvidenceType.GENE_SUMMARY)) {
