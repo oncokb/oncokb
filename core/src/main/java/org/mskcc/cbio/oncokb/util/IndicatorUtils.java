@@ -330,7 +330,7 @@ public class IndicatorUtils {
                 } else if (!isValidHotspotOncogenicity) {
                     // If oncogenicity is invalid, then we want to override to Likely Oncogenic for hotspot mutations
                     indicatorQuery.setOncogenic(Oncogenicity.LIKELY.getOncogenic());
-            
+
                     List<Alteration> oncogenicMutations = new ArrayList<>(AlterationUtils.findOncogenicMutations(AlterationUtils.getAllAlterations(query.getReferenceGenome(), gene)));
                     if (!oncogenicMutations.isEmpty()) {
                         relevantAlterations.addAll(oncogenicMutations);
@@ -410,8 +410,18 @@ public class IndicatorUtils {
 
             // Mutation summary
             if (evidenceTypes.contains(EvidenceType.MUTATION_SUMMARY) && StringUtils.isNotEmpty(matchedAlt.getAlteration())) {
-                indicatorQuery.setVariantSummary(SummaryUtils.variantSummary(gene, matchedAlt,
-                    new ArrayList<>(relevantAlterations), query));
+                String variantSummary = SummaryUtils.variantSummary(gene, matchedAlt, new ArrayList<>(relevantAlterations), query);
+                variantSummary = CplUtils.annotate(
+                    variantSummary,
+                    query.getHugoSymbol(),
+                    query.getAlteration(),
+                    query.getTumorType(),
+                    query.getReferenceGenome(),
+                    gene,
+                    matchedTumorType,
+                    false
+                );
+                indicatorQuery.setVariantSummary(variantSummary);
             }
 
             // Diagnostic summary
@@ -667,7 +677,7 @@ public class IndicatorUtils {
                     indicatorQuery.setTreatments(treatments);
                     highestLevels = findHighestLevel(new HashSet<>(treatments));
                     indicatorQuery.setHighestSensitiveLevel(highestLevels.get("sensitive"));
-            
+
                     latestEvidenceDate = updateLatestEvidenceDate(latestEvidenceDate, treatmentEvidences);
                 }
             }
