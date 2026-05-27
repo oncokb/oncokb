@@ -76,6 +76,26 @@ public class SummaryUtils {
             tumorTypeSummary = getRelevantTumorTypeSummaryByAlt(evidenceType, matchedAlterations, matchedTumorType, relevantTumorTypes);
         }
 
+        List<Alteration> alternativeAlleles = new ArrayList<>();
+        alternativeAlleles.addAll(AlterationUtils.getPositionedAlterations(query.getReferenceGenome(), alteration));
+        alternativeAlleles = ListUtils.intersection(alternativeAlleles, relevantAlterations);
+        alternativeAlleles.removeAll(matchedAlterations);
+    
+        List<Alteration> alternativeAllelesWithoutVariantAllele = alternativeAlleles
+            .stream()
+            .filter(alt -> StringUtils.isEmpty(alt.getVariantResidues()))
+            .collect(Collectors.toList());
+
+        // Get all tumor type summary evidence for alternative alleles with no variant allele
+        if (tumorTypeSummary == null) {
+            for (Alteration allele : alternativeAllelesWithoutVariantAllele) {
+                tumorTypeSummary = getRelevantTumorTypeSummaryByAlt(evidenceType, Collections.singletonList(allele), matchedTumorType, relevantTumorTypes);
+                if (tumorTypeSummary != null) {
+                    break;
+                }
+            }
+        }
+
         // Exact match tag
         List<Evidence> tagEvidences = EvidenceUtils.getTagEvidences(alteration, oncogenicity, Collections.singleton(evidenceType));
         if (tumorTypeSummary == null) {
@@ -84,11 +104,6 @@ public class SummaryUtils {
                 tumorTypeSummary = getTumorTypeSummaryFromEvidences(fileredTagEvidences);
             }
         }
-
-        List<Alteration> alternativeAlleles = new ArrayList<>();
-        alternativeAlleles.addAll(AlterationUtils.getPositionedAlterations(query.getReferenceGenome(), alteration));
-        alternativeAlleles = ListUtils.intersection(alternativeAlleles, relevantAlterations);
-        alternativeAlleles.removeAll(matchedAlterations);
 
         // Get all tumor type summary evidences for the exact alteration + alternative alleles
         // Tumor type has high priority. Get relevant tumor type summary across all alternative alleles, then look for other tumor types summary
