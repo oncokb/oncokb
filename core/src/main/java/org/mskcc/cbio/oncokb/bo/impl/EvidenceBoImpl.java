@@ -181,8 +181,9 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
         int end, 
         Oncogenicity oncogenicity,
         MutationType mutationType,
-        List<EvidenceType> evidenceTypes
+        List<EvidenceType> evidenceTypes,
+        boolean ignoreMutationType
     ) {
-        return getDao().findEvidenceByTagCriteria(entrezGeneId, start, end, oncogenicity, mutationType, evidenceTypes);
+        return getDao().findEvidenceByTagCriteria(entrezGeneId, start, end, oncogenicity, mutationType, evidenceTypes, ignoreMutationType);
     }
 }

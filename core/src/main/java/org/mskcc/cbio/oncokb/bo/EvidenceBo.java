@@ -134,6 +134,7 @@ public interface EvidenceBo extends GenericBo<Evidence> {
         int end, 
         Oncogenicity oncogenicity,
         MutationType mutationType,
-        List<EvidenceType> evidenceTypes
+        List<EvidenceType> evidenceTypes,
+        boolean ignoreMutationType
     );
 }
