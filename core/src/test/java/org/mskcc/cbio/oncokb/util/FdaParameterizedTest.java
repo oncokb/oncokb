@@ -28,12 +28,14 @@ public class FdaParameterizedTest {
 
     private static String FDA_EXAMPLES_PATH = "src/test/resources/test_fda.tsv";
 
+    private String sourceLine;
     private String hugoSymbol;
     private String variant;
     private String cancerType;
     private String fdaLevel;
 
-    public FdaParameterizedTest(String hugoSymbol, String variant, String cancerType, String fdaLevel) {
+    public FdaParameterizedTest(String sourceLine, String hugoSymbol, String variant, String cancerType, String fdaLevel) {
+        this.sourceLine = sourceLine;
         this.hugoSymbol = hugoSymbol;
         this.variant = variant;
         this.cancerType = cancerType;
@@ -47,15 +49,22 @@ public class FdaParameterizedTest {
         query.setAlteration(variant);
         query.setTumorType(cancerType);
         SomaticIndicatorQueryResp resp = IndicatorUtils.processQuerySomatic(query, null, true, null, false);
-        assertEquals(fdaLevel, resp.getHighestFdaLevel().getLevel());
+        assertEquals(
+            String.format(
+                "%s line %s: gene=%s, alteration=%s, cancerType=%s",
+                FDA_EXAMPLES_PATH, sourceLine, hugoSymbol, variant, cancerType
+            ),
+            fdaLevel,
+            resp.getHighestFdaLevel().getLevel()
+        );
     }
 
-    @Parameterized.Parameters
-    public static Collection<String[]> getParameters() throws IOException {
+    @Parameterized.Parameters(name = "{index}: line {0} {1} {2} {3} -> {4}")
+    public static Collection<Object[]> getParameters() throws IOException {
         return importer();
     }
 
-    private static List<String[]> importer() throws IOException {
+    private static List<Object[]> importer() throws IOException {
         if (FDA_EXAMPLES_PATH == null) {
             LOGGER.error("Please specify the testing file path");
             return null;
@@ -66,8 +75,9 @@ public class FdaParameterizedTest {
         BufferedReader buf = new BufferedReader(reader);
         String line = buf.readLine();
 
-        List<String[]> queries = new ArrayList<>();
+        List<Object[]> queries = new ArrayList<>();
         int count = 0;
+        int lineNumber = 1;
         while (line != null) {
             if (!line.startsWith("#") && line.trim().length() > 0) {
                 try {
@@ -79,14 +89,15 @@ public class FdaParameterizedTest {
                     String variant = parts[1];
                     String cancerType = parts[2];
                     String fdaLevel = parts.length > 3 ? parts[3] : "";
-                    String[] query = {gene, variant, cancerType, fdaLevel};
+                    Object[] query = {String.valueOf(lineNumber), gene, variant, cancerType, fdaLevel};
                     queries.add(query);
                     count++;
                 } catch (Exception e) {
-                    LOGGER.error("Could not add line '{}'.", line, e);
+                    LOGGER.error("Could not add line {} '{}'.", lineNumber, line, e);
                 }
             }
             line = buf.readLine();
+            lineNumber++;
         }
         LOGGER.info("Contains {} tumor type summary queries.", count);
         LOGGER.info("Done.");

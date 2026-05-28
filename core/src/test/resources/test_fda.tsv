@@ -4,10 +4,10 @@
 BRAF	V600E	Melanoma	Fda2
 BRAF	Fusions	Melanoma	Fda3
 
-# Level R1 should be mapped to FDA Level 2			
-# Level R2 should be mapped to FDA Level 3			
+# Level R1 should be mapped to FDA Level 2					
 BTK	C481S	CLLSLL	Fda2
-BTK	C481F	CLLSLL	Fda3
+# Level R2 should be mapped to FDA Level 3	
+BTK	T474S	CLLSLL	Fda3
 
 # Some special fda level 3 are from level 2			
 ERBB2	V659G	Non-Small Cell Lung Cancer	Fda3
