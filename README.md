@@ -19,6 +19,15 @@ Please confirm your running environment is:
 -   **Java version: 8**
 -   **MySQL version: 8.0.36**
 
+### MySQL Setup
+
+Run:
+```sql
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'your_password';
+FLUSH PRIVILEGES;
+```
+Replace `your_password` with your MySQL password. Otherwise, you may see MySQL authentication or `NullPointerException` errors during `mvn test`.
+
 ## Prepare properties files
 
 ```
