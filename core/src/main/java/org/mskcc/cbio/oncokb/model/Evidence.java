@@ -90,7 +90,7 @@ import java.util.*;
             "  where o member of t.oncogenicities " +
             "  and o.oncogenicity = (:oncogenicity)" +
             ")) " +
-            "and (size(t.mutationTypes) = 0 or exists (" +
+            "and ((:ignoreMutationType) = true or size(t.mutationTypes) = 0 or exists (" +
             "  select 1 from MutationTypeEntity mt " +
             "  where mt member of t.mutationTypes " +
             "  and mt.mutationType = (:mutationType)" +

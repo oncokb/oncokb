@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.*;
 import static org.mskcc.cbio.oncokb.model.RelevantTumorTypeDirection.DOWNWARD;
+import static org.mskcc.cbio.oncokb.util.AlterationUtils.isPositionedAlteration;
 import static org.mskcc.cbio.oncokb.util.LevelUtils.INFO_LEVELS;
 
 /**
@@ -107,13 +108,15 @@ public class EvidenceUtils {
             return evidences;
         }
 
+        boolean ignoreMutationType = isPositionedAlteration(alt); // a positioned alteration can represent missense, insertion, deletion, etc.
         evidences = ApplicationContextSingleton.getEvidenceBo().findEvidenceByTagCriteria(
             alt.getGene().getEntrezGeneId(), 
             alt.getProteinStart(), 
             alt.getProteinEnd(),
             altOncogenicity, 
             MutationType.fromVariantConsequence(alt.getConsequence()), 
-            new ArrayList<>(evidenceTypes)
+            new ArrayList<>(evidenceTypes),
+            ignoreMutationType
         );
         return evidences;
     }
@@ -124,13 +127,15 @@ public class EvidenceUtils {
             return evidences;
         }
 
+        boolean ignoreMutationType = isPositionedAlteration(alt); // a positioned alteration can represent missense, insertion, deletion, etc.
         evidences = ApplicationContextSingleton.getEvidenceBo().findEvidenceByTagCriteria(
             alt.getGene().getEntrezGeneId(), 
             alt.getProteinStart(), 
             alt.getProteinEnd(),
             altOncogenicity, 
             MutationType.fromVariantConsequence(alt.getConsequence()), 
-            new ArrayList<>(evidenceTypes)
+            new ArrayList<>(evidenceTypes),
+            ignoreMutationType
         );
 
         if (tumorTypes != null && tumorTypes.size() > 0) {

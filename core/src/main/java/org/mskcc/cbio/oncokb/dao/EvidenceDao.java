@@ -132,6 +132,7 @@ public interface EvidenceDao extends GenericDao<Evidence, Integer> {
         int end, 
         Oncogenicity oncogenicity,
         MutationType mutationType,
-        List<EvidenceType> evidenceTypes
+        List<EvidenceType> evidenceTypes,
+        boolean ignoreMutationType
     );
 }
