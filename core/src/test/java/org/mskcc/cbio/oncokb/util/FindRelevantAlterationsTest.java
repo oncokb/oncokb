@@ -99,7 +99,8 @@ public class FindRelevantAlterationsTest {
                 // EGFR exon deletion
                 {"EGFR", "vIII", null, "vIII, Oncogenic Mutations"},
                 {"EGFR", "CTD", null, "C-terminal domain, Oncogenic Mutations"},
-                {"EGFR", "vIV", null, "C-terminal domain, Oncogenic Mutations"},
+                // vIV is now curated, so it will add itself to relevant alteration list
+                {"EGFR", "vIV", null, "vIV, C-terminal domain, Oncogenic Mutations"},
                 {"EGFR", "vIVa", null, "C-terminal domain, Oncogenic Mutations"},
                 {"EGFR", "vIVb", null, "C-terminal domain, Oncogenic Mutations"},
                 {"EGFR", "vIVc", null, "C-terminal domain, Oncogenic Mutations"},
