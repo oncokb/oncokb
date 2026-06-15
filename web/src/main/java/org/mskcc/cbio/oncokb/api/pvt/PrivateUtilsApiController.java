@@ -431,7 +431,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
 
         SomaticVariantAnnotation annotation = new SomaticVariantAnnotation(indicatorQueryResp);
         annotation.setAlteration(alterationModel);
-        annotation.setAlternativeOncoKbVariant(SummaryUtils.alternativeOncoKbVariant(
+        annotation.setAlternativeOncoKbVariant(AlterationUtils.getAlternativeVariantForQuery(
             query,
             indicatorQueryResp.getVariantExist(),
             indicatorQueryResp.getHasVariantEvidence()

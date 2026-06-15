@@ -51,6 +51,7 @@ import org.mskcc.cbio.oncokb.model.FrameshiftVariant;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.InferredMutation;
 import org.mskcc.cbio.oncokb.model.Oncogenicity;
+import org.mskcc.cbio.oncokb.model.Query;
 import org.mskcc.cbio.oncokb.model.ReferenceGenome;
 import org.mskcc.cbio.oncokb.model.SpecialVariant;
 import org.mskcc.cbio.oncokb.model.StructuralAlteration;
@@ -621,6 +622,8 @@ public final class AlterationUtils {
             alteration.setName(hgvsc);
         }
         return alteration;
+    }
+
     public static AlternativeOncoKbVariant findAlternativeOncoKbVariant(String hugoSymbol, String alteration, ReferenceGenome referenceGenome) {
         if (StringUtils.isEmpty(hugoSymbol) || StringUtils.isEmpty(alteration)) {
             return null;
@@ -662,8 +665,30 @@ public final class AlterationUtils {
                 oncokbTranscript
             );
         } catch (ApiException e) {
+            // Best-effort fallback: Genome Nexus can intermittently fail.
+            // We intentionally ignore this and return null so core annotation is not blocked.
             return null;
         }
+    }
+
+    public static AlternativeOncoKbVariant getAlternativeVariantForQuery(Query query, Boolean variantExists, Boolean hasVariantEvidence) {
+        if (Boolean.TRUE.equals(variantExists)
+            || Boolean.TRUE.equals(hasVariantEvidence)
+            || query == null
+            || StringUtils.isAnyEmpty(query.getHugoSymbol(), query.getAlteration())) {
+            return null;
+        }
+
+        ParseAlterationResult parsedAlteration = ProteinChangeParser.parseAlteration(query.getAlteration());
+        if (parsedAlteration == null || !Boolean.TRUE.equals(parsedAlteration.getIsParsed())) {
+            return null;
+        }
+
+        return findAlternativeOncoKbVariant(
+            query.getHugoSymbol(),
+            query.getAlteration(),
+            query.getReferenceGenome()
+        );
     }
 
     public static List<VariantAnnotation> getHgvsgVariantsAnnotationWithQueries(List<AnnotateMutationByHGVSgQuery> queries, ReferenceGenome referenceGenome) throws ApiException {

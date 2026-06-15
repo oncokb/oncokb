@@ -176,6 +176,9 @@ public class IndicatorUtils {
             return result.iterator().next();
         }
 
+        // Initialize variant evidence tracking outside the gene check so it's available for the final flag
+        Set<Evidence> treatmentEvidences = new HashSet<>();
+
         if (gene != null) {
             // we replace hugo symbol with matched gene when queries hugo symbol is not available or when it's the structural variant
             if (StringUtils.isEmpty(query.getHugoSymbol()) || isStructuralVariantEvent) {
@@ -242,8 +245,6 @@ public class IndicatorUtils {
             } else {
                 indicatorQuery.setAlleleExist(true);
             }
-
-            Set<Evidence> treatmentEvidences = new HashSet<>();
 
             if (nonVUSRelevantAlts.size() > 0) {
                 if (hasOncogenicEvidence) {
@@ -498,15 +499,12 @@ public class IndicatorUtils {
             new SimpleDateFormat("MM/dd/yyy").format(latestEvidenceDate));
         indicatorQuery.setDataVersion(MainUtils.getDataVersion());
 
-        // TODO: evidence check
-        Date lastUpdate = getLatestDateFromEvidences(allQueryRelatedEvidences);
-        // Determine if variant has evidence we care about (excluding gene summary)
-        Set<EvidenceType> treatmentEvidenceTypes = EvidenceTypeUtils.getTreatmentEvidenceTypes();
-        boolean hasVariantEvidence = allQueryRelatedEvidences.stream()
-            .map(Evidence::getEvidenceType)
-            .anyMatch(type -> type == EvidenceType.ONCOGENIC
-                || type == EvidenceType.MUTATION_EFFECT
-                || treatmentEvidenceTypes.contains(type));
+        // Determine if variant has curated evidence we care about (excluding gene summary).
+        boolean hasVariantEvidence = !treatmentEvidences.isEmpty()
+            || (indicatorQuery.getOncogenic() != null && !Oncogenicity.UNKNOWN.getOncogenic().equals(indicatorQuery.getOncogenic()))
+            || (indicatorQuery.getMutationEffect() != null && !MutationEffect.UNKNOWN.getMutationEffect().equals(indicatorQuery.getMutationEffect().getKnownEffect()))
+            || !indicatorQuery.getDiagnosticImplications().isEmpty()
+            || !indicatorQuery.getPrognosticImplications().isEmpty();
         indicatorQuery.setHasVariantEvidence(hasVariantEvidence);
 
         // Give default oncogenicity if no data has been assigned.
