@@ -3,6 +3,12 @@ name: Group Release Notes
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Simulated release tag'
+        required: true
+        default: 'v0.0.0-test'
 
 jobs:
   organize-release-notes:
