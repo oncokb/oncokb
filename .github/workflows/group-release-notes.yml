@@ -25,7 +25,7 @@ jobs:
 
       - name: Move pr- files to release folder
         run: |
-          RELEASE_TAG="${{ github.event.release.tag_name }}"
+          RELEASE_TAG="${{ github.event.release.tag_name || github.event.inputs.tag_name }}"
           SOURCE_DIR="release-notes"
           TARGET_DIR="release-notes/${RELEASE_TAG}"
 
