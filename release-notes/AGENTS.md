@@ -18,17 +18,18 @@ Before drafting the file:
 Ask the developer this questionnaire before generating the markdown. Prefill each answer with your best draft based on the change, and ask the developer to confirm, modify, or fill in blanks where needed:
 
 1. What is the release note title?
-2. What is new in this change?
-3. Who is affected and what is the impact?
-4. Are there API changes?
-5. For each API change, list:
+2. What type of release is this. The allowable options are feat, fix, or chore.
+3. What is new in this change?
+4. Who is affected and what is the impact?
+5. Are there API changes?
+6. For each API change, list:
    - Parameter or field path
    - Change type: `Added`, `Edit`, or `Removed`
    - Affected endpoints
-6. Are there self-hosting impacts such as configuration changes, environment variable changes, database changes, migration changes, Docker/runtime changes, or operational changes?
-7. Based on the diff, I think these may be breaking API, database, or self-hosting changes: `<list your findings>`. Is that correct?
-8. If there are breaking changes or self-hosting changes, what migration or action is required?
-9. Are there related PRs, issues, docs, dashboards, or rollout links that should be included?
+7. Are there self-hosting impacts such as configuration changes, environment variable changes, database changes, migration changes, Docker/runtime changes, or operational changes?
+8. Based on the diff, I think these may be breaking API, database, or self-hosting changes: `<list your findings>`. Is that correct?
+9. If there are breaking changes or self-hosting changes, what migration or action is required?
+10. Are there related PRs, issues, docs, dashboards, or rollout links that should be included?
 
 If something cannot be determined from the diff, say that explicitly and leave a clear placeholder for the developer to answer.
 

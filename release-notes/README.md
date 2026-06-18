@@ -4,7 +4,7 @@ Every pull request should include one markdown file in this directory unless the
 
 Recommended file naming:
 
-- `release-notes/pr-<PR_NUMBER>-<short-kebab-summary>.md`
+- `pr-<PR_NUMBER>-<feat|fix|chore>-<short-kebab-summary>.md`
 
 If the PR number is not available yet, use a temporary descriptive name and rename it later if needed.
 
