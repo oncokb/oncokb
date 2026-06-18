@@ -59,9 +59,26 @@ jobs:
             PUBLISHED_AT="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
           fi
 
+          # Build filename → title map
+          FILES_JSON="{"
+          FIRST=true
+          for FILE in "${TARGET_DIR}"/pr-*; do
+            FILENAME=$(basename "${FILE}")
+            # Strip the leading "# " from the first line
+            TITLE=$(head -n 1 "${FILE}" | sed 's/^#\+[[:space:]]*//')
+            if [ "${FIRST}" = true ]; then
+              FILES_JSON+="\"${FILENAME}\": \"${TITLE}\""
+              FIRST=false
+            else
+              FILES_JSON+=", \"${FILENAME}\": \"${TITLE}\""
+            fi
+          done
+          FILES_JSON+="}"
+
           cat > "${TARGET_DIR}/metadata.json" <<EOF
           {
-            "published_at": "${PUBLISHED_AT}"
+            "published_at": "${PUBLISHED_AT}",
+            "files": ${FILES_JSON}
           }
           EOF
 
