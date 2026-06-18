@@ -53,6 +53,20 @@ jobs:
 
           echo "Done. Moved ${#PR_FILES[@]} file(s) to ${TARGET_DIR}."
 
+          # Use published_at from the release event, or fall back to now for workflow_dispatch
+          PUBLISHED_AT="${{ github.event.release.published_at }}"
+          if [ -z "${PUBLISHED_AT}" ]; then
+            PUBLISHED_AT="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+          fi
+
+          cat > "${TARGET_DIR}/metadata.json" <<EOF
+          {
+            "published_at": "${PUBLISHED_AT}"
+          }
+          EOF
+
+          echo "Created ${TARGET_DIR}/metadata.json"
+
       - name: Commit and push changes
         run: |
           RELEASE_TAG="${{ github.event.release.tag_name }}"
