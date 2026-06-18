@@ -1,0 +1,4 @@
+{
+  "published_at": "2026-06-18T17:17:37Z",
+  "files": {"pr-4105-fixed-exception-on-big-number.md": "Fixed an exception when parsing very large protein change numbers.", "pr-4107-fix-find-alteration-with-gene.md": "Fix Gene-Specific Alteration Matching Bug For Hgvs Annotation Queries", "pr-4108-fix-germline-resolve-gn.md": "Fix Genome Nexus-backed germline variant resolution for annotation queries.", "pr-4110-bug-fixes-for-tags.md": "Bug fixes for tags", "pr-4111-fix-tag-alt-alleles.md": "Prioritize curated alterations with no variant allele over tags for tumor type summaries"}
+}
