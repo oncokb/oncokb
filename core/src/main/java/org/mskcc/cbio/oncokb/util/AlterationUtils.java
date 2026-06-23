@@ -32,6 +32,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.genome_nexus.ApiException;
 import org.genome_nexus.client.TranscriptConsequenceSummary;
 import org.genome_nexus.client.VariantAnnotation;
+import org.mskcc.cbio.oncokb.apiModels.AlternativeOncoKbVariant;
 import org.mskcc.cbio.oncokb.apiModels.ActionableGene;
 import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotateMutationByGenomicChangeQuery;
 import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotateMutationByHGVSgQuery;
@@ -49,8 +50,11 @@ import org.mskcc.cbio.oncokb.model.EvidenceType;
 import org.mskcc.cbio.oncokb.model.FrameshiftVariant;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.InferredMutation;
+import org.mskcc.cbio.oncokb.model.MutationEffect;
 import org.mskcc.cbio.oncokb.model.Oncogenicity;
+import org.mskcc.cbio.oncokb.model.Query;
 import org.mskcc.cbio.oncokb.model.ReferenceGenome;
+import org.mskcc.cbio.oncokb.model.SomaticIndicatorQueryResp;
 import org.mskcc.cbio.oncokb.model.SpecialVariant;
 import org.mskcc.cbio.oncokb.model.StructuralAlteration;
 import org.mskcc.cbio.oncokb.model.TumorType;
@@ -622,6 +626,87 @@ public final class AlterationUtils {
         return alteration;
     }
 
+    public static AlternativeOncoKbVariant findAlternativeOncoKbVariant(String hugoSymbol, String alteration, ReferenceGenome referenceGenome) {
+        if (StringUtils.isEmpty(hugoSymbol) || StringUtils.isEmpty(alteration)) {
+            return null;
+        }
+        String inputVariant = resolveProteinAlterationShort(alteration).toUpperCase();
+        String normalizedProteinHgvs = (hugoSymbol + ":p." + inputVariant).toUpperCase();
+        try {
+            List<VariantAnnotation> annotations = GenomeNexusUtils.getHgvsVariantsAnnotation(Collections.singletonList(normalizedProteinHgvs), referenceGenome);
+            if (annotations.size() != 1) {
+                return null;
+            }
+
+            VariantAnnotation genomeNexusAnnotation = annotations.get(0);
+            if (genomeNexusAnnotation.getAnnotationSummary() == null
+                || genomeNexusAnnotation.getAnnotationSummary().getTranscriptConsequenceSummary() == null) {
+                return null;
+            }
+
+            Alteration oncokbAnnotation = convertTranscriptConsequenceSummaryToAlteration(
+                genomeNexusAnnotation.getAnnotationSummary().getTranscriptConsequenceSummary());
+            Alteration foundAlteration = findAlteration(
+                oncokbAnnotation.getGene(),
+                referenceGenome,
+                oncokbAnnotation.getAlteration());
+
+            if (foundAlteration == null) {
+                return null;
+            }
+
+            if (foundAlteration.getGene() == null || StringUtils.isEmpty(foundAlteration.getGene().getHugoSymbol()) || StringUtils.isEmpty(foundAlteration.getAlteration())) {
+                return null;
+            }
+
+            String oncokbTranscript = genomeNexusAnnotation.getAnnotationSummary().getTranscriptConsequenceSummary().getTranscriptId();
+            return new AlternativeOncoKbVariant(
+                foundAlteration,
+                foundAlteration.getGene().getHugoSymbol(),
+                inputVariant,
+                oncokbTranscript
+            );
+        } catch (ApiException e) {
+            // Best-effort fallback: Genome Nexus can intermittently fail.
+            // We intentionally ignore this and return null so core annotation is not blocked.
+            return null;
+        }
+    }
+
+    public static AlternativeOncoKbVariant getAlternativeVariantForQuery(SomaticIndicatorQueryResp indicatorQueryResp) {
+        if (indicatorQueryResp == null) {
+            return null;
+        }
+
+        Query query = indicatorQueryResp.getQuery();
+        boolean hasVariantEvidence =
+            (indicatorQueryResp.getTreatments() != null && !indicatorQueryResp.getTreatments().isEmpty())
+                || (indicatorQueryResp.getOncogenic() != null
+                    && !Oncogenicity.UNKNOWN.getOncogenic().equals(indicatorQueryResp.getOncogenic()))
+                || (indicatorQueryResp.getMutationEffect() != null
+                    && !MutationEffect.UNKNOWN.getMutationEffect().equals(indicatorQueryResp.getMutationEffect().getKnownEffect()))
+                || (indicatorQueryResp.getDiagnosticImplications() != null && !indicatorQueryResp.getDiagnosticImplications().isEmpty())
+                || (indicatorQueryResp.getPrognosticImplications() != null && !indicatorQueryResp.getPrognosticImplications().isEmpty());
+
+        if (Boolean.TRUE.equals(indicatorQueryResp.getVariantExist())
+            || hasVariantEvidence
+            || query == null
+            || StringUtils.isAnyEmpty(query.getHugoSymbol(), query.getAlteration())) {
+            return null;
+        }
+
+        ParseAlterationResult parsedAlteration = ProteinChangeParser.parseAlteration(query.getAlteration());
+        if (parsedAlteration == null || !Boolean.TRUE.equals(parsedAlteration.getIsParsed())) {
+            return null;
+        }
+
+        return findAlternativeOncoKbVariant(
+            query.getHugoSymbol(),
+            query.getAlteration(),
+            query.getReferenceGenome()
+        );
+    }
+
     public static List<VariantAnnotation> getHgvsgVariantsAnnotationWithQueries(List<AnnotateMutationByHGVSgQuery> queries, ReferenceGenome referenceGenome) throws ApiException {
         return GenomeNexusUtils.getHgvsVariantsAnnotation(queries.stream().map(AnnotateMutationByHGVSgQuery::getHgvsg).collect(Collectors.toList()), referenceGenome);
     }
@@ -682,7 +767,6 @@ public final class AlterationUtils {
     }
 
     public static List<Alteration> getAllAlterations(ReferenceGenome referenceGenome, Gene gene) {
-        Set<Alteration> alterations = new HashSet<>();
         if (gene == null) {
             return new ArrayList<>();
         }

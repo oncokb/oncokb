@@ -215,4 +215,5 @@ abstract class IndicatorQueryRespBase implements java.io.Serializable {
     public void setLastUpdate(String lastUpdate) {
         this.lastUpdate = lastUpdate;
     }
+
 }

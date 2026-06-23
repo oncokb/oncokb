@@ -176,6 +176,9 @@ public class IndicatorUtils {
             return result.iterator().next();
         }
 
+        // Initialize variant evidence tracking outside the gene check so it's available for the final flag
+        Set<Evidence> treatmentEvidences = new HashSet<>();
+
         if (gene != null) {
             // we replace hugo symbol with matched gene when queries hugo symbol is not available or when it's the structural variant
             if (StringUtils.isEmpty(query.getHugoSymbol()) || isStructuralVariantEvent) {
@@ -242,8 +245,6 @@ public class IndicatorUtils {
             } else {
                 indicatorQuery.setAlleleExist(true);
             }
-
-            Set<Evidence> treatmentEvidences = new HashSet<>();
 
             if (nonVUSRelevantAlts.size() > 0) {
                 if (hasOncogenicEvidence) {
@@ -496,6 +497,7 @@ public class IndicatorUtils {
 
         indicatorQuery.setLastUpdate(latestEvidenceDate == null ? MainUtils.getDataVersionDate() :
             new SimpleDateFormat("MM/dd/yyy").format(latestEvidenceDate));
+        indicatorQuery.setDataVersion(MainUtils.getDataVersion());
 
         // Give default oncogenicity if no data has been assigned.
         if (indicatorQuery.getOncogenic() == null) {
