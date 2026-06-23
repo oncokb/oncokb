@@ -29,7 +29,7 @@ abstract class IndicatorQueryRespBase implements java.io.Serializable {
     @ApiModelProperty(value = "(Nullable) The highest resistance level from a list of therapeutic evidences.", allowableValues = "LEVEL_R1, LEVEL_R2")
     private LevelOfEvidence highestResistanceLevel;
 
-    @ApiModelProperty(value = "(Nullable) The highest diagnostic level from a list of diagnostic evidences.", allowableValues = "LEVEL_Dx1, LEVEL_Dx2, LEVEL_Dx3.")
+    @ApiModelProperty(value = "(Nullable) The highest diagnostic level from a list of diagnostic evidences.", allowableValues = "LEVEL_Dx1, LEVEL_Dx2, LEVEL_Dx3")
     private LevelOfEvidence highestDiagnosticImplicationLevel;
 
     @ApiModelProperty(value = "(Nullable) The highest prognostic level from a list of prognostic evidences.", allowableValues = "LEVEL_Px1, LEVEL_Px2, LEVEL_Px3")
