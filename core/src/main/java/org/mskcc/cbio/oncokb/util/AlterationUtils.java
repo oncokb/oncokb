@@ -50,9 +50,11 @@ import org.mskcc.cbio.oncokb.model.EvidenceType;
 import org.mskcc.cbio.oncokb.model.FrameshiftVariant;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.InferredMutation;
+import org.mskcc.cbio.oncokb.model.MutationEffect;
 import org.mskcc.cbio.oncokb.model.Oncogenicity;
 import org.mskcc.cbio.oncokb.model.Query;
 import org.mskcc.cbio.oncokb.model.ReferenceGenome;
+import org.mskcc.cbio.oncokb.model.SomaticIndicatorQueryResp;
 import org.mskcc.cbio.oncokb.model.SpecialVariant;
 import org.mskcc.cbio.oncokb.model.StructuralAlteration;
 import org.mskcc.cbio.oncokb.model.TumorType;
@@ -671,9 +673,23 @@ public final class AlterationUtils {
         }
     }
 
-    public static AlternativeOncoKbVariant getAlternativeVariantForQuery(Query query, Boolean variantExists, Boolean hasVariantEvidence) {
-        if (Boolean.TRUE.equals(variantExists)
-            || Boolean.TRUE.equals(hasVariantEvidence)
+    public static AlternativeOncoKbVariant getAlternativeVariantForQuery(SomaticIndicatorQueryResp indicatorQueryResp) {
+        if (indicatorQueryResp == null) {
+            return null;
+        }
+
+        Query query = indicatorQueryResp.getQuery();
+        boolean hasVariantEvidence =
+            (indicatorQueryResp.getTreatments() != null && !indicatorQueryResp.getTreatments().isEmpty())
+                || (indicatorQueryResp.getOncogenic() != null
+                    && !Oncogenicity.UNKNOWN.getOncogenic().equals(indicatorQueryResp.getOncogenic()))
+                || (indicatorQueryResp.getMutationEffect() != null
+                    && !MutationEffect.UNKNOWN.getMutationEffect().equals(indicatorQueryResp.getMutationEffect().getKnownEffect()))
+                || (indicatorQueryResp.getDiagnosticImplications() != null && !indicatorQueryResp.getDiagnosticImplications().isEmpty())
+                || (indicatorQueryResp.getPrognosticImplications() != null && !indicatorQueryResp.getPrognosticImplications().isEmpty());
+
+        if (Boolean.TRUE.equals(indicatorQueryResp.getVariantExist())
+            || hasVariantEvidence
             || query == null
             || StringUtils.isAnyEmpty(query.getHugoSymbol(), query.getAlteration())) {
             return null;

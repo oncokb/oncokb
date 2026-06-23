@@ -499,14 +499,6 @@ public class IndicatorUtils {
             new SimpleDateFormat("MM/dd/yyy").format(latestEvidenceDate));
         indicatorQuery.setDataVersion(MainUtils.getDataVersion());
 
-        // Determine if variant has curated evidence we care about (excluding gene summary).
-        boolean hasVariantEvidence = !treatmentEvidences.isEmpty()
-            || (indicatorQuery.getOncogenic() != null && !Oncogenicity.UNKNOWN.getOncogenic().equals(indicatorQuery.getOncogenic()))
-            || (indicatorQuery.getMutationEffect() != null && !MutationEffect.UNKNOWN.getMutationEffect().equals(indicatorQuery.getMutationEffect().getKnownEffect()))
-            || !indicatorQuery.getDiagnosticImplications().isEmpty()
-            || !indicatorQuery.getPrognosticImplications().isEmpty();
-        indicatorQuery.setHasVariantEvidence(hasVariantEvidence);
-
         // Give default oncogenicity if no data has been assigned.
         if (indicatorQuery.getOncogenic() == null) {
             indicatorQuery.setOncogenic(Oncogenicity.UNKNOWN.getOncogenic());

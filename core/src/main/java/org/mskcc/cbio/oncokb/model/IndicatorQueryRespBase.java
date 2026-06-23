@@ -1,6 +1,5 @@
 package org.mskcc.cbio.oncokb.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.mskcc.cbio.oncokb.apiModels.Implication;
 import org.mskcc.cbio.oncokb.apiModels.MutationEffectResp;
 import org.mskcc.cbio.oncokb.util.MainUtils;
@@ -58,8 +57,6 @@ abstract class IndicatorQueryRespBase implements java.io.Serializable {
     private String dataVersion;
     @ApiModelProperty(value = "OncoKB data release date. Formatted as MM/DD/YYYY", example = "01/30/2025")
     private String lastUpdate;
-    @ApiModelProperty(hidden = true)
-    private Boolean hasVariantEvidence = false;
 
     public IndicatorQueryRespBase() {
         this.dataVersion = MainUtils.getDataVersion();
@@ -219,12 +216,4 @@ abstract class IndicatorQueryRespBase implements java.io.Serializable {
         this.lastUpdate = lastUpdate;
     }
 
-    @JsonIgnore
-    public Boolean getHasVariantEvidence() {
-        return hasVariantEvidence;
-    }
-
-    public void setHasVariantEvidence(Boolean hasVariantEvidence) {
-        this.hasVariantEvidence = hasVariantEvidence;
-    }
 }
