@@ -3,12 +3,6 @@ name: Group Release Notes
 on:
   release:
     types: [published]
-  workflow_dispatch:
-    inputs:
-      tag_name:
-        description: 'Simulated release tag'
-        required: true
-        default: 'v0.0.0-test'
 
 jobs:
   organize-release-notes:
@@ -20,12 +14,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          # Use a PAT or the default token with write permissions
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Move pr- files to release folder
         run: |
-          RELEASE_TAG="${{ github.event.release.tag_name || github.event.inputs.tag_name }}"
+          RELEASE_TAG="${{ github.event.release.tag_name }}"
           SOURCE_DIR="release-notes"
           TARGET_DIR="release-notes/${RELEASE_TAG}"
 
@@ -53,11 +46,7 @@ jobs:
 
           echo "Done. Moved ${#PR_FILES[@]} file(s) to ${TARGET_DIR}."
 
-          # Use published_at from the release event, or fall back to now for workflow_dispatch
           PUBLISHED_AT="${{ github.event.release.published_at }}"
-          if [ -z "${PUBLISHED_AT}" ]; then
-            PUBLISHED_AT="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-          fi
 
           # Build filename → title map
           FILES_JSON="{"
