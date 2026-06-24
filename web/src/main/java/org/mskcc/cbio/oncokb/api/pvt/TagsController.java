@@ -6,9 +6,11 @@ import java.util.Set;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.Evidence;
 import org.mskcc.cbio.oncokb.model.EvidenceQueryRes;
+import org.mskcc.cbio.oncokb.model.EvidenceType;
 import org.mskcc.cbio.oncokb.model.Oncogenicity;
 import org.mskcc.cbio.oncokb.model.OncogenicityEntity;
 import org.mskcc.cbio.oncokb.model.Query;
+import org.mskcc.cbio.oncokb.model.SpecialTumorType;
 import org.mskcc.cbio.oncokb.model.Tag;
 import org.mskcc.cbio.oncokb.model.TumorType;
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
@@ -85,6 +87,15 @@ public class TagsController {
             tag.getEvidences().addAll(EvidenceUtils.getAlterationEvidences(oncogenicMutations));
         }
         Set<Evidence> evidences = EvidenceUtils.filterEvidence(tag.getEvidences(), evidenceQuery, false);
+        if (evidences.stream().noneMatch(evi -> evi.getEvidenceType().equals(EvidenceType.TUMOR_TYPE_SUMMARY))) {
+            for (Evidence evi : tag.getEvidences()) {
+                if (evi.getEvidenceType().equals(EvidenceType.TUMOR_TYPE_SUMMARY) && 
+                evi.getCancerTypes().contains(ApplicationContextSingleton.getTumorTypeBo().getBySpecialTumor(SpecialTumorType.OTHER_TUMOR_TYPES))) {
+                    evi.setDescription(evi.getDescription().replace("[[variant]]", tag.getName()));
+                    evidences.add(evi);
+                }
+            }
+        }
         tag.setEvidences(evidences);
     }
 }

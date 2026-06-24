@@ -101,6 +101,27 @@ public class SummaryUtils {
         if (tumorTypeSummary == null) {
             List<Evidence> fileredTagEvidences = EvidenceUtils.filterEvidencesByTumorType(new HashSet<>(tagEvidences), matchedTumorType, relevantTumorTypes);
             if (fileredTagEvidences.size() > 0) {
+                // Choose most specific tag
+                Tag chosenTag = null;
+                for (Evidence evi : fileredTagEvidences) {
+                    if (evi.getTags().size() == 1) {
+                        Tag tag = evi.getTags().iterator().next();
+                        if (chosenTag == null) {
+                            chosenTag = tag;
+                        } else {
+                            if (tag.getStart() >= chosenTag.getStart() && tag.getEnd() <= chosenTag.getEnd()) {
+                                chosenTag = tag;
+                            }
+                        }
+                    }
+                }
+                if (chosenTag != null) {
+                    final Tag finalChosenTag = chosenTag;
+                    fileredTagEvidences = fileredTagEvidences
+                        .stream()
+                        .filter(tag -> tag.getTags().contains(finalChosenTag))
+                        .collect(Collectors.toList());
+                }
                 tumorTypeSummary = getTumorTypeSummaryFromEvidences(fileredTagEvidences);
             }
         }
