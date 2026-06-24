@@ -2,6 +2,7 @@ package org.mskcc.cbio.oncokb.api.pvt;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.Evidence;
@@ -84,7 +85,11 @@ public class TagsController {
                 AlterationUtils.getAllAlterations(null, tag.getGene())
             );
             evidenceQuery.setAlterations(oncogenicMutations);
-            tag.getEvidences().addAll(EvidenceUtils.getAlterationEvidences(oncogenicMutations));
+            tag.getEvidences().addAll(EvidenceUtils.getAlterationEvidences(oncogenicMutations)
+                .stream()
+                .filter(evi -> evi.getEvidenceType() != EvidenceType.TUMOR_TYPE_SUMMARY) // should not take tumor type summary from oncogenic mutations
+                .collect(Collectors.toList())
+            );
         }
         Set<Evidence> evidences = EvidenceUtils.filterEvidence(tag.getEvidences(), evidenceQuery, false);
         if (evidences.stream().noneMatch(evi -> evi.getEvidenceType().equals(EvidenceType.TUMOR_TYPE_SUMMARY))) {
