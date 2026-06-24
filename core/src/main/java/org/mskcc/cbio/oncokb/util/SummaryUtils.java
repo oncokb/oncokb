@@ -108,10 +108,8 @@ public class SummaryUtils {
                         Tag tag = evi.getTags().iterator().next();
                         if (chosenTag == null) {
                             chosenTag = tag;
-                        } else {
-                            if (tag.getStart() >= chosenTag.getStart() && tag.getEnd() <= chosenTag.getEnd()) {
-                                chosenTag = tag;
-                            }
+                        } else if (tag.getStart() >= chosenTag.getStart() && tag.getEnd() <= chosenTag.getEnd()) {
+                            chosenTag = tag;
                         }
                     }
                 }

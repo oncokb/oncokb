@@ -93,6 +93,7 @@ public class TagsController {
                 evi.getCancerTypes().contains(ApplicationContextSingleton.getTumorTypeBo().getBySpecialTumor(SpecialTumorType.OTHER_TUMOR_TYPES))) {
                     evi.setDescription(evi.getDescription().replace("[[variant]]", tag.getName()));
                     evidences.add(evi);
+                    break;
                 }
             }
         }
