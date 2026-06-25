@@ -1,0 +1,91 @@
+name: Group Release Notes
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  organize-release-notes:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Move pr- files to release folder
+        run: |
+          RELEASE_TAG="${{ github.event.release.tag_name }}"
+          SOURCE_DIR="release-notes"
+          TARGET_DIR="release-notes/${RELEASE_TAG}"
+
+          echo "Release tag: ${RELEASE_TAG}"
+          echo "Moving files from ${SOURCE_DIR} to ${TARGET_DIR}"
+
+          # Check if any pr- files exist
+          shopt -s nullglob
+          PR_FILES=("${SOURCE_DIR}"/pr-*)
+
+          if [ ${#PR_FILES[@]} -eq 0 ]; then
+            echo "No pr- files found in ${SOURCE_DIR}. Nothing to do."
+            exit 0
+          fi
+
+          # Create the target directory
+          mkdir -p "${TARGET_DIR}"
+
+          # Move all files starting with pr-
+          for FILE in "${PR_FILES[@]}"; do
+            FILENAME=$(basename "${FILE}")
+            echo "Moving ${FILENAME} → ${TARGET_DIR}/${FILENAME}"
+            mv "${FILE}" "${TARGET_DIR}/${FILENAME}"
+          done
+
+          echo "Done. Moved ${#PR_FILES[@]} file(s) to ${TARGET_DIR}."
+
+          PUBLISHED_AT="${{ github.event.release.published_at }}"
+
+          # Build filename → title map
+          FILES_JSON="{"
+          FIRST=true
+          for FILE in "${TARGET_DIR}"/pr-*; do
+            FILENAME=$(basename "${FILE}")
+            # Strip the leading "# " from the first line
+            TITLE=$(head -n 1 "${FILE}" | sed 's/^#\+[[:space:]]*//')
+            if [ "${FIRST}" = true ]; then
+              FILES_JSON+="\"${FILENAME}\": \"${TITLE}\""
+              FIRST=false
+            else
+              FILES_JSON+=", \"${FILENAME}\": \"${TITLE}\""
+            fi
+          done
+          FILES_JSON+="}"
+
+          cat > "${TARGET_DIR}/metadata.json" <<EOF
+          {
+            "published_at": "${PUBLISHED_AT}",
+            "files": ${FILES_JSON}
+          }
+          EOF
+
+          echo "Created ${TARGET_DIR}/metadata.json"
+
+      - name: Commit and push changes
+        run: |
+          RELEASE_TAG="${{ github.event.release.tag_name }}"
+
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add release-notes/
+
+          # Only commit if there are staged changes
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "chore: archive release notes for ${RELEASE_TAG}"
+            git push
+          fi
