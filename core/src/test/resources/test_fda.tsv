@@ -10,7 +10,6 @@ BTK	C481S	CLLSLL	Fda2
 BTK	T474S	CLLSLL	Fda3
 
 # Some special fda level 3 are from level 2			
-ERBB2	V659G	Non-Small Cell Lung Cancer	Fda3
 MAP2K1	K57N	Langerhans Cell Histiocytosis	Fda3
 
 # The following case(s) have special mapping to fda level 3 but other treatments exist to trump that			
