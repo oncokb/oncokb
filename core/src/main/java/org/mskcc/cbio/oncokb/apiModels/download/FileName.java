@@ -6,6 +6,7 @@ package org.mskcc.cbio.oncokb.apiModels.download;
 public enum FileName {
     ALL_ANNOTATED_VARIANTS("allAnnotatedVariants"),
     ALL_ACTIONABLE_VARIANTS("allActionableVariants"),
+    ALL_GENOMIC_INDICATORS("allGenomicIndicators"),
     ALL_CURATED_GENES("allCuratedGenes"),
     ALL_CURATED_GENES_GERMLINE("allCuratedGenesGermline"),
     CANCER_GENE_LIST("cancerGeneList"),
