@@ -1,0 +1,4 @@
+{
+  "published_at": "2026-07-08T19:15:16Z",
+  "files": {"pr-4126-feat-all-genomic-indicators-export.md": "Add All Genomic Indicators Export Endpoints", "pr-4128-fix-expose-germline-field-in-api-docs.md": "Expose the germline query field in API documentation"}
+}
