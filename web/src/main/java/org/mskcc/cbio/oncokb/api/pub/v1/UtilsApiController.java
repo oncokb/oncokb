@@ -2,6 +2,7 @@ package org.mskcc.cbio.oncokb.api.pub.v1;
 
 import io.swagger.annotations.ApiParam;
 import org.mskcc.cbio.oncokb.apiModels.ActionableGene;
+import org.mskcc.cbio.oncokb.apiModels.AllGenomicIndicator;
 import org.mskcc.cbio.oncokb.serializer.EntrezGeneIdConverter;
 import org.mskcc.cbio.oncokb.apiModels.AnnotatedVariant;
 import org.mskcc.cbio.oncokb.apiModels.CuratedGene;
@@ -232,6 +233,49 @@ public class UtilsApiController implements UtilsApi {
     }
 
     @Override
+    public ResponseEntity<List<AllGenomicIndicator>> utilsAllGenomicIndicatorsGet(
+        @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
+    ) {
+        if (version != null) {
+            return getDownloadResponseEntity(version, FileName.ALL_GENOMIC_INDICATORS, FileExtension.JSON);
+        }
+        return new ResponseEntity<>(getAllGenomicIndicators(), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<String> utilsAllGenomicIndicatorsTxtGet(
+        @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
+    ) {
+        if (version != null) {
+            return getDownloadResponseEntity(version, FileName.ALL_GENOMIC_INDICATORS, FileExtension.TEXT);
+        }
+        String separator = "\t";
+        String newLine = "\n";
+        StringBuilder sb = new StringBuilder();
+        List<String> header = new ArrayList<>();
+        header.add("Hugo Symbol");
+        header.add("Name");
+        header.add("Associated Variants");
+        header.add("Description");
+        header.add("Inheritance Mechanism");
+        sb.append(MainUtils.listToString(header, separator));
+        sb.append(newLine);
+
+        for (AllGenomicIndicator indicator : getAllGenomicIndicators()) {
+            List<String> row = new ArrayList<>();
+            row.add(nullToEmpty(indicator.getHugoSymbol()));
+            row.add(nullToEmpty(indicator.getName()));
+            row.add(nullToEmpty(indicator.getAssociatedVariants()));
+            row.add(nullToEmpty(indicator.getDescription()));
+            row.add(nullToEmpty(indicator.getInheritanceMechanism()));
+            sb.append(MainUtils.listToString(row, separator));
+            sb.append(newLine);
+        }
+
+        return new ResponseEntity<>(sb.toString(), HttpStatus.OK);
+    }
+
+    @Override
     public ResponseEntity<String> utilsAllActionableVariantsTxtGet(
         @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
     ) {
@@ -287,6 +331,34 @@ public class UtilsApiController implements UtilsApi {
             sb.append(newLine);
         }
         return new ResponseEntity<>(sb.toString(), HttpStatus.OK);
+    }
+
+    protected List<AllGenomicIndicator> getAllGenomicIndicators() {
+        List<AllGenomicIndicator> indicators = new ArrayList<>();
+        Set<Gene> genes = CacheUtils.getAllGenes();
+        for (Gene gene : genes) {
+            for (Evidence evidence : CacheUtils.getEvidences(gene)) {
+                if (!Boolean.TRUE.equals(evidence.getForGermline()) || evidence.getEvidenceType() != EvidenceType.GENOMIC_INDICATOR) {
+                    continue;
+                }
+                for (Alteration alteration : evidence.getAlterations()) {
+                    indicators.add(new AllGenomicIndicator(
+                        gene.getHugoSymbol(),
+                        evidence.getName(),
+                        alteration.getName(),
+                        evidence.getDescription(),
+                        evidence.getKnownEffect()
+                    ));
+                }
+            }
+        }
+        indicators.sort(Comparator.comparing(AllGenomicIndicator::getHugoSymbol, Comparator.nullsLast(String::compareTo))
+            .thenComparing(AllGenomicIndicator::getAssociatedVariants, Comparator.nullsLast(String::compareTo)));
+        return indicators;
+    }
+
+    protected <T> ResponseEntity<T> getDownloadResponseEntity(String version, FileName fileName, FileExtension fileExtension) {
+        return getDataDownloadResponseEntity(version, fileName, fileExtension);
     }
 
     @Override

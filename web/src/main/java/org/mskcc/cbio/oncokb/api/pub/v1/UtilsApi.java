@@ -2,6 +2,7 @@ package org.mskcc.cbio.oncokb.api.pub.v1;
 
 import io.swagger.annotations.*;
 import org.mskcc.cbio.oncokb.apiModels.ActionableGene;
+import org.mskcc.cbio.oncokb.apiModels.AllGenomicIndicator;
 import org.mskcc.cbio.oncokb.apiModels.AnnotatedVariant;
 import org.mskcc.cbio.oncokb.apiModels.CuratedGene;
 import org.mskcc.cbio.oncokb.apiModels.VariantOfUnknownSignificance;
@@ -83,6 +84,33 @@ public interface UtilsApi {
     @RequestMapping(value = "/utils/allActionableVariants", produces = {"application/json"},
         method = RequestMethod.GET)
     ResponseEntity<List<ActionableGene>> utilsAllActionableVariantsGet(
+        @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
+    );
+
+    @PremiumPublicApi
+    @ApiOperation(value = "", notes = "Get all genomic indicators.", response = AllGenomicIndicator.class, responseContainer = "List", tags = {"Variants"})
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK", response = AllGenomicIndicator.class, responseContainer = "List"),
+        @ApiResponse(code = 404, message = "Not Found"),
+        @ApiResponse(code = 503, message = "Service Unavailable")
+    })
+    @RequestMapping(value = "/utils/allGenomicIndicators", produces = {"application/json"},
+        method = RequestMethod.GET)
+    ResponseEntity<List<AllGenomicIndicator>> utilsAllGenomicIndicatorsGet(
+        @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
+    );
+
+    @PremiumPublicApi
+    @ApiOperation(value = "", notes = "Get all genomic indicators in text file.", tags = {"Variants"})
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK"),
+        @ApiResponse(code = 404, message = "Not Found"),
+        @ApiResponse(code = 503, message = "Service Unavailable")
+    })
+    @RequestMapping(value = "/utils/allGenomicIndicators.txt",
+        produces = "text/plain; charset=UTF-8",
+        method = RequestMethod.GET)
+    ResponseEntity<String> utilsAllGenomicIndicatorsTxtGet(
         @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
     );
 
