@@ -4,6 +4,13 @@ on:
   release:
     types: [published]
 
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version/tag, e.g. v6.24.0"
+        required: true
+        type: string
+
 jobs:
   organize-release-notes:
     runs-on: ubuntu-latest
@@ -15,16 +22,52 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          ref: master
+
+      - name: Resolve release info
+        id: release-info
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            RELEASE_TAG="${{ inputs.version }}"
+
+            echo "Manual run requested for release tag: ${RELEASE_TAG}"
+
+            if ! gh release view "${RELEASE_TAG}" --json tagName,publishedAt >/tmp/release.json; then
+              echo "Release ${RELEASE_TAG} does not exist."
+              exit 1
+            fi
+
+            RELEASE_TAG="$(jq -r '.tagName' /tmp/release.json)"
+            PUBLISHED_AT="$(jq -r '.publishedAt' /tmp/release.json)"
+          else
+            RELEASE_TAG="${{ github.event.release.tag_name }}"
+            PUBLISHED_AT="${{ github.event.release.published_at }}"
+          fi
+
+          echo "release_tag=${RELEASE_TAG}" >> "${GITHUB_OUTPUT}"
+          echo "published_at=${PUBLISHED_AT}" >> "${GITHUB_OUTPUT}"
+
+          echo "Resolved release tag: ${RELEASE_TAG}"
+          echo "Resolved published_at: ${PUBLISHED_AT}"
 
       - name: Move pr- files to release folder
         run: |
-          RELEASE_TAG="${{ github.event.release.tag_name }}"
+          RELEASE_TAG="${{ steps.release-info.outputs.release_tag }}"
+          PUBLISHED_AT="${{ steps.release-info.outputs.published_at }}"
+
           SOURCE_DIR="release-notes"
           TARGET_DIR="release-notes/${RELEASE_TAG}"
 
           echo "Release tag: ${RELEASE_TAG}"
+          echo "Published at: ${PUBLISHED_AT}"
           echo "Moving files from ${SOURCE_DIR} to ${TARGET_DIR}"
+
+          # If the folder already exists, do nothing.
+          if [ -d "${TARGET_DIR}" ]; then
+            echo "${TARGET_DIR} already exists. Nothing to do."
+            exit 0
+          fi
 
           # Check if any pr- files exist
           shopt -s nullglob
@@ -47,20 +90,21 @@ jobs:
 
           echo "Done. Moved ${#PR_FILES[@]} file(s) to ${TARGET_DIR}."
 
-          PUBLISHED_AT="${{ github.event.release.published_at }}"
-
           # Build filename → title map
           FILES_JSON="{"
           FIRST=true
           for FILE in "${TARGET_DIR}"/pr-*; do
             FILENAME=$(basename "${FILE}")
-            # Strip the leading "# " from the first line
             TITLE=$(head -n 1 "${FILE}" | sed 's/^#\+[[:space:]]*//')
+
+            FILENAME_ESCAPED=$(jq -Rr @json <<< "${FILENAME}")
+            TITLE_ESCAPED=$(jq -Rr @json <<< "${TITLE}")
+
             if [ "${FIRST}" = true ]; then
-              FILES_JSON+="\"${FILENAME}\": \"${TITLE}\""
+              FILES_JSON+="${FILENAME_ESCAPED}: ${TITLE_ESCAPED}"
               FIRST=false
             else
-              FILES_JSON+=", \"${FILENAME}\": \"${TITLE}\""
+              FILES_JSON+=", ${FILENAME_ESCAPED}: ${TITLE_ESCAPED}"
             fi
           done
           FILES_JSON+="}"
@@ -76,7 +120,7 @@ jobs:
 
       - name: Commit and push changes
         run: |
-          RELEASE_TAG="${{ github.event.release.tag_name }}"
+          RELEASE_TAG="${{ steps.release-info.outputs.release_tag }}"
 
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
