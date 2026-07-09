@@ -327,9 +327,15 @@ public class SummaryUtils {
             .append(alteration.getAlteration())
             .append(" variant is classified as ").append(pathogenicEvis.get(0).getKnownEffect())
             .append(".");
+        } else {
+            return getDefaultGermlineVariantSummary(gene, alteration);
         }
 
         return sb.toString();
+    }
+
+    private static String getDefaultGermlineVariantSummary(Gene gene, Alteration alteration) {
+        return "The " + gene.getHugoSymbol() + " " + alteration.getAlteration() + " variant is not currently included in OncoKB. OncoKB germline annotation is limited to pathogenic and likely pathogenic germline variants identified in patients sequenced at MSK.";
     }
 
     public static String websiteGermlineVariantSummary(Gene gene, Alteration alteration) {
@@ -344,6 +350,8 @@ public class SummaryUtils {
             .append(alteration.getAlteration())
             .append(" as ").append(pathogenicEvis.get(0).getKnownEffect())
             .append(".");
+        } else {
+            return getDefaultGermlineVariantSummary(gene, alteration);
         }
 
         return sb.toString();
