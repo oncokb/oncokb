@@ -324,7 +324,7 @@ public class GenomeNexusUtils {
             // Loop through all transcript consequence summaries and extract the ones where transcriptID matches oncokb canonical transcript
             for (TranscriptConsequenceSummary consequenceSummary : variantAnnotation.getAnnotationSummary().getTranscriptConsequenceSummaries()) {
                 allConsequenceSummaries.add(consequenceSummary);
-                
+
                 Integer entrezGeneId = null;
                 if (StringUtils.isNotEmpty(consequenceSummary.getEntrezGeneId())) {
                     try {
@@ -362,7 +362,11 @@ public class GenomeNexusUtils {
         }
 
         if (selectedAnnotationResult == null) {
-            // If there are no matching summaries, we cannot annotate this variant.
+            // No transcript matches an OncoKB canonical transcript, so we cannot annotate this variant. We
+            // still surface the gene from Genome Nexus for context, but intentionally do not set a
+            // consequence: the most severe consequence may come from a transcript OncoKB does not annotate
+            // on (e.g. the CDKN2A p14ARF transcript, which Genome Nexus reports under the p16 gene), and
+            // using it would incorrectly drive consequence-level annotation.
             List<TranscriptConsequenceSummary> summariesWithMostSevereConsequence = filterTranscriptConsequenceSummaryByMostSevereConsequence(allConsequenceSummaries, variantAnnotation.getMostSevereConsequence());
             if (summariesWithMostSevereConsequence.isEmpty()) {
                 return new TranscriptSummaryAlterationResult();
@@ -372,8 +376,6 @@ public class GenomeNexusUtils {
             TranscriptConsequenceSummary transcriptConsequenceSummary = new TranscriptConsequenceSummary();
             transcriptConsequenceSummary.setHugoGeneSymbol(selectedConsequenceSummary.getHugoGeneSymbol());
             transcriptConsequenceSummary.setEntrezGeneId(selectedConsequenceSummary.getEntrezGeneId());
-            transcriptConsequenceSummary.setConsequenceTerms(selectedConsequenceSummary.getConsequenceTerms());
-            transcriptConsequenceSummary.setVariantClassification(selectedConsequenceSummary.getVariantClassification());
 
             selectedAnnotationResult = new TranscriptSummaryAlterationResult(transcriptConsequenceSummary);
             selectedAnnotationResult.setMessage("This variant does not occur within a gene or transcript annotated in OncoKB.");
