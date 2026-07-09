@@ -350,8 +350,6 @@ public class SummaryUtils {
             .append(alteration.getAlteration())
             .append(" as ").append(pathogenicEvis.get(0).getKnownEffect())
             .append(".");
-        } else {
-            return getDefaultGermlineVariantSummary(gene, alteration);
         }
 
         return sb.toString();
