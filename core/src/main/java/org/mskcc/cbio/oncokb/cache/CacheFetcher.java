@@ -280,6 +280,10 @@ public class CacheFetcher {
         return this.oncokbTranscriptService.findGeneBySymbol(symbol);
     }
 
+    public String getCanonicalProteinSequence(ReferenceGenome referenceGenome, Gene gene) throws ApiException {
+        return this.oncokbTranscriptService.getCanonicalProteinSequence(referenceGenome, gene);
+    }
+
     @Cacheable(
         cacheResolver = "generalCacheResolver",
         keyGenerator = "concatKeyGenerator"

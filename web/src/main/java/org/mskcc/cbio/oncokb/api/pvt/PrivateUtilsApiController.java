@@ -464,7 +464,23 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
 
         SomaticVariantAnnotation annotation = new SomaticVariantAnnotation(indicatorQueryResp);
         annotation.setAlteration(alterationModel);
-        annotation.setAlternativeOncoKbVariant(AlterationUtils.getAlternativeVariantForQuery(indicatorQueryResp));
+        AlternativeOncoKbVariant alternativeOncoKbVariant = AlterationUtils.getAlternativeVariantForQuery(indicatorQueryResp);
+        annotation.setAlternativeOncoKbVariant(alternativeOncoKbVariant);
+
+        // Only validate against the canonical sequence when Genome Nexus did not resolve the query to an
+        // alternative variant. Legacy names and commonly used protein changes map to a valid alternative
+        // transcript, so they must not be marked invalid before that check runs.
+        if (alternativeOncoKbVariant == null && alterationModel != null && alterationModel.getGene() != null) {
+            Gene alterationGene = alterationModel.getGene();
+            try {
+                String canonicalSequence = this.cacheFetcher.getCanonicalProteinSequence(matchedRG, alterationGene);
+                ReferenceResidueValidator
+                    .validate(alterationGene.getHugoSymbol(), alterationModel.getAlteration(), canonicalSequence)
+                    .ifPresent(annotation::setMessage);
+            } catch (ApiException e) {
+                // Fail open: never block annotation when the transcript service is unavailable.
+            }
+        }
 
         // for any hgvsg variant, we need to check whether it is VUE
         if(!StringUtils.isNullOrEmpty(hgvsg)) {

@@ -129,10 +129,22 @@ public class OncokbTranscriptService {
     public String getAminoAcid(ReferenceGenome referenceGenome, Gene gene, int positionStart, int length) throws ApiException {
         String sequence = getProteinSequence(referenceGenome, gene);
 
-        if (sequence.length() >= (positionStart + length - 1)) {
+        if (sequence != null && sequence.length() >= (positionStart + length - 1)) {
             return sequence.substring(positionStart - 1, positionStart + length - 1);
         }
         return "";
+    }
+
+    /**
+     * Returns the OncoKB canonical protein sequence for the gene, or {@code null} when it cannot be
+     * determined (service disabled, or missing entrez id/sequence).
+     */
+    public String getCanonicalProteinSequence(ReferenceGenome referenceGenome, Gene gene) throws ApiException {
+        if (!this.enabled || gene == null || gene.getEntrezGeneId() == null) {
+            return null;
+        }
+        String sequence = getProteinSequence(referenceGenome, gene);
+        return StringUtils.isEmpty(sequence) ? null : sequence;
     }
 
     public List<Drug> findDrugs(String query) throws ApiException {

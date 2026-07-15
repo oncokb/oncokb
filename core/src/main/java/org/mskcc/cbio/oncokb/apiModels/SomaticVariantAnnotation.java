@@ -16,6 +16,7 @@ public class SomaticVariantAnnotation extends SomaticIndicatorQueryResp {
     private Alteration alteration;
 
     private Boolean VUE = false;
+    private String message;
     private List<VariantAnnotationTumorType> tumorTypes = new ArrayList<>();
 
     public SomaticVariantAnnotation() {
@@ -72,6 +73,14 @@ public class SomaticVariantAnnotation extends SomaticIndicatorQueryResp {
 
     public void setVUE(Boolean VUE) {
         this.VUE = VUE;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 
     public List<VariantAnnotationTumorType> getTumorTypes() {
