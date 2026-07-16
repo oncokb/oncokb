@@ -574,70 +574,44 @@ public class GermlineAnnotationsApiController {
             AnnotateMutationByHGVScQuery query = queries.get(i);
             String hgvsc = query.getHgvsc();
 
-            if (this.cacheFetcher.hgvscShouldBeAnnotated(hgvsc)) {
-                Alteration alteration = AlterationUtils.findAlterationWithGeneticType(
-                    referenceGenome,
-                    GeneUtils.getGeneByHugoSymbol(query.getGene()),
-                    query.getAlteration(),
-                    allAlterations,
-                    query.isGermline()
-                );
-
-                if (alteration != null) {
-                    // If we found hgvsc in database, we do not need to annotate with Genome Nexus.
-                    GermlineIndicatorQueryResp germlineResp = this.cacheFetcher.processQueryGermline(
-                        query.getReferenceGenome(),
-                        null,
-                        query.getGene(),
-                        query.getAlteration(),
-                        null,
-                        query.getTumorType(),
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        false,
-                        query.getEvidenceTypes(),
-                        false
-                    );
-                    Gene matchedGene = GeneUtils.getGene(germlineResp.getQuery().getEntrezGeneId(), germlineResp.getQuery().getHugoSymbol());
-                    if (matchedGene != null) {
-                        if (ReferenceGenome.GRCh38.equals(germlineResp.getQuery().getReferenceGenome())) {
-                            germlineResp.getQuery().setCanonicalTranscript(matchedGene.getGrch38Isoform());
-                        } else {
-                            germlineResp.getQuery().setCanonicalTranscript(matchedGene.getGrch37Isoform());
-                        }
-                    }
-                    germlineResp.getQuery().setId(query.getId());
-                    result.add(germlineResp);
-                } else {
-                    if (!queryToGNIndexMap.containsKey(query.getHgvsc())) {
-                        queryToGNIndexMap.put(hgvsc, queriesToGN.size());
-                        Gene gene = GeneUtils.getGeneByAlias(query.getGene());
-                        if (gene != null) {
-                            queriesToGN.add(gene.getHugoSymbol() + ":" + query.getAlteration());
-                        } else {
-                            queriesToGN.add(hgvsc);
-                        }
-                    }
-                    resultIndexToQuery[result.size()] = query;
-                    result.add(null);
-                }
-            } else {
-                GermlineIndicatorQueryResp resp = this.getIndicatorQueryFromHGVS(
-                    query.getReferenceGenome(),
-                    new TranscriptSummaryAlterationResult(),
-                    query.getHgvsc(),
-                    query.getTumorType(),
-                    query.getEvidenceTypes()
-                );
-                resp.getQuery().setId(query.getId());
-                result.add(resp);
+            // Malformed or otherwise unannotatable hgvsc: return an empty result without hitting GN.
+            if (!this.cacheFetcher.hgvscShouldBeAnnotated(hgvsc)) {
+                result.add(emptyHgvscResult(query));
+                continue;
             }
+
+            // Already in the OncoKB database: annotate directly, no Genome Nexus needed.
+            Alteration alteration = AlterationUtils.findAlterationWithGeneticType(
+                referenceGenome,
+                GeneUtils.getGeneByHugoSymbol(query.getGene()),
+                query.getAlteration(),
+                allAlterations,
+                query.isGermline()
+            );
+            if (alteration != null) {
+                result.add(annotateHgvscFromDatabase(query));
+                continue;
+            }
+
+            // We only annotate on the OncoKB canonical transcript, so without a known gene and its
+            // canonical transcript there is nothing for Genome Nexus to resolve the cDNA change
+            // against that we would actually annotate on. Skip the GN call and return an empty result.
+            Gene gene = GeneUtils.getGeneByHugoSymbol(query.getGene());
+            String isoform = GenomeNexusUtils.getIsoform(gene, referenceGenome);
+            if (gene == null || StringUtils.isEmpty(isoform)) {
+                result.add(emptyHgvscResult(query));
+                continue;
+            }
+
+            // Resolve through Genome Nexus. A cDNA change can exist on multiple transcripts of the same
+            // gene, and if we only give GN the hugo symbol we cannot control which one it picks, so swap
+            // it out for the OncoKB canonical transcript id so GN resolves the transcript we annotate on.
+            if (!queryToGNIndexMap.containsKey(hgvsc)) {
+                queryToGNIndexMap.put(hgvsc, queriesToGN.size());
+                queriesToGN.add(isoform + ":" + query.getAlteration());
+            }
+            resultIndexToQuery[result.size()] = query;
+            result.add(null);
         }
 
         List<org.genome_nexus.client.VariantAnnotation> variantAnnotations = GenomeNexusUtils.getHgvsVariantsAnnotation(queriesToGN, referenceGenome);
@@ -673,6 +647,50 @@ public class GermlineAnnotationsApiController {
             }
         }
         return result;
+    }
+
+    private GermlineIndicatorQueryResp emptyHgvscResult(AnnotateMutationByHGVScQuery query) {
+        GermlineIndicatorQueryResp resp = this.getIndicatorQueryFromHGVS(
+            query.getReferenceGenome(),
+            new TranscriptSummaryAlterationResult(),
+            query.getHgvsc(),
+            query.getTumorType(),
+            query.getEvidenceTypes()
+        );
+        resp.getQuery().setId(query.getId());
+        return resp;
+    }
+
+    private GermlineIndicatorQueryResp annotateHgvscFromDatabase(AnnotateMutationByHGVScQuery query) {
+        GermlineIndicatorQueryResp germlineResp = this.cacheFetcher.processQueryGermline(
+            query.getReferenceGenome(),
+            null,
+            query.getGene(),
+            query.getAlteration(),
+            null,
+            query.getTumorType(),
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            false,
+            query.getEvidenceTypes(),
+            false
+        );
+        Gene matchedGene = GeneUtils.getGene(germlineResp.getQuery().getEntrezGeneId(), germlineResp.getQuery().getHugoSymbol());
+        if (matchedGene != null) {
+            if (ReferenceGenome.GRCh38.equals(germlineResp.getQuery().getReferenceGenome())) {
+                germlineResp.getQuery().setCanonicalTranscript(matchedGene.getGrch38Isoform());
+            } else {
+                germlineResp.getQuery().setCanonicalTranscript(matchedGene.getGrch37Isoform());
+            }
+        }
+        germlineResp.getQuery().setId(query.getId());
+        return germlineResp;
     }
 
     private GermlineIndicatorQueryResp getIndicatorQueryFromGenomicLocation(
