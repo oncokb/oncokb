@@ -227,7 +227,7 @@ public class GenomeNexusUtils {
         return result;
     }
 
-    private static String getIsoform(Gene gene, ReferenceGenome referenceGenome) {
+    public static String getIsoform(Gene gene, ReferenceGenome referenceGenome) {
         if (gene == null) {
             return null;
         }
