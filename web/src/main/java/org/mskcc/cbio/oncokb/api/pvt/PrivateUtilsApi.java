@@ -102,6 +102,18 @@ public interface PrivateUtilsApi {
         , @ApiParam(value = "The genomic examples.") @RequestParam(value = "examples") String examples
     ) throws ParserConfigurationException, SAXException, IOException;
 
+    @ApiOperation(value = "", notes = "Get the germline genomic indicators for a list of genes and variants.", response = GenomicIndicatorQueryResp.class, responseContainer = "List")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK", response = GenomicIndicatorQueryResp.class, responseContainer = "List"),
+        @ApiResponse(code = 400, message = "Error, error message will be given.", response = ApiHttpError.class)})
+    @RequestMapping(value = "/utils/genomicIndicators",
+        consumes = {"application/json"},
+        produces = {"application/json"},
+        method = RequestMethod.POST)
+    ResponseEntity<List<GenomicIndicatorQueryResp>> utilsGenomicIndicatorsPost(
+        @ApiParam(value = "List of queries. Each query specifies a hugoSymbol, variant, and optional inheritanceMechanisms filter.", required = true) @RequestBody(required = true) List<GenomicIndicatorQuery> body
+    ) throws ApiHttpErrorException;
+
     @ApiOperation(value = "", notes = "Check which OncoKB variants can be mapped on genomic examples.", response = MatchVariantResult.class, responseContainer = "List")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK")})

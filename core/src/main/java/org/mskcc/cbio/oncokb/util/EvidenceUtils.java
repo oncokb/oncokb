@@ -389,6 +389,14 @@ public class EvidenceUtils {
         return genomicIndicatorEvis;
     }
 
+    public static List<Evidence> getGenomicIndicatorsByGeneAndAlteration(Gene gene, String variant) {
+        Alteration alteration = AlterationUtils.findAlteration(gene, null, variant, true);
+        if (alteration == null) {
+            return new ArrayList<>();
+        }
+        return evidenceBo.findEvidencesByAlteration(Collections.singletonList(alteration), Collections.singleton(EvidenceType.GENOMIC_INDICATOR));
+    }
+
     public static List<Evidence> getGenomicIndicatorAssociatedWithPathogenicVariants(Gene gene, ReferenceGenome referenceGenome, String inheritanceMechanism) {
         List<Alteration> pathogenicAlterations = AlterationUtils
             .getAllAlterations(referenceGenome, gene)

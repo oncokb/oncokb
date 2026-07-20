@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiParam;
 import org.genome_nexus.client.GenomicLocation;
 import org.genome_nexus.client.TranscriptConsequenceSummary;
 import org.mskcc.cbio.oncokb.apiModels.*;
+import org.mskcc.cbio.oncokb.apiModels.GenomicIndicator;
 import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotateMutationByGenomicChangeQuery;
 import org.mskcc.cbio.oncokb.apiModels.annotation.AnnotateMutationByHGVSgQuery;
 import org.mskcc.cbio.oncokb.apiModels.download.DownloadAvailability;
@@ -205,6 +206,38 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             validation.put(example, matchVariant(hugoSymbol, matchedRG, variant, example));
         }
         return new ResponseEntity<>(validation, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<List<GenomicIndicatorQueryResp>> utilsGenomicIndicatorsPost(List<GenomicIndicatorQuery> body) throws ApiHttpErrorException {
+        if (body == null) {
+            throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
+        }
+
+        List<GenomicIndicatorQueryResp> resps = new ArrayList<>();
+        for (GenomicIndicatorQuery query : body) {
+            if (query == null || isEmpty(query.getHugoSymbol())) {
+                throw new ApiHttpErrorException("hugoSymbol is missing.", HttpStatus.BAD_REQUEST);
+            }
+            if (isEmpty(query.getVariant())) {
+                throw new ApiHttpErrorException("variant is missing.", HttpStatus.BAD_REQUEST);
+            }
+
+            GenomicIndicatorQueryResp resp = new GenomicIndicatorQueryResp();
+            resp.setQuery(query);
+            resp.setGenomicIndicators(getGenomicIndicators(query.getHugoSymbol(), query.getVariant(), query.getInheritanceMechanisms()));
+            resps.add(resp);
+        }
+
+        return new ResponseEntity<>(resps, HttpStatus.OK);
+    }
+
+    private List<GenomicIndicator> getGenomicIndicators(String hugoSymbol, String variant, List<InheritanceMechanism> inheritanceMechanisms) {
+        Gene gene = GeneUtils.getGeneByHugoSymbol(hugoSymbol);
+
+        List<Evidence> genomicIndicatorEvidences = EvidenceUtils.getGenomicIndicatorsByGeneAndAlteration(gene, variant);
+        List<GenomicIndicator> genomicIndicators = IndicatorUtils.toGenomicIndicatorsFromEvidence(genomicIndicatorEvidences);
+        return IndicatorUtils.filterGenomicIndicatorsByInheritanceMechanisms(genomicIndicators, inheritanceMechanisms);
     }
 
     private boolean matchVariant(String hugoSymbol, ReferenceGenome referenceGenome, String variant, String example) {

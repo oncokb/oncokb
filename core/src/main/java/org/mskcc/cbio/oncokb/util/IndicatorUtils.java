@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.apiModels.Citations;
+import org.mskcc.cbio.oncokb.apiModels.GenomicIndicator;
 import org.mskcc.cbio.oncokb.apiModels.Implication;
 import org.mskcc.cbio.oncokb.apiModels.MutationEffectResp;
 import org.mskcc.cbio.oncokb.model.*;
@@ -727,13 +728,13 @@ public class IndicatorUtils {
         });
     }
 
-    private static List<org.mskcc.cbio.oncokb.apiModels.GenomicIndicator> toGenomicIndicatorsFromEvidence(List<Evidence> evidences) {
-        List<org.mskcc.cbio.oncokb.apiModels.GenomicIndicator> indicators = new ArrayList<>();
+    public static List<GenomicIndicator> toGenomicIndicatorsFromEvidence(List<Evidence> evidences) {
+        List<GenomicIndicator> indicators = new ArrayList<>();
         if (evidences == null) {
             return indicators;
         }
         for (Evidence evidence : evidences) {
-            org.mskcc.cbio.oncokb.apiModels.GenomicIndicator indicator = new org.mskcc.cbio.oncokb.apiModels.GenomicIndicator();
+            GenomicIndicator indicator = new GenomicIndicator();
             indicator.setName(evidence.getName());
             indicator.setDescription(evidence.getDescription());
             indicator.setInheritanceMechanism(toInheritanceMechanism(evidence.getKnownEffect()));
@@ -753,6 +754,48 @@ public class IndicatorUtils {
             }
         }
         return null;
+    }
+
+    // "Carrier" is not an actual inheritance mechanism, it is always part of the genomic indicator name.
+    private static final String CARRIER_KEYWORD = "carrier";
+
+    /**
+     * Filters the given genomic indicators so only those matching the requested inheritance mechanisms are kept.
+     * The special value {@link InheritanceMechanism#CARRIER} is not matched against the inheritance mechanism but
+     * against the genomic indicator name, since carrier is always part of the name rather than a distinct
+     * inheritance mechanism. When no mechanisms are requested, the indicators are returned unchanged.
+     */
+    public static List<GenomicIndicator> filterGenomicIndicatorsByInheritanceMechanisms(List<GenomicIndicator> genomicIndicators, List<InheritanceMechanism> inheritanceMechanisms) {
+        if (genomicIndicators == null
+            || inheritanceMechanisms == null
+            || inheritanceMechanisms.isEmpty()) {
+            return genomicIndicators;
+        }
+
+        Set<InheritanceMechanism> requestedMechanisms = new HashSet<>();
+        boolean includeCarrier = false;
+        for (InheritanceMechanism mechanism : inheritanceMechanisms) {
+            if (mechanism == null) {
+                continue;
+            }
+            if (mechanism == InheritanceMechanism.CARRIER) {
+                includeCarrier = true;
+            } else {
+                requestedMechanisms.add(mechanism);
+            }
+        }
+
+        final boolean carrier = includeCarrier;
+        return genomicIndicators.stream()
+            .filter(indicator -> {
+                boolean matchesMechanism = indicator.getInheritanceMechanism() != null
+                    && requestedMechanisms.contains(indicator.getInheritanceMechanism());
+                boolean matchesCarrier = carrier
+                    && indicator.getName() != null
+                    && indicator.getName().toLowerCase().contains(CARRIER_KEYWORD);
+                return matchesMechanism || matchesCarrier;
+            })
+            .collect(Collectors.toList());
     }
 
     private static void setGermlineVariantFields(GermlineIndicatorQueryResp indicatorQuery,

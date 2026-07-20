@@ -22,12 +22,14 @@ import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.EvidenceType;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.GermlineIndicatorQueryResp;
+import org.mskcc.cbio.oncokb.model.InheritanceMechanism;
 import org.mskcc.cbio.oncokb.model.Query;
 import org.mskcc.cbio.oncokb.model.ReferenceGenome;
 import org.mskcc.cbio.oncokb.model.genomeNexus.TranscriptSummaryAlterationResult;
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
 import org.mskcc.cbio.oncokb.util.GenomeNexusUtils;
+import org.mskcc.cbio.oncokb.util.IndicatorUtils;
 import org.mskcc.cbio.oncokb.util.QueryUtils;
 import org.oncokb.oncokb_transcript.ApiException;
 import org.slf4j.Logger;
@@ -177,6 +179,7 @@ public class GermlineAnnotationsApiController {
         @ApiParam(value = "HGVS cDNA format following HGVS nomenclature. Example: EGFR:c.2369C>T", required = true) @RequestParam(value = "hgvsc", required = true) String hgvsc
         , @ApiParam(value = "Reference genome, either GRCh37 or GRCh38. The default is GRCh37", required = false, defaultValue = "GRCh37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") String referenceGenome
         , @ApiParam(value = "OncoTree(http://oncotree.info) tumor type name. The field supports OncoTree Code, OncoTree Name and OncoTree Main type. Example: Melanoma") @RequestParam(value = "tumorType", required = false) String tumorType
+        , @ApiParam(value = "List of inheritance mechanisms used to filter the returned genomic indicators. The special value CARRIER is matched against the genomic indicator name rather than the inheritance mechanism. Example: AUTOSOMAL_DOMINANT,CARRIER") @RequestParam(value = "inheritanceMechanisms", required = false) List<InheritanceMechanism> inheritanceMechanisms
     ) throws ApiException, org.genome_nexus.ApiException, ApiHttpErrorException {
         hgvsc = StringUtils.trim(hgvsc);
 
@@ -194,6 +197,7 @@ public class GermlineAnnotationsApiController {
         query.setHgvsc(hgvsc);
         query.setReferenceGenome(matchedRG);
         query.setTumorType(tumorType);
+        query.setInheritanceMechanisms(inheritanceMechanisms);
 
         GermlineIndicatorQueryResp indicatorQueryResp = annotateMutationsByHGVSc(Collections.singletonList(query)).get(0);
         return new ResponseEntity<>(indicatorQueryResp, HttpStatus.OK);
@@ -562,7 +566,9 @@ public class GermlineAnnotationsApiController {
 
         for (int i = 0; i < mutations.size(); i++) {
             AnnotateMutationByHGVScQuery query = mutations.get(i);
-            result.add(query.getReferenceGenome() == ReferenceGenome.GRCh37 ? grch37Alts.get(grch37Map.get(i)) : grch38Alts.get(grch38Map.get(i)));
+            GermlineIndicatorQueryResp indicatorQueryResp = query.getReferenceGenome() == ReferenceGenome.GRCh37 ? grch37Alts.get(grch37Map.get(i)) : grch38Alts.get(grch38Map.get(i));
+            indicatorQueryResp.setGenomicIndicators(IndicatorUtils.filterGenomicIndicatorsByInheritanceMechanisms(indicatorQueryResp.getGenomicIndicators(), query.getInheritanceMechanisms()));
+            result.add(indicatorQueryResp);
         }
         return result;
     }
