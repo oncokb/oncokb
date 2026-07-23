@@ -2,6 +2,7 @@ package org.mskcc.cbio.oncokb.apiModels;
 
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.SomaticIndicatorQueryResp;
+import org.mskcc.cbio.oncokb.model.VariantAnnotationMessageType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +18,7 @@ public class SomaticVariantAnnotation extends SomaticIndicatorQueryResp {
 
     private Boolean VUE = false;
     private String message;
+    private VariantAnnotationMessageType messageType;
     private List<VariantAnnotationTumorType> tumorTypes = new ArrayList<>();
 
     public SomaticVariantAnnotation() {
@@ -81,6 +83,14 @@ public class SomaticVariantAnnotation extends SomaticIndicatorQueryResp {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public VariantAnnotationMessageType getMessageType() {
+        return messageType;
+    }
+
+    public void setMessageType(VariantAnnotationMessageType messageType) {
+        this.messageType = messageType;
     }
 
     public List<VariantAnnotationTumorType> getTumorTypes() {

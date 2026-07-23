@@ -284,6 +284,10 @@ public class CacheFetcher {
         return this.oncokbTranscriptService.getCanonicalProteinSequence(referenceGenome, gene);
     }
 
+    public boolean isTranscriptServiceEnabled() {
+        return this.oncokbTranscriptService.isEnabled();
+    }
+
     @Cacheable(
         cacheResolver = "generalCacheResolver",
         keyGenerator = "concatKeyGenerator"

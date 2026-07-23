@@ -470,16 +470,8 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         // Only validate against the canonical sequence when Genome Nexus did not resolve the query to an
         // alternative variant. Legacy names and commonly used protein changes map to a valid alternative
         // transcript, so they must not be marked invalid before that check runs.
-        if (alternativeOncoKbVariant == null && alterationModel != null && alterationModel.getGene() != null) {
-            Gene alterationGene = alterationModel.getGene();
-            try {
-                String canonicalSequence = this.cacheFetcher.getCanonicalProteinSequence(matchedRG, alterationGene);
-                ReferenceResidueValidator
-                    .validate(alterationGene.getHugoSymbol(), alterationModel.getAlteration(), canonicalSequence)
-                    .ifPresent(annotation::setMessage);
-            } catch (ApiException e) {
-                // Fail open: never block annotation when the transcript service is unavailable.
-            }
+        if (alternativeOncoKbVariant == null) {
+            validateProteinChangeAgainstCanonical(matchedRG, alterationModel, annotation);
         }
 
         // for any hgvsg variant, we need to check whether it is VUE
@@ -573,6 +565,37 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             annotation.getTumorTypes().add(variantAnnotationTumorType);
         }
         return new ResponseEntity<>(annotation, HttpStatus.OK);
+    }
+
+    // Sets a messageType (and, only for an invalid protein change, a message) describing why the queried
+    // protein change could not be confirmed against the OncoKB canonical protein sequence. The message
+    // text for the non-mismatch types is left to the frontend.
+    private void validateProteinChangeAgainstCanonical(ReferenceGenome referenceGenome, Alteration alterationModel, SomaticVariantAnnotation annotation) {
+        if (alterationModel == null || alterationModel.getGene() == null) {
+            return;
+        }
+        if (!this.cacheFetcher.isTranscriptServiceEnabled()) {
+            annotation.setMessageType(VariantAnnotationMessageType.TRANSCRIPT_SERVICE_DISABLED);
+            return;
+        }
+        Gene gene = alterationModel.getGene();
+        String canonicalSequence;
+        try {
+            canonicalSequence = this.cacheFetcher.getCanonicalProteinSequence(referenceGenome, gene);
+        } catch (ApiException e) {
+            annotation.setMessageType(VariantAnnotationMessageType.TRANSCRIPT_SERVICE_UNAVAILABLE);
+            return;
+        }
+        if (StringUtils.isNullOrEmpty(canonicalSequence)) {
+            annotation.setMessageType(VariantAnnotationMessageType.NO_PROTEIN_SEQUENCE);
+            return;
+        }
+        ReferenceResidueValidator
+            .validate(gene.getHugoSymbol(), alterationModel.getAlteration(), canonicalSequence)
+            .ifPresent(message -> {
+                annotation.setMessage(message);
+                annotation.setMessageType(VariantAnnotationMessageType.INVALID_PROTEIN_CHANGE);
+            });
     }
 
     @Override

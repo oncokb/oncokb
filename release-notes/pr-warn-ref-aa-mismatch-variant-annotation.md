@@ -2,15 +2,15 @@
 
 ## What's New
 
-The private `/utils/variantAnnotation` endpoint now validates protein change queries against the OncoKB canonical protein sequence. It extracts the reference residue(s) and position(s) from the alteration, calls the OncoKB transcript service's find-canonical-sequence (`sequenceType=PROTEIN`) for the queried gene, and checks them against the canonical sequence. When something disagrees, the response includes a `message` concisely describing each problem.
+The private `/utils/variantAnnotation` endpoint now validates protein change queries against the OncoKB canonical protein sequence. When Genome Nexus does not resolve the query to a valid alternative OncoKB variant, it extracts the reference residue(s) and position(s) from the alteration, calls the OncoKB transcript service's find-canonical-sequence (`sequenceType=PROTEIN`) for the queried gene, and checks them against the canonical sequence. The response reports the outcome through a `messageType` enum (and, only for a genuine reference mismatch, a detailed `message`).
 
-Checks performed:
-- **Reference amino acid mismatch** — the queried reference residue differs from the canonical residue at that position (e.g. `A600E` on a transcript with `V` at position 600).
-- **Range boundaries** — both boundary residues of a range are validated (e.g. `A237_G238del` checks the residue at 237 and at 238).
-- **Position beyond sequence** — a position greater than the length of the canonical protein sequence is reported.
-- **Spelled-out deletions** — when a deletion lists its deleted residues (e.g. `A237_G238delAG`) that sequence is validated over the whole range for both length and content.
+`messageType` values:
+- **`INVALID_PROTEIN_CHANGE`** — the query is not a valid protein change against the canonical sequence. `message` carries the detail. Covers reference amino acid mismatch (e.g. `A600E` where position 600 is `V`), range boundaries (both boundaries of e.g. `A237_G238del` are checked), a position beyond the sequence length, malformed forms, and spelled-out deletions (e.g. `A237_G238delAG`, validated over the whole range for length and content).
+- **`NO_PROTEIN_SEQUENCE`** — the transcript service returned no canonical protein sequence for the gene, so the query is treated as invalid.
+- **`TRANSCRIPT_SERVICE_DISABLED`** — the transcript service is disabled, so the required validation step could not run.
+- **`TRANSCRIPT_SERVICE_UNAVAILABLE`** — the transcript service failed (likely intermittent); the query should be retried.
 
-The annotation itself is still returned unchanged — this is informational only. If everything agrees, the transcript service is unavailable, the entrez id is unknown, or the alteration is not a reference-bearing protein change, no `message` is added (fail open).
+The message text for the non-mismatch types is left to the frontend — only the type is returned. The annotation itself is still returned unchanged. No `messageType` is set when everything agrees, when the query resolves to a valid alternative variant, or when the alteration is not a reference-bearing protein change.
 
 ## Impact
 
@@ -20,7 +20,8 @@ Affects only the somatic `/utils/variantAnnotation` endpoint, and only for prote
 
 | Parameter/Field Path | Change (Added/Edit/Removed) | Endpoints |
 | --- | --- | --- |
-| `SomaticVariantAnnotation.message` | Added (nullable; set when the queried protein change disagrees with the canonical protein sequence) | `/utils/variantAnnotation` |
+| `SomaticVariantAnnotation.message` | Added (nullable; detail text, set only for an `INVALID_PROTEIN_CHANGE`) | `/utils/variantAnnotation` |
+| `SomaticVariantAnnotation.messageType` | Added (nullable enum: `INVALID_PROTEIN_CHANGE`, `NO_PROTEIN_SEQUENCE`, `TRANSCRIPT_SERVICE_DISABLED`, `TRANSCRIPT_SERVICE_UNAVAILABLE`) | `/utils/variantAnnotation` |
 
 ## Migration / Action Required
 
