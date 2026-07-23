@@ -1,5 +1,8 @@
 package org.mskcc.cbio.oncokb.util;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,9 +18,9 @@ import org.mskcc.cbio.oncokb.util.parser.ProteinChangeParser;
  * {@link AminoAcidConverterUtils}, and whether a string is a protein change is delegated to
  * {@link ProteinChangeParser}. Callers pass in the canonical sequence, so the class is pure.
  */
-public final class ReferenceResidueValidator {
+public final class ProteinChangeValidator {
 
-    private ReferenceResidueValidator() {}
+    private ProteinChangeValidator() {}
 
     // Captures the reference residues the parser does not expose. Boundary residues are captured as
     // [A-Z]+ (not a single letter) so a malformed boundary like VVV600_W604del is recognized.
@@ -26,24 +29,66 @@ public final class ReferenceResidueValidator {
     private static final Pattern REFERENCE_RESIDUES =
         Pattern.compile("^([A-Z]+)([0-9]+)(?:_([A-Z]+)([0-9]+))?(delins|del|ins|dup)?([A-Z0-9*]*)$");
 
+    // A spelled-out deleted sequence: amino-acid residues immediately following the lowercase "del"
+    // operator, terminated by an "ins" operator or the end of the string. HGVS describes deletions by
+    // position only, so these residues are redundant and are stripped by normalize.
+    private static final Pattern DELETED_SEQUENCE = Pattern.compile("del([A-Z]+)(ins|$)");
+
     // Problems in priority order; when more than one applies, the first one wins.
     private enum Problem {
         INVALID_RANGE_BOUNDARY,
         INVALID_POINT_REFERENCE,
         POSITION_OUT_OF_RANGE,
         REFERENCE_RESIDUE_MISMATCH,
-        START_AFTER_END,
-        DELETED_SEQUENCE_MISMATCH
+        START_AFTER_END
     }
 
     /**
-     * @param hugoSymbol        gene symbol, used only to make the message readable
-     * @param proteinChange     the queried protein change (e.g. {@code A600E}, {@code A237_G238del}).
-     *                          Three-letter amino-acid codes (e.g. {@code Val600Glu}) are accepted.
-     * @param canonicalSequence the gene's canonical protein sequence, or {@code null}/empty if unknown
-     * @return a message describing the highest-priority disagreement, or {@link Optional#empty()} when
-     *         everything agrees or the check cannot be performed
+     * Applies every protein-change normalization rule in turn and reports both the rewritten change and
+     * which rules fired, so callers know not just <em>that</em> a query was normalized but <em>how</em>.
+     * A query no rule touches comes back unchanged with an empty {@link NormalizationResult#getApplied()}.
+     * The input is expected to already be in HGVSp-short form (uppercase residues, lowercase operators).
      */
+    public static NormalizationResult normalize(String proteinChange) {
+        List<ProteinChangeNormalization> applied = new ArrayList<>();
+        String result = proteinChange;
+        if (!StringUtils.isEmpty(result)) {
+            // Rule: drop a spelled-out deleted sequence (A237_G238delAG -> A237_G238del). Future rules
+            // append here, each operating on the running `result` and recording what they changed.
+            String stripped = DELETED_SEQUENCE.matcher(result).replaceAll("del$2");
+            if (!stripped.equals(result)) {
+                result = stripped;
+                applied.add(ProteinChangeNormalization.DELETED_SEQUENCE_DROPPED);
+            }
+        }
+        return new NormalizationResult(result, applied);
+    }
+
+    /** The outcome of {@link #normalize(String)}: the rewritten change plus the rules that produced it. */
+    public static final class NormalizationResult {
+        private final String proteinChange;
+        private final List<ProteinChangeNormalization> applied;
+
+        NormalizationResult(String proteinChange, List<ProteinChangeNormalization> applied) {
+            this.proteinChange = proteinChange;
+            this.applied = Collections.unmodifiableList(applied);
+        }
+
+        /** The normalized protein change (equal to the input when nothing was applied). */
+        public String getProteinChange() {
+            return proteinChange;
+        }
+
+        /** The normalizations that fired, in the order applied; empty when the input was left as-is. */
+        public List<ProteinChangeNormalization> getApplied() {
+            return applied;
+        }
+
+        public boolean isNormalized() {
+            return !applied.isEmpty();
+        }
+    }
+
     public static Optional<String> validate(String hugoSymbol, String proteinChange, String canonicalSequence) {
         if (StringUtils.isEmpty(proteinChange) || StringUtils.isEmpty(canonicalSequence)) {
             return Optional.empty();
@@ -92,21 +137,16 @@ public final class ReferenceResidueValidator {
         private final String sequence;
         private final String ref1;
         private final String ref2;   // null unless the query is a range
-        private final String operator;
-        private final String tail;
         private final int start;
         private final int end;       // == start when not a range
 
         private ReferenceContext(String hugoSymbol, String proteinChange, String sequence,
-                                 String ref1, String ref2, String operator, String tail,
-                                 int start, int end) {
+                                 String ref1, String ref2, int start, int end) {
             this.hugoSymbol = hugoSymbol;
             this.proteinChange = proteinChange;
             this.sequence = sequence;
             this.ref1 = ref1;
             this.ref2 = ref2;
-            this.operator = operator;
-            this.tail = tail;
             this.start = start;
             this.end = end;
         }
@@ -116,14 +156,12 @@ public final class ReferenceResidueValidator {
             int start = Integer.parseInt(matcher.group(2));
             String ref2 = matcher.group(3);
             int end = matcher.group(4) == null ? start : Integer.parseInt(matcher.group(4));
-            String operator = matcher.group(5) == null ? "" : matcher.group(5);
-            String tail = matcher.group(6) == null ? "" : matcher.group(6);
 
             // A reversed range (end < start) is reported by START_AFTER_END, not dropped here.
             if (start < 1 || end < 1) {
                 return null;
             }
-            return new ReferenceContext(hugoSymbol, proteinChange, sequence, ref1, ref2, operator, tail, start, end);
+            return new ReferenceContext(hugoSymbol, proteinChange, sequence, ref1, ref2, start, end);
         }
 
         Optional<String> check(Problem problem) {
@@ -138,8 +176,6 @@ public final class ReferenceResidueValidator {
                     return checkReferenceResidues();
                 case START_AFTER_END:
                     return checkStartAfterEnd();
-                case DELETED_SEQUENCE_MISMATCH:
-                    return checkDeletedSequence();
                 default:
                     return Optional.empty();
             }
@@ -155,10 +191,6 @@ public final class ReferenceResidueValidator {
 
         private String prefix() {
             return hugoSymbol + " " + proteinChange + ": ";
-        }
-
-        private String canonicalSpan() {
-            return sequence.substring(start - 1, end);
         }
 
         Optional<String> checkRangeBoundary() {
@@ -221,25 +253,6 @@ public final class ReferenceResidueValidator {
             if (startWrong) {
                 return Optional.of(prefix() + "reference amino acid at position " + start
                     + " is " + canonicalStart + ", not " + startRef + ".");
-            }
-            return Optional.empty();
-        }
-
-        Optional<String> checkDeletedSequence() {
-            // Only a spelled-out del<SEQ> names reference residues; delins/ins/dup tails are inserted.
-            if (!"del".equals(operator) || tail.isEmpty()) {
-                return Optional.empty();
-            }
-            int span = end - start + 1;
-            if (tail.length() != span) {
-                return Optional.of(prefix() + "positions " + start + "-" + end + " span " + span
-                    + " residues, but the specified deleted sequence " + tail + " has " + tail.length()
-                    + " residue(s).");
-            }
-            if (!tail.equals(canonicalSpan())) {
-                return Optional.of(prefix() + "the deleted sequence " + tail
-                    + " does not match the canonical residues " + canonicalSpan()
-                    + " at positions " + start + "-" + end + ".");
             }
             return Optional.empty();
         }
