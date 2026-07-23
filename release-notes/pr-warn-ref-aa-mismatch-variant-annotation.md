@@ -15,7 +15,9 @@ The message text for the `UNCHECKED` reasons is left to the frontend — only th
 
 ## Impact
 
-Affects only the somatic `/utils/variantAnnotation` endpoint, and only for protein change queries (queries with a resolvable protein position and reference residue). HGVSg and genomic change queries are unaffected.
+**This does not affect any of the public API.** `/utils/variantAnnotation` is a private endpoint used by the public website at oncokb.org — API clients do not consume it and do not need to take any action.
+
+Within that private endpoint, the change affects only protein change queries (queries with a resolvable protein position and reference residue). HGVSg and genomic change queries are unaffected.
 
 ## API Changes
 
@@ -33,6 +35,6 @@ None
 
 ## Related Links
 
-- PR:
+- PR: #4131
 - Issue:
 - Docs:
