@@ -32,7 +32,6 @@ public final class ReferenceResidueValidator {
         INVALID_POINT_REFERENCE,
         POSITION_OUT_OF_RANGE,
         REFERENCE_RESIDUE_MISMATCH,
-        VARIANT_ALLELE_MISMATCH,
         START_AFTER_END,
         DELETED_SEQUENCE_MISMATCH
     }
@@ -137,8 +136,6 @@ public final class ReferenceResidueValidator {
                     return checkPositionInRange();
                 case REFERENCE_RESIDUE_MISMATCH:
                     return checkReferenceResidues();
-                case VARIANT_ALLELE_MISMATCH:
-                    return checkVariantAllele();
                 case START_AFTER_END:
                     return checkStartAfterEnd();
                 case DELETED_SEQUENCE_MISMATCH:
@@ -154,12 +151,6 @@ public final class ReferenceResidueValidator {
 
         private boolean isMultiResiduePoint() {
             return !isRange() && ref1.length() > 1;
-        }
-
-        // The only supported multi-residue point form: two reference residues collapsing to a single
-        // variant allele (e.g. IK744K — reference IK, variant K).
-        private boolean isTwoResiduePoint() {
-            return isMultiResiduePoint() && ref1.length() == 2 && operator.isEmpty() && tail.length() == 1;
         }
 
         private String prefix() {
@@ -186,7 +177,7 @@ public final class ReferenceResidueValidator {
         }
 
         Optional<String> checkPointReference() {
-            if (isMultiResiduePoint() && !isTwoResiduePoint()) {
+            if (isMultiResiduePoint()) {
                 return Optional.of(prefix() + "not a valid protein change.");
             }
             return Optional.empty();
@@ -212,7 +203,7 @@ public final class ReferenceResidueValidator {
 
         Optional<String> checkReferenceResidues() {
             String canonicalStart = sequence.substring(start - 1, start);
-            String startRef = ref1.substring(0, 1);
+            String startRef = ref1;
             boolean startWrong = !canonicalStart.equals(startRef);
 
             if (isRange()) {
@@ -230,20 +221,6 @@ public final class ReferenceResidueValidator {
             if (startWrong) {
                 return Optional.of(prefix() + "reference amino acid at position " + start
                     + " is " + canonicalStart + ", not " + startRef + ".");
-            }
-            return Optional.empty();
-        }
-
-        Optional<String> checkVariantAllele() {
-            // For the two-residue point form (IK744K), the second reference residue must equal the
-            // variant allele (the deletion collapses IK -> K).
-            if (!isTwoResiduePoint()) {
-                return Optional.empty();
-            }
-            String secondRef = ref1.substring(1, 2);
-            if (!secondRef.equals(tail)) {
-                return Optional.of(prefix() + "the second reference amino acid " + secondRef
-                    + " does not match the variant allele " + tail + ".");
             }
             return Optional.empty();
         }

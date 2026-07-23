@@ -130,24 +130,10 @@ public class ReferenceResidueValidatorTest {
     }
 
     @Test
-    public void twoResiduePointReferenceThatAgreesProducesNoMessage() {
-        Assert.assertFalse(ReferenceResidueValidator.validate("BRAF", "AL3L", SEQUENCE).isPresent());
-    }
-
-    @Test
-    public void twoResiduePointReferenceChecksFirstResidueAgainstCanonical() {
-        Optional<String> message = ReferenceResidueValidator.validate("BRAF", "GL3L", SEQUENCE);
+    public void multiResiduePointReferenceIsInvalid() {
+        Optional<String> message = ReferenceResidueValidator.validate("BRAF", "AL3L", SEQUENCE);
         Assert.assertTrue(message.isPresent());
-        Assert.assertEquals("BRAF GL3L: reference amino acid at position 3 is A, not G.", message.get());
-    }
-
-    @Test
-    public void twoResiduePointReferenceChecksSecondResidueAgainstVariant() {
-        Optional<String> message = ReferenceResidueValidator.validate("BRAF", "AL3Q", SEQUENCE);
-        Assert.assertTrue(message.isPresent());
-        Assert.assertEquals(
-            "BRAF AL3Q: the second reference amino acid L does not match the variant allele Q.",
-            message.get());
+        Assert.assertEquals("BRAF AL3L: not a valid protein change.", message.get());
     }
 
     @Test
