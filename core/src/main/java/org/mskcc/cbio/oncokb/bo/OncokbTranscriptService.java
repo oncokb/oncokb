@@ -128,11 +128,11 @@ public class OncokbTranscriptService {
 
     public String getAminoAcid(ReferenceGenome referenceGenome, Gene gene, int positionStart, int length) throws ApiException {
         String sequence = getProteinSequence(referenceGenome, gene);
-
-        if (sequence != null && sequence.length() >= (positionStart + length - 1)) {
-            return sequence.substring(positionStart - 1, positionStart + length - 1);
+        int end = positionStart + length - 1;
+        if (sequence == null || sequence.length() < end) {
+            return "";
         }
-        return "";
+        return sequence.substring(positionStart - 1, end);
     }
 
     /**
