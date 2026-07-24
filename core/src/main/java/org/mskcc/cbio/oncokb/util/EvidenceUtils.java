@@ -390,11 +390,28 @@ public class EvidenceUtils {
     }
 
     public static List<Evidence> getGenomicIndicatorsByGeneAndAlteration(Gene gene, String variant) {
-        Alteration alteration = AlterationUtils.findAlteration(gene, null, variant, true);
-        if (alteration == null) {
+        if (gene == null || StringUtils.isEmpty(variant)) {
             return new ArrayList<>();
         }
-        return evidenceBo.findEvidencesByAlteration(Collections.singletonList(alteration), Collections.singleton(EvidenceType.GENOMIC_INDICATOR));
+        List<Alteration> alterations = new ArrayList<>();
+        if (variant.trim().equalsIgnoreCase(InferredMutation.PATHOGENIC_VARIANTS.getVariant())) {
+            // A "Pathogenic Variants" query should also match stored alterations that carry an exclusion
+            // clause, e.g. "Pathogenic Variants {excluding A, B, C}", so collect every germline alteration
+            // whose name starts with "Pathogenic Variants".
+            alterations = AlterationUtils.getAllAlterations(null, gene).stream()
+                .filter(alt -> Boolean.TRUE.equals(alt.getForGermline()))
+                .filter(alt -> alt.getAlteration() != null && AlterationUtils.startsWithIgnoreCase(alt.getAlteration(), InferredMutation.PATHOGENIC_VARIANTS.getVariant()))
+                .collect(Collectors.toList());
+        } else {
+            Alteration alteration = AlterationUtils.findAlteration(gene, null, variant, true);
+            if (alteration != null) {
+                alterations.add(alteration);
+            }
+        }
+        if (alterations.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return evidenceBo.findEvidencesByAlteration(alterations, Collections.singleton(EvidenceType.GENOMIC_INDICATOR));
     }
 
     public static List<Evidence> getGenomicIndicatorAssociatedWithPathogenicVariants(Gene gene, ReferenceGenome referenceGenome, String inheritanceMechanism) {
