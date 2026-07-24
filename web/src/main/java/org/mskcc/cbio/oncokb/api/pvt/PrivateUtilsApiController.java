@@ -209,7 +209,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     }
 
     @Override
-    public ResponseEntity<List<GenomicIndicatorQueryResp>> utilsGenomicIndicatorsPost(List<GenomicIndicatorQuery> body) throws ApiHttpErrorException {
+    public ResponseEntity<List<GenomicIndicatorQueryResp>> utilsGenomicIndicatorsPost(@RequestBody(required = true) List<GenomicIndicatorQuery> body) throws ApiHttpErrorException {
         if (body == null) {
             throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         }
