@@ -33,15 +33,12 @@ public class SummaryUtils {
     public static Map<String, Object> tumorTypeSummary(EvidenceType evidenceType, Gene gene, Query query, Alteration exactMatchedAlt, List<Alteration> alterations, TumorType matchedTumorType, List<TumorType> relevantTumorTypes, Oncogenicity oncogenicity) {
         Map<String, Object> tumorTypeSummary = newTumorTypeSummary();
         String queryTumorType = query.getTumorType();
-        String key = query.getQueryId();
-        queryTumorType = convertTumorTypeNameInSummary(queryTumorType);
 
         if (gene == null || alterations == null || relevantTumorTypes == null || queryTumorType == null) {
             Map<String, Object> map = newTumorTypeSummary();
             return map;
         }
 
-        query.setTumorType(queryTumorType);
         tumorTypeSummary = getTumorTypeSummarySubFunc(evidenceType, gene, query, exactMatchedAlt, alterations, matchedTumorType, relevantTumorTypes, oncogenicity);
 
         return tumorTypeSummary;
