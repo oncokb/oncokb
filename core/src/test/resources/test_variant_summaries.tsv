@@ -12,7 +12,7 @@ ERBB2	E717V	Likely Oncogenic	There is no available functional data about the ERB
 
 ## Table 9.2b: Assigning an Oncogenic Effect and Creating Variant Summaries for Alternate Alleles When There is >1 Curated Reference Alleles with different oncogenic effect
 KLF5	E419G	Likely Oncogenic	There is no available functional data about the KLF5 E419G mutation (last reviewed on 10/16/2019). However, KLF5 E419Q is known to be oncogenic and KLF5 E419K is likely oncogenic; therefore KLF5 E419G is considered likely oncogenic.
-RET	C634F	Likely Oncogenic	There is no available functional data about the RET C634F mutation (last reviewed on 03/02/2017). However, RET C634R is known to be oncogenic and RET C634S/W/Y are likely oncogenic; therefore RET C634F is considered likely oncogenic.
+RET	C634F	Likely Oncogenic	There is no available functional data about the RET C634F mutation (last reviewed on 03/02/2017). However, it has been identified as a statistically significant hotspot and is likely to be oncogenic.
 ERBB2	A644S	Likely Oncogenic	There is no available functional data about the ERBB2 A644S mutation (last reviewed on 06/23/2023). However, ERBB2 A644F is likely oncogenic and ERBB2 A644V is likely neutral; therefore ERBB2 A644S is considered likely oncogenic.
 BRCA1	M1628F	Unknown	The BRCA1 M1628F mutation has not specifically been reviewed by the OncoKB team. While BRCA1 M1628T/V are likely neutral, the oncogenic effect of BRCA1 M1628F is unknown.
 PIK3CA	G451K	Likely Oncogenic	There is no available functional data about the PIK3CA G451K mutation (last reviewed on 08/05/2017). However, PIK3CA G451R is likely oncogenic, and therefore PIK3CA G451K is considered likely oncogenic.
