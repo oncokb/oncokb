@@ -1,5 +1,7 @@
 package org.mskcc.cbio.oncokb.bo;
 
+import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
+
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.apiModels.TranscriptUpdateValidationVM;
 import org.mskcc.cbio.oncokb.model.Gene;
@@ -117,7 +119,10 @@ public class OncokbTranscriptService {
 
     public String getProteinSequence(ReferenceGenome referenceGenome, Gene gene) throws ApiException {
         SequenceControllerApi sequenceResourceApi = new SequenceControllerApi();
-        Sequence sequence = sequenceResourceApi.findCanonicalSequenceUsingGET(referenceGenome.name(), gene.getEntrezGeneId(), SEQUENCE_TYPE);
+        // The sequence differs between reference genomes for some genes, so an unspecified genome has to
+        // fall back to the same default the API advertises rather than to whichever one the service picks.
+        ReferenceGenome rg = referenceGenome == null ? DEFAULT_REFERENCE_GENOME : referenceGenome;
+        Sequence sequence = sequenceResourceApi.findCanonicalSequenceUsingGET(rg.name(), gene.getEntrezGeneId(), SEQUENCE_TYPE);
         return sequence == null ? null : sequence.getSequence();
     }
 

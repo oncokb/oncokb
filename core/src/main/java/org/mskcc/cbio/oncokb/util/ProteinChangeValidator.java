@@ -29,6 +29,12 @@ public final class ProteinChangeValidator {
     private static final Pattern REFERENCE_RESIDUES =
         Pattern.compile("^([A-Z]+)([0-9]+)(?:_([A-Z]+)([0-9]+))?(delins|del|ins|dup)?([A-Z0-9*]*)$");
 
+    // Frameshift queries (V600fs, R123Gfs*45) carry a reference residue too, but the pattern above
+    // cannot see it because of the lowercase "fs" operator, so they get their own pattern.
+    // Groups: 1 ref residue, 2 position.
+    private static final Pattern FRAMESHIFT_REFERENCE_RESIDUES =
+        Pattern.compile("^([A-Z])([0-9]+)[A-Z]?fs(\\*([0-9]+|\\?)?)?$");
+
     // A spelled-out deleted sequence: amino-acid residues immediately following the lowercase "del"
     // operator, terminated by an "ins" operator or the end of the string. HGVS describes deletions by
     // position only, so these residues are redundant and are stripped by normalize.
@@ -96,11 +102,17 @@ public final class ProteinChangeValidator {
 
         String normalized = AminoAcidConverterUtils.resolveHgvspShortFromHgvsp(proteinChange);
 
+        ReferenceContext ctx;
         Matcher matcher = REFERENCE_RESIDUES.matcher(normalized);
-        if (!matcher.matches()) {
-            return Optional.empty();
+        if (matcher.matches()) {
+            ctx = ReferenceContext.from(hugoSymbol, normalized, canonicalSequence, matcher);
+        } else {
+            Matcher frameshift = FRAMESHIFT_REFERENCE_RESIDUES.matcher(normalized);
+            if (!frameshift.matches()) {
+                return Optional.empty();
+            }
+            ctx = ReferenceContext.fromFrameshift(hugoSymbol, normalized, canonicalSequence, frameshift);
         }
-        ReferenceContext ctx = ReferenceContext.from(hugoSymbol, normalized, canonicalSequence, matcher);
         if (ctx == null) {
             return Optional.empty();
         }
@@ -164,6 +176,19 @@ public final class ProteinChangeValidator {
             return new ReferenceContext(hugoSymbol, proteinChange, sequence, ref1, ref2, start, end);
         }
 
+        /**
+         * A frameshift is a single position carrying a single reference residue, so it is a point context:
+         * the range-boundary, reversed-range and multi-residue checks can never fire on it, leaving the
+         * position and the reference residue as the only two that do any work.
+         */
+        static ReferenceContext fromFrameshift(String hugoSymbol, String proteinChange, String sequence, Matcher matcher) {
+            int start = Integer.parseInt(matcher.group(2));
+            if (start < 1) {
+                return null;
+            }
+            return new ReferenceContext(hugoSymbol, proteinChange, sequence, matcher.group(1), null, start, start);
+        }
+
         Optional<String> check(Problem problem) {
             switch (problem) {
                 case INVALID_RANGE_BOUNDARY:
@@ -198,19 +223,19 @@ public final class ProteinChangeValidator {
                 return Optional.empty();
             }
             if (ref1.length() > 1) {
-                return Optional.of(prefix() + "the reference amino acid at position " + start
-                    + " must be a single amino acid, but is " + ref1 + ".");
+                return Optional.of(prefix() + "The reference amino acid at position " + start
+                    + " must be a single amino acid instead of " + ref1 + ".");
             }
             if (ref2.length() > 1) {
-                return Optional.of(prefix() + "the reference amino acid at position " + end
-                    + " must be a single amino acid, but is " + ref2 + ".");
+                return Optional.of(prefix() + "The reference amino acid at position " + end
+                    + " must be a single amino acid instead of " + ref2 + ".");
             }
             return Optional.empty();
         }
 
         Optional<String> checkPointReference() {
             if (isMultiResiduePoint()) {
-                return Optional.of(prefix() + "not a valid protein change.");
+                return Optional.of(prefix() + "Not a valid protein change.");
             }
             return Optional.empty();
         }
@@ -227,7 +252,7 @@ public final class ProteinChangeValidator {
 
         Optional<String> checkStartAfterEnd() {
             if (start > end) {
-                return Optional.of(prefix() + "start position " + start
+                return Optional.of(prefix() + "Start position " + start
                     + " is greater than end position " + end + ".");
             }
             return Optional.empty();
@@ -242,17 +267,18 @@ public final class ProteinChangeValidator {
                 String canonicalEnd = sequence.substring(end - 1, end);
                 boolean endWrong = !canonicalEnd.equals(ref2);
                 if (startWrong && endWrong) {
-                    return Optional.of(prefix() + "reference amino acids at positions " + start + " and " + end
-                        + " are " + canonicalStart + " and " + canonicalEnd + ", not " + startRef + " and " + ref2 + ".");
+                    return Optional.of(prefix() + "The reference amino acids at positions " + start + " and " + end
+                        + " are " + canonicalStart + " and " + canonicalEnd + " instead of " + startRef + " and " + ref2
+                        + " on the OncoKB canonical transcript.");
                 }
                 if (endWrong) {
-                    return Optional.of(prefix() + "reference amino acid at position " + end
-                        + " is " + canonicalEnd + ", not " + ref2 + ".");
+                    return Optional.of(prefix() + "The reference amino acid at position " + end
+                        + " is " + canonicalEnd + " instead of " + ref2 + " on the OncoKB canonical transcript.");
                 }
             }
             if (startWrong) {
-                return Optional.of(prefix() + "reference amino acid at position " + start
-                    + " is " + canonicalStart + ", not " + startRef + ".");
+                return Optional.of(prefix() + "The reference amino acid at position " + start
+                    + " is " + canonicalStart + " instead of " + startRef + " on the OncoKB canonical transcript.");
             }
             return Optional.empty();
         }

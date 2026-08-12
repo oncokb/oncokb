@@ -2,12 +2,14 @@
 
 ## What's New
 
-The private `/utils/variantAnnotation` endpoint now validates protein change queries against the OncoKB canonical protein sequence. When Genome Nexus does not resolve the query to a valid alternative OncoKB variant, it extracts the reference residue(s) and position(s) from the alteration, calls the OncoKB transcript service's find-canonical-sequence (`sequenceType=PROTEIN`) for the queried gene, and checks them against the canonical sequence.
+The private `/utils/variantAnnotation` endpoint now validates protein change queries against the OncoKB canonical protein sequence. When Genome Nexus does not resolve the query to a valid alternative OncoKB variant, it extracts the reference residue(s) and position(s) from the alteration, calls the OncoKB transcript service's find-canonical-sequence (`sequenceType=PROTEIN`) for the queried gene and the queried `referenceGenome` (the canonical sequence differs between GRCh37 and GRCh38 for some genes, so the query is always checked against the sequence for the genome it was asked about), and checks them against that sequence.
+
+Frameshift queries are checked too: the reference residue of e.g. `V600fs`, `R123Gfs*45` or `Gly7GlufsTer12` is verified against the canonical sequence like any other protein change. A frameshift that does not name exactly one reference residue (`105fs*4`, `EED153fs`) or that is anchored on the stop codon (`*1069Ffs*5`, which the canonical sequence does not include) is left unchecked.
 
 The outcome is reported through a single nested `proteinChangeValidation` object with a `status` (severity), a `messageType` (specific reason), a human-readable `message`, and, when the query was rewritten before annotation, the `normalizedProteinChange`.
 
 `status` values:
-- **`INVALID`** — the query disagrees with the canonical sequence. `message` carries the detail. Covers reference amino acid mismatch (e.g. `A600E` where position 600 is `V`), range boundaries (both boundaries of e.g. `A237_G238del` are checked), a position beyond the sequence length, a reversed range, and malformed forms. `messageType` is `INVALID_PROTEIN_CHANGE`.
+- **`INVALID`** — the query disagrees with the canonical sequence. `message` carries the detail. Covers reference amino acid mismatch (e.g. `A600E` or `A600fs` where position 600 is `V`), range boundaries (both boundaries of e.g. `A237_G238del` are checked), a position beyond the sequence length, a reversed range, and malformed forms. `messageType` is `INVALID_PROTEIN_CHANGE`.
 - **`NORMALIZED`** — the query was non-standard but unambiguously rewritten, and annotation ran on the normalized form. HGVS specifies a deletion by position only and does not spell out the deleted residues, so a spelled-out deleted sequence is dropped: `A237_G238delAG` → `A237_G238del`, and `A237_G238delAGinsCT` → `A237_G238delinsCT`. `messageType` is `NORMALIZED_DELETED_SEQUENCE`; `normalizedProteinChange` holds the form actually annotated.
 - **`UNCHECKED`** — the check could not be performed. `messageType` distinguishes `NO_PROTEIN_SEQUENCE` (the transcript service returned no canonical protein sequence for the gene), `TRANSCRIPT_SERVICE_DISABLED` (the transcript service is disabled), and `TRANSCRIPT_SERVICE_UNAVAILABLE` (the transcript service failed; the query should be retried).
 
