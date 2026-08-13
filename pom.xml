@@ -106,16 +106,10 @@
             <artifactId>jstl</artifactId>
             <version>1.2</version>
         </dependency>
-        <!--
-            TODO: revert to a master build once oncokb-java-api-client#25 is merged.
-            This is pinned to the head of feature/canonical-protein-sequence-fetch because
-            /api/find-canonical-protein-sequences (oncokb-transcript#610) is not in the master client yet.
-            When #25 is merged, replace this version with the resulting master commit and drop this comment.
-        -->
         <dependency>
             <groupId>com.github.oncokb</groupId>
             <artifactId>oncokb-java-api-client</artifactId>
-            <version>7195a32811</version>
+            <version>d5777bcecc</version>
         </dependency>
         <dependency>
             <groupId>com.vdurmont</groupId>
