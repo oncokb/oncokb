@@ -14,6 +14,8 @@ import org.oncokb.oncokb_transcript.ApiException;
 import org.oncokb.oncokb_transcript.Configuration;
 import org.oncokb.oncokb_transcript.auth.HttpBearerAuth;
 import org.oncokb.oncokb_transcript.client.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -23,6 +25,7 @@ import java.util.stream.Collectors;
  */
 public class OncokbTranscriptService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(OncokbTranscriptService.class);
     private static final String ONCOKB_TRANSCRIPT_URL = "https://transcript.oncokb.org";
 
     private ApiClient client;
@@ -46,7 +49,13 @@ public class OncokbTranscriptService {
         Authorization.setBearerToken(oncokbTranscriptToken);
         if (StringUtils.isNotEmpty(oncokbTranscriptToken)) {
             enabled = true;
-            cacheAllGenes();
+            // The gene cache is static and shared by every instance, so constructing another service has
+            // nothing to add once it is populated. Skipping it matters because instances are created per
+            // request in several controllers and each fetch pulls the full gene list (~8MB).
+            // Call cacheAllGenes() directly to refresh it on purpose.
+            if (transcriptGeneByKeywords.isEmpty()) {
+                cacheAllGenes();
+            }
         }
     }
 
@@ -129,6 +138,46 @@ public class OncokbTranscriptService {
     public List<Sequence> getAllProteinSequences(ReferenceGenome referenceGenome) throws ApiException {
         SequenceControllerApi sequenceResourceApi = new SequenceControllerApi();
         return sequenceResourceApi.findCanonicalSequencesUsingPOST(referenceGenome.name(), SEQUENCE_TYPE, CacheUtils.getAllGenes().stream().map(Gene::getEntrezGeneId).collect(Collectors.toList()));
+    }
+
+    /**
+     * Fetches the canonical protein sequence for every given gene in one request, keyed by entrez gene id.
+     *
+     * <p>Uses /api/find-canonical-protein-sequences, which resolves any number of genes with a single joined
+     * statement and returns the entrez gene id alongside each sequence. That is what makes one request for
+     * the whole gene list viable, and it also removes the need to map results back onto genes through the
+     * curated isoform.
+     *
+     * <p>Genes the service has no sequence for are simply absent from the returned map — that is a normal
+     * outcome (not every gene has a transcript in every reference genome), so callers should treat a missing
+     * key as "known to have none" rather than as a failure.
+     */
+    public Map<Integer, String> getCanonicalProteinSequences(ReferenceGenome referenceGenome, Collection<Gene> genes) throws ApiException {
+        Map<Integer, String> sequences = new HashMap<>();
+        if (!this.enabled || genes == null || genes.isEmpty()) {
+            return sequences;
+        }
+        ReferenceGenome rg = referenceGenome == null ? DEFAULT_REFERENCE_GENOME : referenceGenome;
+
+        List<Integer> entrezGeneIds = genes
+            .stream()
+            .filter(gene -> gene != null && gene.getEntrezGeneId() != null)
+            .map(Gene::getEntrezGeneId)
+            .collect(Collectors.toList());
+        if (entrezGeneIds.isEmpty()) {
+            return sequences;
+        }
+
+        List<CanonicalProteinSequenceVM> response = new SequenceControllerApi()
+            .findCanonicalProteinSequencesUsingPOST(rg.name(), entrezGeneIds);
+
+        for (CanonicalProteinSequenceVM proteinSequence : response == null ? Collections.<CanonicalProteinSequenceVM>emptyList() : response) {
+            if (proteinSequence == null || proteinSequence.getEntrezGeneId() == null || StringUtils.isEmpty(proteinSequence.getSequence())) {
+                continue;
+            }
+            sequences.put(proteinSequence.getEntrezGeneId(), proteinSequence.getSequence());
+        }
+        return sequences;
     }
 
     public String getAminoAcid(ReferenceGenome referenceGenome, Gene gene, int positionStart, int length) throws ApiException {

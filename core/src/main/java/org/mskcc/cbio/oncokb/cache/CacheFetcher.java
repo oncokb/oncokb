@@ -281,6 +281,16 @@ public class CacheFetcher {
     }
 
     public String getCanonicalProteinSequence(ReferenceGenome referenceGenome, Gene gene) throws ApiException {
+        // Served from the cache warmed at startup. A gene absent from it has no sequence in this reference
+        // genome, which is a valid answer, so it must not fall through to the transcript service. The direct
+        // lookup is only for when the cache never loaded at all (transcript service disabled).
+        if (CacheUtils.isProteinSequenceCached()) {
+            if (gene == null || gene.getEntrezGeneId() == null) {
+                return null;
+            }
+            ReferenceGenome rg = referenceGenome == null ? DEFAULT_REFERENCE_GENOME : referenceGenome;
+            return CacheUtils.getProteinSequence(rg, gene.getEntrezGeneId());
+        }
         return this.oncokbTranscriptService.getCanonicalProteinSequence(referenceGenome, gene);
     }
 
