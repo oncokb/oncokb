@@ -8,6 +8,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
+import org.mskcc.cbio.oncokb.apiModels.AlterationValidationError;
+import org.mskcc.cbio.oncokb.model.AlterationValidationErrorType;
 import org.mskcc.cbio.oncokb.util.parser.ProteinChangeParser;
 
 /**
@@ -40,13 +42,21 @@ public final class ProteinChangeValidator {
     // position only, so these residues are redundant and are stripped by normalize.
     private static final Pattern DELETED_SEQUENCE = Pattern.compile("del([A-Z]+)(ins|$)");
 
-    // Problems in priority order; when more than one applies, the first one wins.
+    // Problems in priority order; when more than one applies, the first one wins. Each carries the
+    // AlterationValidationErrorType it is reported as; several protein-change problems share one, since the
+    // reported vocabulary is coarser than the checks that produce it.
     private enum Problem {
-        INVALID_RANGE_BOUNDARY,
-        INVALID_POINT_REFERENCE,
-        POSITION_OUT_OF_RANGE,
-        REFERENCE_RESIDUE_MISMATCH,
-        START_AFTER_END
+        INVALID_RANGE_BOUNDARY(AlterationValidationErrorType.MALFORMED_ALTERATION),
+        INVALID_POINT_REFERENCE(AlterationValidationErrorType.MALFORMED_ALTERATION),
+        POSITION_OUT_OF_RANGE(AlterationValidationErrorType.POSITION_OUT_OF_RANGE),
+        REFERENCE_RESIDUE_MISMATCH(AlterationValidationErrorType.REFERENCE_ALLELE_MISMATCH),
+        START_AFTER_END(AlterationValidationErrorType.REVERSED_POSITION_RANGE);
+
+        private final AlterationValidationErrorType type;
+
+        Problem(AlterationValidationErrorType type) {
+            this.type = type;
+        }
     }
 
     /**
@@ -95,7 +105,7 @@ public final class ProteinChangeValidator {
         }
     }
 
-    public static Optional<String> validate(String hugoSymbol, String proteinChange, String canonicalSequence) {
+    public static Optional<AlterationValidationError> validate(String hugoSymbol, String proteinChange, String canonicalSequence) {
         if (StringUtils.isEmpty(proteinChange) || StringUtils.isEmpty(canonicalSequence)) {
             return Optional.empty();
         }
@@ -121,7 +131,7 @@ public final class ProteinChangeValidator {
         // parse it, so run this structural check before the parser gate below.
         Optional<String> structural = ctx.check(Problem.INVALID_RANGE_BOUNDARY);
         if (structural.isPresent()) {
-            return structural;
+            return Optional.of(new AlterationValidationError(Problem.INVALID_RANGE_BOUNDARY.type, structural.get()));
         }
 
         // The remaining checks interpret residues/positions, so only run them once the parser confirms
@@ -136,7 +146,7 @@ public final class ProteinChangeValidator {
             }
             Optional<String> message = ctx.check(problem);
             if (message.isPresent()) {
-                return message;
+                return Optional.of(new AlterationValidationError(problem.type, message.get()));
             }
         }
         return Optional.empty();

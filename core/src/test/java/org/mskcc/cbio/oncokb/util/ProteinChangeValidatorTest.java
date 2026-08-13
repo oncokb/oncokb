@@ -5,40 +5,66 @@ import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.mskcc.cbio.oncokb.apiModels.AlterationValidationError;
+import org.mskcc.cbio.oncokb.model.AlterationValidationErrorType;
 
 public class ProteinChangeValidatorTest {
 
     // BRAF-like sequence: 1-based positions -> M(1) A(2) A(3) L(4) S(5) G(6) V(7)
     private static final String SEQUENCE = "MAALSGV";
 
+    // Most tests only care about the wording, so they go through these two projections of the issue.
+    private static Optional<String> validateMessage(String hugoSymbol, String proteinChange, String sequence) {
+        return ProteinChangeValidator.validate(hugoSymbol, proteinChange, sequence)
+            .map(AlterationValidationError::getMessage);
+    }
+
+    private static AlterationValidationErrorType validateError(String hugoSymbol, String proteinChange, String sequence) {
+        return ProteinChangeValidator.validate(hugoSymbol, proteinChange, sequence)
+            .map(AlterationValidationError::getType).orElse(null);
+    }
+
     @Test
     public void noMessageWhenReferenceResidueAgrees() {
-        Assert.assertFalse(ProteinChangeValidator.validate("BRAF", "V7E", SEQUENCE).isPresent());
+        Assert.assertFalse(validateMessage("BRAF", "V7E", SEQUENCE).isPresent());
     }
 
     @Test
     public void noMessageWhenSequenceUnknown() {
-        Assert.assertFalse(ProteinChangeValidator.validate("BRAF", "V7E", null).isPresent());
-        Assert.assertFalse(ProteinChangeValidator.validate("BRAF", "V7E", "").isPresent());
+        Assert.assertFalse(validateMessage("BRAF", "V7E", null).isPresent());
+        Assert.assertFalse(validateMessage("BRAF", "V7E", "").isPresent());
     }
 
     @Test
     public void skipsNonReferenceBearingAlterations() {
-        Assert.assertFalse(ProteinChangeValidator.validate("BRAF", "Amplification", SEQUENCE).isPresent());
-        Assert.assertFalse(ProteinChangeValidator.validate("BRAF", "Fusion", SEQUENCE).isPresent());
-        Assert.assertFalse(ProteinChangeValidator.validate("BRAF", "7del", SEQUENCE).isPresent());
+        Assert.assertFalse(validateMessage("BRAF", "Amplification", SEQUENCE).isPresent());
+        Assert.assertFalse(validateMessage("BRAF", "Fusion", SEQUENCE).isPresent());
+        Assert.assertFalse(validateMessage("BRAF", "7del", SEQUENCE).isPresent());
+    }
+
+    @Test
+    public void reportsTheErrorEachProblemMapsTo() {
+        Assert.assertEquals(AlterationValidationErrorType.REFERENCE_ALLELE_MISMATCH, validateError("BRAF", "G7E", SEQUENCE));
+        Assert.assertEquals(AlterationValidationErrorType.REFERENCE_ALLELE_MISMATCH, validateError("BRAF", "G7fs", SEQUENCE));
+        Assert.assertEquals(AlterationValidationErrorType.POSITION_OUT_OF_RANGE, validateError("BRAF", "Z99E", SEQUENCE));
+        Assert.assertEquals(AlterationValidationErrorType.REVERSED_POSITION_RANGE, validateError("BRAF", "V7_G6del", SEQUENCE));
+        // Both a multi-residue point reference and a multi-residue range boundary are malformed.
+        Assert.assertEquals(AlterationValidationErrorType.MALFORMED_ALTERATION, validateError("BRAF", "AL3L", SEQUENCE));
+        Assert.assertEquals(AlterationValidationErrorType.MALFORMED_ALTERATION, validateError("BRAF", "VVV600_W604del", SEQUENCE));
+        // Nothing wrong, nothing reported.
+        Assert.assertNull(validateError("BRAF", "V7E", SEQUENCE));
     }
 
     @Test
     public void reportsSingleReferenceResidueMismatch() {
-        Optional<String> message = ProteinChangeValidator.validate("BRAF", "G7E", SEQUENCE);
+        Optional<String> message = validateMessage("BRAF", "G7E", SEQUENCE);
         Assert.assertTrue(message.isPresent());
         Assert.assertEquals("BRAF G7E: The reference amino acid at position 7 is V instead of G on the OncoKB canonical transcript.", message.get());
     }
 
     @Test
     public void reportsBothRangeBoundaryMismatches() {
-        Optional<String> message = ProteinChangeValidator.validate("BRAF", "V2_V3del", SEQUENCE);
+        Optional<String> message = validateMessage("BRAF", "V2_V3del", SEQUENCE);
         Assert.assertTrue(message.isPresent());
         Assert.assertEquals(
             "BRAF V2_V3del: The reference amino acids at positions 2 and 3 are A and A instead of V and V on the OncoKB canonical transcript.",
@@ -47,14 +73,14 @@ public class ProteinChangeValidatorTest {
 
     @Test
     public void reportsOnlyTheWrongRangeBoundary() {
-        Optional<String> message = ProteinChangeValidator.validate("BRAF", "A2_V3del", SEQUENCE);
+        Optional<String> message = validateMessage("BRAF", "A2_V3del", SEQUENCE);
         Assert.assertTrue(message.isPresent());
         Assert.assertEquals("BRAF A2_V3del: The reference amino acid at position 3 is A instead of V on the OncoKB canonical transcript.", message.get());
     }
 
     @Test
     public void positionOutOfRangeOutranksResidueMismatch() {
-        Optional<String> message = ProteinChangeValidator.validate("BRAF", "Z99E", SEQUENCE);
+        Optional<String> message = validateMessage("BRAF", "Z99E", SEQUENCE);
         Assert.assertTrue(message.isPresent());
         Assert.assertEquals("BRAF Z99E: position 99 exceeds the BRAF canonical protein length of 7.", message.get());
     }
@@ -108,19 +134,19 @@ public class ProteinChangeValidatorTest {
 
     @Test
     public void insertedResiduesAreNotValidatedAgainstCanonical() {
-        Assert.assertFalse(ProteinChangeValidator.validate("BRAF", "A2_A3insXYZ", SEQUENCE).isPresent());
+        Assert.assertFalse(validateMessage("BRAF", "A2_A3insXYZ", SEQUENCE).isPresent());
     }
 
     @Test
     public void acceptsThreeLetterPointMutation() {
-        Optional<String> message = ProteinChangeValidator.validate("BRAF", "Gly7Glu", SEQUENCE);
+        Optional<String> message = validateMessage("BRAF", "Gly7Glu", SEQUENCE);
         Assert.assertTrue(message.isPresent());
         Assert.assertEquals("BRAF G7E: The reference amino acid at position 7 is V instead of G on the OncoKB canonical transcript.", message.get());
     }
 
     @Test
     public void acceptsThreeLetterRangeDeletion() {
-        Optional<String> message = ProteinChangeValidator.validate("BRAF", "Val2_Val3del", SEQUENCE);
+        Optional<String> message = validateMessage("BRAF", "Val2_Val3del", SEQUENCE);
         Assert.assertTrue(message.isPresent());
         Assert.assertEquals(
             "BRAF V2_V3del: The reference amino acids at positions 2 and 3 are A and A instead of V and V on the OncoKB canonical transcript.",
@@ -129,7 +155,7 @@ public class ProteinChangeValidatorTest {
 
     @Test
     public void flagsMalformedMultiResidueRangeBoundary() {
-        Optional<String> message = ProteinChangeValidator.validate("BRAF", "VVV600_W604del", SEQUENCE);
+        Optional<String> message = validateMessage("BRAF", "VVV600_W604del", SEQUENCE);
         Assert.assertTrue(message.isPresent());
         Assert.assertEquals(
             "BRAF VVV600_W604del: The reference amino acid at position 600 must be a single amino acid instead of VVV.",
@@ -138,7 +164,7 @@ public class ProteinChangeValidatorTest {
 
     @Test
     public void flagsWrongCaseThreeLetterRangeBoundary() {
-        Optional<String> message = ProteinChangeValidator.validate("BRAF", "VAL2_VAL3del", SEQUENCE);
+        Optional<String> message = validateMessage("BRAF", "VAL2_VAL3del", SEQUENCE);
         Assert.assertTrue(message.isPresent());
         Assert.assertEquals(
             "BRAF VAL2_VAL3del: The reference amino acid at position 2 must be a single amino acid instead of VAL.",
@@ -147,51 +173,51 @@ public class ProteinChangeValidatorTest {
 
     @Test
     public void multiResiduePointReferenceIsInvalid() {
-        Optional<String> message = ProteinChangeValidator.validate("BRAF", "AL3L", SEQUENCE);
+        Optional<String> message = validateMessage("BRAF", "AL3L", SEQUENCE);
         Assert.assertTrue(message.isPresent());
         Assert.assertEquals("BRAF AL3L: Not a valid protein change.", message.get());
     }
 
     @Test
     public void threeResiduePointReferenceIsInvalid() {
-        Optional<String> message = ProteinChangeValidator.validate("BRAF", "ALS3S", SEQUENCE);
+        Optional<String> message = validateMessage("BRAF", "ALS3S", SEQUENCE);
         Assert.assertTrue(message.isPresent());
         Assert.assertEquals("BRAF ALS3S: Not a valid protein change.", message.get());
     }
 
     @Test
     public void noMessageWhenFrameshiftReferenceResidueAgrees() {
-        Assert.assertFalse(ProteinChangeValidator.validate("BRAF", "V7fs", SEQUENCE).isPresent());
-        Assert.assertFalse(ProteinChangeValidator.validate("BRAF", "V7Efs*12", SEQUENCE).isPresent());
+        Assert.assertFalse(validateMessage("BRAF", "V7fs", SEQUENCE).isPresent());
+        Assert.assertFalse(validateMessage("BRAF", "V7Efs*12", SEQUENCE).isPresent());
     }
 
     @Test
     public void reportsFrameshiftReferenceResidueMismatch() {
-        Optional<String> message = ProteinChangeValidator.validate("BRAF", "G7fs", SEQUENCE);
+        Optional<String> message = validateMessage("BRAF", "G7fs", SEQUENCE);
         Assert.assertTrue(message.isPresent());
         Assert.assertEquals("BRAF G7fs: The reference amino acid at position 7 is V instead of G on the OncoKB canonical transcript.", message.get());
     }
 
     @Test
     public void reportsFrameshiftReferenceResidueMismatchWithExtension() {
-        Optional<String> message = ProteinChangeValidator.validate("BRAF", "G7Efs*12", SEQUENCE);
+        Optional<String> message = validateMessage("BRAF", "G7Efs*12", SEQUENCE);
         Assert.assertTrue(message.isPresent());
         Assert.assertEquals("BRAF G7Efs*12: The reference amino acid at position 7 is V instead of G on the OncoKB canonical transcript.", message.get());
 
-        Assert.assertTrue(ProteinChangeValidator.validate("BRAF", "G7Efs*", SEQUENCE).isPresent());
-        Assert.assertTrue(ProteinChangeValidator.validate("BRAF", "G7Efs*?", SEQUENCE).isPresent());
+        Assert.assertTrue(validateMessage("BRAF", "G7Efs*", SEQUENCE).isPresent());
+        Assert.assertTrue(validateMessage("BRAF", "G7Efs*?", SEQUENCE).isPresent());
     }
 
     @Test
     public void acceptsThreeLetterFrameshift() {
-        Optional<String> message = ProteinChangeValidator.validate("BRAF", "Gly7GlufsTer12", SEQUENCE);
+        Optional<String> message = validateMessage("BRAF", "Gly7GlufsTer12", SEQUENCE);
         Assert.assertTrue(message.isPresent());
         Assert.assertEquals("BRAF G7Efs*12: The reference amino acid at position 7 is V instead of G on the OncoKB canonical transcript.", message.get());
     }
 
     @Test
     public void reportsFrameshiftPositionOutOfRange() {
-        Optional<String> message = ProteinChangeValidator.validate("BRAF", "G99fs", SEQUENCE);
+        Optional<String> message = validateMessage("BRAF", "G99fs", SEQUENCE);
         Assert.assertTrue(message.isPresent());
         Assert.assertEquals("BRAF G99fs: position 99 exceeds the BRAF canonical protein length of 7.", message.get());
     }
@@ -201,21 +227,21 @@ public class ProteinChangeValidatorTest {
         // None of these name a single reference residue to compare: the first states none, the second
         // states more than one position can account for, and the stop codon the third is anchored on is
         // not part of the canonical sequence.
-        Assert.assertFalse(ProteinChangeValidator.validate("BRAF", "7fs*4", SEQUENCE).isPresent());
-        Assert.assertFalse(ProteinChangeValidator.validate("BRAF", "GVX7fs", SEQUENCE).isPresent());
-        Assert.assertFalse(ProteinChangeValidator.validate("BRAF", "*8Ffs*5", SEQUENCE).isPresent());
+        Assert.assertFalse(validateMessage("BRAF", "7fs*4", SEQUENCE).isPresent());
+        Assert.assertFalse(validateMessage("BRAF", "GVX7fs", SEQUENCE).isPresent());
+        Assert.assertFalse(validateMessage("BRAF", "*8Ffs*5", SEQUENCE).isPresent());
     }
 
     @Test
     public void reportsReversedRange() {
-        Optional<String> message = ProteinChangeValidator.validate("BRAF", "V7_G6del", SEQUENCE);
+        Optional<String> message = validateMessage("BRAF", "V7_G6del", SEQUENCE);
         Assert.assertTrue(message.isPresent());
         Assert.assertEquals("BRAF V7_G6del: Start position 7 is greater than end position 6.", message.get());
     }
 
     @Test
     public void residueMismatchOutranksReversedRange() {
-        Optional<String> message = ProteinChangeValidator.validate("BRAF", "A7_A6del", SEQUENCE);
+        Optional<String> message = validateMessage("BRAF", "A7_A6del", SEQUENCE);
         Assert.assertTrue(message.isPresent());
         Assert.assertEquals(
             "BRAF A7_A6del: The reference amino acids at positions 7 and 6 are V and G instead of A and A on the OncoKB canonical transcript.",

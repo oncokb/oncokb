@@ -29,7 +29,6 @@ M1ext-1	inframe_insertion			1	1
 1ext	inframe_insertion			1	1
 C359del	inframe_deletion	C		359	359
 359del	inframe_deletion			359	359
-IK744A	inframe_deletion	IK	A	744	745
 1459_1468del	inframe_deletion			1459	1468
 A1459_D1468del	inframe_deletion			1459	1468
 1459_D1468del	inframe_deletion			1459	1468

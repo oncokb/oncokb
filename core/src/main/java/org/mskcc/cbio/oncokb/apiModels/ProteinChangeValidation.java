@@ -7,10 +7,6 @@ import org.mskcc.cbio.oncokb.model.VariantAnnotationMessageType;
  * Outcome of validating a queried protein change against the OncoKB canonical protein sequence.
  * Present on a {@link SomaticVariantAnnotation} only when there is something to report; a query
  * that agrees with the canonical sequence leaves this null.
- *
- * <p>{@link #status} is the headline severity, {@link #messageType} the machine-readable reason,
- * and {@link #message} the human-readable detail. {@link #normalizedProteinChange} is set whenever
- * the queried string was rewritten before annotation, independent of the status.
  */
 public class ProteinChangeValidation {
     private ProteinChangeValidationStatus status;

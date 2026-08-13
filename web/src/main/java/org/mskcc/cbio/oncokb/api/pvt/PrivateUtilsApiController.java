@@ -589,29 +589,10 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         if (alterationModel == null || alterationModel.getGene() == null) {
             return;
         }
-        if (!this.cacheFetcher.isTranscriptServiceEnabled()) {
-            annotation.setProteinChangeValidation(unchecked(VariantAnnotationMessageType.TRANSCRIPT_SERVICE_DISABLED, appliedNormalizations, alterationModel));
-            return;
-        }
         Gene gene = alterationModel.getGene();
-        String canonicalSequence;
-        try {
-            canonicalSequence = this.cacheFetcher.getCanonicalProteinSequence(referenceGenome, gene);
-        } catch (ApiException e) {
-            annotation.setProteinChangeValidation(unchecked(VariantAnnotationMessageType.TRANSCRIPT_SERVICE_UNAVAILABLE, appliedNormalizations, alterationModel));
-            return;
-        }
-        if (StringUtils.isNullOrEmpty(canonicalSequence)) {
-            annotation.setProteinChangeValidation(unchecked(VariantAnnotationMessageType.NO_PROTEIN_SEQUENCE, appliedNormalizations, alterationModel));
-            return;
-        }
-
-        Optional<String> invalid = ProteinChangeValidator.validate(gene.getHugoSymbol(), alterationModel.getAlteration(), canonicalSequence);
-        ProteinChangeValidation validation = null;
-        if (invalid.isPresent()) {
-            validation = new ProteinChangeValidation(ProteinChangeValidationStatus.INVALID,
-                VariantAnnotationMessageType.INVALID_PROTEIN_CHANGE, invalid.get());
-        } else if (!appliedNormalizations.isEmpty()) {
+        ProteinChangeValidation validation = ProteinChangeValidationUtils.validate(
+            this.cacheFetcher, referenceGenome, gene, alterationModel.getAlteration());
+        if (validation == null && !appliedNormalizations.isEmpty()) {
             // Each normalization carries its own reason and message; a single object surfaces the first
             // as the headline messageType and joins every rationale into the message.
             String message = appliedNormalizations.stream()
@@ -626,16 +607,6 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             }
             annotation.setProteinChangeValidation(validation);
         }
-    }
-
-    // An UNCHECKED validation for the cases where the canonical sequence could not be obtained; still
-    // records the normalized protein change when the query was rewritten before annotation.
-    private ProteinChangeValidation unchecked(VariantAnnotationMessageType messageType, List<ProteinChangeNormalization> appliedNormalizations, Alteration alterationModel) {
-        ProteinChangeValidation validation = new ProteinChangeValidation(ProteinChangeValidationStatus.UNCHECKED, messageType, null);
-        if (!appliedNormalizations.isEmpty()) {
-            validation.setNormalizedProteinChange(alterationModel.getAlteration());
-        }
-        return validation;
     }
 
     @Override
