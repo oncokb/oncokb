@@ -24,15 +24,15 @@ ERBB2	E719A	Unknown	The ERBB2 E719A mutation has not specifically been reviewed 
 
 ## Table 9.3: Leading Sentences, mainly test unknown mutation but fall under umbrella terms(Truncating Mutations, Fusion)
 ### Truncating mutation in oncogene
-BRAF	T100*	Unknown	BRAF is considered an oncogene and truncating mutations in oncogenes are typically nonfunctional.
+BRAF	L100*	Unknown	BRAF is considered an oncogene and truncating mutations in oncogenes are typically nonfunctional.
 ### Truncating mutation in TSG
-BRCA1	T100*	Likely Oncogenic	The BRCA1 T100* is a truncating mutation in a tumor suppressor gene, and therefore is likely oncogenic.
+BRCA1	E100*	Likely Oncogenic	The BRCA1 E100* is a truncating mutation in a tumor suppressor gene, and therefore is likely oncogenic.
 ### Truncating mutations in TSG that are not curated
-PPP2R2A	T100*	Likely Oncogenic	The PPP2R2A T100* is a truncating mutation in a tumor suppressor gene, and therefore is likely oncogenic.
+PPP2R2A	R100*	Likely Oncogenic	The PPP2R2A R100* is a truncating mutation in a tumor suppressor gene, and therefore is likely oncogenic.
 ### Truncating mutation in both
-PTPN1	T100*	Likely Oncogenic	The PTPN1 T100* is a truncating mutation in a tumor suppressor gene, and therefore is likely oncogenic.
+PTPN1	W100*	Likely Oncogenic	The PTPN1 W100* is a truncating mutation in a tumor suppressor gene, and therefore is likely oncogenic.
 ### Truncating mutation in neither
-GATA1	T100*	Unknown	The GATA1 T100* mutation has not specifically been reviewed by the OncoKB team, and therefore its biological significance is unknown.
+GATA1	K100*	Unknown	The GATA1 K100* mutation has not specifically been reviewed by the OncoKB team, and therefore its biological significance is unknown.
 
 ### Fusions
 ### Fusion in oncogene
