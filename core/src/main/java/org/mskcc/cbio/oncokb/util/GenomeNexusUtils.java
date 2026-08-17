@@ -21,6 +21,8 @@ import org.mskcc.cbio.oncokb.model.genomeNexusPreAnnotations.GenomeNexusAnnotate
 import org.springframework.http.*;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -31,6 +33,7 @@ import static org.mskcc.cbio.oncokb.util.VariantConsequenceUtils.consequenceReso
  * Created by Hongxin on 6/26/17.
  */
 public class GenomeNexusUtils {
+    private static final Logger LOG = LoggerFactory.getLogger(GenomeNexusUtils.class);
 
     private static final String MSK_ISOFORM_OVERRIDE = "mskcc";
 
@@ -295,6 +298,7 @@ public class GenomeNexusUtils {
         if (queries != null) {
             List<String> gnFields = new ArrayList<>();
             gnFields.add("annotation_summary");
+            LOG.info("Genome Nexus fetchVariantAnnotationPOST payload size: {} items (referenceGenome: {})", queries.size(), referenceGenome);
             variantsAnnotation = getAnnotationControllerApi(referenceGenome).fetchVariantAnnotationPOST(queries, MSK_ISOFORM_OVERRIDE, null, gnFields);
         }
         return variantsAnnotation;
@@ -305,6 +309,7 @@ public class GenomeNexusUtils {
         if (queries != null) {
             List<String> gnFields = new ArrayList<>();
             gnFields.add("annotation_summary");
+            LOG.info("Genome Nexus fetchVariantAnnotationByGenomicLocationPOST payload size: {} items (referenceGenome: {})", queries.size(), referenceGenome);
             variantsAnnotation = getAnnotationControllerApi(referenceGenome).fetchVariantAnnotationByGenomicLocationPOST(queries, MSK_ISOFORM_OVERRIDE, null, gnFields);
         }
         return variantsAnnotation;
@@ -358,7 +363,7 @@ public class GenomeNexusUtils {
             if (!annotationResult.isEmpty()) {
                 // If there are multiple summaries that match most_severe_consequence, we will pick the first one.
                 selectedAnnotationResult = annotationResult.iterator().next();
-            } 
+            }
         }
 
         if (selectedAnnotationResult == null) {

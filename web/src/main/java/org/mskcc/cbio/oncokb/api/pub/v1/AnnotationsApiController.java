@@ -8,6 +8,8 @@ import org.apache.logging.log4j.util.Strings;
 import org.genome_nexus.client.GenomicLocation;
 import org.genome_nexus.client.TranscriptConsequenceSummary;
 import org.genome_nexus.client.VariantAnnotation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.mskcc.cbio.oncokb.apiModels.annotation.*;
 import org.mskcc.cbio.oncokb.cache.CacheFetcher;
 import org.mskcc.cbio.oncokb.config.annotation.PremiumPublicApi;
@@ -38,6 +40,7 @@ import java.util.stream.Stream;
 @Controller
 public class AnnotationsApiController {
     private static final boolean SOMATIC = false;
+    private static final Logger LOG = LoggerFactory.getLogger(AnnotationsApiController.class);
 
     final String EVIDENCE_TYPES_DESCRIPTION = "DEPRECATED. We do not recommend using this parameter and it will eventually be removed.";
 
@@ -111,7 +114,8 @@ public class AnnotationsApiController {
     ) throws ApiHttpErrorException {
         if (body == null) {
             throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
-        } 
+        }
+        LOG.info("POST /annotate/mutations/byProteinChange annotations count: {}", body.size());
         return new ResponseEntity<>(annotateMutationsByProteinChange(body), HttpStatus.OK);
     }
 
@@ -168,6 +172,7 @@ public class AnnotationsApiController {
         if (body == null) {
             throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         }
+        LOG.info("POST /annotate/mutations/byGenomicChange annotations count: {}", body.size());
         return new ResponseEntity<>(annotateMutationsByGenomicChange(body), HttpStatus.OK);
     }
 
@@ -228,6 +233,7 @@ public class AnnotationsApiController {
         if (body == null) {
             throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         }
+        LOG.info("POST /annotate/mutations/byHGVSg annotations count: {}", body.size());
         return new ResponseEntity<>(annotateMutationsByHGVSg(body), HttpStatus.OK);
     }
 
@@ -286,6 +292,7 @@ public class AnnotationsApiController {
         if (body == null) {
             throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         }
+        LOG.info("POST /annotate/mutations/byHGVSc annotations count: {}", body.size());
         return new ResponseEntity<>(annotateMutationsByHGVSc(body), HttpStatus.OK);
     }
 
@@ -355,6 +362,7 @@ public class AnnotationsApiController {
         if (body == null) {
             throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         }
+        LOG.info("POST /annotate/copyNumberAlterations annotations count: {}", body.size());
         return new ResponseEntity<>(annotateCopyNumberAlterations(body), HttpStatus.OK);
     }
 
@@ -443,6 +451,7 @@ public class AnnotationsApiController {
         if (body == null) {
             throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         }
+        LOG.info("POST /annotate/structuralVariants annotations count: {}", body.size());
         return new ResponseEntity<>(annotateStructuralVariants(body), HttpStatus.OK);
     }
 
@@ -488,6 +497,7 @@ public class AnnotationsApiController {
         if (body == null) {
             throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         }
+        LOG.info("POST /annotate/sample annotations count: {}", body.size());
 
         List<SampleQueryResp> annotatedSamples = new ArrayList<>();
         for (AnnotateSampleQuery query : body) {
