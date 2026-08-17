@@ -20,7 +20,9 @@ import java.util.UUID;
 public class RequestResponseLoggingFilter extends OncePerRequestFilter {
     private static final Logger LOGGER = LoggerFactory.getLogger(RequestResponseLoggingFilter.class);
     private static final String REQUEST_ID_HEADER = "X-Request-ID";
+    private static final String USER_AGENT_HEADER = "User-Agent";
     private static final String MDC_REQUEST_ID_KEY = "requestId";
+    private static final String MDC_USER_AGENT_KEY = "userAgent";
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -30,8 +32,12 @@ public class RequestResponseLoggingFilter extends OncePerRequestFilter {
         if (requestId == null || requestId.isEmpty()) {
             requestId = UUID.randomUUID().toString();
         }
+        String userAgent = request.getHeader(USER_AGENT_HEADER);
 
         MDC.put(MDC_REQUEST_ID_KEY, requestId);
+        if (userAgent != null && !userAgent.isEmpty()) {
+            MDC.put(MDC_USER_AGENT_KEY, userAgent);
+        }
 
         try {
             ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(request);
@@ -55,6 +61,7 @@ public class RequestResponseLoggingFilter extends OncePerRequestFilter {
             throw e;
         } finally {
             MDC.remove(MDC_REQUEST_ID_KEY);
+            MDC.remove(MDC_USER_AGENT_KEY);
         }
     }
 
@@ -89,4 +96,3 @@ public class RequestResponseLoggingFilter extends OncePerRequestFilter {
         response.copyBodyToResponse();
     }
 }
-

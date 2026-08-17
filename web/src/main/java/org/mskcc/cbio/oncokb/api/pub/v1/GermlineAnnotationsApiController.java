@@ -30,6 +30,8 @@ import org.mskcc.cbio.oncokb.util.GeneUtils;
 import org.mskcc.cbio.oncokb.util.GenomeNexusUtils;
 import org.mskcc.cbio.oncokb.util.QueryUtils;
 import org.oncokb.oncokb_transcript.ApiException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -51,6 +53,7 @@ import java.util.Set;
 @Controller
 public class GermlineAnnotationsApiController {
     private static final boolean GERMLINE = true;
+    private static final Logger LOG = LoggerFactory.getLogger(GermlineAnnotationsApiController.class);
 
     @Autowired
     CacheFetcher cacheFetcher;
@@ -101,6 +104,7 @@ public class GermlineAnnotationsApiController {
         if (body == null) {
             throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         }
+        LOG.info("POST /annotate/germline/mutations/byGenomicChange annotations count: {}", body.size());
         return new ResponseEntity<>(annotateMutationsByGenomicChange(body), HttpStatus.OK);
     }
 
@@ -155,6 +159,7 @@ public class GermlineAnnotationsApiController {
         if (body == null) {
             throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         }
+        LOG.info("POST /annotate/germline/mutations/byHGVSg annotations count: {}", body.size());
         return new ResponseEntity<>(annotateMutationsByHGVSg(body), HttpStatus.OK);
     }
 
@@ -210,6 +215,7 @@ public class GermlineAnnotationsApiController {
         if (body == null) {
             throw new ApiHttpErrorException("The request body is missing.", HttpStatus.BAD_REQUEST);
         }
+        LOG.info("POST /annotate/germline/mutations/byHGVSc annotations count: {}", body.size());
         return new ResponseEntity<>(annotateMutationsByHGVSc(body), HttpStatus.OK);
     }
 
