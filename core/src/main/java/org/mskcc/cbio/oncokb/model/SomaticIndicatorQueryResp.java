@@ -1,7 +1,7 @@
 package org.mskcc.cbio.oncokb.model;
 
 import io.swagger.annotations.ApiModelProperty;
-import org.mskcc.cbio.oncokb.apiModels.AlterationValidationError;
+import org.mskcc.cbio.oncokb.apiModels.ValidationError;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,8 +29,8 @@ public class SomaticIndicatorQueryResp extends IndicatorQueryRespBase {
     @ApiModelProperty(value = "DEPRECATED. (Nullable) The affected exon of this variant, if applicable (currently only supported when annotating via HGVSg or Genomic Location)")
     private String exon;
 
-    @ApiModelProperty(value = "(Nullable) Why the queried alteration was rejected as impossible against the OncoKB canonical sequence, leaving the query annotated at the gene level only. Carries both the reason to branch on and the same reason in words. Null whenever the variant itself was annotated. See docs/alteration-validation-errors.md")
-    private AlterationValidationError alterationValidationError;
+    @ApiModelProperty(value = "Everything OncoKB found wrong with the query, each carrying both a reason to branch on and the same reason in words. Empty whenever there is nothing wrong, and never null. An error may mean the variant was left unannotated - a queried alteration that cannot exist against the OncoKB canonical sequence is annotated at the gene level only. See docs/validation-errors.md")
+    private List<ValidationError> errors = new ArrayList<>();
 
     public SomaticIndicatorQueryResp() {
         super();
@@ -65,7 +65,7 @@ public class SomaticIndicatorQueryResp extends IndicatorQueryRespBase {
         newResp.setLastUpdate(this.getLastUpdate());
         newResp.setOncogenic(this.oncogenic);
         newResp.setHotspot(this.hotspot);
-        newResp.setAlterationValidationError(this.alterationValidationError);
+        newResp.setErrors(new ArrayList<>(this.errors));
         return newResp;
     }
 
@@ -127,11 +127,11 @@ public class SomaticIndicatorQueryResp extends IndicatorQueryRespBase {
         this.exon = exon;
     }
 
-    public AlterationValidationError getAlterationValidationError() {
-        return alterationValidationError;
+    public List<ValidationError> getErrors() {
+        return errors;
     }
 
-    public void setAlterationValidationError(AlterationValidationError alterationValidationError) {
-        this.alterationValidationError = alterationValidationError;
+    public void setErrors(List<ValidationError> errors) {
+        this.errors = errors == null ? new ArrayList<>() : errors;
     }
 }

@@ -1,7 +1,7 @@
 package org.mskcc.cbio.oncokb.util;
 
 import org.apache.commons.lang3.StringUtils;
-import org.mskcc.cbio.oncokb.apiModels.AlterationValidationError;
+import org.mskcc.cbio.oncokb.apiModels.ValidationError;
 import org.mskcc.cbio.oncokb.apiModels.ProteinChangeValidation;
 import org.mskcc.cbio.oncokb.cache.CacheFetcher;
 import org.mskcc.cbio.oncokb.model.Gene;
@@ -10,6 +10,8 @@ import org.mskcc.cbio.oncokb.model.ReferenceGenome;
 import org.mskcc.cbio.oncokb.model.VariantAnnotationMessageType;
 import org.oncokb.oncokb_transcript.ApiException;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
@@ -24,24 +26,27 @@ public final class ProteinChangeValidationUtils {
     private ProteinChangeValidationUtils() {}
 
     /**
-     * The annotation-path entry point: the reason the queried protein change cannot exist on the OncoKB
-     * canonical sequence, or null when there is nothing to report.
+     * The annotation-path entry point: the reasons the queried protein change cannot exist on the OncoKB
+     * canonical sequence, empty when there is nothing to report. Returned as a list so it composes with the
+     * other checks an annotated query collects; the protein-change check itself reports at most one.
      *
      * <p>Unlike {@link #validate}, this only consults the protein-sequence cache warmed at startup and never
      * reaches for the transcript service, so it is safe to call on every annotated query. A gene with no
      * cached sequence — including the case where the cache never loaded — is simply left unchecked, which
      * annotates as usual rather than failing the query.
      */
-    public static AlterationValidationError getAlterationValidationError(ReferenceGenome referenceGenome, Gene gene, String proteinChange) {
+    public static List<ValidationError> getProteinChangeValidationErrors(ReferenceGenome referenceGenome, Gene gene, String proteinChange) {
         if (gene == null || gene.getEntrezGeneId() == null || !CacheUtils.isProteinSequenceCached()) {
-            return null;
+            return Collections.emptyList();
         }
         String canonicalSequence = CacheUtils.getProteinSequence(
             referenceGenome == null ? DEFAULT_REFERENCE_GENOME : referenceGenome, gene.getEntrezGeneId());
         if (StringUtils.isEmpty(canonicalSequence)) {
-            return null;
+            return Collections.emptyList();
         }
-        return ProteinChangeValidator.validate(gene.getHugoSymbol(), proteinChange, canonicalSequence).orElse(null);
+        return ProteinChangeValidator.validate(gene.getHugoSymbol(), proteinChange, canonicalSequence)
+            .map(Collections::singletonList)
+            .orElse(Collections.emptyList());
     }
 
     /**
@@ -67,7 +72,7 @@ public final class ProteinChangeValidationUtils {
             return unchecked(VariantAnnotationMessageType.NO_PROTEIN_SEQUENCE);
         }
 
-        Optional<AlterationValidationError> invalid =
+        Optional<ValidationError> invalid =
             ProteinChangeValidator.validate(gene.getHugoSymbol(), proteinChange, canonicalSequence);
         return invalid
             .map(error -> new ProteinChangeValidation(ProteinChangeValidationStatus.INVALID,

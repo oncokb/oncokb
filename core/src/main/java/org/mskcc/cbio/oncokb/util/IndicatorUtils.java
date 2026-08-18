@@ -3,7 +3,7 @@ package org.mskcc.cbio.oncokb.util;
 import com.google.common.collect.Sets;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
-import org.mskcc.cbio.oncokb.apiModels.AlterationValidationError;
+import org.mskcc.cbio.oncokb.apiModels.ValidationError;
 import org.mskcc.cbio.oncokb.apiModels.Citations;
 import org.mskcc.cbio.oncokb.apiModels.GenomicIndicator;
 import org.mskcc.cbio.oncokb.apiModels.Implication;
@@ -206,15 +206,20 @@ public class IndicatorUtils {
                     EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Collections.singleton(EvidenceType.GENE_SUMMARY)));
             }
 
-            // The queried protein change is checked against the OncoKB canonical protein sequence before
-            // anything variant-level is looked up. One that disagrees with that sequence describes a variant
-            // that cannot exist, so nothing is annotated for the variant itself; what OncoKB knows about the
-            // gene still holds, so everything above stands and the variant-level fields keep their defaults.
-            // The query is echoed back untouched, alongside the reason it was not annotated.
-            AlterationValidationError validationError = ProteinChangeValidationUtils.getAlterationValidationError(
-                query.getReferenceGenome(), gene, query.getAlteration());
-            if (validationError != null) {
-                indicatorQuery.setAlterationValidationError(validationError);
+            // Everything OncoKB validates about the query is collected here, before anything variant-level is
+            // looked up, and reported together on the response. A new check appends to this list; only its
+            // error type decides what happens next. Today that is the queried protein change against the
+            // OncoKB canonical protein sequence.
+            List<ValidationError> validationErrors = new ArrayList<>(
+                ProteinChangeValidationUtils.getProteinChangeValidationErrors(
+                    query.getReferenceGenome(), gene, query.getAlteration()));
+            indicatorQuery.setErrors(validationErrors);
+
+            // A blocking error describes a variant that cannot exist, so nothing is annotated for the variant
+            // itself; what OncoKB knows about the gene still holds, so everything above stands and the
+            // variant-level fields keep their defaults. The query is echoed back untouched, alongside the
+            // reasons it was not annotated. A non-blocking error is reported alongside a full annotation.
+            if (validationErrors.stream().anyMatch(error -> error.getType() != null && error.getType().blocksAnnotation())) {
                 return finalizeIndicatorQuery(indicatorQuery, query, latestEvidenceDate);
             }
 

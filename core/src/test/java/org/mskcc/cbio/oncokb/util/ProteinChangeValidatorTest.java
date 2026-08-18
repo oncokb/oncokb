@@ -5,8 +5,8 @@ import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.mskcc.cbio.oncokb.apiModels.AlterationValidationError;
-import org.mskcc.cbio.oncokb.model.AlterationValidationErrorType;
+import org.mskcc.cbio.oncokb.apiModels.ValidationError;
+import org.mskcc.cbio.oncokb.model.ValidationErrorType;
 
 public class ProteinChangeValidatorTest {
 
@@ -16,12 +16,12 @@ public class ProteinChangeValidatorTest {
     // Most tests only care about the wording, so they go through these two projections of the issue.
     private static Optional<String> validateMessage(String hugoSymbol, String proteinChange, String sequence) {
         return ProteinChangeValidator.validate(hugoSymbol, proteinChange, sequence)
-            .map(AlterationValidationError::getMessage);
+            .map(ValidationError::getMessage);
     }
 
-    private static AlterationValidationErrorType validateError(String hugoSymbol, String proteinChange, String sequence) {
+    private static ValidationErrorType validateError(String hugoSymbol, String proteinChange, String sequence) {
         return ProteinChangeValidator.validate(hugoSymbol, proteinChange, sequence)
-            .map(AlterationValidationError::getType).orElse(null);
+            .map(ValidationError::getType).orElse(null);
     }
 
     @Test
@@ -44,13 +44,13 @@ public class ProteinChangeValidatorTest {
 
     @Test
     public void reportsTheErrorEachProblemMapsTo() {
-        Assert.assertEquals(AlterationValidationErrorType.REFERENCE_ALLELE_MISMATCH, validateError("BRAF", "G7E", SEQUENCE));
-        Assert.assertEquals(AlterationValidationErrorType.REFERENCE_ALLELE_MISMATCH, validateError("BRAF", "G7fs", SEQUENCE));
-        Assert.assertEquals(AlterationValidationErrorType.POSITION_OUT_OF_RANGE, validateError("BRAF", "Z99E", SEQUENCE));
-        Assert.assertEquals(AlterationValidationErrorType.REVERSED_POSITION_RANGE, validateError("BRAF", "V7_G6del", SEQUENCE));
+        Assert.assertEquals(ValidationErrorType.REFERENCE_ALLELE_MISMATCH, validateError("BRAF", "G7E", SEQUENCE));
+        Assert.assertEquals(ValidationErrorType.REFERENCE_ALLELE_MISMATCH, validateError("BRAF", "G7fs", SEQUENCE));
+        Assert.assertEquals(ValidationErrorType.POSITION_OUT_OF_RANGE, validateError("BRAF", "Z99E", SEQUENCE));
+        Assert.assertEquals(ValidationErrorType.REVERSED_POSITION_RANGE, validateError("BRAF", "V7_G6del", SEQUENCE));
         // Both a multi-residue point reference and a multi-residue range boundary are malformed.
-        Assert.assertEquals(AlterationValidationErrorType.MALFORMED_ALTERATION, validateError("BRAF", "AL3L", SEQUENCE));
-        Assert.assertEquals(AlterationValidationErrorType.MALFORMED_ALTERATION, validateError("BRAF", "VVV600_W604del", SEQUENCE));
+        Assert.assertEquals(ValidationErrorType.MALFORMED_ALTERATION, validateError("BRAF", "AL3L", SEQUENCE));
+        Assert.assertEquals(ValidationErrorType.MALFORMED_ALTERATION, validateError("BRAF", "VVV600_W604del", SEQUENCE));
         // Nothing wrong, nothing reported.
         Assert.assertNull(validateError("BRAF", "V7E", SEQUENCE));
     }
