@@ -207,19 +207,20 @@ public class IndicatorUtils {
             }
 
             // Everything OncoKB validates about the query is collected here, before anything variant-level is
-            // looked up, and reported together on the response. A new check appends to this list; only its
-            // error type decides what happens next. Today that is the queried protein change against the
-            // OncoKB canonical protein sequence.
+            // looked up, and reported together on the response. A new check appends to this list. Today that
+            // is the queried protein change against the OncoKB canonical protein sequence.
             List<ValidationError> validationErrors = new ArrayList<>(
                 ProteinChangeValidationUtils.getProteinChangeValidationErrors(
                     query.getReferenceGenome(), gene, query.getAlteration()));
             indicatorQuery.setErrors(validationErrors);
 
-            // A blocking error describes a variant that cannot exist, so nothing is annotated for the variant
-            // itself; what OncoKB knows about the gene still holds, so everything above stands and the
+            // Every error type we have describes a variant that cannot exist, so nothing is annotated for the
+            // variant itself; what OncoKB knows about the gene still holds, so everything above stands and the
             // variant-level fields keep their defaults. The query is echoed back untouched, alongside the
-            // reasons it was not annotated. A non-blocking error is reported alongside a full annotation.
-            if (validationErrors.stream().anyMatch(error -> error.getType() != null && error.getType().blocksAnnotation())) {
+            // reasons it was not annotated.
+            // NOTE: if we ever add an error type that should be reported alongside a full annotation, this
+            // check has to branch on the error type instead of on the list being non-empty.
+            if (!validationErrors.isEmpty()) {
                 return finalizeIndicatorQuery(indicatorQuery, query, latestEvidenceDate);
             }
 
