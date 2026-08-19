@@ -21,7 +21,7 @@ Additive for all consumers. Existing requests that do not send `inheritanceMecha
 
 Clients of the premium germline HGVSc endpoints can now narrow genomic indicators server-side instead of filtering the full list themselves. The new private endpoint is for internal consumers only and is not part of the public API surface.
 
-The public API version is bumped from `v1.6.0` to `v1.7.0`, and `.version-level` is set to `minor` so the next application release is cut as a minor version.
+The public and private API versions are bumped from `v1.6.0` to `v1.7.0`, and `.version-level` is set to `minor` so the next application release is cut as a minor version.
 
 ## API Changes
 

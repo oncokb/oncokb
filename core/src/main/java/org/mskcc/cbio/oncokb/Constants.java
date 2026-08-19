@@ -22,7 +22,7 @@ public final class Constants {
     public static final String PROTEIN_ALTERING_VARIANT = "protein_altering_variant";
 
     public static final String PUBLIC_API_VERSION = "v1.7.0";
-    public static final String PRIVATE_API_VERSION = "v1.6.0";
+    public static final String PRIVATE_API_VERSION = "v1.7.0";
 
     // Defaults
     public static final String SWAGGER_DEFAULT_DESCRIPTION="OncoKB, a comprehensive and curated precision oncology knowledge base, offers oncologists detailed, evidence-based information about individual somatic mutations and structural alterations present in patient tumors with the goal of supporting optimal treatment decisions.";
