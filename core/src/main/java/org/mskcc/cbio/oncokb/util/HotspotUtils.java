@@ -1,7 +1,5 @@
 package org.mskcc.cbio.oncokb.util;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import org.genome_nexus.client.Hotspot;
 import org.genome_nexus.client.IntegerRange;
 import org.genome_nexus.client.ProteinLocation;
@@ -11,6 +9,7 @@ import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.ReferenceGenome;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -35,11 +34,6 @@ class EnrichedHotspot extends Hotspot {
         this.setHugoSymbol(hotspot.getHugoSymbol());
         this.setType(hotspot.getType());
         this.setResidue(hotspot.getResidue());
-        this.setTranscriptId(hotspot.getTranscriptId());
-        this.setInframeCount(hotspot.getInframeCount());
-        this.setTumorCount(hotspot.getTumorCount());
-        this.setTruncatingCount(hotspot.getTruncatingCount());
-        this.setSpliceCount(hotspot.getSpliceCount());
 
         // Protein location
         IntegerRange integerRange = extractProteinPos(this.getResidue());
@@ -67,7 +61,9 @@ class EnrichedHotspot extends Hotspot {
 
 public class HotspotUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(HotspotUtils.class);
-    private static final String HOTSPOT_FILE_PATH = "/data/cancer-hotspots-gn.json";
+    private static final String HOTSPOT_FILE_PATH = "/data/hotspots_v2_and_3d.txt";
+    private static final String DELIMITER = "\t";
+    private static final String COMMENT_PREFIX = "#";
     private static Map<Gene, List<EnrichedHotspot>> hotspotMutations = new HashMap<>();
     private static final String POSITIONAL_MUTATION_TYPE="positional";
     private static final String RANGE_INFRAME_MUTATION_TYPE="rangeInframe";
@@ -79,13 +75,37 @@ public class HotspotUtils {
 
     private static void getHotspotsFromDataFile() {
         List<EnrichedHotspot> hotspots = new ArrayList<>();
-        Gson gson = new GsonBuilder().create();
-        Hotspot[] mutations = gson.fromJson(new BufferedReader(new InputStreamReader(HotspotUtils.class.getResourceAsStream(HOTSPOT_FILE_PATH))), Hotspot[].class);
-        for (int i = 0; i < mutations.length; i++) {
-            EnrichedHotspot enrichedHotspot = new EnrichedHotspot(mutations[i]);
-            hotspots.add(enrichedHotspot);
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(HotspotUtils.class.getResourceAsStream(HOTSPOT_FILE_PATH)))) {
+            Map<String, Integer> columnIndex = new HashMap<>();
+            String[] header = readNextDataLine(reader).split(DELIMITER, -1);
+            for (int i = 0; i < header.length; i++) {
+                columnIndex.put(header[i], i);
+            }
+
+            String line;
+            while ((line = readNextDataLine(reader)) != null) {
+                String[] parts = line.split(DELIMITER, -1);
+                Hotspot hotspot = new Hotspot();
+                hotspot.setHugoSymbol(parts[columnIndex.get("hugo_symbol")]);
+                hotspot.setType(parts[columnIndex.get("type")]);
+                hotspot.setResidue(parts[columnIndex.get("residue")]);
+                hotspots.add(new EnrichedHotspot(hotspot));
+            }
+        } catch (IOException e) {
+            LOGGER.error("Failed to read the hotspot data file " + HOTSPOT_FILE_PATH, e);
         }
         parseData(hotspots);
+    }
+
+    // Skips the leading source comment and any blank lines
+    private static String readNextDataLine(BufferedReader reader) throws IOException {
+        String line;
+        while ((line = reader.readLine()) != null) {
+            if (!line.trim().isEmpty() && !line.startsWith(COMMENT_PREFIX)) {
+                return line;
+            }
+        }
+        return null;
     }
 
     private static void parseData(List<EnrichedHotspot> hotspots) {
