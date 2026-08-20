@@ -1,0 +1,6 @@
+{
+  "published_at": "2026-07-10T13:37:45Z",
+  "files": {
+    "pr-4129-fix-consequence-for-non-canonical.md": "Stop propagating a consequence downstream for variants without an OncoKB canonical transcript"
+  }
+}

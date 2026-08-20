@@ -1,0 +1,6 @@
+{
+  "published_at": "2026-07-28T13:38:08Z",
+  "files": {
+    "pr-4132-fix-resolve-hgvsc-canonical-transcript.md": "Resolve germline HGVSc queries against the OncoKB canonical transcript before annotating"
+  }
+}
