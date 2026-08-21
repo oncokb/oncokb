@@ -202,6 +202,22 @@ public interface PrivateUtilsApi {
         , @ApiParam(value = "OncoTree tumor type name/main type/code") @RequestParam(value = "tumorType", required = false) String tumorType
     ) throws ApiException, org.genome_nexus.ApiException;
 
+    @ApiOperation(value = "", notes = "Get the annotation of a cancer hotspot, either by its residue or by an alteration on it. The residue is a single residue (e.g. V600), a splice site position (e.g. X307) or an in-frame indel range (e.g. 27-42).", response = SomaticVariantAnnotation.class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK", response = SomaticVariantAnnotation.class),
+        @ApiResponse(code = 400, message = "Neither residue nor alteration is given"),
+        @ApiResponse(code = 404, message = "Hotspot not found")})
+    @RequestMapping(value = "/utils/hotspotAnnotation",
+        produces = {"application/json"},
+        method = RequestMethod.GET)
+    ResponseEntity<SomaticVariantAnnotation> utilHotspotAnnotationGet(
+        @ApiParam(value = "hugoSymbol") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
+        , @ApiParam(value = "entrezGeneId") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
+        , @ApiParam(value = "Hotspot residue. Example: V600, X307 or 27-42") @RequestParam(value = "residue", required = false) String residue
+        , @ApiParam(value = "An alteration on the hotspot, used when residue is not given. Example: V600E, K459del or X307_splice") @RequestParam(value = "alteration", required = false) String alteration
+        , @ApiParam(value = "Reference genome, either GRCh37 or GRCh38. The default is GRCh37", defaultValue = "GRCh37") @RequestParam(value = "referenceGenome", required = false, defaultValue = "GRCh37") String referenceGenome
+    );
+
     @ApiOperation(value = "", notes = "Get all the info for the germline query", response = GermlineVariantAnnotation.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = GermlineVariantAnnotation.class)})

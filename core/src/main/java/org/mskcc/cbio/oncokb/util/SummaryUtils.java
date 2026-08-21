@@ -863,6 +863,10 @@ public class SummaryUtils {
 
     public static String positionalVariantSummary(Alteration alteration, Query query, boolean isHotspot) {
         if (isHotspot) {
+            CancerHotspot hotspot = HotspotUtils.getMatchedHotspot(alteration);
+            if (hotspot != null) {
+                return cancerHotspotSummary(hotspot);
+            }
             return hotspotSummary(alteration, query, false, true);
         } else {
             StringBuilder sb = new StringBuilder();
@@ -1233,5 +1237,62 @@ public class SummaryUtils {
             return str1;
         }
         return str1 + " " + str2;
+    }
+
+    public static String cancerHotspotSummary(CancerHotspot hotspot) {
+        String name = hotspot.getHugoSymbol() + " " + hotspot.getName();
+        String mutations;
+        if (HotspotUtils.IN_FRAME_INDEL_HOTSPOT_TYPE.equals(hotspot.getType())) {
+            mutations = "in-frame indels overlapping this region";
+        } else if (HotspotUtils.SPLICE_SITE_HOTSPOT_TYPE.equals(hotspot.getType())) {
+            mutations = "splice site mutations at this position";
+        } else {
+            mutations = "single residue mutations at this position";
+        }
+        return name + " has been identified as a statistically significant hotspot and " + mutations + " are considered likely oncogenic unless functional evidence suggests otherwise.";
+    }
+
+    public static String cancerHotspotMutationEffectDescription(CancerHotspot hotspot) {
+        String hugoSymbol = hotspot.getHugoSymbol();
+        String name = hugoSymbol + " " + hotspot.getName();
+        String identifyingRefs = formatPmids(hotspot.getPmids());
+        String analyses = hotspot.getPmids().size() > 1 ? "these analyses" : "this analysis";
+        String methodRefs = formatPmids(HotspotUtils.HOTSPOT_METHOD_PMIDS);
+
+        if (HotspotUtils.IN_FRAME_INDEL_HOTSPOT_TYPE.equals(hotspot.getType())) {
+            return name + " has been identified as a statistically significant recurrent in-frame indel hotspot " + identifyingRefs
+                + ". In " + analyses + ", an indel hotspot is defined as a protein region affected by in-frame insertions, deletions, duplications, or deletion-insertions in more tumors than expected in the absence of selection."
+                + " The repeated, independent emergence of indels within the same region across many tumors indicates positive selection, suggesting these mutations confer a growth advantage to cancer cells."
+                + " Because in-frame indels vary in length and exact position between tumors, overlapping indels are grouped into a single hotspot region."
+                + " Therefore, in-frame indels that overlap at least one amino acid within " + hugoSymbol + " " + hotspot.getResidue().replace("-", "\u2013")
+                + " are considered likely oncogenic unless functional evidence indicates otherwise " + methodRefs + ".";
+        }
+        if (HotspotUtils.SPLICE_SITE_HOTSPOT_TYPE.equals(hotspot.getType())) {
+            return name + " has been identified as a statistically significant recurrent splice site hotspot " + identifyingRefs
+                + ". In " + analyses + ", a hotspot is defined as a position that is mutated in more tumors than expected in the absence of selection."
+                + " The repeated, independent emergence of mutations at the same position across many tumors indicates positive selection, suggesting these mutations confer a growth advantage to cancer cells."
+                + " Therefore, splice site mutations at " + name + " are considered likely oncogenic unless functional evidence indicates otherwise " + methodRefs + ".";
+        }
+        return name + " has been identified as a statistically significant recurrent mutational hotspot " + identifyingRefs
+            + ". In " + analyses + ", a hotspot is defined as an amino acid position that is mutated in more tumors than expected in the absence of selection."
+            + " The repeated, independent emergence of mutations at the same position across many tumors indicates positive selection, suggesting these mutations confer a growth advantage to cancer cells."
+            + " Because hotspots are defined by amino acid position, different amino acid substitutions at the same position all contribute to the same hotspot."
+            + " Therefore, single-residue substitutions at " + name + " are considered likely oncogenic unless functional evidence indicates otherwise " + methodRefs + ".";
+    }
+
+    public static String cancerHotspotCuratedVariantsDescription(CancerHotspot hotspot) {
+        String hugoSymbol = hotspot.getHugoSymbol();
+        String residue = hotspot.getResidue();
+        if (HotspotUtils.IN_FRAME_INDEL_HOTSPOT_TYPE.equals(hotspot.getType())) {
+            return "The following in-frame indels overlapping residues " + residue.replace("-", "_") + " in " + hugoSymbol + " are specifically curated in OncoKB.";
+        }
+        if (HotspotUtils.SPLICE_SITE_HOTSPOT_TYPE.equals(hotspot.getType())) {
+            return "The following splice site mutations at the " + hugoSymbol + " " + residue + " hotspot have their own individual curations in OncoKB.";
+        }
+        return "The following missense mutations at the " + hugoSymbol + " " + residue + " hotspot have their own individual curations in OncoKB.";
+    }
+
+    private static String formatPmids(Collection<String> pmids) {
+        return "(PMID: " + String.join(", ", pmids) + ")";
     }
 }
