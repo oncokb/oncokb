@@ -112,4 +112,22 @@ public class HotspotUtilsTest extends TestCase {
         assertFalse(HotspotUtils.isHotspot(alteration));
     }
 
+    public void testGetHotspotType() throws Exception {
+        // A missense mutation matches the single residue hotspot at its position
+        Alteration alteration = AlterationUtils.getAlteration("BRAF", "V600E", null, null, null, null, null, false);
+        assertEquals("single residue", HotspotUtils.getHotspotType(alteration));
+
+        // An in-frame deletion covering that same residue is a hotspot of the
+        // in-frame indel range, not of the single residue hotspot it overlaps
+        alteration = AlterationUtils.getAlteration("BRAF", "L485_P490del", null, null, null, null, null, false);
+        assertEquals("in-frame indel", HotspotUtils.getHotspotType(alteration));
+
+        alteration = AlterationUtils.getAlteration("MET", "X1010splice", null, null, null, null, null, false);
+        assertEquals("splice site", HotspotUtils.getHotspotType(alteration));
+
+        // Not a hotspot, so no type
+        alteration = AlterationUtils.getAlteration("AKT1", "E17*", null, null, null, null, null, false);
+        assertNull(HotspotUtils.getHotspotType(alteration));
+    }
+
 }
