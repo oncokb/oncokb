@@ -7,7 +7,6 @@
 -   [ ] Generate database dumps by following instructions [HERE](https://github.com/knowledgesystems/oncokb-deployment/blob/master/oncokb-data-release/README.md#prepare-the-public-database)
 -   [ ] Check all newly added genes have ensembl gene id, transcript id for both GRCh37 and GRCh38
 -   [ ] Update News
--   [ ] Update oncokb_summary image and update the index.html in oncokb-public for the tags `<meta name="twitter:image">` and `<meta property="og:image">`
 
 ### Release and Deployment
 
@@ -21,7 +20,6 @@ Checklist for deployment after curation team approves beta
     - [ ] genome-nexus-vep
     - [ ] mysql 
     - [ ] redis
--   [ ] Update oncokb-annotator tests by running this [script](https://github.com/knowledgesystems/oncokb-deployment/blob/master/oncokb-data-release/update_annotation.sh)
 -   [ ] Push data to private [oncokb-data repo](https://github.com/knowledgesystems/oncokb-data) and public [oncokb-datahub repo](https://github.com/oncokb/oncokb-datahub)
 -   [ ] Update release note
 -   [ ] Update public site (https://www.oncokb.org)
@@ -37,5 +35,4 @@ Checklist for deployment after curation team approves beta
     -   [ ] Update [oncokb-core-public](https://github.com/knowledgesystems/knowledgesystems-k8s-deployment/blob/master/oncokb/oncokb-prod/oncokb_core_public.yaml)
 -   [ ] Update MSK Prod site (https://www.oncokb.aws.mskcc.org)
     -   [ ] Generate versioned database (`oncokb_core_v4_15`)
-    -   [ ] Update `-Djdbc.url` with latest versioned database in both [oncokb-core](https://github.com/knowledgesystems/knowledgesystems-k8s-deployment/blob/master/oncokb/oncokb-msk/prod/oncokb_core.yaml) and [oncokb-core-cbx](https://github.com/knowledgesystems/knowledgesystems-k8s-deployment/blob/master/oncokb/oncokb-msk/prod/oncokb_core_cbx.yaml)
-    -   [ ] Update [oncokb-public](https://github.com/knowledgesystems/knowledgesystems-k8s-deployment/blob/master/oncokb/oncokb-msk/prod/oncokb_public.yaml) image
+    -   [ ] Update `-Djdbc.url` with latest versioned database in [oncokb-core-cbx](https://github.com/knowledgesystems/knowledgesystems-k8s-deployment/blob/master/oncokb/oncokb-msk/prod/oncokb_core_cbx.yaml)
