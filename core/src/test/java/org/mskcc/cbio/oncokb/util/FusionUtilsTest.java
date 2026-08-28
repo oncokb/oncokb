@@ -73,7 +73,7 @@ public class FusionUtilsTest extends TestCase {
         geneB.setGeneAliases(new HashSet<>(Arrays.asList("ERBB1")));
 
         String fusionName = FusionUtils.getFusionName(geneA, geneB);
-        assertEquals("EGFR::SEPT14", fusionName);
+        assertEquals("EGFR::SEPTIN14", fusionName);
 
         geneA = new Gene();
         geneA.setEntrezGeneId(23175);
