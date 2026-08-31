@@ -147,6 +147,14 @@
             <version>1.95</version>
         </dependency>
 
+        <!-- The genome-nexus client pulls in okhttp 2.x, whose okio 1.6.0 wins dependency mediation and
+             breaks okhttp 4.x used by the oncokb-transcript client (okio.Options is missing). Pin the okio
+             version okhttp 4.x expects; it stays backward compatible with okhttp 2.x. -->
+        <dependency>
+            <groupId>com.squareup.okio</groupId>
+            <artifactId>okio</artifactId>
+            <version>2.8.0</version>
+        </dependency>
         <dependency>
             <groupId>com.github.genome-nexus</groupId>
             <artifactId>genome-nexus-java-api-client</artifactId>
