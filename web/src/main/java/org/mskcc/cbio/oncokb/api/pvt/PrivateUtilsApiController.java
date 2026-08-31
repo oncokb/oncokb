@@ -415,6 +415,8 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         List<TumorType> relevantTumorTypes = TumorTypeUtils.findRelevantTumorTypes(tumorType);
         TumorType matchedTumorType = ApplicationContextSingleton.getTumorTypeBo().getByName(tumorType);
 
+        String originalAlteration = alteration;
+        List<ProteinChangeNormalization> appliedNormalizations = Collections.emptyList();
         Query query;
         Gene gene;
         ReferenceGenome matchedRG = null;
@@ -435,6 +437,17 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             query = QueryUtils.getQueryFromAlteration(matchedRG, tumorType, transcriptSummaryAlterationResult, hgvsg, false);
             gene = GeneUtils.getGeneByEntrezId(query.getEntrezGeneId());
         } else {
+            // Normalize the queried protein change (e.g. drop a spelled-out deleted sequence,
+            // A237_G238delAG -> A237_G238del) before annotating, and keep the applied rules so the
+            // response can report exactly what was rewritten and why.
+            if (!StringUtils.isNullOrEmpty(alteration)) {
+                ProteinChangeValidator.NormalizationResult normalization =
+                    ProteinChangeValidator.normalize(AlterationUtils.resolveProteinAlterationShort(alteration));
+                if (normalization.isNormalized()) {
+                    alteration = normalization.getProteinChange();
+                    appliedNormalizations = normalization.getApplied();
+                }
+            }
             gene = GeneUtils.getGene(entrezGeneId, hugoSymbol);
             alterationModel = AlterationUtils.findAlteration(gene, matchedRG, alteration, false);
             if (alterationModel == null) {
@@ -464,7 +477,15 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
 
         SomaticVariantAnnotation annotation = new SomaticVariantAnnotation(indicatorQueryResp);
         annotation.setAlteration(alterationModel);
-        annotation.setAlternativeOncoKbVariant(AlterationUtils.getAlternativeVariantForQuery(indicatorQueryResp));
+        AlternativeOncoKbVariant alternativeOncoKbVariant = AlterationUtils.getAlternativeVariantForQuery(indicatorQueryResp);
+        annotation.setAlternativeOncoKbVariant(alternativeOncoKbVariant);
+
+        // Only validate against the canonical sequence when Genome Nexus did not resolve the query to an
+        // alternative variant. Legacy names and commonly used protein changes map to a valid alternative
+        // transcript, so they must not be marked invalid before that check runs.
+        if (alternativeOncoKbVariant == null) {
+            validateProteinChangeAgainstCanonical(matchedRG, alterationModel, annotation, appliedNormalizations, originalAlteration);
+        }
 
         // for any hgvsg variant, we need to check whether it is VUE
         if(!StringUtils.isNullOrEmpty(hgvsg)) {
@@ -557,6 +578,35 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             annotation.getTumorTypes().add(variantAnnotationTumorType);
         }
         return new ResponseEntity<>(annotation, HttpStatus.OK);
+    }
+
+    // Attaches a ProteinChangeValidation describing the outcome of checking the queried protein change
+    // against the OncoKB canonical protein sequence: INVALID for a genuine disagreement, NORMALIZED when
+    // the query was rewritten (e.g. a spelled-out deleted sequence dropped) before annotation, or
+    // UNCHECKED when the check could not run. A query that agrees leaves the validation null.
+    private void validateProteinChangeAgainstCanonical(ReferenceGenome referenceGenome, Alteration alterationModel,
+            SomaticVariantAnnotation annotation, List<ProteinChangeNormalization> appliedNormalizations, String originalAlteration) {
+        if (alterationModel == null || alterationModel.getGene() == null) {
+            return;
+        }
+        Gene gene = alterationModel.getGene();
+        ProteinChangeValidation validation = ProteinChangeValidationUtils.validate(
+            this.cacheFetcher, referenceGenome, gene, alterationModel.getAlteration());
+        if (validation == null && !appliedNormalizations.isEmpty()) {
+            // Each normalization carries its own reason and message; a single object surfaces the first
+            // as the headline messageType and joins every rationale into the message.
+            String message = appliedNormalizations.stream()
+                .map(n -> n.describe(gene.getHugoSymbol(), originalAlteration, alterationModel.getAlteration()))
+                .collect(Collectors.joining(" "));
+            validation = new ProteinChangeValidation(ProteinChangeValidationStatus.NORMALIZED,
+                appliedNormalizations.get(0).getMessageType(), message);
+        }
+        if (validation != null) {
+            if (!appliedNormalizations.isEmpty()) {
+                validation.setNormalizedProteinChange(alterationModel.getAlteration());
+            }
+            annotation.setProteinChangeValidation(validation);
+        }
     }
 
     @Override

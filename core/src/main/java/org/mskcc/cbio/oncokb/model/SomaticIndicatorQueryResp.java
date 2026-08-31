@@ -1,6 +1,7 @@
 package org.mskcc.cbio.oncokb.model;
 
 import io.swagger.annotations.ApiModelProperty;
+import org.mskcc.cbio.oncokb.apiModels.ValidationError;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +28,9 @@ public class SomaticIndicatorQueryResp extends IndicatorQueryRespBase {
     @Deprecated
     @ApiModelProperty(value = "DEPRECATED. (Nullable) The affected exon of this variant, if applicable (currently only supported when annotating via HGVSg or Genomic Location)")
     private String exon;
+
+    @ApiModelProperty(value = "Everything OncoKB found wrong with the query, each carrying both a reason to branch on and the same reason in words. Empty whenever there is nothing wrong, and never null. An error may mean the variant was left unannotated - a queried alteration that cannot exist against the OncoKB canonical sequence is annotated at the gene level only. See docs/validation-errors.md")
+    private List<ValidationError> errors = new ArrayList<>();
 
     public SomaticIndicatorQueryResp() {
         super();
@@ -61,6 +65,7 @@ public class SomaticIndicatorQueryResp extends IndicatorQueryRespBase {
         newResp.setLastUpdate(this.getLastUpdate());
         newResp.setOncogenic(this.oncogenic);
         newResp.setHotspot(this.hotspot);
+        newResp.setErrors(new ArrayList<>(this.errors));
         return newResp;
     }
 
@@ -120,5 +125,13 @@ public class SomaticIndicatorQueryResp extends IndicatorQueryRespBase {
     @Deprecated
     public void setExon(String exon) {
         this.exon = exon;
+    }
+
+    public List<ValidationError> getErrors() {
+        return errors;
+    }
+
+    public void setErrors(List<ValidationError> errors) {
+        this.errors = errors == null ? new ArrayList<>() : errors;
     }
 }

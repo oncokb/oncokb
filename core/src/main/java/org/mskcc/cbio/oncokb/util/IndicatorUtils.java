@@ -3,6 +3,7 @@ package org.mskcc.cbio.oncokb.util;
 import com.google.common.collect.Sets;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
+import org.mskcc.cbio.oncokb.apiModels.ValidationError;
 import org.mskcc.cbio.oncokb.apiModels.Citations;
 import org.mskcc.cbio.oncokb.apiModels.GenomicIndicator;
 import org.mskcc.cbio.oncokb.apiModels.Implication;
@@ -190,11 +191,37 @@ public class IndicatorUtils {
             // Gene exist should only be set to true if entrezGeneId is bigger than 0
             indicatorQuery.setGeneExist(gene.getEntrezGeneId() > 0);
 
+            // Report the OncoKB canonical transcript the query was interpreted against. Callers that know
+            // the exact transcript the annotation came from (the genomic change and HGVS paths, which get
+            // it from Genome Nexus) overwrite this afterwards with that more specific one.
+            if (indicatorQuery.getGeneExist()) {
+                query.setCanonicalTranscript(ReferenceGenome.GRCh38.equals(query.getReferenceGenome())
+                    ? gene.getGrch38Isoform() : gene.getGrch37Isoform());
+            }
+
             // Gene summary
             if (evidenceTypes.contains(EvidenceType.GENE_SUMMARY)) {
                 indicatorQuery.setGeneSummary(SummaryUtils.getGeneSummaryByGeneticType(gene, query.getHugoSymbol(), query.isGermline()));
                 latestEvidenceDate = updateLatestEvidenceDate(latestEvidenceDate,
                     EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Collections.singleton(EvidenceType.GENE_SUMMARY)));
+            }
+
+            // Everything OncoKB validates about the query is collected here, before anything variant-level is
+            // looked up, and reported together on the response. A new check appends to this list. Today that
+            // is the queried protein change against the OncoKB canonical protein sequence.
+            List<ValidationError> validationErrors = new ArrayList<>(
+                ProteinChangeValidationUtils.getProteinChangeValidationErrors(
+                    query.getReferenceGenome(), gene, query.getAlteration()));
+            indicatorQuery.setErrors(validationErrors);
+
+            // Every error type we have describes a variant that cannot exist, so nothing is annotated for the
+            // variant itself; what OncoKB knows about the gene still holds, so everything above stands and the
+            // variant-level fields keep their defaults. The query is echoed back untouched, alongside the
+            // reasons it was not annotated.
+            // NOTE: if we ever add an error type that should be reported alongside a full annotation, this
+            // check has to branch on the error type instead of on the list being non-empty.
+            if (!validationErrors.isEmpty()) {
+                return finalizeIndicatorQuery(indicatorQuery, query, latestEvidenceDate);
             }
 
             alteration = AlterationUtils.getAlteration(gene.getHugoSymbol(), query.getAlteration(),
@@ -488,6 +515,10 @@ public class IndicatorUtils {
             indicatorQuery.setGeneExist(false);
         }
 
+        return finalizeIndicatorQuery(indicatorQuery, query, latestEvidenceDate);
+    }
+
+    private static SomaticIndicatorQueryResp finalizeIndicatorQuery(SomaticIndicatorQueryResp indicatorQuery, Query query, Date latestEvidenceDate) {
         if(StringUtils.isEmpty(indicatorQuery.getOncogenic()) && StringUtils.isNotEmpty(query.getAlteration()) && query.getAlteration().trim().toLowerCase().startsWith(InferredMutation.ONCOGENIC_MUTATIONS.getVariant().toLowerCase())) {
             indicatorQuery.setOncogenic(Oncogenicity.YES.getOncogenic());
         }

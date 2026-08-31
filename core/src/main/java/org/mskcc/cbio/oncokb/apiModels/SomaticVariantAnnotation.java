@@ -16,6 +16,7 @@ public class SomaticVariantAnnotation extends SomaticIndicatorQueryResp {
     private Alteration alteration;
 
     private Boolean VUE = false;
+    private ProteinChangeValidation proteinChangeValidation;
     private List<VariantAnnotationTumorType> tumorTypes = new ArrayList<>();
 
     public SomaticVariantAnnotation() {
@@ -72,6 +73,14 @@ public class SomaticVariantAnnotation extends SomaticIndicatorQueryResp {
 
     public void setVUE(Boolean VUE) {
         this.VUE = VUE;
+    }
+
+    public ProteinChangeValidation getProteinChangeValidation() {
+        return proteinChangeValidation;
+    }
+
+    public void setProteinChangeValidation(ProteinChangeValidation proteinChangeValidation) {
+        this.proteinChangeValidation = proteinChangeValidation;
     }
 
     public List<VariantAnnotationTumorType> getTumorTypes() {

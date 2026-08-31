@@ -3,6 +3,7 @@ package org.mskcc.cbio.oncokb.util;
 import com.mysql.jdbc.StringUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.mskcc.cbio.oncokb.apiModels.download.DownloadAvailability;
+import org.mskcc.cbio.oncokb.bo.OncokbTranscriptService;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.health.InMemoryCacheSizes;
 
@@ -67,6 +68,14 @@ public class CacheUtils {
 
     private static Map<String, Long> recordTime = new HashedMap();
 
+    // Canonical protein sequence per gene, per reference genome. Warmed up front so protein change
+    // validation does not have to call the transcript service on every request. A gene missing from the
+    // inner map is known to have no sequence in that reference genome, which is a normal outcome and must
+    // not trigger a lookup; see cacheAllProteinSequences.
+    private static Map<ReferenceGenome, Map<Integer, String>> proteinSequences = new EnumMap<>(ReferenceGenome.class);
+    private static boolean proteinSequencesCached = false;
+    private static OncokbTranscriptService transcriptService;
+
     private static Info oncokbInfo;
     private static final AtomicBoolean cacheRefreshInProgress = new AtomicBoolean(false);
 
@@ -119,8 +128,9 @@ public class CacheUtils {
         try {
             registerOtherServices();
             refreshAllCaches();
-        } catch (Exception e) {
-            LOGGER.error("Unexpected Error", e);
+        } catch (Throwable e) {
+            LOGGER.error("Unable to warm up the in memory caches, aborting startup", e);
+            throw new ExceptionInInitializerError(e);
         }
     }
 
@@ -268,9 +278,81 @@ public class CacheUtils {
             current = MainUtils.getCurrentTimestamp();
             oncokbInfo = ApplicationContextSingleton.getInfoBo().get();
             LOGGER.info("Cached oncokb info {}", CacheUtils.getCacheCompletionMessage(current));
+
+            current = MainUtils.getCurrentTimestamp();
+            cacheAllProteinSequences();
+            LOGGER.info("Cached canonical protein sequences {}", CacheUtils.getCacheCompletionMessage(current));
         } finally {
             cacheRefreshInProgress.set(false);
         }
+    }
+
+    /**
+     * The transcript service is stateless apart from a gene cache it holds statically, so one instance is
+     * kept and reused: constructing another would refetch that gene list for nothing.
+     */
+    private static synchronized OncokbTranscriptService getTranscriptService() {
+        if (transcriptService == null) {
+            transcriptService = new OncokbTranscriptService();
+        }
+        return transcriptService;
+    }
+
+    /**
+     * Loads the canonical protein sequence for every cached gene, in both reference genomes, so protein
+     * change validation can be served entirely from memory. One request per reference genome.
+     *
+     * <p>Genes the transcript service has no sequence for are left out of the cache deliberately: not every
+     * gene has a transcript in every reference genome, so that is a valid answer rather than a missing one,
+     * and recording it here is what keeps those genes from being asked about again on each request.
+     *
+     * <p>A genuine fetch failure is fatal. Starting with a partially warmed cache would silently skip
+     * validation for whichever genes were lost, so the error is logged and rethrown to abort startup.
+     */
+    private static void cacheAllProteinSequences() {
+        proteinSequences = new EnumMap<>(ReferenceGenome.class);
+        proteinSequencesCached = false;
+
+        OncokbTranscriptService transcriptService = getTranscriptService();
+        if (!transcriptService.isEnabled()) {
+            LOGGER.info("Transcript service is disabled, skipping the canonical protein sequence cache");
+            return;
+        }
+
+        Set<Gene> cachedGenes = new HashSet<>(genes);
+        for (ReferenceGenome referenceGenome : ReferenceGenome.values()) {
+            Map<Integer, String> sequences;
+            try {
+                sequences = transcriptService.getCanonicalProteinSequences(referenceGenome, cachedGenes);
+            } catch (Exception e) {
+                proteinSequences = new EnumMap<>(ReferenceGenome.class);
+                LOGGER.error("Failed to cache the canonical protein sequences for {}", referenceGenome, e);
+                throw new ProteinSequenceCacheException(referenceGenome, e);
+            }
+            proteinSequences.put(referenceGenome, sequences);
+            LOGGER.info("Cached {} of {} canonical protein sequences for {} ({} genes have none)",
+                sequences.size(), cachedGenes.size(), referenceGenome, cachedGenes.size() - sequences.size());
+        }
+        proteinSequencesCached = true;
+    }
+
+    /**
+     * Whether the protein sequence cache is populated. When false, callers have to fall back to querying the
+     * transcript service directly — the cache says nothing about any gene.
+     */
+    public static boolean isProteinSequenceCached() {
+        return proteinSequencesCached;
+    }
+
+    /**
+     * The canonical protein sequence for a gene, or null when the gene has none in this reference genome.
+     * Only meaningful once {@link #isProteinSequenceCached()} is true.
+     */
+    public static String getProteinSequence(ReferenceGenome referenceGenome, Integer entrezGeneId) {
+        if (referenceGenome == null || entrezGeneId == null) {
+            return null;
+        }
+        return proteinSequences.getOrDefault(referenceGenome, Collections.emptyMap()).get(entrezGeneId);
     }
 
     public static Gene getGeneByEntrezId(Integer entrezId) {
