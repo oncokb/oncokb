@@ -1,0 +1,4 @@
+{
+  "published_at": "2026-08-31T19:34:57Z",
+  "files": {"pr-4131-feat-validate-protein-change-ref-aa.md": "Validate and normalize a queried protein change against the OncoKB canonical protein sequence"}
+}
