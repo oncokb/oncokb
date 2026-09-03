@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import org.mskcc.cbio.oncokb.model.BiologicalVariant;
 
 import static org.mskcc.cbio.oncokb.util.FusionUtils.FUSION_ALTERNATIVE_SEPARATOR;
+import static org.mskcc.cbio.oncokb.util.FusionUtils.FUSION_SEPARATOR;
 
 public class ValidationUtils {
 
@@ -207,6 +208,7 @@ public class ValidationUtils {
         final String INDEL_IS_NOT_SUPPORTED = "Indel is not supported";
         final String EXON_RANGE_NEEDED = "Exon does not have a range defined";
         final String FUSION_NAME_IS_INCORRECT = "Fusion name is incorrect";
+        final String FUSION_SEPARATOR_IS_LEGACY = "Fusion name uses the legacy hyphen separator instead of the HGVS '" + FUSION_SEPARATOR + "'";
         final String VARIANT_CONSEQUENCE_IS_NOT_AVAILABLE = "The alteration does not have variant consequence";
         final String VARIANT_CONSEQUENCE_ANY_IS_INAPPROPRIATE = "The consequence any is assigned to incorrect alteration";
 
@@ -230,8 +232,15 @@ public class ValidationUtils {
                     if (alteration.getName().toLowerCase().contains("exon") && (alteration.getProteinStart() == null || alteration.getProteinEnd() == null || alteration.getProteinStart().equals(alteration.getProteinEnd()) || alteration.getProteinStart().equals(-1))) {
                         data.put(getErrorMessage(getTarget(alteration.getGene().getHugoSymbol(), getAlterationName(alteration)), EXON_RANGE_NEEDED));
                     }
-                    if (alteration.getAlteration().contains(FUSION_ALTERNATIVE_SEPARATOR) && !alteration.getAlteration().toLowerCase().contains("fusion") && !specialAlterationNames().contains(alteration.getName())) {
+                    if ((alteration.getAlteration().contains(FUSION_ALTERNATIVE_SEPARATOR) || alteration.getAlteration().contains(FUSION_SEPARATOR))
+                        && !alteration.getAlteration().toLowerCase().contains("fusion") && !specialAlterationNames().contains(alteration.getName())) {
                         data.put(getErrorMessage(getTarget(alteration.getGene().getHugoSymbol(), getAlterationName(alteration)), FUSION_NAME_IS_INCORRECT));
+                    }
+                    // Fusions are curated under the HGVS separator; a curated name still using the hyphen
+                    // is what normalizeSeparator would have to rewrite, or could not rewrite at all.
+                    FusionUtils.FusionNameNormalization fusionName = FusionUtils.normalizeSeparator(alteration.getAlteration());
+                    if (fusionName.isNormalized() || fusionName.isAmbiguous()) {
+                        data.put(getErrorMessage(getTarget(alteration.getGene().getHugoSymbol(), getAlterationName(alteration)), FUSION_SEPARATOR_IS_LEGACY));
                     }
                     if (alteration.getConsequence() == null) {
                         data.put(getErrorMessage(getTarget(alteration.getGene().getHugoSymbol(), getAlterationName(alteration)), VARIANT_CONSEQUENCE_IS_NOT_AVAILABLE));

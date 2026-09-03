@@ -36,15 +36,15 @@ GATA1	K100*	Unknown	The GATA1 K100* mutation has not specifically been reviewed 
 
 ### Fusions
 ### Fusion in oncogene
-ALK	Test-ALK fusion	Likely Oncogenic	The Test-ALK fusion is likely oncogenic.
+ALK	Test-ALK fusion	Likely Oncogenic	The Test::ALK fusion is likely oncogenic.
 ### Fusion in TSG
-BRCA1	Test-BRCA1 fusion	Likely Oncogenic	The Test-BRCA1 fusion leads to truncation of the BRCA1 tumor suppressor gene and is considered likely oncogenic.
+BRCA1	Test-BRCA1 fusion	Likely Oncogenic	The Test::BRCA1 fusion leads to truncation of the BRCA1 tumor suppressor gene and is considered likely oncogenic.
 ### Fusion in TSG that Truncating Mutations is not curated
-PPP2R2A	Test-PPP2R2A fusion	Likely Oncogenic	The Test-PPP2R2A fusion leads to truncation of the PPP2R2A tumor suppressor gene and is considered likely oncogenic.
+PPP2R2A	Test-PPP2R2A fusion	Likely Oncogenic	The Test::PPP2R2A fusion leads to truncation of the PPP2R2A tumor suppressor gene and is considered likely oncogenic.
 ### Fusion in both
-PTPN1	Test-PTPN1 fusion	Likely Oncogenic	The Test-PTPN1 fusion leads to truncation of the PTPN1 tumor suppressor gene and is considered likely oncogenic.
+PTPN1	Test-PTPN1 fusion	Likely Oncogenic	The Test::PTPN1 fusion leads to truncation of the PTPN1 tumor suppressor gene and is considered likely oncogenic.
 ### Fusion in neither
-GATA1	Test-GATA1 fusion	Unknown	The Test-GATA1 fusion has not specifically been reviewed by the OncoKB team, and therefore its biological significance is unknown.
+GATA1	Test-GATA1 fusion	Unknown	The Test::GATA1 fusion has not specifically been reviewed by the OncoKB team, and therefore its biological significance is unknown.
 
 ### Plural mutation
 TP53	DNA binding domain deletions	Likely Oncogenic	TP53 DNA binding domain deletions are likely oncogenic.

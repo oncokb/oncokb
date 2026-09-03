@@ -510,6 +510,13 @@ public final class AlterationUtils {
 
         if (alteration != null) {
             alteration = AlterationUtils.trimAlterationName(alteration);
+            // Fusions are curated under the HGVS "::" separator, so a queried name written with the
+            // legacy hyphen is rewritten before it is matched against them. A name carrying more than
+            // one hyphen is left as queried, to be reported rather than searched for.
+            FusionUtils.FusionNameNormalization fusionName = FusionUtils.normalizeSeparator(alteration);
+            if (fusionName.isNormalized()) {
+                alteration = fusionName.getName();
+            }
             alt.setAlteration(alteration);
         }
 

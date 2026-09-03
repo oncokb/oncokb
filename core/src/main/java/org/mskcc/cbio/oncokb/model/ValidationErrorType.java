@@ -34,5 +34,10 @@ public enum ValidationErrorType {
 
     // The query is not a well-formed alteration of its kind, independent of the canonical sequence.
     // e.g. a single position carrying more than one reference residue (AL3L, VVV600_W604del).
-    MALFORMED_ALTERATION;
+    MALFORMED_ALTERATION,
+
+    // The query names a fusion with more than one hyphen, e.g. H1-4-H2BC5 Fusion. Which hyphen
+    // separates the partners could be worked out by trying every split against the gene table, but
+    // OncoKB does not: the name is asked for in the form that already says it, H1-4::H2BC5.
+    AMBIGUOUS_FUSION_SEPARATOR;
 }

@@ -12,6 +12,7 @@ import org.mskcc.cbio.oncokb.apiModels.annotation.*;
 import org.mskcc.cbio.oncokb.serializer.EntrezGeneIdConverter;
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.AminoAcidConverterUtils;
+import org.mskcc.cbio.oncokb.util.FusionUtils;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
 import org.mskcc.cbio.oncokb.util.QueryUtils;
 
@@ -370,6 +371,16 @@ public class Query implements java.io.Serializable {
         }
 
         this.setAlteration(QueryUtils.getAlterationName(this));
+
+        // OncoKB curates fusions under the HGVS "::" separator, so a name written with the legacy
+        // hyphen is rewritten here, before anything is looked up. That is the whole of the backwards
+        // compatibility: everything downstream reads the enriched alteration. A name carrying more
+        // than one hyphen is left exactly as queried - OncoKB does not search for the split, it
+        // reports the name back through validation and asks for the HGVS form.
+        FusionUtils.FusionNameNormalization fusionName = FusionUtils.normalizeSeparator(this.getAlteration());
+        if (fusionName.isNormalized()) {
+            this.setAlteration(fusionName.getName());
+        }
 
         if (StringUtils.isNotEmpty(this.inheritanceMechanism)) {
             if (this.inheritanceMechanism.toLowerCase().equals("heterozygous")) {
