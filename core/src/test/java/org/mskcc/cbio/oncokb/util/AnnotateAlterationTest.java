@@ -86,6 +86,7 @@ public class AnnotateAlterationTest {
                 {"M1?", "1", "1", "1", "1", "M", "?", "start_lost"},
 
                 // NA
+                {"BCR::ABL1 Fusion", Integer.toString(AlterationPositionBoundary.START.getValue()), Integer.toString(AlterationPositionBoundary.END.getValue()), Integer.toString(AlterationPositionBoundary.START.getValue()), Integer.toString(AlterationPositionBoundary.END.getValue()), null, null, "NA"},
                 {"BCR-ABL1 Fusion", Integer.toString(AlterationPositionBoundary.START.getValue()), Integer.toString(AlterationPositionBoundary.END.getValue()), Integer.toString(AlterationPositionBoundary.START.getValue()), Integer.toString(AlterationPositionBoundary.END.getValue()), null, null, "NA"},
                 {"Oncogenic Mutations", Integer.toString(AlterationPositionBoundary.START.getValue()), Integer.toString(AlterationPositionBoundary.END.getValue()), Integer.toString(AlterationPositionBoundary.START.getValue()), Integer.toString(AlterationPositionBoundary.END.getValue()), null, null, "NA"},
                 {"V600", "600", "600", "600", "600", "V", null, "NA"},

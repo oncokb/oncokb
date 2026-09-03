@@ -1430,6 +1430,35 @@ public class IndicatorUtilsTest {
     }
 
     @Test
+    public void testFusionSeparatorNomenclature() {
+        // A fusion queried with the legacy hyphen is annotated exactly as the curated "::" name is,
+        // and the name OncoKB annotated is echoed back in the query
+        Query hyphen = new Query(null, DEFAULT_REFERENCE_GENOME, null, "ABL1", "BCR-ABL1 Fusion", null, null, "Chronic Myelogenous Leukemia", null, null, null, null, false, null, null);
+        Query hgvs = new Query(null, DEFAULT_REFERENCE_GENOME, null, "ABL1", "BCR::ABL1 Fusion", null, null, "Chronic Myelogenous Leukemia", null, null, null, null, false, null, null);
+        SomaticIndicatorQueryResp hyphenResp = IndicatorUtils.processQuerySomatic(hyphen, null, true, null, false);
+        SomaticIndicatorQueryResp hgvsResp = IndicatorUtils.processQuerySomatic(hgvs, null, true, null, false);
+
+        assertTrue("The hyphenated fusion name should not be reported as an error", hyphenResp.getErrors().isEmpty());
+        assertEquals("The hyphenated fusion name should be normalized onto the HGVS separator",
+            "BCR::ABL1 Fusion", hyphenResp.getQuery().getAlteration());
+        assertEquals("Both spellings should be annotated the same", hgvsResp.getOncogenic(), hyphenResp.getOncogenic());
+        assertTrue("Both spellings should be annotated the same",
+            LevelUtils.areSameLevels(hgvsResp.getHighestSensitiveLevel(), hyphenResp.getHighestSensitiveLevel()));
+
+        // More than one hyphen cannot be interpreted: the variant is left unannotated and the caller is
+        // told to use the HGVS separator, while what OncoKB knows about the gene still stands
+        Query ambiguous = new Query(null, DEFAULT_REFERENCE_GENOME, null, "BRAF", "H1-4-BRAF Fusion", null, null, "Ovarian Cancer", null, null, null, null, false, null, null);
+        SomaticIndicatorQueryResp ambiguousResp = IndicatorUtils.processQuerySomatic(ambiguous, null, true, null, false);
+
+        assertEquals("The ambiguous fusion name should be reported", 1, ambiguousResp.getErrors().size());
+        assertEquals(ValidationErrorType.AMBIGUOUS_FUSION_SEPARATOR, ambiguousResp.getErrors().get(0).getType());
+        assertEquals("The queried name should be echoed back untouched",
+            "H1-4-BRAF Fusion", ambiguousResp.getQuery().getAlteration());
+        assertEquals("The gene should still be annotated", true, ambiguousResp.getGeneExist());
+        assertEquals("The variant should be left unannotated", false, ambiguousResp.getVariantExist());
+    }
+
+    @Test
     public void testFilterImplication() {
         TumorType melanoma = new TumorType();
         melanoma.setName("Melanoma");

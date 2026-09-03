@@ -208,10 +208,13 @@ public class IndicatorUtils {
 
             // Everything OncoKB validates about the query is collected here, before anything variant-level is
             // looked up, and reported together on the response. A new check appends to this list. Today that
-            // is the queried protein change against the OncoKB canonical protein sequence.
+            // is the queried protein change against the OncoKB canonical protein sequence, and the separator
+            // of a queried fusion name. A fusion name that could be rewritten already was, in Query.enrich();
+            // what reaches here is one that could not be.
             List<ValidationError> validationErrors = new ArrayList<>(
                 ProteinChangeValidationUtils.getProteinChangeValidationErrors(
                     query.getReferenceGenome(), gene, query.getAlteration()));
+            validationErrors.addAll(FusionValidationUtils.getFusionValidationErrors(query.getAlteration()));
             indicatorQuery.setErrors(validationErrors);
 
             // Every error type we have describes a variant that cannot exist, so nothing is annotated for the
