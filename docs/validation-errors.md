@@ -25,15 +25,24 @@ somatic annotation response: `/annotate/mutations/byProteinChange` (GET and POST
 `/annotate/mutations/byHGVSg`, `/annotate/mutations/byHGVSc`, `/annotate/mutations/byGenomicChange`,
 `/annotate/samples` and `/search`.
 
+Fusion names are checked too. OncoKB curates fusions under the HGVS `::` separator, so a fusion queried
+with a single hyphen (`BCR-ABL1 Fusion`) is rewritten to `BCR::ABL1 Fusion` before anything is looked up
+and is annotated exactly as the `::` spelling is — the normalized name is what comes back in
+`query.alteration`, and nothing is reported. A name carrying more than one hyphen is not rewritten:
+gene symbols may themselves contain hyphens (H1-4, HLA-A, NKX2-1), so the split could only be found by
+trying every candidate pair against the gene table. OncoKB does not do that; it reports
+`AMBIGUOUS_FUSION_SEPARATOR` and asks for the name in the form that already says it, with `::`.
+
 What is checked is the protein change the query resolves to. On `byProteinChange` that is the alteration
 as sent; on the HGVS and genomic change endpoints it is the protein change Genome Nexus resolved the
 query to, which OncoKB takes only from its own canonical transcript. A query on those endpoints is
 therefore flagged only when OncoKB's canonical sequence and the transcript the annotation came from have
 drifted apart. Alterations that name no reference residue — copy number, structural variants, `Fusion`,
-`Amplification`, `Oncogenic Mutations` — are never flagged. Germline annotation does not carry `errors`,
+`Amplification`, `Oncogenic Mutations` — are never flagged by this check; a fusion name is checked only
+for its separator, as described above. Germline annotation does not carry `errors`,
 as it matches on cDNA rather than protein change.
 
-The private `/utils/variantAnnotation` runs the same check but reports it as a `proteinChangeValidation`
+The private `/utils/variantAnnotation` runs the same checks but reports them as a `proteinChangeValidation`
 object with a `status` and a human-readable `message` rather than through `errors`, and annotates the
 query rather than rejecting it.
 
@@ -91,8 +100,9 @@ one entry, though — it is a list precisely so that later checks can report alo
 | `POSITION_OUT_OF_RANGE` | The position the query names is past the end of the OncoKB canonical sequence. Also typical of a query written against a longer, non-canonical isoform. | `BRAF V9999E` — the canonical protein is 766 residues. |
 | `REVERSED_POSITION_RANGE` | The query names a range whose start position comes after its end position. | `BRAF V600_G596del`. |
 | `MALFORMED_ALTERATION` | The query is not a well-formed alteration of its kind, independent of the canonical sequence — most often a single position carrying more than one reference residue. | `BRAF AL600L`, `BRAF VVV600_W604del`. |
+| `AMBIGUOUS_FUSION_SEPARATOR` | The query names a fusion with more than one hyphen — HUGO symbols may themselves contain hyphens, and OncoKB does not search for which hyphen separates the partners. Send the name with the HGVS `::` separator instead. | `H1-4-H2BC5 Fusion` — send `H1-4::H2BC5 Fusion`. |
 
-All four mean the queried alteration cannot exist, so all four leave the variant unannotated.
+All five mean OncoKB has no alteration to annotate, so all five leave the variant unannotated.
 
 ## Adding checks
 
@@ -109,7 +119,11 @@ Read the response fields for what was annotated, and `errors` for what was wrong
   check is skipped, not failed.
 - **An alteration with no reference allele to check** — `Amplification`, `Fusion`, `Truncating
   Mutations`, an insertion's inserted residues, a frameshift that names no single reference residue.
-  These are annotated as usual.
+  These are annotated as usual. A fusion is checked for its separator only, never against a sequence.
+- **A fusion name that was rewritten.** A single hyphen is unambiguous, so the query is annotated on the
+  normalized name and `errors` stays empty. The private `/utils/variantAnnotation` does not report it
+  either: the rewrite is not a finding about the query, and the normalized name is echoed back in the
+  response. Only an ambiguous name is reported there, as an `INVALID` `proteinChangeValidation`.
 - **An unknown gene.** A gene OncoKB does not curate is reported through `geneExist`, as before.
 - **The private `/utils/variantAnnotation` endpoint**, which reports its own `proteinChangeValidation`
   object rather than this field — it also covers normalized and unchecked queries, and carries the same

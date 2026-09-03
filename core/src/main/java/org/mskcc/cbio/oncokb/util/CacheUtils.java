@@ -299,6 +299,27 @@ public class CacheUtils {
     }
 
     /**
+     * Whether oncokb-transcript knows this symbol. The curated gene table holds only the genes OncoKB
+     * curates, so symbols that are perfectly real but uncurated - lncRNAs, IG loci, most HLA genes - are
+     * absent from it. Fusion partners are frequently such genes, which is why a check against the curated
+     * table alone is not enough to tell a hyphenated gene symbol from a hyphen separating two partners.
+     *
+     * <p>Answers from the static gene cache the transcript service warms at construction, so this is a map
+     * lookup rather than a request. Returns false when the service is disabled, leaving the curated table
+     * as the only answer available.
+     */
+    public static boolean isTranscriptGeneSymbol(String hugoSymbol) {
+        if (StringUtils.isNullOrEmpty(hugoSymbol)) {
+            return false;
+        }
+        OncokbTranscriptService transcriptService = getTranscriptService();
+        if (!transcriptService.isEnabled()) {
+            return false;
+        }
+        return transcriptService.findTranscriptGeneBySymbol(hugoSymbol) != null;
+    }
+
+    /**
      * Loads the canonical protein sequence for every cached gene, in both reference genomes, so protein
      * change validation can be served entirely from memory. One request per reference genome.
      *
