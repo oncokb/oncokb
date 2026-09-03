@@ -14,7 +14,7 @@ import org.mskcc.cbio.oncokb.model.ValidationErrorType;
  * See {@code docs/validation-errors.md}.
  */
 public class ValidationError {
-    @ApiModelProperty(value = "What is wrong with the query.", allowableValues = "REFERENCE_ALLELE_MISMATCH, POSITION_OUT_OF_RANGE, REVERSED_POSITION_RANGE, MALFORMED_ALTERATION")
+    @ApiModelProperty(value = "What is wrong with the query.", allowableValues = "REFERENCE_ALLELE_MISMATCH, POSITION_OUT_OF_RANGE, REVERSED_POSITION_RANGE, MALFORMED_ALTERATION, AMBIGUOUS_FUSION_SEPARATOR")
     private ValidationErrorType type;
 
     @ApiModelProperty(value = "The same reason in words, naming what was queried and what OncoKB has instead.", example = "BRAF A600E: The reference amino acid at position 600 is V instead of A on the OncoKB canonical transcript.")
