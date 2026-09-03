@@ -17,5 +17,8 @@ public enum VariantAnnotationMessageType {
     // The transcript service is disabled, so the required validation step could not run.
     TRANSCRIPT_SERVICE_DISABLED,
     // The transcript service failed (likely intermittent); the query should be retried.
-    TRANSCRIPT_SERVICE_UNAVAILABLE
+    TRANSCRIPT_SERVICE_UNAVAILABLE,
+    // The query named a fusion with more than one hyphen; rather than guess the split, OncoKB asks
+    // for the HGVS separator. The detail is carried in the message field.
+    AMBIGUOUS_FUSION_SEPARATOR
 }
