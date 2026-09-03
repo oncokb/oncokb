@@ -121,8 +121,9 @@ Read the response fields for what was annotated, and `errors` for what was wrong
   Mutations`, an insertion's inserted residues, a frameshift that names no single reference residue.
   These are annotated as usual. A fusion is checked for its separator only, never against a sequence.
 - **A fusion name that was rewritten.** A single hyphen is unambiguous, so the query is annotated on the
-  normalized name and `errors` stays empty. The private `/utils/variantAnnotation` does report it, as a
-  `NORMALIZED` `proteinChangeValidation`.
+  normalized name and `errors` stays empty. The private `/utils/variantAnnotation` does not report it
+  either: the rewrite is not a finding about the query, and the normalized name is echoed back in the
+  response. Only an ambiguous name is reported there, as an `INVALID` `proteinChangeValidation`.
 - **An unknown gene.** A gene OncoKB does not curate is reported through `geneExist`, as before.
 - **The private `/utils/variantAnnotation` endpoint**, which reports its own `proteinChangeValidation`
   object rather than this field — it also covers normalized and unchecked queries, and carries the same
