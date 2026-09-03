@@ -68,7 +68,7 @@ public class FindRelevantAlterationsTest {
 
                 // Tumor suppressor should be mapped with Truncating Mutations. (The code does not check whether gene
                 // is tumor suppressor, just check whether Fusions is curated, is not, link Truncating Mutations)
-                {"PIK3R1", "KCTD16::PIK3R1 fusion", null, "KCTD16::PIK3R1 fusion, Truncating Mutations"},
+                {"PIK3R1", "KCTD16::PIK3R1 fusion", null, "KCTD16::PIK3R1 Fusion, Truncating Mutations"},
 
                 // General truncating consequence should be associated with Truncating Mutations
                 // Check splice

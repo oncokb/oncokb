@@ -62,6 +62,20 @@ public class FusionUtilsTest extends TestCase {
 
         // A single gene whose symbol contains a hyphen has nothing to separate
         assertEquals(FusionSeparatorStatus.NOT_APPLICABLE, normalizeSeparator("H1-4 Fusion").getStatus());
+        assertEquals(FusionSeparatorStatus.NOT_APPLICABLE, normalizeSeparator("NKX2-1 Fusion").getStatus());
+
+        // The same holds for a gene OncoKB does not curate. These are absent from the curated gene table
+        // but are real symbols, and splitting them yields partners that do not exist.
+        assertEquals(FusionSeparatorStatus.NOT_APPLICABLE, normalizeSeparator("COX10-AS1 Fusion").getStatus());
+        assertEquals("COX10-AS1 Fusion", normalizeSeparator("COX10-AS1 Fusion").getName());
+        assertEquals(FusionSeparatorStatus.NOT_APPLICABLE, normalizeSeparator("HLA-DRB1 Fusion").getStatus());
+        assertEquals("HLA-DRB1 Fusion", normalizeSeparator("HLA-DRB1 Fusion").getName());
+        assertEquals(FusionSeparatorStatus.NOT_APPLICABLE, normalizeSeparator("SOX2-OT Fusion").getStatus());
+        assertEquals(FusionSeparatorStatus.NOT_APPLICABLE, normalizeSeparator("KCNMB2-AS1 Fusion").getStatus());
+
+        // A hyphenated pair of genuine partners is still rewritten
+        assertEquals("BCR::ABL1 Fusion", normalizeSeparator("BCR-ABL1 Fusion").getName());
+        assertEquals(FusionSeparatorStatus.NORMALIZED, normalizeSeparator("BCR-ABL1 Fusion").getStatus());
 
         // Without the fusion keyword there is no fusion name to rewrite
         assertEquals(FusionSeparatorStatus.NOT_APPLICABLE, normalizeSeparator("A-B").getStatus());

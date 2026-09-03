@@ -139,7 +139,8 @@ public class FusionUtils {
      *
      * <p>Only names carrying the trailing "Fusion"/"Fusions" keyword are considered, so an ordinary
      * protein change that happens to contain a hyphen is never touched. A gene part that is itself a
-     * curated HUGO symbol (H1-4 Fusion) is left alone as well.
+     * HUGO symbol (H1-4 Fusion, COX10-AS1 Fusion) is left alone as well, whether or not OncoKB curates
+     * that gene.
      */
     public static FusionNameNormalization normalizeSeparator(String alteration) {
         if (StringUtils.isNullOrEmpty(alteration)) {
@@ -154,8 +155,11 @@ public class FusionUtils {
         if (genePart.contains(FUSION_SEPARATOR)) {
             return new FusionNameNormalization(alteration, FusionSeparatorStatus.HGVS);
         }
-        if (GeneUtils.getGeneByHugoSymbol(genePart) != null) {
+        if (GeneUtils.isKnownGeneSymbol(genePart)) {
             // A single gene whose symbol contains a hyphen, e.g. "H1-4 Fusion". Nothing to separate.
+            // Asked of every gene OncoKB knows of rather than only the curated ones: uncurated symbols
+            // like COX10-AS1 and HLA-DRB1 are real genes and would otherwise be split into partners that
+            // do not exist, and the invented name would be echoed back and written into the summaries.
             return new FusionNameNormalization(alteration, FusionSeparatorStatus.NOT_APPLICABLE);
         }
         int hyphens = org.apache.commons.lang3.StringUtils.countMatches(genePart, FUSION_ALTERNATIVE_SEPARATOR);
