@@ -42,6 +42,19 @@ public class GeneUtils {
         return null;
     }
 
+    /**
+     * Whether the symbol names a gene OncoKB knows of at all - curated or merely present in
+     * oncokb-transcript. {@link #getGeneByHugoSymbol(String)} answers the narrower question of whether
+     * OncoKB curates the gene, which is the wrong test when all that is being asked is whether a string
+     * is a gene symbol rather than something else.
+     */
+    public static boolean isKnownGeneSymbol(String hugoSymbol) {
+        if (StringUtils.isEmpty(hugoSymbol)) {
+            return false;
+        }
+        return getGeneByHugoSymbol(hugoSymbol) != null || CacheUtils.isTranscriptGeneSymbol(hugoSymbol);
+    }
+
     public static Gene getGeneByEntrezId(Integer entrezId) {
         if (entrezId != null) {
             GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
