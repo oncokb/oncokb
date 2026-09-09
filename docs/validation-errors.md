@@ -25,6 +25,13 @@ somatic annotation response: `/annotate/mutations/byProteinChange` (GET and POST
 `/annotate/mutations/byHGVSg`, `/annotate/mutations/byHGVSc`, `/annotate/mutations/byGenomicChange`,
 `/annotate/samples` and `/search`.
 
+An alteration OncoKB itself curates is never checked. Curation is the source of truth: a query naming a
+curated alteration verbatim — by its alteration or by its name, case-insensitively — annotates from that
+alteration, so a check against the canonical sequence could only contradict it. This is what makes a
+curated name that reads like a protein change but means something else safe to query: `AR V7` names the
+AR-V7 splice isoform rather than valine at codon 7, and is annotated rather than rejected for disagreeing
+with a sequence it was never a claim about.
+
 What is checked is the protein change the query resolves to. On `byProteinChange` that is the alteration
 as sent; on the HGVS and genomic change endpoints it is the protein change Genome Nexus resolved the
 query to, which OncoKB takes only from its own canonical transcript. A query on those endpoints is
@@ -110,6 +117,8 @@ Read the response fields for what was annotated, and `errors` for what was wrong
 - **An alteration with no reference allele to check** — `Amplification`, `Fusion`, `Truncating
   Mutations`, an insertion's inserted residues, a frameshift that names no single reference residue.
   These are annotated as usual.
+- **A curated alteration.** An alteration OncoKB curates on the queried gene is annotated as usual,
+  whatever its name looks like, as described above.
 - **An unknown gene.** A gene OncoKB does not curate is reported through `geneExist`, as before.
 - **The private `/utils/variantAnnotation` endpoint**, which reports its own `proteinChangeValidation`
   object rather than this field — it also covers normalized and unchecked queries, and carries the same

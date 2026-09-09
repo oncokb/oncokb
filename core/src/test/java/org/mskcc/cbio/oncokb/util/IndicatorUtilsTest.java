@@ -4,8 +4,10 @@ import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.genome_nexus.ApiException;
 import org.genome_nexus.client.VariantAnnotation;
+import org.junit.Assume;
 import org.junit.Test;
 import org.mskcc.cbio.oncokb.apiModels.Implication;
+import org.mskcc.cbio.oncokb.apiModels.ValidationError;
 import org.mskcc.cbio.oncokb.apiModels.MainType;
 import org.mskcc.cbio.oncokb.genomenexus.GNVariantAnnotationType;
 import org.mskcc.cbio.oncokb.model.*;
@@ -1535,6 +1537,78 @@ public class IndicatorUtilsTest {
             }
         }
         return false;
+    }
+
+    @Test
+    public void testCuratedAlterationSkipsProteinChangeValidation() {
+        assumeProteinChangeValidationIsActive();
+
+        // The regression: a curated alteration that the reference allele check would otherwise reject.
+        assertAnnotated("AR", "V7");
+        // Curation is matched case-insensitively, so the same query in any casing is annotated.
+        assertAnnotated("AR", "v7");
+        // The other curated name of this shape, reached through its abbreviation as well.
+        assertAnnotated("EGFR", "vIII");
+        assertAnnotated("EGFR", "EGFRvIII");
+    }
+
+    @Test
+    public void testUncuratedProteinChangeIsStillValidated() {
+        assumeProteinChangeValidationIsActive();
+
+        assertRejected("AR", "V7E", ValidationErrorType.REFERENCE_ALLELE_MISMATCH);
+        assertRejected("AR", "A600E", ValidationErrorType.REFERENCE_ALLELE_MISMATCH);
+        assertRejected("BRAF", "A600E", ValidationErrorType.REFERENCE_ALLELE_MISMATCH);
+        assertRejected("BRAF", "V9999E", ValidationErrorType.POSITION_OUT_OF_RANGE);
+    }
+
+    /**
+     * Skips rather than passes when the protein sequence cache never warmed. Without it every check under
+     * test is inactive, so the assertions would hold for the wrong reason and the regression they exist to
+     * catch could return unnoticed.
+     */
+    private void assumeProteinChangeValidationIsActive() {
+        Assume.assumeTrue(
+            "The canonical protein sequence cache is not warmed, so protein change validation does not run.",
+            CacheUtils.isProteinSequenceCached());
+    }
+
+    private void assertAnnotated(String hugoSymbol, String alteration) {
+        SomaticIndicatorQueryResp resp = annotate(hugoSymbol, alteration);
+        // Compared as text so a failure names the reason the query was rejected, not an object identity.
+        assertEquals(hugoSymbol + " " + alteration + " is curated and should not be reported as invalid",
+            Collections.emptyList(), describeErrors(resp));
+        assertEquals(hugoSymbol + " " + alteration + " is curated, so the variant should exist",
+            Boolean.TRUE, resp.getVariantExist());
+        assertNotEquals(hugoSymbol + " " + alteration + " is curated, so it should carry an oncogenicity",
+            Oncogenicity.UNKNOWN.getOncogenic(), resp.getOncogenic());
+    }
+
+    private void assertRejected(String hugoSymbol, String alteration, ValidationErrorType expectedType) {
+        SomaticIndicatorQueryResp resp = annotate(hugoSymbol, alteration);
+        List<ValidationError> errors = resp.getErrors();
+        assertEquals(hugoSymbol + " " + alteration + " should be reported as invalid", 1, errors.size());
+        assertEquals("Not the expected error type for " + hugoSymbol + " " + alteration,
+            expectedType, errors.get(0).getType());
+        // An invalid query is annotated at the gene level only, so nothing variant-level comes back.
+        assertEquals("The gene should still exist for " + hugoSymbol + " " + alteration,
+            Boolean.TRUE, resp.getGeneExist());
+        assertEquals("The variant should not exist for " + hugoSymbol + " " + alteration,
+            Boolean.FALSE, resp.getVariantExist());
+    }
+
+    private List<String> describeErrors(SomaticIndicatorQueryResp resp) {
+        List<String> described = new ArrayList<>();
+        for (ValidationError error : resp.getErrors()) {
+            described.add(error.getType() + ": " + error.getMessage());
+        }
+        return described;
+    }
+
+    private SomaticIndicatorQueryResp annotate(String hugoSymbol, String alteration) {
+        Query query = new Query(null, DEFAULT_REFERENCE_GENOME, null, hugoSymbol, alteration,
+            null, null, null, null, null, null, null, false, null, null);
+        return IndicatorUtils.processQuerySomatic(query, null, true, null, false);
     }
 
     private Alteration generateAlteration(Gene gene, String proteinChange) {
