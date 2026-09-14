@@ -1,6 +1,4 @@
-# Title
-
-Fix Redis cache serialization failure for validation errors.
+# Fix Redis cache serialization failure for validation errors.
 
 ## What's New
 
