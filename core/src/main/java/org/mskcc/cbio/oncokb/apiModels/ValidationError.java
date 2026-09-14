@@ -13,7 +13,7 @@ import org.mskcc.cbio.oncokb.model.ValidationErrorType;
  * covers the alteration a query names today and is meant to grow to gene-level and other checks.
  * See {@code docs/validation-errors.md}.
  */
-public class ValidationError {
+public class ValidationError implements java.io.Serializable {
     @ApiModelProperty(value = "What is wrong with the query.", allowableValues = "REFERENCE_ALLELE_MISMATCH, POSITION_OUT_OF_RANGE, REVERSED_POSITION_RANGE, MALFORMED_ALTERATION")
     private ValidationErrorType type;
 
