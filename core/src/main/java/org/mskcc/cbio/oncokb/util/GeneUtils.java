@@ -43,10 +43,8 @@ public class GeneUtils {
     }
 
     /**
-     * Whether the symbol names a gene OncoKB knows of at all - curated or merely present in
-     * oncokb-transcript. {@link #getGeneByHugoSymbol(String)} answers the narrower question of whether
-     * OncoKB curates the gene, which is the wrong test when all that is being asked is whether a string
-     * is a gene symbol rather than something else.
+     * OncoKB core database only has curated genes. This function checks if the gene
+     * is valid based on the transcript database, which has all genes.
      */
     public static boolean isKnownGeneSymbol(String hugoSymbol) {
         if (StringUtils.isEmpty(hugoSymbol)) {

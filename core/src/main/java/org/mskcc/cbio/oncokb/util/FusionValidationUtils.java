@@ -36,11 +36,9 @@ public final class FusionValidationUtils {
             ValidationErrorType.AMBIGUOUS_FUSION_SEPARATOR, describeAmbiguous(alteration)));
     }
 
-    /** Why a multi-hyphen fusion name was not annotated, and what to send instead. */
     public static String describeAmbiguous(String alteration) {
         return StringUtils.trimToEmpty(alteration)
             + " does not follow HGNC fusion nomenclature. Use " + FusionUtils.FUSION_SEPARATOR
-            + " to separate fusion gene partners, especially since HGNC gene symbols may contain"
-            + " hyphens.";
+            + " to separate fusion gene partners, as HGNC gene symbols may contain hyphens.";
     }
 }

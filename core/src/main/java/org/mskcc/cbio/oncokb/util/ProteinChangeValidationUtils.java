@@ -2,11 +2,11 @@ package org.mskcc.cbio.oncokb.util;
 
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.apiModels.ValidationError;
-import org.mskcc.cbio.oncokb.apiModels.ProteinChangeValidation;
+import org.mskcc.cbio.oncokb.apiModels.VariantValidation;
 import org.mskcc.cbio.oncokb.cache.CacheFetcher;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.Gene;
-import org.mskcc.cbio.oncokb.model.ProteinChangeValidationStatus;
+import org.mskcc.cbio.oncokb.model.VariantValidationStatus;
 import org.mskcc.cbio.oncokb.model.ReferenceGenome;
 import org.mskcc.cbio.oncokb.model.VariantAnnotationMessageType;
 import org.oncokb.oncokb_transcript.ApiException;
@@ -62,7 +62,7 @@ public final class ProteinChangeValidationUtils {
      * reference-bearing protein change. Callers that rewrite the query before annotating layer their own
      * NORMALIZED status on top of this result.
      */
-    public static ProteinChangeValidation validate(CacheFetcher cacheFetcher, ReferenceGenome referenceGenome, Gene gene, String proteinChange) {
+    public static VariantValidation validate(CacheFetcher cacheFetcher, ReferenceGenome referenceGenome, Gene gene, String proteinChange) {
         if (gene == null) {
             return null;
         }
@@ -85,7 +85,7 @@ public final class ProteinChangeValidationUtils {
         Optional<ValidationError> invalid =
             ProteinChangeValidator.validate(gene.getHugoSymbol(), proteinChange, canonicalSequence);
         return invalid
-            .map(error -> new ProteinChangeValidation(ProteinChangeValidationStatus.INVALID,
+            .map(error -> new VariantValidation(VariantValidationStatus.INVALID,
                 VariantAnnotationMessageType.INVALID_PROTEIN_CHANGE, error.getMessage()))
             .orElse(null);
     }
@@ -99,7 +99,7 @@ public final class ProteinChangeValidationUtils {
         return curated != null;
     }
 
-    private static ProteinChangeValidation unchecked(VariantAnnotationMessageType messageType) {
-        return new ProteinChangeValidation(ProteinChangeValidationStatus.UNCHECKED, messageType, null);
+    private static VariantValidation unchecked(VariantAnnotationMessageType messageType) {
+        return new VariantValidation(VariantValidationStatus.UNCHECKED, messageType, null);
     }
 }

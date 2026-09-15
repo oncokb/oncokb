@@ -492,9 +492,9 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
 
         // Both checks report through the same validation object, and a fusion name is never a protein
         // change, so what OncoKB made of the fusion nomenclature wins when there is anything to say.
-        ProteinChangeValidation fusionValidation = validateFusionNomenclature(fusionNormalization, originalAlteration);
+        VariantValidation fusionValidation = validateFusionNomenclature(fusionNormalization, originalAlteration);
         if (fusionValidation != null) {
-            annotation.setProteinChangeValidation(fusionValidation);
+            annotation.setVariantValidation(fusionValidation);
         } else if (alternativeOncoKbVariant == null) {
             // Only validate against the canonical sequence when Genome Nexus did not resolve the query to an
             // alternative variant. Legacy names and commonly used protein changes map to a valid alternative
@@ -595,22 +595,22 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         return new ResponseEntity<>(annotation, HttpStatus.OK);
     }
 
-    // What OncoKB made of the queried fusion name: INVALID when more than one hyphen meant the split
-    // was not read off the name, in which case nothing was annotated for the variant and the caller is
-    // told to use "::" rather than OncoKB searching for the partners.
+    // What OncoKB made of the queried fusion name: INVALID when the name has more than one hyphen and
+    // no single split turns it into two known genes, in which case nothing was annotated for the
+    // variant and the caller is told to use "::".
     // Null otherwise - a name rewritten from the legacy hyphen onto the HGVS separator is annotated in
     // full and is not worth reporting, as is a query that named no fusion or already used "::".
-    private ProteinChangeValidation validateFusionNomenclature(FusionUtils.FusionNameNormalization normalization, String originalAlteration) {
+    private VariantValidation validateFusionNomenclature(FusionUtils.FusionNameNormalization normalization, String originalAlteration) {
         if (normalization.isAmbiguous()) {
-            return new ProteinChangeValidation(
-                ProteinChangeValidationStatus.INVALID,
+            return new VariantValidation(
+                VariantValidationStatus.INVALID,
                 VariantAnnotationMessageType.AMBIGUOUS_FUSION_SEPARATOR,
                 FusionValidationUtils.describeAmbiguous(originalAlteration));
         }
         return null;
     }
 
-    // Attaches a ProteinChangeValidation describing the outcome of checking the queried protein change
+    // Attaches a VariantValidation describing the outcome of checking the queried protein change
     // against the OncoKB canonical protein sequence: INVALID for a genuine disagreement, NORMALIZED when
     // the query was rewritten (e.g. a spelled-out deleted sequence dropped) before annotation, or
     // UNCHECKED when the check could not run. A query that agrees leaves the validation null.
@@ -620,7 +620,7 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             return;
         }
         Gene gene = alterationModel.getGene();
-        ProteinChangeValidation validation = ProteinChangeValidationUtils.validate(
+        VariantValidation validation = ProteinChangeValidationUtils.validate(
             this.cacheFetcher, referenceGenome, gene, alterationModel.getAlteration());
         if (validation == null && !appliedNormalizations.isEmpty()) {
             // Each normalization carries its own reason and message; a single object surfaces the first
@@ -628,14 +628,14 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             String message = appliedNormalizations.stream()
                 .map(n -> n.describe(gene.getHugoSymbol(), originalAlteration, alterationModel.getAlteration()))
                 .collect(Collectors.joining(" "));
-            validation = new ProteinChangeValidation(ProteinChangeValidationStatus.NORMALIZED,
+            validation = new VariantValidation(VariantValidationStatus.NORMALIZED,
                 appliedNormalizations.get(0).getMessageType(), message);
         }
         if (validation != null) {
             if (!appliedNormalizations.isEmpty()) {
                 validation.setNormalizedProteinChange(alterationModel.getAlteration());
             }
-            annotation.setProteinChangeValidation(validation);
+            annotation.setVariantValidation(validation);
         }
     }
 
