@@ -16,19 +16,19 @@ public enum ResistanceDescription {
     }
 
     public static ResistanceDescription deriveFromOncogenicityAndLevels(Oncogenicity o, LevelOfEvidence highestTherapeuticLevel, LevelOfEvidence highestResistanceLevel) {
-        if (highestResistanceLevel.equals(LevelOfEvidence.LEVEL_R1)) {
-            if (o.equals(Oncogenicity.YES) || o.equals(Oncogenicity.LIKELY) || o.equals(Oncogenicity.RESISTANCE)) {
+        if (LevelOfEvidence.LEVEL_R1.equals(highestResistanceLevel)) {
+            if (Oncogenicity.YES.equals(o) || Oncogenicity.LIKELY.equals(o) || Oncogenicity.RESISTANCE.equals(o)) {
                 return KNOWN;
             }
         }
 
-        if (highestResistanceLevel.equals(LevelOfEvidence.LEVEL_R2)) {
-            if (o.equals(Oncogenicity.YES) || o.equals(Oncogenicity.LIKELY) || o.equals(Oncogenicity.RESISTANCE)) {
+        if (LevelOfEvidence.LEVEL_R2.equals(highestResistanceLevel)) {
+            if (Oncogenicity.YES.equals(o) || Oncogenicity.LIKELY.equals(o) || Oncogenicity.RESISTANCE.equals(o)) {
                 return POTENTIAL;
             }
         }
 
-        if (o.equals(Oncogenicity.RESISTANCE)) {
+        if (Oncogenicity.RESISTANCE.equals(o)) {
             return LIMITED;
         }
 

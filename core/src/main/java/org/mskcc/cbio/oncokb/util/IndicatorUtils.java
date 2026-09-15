@@ -437,13 +437,15 @@ public class IndicatorUtils {
                 }
             }
 
-            indicatorQuery.setResistanceDescription(
-                ResistanceDescription.deriveFromOncogenicityAndLevels(
-                    oncogenicity,
-                    indicatorQuery.getHighestSensitiveLevel(),
-                    indicatorQuery.getHighestResistanceLevel()
-                ).getDescription()
+            // Resistance Description
+            ResistanceDescription rd = ResistanceDescription.deriveFromOncogenicityAndLevels(
+                oncogenicity,
+                indicatorQuery.getHighestSensitiveLevel(),
+                indicatorQuery.getHighestResistanceLevel()
             );
+            if (rd != null) {
+                indicatorQuery.setResistanceDescription(rd.getDescription());
+            }
 
             // Mutation summary
             if (evidenceTypes.contains(EvidenceType.MUTATION_SUMMARY) && StringUtils.isNotEmpty(matchedAlt.getAlteration())) {

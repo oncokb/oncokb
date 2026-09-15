@@ -851,9 +851,9 @@ public class SummaryUtils {
         sb.append(query.getAlteration());
         sb.append( " ");
 
-        if (highestResistanceLevel.equals(LevelOfEvidence.LEVEL_R1)) {
+        if (LevelOfEvidence.LEVEL_R1.equals(highestResistanceLevel)) {
             sb.append("is a well characterized resistance mutation");
-        } else if (highestResistanceLevel.equals(LevelOfEvidence.LEVEL_R2)) {
+        } else if (LevelOfEvidence.LEVEL_R2.equals(highestResistanceLevel)) {
             sb.append("has been reported in the context of resistance to a precision oncology therapy(s)");
         } else {
             sb.append("has limited evidence suggesting a role in resistance to precision oncology therapy(s)");

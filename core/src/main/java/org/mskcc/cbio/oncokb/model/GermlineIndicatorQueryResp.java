@@ -38,6 +38,7 @@ public class GermlineIndicatorQueryResp extends IndicatorQueryRespBase {
         newResp.setDiagnosticImplications(new java.util.ArrayList<>(this.getDiagnosticImplications()));
         newResp.setPrognosticImplications(new java.util.ArrayList<>(this.getPrognosticImplications()));
         newResp.setTreatments(new java.util.ArrayList<>(this.getTreatments()));
+        newResp.setResistanceDescription(this.getResistanceDescription());
         newResp.setDataVersion(this.getDataVersion());
         newResp.setLastUpdate(this.getLastUpdate());
         newResp.setGenomicIndicators(new ArrayList<>(this.genomicIndicators));
