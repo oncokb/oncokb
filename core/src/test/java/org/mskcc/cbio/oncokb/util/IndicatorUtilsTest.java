@@ -1447,15 +1447,16 @@ public class IndicatorUtilsTest {
         assertTrue("Both spellings should be annotated the same",
             LevelUtils.areSameLevels(hgvsResp.getHighestSensitiveLevel(), hyphenResp.getHighestSensitiveLevel()));
 
-        // More than one hyphen cannot be interpreted: the variant is left unannotated and the caller is
+        // A name with more than one hyphen that no single split turns into two known genes cannot be
+        // interpreted: the variant is left unannotated and the caller is
         // told to use the HGVS separator, while what OncoKB knows about the gene still stands
-        Query ambiguous = new Query(null, DEFAULT_REFERENCE_GENOME, null, "BRAF", "H1-4-BRAF Fusion", null, null, "Ovarian Cancer", null, null, null, null, false, null, null);
+        Query ambiguous = new Query(null, DEFAULT_REFERENCE_GENOME, null, "BRAF", "FOO-BAR-BRAF Fusion", null, null, "Ovarian Cancer", null, null, null, null, false, null, null);
         SomaticIndicatorQueryResp ambiguousResp = IndicatorUtils.processQuerySomatic(ambiguous, null, true, null, false);
 
         assertEquals("The ambiguous fusion name should be reported", 1, ambiguousResp.getErrors().size());
         assertEquals(ValidationErrorType.AMBIGUOUS_FUSION_SEPARATOR, ambiguousResp.getErrors().get(0).getType());
         assertEquals("The queried name should be echoed back untouched",
-            "H1-4-BRAF Fusion", ambiguousResp.getQuery().getAlteration());
+            "FOO-BAR-BRAF Fusion", ambiguousResp.getQuery().getAlteration());
         assertEquals("The gene should still be annotated", true, ambiguousResp.getGeneExist());
         assertEquals("The variant should be left unannotated", false, ambiguousResp.getVariantExist());
     }

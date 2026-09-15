@@ -55,10 +55,14 @@ public class FusionUtilsTest extends TestCase {
         assertEquals("H1-4::H2BC5 Fusion", normalizeSeparator("H1-4::H2BC5 Fusion").getName());
         assertEquals(FusionSeparatorStatus.HGVS, normalizeSeparator("H1-4::H2BC5 Fusion").getStatus());
 
-        // More than one hyphen: which one separates the partners cannot be determined
-        assertEquals(FusionSeparatorStatus.AMBIGUOUS, normalizeSeparator("H1-4-H2BC5 Fusion").getStatus());
-        assertEquals("H1-4-H2BC5 Fusion", normalizeSeparator("H1-4-H2BC5 Fusion").getName());
+        // More than one hyphen: rewritten when exactly one hyphen splits the name into two known genes
+        assertEquals(FusionSeparatorStatus.NORMALIZED, normalizeSeparator("H1-4-H2BC5 Fusion").getStatus());
+        assertEquals("H1-4::H2BC5 Fusion", normalizeSeparator("H1-4-H2BC5 Fusion").getName());
+        assertEquals("H2BC5::H1-4 Fusion", normalizeSeparator("H2BC5-H1-4 Fusion").getName());
+
+        // Otherwise which hyphen separates the partners cannot be determined
         assertTrue(normalizeSeparator("A-B-C Fusion").isAmbiguous());
+        assertEquals("A-B-C Fusion", normalizeSeparator("A-B-C Fusion").getName());
 
         // A single gene whose symbol contains a hyphen has nothing to separate
         assertEquals(FusionSeparatorStatus.NOT_APPLICABLE, normalizeSeparator("H1-4 Fusion").getStatus());
