@@ -30,6 +30,7 @@ public class GermlineVariantAnnotation extends GermlineIndicatorQueryResp {
         this.setDiagnosticImplications(indicatorQueryResp.getDiagnosticImplications());
         this.setPrognosticImplications(indicatorQueryResp.getPrognosticImplications());
         this.setTreatments(indicatorQueryResp.getTreatments());
+        this.setResistanceDescription(indicatorQueryResp.getResistanceDescription());
         this.setDataVersion(indicatorQueryResp.getDataVersion());
         this.setLastUpdate(indicatorQueryResp.getLastUpdate());
         this.setGenomicIndicators(indicatorQueryResp.getGenomicIndicators());

@@ -437,9 +437,24 @@ public class IndicatorUtils {
                 }
             }
 
+            // Resistance Description
+            ResistanceDescription rd = ResistanceDescription.deriveFromOncogenicityAndLevels(
+                oncogenicity,
+                indicatorQuery.getHighestSensitiveLevel(),
+                indicatorQuery.getHighestResistanceLevel()
+            );
+            if (rd != null) {
+                indicatorQuery.setResistanceDescription(rd.getDescription());
+            }
+
             // Mutation summary
             if (evidenceTypes.contains(EvidenceType.MUTATION_SUMMARY) && StringUtils.isNotEmpty(matchedAlt.getAlteration())) {
-                String variantSummary = SummaryUtils.variantSummary(gene, matchedAlt, new ArrayList<>(relevantAlterations), query);
+                String variantSummary = SummaryUtils.variantSummary(
+                    gene, matchedAlt, 
+                    new ArrayList<>(relevantAlterations), 
+                    query, 
+                    indicatorQuery.getHighestResistanceLevel()
+                );
                 variantSummary = CplUtils.annotate(
                     variantSummary,
                     query.getHugoSymbol(),
