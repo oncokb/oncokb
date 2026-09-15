@@ -1,0 +1,17 @@
+services:
+  core-api-redis:
+    image: redis:7.2-alpine
+    container_name: core-api-redis
+    environment:
+      REDIS_PASSWORD: oncokb-redis-password
+    command:
+      - sh
+      - -c
+      - redis-server --appendonly yes --requirepass "$${REDIS_PASSWORD}"
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "oncokb-redis-password", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
