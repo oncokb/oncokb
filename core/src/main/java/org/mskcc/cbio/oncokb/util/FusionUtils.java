@@ -1,6 +1,6 @@
 package org.mskcc.cbio.oncokb.util;
 
-import com.mysql.jdbc.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.model.Alteration;
 import org.mskcc.cbio.oncokb.model.FusionSeparatorStatus;
 import org.mskcc.cbio.oncokb.model.Gene;
@@ -9,34 +9,29 @@ import org.mskcc.cbio.oncokb.model.ReferenceGenome;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class FusionUtils {
     public final static String FUSION_SEPARATOR = "::";
-    public final static String FUSION_ALTERNATIVE_SEPARATOR = "-";
-    // Gene symbols may contain hyphens (H1-4, HLA-A, NKX2-1), so the partners around the HGVS
-    // separator are matched as [\w-]* rather than \w*. The legacy hyphen form cannot afford the same,
-    // since there the hyphen is the separator; it stays limited to a single unambiguous hyphen.
+    public final static String FUSION_LEGACY_SEPARATOR = "-";
     private final static String FUSION_REGEX = "\\s*([\\w-]*)" + FUSION_SEPARATOR + "([\\w-]*)\\s*(?i)(fusion)?\\s*";
-    private final static String FUSION_ALT_REGEX = "\\s*((\\w*)" + FUSION_ALTERNATIVE_SEPARATOR + "(\\w*))\\s+(?i)fusion\\s*";
+    private final static String FUSION_ALT_REGEX = "\\s*((\\w*)" + FUSION_LEGACY_SEPARATOR + "(\\w*))\\s+(?i)fusion\\s*";
 
-    // Splits a fusion name into its gene part and the trailing "Fusion"/"Fusions" keyword, so the
-    // separator can be rewritten without disturbing the keyword. Groups: 1 gene part, 2 keyword.
+    // Groups: 1 gene partner, 2 fusion keyword.
     private final static Pattern FUSION_KEYWORD_PATTERN =
         Pattern.compile("\\s*(.*?)(?:\\s+(?i)(fusions?))?\\s*", Pattern.DOTALL);
 
     public static List<String> getGenesStrs(String query) {
         Set<String> geneStrsList = new LinkedHashSet<>();
-        if (!StringUtils.isNullOrEmpty(query)) {
-            String fusionSeparator = query.contains(FUSION_SEPARATOR) ? FUSION_SEPARATOR : FUSION_ALTERNATIVE_SEPARATOR;
+        if (!StringUtils.isEmpty(query)) {
+            String fusionSeparator = query.contains(FUSION_SEPARATOR) ? FUSION_SEPARATOR : FUSION_LEGACY_SEPARATOR;
             List<String> geneFragments = Arrays.asList(query.split(fusionSeparator));
             if (geneFragments.size() > 2) {
-                String rightHandGene = org.apache.commons.lang3.StringUtils.join(geneFragments.subList(1, geneFragments.size()), fusionSeparator);
+                String rightHandGene = StringUtils.join(geneFragments.subList(1, geneFragments.size()), fusionSeparator);
                 if (GeneUtils.getGeneByHugoSymbol(rightHandGene) != null) {
                     geneStrsList.add(rightHandGene);
                     geneStrsList.add(geneFragments.get(0));
                 }
-                String leftHandGene = org.apache.commons.lang3.StringUtils.join(geneFragments.subList(0, geneFragments.size() - 1), fusionSeparator);
+                String leftHandGene = StringUtils.join(geneFragments.subList(0, geneFragments.size() - 1), fusionSeparator);
                 if (GeneUtils.getGeneByHugoSymbol(leftHandGene) != null) {
                     geneStrsList.add(leftHandGene);
                     geneStrsList.add(geneFragments.get(geneFragments.size() - 1));
@@ -124,18 +119,16 @@ public class FusionUtils {
         return hugoA + FUSION_SEPARATOR + hugoB;
     }
 
-    // This is used to find fusion in the alteration table, which curates fusions under the HGVS
-    // separator and the "Fusion" keyword.
     private static String getFusionAlterationName(String hugoA, String hugoB) {
         return hugoA + FUSION_SEPARATOR + hugoB + " Fusion";
     }
 
     /**
      * Rewrites a queried fusion name onto the HGVS {@code ::} separator, which is what OncoKB curates
-     * fusions under. A name written with a single legacy hyphen is rewritten; one written with more
-     * than one hyphen is left alone and reported as {@link FusionSeparatorStatus#AMBIGUOUS}: HUGO
-     * symbols may themselves contain hyphens (H1-4, HLA-A), so the split could only be found by
-     * trying every candidate pair against the gene table, and OncoKB asks for the HGVS form instead.
+     * fusions under. A name written with a single legacy hyphen is rewritten. HUGO symbols may themselves
+     * contain hyphens (H1-4, HLA-A), so a name written with more than one hyphen is rewritten only when
+     * exactly one hyphen splits it into two known gene symbols (H1-4-BRAF Fusion); otherwise it is left
+     * alone and reported as {@link FusionSeparatorStatus#AMBIGUOUS}.
      *
      * <p>Only names carrying the trailing "Fusion"/"Fusions" keyword are considered, so an ordinary
      * protein change that happens to contain a hyphen is never touched. A gene part that is itself a
@@ -143,7 +136,7 @@ public class FusionUtils {
      * that gene.
      */
     public static FusionNameNormalization normalizeSeparator(String alteration) {
-        if (StringUtils.isNullOrEmpty(alteration)) {
+        if (StringUtils.isEmpty(alteration)) {
             return new FusionNameNormalization(alteration, FusionSeparatorStatus.NOT_APPLICABLE);
         }
         Matcher matcher = FUSION_KEYWORD_PATTERN.matcher(alteration);
@@ -156,22 +149,47 @@ public class FusionUtils {
             return new FusionNameNormalization(alteration, FusionSeparatorStatus.HGVS);
         }
         if (GeneUtils.isKnownGeneSymbol(genePart)) {
-            // A single gene whose symbol contains a hyphen, e.g. "H1-4 Fusion". Nothing to separate.
-            // Asked of every gene OncoKB knows of rather than only the curated ones: uncurated symbols
-            // like COX10-AS1 and HLA-DRB1 are real genes and would otherwise be split into partners that
-            // do not exist, and the invented name would be echoed back and written into the summaries.
+            // Prevent a gene that is not in oncokb core to be split into two genes.
+            // For example COX10-AS1 should not be split into COX10::AS1.
             return new FusionNameNormalization(alteration, FusionSeparatorStatus.NOT_APPLICABLE);
         }
-        int hyphens = org.apache.commons.lang3.StringUtils.countMatches(genePart, FUSION_ALTERNATIVE_SEPARATOR);
+        int hyphens = StringUtils.countMatches(genePart, FUSION_LEGACY_SEPARATOR);
         if (hyphens == 0) {
             return new FusionNameNormalization(alteration, FusionSeparatorStatus.NOT_APPLICABLE);
         }
         if (hyphens > 1) {
-            return new FusionNameNormalization(alteration, FusionSeparatorStatus.AMBIGUOUS);
+            String[] partners = findOnlyGenePartnerSplit(genePart);
+            if (partners == null) {
+                return new FusionNameNormalization(alteration, FusionSeparatorStatus.AMBIGUOUS);
+            }
+            return new FusionNameNormalization(
+                getFusionName(partners[0], partners[1]) + " " + keyword,
+                FusionSeparatorStatus.NORMALIZED);
         }
         return new FusionNameNormalization(
-            genePart.replace(FUSION_ALTERNATIVE_SEPARATOR, FUSION_SEPARATOR) + " " + keyword,
+            genePart.replace(FUSION_LEGACY_SEPARATOR, FUSION_SEPARATOR) + " " + keyword,
             FusionSeparatorStatus.NORMALIZED);
+    }
+
+    /**
+     * Tries every hyphen in the gene part as the separator and returns the partners when exactly one
+     * split leaves a known gene symbol on both sides. Returns null when no split or more than 1.
+     */
+    private static String[] findOnlyGenePartnerSplit(String genePart) {
+        String[] match = null;
+        int index = genePart.indexOf(FUSION_LEGACY_SEPARATOR);
+        while (index != -1) {
+            String geneA = genePart.substring(0, index);
+            String geneB = genePart.substring(index + FUSION_LEGACY_SEPARATOR.length());
+            if (GeneUtils.isKnownGeneSymbol(geneA) && GeneUtils.isKnownGeneSymbol(geneB)) {
+                if (match != null) {
+                    return null;
+                }
+                match = new String[]{geneA, geneB};
+            }
+            index = genePart.indexOf(FUSION_LEGACY_SEPARATOR, index + 1);
+        }
+        return match;
     }
 
     /** The outcome of {@link #normalizeSeparator(String)}: the name to annotate and what was done to it. */
@@ -203,7 +221,7 @@ public class FusionUtils {
     }
 
     public static Boolean isFusion(String variant) {
-        if (!StringUtils.isNullOrEmpty(variant)) {
+        if (!StringUtils.isEmpty(variant)) {
             if (variant.toLowerCase().equals("fusion") || variant.toLowerCase().equals("fusions")) {
                 return true;
             }

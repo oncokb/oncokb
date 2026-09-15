@@ -50,28 +50,25 @@ import org.mskcc.cbio.oncokb.model.TypeaheadSearchResp;
 
 public class AnnotationSearchUtils {
 
-    // A typed fusion keyword may use either separator: OncoKB curates fusions under the HGVS "::",
-    // but the hyphen is still what many people type. Preferring "::" when it is there keeps gene
-    // symbols that themselves contain a hyphen (H1-4::H2BC5) intact.
     private static boolean hasFusionSeparator(String keyword) {
-        return keyword.contains(FusionUtils.FUSION_SEPARATOR) || keyword.contains(FusionUtils.FUSION_ALTERNATIVE_SEPARATOR);
+        // Maintian backwards compatibility for people who still query using the hyphen
+        return keyword.contains(FusionUtils.FUSION_SEPARATOR) || keyword.contains(FusionUtils.FUSION_LEGACY_SEPARATOR);
     }
 
     private static String[] splitFusionKeyword(String keyword) {
         return keyword.contains(FusionUtils.FUSION_SEPARATOR)
             ? keyword.split(FusionUtils.FUSION_SEPARATOR)
-            : keyword.split(FusionUtils.FUSION_ALTERNATIVE_SEPARATOR);
+            : keyword.split(FusionUtils.FUSION_LEGACY_SEPARATOR);
     }
 
     // Curated fusion names use "::", so a keyword typed with a single hyphen (BCR-ABL1) is searched for
-    // under both spellings. Anything else - a keyword with no hyphen, or one with several, where the
-    // hyphen may belong to a gene symbol - is searched for as typed.
+    // under both spellings.
     private static List<String> fusionSeparatorSpellings(String keyword) {
         List<String> spellings = new ArrayList<>();
         spellings.add(keyword);
         if (!keyword.contains(FusionUtils.FUSION_SEPARATOR)
-            && org.apache.commons.lang3.StringUtils.countMatches(keyword, FusionUtils.FUSION_ALTERNATIVE_SEPARATOR) == 1) {
-            spellings.add(keyword.replace(FusionUtils.FUSION_ALTERNATIVE_SEPARATOR, FusionUtils.FUSION_SEPARATOR));
+            && StringUtils.countMatches(keyword, FusionUtils.FUSION_LEGACY_SEPARATOR) == 1) {
+            spellings.add(keyword.replace(FusionUtils.FUSION_LEGACY_SEPARATOR, FusionUtils.FUSION_SEPARATOR));
         }
         return spellings;
     }
