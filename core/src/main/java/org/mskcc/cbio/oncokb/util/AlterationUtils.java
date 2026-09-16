@@ -510,6 +510,10 @@ public final class AlterationUtils {
 
         if (alteration != null) {
             alteration = AlterationUtils.trimAlterationName(alteration);
+            FusionUtils.FusionNameNormalization fusionName = FusionUtils.normalizeSeparator(alteration);
+            if (fusionName.isNormalized()) {
+                alteration = fusionName.getName();
+            }
             alt.setAlteration(alteration);
         }
 

@@ -18,7 +18,7 @@ import junit.framework.TestCase;
  */
 public class AlterationUtilsTest extends TestCase {
     public void testGetRevertFusions() throws Exception {
-        Alteration alteration = createBRAFAlteration("BRAF-MKRN1 fusion");
+        Alteration alteration = createBRAFAlteration("BRAF::MKRN1 Fusion");
 
         // Check when alteration is not available
         List<Alteration> fullAlterations = new ArrayList<>();
@@ -26,15 +26,20 @@ public class AlterationUtilsTest extends TestCase {
         assertEquals("The result should be null", null, result);
 
         fullAlterations = new ArrayList<>();
-        fullAlterations.add(createBRAFAlteration("BRAF-MKRN1 fusion"));
+        fullAlterations.add(createBRAFAlteration("BRAF::MKRN1 Fusion"));
         result = AlterationUtils.getRevertFusions(DEFAULT_REFERENCE_GENOME, alteration, fullAlterations);
         assertEquals("The result should be null", null, result);
 
         fullAlterations = new ArrayList<>();
-        fullAlterations.add(createBRAFAlteration("MKRN1-BRAF fusion"));
+        fullAlterations.add(createBRAFAlteration("MKRN1::BRAF Fusion"));
         result = AlterationUtils.getRevertFusions(DEFAULT_REFERENCE_GENOME, alteration, fullAlterations);
         assertTrue("The result should not be null", result != null);
 
+        // A fusion queried with the legacy hyphen separator still finds the curated reverted fusion
+        fullAlterations = new ArrayList<>();
+        fullAlterations.add(createBRAFAlteration("MKRN1::BRAF Fusion"));
+        result = AlterationUtils.getRevertFusions(DEFAULT_REFERENCE_GENOME, createBRAFAlteration("BRAF-MKRN1 fusion"), fullAlterations);
+        assertTrue("The result should not be null", result != null);
     }
 
     private Alteration createBRAFAlteration(String alterationName) {
@@ -188,11 +193,11 @@ public class AlterationUtilsTest extends TestCase {
         assertEquals("The relevant alterations do not match", "V600, V600 {excluding V600E}, V600E, V600K, V600_V601delinsEB, V600_V601delinsEB {excluding V600E}", relevantAltsName);
 
         // Test alteration when relevant alt has exclusion
-        Alteration fusionA = generateAlteration(gene, "AKAP9-BRAF Fusion");
-        Alteration fusionB = generateAlteration(gene, "AGAP3-BRAF Fusion");
-        Alteration fusionC = generateAlteration(gene, "FAM131B-BRAF Fusion");
+        Alteration fusionA = generateAlteration(gene, "AKAP9::BRAF Fusion");
+        Alteration fusionB = generateAlteration(gene, "AGAP3::BRAF Fusion");
+        Alteration fusionC = generateAlteration(gene, "FAM131B::BRAF Fusion");
         Alteration fusions = generateAlteration(gene, "Fusions");
-        Alteration oncogenicMutationsExcludesFusion = generateAlteration(gene, "Fusions {excluding AKAP9-BRAF Fusion; FAM131B-BRAF Fusion}");
+        Alteration oncogenicMutationsExcludesFusion = generateAlteration(gene, "Fusions {excluding AKAP9::BRAF Fusion; FAM131B::BRAF Fusion}");
 
         fullAlteration = new ArrayList<>();
         fullAlteration.add(fusionA);
@@ -203,21 +208,21 @@ public class AlterationUtilsTest extends TestCase {
 
         alterations = AlterationUtils.getRelevantAlterations(DEFAULT_REFERENCE_GENOME, fusionA, fullAlteration);
         relevantAltsName = AlterationUtils.toString(alterations);
-        assertEquals("The relevant alterations do not match", "AKAP9-BRAF Fusion, Fusions", relevantAltsName);
+        assertEquals("The relevant alterations do not match", "AKAP9::BRAF Fusion, Fusions", relevantAltsName);
 
         alterations = AlterationUtils.getRelevantAlterations(DEFAULT_REFERENCE_GENOME, fusionB, fullAlteration);
         relevantAltsName = AlterationUtils.toString(alterations);
-        assertEquals("The relevant alterations do not match", "AGAP3-BRAF Fusion, Fusions {excluding AKAP9-BRAF Fusion; FAM131B-BRAF Fusion}, Fusions", relevantAltsName);
+        assertEquals("The relevant alterations do not match", "AGAP3::BRAF Fusion, Fusions {excluding AKAP9::BRAF Fusion; FAM131B::BRAF Fusion}, Fusions", relevantAltsName);
 
         alterations = AlterationUtils.getRelevantAlterations(DEFAULT_REFERENCE_GENOME, fusionC, fullAlteration);
         relevantAltsName = AlterationUtils.toString(alterations);
-        assertEquals("The relevant alterations do not match", "FAM131B-BRAF Fusion, Fusions", relevantAltsName);
+        assertEquals("The relevant alterations do not match", "FAM131B::BRAF Fusion, Fusions", relevantAltsName);
     }
 
     public void testGetRelevantAlterationsWhenAltHasExclusion() throws Exception {
         Gene gene = GeneUtils.getGeneByHugoSymbol("BRAF");
-        Alteration fusion = generateAlteration(gene, "AKAP9-BRAF Fusion");
-        Alteration fusionsWithExcluding = generateAlteration(gene, "Fusions {excluding AKAP9-BRAF Fusion}");
+        Alteration fusion = generateAlteration(gene, "AKAP9::BRAF Fusion");
+        Alteration fusionsWithExcluding = generateAlteration(gene, "Fusions {excluding AKAP9::BRAF Fusion}");
 
         List<Alteration> fullAlteration = new ArrayList<>();
         fullAlteration.add(fusion);
@@ -225,11 +230,11 @@ public class AlterationUtilsTest extends TestCase {
 
         List<Alteration> alterations = AlterationUtils.getRelevantAlterations(DEFAULT_REFERENCE_GENOME, fusion, fullAlteration);
         String relevantAltsName = AlterationUtils.toString(alterations);
-        assertEquals("The relevant alterations do not match", "AKAP9-BRAF Fusion", relevantAltsName);
+        assertEquals("The relevant alterations do not match", "AKAP9::BRAF Fusion", relevantAltsName);
 
         alterations = AlterationUtils.getRelevantAlterations(DEFAULT_REFERENCE_GENOME, fusionsWithExcluding, fullAlteration);
         relevantAltsName = AlterationUtils.toString(alterations);
-        assertEquals("The relevant alterations do not match", "Fusions {excluding AKAP9-BRAF Fusion}", relevantAltsName);
+        assertEquals("The relevant alterations do not match", "Fusions {excluding AKAP9::BRAF Fusion}", relevantAltsName);
     }
 
     private Alteration generateAlteration(Gene gene, String proteinChange) {
