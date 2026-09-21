@@ -6,7 +6,7 @@ public class EvidenceSetContainer {
     public Set<Evidence> relevantEvidencesFilteredByTumorType;
     public Set<Evidence> relevantEvidencesUnfiltered;
 
-    public EvidenceSetContainer(Set<Evidence> filtered, Set<Evidence> unfiltered) { // TODO: change both to list? Set?
+    public EvidenceSetContainer(Set<Evidence> filtered, Set<Evidence> unfiltered) {
         this.relevantEvidencesFilteredByTumorType = filtered;
         this.relevantEvidencesUnfiltered = unfiltered;
     }
