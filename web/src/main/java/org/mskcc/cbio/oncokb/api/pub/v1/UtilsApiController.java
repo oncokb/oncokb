@@ -1,6 +1,7 @@
 package org.mskcc.cbio.oncokb.api.pub.v1;
 
 import io.swagger.annotations.ApiParam;
+import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.apiModels.ActionableGene;
 import org.mskcc.cbio.oncokb.apiModels.AllGenomicIndicator;
 import org.mskcc.cbio.oncokb.serializer.EntrezGeneIdConverter;
@@ -10,6 +11,7 @@ import org.mskcc.cbio.oncokb.apiModels.VariantOfUnknownSignificance;
 import org.mskcc.cbio.oncokb.apiModels.download.FileName;
 import org.mskcc.cbio.oncokb.apiModels.download.FileExtension;
 import org.mskcc.cbio.oncokb.cache.CacheFetcher;
+import org.mskcc.cbio.oncokb.controller.advice.ApiHttpErrorException;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.model.BiologicalVariant;
 import org.mskcc.cbio.oncokb.util.*;
@@ -24,6 +26,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.mskcc.cbio.oncokb.api.pub.v1.Constants.HUGO_SYMBOL;
 import static org.mskcc.cbio.oncokb.api.pub.v1.Constants.INCLUDE_EVIDENCE;
 import static org.mskcc.cbio.oncokb.api.pub.v1.Constants.VERSION;
 import static org.mskcc.cbio.oncokb.util.HttpUtils.getDataDownloadResponseEntity;
@@ -387,11 +390,52 @@ public class UtilsApiController implements UtilsApi {
     public ResponseEntity<List<CuratedGene>> utilsAllCuratedGenesGet(
         @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
         , @ApiParam(value = INCLUDE_EVIDENCE, defaultValue = "TRUE") @RequestParam(value = "includeEvidence", required = false, defaultValue = "TRUE") Boolean includeEvidence
-    ) {
+        , @ApiParam(value = HUGO_SYMBOL) @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
+    ) throws ApiHttpErrorException {
         if (version != null) {
-            return getDataDownloadResponseEntity(version, FileName.ALL_CURATED_GENES, FileExtension.JSON);
+            ResponseEntity<List<CuratedGene>> archived = getDataDownloadResponseEntity(version, FileName.ALL_CURATED_GENES, FileExtension.JSON);
+            if (StringUtils.isBlank(hugoSymbol) || !archived.getStatusCode().is2xxSuccessful() || archived.getBody() == null) {
+                return archived;
+            }
+            return new ResponseEntity<>(filterCuratedGenesByHugoSymbol(archived.getBody(), hugoSymbol), archived.getStatusCode());
         }
-        return new ResponseEntity<>(this.cacheFetcher.getCuratedGenesAll(includeEvidence), HttpStatus.OK);
+        return new ResponseEntity<>(filterCuratedGenesByHugoSymbol(this.cacheFetcher.getCuratedGenesAll(includeEvidence), hugoSymbol), HttpStatus.OK);
+    }
+
+    private List<CuratedGene> filterCuratedGenesByHugoSymbol(List<CuratedGene> genes, String hugoSymbol) throws ApiHttpErrorException {
+        if (StringUtils.isBlank(hugoSymbol)) {
+            return genes;
+        }
+        String trimmed = hugoSymbol.trim();
+        Gene gene = GeneUtils.getGeneByHugoSymbol(trimmed);
+        String queried = gene == null ? trimmed : gene.getHugoSymbol();
+        List<?> rows = genes;
+        List<Object> matches = new ArrayList<>();
+        for (Object curatedGene : rows) {
+            if (queried.equals(getCuratedGeneHugoSymbol(curatedGene))) {
+                matches.add(curatedGene);
+            }
+        }
+        if (matches.isEmpty()) {
+            throw new ApiHttpErrorException("No curated gene found for hugoSymbol \"" + trimmed + "\".", HttpStatus.NOT_FOUND);
+        }
+        return asCuratedGenes(matches);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static List<CuratedGene> asCuratedGenes(List<?> genes) {
+        return (List<CuratedGene>) genes;
+    }
+
+    private String getCuratedGeneHugoSymbol(Object curatedGene) {
+        if (curatedGene instanceof CuratedGene) {
+            return ((CuratedGene) curatedGene).getHugoSymbol();
+        }
+        if (curatedGene instanceof Map) {
+            Object hugoSymbol = ((Map<?, ?>) curatedGene).get("hugoSymbol");
+            return hugoSymbol == null ? null : hugoSymbol.toString();
+        }
+        return null;
     }
 
     @Override

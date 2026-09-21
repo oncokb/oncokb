@@ -8,6 +8,7 @@ import org.mskcc.cbio.oncokb.apiModels.CuratedGene;
 import org.mskcc.cbio.oncokb.apiModels.VariantOfUnknownSignificance;
 import org.mskcc.cbio.oncokb.config.annotation.PremiumPublicApi;
 import org.mskcc.cbio.oncokb.config.annotation.PublicApi;
+import org.mskcc.cbio.oncokb.controller.advice.ApiHttpErrorException;
 import org.mskcc.cbio.oncokb.model.CancerGene;
 import org.oncokb.oncokb_transcript.ApiException;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.io.IOException;
 import java.util.List;
 
+import static org.mskcc.cbio.oncokb.api.pub.v1.Constants.HUGO_SYMBOL;
 import static org.mskcc.cbio.oncokb.api.pub.v1.Constants.INCLUDE_EVIDENCE;
 import static org.mskcc.cbio.oncokb.api.pub.v1.Constants.VERSION;
 
@@ -164,7 +166,7 @@ public interface UtilsApi {
     @ApiOperation(value = "", notes = "Get list of genes OncoKB curated", tags = {"Cancer Genes"})
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK"),
-        @ApiResponse(code = 404, message = "Not Found"),
+        @ApiResponse(code = 404, message = "Not Found. The specified version or hugoSymbol does not exist."),
         @ApiResponse(code = 503, message = "Service Unavailable")
     })
     @RequestMapping(value = "/utils/allCuratedGenes",
@@ -173,7 +175,8 @@ public interface UtilsApi {
     ResponseEntity<List<CuratedGene>> utilsAllCuratedGenesGet(
         @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
         , @ApiParam(value = INCLUDE_EVIDENCE, defaultValue = "TRUE") @RequestParam(value = "includeEvidence", required = false, defaultValue = "TRUE") Boolean includeEvidence
-    );
+        , @ApiParam(value = HUGO_SYMBOL) @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
+    ) throws ApiHttpErrorException;
 
     @PublicApi
     @PremiumPublicApi
