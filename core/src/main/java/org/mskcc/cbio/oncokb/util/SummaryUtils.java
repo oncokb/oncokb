@@ -857,11 +857,11 @@ public class SummaryUtils {
 
     public static String resistanceOncogenicitySummary(Gene gene, Query query, LevelOfEvidence highestResistanceLevel) {
         StringBuilder sb = new StringBuilder();
-        sb.append("The ");
+        sb.append("While the ");
         sb.append(gene.getHugoSymbol());
         sb.append(" ");
         sb.append(query.getAlteration());
-        sb.append( " ");
+        sb.append( " mutation ");
 
         if (LevelOfEvidence.LEVEL_R1.equals(highestResistanceLevel)) {
             sb.append("is a well characterized resistance mutation");
