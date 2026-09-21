@@ -14,7 +14,9 @@ A symbol that matches no curated gene returns `404` rather than an empty list, s
 
 Filtering is applied to the cached gene list rather than pushed into the cache lookup, so the cache still holds one entry for the full list rather than one entry per queried gene.
 
-`hugoSymbol` also applies when `version` is supplied, so a historic data version can be filtered to a single gene the same way. Symbols are matched against the archived payload itself, so a gene that existed under a symbol at the time of that release still resolves even if the symbol is no longer current.
+`hugoSymbol` applies to the latest data version only. It may be sent without `version`, which already means the latest, or together with `version` when that version is the latest. Combining it with any earlier version returns `400`, and the response names the latest version.
+
+Earlier versions are excluded because the symbol is resolved against current curation before it is matched. A symbol that has been renamed since an older release would be resolved to its current name and then fail to match the archived records, reporting a gene that the archive does contain as missing. Downloading an earlier version without `hugoSymbol` is unaffected and still returns that version's full list.
 
 The `/utils/allCuratedGenes.txt` endpoint is unchanged and does not accept the parameter.
 
@@ -22,23 +24,21 @@ The `/utils/allCuratedGenes.txt` endpoint is unchanged and does not accept the p
 
 Affects only callers who pass the new parameter. Existing callers see no change in behavior, response shape, or status codes.
 
-Callers adopting the parameter should note two things: matching is case-sensitive, and an unmatched symbol is a `404`, not an empty `200`.
-
-Requests that combine `version` and `hugoSymbol` are filtered against the archived payload for that version, and return `404` when that version contains no matching gene.
+Callers adopting the parameter should note three things: matching is case-sensitive, an unmatched symbol is a `404` rather than an empty `200`, and the parameter cannot be combined with an earlier data version.
 
 ## API Changes
 
 | Parameter/Field Path | Change (Added/Edit/Removed) | Endpoints |
 | --- | --- | --- |
 | `hugoSymbol` (query parameter, optional) | Added | `/utils/allCuratedGenes` |
+| `400` response when `hugoSymbol` is combined with a data version other than the latest | Added | `/utils/allCuratedGenes` |
 | `404` response for an unmatched `hugoSymbol` | Added | `/utils/allCuratedGenes` |
-| `hugoSymbol` combined with `version` | Added | `/utils/allCuratedGenes` |
 
 No response fields were added, renamed, or removed, and no existing request behavior changed.
 
 ## Migration / Action Required
 
-None. The parameter is optional and additive, and the `404` can only be triggered by a request shape that was not previously possible.
+None. The parameter is optional and additive, and the new `400` and `404` responses can only be triggered by a request shape that was not previously possible.
 
 No configuration, environment variable, database, migration, Docker, or startup changes, so there is nothing for self-hosted deployments to do.
 

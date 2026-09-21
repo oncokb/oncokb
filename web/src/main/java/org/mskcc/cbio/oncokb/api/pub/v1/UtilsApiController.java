@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.mskcc.cbio.oncokb.api.pub.v1.Constants.HUGO_SYMBOL;
 import static org.mskcc.cbio.oncokb.api.pub.v1.Constants.INCLUDE_EVIDENCE;
 import static org.mskcc.cbio.oncokb.api.pub.v1.Constants.VERSION;
 import static org.mskcc.cbio.oncokb.util.HttpUtils.getDataDownloadResponseEntity;
@@ -390,9 +389,14 @@ public class UtilsApiController implements UtilsApi {
     public ResponseEntity<List<CuratedGene>> utilsAllCuratedGenesGet(
         @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
         , @ApiParam(value = INCLUDE_EVIDENCE, defaultValue = "TRUE") @RequestParam(value = "includeEvidence", required = false, defaultValue = "TRUE") Boolean includeEvidence
-        , @ApiParam(value = HUGO_SYMBOL) @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
+        , @ApiParam(value = "The gene symbol used in Human Genome Organisation. Gene aliases are accepted. The symbol is case-sensitive. When specified, only the curated gene matching this symbol is returned. Only supported for the latest data version, so it may be combined with version only when that version is the latest. Example: BRAF") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
     ) throws ApiHttpErrorException {
         if (version != null) {
+            // The symbol is resolved against current gene curation, so an archived version that
+            // stored a since-renamed symbol would report a gene it actually contains as missing.
+            if (StringUtils.isNotBlank(hugoSymbol) && !isLatestDataVersion(version)) {
+                throw new ApiHttpErrorException("The hugoSymbol parameter is only supported for the latest data version (" + MainUtils.getDataVersion() + ").", HttpStatus.BAD_REQUEST);
+            }
             ResponseEntity<List<CuratedGene>> archived = getDataDownloadResponseEntity(version, FileName.ALL_CURATED_GENES, FileExtension.JSON);
             if (StringUtils.isBlank(hugoSymbol) || !archived.getStatusCode().is2xxSuccessful() || archived.getBody() == null) {
                 return archived;
@@ -402,6 +406,15 @@ public class UtilsApiController implements UtilsApi {
         return new ResponseEntity<>(filterCuratedGenesByHugoSymbol(this.cacheFetcher.getCuratedGenesAll(includeEvidence), hugoSymbol), HttpStatus.OK);
     }
 
+    private static boolean isLatestDataVersion(String version) {
+        String latest = MainUtils.getDataVersion();
+        return StringUtils.isNotBlank(latest) && normalizeDataVersion(latest).equals(normalizeDataVersion(version));
+    }
+
+    private static String normalizeDataVersion(String version) {
+        return StringUtils.removeStartIgnoreCase(StringUtils.trimToEmpty(version), "v");
+    }
+
     private List<CuratedGene> filterCuratedGenesByHugoSymbol(List<CuratedGene> genes, String hugoSymbol) throws ApiHttpErrorException {
         if (StringUtils.isBlank(hugoSymbol)) {
             return genes;
@@ -409,9 +422,8 @@ public class UtilsApiController implements UtilsApi {
         String trimmed = hugoSymbol.trim();
         Gene gene = GeneUtils.getGeneByHugoSymbol(trimmed);
         String queried = gene == null ? trimmed : gene.getHugoSymbol();
-        List<?> rows = genes;
         List<Object> matches = new ArrayList<>();
-        for (Object curatedGene : rows) {
+        for (Object curatedGene : (List<?>) genes) {
             if (queried.equals(getCuratedGeneHugoSymbol(curatedGene))) {
                 matches.add(curatedGene);
             }

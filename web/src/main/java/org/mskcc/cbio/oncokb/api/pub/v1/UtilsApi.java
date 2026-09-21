@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.io.IOException;
 import java.util.List;
 
-import static org.mskcc.cbio.oncokb.api.pub.v1.Constants.HUGO_SYMBOL;
 import static org.mskcc.cbio.oncokb.api.pub.v1.Constants.INCLUDE_EVIDENCE;
 import static org.mskcc.cbio.oncokb.api.pub.v1.Constants.VERSION;
 
@@ -166,6 +165,7 @@ public interface UtilsApi {
     @ApiOperation(value = "", notes = "Get list of genes OncoKB curated", tags = {"Cancer Genes"})
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK"),
+        @ApiResponse(code = 400, message = "Bad Request. The hugoSymbol parameter is only supported for the latest data version."),
         @ApiResponse(code = 404, message = "Not Found. The specified version or hugoSymbol does not exist."),
         @ApiResponse(code = 503, message = "Service Unavailable")
     })
@@ -175,7 +175,7 @@ public interface UtilsApi {
     ResponseEntity<List<CuratedGene>> utilsAllCuratedGenesGet(
         @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
         , @ApiParam(value = INCLUDE_EVIDENCE, defaultValue = "TRUE") @RequestParam(value = "includeEvidence", required = false, defaultValue = "TRUE") Boolean includeEvidence
-        , @ApiParam(value = HUGO_SYMBOL) @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
+        , @ApiParam(value = "The gene symbol used in Human Genome Organisation. Gene aliases are accepted. The symbol is case-sensitive. When specified, only the curated gene matching this symbol is returned. Only supported for the latest data version, so it may be combined with version only when that version is the latest. Example: BRAF") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
     ) throws ApiHttpErrorException;
 
     @PublicApi
