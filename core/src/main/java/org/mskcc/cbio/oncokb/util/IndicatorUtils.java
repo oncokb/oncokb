@@ -320,7 +320,7 @@ public class IndicatorUtils {
 
             Oncogenicity oncogenicity = Oncogenicity.getByEffect(indicatorQuery.getOncogenic());
             if (hasTreatmentEvidence) {
-                EvidenceContainer e = EvidenceUtils.getRelevantEvidences(query, matchedAlt,
+                EvidenceSetContainer e = EvidenceUtils.getRelevantEvidences(query, matchedAlt,
                         selectedTreatmentEvidence, levels, relevantAlterationsWithoutAlternativeAlleles, alleles, geneQueryOnly, Optional.ofNullable(oncogenicity));
                 treatmentEvidences = e.relevantEvidencesFilteredByTumorType;
                 treatmentEvidencesUnfilteredByTumorType = e.relevantEvidencesUnfiltered; // since this is only for highest resistance level for variant summary, filtering by same treatment is unnecessary
@@ -689,11 +689,11 @@ public class IndicatorUtils {
             // Set implications
             if (hasTreatmentEvidence) {
                 if (StringUtils.isEmpty(query.getTumorType())) {
-                    EvidenceContainer e = EvidenceUtils.getRelevantEvidences(query, matchedAlt,
+                    EvidenceSetContainer e = EvidenceUtils.getRelevantEvidences(query, matchedAlt,
                         selectedTreatmentEvidence, levels, relevantAlterations, Collections.emptyList(), geneQueryOnly, Optional.empty());
                     treatmentEvidences = e.relevantEvidencesFilteredByTumorType;
                 } else {
-                    EvidenceContainer e = EvidenceUtils.getRelevantEvidences(query, matchedAlt,
+                    EvidenceSetContainer e = EvidenceUtils.getRelevantEvidences(query, matchedAlt,
                             selectedTreatmentEvidence, levels, relevantAlterations, Collections.emptyList(), geneQueryOnly, Optional.empty());
                     treatmentEvidences = EvidenceUtils.keepHighestLevelForSameTreatments(e.relevantEvidencesFilteredByTumorType, query.getReferenceGenome(), matchedAlt, matchedTumorType);
                 }

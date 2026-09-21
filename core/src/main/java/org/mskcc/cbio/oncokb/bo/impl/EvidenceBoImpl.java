@@ -63,32 +63,32 @@ public class EvidenceBoImpl extends GenericBoImpl<Evidence, EvidenceDao> impleme
     }
     
     @Override
-    public EvidenceContainer findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, TumorType matchedTumorType, List<TumorType> tumorTypes) {
+    public EvidenceListContainer findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, TumorType matchedTumorType, List<TumorType> tumorTypes) {
         if (matchedTumorType == null && tumorTypes == null) {
             if (evidenceTypes == null) {
                 List<Evidence> evidences = findEvidencesByAlteration(alterations);
-                return new EvidenceContainer(new HashSet<>(evidences), new HashSet<>(evidences));
+                return new EvidenceListContainer(evidences, evidences);
             }
 
             List<Evidence> evidences = findEvidencesByAlteration(alterations, evidenceTypes);
-            return new EvidenceContainer(new HashSet<>(evidences), new HashSet<>(evidences));
+            return new EvidenceListContainer(evidences, evidences);
         }
 
         List<Evidence> alterationEvidences = findEvidencesByAlteration(alterations, evidenceTypes);
-        return new EvidenceContainer(new HashSet<>(EvidenceUtils.filterEvidencesByTumorType(new HashSet<>(alterationEvidences), matchedTumorType, tumorTypes)), new HashSet<>(alterationEvidences));
+        return new EvidenceListContainer(EvidenceUtils.filterEvidencesByTumorType(new HashSet<>(alterationEvidences), matchedTumorType, tumorTypes), alterationEvidences);
     }
 
     @Override
-    public EvidenceContainer findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, TumorType matchedTumorType, List<TumorType> tumorTypes, Collection<LevelOfEvidence> levelOfEvidences) {
-        EvidenceContainer evidences = findEvidencesByAlteration(alterations, evidenceTypes, matchedTumorType, tumorTypes);
+    public EvidenceListContainer findEvidencesByAlteration(Collection<Alteration> alterations, Collection<EvidenceType> evidenceTypes, TumorType matchedTumorType, List<TumorType> tumorTypes, Collection<LevelOfEvidence> levelOfEvidences) {
+        EvidenceListContainer evidences = findEvidencesByAlteration(alterations, evidenceTypes, matchedTumorType, tumorTypes);
         evidences.relevantEvidencesFilteredByTumorType = evidences.relevantEvidencesFilteredByTumorType
             .stream()
             .filter(evidence -> levelOfEvidences.contains(evidence.getLevelOfEvidence()))
-            .collect(Collectors.toSet());
+            .collect(Collectors.toList());
         evidences.relevantEvidencesUnfiltered = evidences.relevantEvidencesUnfiltered
             .stream()
             .filter(evidence -> levelOfEvidences.contains(evidence.getLevelOfEvidence()))
-            .collect(Collectors.toSet());
+            .collect(Collectors.toList());
         return evidences;
     }
 
