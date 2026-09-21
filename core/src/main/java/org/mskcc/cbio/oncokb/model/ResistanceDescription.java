@@ -15,7 +15,7 @@ public enum ResistanceDescription {
         return this.description;
     }
 
-    public static ResistanceDescription deriveFromOncogenicityAndLevels(Oncogenicity o, LevelOfEvidence highestTherapeuticLevel, LevelOfEvidence highestResistanceLevel) {
+    public static ResistanceDescription deriveFromOncogenicityAndLevel(Oncogenicity o, LevelOfEvidence highestResistanceLevel) {
         if (LevelOfEvidence.LEVEL_R1.equals(highestResistanceLevel)) {
             if (Oncogenicity.YES.equals(o) || Oncogenicity.LIKELY.equals(o) || Oncogenicity.RESISTANCE.equals(o)) {
                 return KNOWN;

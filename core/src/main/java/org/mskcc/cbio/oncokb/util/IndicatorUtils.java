@@ -180,6 +180,7 @@ public class IndicatorUtils {
 
         // Initialize variant evidence tracking outside the gene check so it's available for the final flag
         Set<Evidence> treatmentEvidences = new HashSet<>();
+        Set<Evidence> treatmentEvidencesUnfilteredByTumorType = new HashSet<>();
 
         if (gene != null) {
             // we replace hugo symbol with matched gene when queries hugo symbol is not available or when it's the structural variant
@@ -318,11 +319,12 @@ public class IndicatorUtils {
             }
 
             Oncogenicity oncogenicity = Oncogenicity.getByEffect(indicatorQuery.getOncogenic());
-
-            // Set implications
             if (hasTreatmentEvidence) {
-                treatmentEvidences = EvidenceUtils.getRelevantEvidences(query, matchedAlt,
+                EvidenceContainer e = EvidenceUtils.getRelevantEvidences(query, matchedAlt,
                         selectedTreatmentEvidence, levels, relevantAlterationsWithoutAlternativeAlleles, alleles, geneQueryOnly, Optional.ofNullable(oncogenicity));
+                treatmentEvidences = e.relevantEvidencesFilteredByTumorType;
+                treatmentEvidencesUnfilteredByTumorType = e.relevantEvidencesUnfiltered; // since this is only for highest resistance level for variant summary, filtering by same treatment is unnecessary
+
                 if (StringUtils.isNotEmpty(query.getTumorType())) {
                     treatmentEvidences = EvidenceUtils.keepHighestLevelForSameTreatments(treatmentEvidences, query.getReferenceGenome(), matchedAlt, matchedTumorType);
                 }
@@ -438,10 +440,15 @@ public class IndicatorUtils {
             }
 
             // Resistance Description
-            ResistanceDescription rd = ResistanceDescription.deriveFromOncogenicityAndLevels(
+            LevelOfEvidence highestResistanceLevelTumorAgnostic = LevelUtils.getHighestLevelFromEvidenceByLevels(
+                treatmentEvidencesUnfilteredByTumorType, 
+                LevelUtils.getResistanceLevels(), 
+                false
+            );
+
+            ResistanceDescription rd = ResistanceDescription.deriveFromOncogenicityAndLevel(
                 oncogenicity,
-                indicatorQuery.getHighestSensitiveLevel(),
-                indicatorQuery.getHighestResistanceLevel()
+                highestResistanceLevelTumorAgnostic
             );
             if (rd != null) {
                 indicatorQuery.setResistanceDescription(rd.getDescription());
@@ -453,7 +460,7 @@ public class IndicatorUtils {
                     gene, matchedAlt, 
                     new ArrayList<>(relevantAlterations), 
                     query, 
-                    indicatorQuery.getHighestResistanceLevel()
+                    highestResistanceLevelTumorAgnostic
                 );
                 variantSummary = CplUtils.annotate(
                     variantSummary,
@@ -682,12 +689,13 @@ public class IndicatorUtils {
             // Set implications
             if (hasTreatmentEvidence) {
                 if (StringUtils.isEmpty(query.getTumorType())) {
-                    treatmentEvidences = EvidenceUtils.getRelevantEvidences(query, matchedAlt,
+                    EvidenceContainer e = EvidenceUtils.getRelevantEvidences(query, matchedAlt,
                         selectedTreatmentEvidence, levels, relevantAlterations, Collections.emptyList(), geneQueryOnly, Optional.empty());
+                    treatmentEvidences = e.relevantEvidencesFilteredByTumorType;
                 } else {
-                    treatmentEvidences = EvidenceUtils.keepHighestLevelForSameTreatments(
-                        EvidenceUtils.getRelevantEvidences(query, matchedAlt,
-                            selectedTreatmentEvidence, levels, relevantAlterations, Collections.emptyList(), geneQueryOnly, Optional.empty()), query.getReferenceGenome(), matchedAlt, matchedTumorType);
+                    EvidenceContainer e = EvidenceUtils.getRelevantEvidences(query, matchedAlt,
+                            selectedTreatmentEvidence, levels, relevantAlterations, Collections.emptyList(), geneQueryOnly, Optional.empty());
+                    treatmentEvidences = EvidenceUtils.keepHighestLevelForSameTreatments(e.relevantEvidencesFilteredByTumorType, query.getReferenceGenome(), matchedAlt, matchedTumorType);
                 }
             }
 
@@ -995,7 +1003,7 @@ public class IndicatorUtils {
 
         if (matchedAlt != null && !StringUtils.isEmpty(matchedAlt.getAlteration())) {
             // Find alteration specific evidence
-            List<Evidence> selfAltEvis = EvidenceUtils.getEvidence(Collections.singletonList(matchedAlt), Collections.singleton(evidenceType), matchedTumorType, tumorTypes, levelOfEvidences);
+            List<Evidence> selfAltEvis = new ArrayList<>(EvidenceUtils.getEvidence(Collections.singletonList(matchedAlt), Collections.singleton(evidenceType), matchedTumorType, tumorTypes, levelOfEvidences).relevantEvidencesFilteredByTumorType);
             if (selfAltEvis != null && selfAltEvis.size() > 0) {
                 implications.addAll(getImplicationFromEvidence(selfAltEvis, queryHugoSymbol));
             }
@@ -1004,7 +1012,7 @@ public class IndicatorUtils {
             listToBeRemoved.add(matchedAlt);
 
             for (Alteration alt : AlterationUtils.removeAlterationsFromList(relevantAlterations, listToBeRemoved)) {
-                List<Evidence> altEvis = EvidenceUtils.getEvidence(Collections.singletonList(alt), Collections.singleton(evidenceType), matchedTumorType, tumorTypes, levelOfEvidences);
+                List<Evidence> altEvis = new ArrayList<>(EvidenceUtils.getEvidence(Collections.singletonList(alt), Collections.singleton(evidenceType), matchedTumorType, tumorTypes, levelOfEvidences).relevantEvidencesFilteredByTumorType);
                 if (altEvis != null && altEvis.size() > 0) {
                     implications.addAll(getImplicationFromEvidence(altEvis, queryHugoSymbol));
                 }

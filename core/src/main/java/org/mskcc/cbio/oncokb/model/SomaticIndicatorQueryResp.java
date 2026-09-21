@@ -29,6 +29,9 @@ public class SomaticIndicatorQueryResp extends IndicatorQueryRespBase {
     @ApiModelProperty(value = "DEPRECATED. (Nullable) The affected exon of this variant, if applicable (currently only supported when annotating via HGVSg or Genomic Location)")
     private String exon;
 
+    @ApiModelProperty(value = "(Nullable) Additional resistance information if the oncogenicity equals 'Resistance'", allowableValues = "Known Resistance Mutation, Potential Resistance Implications, Limited Resistance Evidence")
+    private String resistanceDescription;
+
     @ApiModelProperty(value = "Everything OncoKB found wrong with the query, each carrying both a reason to branch on and the same reason in words. Empty whenever there is nothing wrong, and never null. An error may mean the variant was left unannotated - a queried alteration that cannot exist against the OncoKB canonical sequence is annotated at the gene level only. See docs/validation-errors.md")
     private List<ValidationError> errors = new ArrayList<>();
 
@@ -126,6 +129,14 @@ public class SomaticIndicatorQueryResp extends IndicatorQueryRespBase {
     @Deprecated
     public void setExon(String exon) {
         this.exon = exon;
+    }
+
+    public String getResistanceDescription() {
+        return resistanceDescription;
+    }
+
+    public void setResistanceDescription(String resistanceDescription) {
+        this.resistanceDescription = resistanceDescription;
     }
 
     public List<ValidationError> getErrors() {

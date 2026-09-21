@@ -53,9 +53,6 @@ abstract class IndicatorQueryRespBase implements java.io.Serializable {
     @ApiModelProperty(value = "List of therapeutic implications implications. Defaulted to empty list")
     private List<IndicatorQueryTreatment> treatments = new ArrayList<>();
 
-    @ApiModelProperty(value = "(Nullable) The highest sensitivity level from a list of therapeutic evidences.", allowableValues = "Known Resistance Mutation, Potential Resistance Implications, Limited Resistance Evidence")
-    private String resistanceDescription;
-
     @ApiModelProperty(value = "OncoKB data version. See www.oncokb.org/news", example = "v4.25")
     private String dataVersion;
     @ApiModelProperty(value = "OncoKB data release date. Formatted as MM/DD/YYYY", example = "01/30/2025")
@@ -201,14 +198,6 @@ abstract class IndicatorQueryRespBase implements java.io.Serializable {
 
     public void setTreatments(List<IndicatorQueryTreatment> treatments) {
         this.treatments = treatments;
-    }
-
-    public String getResistanceDescription() {
-        return resistanceDescription;
-    }
-
-    public void setResistanceDescription(String resistanceDescription) {
-        this.resistanceDescription = resistanceDescription;
     }
 
     public String getDataVersion() {

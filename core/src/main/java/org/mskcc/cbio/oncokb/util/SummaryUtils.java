@@ -264,7 +264,15 @@ public class SummaryUtils {
     }
 
     private static Map<String, Object> getRelevantTumorTypeSummaryByAlt(EvidenceType evidenceType, List<Alteration> alterations, TumorType matchedTumorType, List<TumorType> relevantTumorTypes) {
-        return getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(alterations, Collections.singleton(evidenceType), matchedTumorType, relevantTumorTypes, null));
+        return getTumorTypeSummaryFromEvidences(new ArrayList<>(
+            EvidenceUtils.getEvidence(
+                alterations, 
+                Collections.singleton(evidenceType), 
+                matchedTumorType, 
+                relevantTumorTypes, 
+                null)
+            .relevantEvidencesFilteredByTumorType
+        ));
     }
 
     private static Map<String, Object> getOtherTumorTypeSummaryByAlt(EvidenceType evidenceType, Alteration alteration, Set<TumorType> relevantTumorTypes) {
@@ -273,11 +281,15 @@ public class SummaryUtils {
 
         for (SpecialTumorType specialTumorType : specialTumorTypes) {
 
-            List<Evidence> evidences = EvidenceUtils.getEvidence(
-                Collections.singletonList(alteration),
-                Collections.singleton(evidenceType),
-                ApplicationContextSingleton.getTumorTypeBo().getBySpecialTumor(specialTumorType),
-                Collections.singletonList(ApplicationContextSingleton.getTumorTypeBo().getBySpecialTumor(specialTumorType)), null);
+            List<Evidence> evidences = new ArrayList<>(
+                EvidenceUtils.getEvidence(
+                    Collections.singletonList(alteration),
+                    Collections.singleton(evidenceType),
+                    ApplicationContextSingleton.getTumorTypeBo().getBySpecialTumor(specialTumorType),
+                    Collections.singletonList(ApplicationContextSingleton.getTumorTypeBo().getBySpecialTumor(specialTumorType)), null
+                )
+                .relevantEvidencesFilteredByTumorType
+            );
             if (evidences.size() > 0) {
                 return getTumorTypeSummaryFromEvidences(evidences);
             }
@@ -845,7 +857,7 @@ public class SummaryUtils {
 
     public static String resistanceOncogenicitySummary(Gene gene, Query query, LevelOfEvidence highestResistanceLevel) {
         StringBuilder sb = new StringBuilder();
-        sb.append("While the ");
+        sb.append("The ");
         sb.append(gene.getHugoSymbol());
         sb.append(" ");
         sb.append(query.getAlteration());
