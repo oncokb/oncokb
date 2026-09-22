@@ -8,6 +8,7 @@ import org.mskcc.cbio.oncokb.apiModels.CuratedGene;
 import org.mskcc.cbio.oncokb.apiModels.VariantOfUnknownSignificance;
 import org.mskcc.cbio.oncokb.config.annotation.PremiumPublicApi;
 import org.mskcc.cbio.oncokb.config.annotation.PublicApi;
+import org.mskcc.cbio.oncokb.controller.advice.ApiHttpErrorException;
 import org.mskcc.cbio.oncokb.model.CancerGene;
 import org.oncokb.oncokb_transcript.ApiException;
 import org.springframework.http.ResponseEntity;
@@ -164,7 +165,8 @@ public interface UtilsApi {
     @ApiOperation(value = "", notes = "Get list of genes OncoKB curated", tags = {"Cancer Genes"})
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK"),
-        @ApiResponse(code = 404, message = "Not Found"),
+        @ApiResponse(code = 400, message = "Bad Request. The hugoSymbol parameter is only supported for the latest data version."),
+        @ApiResponse(code = 404, message = "Not Found. The specified version or hugoSymbol does not exist."),
         @ApiResponse(code = 503, message = "Service Unavailable")
     })
     @RequestMapping(value = "/utils/allCuratedGenes",
@@ -173,7 +175,8 @@ public interface UtilsApi {
     ResponseEntity<List<CuratedGene>> utilsAllCuratedGenesGet(
         @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
         , @ApiParam(value = INCLUDE_EVIDENCE, defaultValue = "TRUE") @RequestParam(value = "includeEvidence", required = false, defaultValue = "TRUE") Boolean includeEvidence
-    );
+        , @ApiParam(value = "The gene symbol used in Human Genome Organisation. Gene aliases are accepted. The symbol is case-sensitive. When specified, only the curated gene matching this symbol is returned. Only supported for the latest data version, so it may be combined with version only when that version is the latest. Example: BRAF") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
+    ) throws ApiHttpErrorException;
 
     @PublicApi
     @PremiumPublicApi
