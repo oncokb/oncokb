@@ -264,7 +264,15 @@ public class SummaryUtils {
     }
 
     private static Map<String, Object> getRelevantTumorTypeSummaryByAlt(EvidenceType evidenceType, List<Alteration> alterations, TumorType matchedTumorType, List<TumorType> relevantTumorTypes) {
-        return getTumorTypeSummaryFromEvidences(EvidenceUtils.getEvidence(alterations, Collections.singleton(evidenceType), matchedTumorType, relevantTumorTypes, null));
+        return getTumorTypeSummaryFromEvidences(new ArrayList<>(
+            EvidenceUtils.getEvidence(
+                alterations, 
+                Collections.singleton(evidenceType), 
+                matchedTumorType, 
+                relevantTumorTypes, 
+                null)
+            .relevantEvidencesFilteredByTumorType
+        ));
     }
 
     private static Map<String, Object> getOtherTumorTypeSummaryByAlt(EvidenceType evidenceType, Alteration alteration, Set<TumorType> relevantTumorTypes) {
@@ -273,11 +281,15 @@ public class SummaryUtils {
 
         for (SpecialTumorType specialTumorType : specialTumorTypes) {
 
-            List<Evidence> evidences = EvidenceUtils.getEvidence(
-                Collections.singletonList(alteration),
-                Collections.singleton(evidenceType),
-                ApplicationContextSingleton.getTumorTypeBo().getBySpecialTumor(specialTumorType),
-                Collections.singletonList(ApplicationContextSingleton.getTumorTypeBo().getBySpecialTumor(specialTumorType)), null);
+            List<Evidence> evidences = new ArrayList<>(
+                EvidenceUtils.getEvidence(
+                    Collections.singletonList(alteration),
+                    Collections.singleton(evidenceType),
+                    ApplicationContextSingleton.getTumorTypeBo().getBySpecialTumor(specialTumorType),
+                    Collections.singletonList(ApplicationContextSingleton.getTumorTypeBo().getBySpecialTumor(specialTumorType)), null
+                )
+                .relevantEvidencesFilteredByTumorType
+            );
             if (evidences.size() > 0) {
                 return getTumorTypeSummaryFromEvidences(evidences);
             }
@@ -352,7 +364,7 @@ public class SummaryUtils {
         return sb.toString();
     }
 
-    public static String variantSummary(Gene gene, Alteration exactMatchAlteration, List<Alteration> alterations, Query query) {
+    public static String variantSummary(Gene gene, Alteration exactMatchAlteration, List<Alteration> alterations, Query query, LevelOfEvidence highestResistanceLevel) {
         if (!StringUtils.isEmpty(query.getAlteration()) && query.getAlteration().toLowerCase().startsWith(InferredMutation.ONCOGENIC_MUTATIONS.getVariant().toLowerCase())) {
             return ONCOGENIC_MUTATIONS_DEFAULT_SUMMARY;
         }
@@ -365,10 +377,10 @@ public class SummaryUtils {
                 return mutationSummary;
             }
         }
-        return getOncogenicSummarySubFunc(gene, exactMatchAlteration, alterations, query);
+        return getOncogenicSummarySubFunc(gene, exactMatchAlteration, alterations, query, highestResistanceLevel);
     }
 
-    private static String getOncogenicSummarySubFunc(Gene gene, Alteration exactMatchAlteration, List<Alteration> alterations, Query query) {
+    private static String getOncogenicSummarySubFunc(Gene gene, Alteration exactMatchAlteration, List<Alteration> alterations, Query query, LevelOfEvidence highestResistanceLevel) {
         StringBuilder sb = new StringBuilder();
 
         Oncogenicity oncogenic = null;
@@ -432,7 +444,7 @@ public class SummaryUtils {
         }
 
         if (oncogenic != null && !oncogenic.equals(Oncogenicity.UNKNOWN)) {
-            return getOncogenicSummaryFromOncogenicity(oncogenic, alteration, query);
+            return getOncogenicSummaryFromOncogenicity(oncogenic, alteration, query, highestResistanceLevel);
         }
 
         isHotspot = HotspotUtils.isHotspot(alteration);
@@ -488,7 +500,7 @@ public class SummaryUtils {
         }
 
         if (oncogenic != null && !oncogenic.equals(Oncogenicity.UNKNOWN)) {
-            return getOncogenicSummaryFromOncogenicity(oncogenic, alteration, query);
+            return getOncogenicSummaryFromOncogenicity(oncogenic, alteration, query, highestResistanceLevel);
         }
 
         if (alteration != null && MainUtils.isVUS(alteration)) {
@@ -560,7 +572,7 @@ public class SummaryUtils {
         return sb.toString();
     }
 
-    private static String getOncogenicSummaryFromOncogenicity(Oncogenicity oncogenicity, Alteration alteration, Query query) {
+    private static String getOncogenicSummaryFromOncogenicity(Oncogenicity oncogenicity, Alteration alteration, Query query, LevelOfEvidence highestResistanceLevel) {
         StringBuilder sb = new StringBuilder();
         String queryAlteration = query.getAlteration();
         String altName = getGeneMutationNameInVariantSummary(alteration.getGene(), query.getReferenceGenome(), query.getHugoSymbol(), queryAlteration, query.isGermline());
@@ -579,7 +591,7 @@ public class SummaryUtils {
             }
 
             if (oncogenicity.equals(Oncogenicity.RESISTANCE)) {
-                return resistanceOncogenicitySummary(alteration.getGene(), query);
+                return resistanceOncogenicitySummary(alteration.getGene(), query, highestResistanceLevel);
             }
             if (appendThe) {
                 sb.append("The ");
@@ -843,13 +855,23 @@ public class SummaryUtils {
         return sb.toString();
     }
 
-    public static String resistanceOncogenicitySummary(Gene gene, Query query) {
+    public static String resistanceOncogenicitySummary(Gene gene, Query query, LevelOfEvidence highestResistanceLevel) {
         StringBuilder sb = new StringBuilder();
-        sb.append("The ");
+        sb.append("While the ");
         sb.append(gene.getHugoSymbol());
         sb.append(" ");
         sb.append(query.getAlteration());
-        sb.append(" mutation has been found in the context of resistance to a targeted therapy(s).");
+        sb.append( " mutation ");
+
+        if (LevelOfEvidence.LEVEL_R1.equals(highestResistanceLevel)) {
+            sb.append("is a well characterized resistance mutation");
+        } else if (LevelOfEvidence.LEVEL_R2.equals(highestResistanceLevel)) {
+            sb.append("has been reported in the context of resistance to a precision oncology therapy(s)");
+        } else {
+            sb.append("has limited evidence suggesting a role in resistance to precision oncology therapy(s)");
+        }
+        sb.append(", its oncogenic activity is unknown in the absence of drug exposure.");
+
         return sb.toString();
     }
 
