@@ -26,6 +26,7 @@ public class BiologicalVariant {
     private Set<ArticleAbstract> pathogenicAbstracts = new HashSet<>();
     private String penetrance = null;
     private String cancerRisk = null;
+    private VariantHotspot hotspot = new VariantHotspot();
 
 
     /**
@@ -159,6 +160,14 @@ public class BiologicalVariant {
         this.cancerRisk = cancerRisk;
     }
 
+    public VariantHotspot getHotspot() {
+        return hotspot;
+    }
+
+    public void setHotspot(VariantHotspot hotspot) {
+        this.hotspot = hotspot;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -187,6 +196,7 @@ public class BiologicalVariant {
             return false;
         if (penetrance != null ? !penetrance.equals(that.pathogenic) : that.penetrance != null) return false;
         if (cancerRisk != null ? !cancerRisk.equals(that.cancerRisk) : that.cancerRisk != null) return false;
+        if (hotspot != null ? !hotspot.equals(that.hotspot) : that.hotspot != null) return false;
 
         return true;
     }
@@ -207,6 +217,7 @@ public class BiologicalVariant {
             ", pathogenicAbstracts=" + pathogenicAbstracts +
             ", penetrance=" + penetrance +
             ", cancerRisk=" + cancerRisk +
+            ", hotspot=" + hotspot +
             '}';
     }
 }

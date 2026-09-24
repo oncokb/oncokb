@@ -123,8 +123,23 @@ public class HotspotUtils {
     }
 
     public static boolean isHotspot(Alteration alteration) {
+        return getHotspotType(alteration) != null;
+    }
+
+    /**
+     * The type of the hotspots the alteration matches — "single residue",
+     * "in-frame indel" or "splice site" — or null when it is not a hotspot. A
+     * caller that knows which hotspot it is looking at needs this to tell, say,
+     * a single residue hotspot mutation from an in-frame indel that merely
+     * covers the same position.
+     *
+     * There is only ever one type to report: the alteration's own mutation type
+     * decides which kind of hotspot it can be paired with, so the matches below
+     * all share a type even when the alteration covers several hotspots.
+     */
+    public static String getHotspotType(Alteration alteration) {
         if (alteration == null || alteration.getGene() == null || alteration.getProteinStart().intValue() == AlterationPositionBoundary.START.getValue() || alteration.getProteinEnd().intValue() == AlterationPositionBoundary.END.getValue()) {
-            return false;
+            return null;
         }
 
         // There are few genes we cannot map to GRCh38 yet
@@ -134,7 +149,7 @@ public class HotspotUtils {
         notMappedHugos.add("RYBP");
         notMappedHugos.add("WT1");
         if (notMappedHugos.contains(alteration.getGene().getHugoSymbol()) && !alteration.getReferenceGenomes().contains(ReferenceGenome.GRCh37)) {
-            return false;
+            return null;
         }
 
         AlterationUtils.annotateAlteration(alteration, alteration.getAlteration());
@@ -152,12 +167,12 @@ public class HotspotUtils {
         List<EnrichedHotspot> hotspots = new ArrayList<>();
 
         if (hotspotMutations.get(alteration.getGene()) == null) {
-            return false;
+            return null;
         }
 
         // for alteration that is missense but ends as mis, it is a range mutation
         if(alteration.getConsequence() != null && alteration.getConsequence().equals(VariantConsequenceUtils.findVariantConsequenceByTerm(MISSENSE_VARIANT)) && alteration.getAlteration().endsWith("mis")) {
-            return false;
+            return null;
         }
 
         for (EnrichedHotspot hotspot : hotspotMutations.get(alteration.getGene())) {
@@ -165,7 +180,10 @@ public class HotspotUtils {
                 hotspots.add(hotspot);
             }
         }
-        return proteinLocationHotspotsFilter(hotspots, proteinLocation, alteration.getRefResidues()).size() > 0;
+        for (Hotspot hotspot : proteinLocationHotspotsFilter(hotspots, proteinLocation, alteration.getRefResidues())) {
+            return hotspot.getType();
+        }
+        return null;
     }
 
     // Logic from GN
