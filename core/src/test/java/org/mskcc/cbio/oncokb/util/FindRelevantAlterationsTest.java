@@ -49,8 +49,9 @@ public class FindRelevantAlterationsTest {
                 // but the alternative allele should not be resistance, therefore, should not get Oncogenic Mutations matched
                 {"ALK", "G1202E", null, "G1202R"},
 
-                // Check Fusions
-                {"BRAF", "PAPSS1-BRAF Fusion", null, "PAPSS1-BRAF Fusion, Fusions, Oncogenic Mutations, Oncogenic Mutations {excluding V600}"},
+                // Check Fusions. The queried name may use either separator; the curated one uses "::".
+                {"BRAF", "PAPSS1::BRAF Fusion", null, "PAPSS1::BRAF Fusion, Fusions, Oncogenic Mutations, Oncogenic Mutations {excluding V600}"},
+                {"BRAF", "PAPSS1-BRAF Fusion", null, "PAPSS1::BRAF Fusion, Fusions, Oncogenic Mutations, Oncogenic Mutations {excluding V600}"},
 
                 // Check excluding issue
                 {"BRAF", "V600E", null, "V600E, V600A, V600D, V600G, V600K, V600L, V600M, V600Q, V600R, VK600EI, V600, Oncogenic Mutations"},
@@ -59,13 +60,15 @@ public class FindRelevantAlterationsTest {
                 {"EGFR", "Y764_D770dup", null, "Y764_D770dup, 762_823ins, A767_V769dup, S768_D770dup, A767_S768insASV, S768_V769insSVD, S768_V769insVAS, V769_D770insASV, V769_D770insGVV, D770delinsGTH, D770delinsGY, A763_Y764insFQEA, D770_N771insD, D770_N771insG, D770_N771insGF, D770_N771insGL, D770_N771insNPG, D770_N771insSVD, D770_N771insVDSVDNP, D770_N771insY, D770_P772dup, Oncogenic Mutations, 762_823ins {excluding A763_Y764insFQEA}"},
                 {"EGFR", "A763_Y764insFQEA", null, "A763_Y764insFQEA, 762_823ins, A763insLQEA, Y764_D770dup, Oncogenic Mutations"},
 
-                // The revert fusion should get picked
-                {"ABL1", "ABL1-BCR fusion", null, "BCR-ABL1 Fusion, Fusions"},
-                {"ABL1", "BCR-ABL1 fusion", null, "BCR-ABL1 Fusion, Fusions"},
+                // The revert fusion should get picked, whichever separator the query used
+                {"ABL1", "ABL1::BCR fusion", null, "BCR::ABL1 Fusion, Fusions"},
+                {"ABL1", "BCR::ABL1 fusion", null, "BCR::ABL1 Fusion, Fusions"},
+                {"ABL1", "ABL1-BCR fusion", null, "BCR::ABL1 Fusion, Fusions"},
+                {"ABL1", "BCR-ABL1 fusion", null, "BCR::ABL1 Fusion, Fusions"},
 
                 // Tumor suppressor should be mapped with Truncating Mutations. (The code does not check whether gene
                 // is tumor suppressor, just check whether Fusions is curated, is not, link Truncating Mutations)
-                {"PIK3R1", "KCTD16-PIK3R1 fusion", null, "KCTD16-PIK3R1 fusion, Truncating Mutations"},
+                {"PIK3R1", "KCTD16::PIK3R1 fusion", null, "KCTD16::PIK3R1 Fusion, Truncating Mutations"},
 
                 // General truncating consequence should be associated with Truncating Mutations
                 // Check splice

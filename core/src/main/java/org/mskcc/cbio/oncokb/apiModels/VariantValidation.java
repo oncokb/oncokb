@@ -1,33 +1,33 @@
 package org.mskcc.cbio.oncokb.apiModels;
 
-import org.mskcc.cbio.oncokb.model.ProteinChangeValidationStatus;
+import org.mskcc.cbio.oncokb.model.VariantValidationStatus;
 import org.mskcc.cbio.oncokb.model.VariantAnnotationMessageType;
 
 /**
- * Outcome of validating a queried protein change against the OncoKB canonical protein sequence.
- * Present on a {@link SomaticVariantAnnotation} only when there is something to report; a query
- * that agrees with the canonical sequence leaves this null.
+ * Outcome of validating a queried variant: a protein change against the OncoKB canonical protein
+ * sequence, or the separator of a fusion name. Present on a {@link SomaticVariantAnnotation} only when
+ * there is something to report; a query that passes leaves this null.
  */
-public class ProteinChangeValidation {
-    private ProteinChangeValidationStatus status;
+public class VariantValidation {
+    private VariantValidationStatus status;
     private VariantAnnotationMessageType messageType;
     private String message;
     private String normalizedProteinChange;
 
-    public ProteinChangeValidation() {
+    public VariantValidation() {
     }
 
-    public ProteinChangeValidation(ProteinChangeValidationStatus status, VariantAnnotationMessageType messageType, String message) {
+    public VariantValidation(VariantValidationStatus status, VariantAnnotationMessageType messageType, String message) {
         this.status = status;
         this.messageType = messageType;
         this.message = message;
     }
 
-    public ProteinChangeValidationStatus getStatus() {
+    public VariantValidationStatus getStatus() {
         return status;
     }
 
-    public void setStatus(ProteinChangeValidationStatus status) {
+    public void setStatus(VariantValidationStatus status) {
         this.status = status;
     }
 

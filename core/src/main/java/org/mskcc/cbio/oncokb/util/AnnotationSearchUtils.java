@@ -50,6 +50,29 @@ import org.mskcc.cbio.oncokb.model.TypeaheadSearchResp;
 
 public class AnnotationSearchUtils {
 
+    private static boolean hasFusionSeparator(String keyword) {
+        // Maintian backwards compatibility for people who still query using the hyphen
+        return keyword.contains(FusionUtils.FUSION_SEPARATOR) || keyword.contains(FusionUtils.FUSION_LEGACY_SEPARATOR);
+    }
+
+    private static String[] splitFusionKeyword(String keyword) {
+        return keyword.contains(FusionUtils.FUSION_SEPARATOR)
+            ? keyword.split(FusionUtils.FUSION_SEPARATOR)
+            : keyword.split(FusionUtils.FUSION_LEGACY_SEPARATOR);
+    }
+
+    // Curated fusion names use "::", so a keyword typed with a single hyphen (BCR-ABL1) is searched for
+    // under both spellings.
+    private static List<String> fusionSeparatorSpellings(String keyword) {
+        List<String> spellings = new ArrayList<>();
+        spellings.add(keyword);
+        if (!keyword.contains(FusionUtils.FUSION_SEPARATOR)
+            && StringUtils.countMatches(keyword, FusionUtils.FUSION_LEGACY_SEPARATOR) == 1) {
+            spellings.add(keyword.replace(FusionUtils.FUSION_LEGACY_SEPARATOR, FusionUtils.FUSION_SEPARATOR));
+        }
+        return spellings;
+    }
+
     public static Set<TypeaheadSearchResp> searchCuratedAnnotation(String query) {
         LinkedHashSet<TypeaheadSearchResp> result = new LinkedHashSet<>();
         // genomic queries will not have space in the query
@@ -65,7 +88,9 @@ public class AnnotationSearchUtils {
             result.addAll(convertGene(GeneUtils.searchGene(keywords.get(0), false), keywords.get(0)));
 
             // Blur search variant
-            result.addAll(convertVariant(AlterationUtils.lookupVariant(keywords.get(0), false, false, AlterationUtils.getAllAlterations()), keywords.get(0)));
+            for (String spelling : fusionSeparatorSpellings(keywords.get(0))) {
+                result.addAll(convertVariant(AlterationUtils.lookupVariant(spelling, false, false, AlterationUtils.getAllAlterations()), spelling));
+            }
 
             // Blur search drug
             result.addAll(findEvidencesWithDrugAssociated(keywords.get(0), false));
@@ -73,9 +98,9 @@ public class AnnotationSearchUtils {
             // Blur search cancer type
             result.addAll(findMatchingCancerTypes(keywords.get(0), false));
 
-            // If the keyword contains dash and result is empty, then we should return both fusion genes
-            if (keywords.get(0).contains("-") && result.isEmpty()) {
-                for (String subKeyword : keywords.get(0).split("-")) {
+            // If the keyword contains a fusion separator and result is empty, then we should return both fusion genes
+            if (hasFusionSeparator(keywords.get(0)) && result.isEmpty()) {
+                for (String subKeyword : splitFusionKeyword(keywords.get(0))) {
                     result.addAll(convertGene(GeneUtils.searchGene(subKeyword, false), subKeyword));
                 }
             }
@@ -88,9 +113,9 @@ public class AnnotationSearchUtils {
             // Assume one of the keyword is gene
             Map<String, Set<Gene>> map = new HashedMap();
             for (String keyword : keywords) {
-                if (keyword.contains("-")) {
+                if (hasFusionSeparator(keyword)) {
                     Set<Gene> subGenes = new HashSet<>();
-                    for (String subKeyword : keyword.split("-")) {
+                    for (String subKeyword : splitFusionKeyword(keyword)) {
                         subGenes.addAll(GeneUtils.searchGene(subKeyword, false));
                     }
                     map.put(keyword, subGenes);
@@ -175,14 +200,16 @@ public class AnnotationSearchUtils {
             result.addAll(findActionableGenesByGeneSearch(keywords.get(0)));
 
             // Blur search variant
-            result.addAll(findActionableGenesByAlterationSearch(keywords.get(0)));
+            for (String spelling : fusionSeparatorSpellings(keywords.get(0))) {
+                result.addAll(findActionableGenesByAlterationSearch(spelling));
+            }
 
             // Blur search cancer type
             result.addAll(findActionableGenesByCancerType(keywords.get(0)));
 
-            // If the keyword contains dash and result is empty, then we should return both fusion genes
-            if (keywords.get(0).contains("-") && result.isEmpty()) {
-                for (String subKeyword : keywords.get(0).split("-")) {
+            // If the keyword contains a fusion separator and result is empty, then we should return both fusion genes
+            if (hasFusionSeparator(keywords.get(0)) && result.isEmpty()) {
+                for (String subKeyword : splitFusionKeyword(keywords.get(0))) {
                     result.addAll(findActionableGenesByGeneSearch(subKeyword));
                 }
             }
@@ -190,9 +217,9 @@ public class AnnotationSearchUtils {
             // Assume that the first keyword is a gene, followed by alteration
             // Todo: We should be able to find the gene even if it is not the first keyword.
             Set<Gene> geneMatches = new HashSet<>();
-            if (keywords.get(0).contains("-")) {
+            if (hasFusionSeparator(keywords.get(0))) {
                 Set<Gene> subGenes = new HashSet<>();
-                for (String subKeyword : keywords.get(0).split("-")) {
+                for (String subKeyword : splitFusionKeyword(keywords.get(0))) {
                     subGenes.addAll(GeneUtils.searchGene(subKeyword, false));
                 }
                 geneMatches.addAll(subGenes);
