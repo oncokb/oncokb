@@ -12,7 +12,7 @@ ERBB2	E717V	Likely Gain-of-function	There is no available functional data about 
 
 ## Table 9.2b: Assigning an Oncogenic Effect and Creating Variant Summaries for Alternate Alleles When There is >1 Curated Reference Alleles with different oncogenic effect
 KLF5	E419G	Likely Gain-of-function	There is no available functional data about the KLF5 E419G mutation (last reviewed on 10/16/2019). However, we have mutation effect descriptions for KLF5 E419K/Q.
-RET	C634F	Likely Gain-of-function	There is no available functional data about the RET C634F mutation (last reviewed on 03/02/2017). However, we have mutation effect descriptions for RET C634G/R/S/W/Y.
+RET	C634F	Likely Gain-of-function	The RET C634F mutation has not specifically been reviewed by the OncoKB team. However, we have mutation effect descriptions for RET C634R/S/W/Y.
 ERBB2	A644S	Unknown	There is no available functional data about the ERBB2 A644S mutation (last reviewed on 06/23/2023). However, we have mutation effect descriptions for ERBB2 A644F/V.
 BRCA1	M1628F	Unknown	The BRCA1 M1628F mutation has not specifically been reviewed by the OncoKB team. However, we have mutation effect descriptions for BRCA1 M1628T/V.
 PIK3CA	G451K	Unknown	There is no available functional data about the PIK3CA G451K mutation (last reviewed on 08/05/2017). However, we have mutation effect descriptions for PIK3CA G451R/V.
