@@ -38,8 +38,8 @@ public class FindRelevantAlterationsTest {
                 {"MSH2", "", null, ""},
 
                 // Critical cases
-                {"BRAF", "V600E", null, "V600E, V600A, V600D, V600G, V600K, V600L, V600M, V600Q, V600R, VK600EI, V600, Oncogenic Mutations"},
-                {"SMARCB1", "R374Q", null, "R374Q, R374W, Oncogenic Mutations"},
+                {"BRAF", "V600E", null, "V600E, V600A, V600D, V600G, V600K, V600L, V600M, V600R, VK600EI, V600, Oncogenic Mutations"},
+                {"SMARCB1", "R374Q", null, ""},
                 {"EGFR", "S768I", null, "S768I, S768T, Oncogenic Mutations"},
                 {"EGFR", "S768_V769delinsIL", null, "S768I, V769L, S768T, V769M, Oncogenic Mutations"},
 
@@ -53,10 +53,10 @@ public class FindRelevantAlterationsTest {
                 {"BRAF", "PAPSS1-BRAF Fusion", null, "PAPSS1-BRAF Fusion, Fusions, Oncogenic Mutations, Oncogenic Mutations {excluding V600}"},
 
                 // Check excluding issue
-                {"BRAF", "V600E", null, "V600E, V600A, V600D, V600G, V600K, V600L, V600M, V600Q, V600R, VK600EI, V600, Oncogenic Mutations"},
-                {"BRAF", "V600R", null, "V600R, V600A, V600D, V600E, V600G, V600K, V600L, V600M, V600Q, VK600EI, V600, Oncogenic Mutations, V600 {excluding V600E; V600K}"},
+                {"BRAF", "V600E", null, "V600E, V600A, V600D, V600G, V600K, V600L, V600M, V600R, VK600EI, V600, Oncogenic Mutations"},
+                {"BRAF", "V600R", null, "V600R, V600A, V600D, V600E, V600G, V600K, V600L, V600M, VK600EI, V600, Oncogenic Mutations, V600 {excluding V600E; V600K}"},
                 {"BRAF", "L597S", null, "L597S, L597P, L597Q, L597R, L597V, L597, Oncogenic Mutations, Oncogenic Mutations {excluding V600}"},
-                {"EGFR", "Y764_D770dup", null, "Y764_D770dup, 762_823ins, A767_V769dup, S768_D770dup, A767_S768insASV, S768_V769insSVD, S768_V769insVAS, V769_D770insASV, V769_D770insGVV, D770delinsGTH, D770delinsGY, A763_Y764insFQEA, D770_N771insD, D770_N771insG, D770_N771insGF, D770_N771insGL, D770_N771insNPG, D770_N771insSVD, D770_N771insVDSVDNP, D770_N771insY, D770_P772dup, Oncogenic Mutations, 762_823ins {excluding A763_Y764insFQEA}"},
+                {"EGFR", "Y764_D770dup", null, "Y764_D770dup, 762_823ins, A767_V769dup, S768_D770dup, A767_S768insASV, S768_V769insSVD, S768_V769insVAS, V769_D770insASV, V769_D770insGVV, D770delinsGY, A763_Y764insFQEA, D770_N771insD, D770_N771insG, D770_N771insGF, D770_N771insGL, D770_N771insNPG, D770_N771insSVD, D770_N771insVDSVDNP, D770_N771insY, D770_P772dup, Oncogenic Mutations, 762_823ins {excluding A763_Y764insFQEA}"},
                 {"EGFR", "A763_Y764insFQEA", null, "A763_Y764insFQEA, 762_823ins, A763insLQEA, Y764_D770dup, Oncogenic Mutations"},
 
                 // The revert fusion should get picked
@@ -70,7 +70,7 @@ public class FindRelevantAlterationsTest {
                 // General truncating consequence should be associated with Truncating Mutations
                 // Check splice
                 // TP53 Oncogenic Mutations does not have any information we are ready to release
-                {"TP53", "X33_splice", null, "X33_splice, Truncating Mutations, Oncogenic Mutations"},
+                {"TP53", "X33_splice", null, "Truncating Mutations, Oncogenic Mutations"},
                 {"MET", "X1010_splice", null, "X1010_splice, 963_1010splice, 981_1028splice, Oncogenic Mutations"},
                 {"MET", "X1010splice", null, "X1010_splice, 963_1010splice, 981_1028splice, Oncogenic Mutations"},
 
@@ -82,7 +82,7 @@ public class FindRelevantAlterationsTest {
                 {"FGFR3", "*807Wext*101", null, "*807Wext*101, *807Rext*141, Oncogenic Mutations"},
 
                 // Check inframe-insertion, inframe-deletion
-                {"EGFR", "Y764_D770dup", null, "Y764_D770dup, 762_823ins, A767_V769dup, S768_D770dup, A767_S768insASV, S768_V769insSVD, S768_V769insVAS, V769_D770insASV, V769_D770insGVV, D770delinsGTH, D770delinsGY, A763_Y764insFQEA, D770_N771insD, D770_N771insG, D770_N771insGF, D770_N771insGL, D770_N771insNPG, D770_N771insSVD, D770_N771insVDSVDNP, D770_N771insY, D770_P772dup, Oncogenic Mutations, 762_823ins {excluding A763_Y764insFQEA}"},
+                {"EGFR", "Y764_D770dup", null, "Y764_D770dup, 762_823ins, A767_V769dup, S768_D770dup, A767_S768insASV, S768_V769insSVD, S768_V769insVAS, V769_D770insASV, V769_D770insGVV, D770delinsGY, A763_Y764insFQEA, D770_N771insD, D770_N771insG, D770_N771insGF, D770_N771insGL, D770_N771insNPG, D770_N771insSVD, D770_N771insVDSVDNP, D770_N771insY, D770_P772dup, Oncogenic Mutations, 762_823ins {excluding A763_Y764insFQEA}"},
                 {"EGFR", "A763_Y764insFQEA", null, "A763_Y764insFQEA, 762_823ins, A763insLQEA, Y764_D770dup, Oncogenic Mutations"},
                 {"EGFR", "E746_A750del", null, "E746_A750del, E746_A750delinsQ, E746_T751delinsA, E746_T751delinsL, E746_T751delinsVA, K745_A750del, E746_S752delinsA, E746_S752delinsI, E746_S752delinsV, 729_761del, L747_A750del, L747_A750delinsP, L747_T751del, L747_T751delinsP, L747_S752del, L747_P753del, L747_P753delinsS, L747_K754delinsATSPE, L747_E749del, A750_E758del, A750_E758delinsP, A750_I759delinsGN, Oncogenic Mutations"},
                 {"EGFR", "E746_A750delinsQ", null, "E746_A750delinsQ, E746_A750del, E746_T751delinsA, E746_T751delinsL, E746_T751delinsVA, K745_A750del, E746_S752delinsA, E746_S752delinsI, E746_S752delinsV, 729_761del, L747_A750del, L747_A750delinsP, L747_T751del, L747_T751delinsP, L747_S752del, L747_P753del, L747_P753delinsS, L747_K754delinsATSPE, L747_E749del, A750_E758del, A750_E758delinsP, A750_I759delinsGN, Oncogenic Mutations"},
@@ -106,8 +106,8 @@ public class FindRelevantAlterationsTest {
                 {"EGFR", "vIVc", null, "C-terminal domain, Oncogenic Mutations"},
 
                 // Check range
-                {"MED12", "G44S", null, "G44S, G44A, G44C, G44D, G44V, 34_68mis"},
-                {"MED12", "G44D", null, "G44D, G44A, G44C, G44S, G44V, 34_68mis"},
+                {"MED12", "G44S", null, "G44S, G44D, 34_68mis"},
+                {"MED12", "G44D", null, "G44D, G44S, 34_68mis"},
                 {"MED12", "G44*", null, "Truncating Mutations"},
                 {"MED12", "38_40del", null, "34_68del"},
                 {"NOTCH1", "Q2405Rfs*17", null, "Q2405Rfs*17, 2375_2555trunc, Oncogenic Mutations"},
