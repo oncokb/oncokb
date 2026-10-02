@@ -206,12 +206,10 @@ public class IndicatorUtils {
                     EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Collections.singleton(EvidenceType.GENE_SUMMARY)));
             }
 
-            // Everything OncoKB validates about the query is collected here, before anything variant-level is
-            // looked up, and reported together on the response. A new check appends to this list. Today that
-            // is the queried protein change against the OncoKB canonical protein sequence.
             List<ValidationError> validationErrors = new ArrayList<>(
                 ProteinChangeValidationUtils.getProteinChangeValidationErrors(
                     query.getReferenceGenome(), gene, query.getAlteration()));
+            validationErrors.addAll(FusionValidationUtils.getFusionValidationErrors(query.getAlteration()));
             indicatorQuery.setErrors(validationErrors);
 
             // Every error type we have describes a variant that cannot exist, so nothing is annotated for the

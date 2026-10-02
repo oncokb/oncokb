@@ -298,6 +298,17 @@ public class CacheUtils {
         return transcriptService;
     }
 
+    public static boolean isTranscriptGeneSymbol(String hugoSymbol) {
+        if (StringUtils.isNullOrEmpty(hugoSymbol)) {
+            return false;
+        }
+        OncokbTranscriptService transcriptService = getTranscriptService();
+        if (!transcriptService.isEnabled()) {
+            return false;
+        }
+        return transcriptService.findTranscriptGeneBySymbol(hugoSymbol) != null;
+    }
+
     /**
      * Loads the canonical protein sequence for every cached gene, in both reference genomes, so protein
      * change validation can be served entirely from memory. One request per reference genome.

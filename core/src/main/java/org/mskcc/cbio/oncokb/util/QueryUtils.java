@@ -29,7 +29,7 @@ public class QueryUtils {
                         } else {
                             LinkedHashSet<String> genes = StringUtils.isNullOrEmpty(query.getHugoSymbol()) ? new LinkedHashSet<>() : new LinkedHashSet<>(FusionUtils.getGenesStrs(query.getHugoSymbol()));
                             if (genes.size() > 1) {
-                                name = org.apache.commons.lang3.StringUtils.join(genes, "-") + " Fusion";
+                                name = org.apache.commons.lang3.StringUtils.join(genes, FusionUtils.FUSION_SEPARATOR) + " Fusion";
                             } else if (genes.size() == 1) {
                                 name = "Fusions";
                             }

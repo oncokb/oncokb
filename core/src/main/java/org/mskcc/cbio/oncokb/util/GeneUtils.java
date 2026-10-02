@@ -42,6 +42,17 @@ public class GeneUtils {
         return null;
     }
 
+    /**
+     * OncoKB core database only has curated genes. This function checks if the gene
+     * is valid based on the transcript database, which has all genes.
+     */
+    public static boolean isKnownGeneSymbol(String hugoSymbol) {
+        if (StringUtils.isEmpty(hugoSymbol)) {
+            return false;
+        }
+        return getGeneByHugoSymbol(hugoSymbol) != null || CacheUtils.isTranscriptGeneSymbol(hugoSymbol);
+    }
+
     public static Gene getGeneByEntrezId(Integer entrezId) {
         if (entrezId != null) {
             GeneBo geneBo = ApplicationContextSingleton.getGeneBo();
