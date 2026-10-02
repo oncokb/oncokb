@@ -18,7 +18,7 @@ Fusion names in `query.alteration` and summaries now use `::`. Clients that comp
 
 | Parameter/Field Path | Change (Added/Edit/Removed) | Endpoints |
 | --- | --- | --- |
-| `errors[].type` value `AMBIGUOUS_FUSION_SEPARATOR` | Added | `/annotate/mutations/byProteinChange` (GET, POST), `/annotate/mutations/byHGVSg`, `/annotate/mutations/byHGVSc`, `/annotate/mutations/byGenomicChange`, `/annotate/samples`, `/search` |
+| `errors[].type` value `AMBIGUOUS_FUSION_SEPARATOR` | Added | `/annotate/mutations/byProteinChange` (GET, POST), `/annotate/mutations/byHGVSg`, `/annotate/mutations/byHGVSc`, `/annotate/mutations/byGenomicChange`, `/search` |
 | `query.alteration` for a hyphenated fusion query | Edit | Every somatic annotation endpoint |
 | `proteinChangeValidation` renamed to `variantValidation` | Edit | `/utils/variantAnnotation` |
 | `variantValidation.messageType` value `AMBIGUOUS_FUSION_SEPARATOR` | Added | `/utils/variantAnnotation` |
