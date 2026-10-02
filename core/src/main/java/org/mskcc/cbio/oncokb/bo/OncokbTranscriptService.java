@@ -18,6 +18,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.stream.Collectors;
 
 /**
@@ -27,6 +29,7 @@ public class OncokbTranscriptService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OncokbTranscriptService.class);
     private static final String ONCOKB_TRANSCRIPT_URL = "https://transcript.oncokb.org";
+    private static final int SEQUENCE_BATCH_COUNT = 3;
 
     private ApiClient client;
     private final int DEFAULT_TIMEOUT = 30000;
@@ -136,8 +139,40 @@ public class OncokbTranscriptService {
     }
 
     public List<Sequence> getAllProteinSequences(ReferenceGenome referenceGenome) throws ApiException {
+        List<Integer> allGeneIds = CacheUtils.getAllGenes().stream().map(Gene::getEntrezGeneId).collect(Collectors.toList());
+
+        int chunkSize = (allGeneIds.size() + SEQUENCE_BATCH_COUNT - 1) / SEQUENCE_BATCH_COUNT;
+        List<CompletableFuture<List<Sequence>>> futures = new ArrayList<>();
+
+        for (int i = 0; i < allGeneIds.size(); i += chunkSize) {
+            int end = Math.min(i + chunkSize, allGeneIds.size());
+            List<Integer> chunk = new ArrayList<>(allGeneIds.subList(i, end));
+            futures.add(CompletableFuture.supplyAsync(() -> {
+                try {
+                    return fetchProteinSequences(referenceGenome, chunk);
+                } catch (ApiException e) {
+                    throw new CompletionException(e);
+                }
+            }));
+        }
+
+        List<Sequence> combined = new ArrayList<>();
+        for (CompletableFuture<List<Sequence>> future : futures) {
+            try {
+                combined.addAll(future.join());
+            } catch (CompletionException e) {
+                if (e.getCause() instanceof ApiException) {
+                    throw (ApiException) e.getCause();
+                }
+                throw e;
+            }
+        }
+        return combined;
+    }
+
+    private List<Sequence> fetchProteinSequences(ReferenceGenome referenceGenome, List<Integer> geneIds) throws ApiException {
         SequenceControllerApi sequenceResourceApi = new SequenceControllerApi();
-        return sequenceResourceApi.findCanonicalSequencesUsingPOST(referenceGenome.name(), SEQUENCE_TYPE, CacheUtils.getAllGenes().stream().map(Gene::getEntrezGeneId).collect(Collectors.toList()));
+        return sequenceResourceApi.findCanonicalSequencesUsingPOST(referenceGenome.name(), SEQUENCE_TYPE, geneIds);
     }
 
     /**
