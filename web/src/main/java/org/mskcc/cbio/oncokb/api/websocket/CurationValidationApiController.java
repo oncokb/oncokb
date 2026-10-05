@@ -7,7 +7,6 @@ import org.mskcc.cbio.oncokb.bo.OncokbTranscriptService;
 import org.mskcc.cbio.oncokb.model.*;
 import org.mskcc.cbio.oncokb.util.*;
 import org.oncokb.oncokb_transcript.ApiException;
-import org.oncokb.oncokb_transcript.client.Sequence;
 
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
@@ -295,8 +294,9 @@ public class CurationValidationApiController {
         JSONArray data = new JSONArray();
         OncokbTranscriptService oncokbTranscriptService = new OncokbTranscriptService();
 
-        List<org.oncokb.oncokb_transcript.client.Sequence> allGrch37Sequences = oncokbTranscriptService.getAllProteinSequences(ReferenceGenome.GRCh37);
-        List<org.oncokb.oncokb_transcript.client.Sequence> allGrch38Sequences = oncokbTranscriptService.getAllProteinSequences(ReferenceGenome.GRCh38);
+        Set<Gene> allGenes = CacheUtils.getAllGenes();
+        Map<Integer, String> grch37Sequences = oncokbTranscriptService.getCanonicalProteinSequences(ReferenceGenome.GRCh37, allGenes);
+        Map<Integer, String> grch38Sequences = oncokbTranscriptService.getCanonicalProteinSequences(ReferenceGenome.GRCh38, allGenes);
 
         for (Alteration alteration : AlterationUtils.getAllAlterations()) {
             if (!ValidationUtils.isSomaticAlteration(alteration)) {
@@ -309,10 +309,10 @@ public class CurationValidationApiController {
                 for (ReferenceGenome ref : alteration.getReferenceGenomes()) {
                     if (ref.equals(ReferenceGenome.GRCh37)) {
                         isoform = alteration.getGene().getGrch37Isoform();
-                        sequence = getGeneSequenceFromPool(allGrch37Sequences, isoform);
+                        sequence = grch37Sequences.get(alteration.getGene().getEntrezGeneId());
                     } else if (ref.equals(ReferenceGenome.GRCh38)) {
                         isoform = alteration.getGene().getGrch38Isoform();
-                        sequence = getGeneSequenceFromPool(allGrch38Sequences, isoform);
+                        sequence = grch38Sequences.get(alteration.getGene().getEntrezGeneId());
                     }
                     if (!StringUtils.isEmpty(sequence)) {
                         referenceGenome = ref;
@@ -432,13 +432,5 @@ public class CurationValidationApiController {
             }
         }
         return data;
-    }
-
-    private String getGeneSequenceFromPool(List<Sequence> allSequences, String geneIsoform) {
-        if (StringUtils.isEmpty(geneIsoform)) {
-            return null;
-        }
-        Sequence matchedSeq = allSequences.stream().filter(sequence -> sequence.getTranscript().getEnsemblTranscriptId().equals(geneIsoform)).findAny().orElse(null);
-        return matchedSeq == null ? null : matchedSeq.getSequence();
     }
 }

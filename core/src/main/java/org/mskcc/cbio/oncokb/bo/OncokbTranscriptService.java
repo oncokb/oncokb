@@ -6,7 +6,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.apiModels.TranscriptUpdateValidationVM;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.ReferenceGenome;
-import org.mskcc.cbio.oncokb.util.CacheUtils;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
 import org.mskcc.cbio.oncokb.util.PropertiesUtils;
 import org.oncokb.oncokb_transcript.ApiClient;
@@ -133,11 +132,6 @@ public class OncokbTranscriptService {
         ReferenceGenome rg = referenceGenome == null ? DEFAULT_REFERENCE_GENOME : referenceGenome;
         Sequence sequence = sequenceResourceApi.findCanonicalSequenceUsingGET(rg.name(), gene.getEntrezGeneId(), SEQUENCE_TYPE);
         return sequence == null ? null : sequence.getSequence();
-    }
-
-    public List<Sequence> getAllProteinSequences(ReferenceGenome referenceGenome) throws ApiException {
-        SequenceControllerApi sequenceResourceApi = new SequenceControllerApi();
-        return sequenceResourceApi.findCanonicalSequencesUsingPOST(referenceGenome.name(), SEQUENCE_TYPE, CacheUtils.getAllGenes().stream().map(Gene::getEntrezGeneId).collect(Collectors.toList()));
     }
 
     /**
