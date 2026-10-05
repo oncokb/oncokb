@@ -12,6 +12,7 @@ import org.mskcc.cbio.oncokb.apiModels.annotation.*;
 import org.mskcc.cbio.oncokb.serializer.EntrezGeneIdConverter;
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
 import org.mskcc.cbio.oncokb.util.AminoAcidConverterUtils;
+import org.mskcc.cbio.oncokb.util.FusionUtils;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
 import org.mskcc.cbio.oncokb.util.QueryUtils;
 
@@ -19,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.mskcc.cbio.oncokb.Constants.DEFAULT_REFERENCE_GENOME;
-import static org.mskcc.cbio.oncokb.util.FusionUtils.FUSION_ALTERNATIVE_SEPARATOR;
+import static org.mskcc.cbio.oncokb.util.FusionUtils.FUSION_LEGACY_SEPARATOR;
 import static org.mskcc.cbio.oncokb.util.FusionUtils.FUSION_SEPARATOR;
 
 
@@ -357,7 +358,7 @@ public class Query implements java.io.Serializable {
             }
             if (this.getAlteration() != null &&
                     !this.getAlteration().toLowerCase().contains("fusion") &&
-                    (!this.getAlteration().toLowerCase().contains(FUSION_SEPARATOR) && this.getAlteration().toLowerCase().contains(FUSION_ALTERNATIVE_SEPARATOR)) &&
+                    (!this.getAlteration().toLowerCase().contains(FUSION_SEPARATOR) && this.getAlteration().toLowerCase().contains(FUSION_LEGACY_SEPARATOR)) &&
                     (alterationType.equals(AlterationType.FUSION) || (this.consequence != null && this.consequence.toLowerCase().equals("fusion")))
             ) {
                 this.setAlteration(this.getAlteration() + " Fusion");
@@ -370,6 +371,11 @@ public class Query implements java.io.Serializable {
         }
 
         this.setAlteration(QueryUtils.getAlterationName(this));
+
+        FusionUtils.FusionNameNormalization fusionName = FusionUtils.normalizeSeparator(this.getAlteration());
+        if (fusionName.isNormalized()) {
+            this.setAlteration(fusionName.getName());
+        }
 
         if (StringUtils.isNotEmpty(this.inheritanceMechanism)) {
             if (this.inheritanceMechanism.toLowerCase().equals("heterozygous")) {
