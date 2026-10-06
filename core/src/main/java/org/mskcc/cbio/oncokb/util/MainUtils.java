@@ -532,6 +532,11 @@ public class MainUtils {
 
                 BiologicalVariant variant = new BiologicalVariant();
                 variant.setVariant(alteration);
+                String hotspotType = HotspotUtils.getHotspotType(alteration);
+                VariantHotspot variantHotspot = new VariantHotspot();
+                variantHotspot.setIsHotspot(hotspotType != null);
+                variantHotspot.setType(hotspotType);
+                variant.setHotspot(variantHotspot);
                 Oncogenicity oncogenicity = EvidenceUtils.getOncogenicityFromEvidence(map.get(EvidenceType.ONCOGENIC));
                 Pathogenicity pathogenicity = EvidenceUtils.getPathogenicityFromEvidence(map.get(EvidenceType.PATHOGENIC));
                 Set<Evidence> mutationEffectEvidences = map.get(EvidenceType.MUTATION_EFFECT);
