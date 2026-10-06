@@ -402,6 +402,55 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
     }
 
     @Override
+    public ResponseEntity<SomaticVariantAnnotation> utilHotspotAnnotationGet(
+        @ApiParam(value = "hugoSymbol") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
+        , @ApiParam(value = "entrezGeneId") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
+        , @ApiParam(value = "Hotspot residue. Example: V600, X307 or 27-42", required = true) @RequestParam(value = "residue") String residue
+    ) {
+        Gene gene = GeneUtils.getGene(entrezGeneId, hugoSymbol);
+        CancerHotspot hotspot = HotspotUtils.getHotspot(gene, residue);
+        if (hotspot == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        hotspot.setCuratedAlterations(HotspotUtils.getCuratedAlterations(gene, hotspot));
+
+        Query query = new Query();
+        query.setHugoSymbol(gene.getHugoSymbol());
+        query.setEntrezGeneId(gene.getEntrezGeneId());
+        query.setAlteration(hotspot.getName());
+        query.setGermline(false);
+
+        Set<String> citationPmids = new LinkedHashSet<>(hotspot.getPmids());
+        citationPmids.addAll(HotspotUtils.HOTSPOT_METHOD_PMIDS);
+        Citations citations = new Citations();
+        citations.setPmids(citationPmids);
+        MutationEffectResp mutationEffect = new MutationEffectResp();
+        mutationEffect.setKnownEffect(MutationEffect.UNKNOWN.getMutationEffect());
+        mutationEffect.setDescription(SummaryUtils.cancerHotspotMutationEffectDescription(hotspot));
+        mutationEffect.setCitations(citations);
+
+        SomaticVariantAnnotation annotation = new SomaticVariantAnnotation();
+        annotation.setQuery(query);
+        annotation.setGeneExist(true);
+        annotation.setHotspot(true);
+        annotation.setOncogenic(Oncogenicity.LIKELY.getOncogenic());
+        annotation.setMutationEffect(mutationEffect);
+        annotation.setGeneSummary(SummaryUtils.getGeneSummaryByGeneticType(gene, gene.getHugoSymbol(), false));
+        annotation.setVariantSummary(SummaryUtils.cancerHotspotSummary(hotspot));
+        annotation.setCancerHotspot(hotspot);
+        annotation.setDataVersion(MainUtils.getDataVersion());
+        annotation.setLastUpdate(MainUtils.getDataVersionDate());
+
+        Set<Evidence> background = EvidenceUtils.getEvidenceByGeneAndEvidenceTypes(gene, Collections.singleton(EvidenceType.GENE_BACKGROUND));
+        if (background.size() > 0) {
+            annotation.setBackground(CplUtils.annotateGene(background.iterator().next().getDescription(), gene.getHugoSymbol()));
+        }
+
+        return new ResponseEntity<>(annotation, HttpStatus.OK);
+    }
+
+    @Override
     public ResponseEntity<SomaticVariantAnnotation> utilVariantAnnotationGet(
         @ApiParam(value = "hugoSymbol") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
         , @ApiParam(value = "entrezGeneId") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId

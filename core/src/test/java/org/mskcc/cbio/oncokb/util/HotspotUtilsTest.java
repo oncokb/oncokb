@@ -2,11 +2,16 @@ package org.mskcc.cbio.oncokb.util;
 
 import junit.framework.TestCase;
 import org.mskcc.cbio.oncokb.model.Alteration;
+import org.mskcc.cbio.oncokb.model.CancerHotspot;
 import org.mskcc.cbio.oncokb.model.ReferenceGenome;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 
 /**
@@ -130,4 +135,82 @@ public class HotspotUtilsTest extends TestCase {
         assertNull(HotspotUtils.getHotspotType(alteration));
     }
 
+    public void testGetHotspotPmids() throws Exception {
+        Alteration alteration = AlterationUtils.getAlteration("BRAF", "V600E", null, null, null, null, null, false);
+        assertEquals(new LinkedHashSet<>(Arrays.asList("26619011", "29247016")), HotspotUtils.getHotspotPmids(alteration));
+
+        alteration = AlterationUtils.getAlteration("TP53", "X307splice", null, null, null, null, null, false);
+        assertEquals(Collections.singleton("29247016"), HotspotUtils.getHotspotPmids(alteration));
+
+        alteration = AlterationUtils.getAlteration("AKT1", "E40K", null, null, null, null, null, false);
+        assertEquals(Collections.singleton("41895280"), HotspotUtils.getHotspotPmids(alteration));
+
+        alteration = AlterationUtils.getAlteration("BRAF", "L485_P490del", null, null, null, null, null, false);
+        assertEquals(Collections.singleton("29247016"), HotspotUtils.getHotspotPmids(alteration));
+
+        alteration = AlterationUtils.getAlteration("AKT1", "E17*", null, null, null, null, null, false);
+        assertTrue(HotspotUtils.getHotspotPmids(alteration).isEmpty());
+    }
+
+    public void testGetHotspot() throws Exception {
+        CancerHotspot hotspot = HotspotUtils.getHotspot(GeneUtils.getGeneByHugoSymbol("BRAF"), "V600");
+        assertEquals("V600", hotspot.getName());
+        assertEquals("single residue", hotspot.getType());
+        assertEquals(Integer.valueOf(600), hotspot.getProteinStart());
+        assertEquals(Integer.valueOf(600), hotspot.getProteinEnd());
+        assertEquals(Integer.valueOf(897), hotspot.getTumorCount());
+        assertEquals(new LinkedHashSet<>(Arrays.asList("26619011", "29247016")), hotspot.getPmids());
+
+        hotspot = HotspotUtils.getHotspot(GeneUtils.getGeneByHugoSymbol("TP53"), "X307");
+        assertEquals("splice site", hotspot.getType());
+        assertEquals("X307", hotspot.getName());
+
+        hotspot = HotspotUtils.getHotspot(GeneUtils.getGeneByHugoSymbol("PIK3R1"), "439-470");
+        assertEquals("in-frame indel", hotspot.getType());
+        assertEquals("439_470insdel", hotspot.getName());
+        assertEquals(Integer.valueOf(439), hotspot.getProteinStart());
+        assertEquals(Integer.valueOf(470), hotspot.getProteinEnd());
+
+        assertNull(HotspotUtils.getHotspot(GeneUtils.getGeneByHugoSymbol("BRAF"), "V601"));
+        assertNull(HotspotUtils.getHotspot(null, "V600"));
+    }
+
+    public void testGetCuratedAlterations() throws Exception {
+        CancerHotspot v600 = HotspotUtils.getHotspot(GeneUtils.getGeneByHugoSymbol("BRAF"), "V600");
+        List<String> names = HotspotUtils.getCuratedAlterations(GeneUtils.getGeneByHugoSymbol("BRAF"), v600).stream().map(Alteration::getAlteration).collect(Collectors.toList());
+        assertTrue(names.contains("V600E"));
+        assertTrue(names.contains("V600K"));
+        assertFalse(names.contains("V600"));
+        assertFalse(names.contains("K601E"));
+        assertTrue(names.stream().allMatch(name -> name.matches("V600[A-Z]")));
+
+        CancerHotspot range = HotspotUtils.getHotspot(GeneUtils.getGeneByHugoSymbol("PIK3R1"), "439-470");
+        List<Alteration> indels = HotspotUtils.getCuratedAlterations(GeneUtils.getGeneByHugoSymbol("PIK3R1"), range);
+        assertFalse(indels.isEmpty());
+        for (Alteration indel : indels) {
+            assertTrue(AlterationUtils.isInframeAlteration(indel));
+            assertTrue(indel.getProteinStart() <= 470 && indel.getProteinEnd() >= 439);
+        }
+
+        CancerHotspot splice = HotspotUtils.getHotspot(GeneUtils.getGeneByHugoSymbol("TP53"), "X307");
+        for (Alteration alteration : HotspotUtils.getCuratedAlterations(GeneUtils.getGeneByHugoSymbol("TP53"), splice)) {
+            assertEquals(Integer.valueOf(307), alteration.getProteinStart());
+        }
+
+        assertTrue(HotspotUtils.getCuratedAlterations(GeneUtils.getGeneByHugoSymbol("BRAF"), null).isEmpty());
+    }
+
+    public void testCancerHotspotText() throws Exception {
+        CancerHotspot v600 = HotspotUtils.getHotspot(GeneUtils.getGeneByHugoSymbol("BRAF"), "V600");
+        assertEquals("BRAF V600 has been identified as a statistically significant hotspot and single residue mutations at this position are considered likely oncogenic unless functional evidence suggests otherwise.", SummaryUtils.cancerHotspotSummary(v600));
+        String description = SummaryUtils.cancerHotspotMutationEffectDescription(v600);
+        assertTrue(description.startsWith("BRAF V600 has been identified as a statistically significant recurrent mutational hotspot (PMID: 26619011, 29247016). In these analyses,"));
+        assertTrue(description.endsWith("Therefore, single-residue substitutions at BRAF V600 are considered likely oncogenic unless functional evidence indicates otherwise (PMID: 26619011, 29247016, 41895280)."));
+
+        CancerHotspot range = HotspotUtils.getHotspot(GeneUtils.getGeneByHugoSymbol("PIK3R1"), "439-470");
+        assertEquals("PIK3R1 439_470insdel has been identified as a statistically significant hotspot and in-frame indels overlapping this region are considered likely oncogenic unless functional evidence suggests otherwise.", SummaryUtils.cancerHotspotSummary(range));
+        description = SummaryUtils.cancerHotspotMutationEffectDescription(range);
+        assertTrue(description.startsWith("PIK3R1 439_470insdel has been identified as a statistically significant recurrent in-frame indel hotspot (PMID: 29247016). In this analysis,"));
+        assertTrue(description.contains("overlap at least one amino acid within PIK3R1 439\u2013470 are considered"));
+    }
 }

@@ -202,6 +202,19 @@ public interface PrivateUtilsApi {
         , @ApiParam(value = "OncoTree tumor type name/main type/code") @RequestParam(value = "tumorType", required = false) String tumorType
     ) throws ApiException, org.genome_nexus.ApiException;
 
+    @ApiOperation(value = "", notes = "Get the annotation of a cancer hotspot. The residue is a single residue (e.g. V600), a splice site position (e.g. X307) or an in-frame indel range (e.g. 27-42).", response = SomaticVariantAnnotation.class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK", response = SomaticVariantAnnotation.class),
+        @ApiResponse(code = 404, message = "Hotspot not found")})
+    @RequestMapping(value = "/utils/hotspotAnnotation",
+        produces = {"application/json"},
+        method = RequestMethod.GET)
+    ResponseEntity<SomaticVariantAnnotation> utilHotspotAnnotationGet(
+        @ApiParam(value = "hugoSymbol") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
+        , @ApiParam(value = "entrezGeneId") @RequestParam(value = "entrezGeneId", required = false) Integer entrezGeneId
+        , @ApiParam(value = "Hotspot residue. Example: V600, X307 or 27-42", required = true) @RequestParam(value = "residue") String residue
+    );
+
     @ApiOperation(value = "", notes = "Get all the info for the germline query", response = GermlineVariantAnnotation.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "OK", response = GermlineVariantAnnotation.class)})
