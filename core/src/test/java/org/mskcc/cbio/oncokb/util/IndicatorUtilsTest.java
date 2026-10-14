@@ -1431,6 +1431,21 @@ public class IndicatorUtilsTest {
 
     }
 
+    @Test 
+    public void testResistanceDescription() {
+        Query query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "KRAS", "G12C", null, null, null, null, null, null, null, false, null, null);
+        SomaticIndicatorQueryResp indicatorQueryResp = IndicatorUtils.processQuerySomatic(query, null, true, null, false);
+        assertEquals(indicatorQueryResp.getResistanceDescription(), ResistanceDescription.KNOWN.getDescription());
+
+        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "ABL1", "E279K", null, null, null, null, null, null, null, false, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuerySomatic(query, null, true, null, false);
+        assertEquals(indicatorQueryResp.getResistanceDescription(), ResistanceDescription.POTENTIAL.getDescription());
+
+        query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "ALK", "G1269S", null, null, null, null, null, null, null, false, null, null);
+        indicatorQueryResp = IndicatorUtils.processQuerySomatic(query, null, true, null, false);
+        assertEquals(indicatorQueryResp.getResistanceDescription(), ResistanceDescription.LIMITED.getDescription());
+    }
+
     @Test
     public void testFilterImplication() {
         TumorType melanoma = new TumorType();
