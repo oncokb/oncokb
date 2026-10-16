@@ -222,15 +222,13 @@ public class HotspotUtilsTest extends TestCase {
 
     public void testCancerHotspotText() throws Exception {
         CancerHotspot v600 = HotspotUtils.getHotspot(GeneUtils.getGeneByHugoSymbol("BRAF"), "V600");
-        assertEquals("BRAF V600 has been identified as a statistically significant hotspot and single residue mutations at this position are considered likely oncogenic unless functional evidence suggests otherwise.", SummaryUtils.cancerHotspotSummary(v600));
+        assertEquals("BRAF V600 is a statistically significant hotspot and single residue mutations at this position are considered likely oncogenic unless functional evidence suggests otherwise.", SummaryUtils.cancerHotspotSummary(v600));
         String description = SummaryUtils.cancerHotspotMutationEffectDescription(v600);
-        assertTrue(description.startsWith("BRAF V600 has been identified as a statistically significant recurrent mutational hotspot (PMID: 26619011, 29247016). In these analyses,"));
-        assertTrue(description.endsWith("Therefore, single-residue substitutions at BRAF V600 are considered likely oncogenic unless functional evidence indicates otherwise (PMID: 26619011, 29247016, 41895280)."));
+        assertEquals("BRAF V600 is a statistically significant recurrent mutational hotspot (PMID: 26619011, 29247016). A hotspot is defined as a single amino-acid residue that is mutated more often than expected in the absence of selection. The repeated, independent emergence of mutations at the same position across many tumor samples may indicate positive selection and confer a growth advantage to cancer cells. Because hotspots are defined at the residue rather than by the specific amino acid change, different substitutions at the same residue all contribute to a hotspot signal. All single-residue substitutions at BRAF V600 are considered hotspots and therefore likely oncogenic unless functional evidence indicates otherwise (PMID: 26619011, 29247016, 41895280).", description);
 
         CancerHotspot range = HotspotUtils.getHotspot(GeneUtils.getGeneByHugoSymbol("PIK3R1"), "439-470");
         assertEquals("PIK3R1 439_470insdel has been identified as a statistically significant hotspot and in-frame indels overlapping this region are considered likely oncogenic unless functional evidence suggests otherwise.", SummaryUtils.cancerHotspotSummary(range));
         description = SummaryUtils.cancerHotspotMutationEffectDescription(range);
-        assertTrue(description.startsWith("PIK3R1 439_470insdel has been identified as a statistically significant recurrent in-frame indel hotspot (PMID: 29247016). In this analysis,"));
-        assertTrue(description.contains("overlap at least one amino acid within PIK3R1 439\u2013470 are considered"));
+        assertEquals("PIK3R1 439_470insdel is a statistically significant recurrent in-frame indel hotspot (PMID: 29247016). An indel hotspot is defined as a protein region affected by in-frame insertions, deletions, duplications, or deletion-insertions in more tumor samples than expected in the absence of selection. The repeated, independent emergence of indels within the same region across many tumor samples may indicate positive selection and confer a growth advantage to cancer cells. Because in-frame indels vary in length and exact position between tumor samples, overlapping indels all contribute to a hotspot signal. In-frame indels that overlap at least one amino acid within PIK3R1 439\u2013470 are considered hotspots and therefore likely oncogenic unless functional evidence indicates otherwise (PMID: 26619011, 29247016, 41895280).", description);
     }
 }

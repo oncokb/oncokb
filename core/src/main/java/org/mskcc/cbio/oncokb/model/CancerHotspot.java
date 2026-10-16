@@ -17,7 +17,6 @@ public class CancerHotspot implements Serializable {
     private Integer tumorCount;
     private Set<String> pmids = new LinkedHashSet<>();
     private List<BiologicalVariant> curatedVariants = new ArrayList<>();
-    private String curatedVariantsDescription;
 
     public String getHugoSymbol() {
         return hugoSymbol;
@@ -89,13 +88,5 @@ public class CancerHotspot implements Serializable {
 
     public void setCuratedVariants(List<BiologicalVariant> curatedVariants) {
         this.curatedVariants = curatedVariants;
-    }
-
-    public String getCuratedVariantsDescription() {
-        return curatedVariantsDescription;
-    }
-
-    public void setCuratedVariantsDescription(String curatedVariantsDescription) {
-        this.curatedVariantsDescription = curatedVariantsDescription;
     }
 }
