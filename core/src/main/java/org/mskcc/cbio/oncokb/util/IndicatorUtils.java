@@ -317,6 +317,14 @@ public class IndicatorUtils {
                 }
             }
 
+            if (hasMutationEffectEvidence && indicatorQuery.getHotspot() && AlterationUtils.isPositionedAlteration(matchedAlt)
+                && (indicatorQuery.getMutationEffect() == null || MutationEffect.UNKNOWN.getMutationEffect().equals(indicatorQuery.getMutationEffect().getKnownEffect()))) {
+                CancerHotspot hotspot = HotspotUtils.getMatchedHotspot(matchedAlt);
+                if (hotspot != null) {
+                    indicatorQuery.setMutationEffect(HotspotUtils.getMutationEffect(hotspot));
+                }
+            }
+
             Oncogenicity oncogenicity = Oncogenicity.getByEffect(indicatorQuery.getOncogenic());
 
             // Set implications

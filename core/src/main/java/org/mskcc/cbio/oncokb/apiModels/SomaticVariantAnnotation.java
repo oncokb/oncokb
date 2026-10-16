@@ -1,6 +1,7 @@
 package org.mskcc.cbio.oncokb.apiModels;
 
 import org.mskcc.cbio.oncokb.model.Alteration;
+import org.mskcc.cbio.oncokb.model.CancerHotspot;
 import org.mskcc.cbio.oncokb.model.SomaticIndicatorQueryResp;
 
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ public class SomaticVariantAnnotation extends SomaticIndicatorQueryResp {
     private Boolean VUE = false;
     private ProteinChangeValidation proteinChangeValidation;
     private List<VariantAnnotationTumorType> tumorTypes = new ArrayList<>();
+    private CancerHotspot cancerHotspot;
 
     public SomaticVariantAnnotation() {
     }
@@ -98,5 +100,13 @@ public class SomaticVariantAnnotation extends SomaticIndicatorQueryResp {
 
     public void setAlteration(Alteration alteration) {
         this.alteration = alteration;
+    }
+
+    public CancerHotspot getCancerHotspot() {
+        return cancerHotspot;
+    }
+
+    public void setCancerHotspot(CancerHotspot cancerHotspot) {
+        this.cancerHotspot = cancerHotspot;
     }
 }
