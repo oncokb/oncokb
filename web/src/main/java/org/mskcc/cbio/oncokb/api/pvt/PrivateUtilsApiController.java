@@ -444,7 +444,6 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             }
         }
         hotspot.setCuratedVariants(curatedVariants);
-        hotspot.setCuratedVariantsDescription(SummaryUtils.cancerHotspotCuratedVariantsDescription(hotspot));
 
         Query query = new Query();
         query.setHugoSymbol(gene.getHugoSymbol());

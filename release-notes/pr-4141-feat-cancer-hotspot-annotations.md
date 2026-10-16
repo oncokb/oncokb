@@ -8,7 +8,7 @@ Annotations of positional cancer hotspot variants now describe the hotspot by it
 
 The variant summary for a positional hotspot query now names the hotspot type: single residue, in-frame indel, or splice site. For example, `BRAF V600` now returns:
 
-> BRAF V600 has been identified as a statistically significant hotspot and single residue mutations at this position are considered likely oncogenic unless functional evidence suggests otherwise.
+> BRAF V600 is a statistically significant hotspot and single residue mutations at this position are considered likely oncogenic unless functional evidence suggests otherwise.
 
 When a positional hotspot variant has no curated mutation effect, `mutationEffect.description` now explains how the hotspot was identified. `mutationEffect.citations.pmids` now lists the studies that identified the hotspot and the hotspot detection methods. `mutationEffect.knownEffect` remains `Unknown`.
 
