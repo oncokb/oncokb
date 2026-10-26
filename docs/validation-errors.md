@@ -58,12 +58,12 @@ implication lists and the highest levels) at their defaults.
     "hugoSymbol": "BRAF",
     "alteration": "A600E",
     "referenceGenome": "GRCh37",
-    "canonicalTranscript": "ENST00000646891"
+    "canonicalTranscript": "ENST00000288602"
   },
   "errors": [
     {
       "type": "REFERENCE_ALLELE_MISMATCH",
-      "message": "BRAF A600E: The reference amino acid at position 600 is V instead of A on the OncoKB canonical transcript."
+      "message": "BRAF A600E: The reference amino acid at position 600 is V instead of A on the OncoKB GRCh37 canonical transcript."
     }
   ],
   "geneExist": true,
@@ -94,8 +94,8 @@ one entry, though — it is a list precisely so that later checks can report alo
 
 | Value | Meaning | Example |
 | --- | --- | --- |
-| `REFERENCE_ALLELE_MISMATCH` | The reference allele the query names is not what the OncoKB canonical sequence has at that position. Usually a wrong reference residue, a position off by a few, or a query written against a different transcript than the OncoKB canonical one. | `BRAF A600E` — position 600 is `V` on the OncoKB canonical transcript. |
-| `POSITION_OUT_OF_RANGE` | The position the query names is past the end of the OncoKB canonical sequence. Also typical of a query written against a longer, non-canonical isoform. | `BRAF V9999E` — the canonical protein is 766 residues. |
+| `REFERENCE_ALLELE_MISMATCH` | The reference allele the query names is not what the OncoKB canonical sequence has at that position. Usually a wrong reference residue, a position off by a few, or a query written against a different transcript than the OncoKB canonical one. | `BRAF A600E` — position 600 is `V` on the OncoKB GRCh37 canonical transcript. |
+| `POSITION_OUT_OF_RANGE` | The position the query names is past the end of the OncoKB canonical sequence. Also typical of a query written against a longer, non-canonical isoform. | `BRAF V9999E` — the GRCh37 canonical protein is 766 residues. |
 | `REVERSED_POSITION_RANGE` | The query names a range whose start position comes after its end position. | `BRAF V600_G596del`. |
 | `MALFORMED_ALTERATION` | The query is not a well-formed alteration of its kind, independent of the canonical sequence — most often a single position carrying more than one reference residue. | `BRAF AL600L`, `BRAF VVV600_W604del`. |
 
