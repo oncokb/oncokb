@@ -23,6 +23,6 @@ None. Clients that string-match `message` should branch on `errors[].type` inste
 
 ## Related Links
 
-- PR:
+- PR: #4269
 - Issue: https://github.com/oncokb/oncokb/issues/4268
 - Docs: [docs/validation-errors.md](../docs/validation-errors.md)
