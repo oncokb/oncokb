@@ -322,12 +322,16 @@ public class CurationValidationApiController {
                     String target = ValidationUtils.getTarget(targetHugoSymbol, altTargetName);
                     if (StringUtils.isEmpty(sequence)) {
                         data.put(ValidationUtils.getErrorMessage(target, "No " + referenceGenome.name() + " sequence available for " + alteration.getGene().getHugoSymbol() + DEV_TEAM_ISSUE));
-                    } else if (sequence.length() < alteration.getProteinStart()) {
+                        continue;
+                    }
+                    String sequenceWithStop = sequence + "*";
+                    if (sequenceWithStop.length() < alteration.getProteinStart()) {
                         data.put(ValidationUtils.getErrorMessage(target, "The gene only has " + sequence.length() + " AAs on " + referenceGenome.name() + ". But the variant protein start is " + alteration.getProteinStart()));
-                    } else if (sequence.length() < alteration.getProteinEnd()) {
+                    } else if (sequenceWithStop.length() < alteration.getProteinEnd()) {
                         data.put(ValidationUtils.getErrorMessage(target, "The gene only has " + sequence.length() + " AAs on " + referenceGenome.name() + ". But the variant protein end is " + alteration.getProteinEnd()));
                     } else {
-                        String referenceAA = sequence.substring(alteration.getProteinStart() - 1, alteration.getProteinStart() + alteration.getRefResidues().length() - 1);
+                        int referenceEnd = Math.min(sequenceWithStop.length(), alteration.getProteinStart() + alteration.getRefResidues().length() - 1);
+                        String referenceAA = sequenceWithStop.substring(alteration.getProteinStart() - 1, referenceEnd);
                         if (!referenceAA.equals(alteration.getRefResidues())) {
                             data.put(ValidationUtils.getErrorMessage(target, "The reference amino acid does not match with the curated variant on " + referenceGenome.name() + ". The expected AA is " + referenceAA));
                         }
