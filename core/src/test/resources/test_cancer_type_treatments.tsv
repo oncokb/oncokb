@@ -126,8 +126,8 @@ IDH1	R132H	Therapy-Related Acute Myeloid Leukemia	1: Ivosidenib; 1: Olutasidenib
 IDH2	R172K	Acute Myeloid Leukemia	1: Enasidenib;
 IDH2	R172K	Melanoma	3B: Vorasidenib;
 MAP2K1	K57N	Erdheim-Chester Disease	2: Cobimetinib; 2: Trametinib;
-MAP2K1	K57N	Lung Adenocarcinoma	3A: Trametinib+Cobimetinib;
-MAP2K1	K57N	Glioblastoma, IDH-Wildtype	3B: Trametinib+Cobimetinib;
+MAP2K1	K57N	Lung Adenocarcinoma	3A: Trametinib; 3A: Cobimetinib;
+MAP2K1	K57N	Glioblastoma, IDH-Wildtype	3B: Trametinib; 3B: Cobimetinib;
 #MAP2K1	K57N	Diffuse Large B-Cell Lymphoma, NOS
 PIK3CA	E545K	Breast Cancer	1: Alpelisib+Fulvestrant; 1: Capivasertib+Fulvestrant; 1: Inavolisib+Palbociclib+Fulvestrant; 4: RLY-2608; 4: RLY-2608+Fulvestrant;
 PIK3CA	E545K	Ovarian Cancer	3B: Alpelisib+Fulvestrant; 3B: Capivasertib+Fulvestrant; 3B: Inavolisib+Palbociclib+Fulvestrant; 4: RLY-2608;
@@ -141,8 +141,8 @@ SF3B1	R625G	Breast Cancer
 # the following tests should be enabled when the liquid propagation is in production also the AGM-510 treatment is in place
 KRAS	G12C	Breast Cancer	3B: Adagrasib; 3B: Adagrasib+Cetuximab; 3B: Adagrasib+Panitumumab; 3B: Avutometinib+Defactinib; 3B: Sotorasib; 3B: Sotorasib+Panitumumab; 3B: Sotorasib+Cetuximab; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
 KRAS	G12D	Breast Cancer	3B: Avutometinib+Defactinib; 4: Daraxonrasib; 4: MRTX1133; 4: Setidegrasib; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
-KRAS	G12C	NSCLC	1: Adagrasib; 1: Sotorasib; 3B: Adagrasib+Cetuximab; 3B: Adagrasib+Panitumumab; 3B: Avutometinib+Defactinib; 3B: Sotorasib+Panitumumab; 3B: Sotorasib+Cetuximab; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
-KRAS	G12D	NSCLC	3A: Daraxonrasib; 3A: Setidegrasib; 3B: Avutometinib+Defactinib; 4: MRTX1133; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
+KRAS	G12C	NSCLC	1: Adagrasib; 1: Sotorasib; 2: Daraxonrasib; 3B: Adagrasib+Cetuximab; 3B: Adagrasib+Panitumumab; 3B: Avutometinib+Defactinib; 3B: Sotorasib+Panitumumab; 3B: Sotorasib+Cetuximab; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
+KRAS	G12D	NSCLC	2: Daraxonrasib; 3A: Setidegrasib; 3B: Avutometinib+Defactinib; 4: MRTX1133; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
 KRAS	G12C	Colorectal Cancer	R1: Cetuximab; R1: Tucatinib+Trastuzumab; R1: Panitumumab; 1: Adagrasib+Cetuximab; 1: Sotorasib+Panitumumab; 2: Adagrasib+Panitumumab; 2: Sotorasib+Cetuximab; 3B: Adagrasib; 3B: Avutometinib+Defactinib; 3B: Sotorasib; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
 KRAS	G12D	Colorectal Cancer	R1: Cetuximab; R1: Tucatinib+Trastuzumab; R1: Panitumumab; 3B: Avutometinib+Defactinib; 4: Daraxonrasib; 4: MRTX1133; 4: Setidegrasib; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
 KRAS	G12C	AML	3B: Cobimetinib; 3B: Trametinib;
@@ -178,20 +178,20 @@ ABL1	Y253H	TLL	3B: Bosutinib; 3B: Dasatinib;
 ABL1	Y253M	CML
 BRAF	L597R	Melanoma	3A: Trametinib; 4: Plixorafenib;
 BRAF	L597M	NSCLC	3B: Trametinib; 4: Plixorafenib;
-EGFR	L861Q	NSCLC	1: Afatinib; 1: Datopotamab Deruxtecan; 2: Amivantamab+Chemotherapy; 2: Dacomitinib; 2: Erlotinib; 2: Gefitinib; 2: Osimertinib; 3A: Amivantamab+Lazertinib; 3A: Patritumab Deruxtecan;
+EGFR	L861Q	NSCLC	1: Afatinib; 1: Datopotamab Deruxtecan; 2: Dacomitinib; 2: Erlotinib; 2: Gefitinib; 2: Osimertinib; 3A: Amivantamab+Lazertinib; 3A: Patritumab Deruxtecan;
 EGFR	L861R	NSCLC   1: Datopotamab Deruxtecan;
 EGFR	L861M	NSCLC   1: Datopotamab Deruxtecan;
 EGFR	G724S	NSCLC	1: Datopotamab Deruxtecan; 3A: Afatinib; R2: Osimertinib;
 EGFR	G724S	MEL	3B: Afatinib; 3B: Datopotamab Deruxtecan;
-KRAS	G12C	NSCLC	1: Adagrasib; 1: Sotorasib; 3B: Adagrasib+Cetuximab; 3B: Adagrasib+Panitumumab; 3B: Avutometinib+Defactinib; 3B: Sotorasib+Panitumumab; 3B: Sotorasib+Cetuximab; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
+KRAS	G12C	NSCLC	1: Adagrasib; 1: Sotorasib; 2: Daraxonrasib; 3B: Adagrasib+Cetuximab; 3B: Adagrasib+Panitumumab; 3B: Avutometinib+Defactinib; 3B: Sotorasib+Panitumumab; 3B: Sotorasib+Cetuximab; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
 KRAS	G12C	Melanoma	3B: Adagrasib; 3B: Adagrasib+Cetuximab; 3B: Adagrasib+Panitumumab; 3B: Avutometinib+Defactinib; 3B: Sotorasib; 3B: Sotorasib+Panitumumab; 3B: Sotorasib+Cetuximab; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
-KRAS	G12A	NSCLC	3A: Daraxonrasib; 3B: Avutometinib+Defactinib; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
+KRAS	G12A	NSCLC	2: Daraxonrasib; 3B: Avutometinib+Defactinib; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
 KRAS	G12A	Melanoma	3B: Avutometinib+Defactinib; 4: Daraxonrasib; 4: Trametinib; 4: Cobimetinib; 4: Binimetinib;
 KRAS	G12C	Histiocytosis	3A: Cobimetinib; 3A: Trametinib;
 KRAS	G12A	Histiocytosis	3A: Cobimetinib; 3A: Trametinib;
 IDH1	R132H	AML	1: Ivosidenib; 1: Olutasidenib; 3B: Olutasidenib+Azacitidine Regimen;
 IDH1	R132G	AML	1: Ivosidenib; 1: Olutasidenib; 3B: Olutasidenib+Azacitidine Regimen;
-FGFR2	FGFR2-BICC1 Fusion	Cholangiocarcinoma	1: Futibatinib; 1: Pemigatinib; 3A: Lirafugratinib; 3B: Erdafitinib; 4: Fexagratinib;
+FGFR2	FGFR2-BICC1 Fusion	Cholangiocarcinoma	1: Futibatinib; 1: Lirafugratinib; 1: Pemigatinib; 3B: Erdafitinib; 4: Fexagratinib;
 ERBB2	Amplification	Breast Cancer	1: Ado-Trastuzumab Emtansine; 1: Lapatinib+Capecitabine; 1: Margetuximab+Chemotherapy; 1: Neratinib; 1: Palbociclib+Trastuzumab+Hormone Therapy+Pertuzumab; 1: Trastuzumab; 1: Trastuzumab Deruxtecan; 1: Trastuzumab Deruxtecan+Pertuzumab; 1: Trastuzumab+Pertuzumab+Chemotherapy; 1: Trastuzumab+Tucatinib+Capecitabine; 1: Lapatinib+Letrozole; 1: Neratinib+Capecitabine; 1: Palbociclib+Trastuzumab+Hormone Therapy; 1: Trastuzumab+Chemotherapy; 3B: Lapatinib+Trastuzumab; 3B: Pembrolizumab+Trastuzumab+Chemotherapy; 3B: Trastuzumab+Carboplatin-Taxol Regimen; 3B: Trastuzumab+Pertuzumab; 3B: Trastuzumab+Tucatinib; 3B: Zanidatamab; 3B: Trastuzumab+Docetaxel;
 ERBB2	Amplification	Colorectal Cancer	1: Tucatinib+Trastuzumab; 2: Lapatinib+Trastuzumab; 2: Trastuzumab Deruxtecan; 2: Trastuzumab+Pertuzumab; 3B: Ado-Trastuzumab Emtansine; 3B: Lapatinib+Capecitabine; 3B: Margetuximab+Chemotherapy; 3B: Neratinib; 3B: Palbociclib+Trastuzumab+Hormone Therapy+Pertuzumab; 3B: Pembrolizumab+Trastuzumab+Chemotherapy; 3B: Trastuzumab; 3B: Trastuzumab Deruxtecan+Pertuzumab; 3B: Trastuzumab+Carboplatin-Taxol Regimen; 3B: Trastuzumab+Pertuzumab+Chemotherapy; 3B: Trastuzumab+Tucatinib+Capecitabine; 3B: Zanidatamab; 3B: Lapatinib+Letrozole; 3B: Neratinib+Capecitabine; 3B: Palbociclib+Trastuzumab+Hormone Therapy; 3B: Trastuzumab+Chemotherapy; 3B: Trastuzumab+Docetaxel;
 RET	KIF5B-RET Fusion	NSCLC	1: Pralsetinib; 1: Selpercatinib; 2: Cabozantinib; 3A: Vandetanib;

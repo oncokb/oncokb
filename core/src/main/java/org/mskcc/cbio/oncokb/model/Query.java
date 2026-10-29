@@ -11,7 +11,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.apiModels.annotation.*;
 import org.mskcc.cbio.oncokb.serializer.EntrezGeneIdConverter;
 import org.mskcc.cbio.oncokb.util.AlterationUtils;
-import org.mskcc.cbio.oncokb.util.AminoAcidConverterUtils;
 import org.mskcc.cbio.oncokb.util.FusionUtils;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
 import org.mskcc.cbio.oncokb.util.QueryUtils;
