@@ -136,11 +136,13 @@ For this option, you need to download the VEP cache, which is used in the `gn-ve
 | v4.x.x    | v0.9.4            | >=v1.x.x       | v0.x     | >=v0.0.1         | v8.0.x | v7.x.x | v5.x.x      |
 | v5.0.x-rc | v0.9.4            | >=v1.x.x       | v0.x     | >=v0.0.1         | v8.0.x | v7.x.x | v6.x.x      |
 | v5.x.x    | v0.9.4            | >=v1.x.x       | v0.x     | >=v0.0.1         | v8.0.x | v7.x.x | v6.x.x      |
-| v6.x.x    | v0.9.4            | >=v1.x.x       | v0.x     | >=v0.0.1         | v8.0.x | v7.x.x | v7.x.x      |
+| v6.0.x - v6.11.x | v0.9.4     | >=v1.x.x       | v0.x     | >=v0.0.1         | v8.0.x | v7.x.x | v7.0 - v7.6 |
+| >=v6.12.0 | v0.9.4            | >=v1.x.x       | v0.x     | >=v0.0.1         | v8.0.x | v7.x.x | >=v7.7      |
 
 > [!WARNING]
 > `v5.0.x-rc` is a pre-release with known bugs. Do not deploy this version; stay on a stable release until a stable v5.x.x build is available.
 > `v6.3.0` contains a known bug with germline HGVSg and genomic change endpoints. Please use 6.4.0+
+> OncoKB data `v7.7` renames fusion nomenclature and requires `oncokb` `v6.12.0` or later. Earlier `v6.x.x` releases are not compatible with `v7.7`+ data.
 
 ### Additional Information
 
