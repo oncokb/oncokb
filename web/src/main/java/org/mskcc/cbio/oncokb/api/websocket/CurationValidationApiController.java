@@ -315,7 +315,7 @@ public class CurationValidationApiController {
                         isoform = alteration.getGene().getGrch38Isoform();
                         sequence = grch38Sequences.get(alteration.getGene().getEntrezGeneId());
                     }
-                    String targetHugoSymbol = alteration.getGene().getHugoSymbol() + " / " + referenceGenome.name();
+                    String targetHugoSymbol = alteration.getGene().getHugoSymbol();
                     if (StringUtils.isNotEmpty(isoform)) {
                         targetHugoSymbol = targetHugoSymbol + " / Isoform: " + isoform;
                     }
