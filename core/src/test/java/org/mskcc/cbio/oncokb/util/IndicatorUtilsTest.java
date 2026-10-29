@@ -1447,6 +1447,14 @@ public class IndicatorUtilsTest {
         assertTrue("Both spellings should be annotated the same",
             LevelUtils.areSameLevels(hgvsResp.getHighestSensitiveLevel(), hyphenResp.getHighestSensitiveLevel()));
 
+        Query reversed = new Query(null, DEFAULT_REFERENCE_GENOME, null, "ABL1", "ABL1::BCR Fusion", null, null, "Chronic Myelogenous Leukemia", null, null, null, null, false, null, null);
+        SomaticIndicatorQueryResp reversedResp = IndicatorUtils.processQuerySomatic(reversed, null, true, null, false);
+        assertTrue("The reversed fusion should match the curated fusion", reversedResp.getVariantExist());
+        assertEquals("The reversed fusion should get the curated mutation effect",
+            hgvsResp.getMutationEffect().getDescription(), reversedResp.getMutationEffect().getDescription());
+        assertEquals(hgvsResp.getOncogenic(), reversedResp.getOncogenic());
+        assertTrue(LevelUtils.areSameLevels(hgvsResp.getHighestSensitiveLevel(), reversedResp.getHighestSensitiveLevel()));
+
         // A name with more than one hyphen that no single split turns into two known genes cannot be
         // interpreted: the variant is left unannotated and the caller is
         // told to use the HGVS separator, while what OncoKB knows about the gene still stands
