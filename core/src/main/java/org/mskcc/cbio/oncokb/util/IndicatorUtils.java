@@ -233,7 +233,7 @@ public class IndicatorUtils {
 
             Alteration matchedAlt = AlterationUtils.findExactlyMatchedAlteration(query.getReferenceGenome(), alteration, AlterationUtils.getAllAlterations(query.getReferenceGenome(), gene));
 
-            if (matchedAlt == null && isStructuralVariantEvent) {
+            if (matchedAlt == null && (isStructuralVariantEvent || FusionUtils.isFusion(alteration.getAlteration()))) {
                 matchedAlt = AlterationUtils.getRevertFusions(query.getReferenceGenome(), alteration);
             }
 
