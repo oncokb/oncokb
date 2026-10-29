@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.apiModels.ValidationError;
+import org.mskcc.cbio.oncokb.model.ReferenceGenome;
 import org.mskcc.cbio.oncokb.model.ValidationErrorType;
 import org.mskcc.cbio.oncokb.util.parser.ProteinChangeParser;
 
@@ -105,7 +106,7 @@ public final class ProteinChangeValidator {
         }
     }
 
-    public static Optional<ValidationError> validate(String hugoSymbol, String proteinChange, String canonicalSequence) {
+    public static Optional<ValidationError> validate(ReferenceGenome referenceGenome, String hugoSymbol, String proteinChange, String canonicalSequence) {
         if (StringUtils.isEmpty(proteinChange) || StringUtils.isEmpty(canonicalSequence)) {
             return Optional.empty();
         }
@@ -115,13 +116,13 @@ public final class ProteinChangeValidator {
         ReferenceContext ctx;
         Matcher matcher = REFERENCE_RESIDUES.matcher(normalized);
         if (matcher.matches()) {
-            ctx = ReferenceContext.from(hugoSymbol, normalized, canonicalSequence, matcher);
+            ctx = ReferenceContext.from(referenceGenome, hugoSymbol, normalized, canonicalSequence, matcher);
         } else {
             Matcher frameshift = FRAMESHIFT_REFERENCE_RESIDUES.matcher(normalized);
             if (!frameshift.matches()) {
                 return Optional.empty();
             }
-            ctx = ReferenceContext.fromFrameshift(hugoSymbol, normalized, canonicalSequence, frameshift);
+            ctx = ReferenceContext.fromFrameshift(referenceGenome, hugoSymbol, normalized, canonicalSequence, frameshift);
         }
         if (ctx == null) {
             return Optional.empty();
@@ -154,6 +155,7 @@ public final class ProteinChangeValidator {
 
     /** Immutable holder for the parsed pieces of one query plus the message-building for each check. */
     private static final class ReferenceContext {
+        private final ReferenceGenome referenceGenome;
         private final String hugoSymbol;
         private final String proteinChange;
         private final String sequence;
@@ -162,8 +164,9 @@ public final class ProteinChangeValidator {
         private final int start;
         private final int end;       // == start when not a range
 
-        private ReferenceContext(String hugoSymbol, String proteinChange, String sequence,
+        private ReferenceContext(ReferenceGenome referenceGenome, String hugoSymbol, String proteinChange, String sequence,
                                  String ref1, String ref2, int start, int end) {
+            this.referenceGenome = referenceGenome;
             this.hugoSymbol = hugoSymbol;
             this.proteinChange = proteinChange;
             this.sequence = sequence;
@@ -173,7 +176,7 @@ public final class ProteinChangeValidator {
             this.end = end;
         }
 
-        static ReferenceContext from(String hugoSymbol, String proteinChange, String sequence, Matcher matcher) {
+        static ReferenceContext from(ReferenceGenome referenceGenome, String hugoSymbol, String proteinChange, String sequence, Matcher matcher) {
             String ref1 = matcher.group(1);
             int start = Integer.parseInt(matcher.group(2));
             String ref2 = matcher.group(3);
@@ -183,7 +186,7 @@ public final class ProteinChangeValidator {
             if (start < 1 || end < 1) {
                 return null;
             }
-            return new ReferenceContext(hugoSymbol, proteinChange, sequence, ref1, ref2, start, end);
+            return new ReferenceContext(referenceGenome, hugoSymbol, proteinChange, sequence, ref1, ref2, start, end);
         }
 
         /**
@@ -191,12 +194,12 @@ public final class ProteinChangeValidator {
          * the range-boundary, reversed-range and multi-residue checks can never fire on it, leaving the
          * position and the reference residue as the only two that do any work.
          */
-        static ReferenceContext fromFrameshift(String hugoSymbol, String proteinChange, String sequence, Matcher matcher) {
+        static ReferenceContext fromFrameshift(ReferenceGenome referenceGenome, String hugoSymbol, String proteinChange, String sequence, Matcher matcher) {
             int start = Integer.parseInt(matcher.group(2));
             if (start < 1) {
                 return null;
             }
-            return new ReferenceContext(hugoSymbol, proteinChange, sequence, matcher.group(1), null, start, start);
+            return new ReferenceContext(referenceGenome, hugoSymbol, proteinChange, sequence, matcher.group(1), null, start, start);
         }
 
         Optional<String> check(Problem problem) {
@@ -228,6 +231,10 @@ public final class ProteinChangeValidator {
             return hugoSymbol + " " + proteinChange + ": ";
         }
 
+        private String onCanonicalTranscript() {
+            return " on the OncoKB " + referenceGenome + " canonical transcript.";
+        }
+
         Optional<String> checkRangeBoundary() {
             if (!isRange()) {
                 return Optional.empty();
@@ -255,7 +262,7 @@ public final class ProteinChangeValidator {
             int furthest = Math.max(start, end);
             if (furthest > sequence.length()) {
                 return Optional.of(prefix() + "position " + furthest + " exceeds the " + hugoSymbol
-                    + " canonical protein length of " + sequence.length() + ".");
+                    + " " + referenceGenome + " canonical protein length of " + sequence.length() + ".");
             }
             return Optional.empty();
         }
@@ -279,16 +286,16 @@ public final class ProteinChangeValidator {
                 if (startWrong && endWrong) {
                     return Optional.of(prefix() + "The reference amino acids at positions " + start + " and " + end
                         + " are " + canonicalStart + " and " + canonicalEnd + " instead of " + startRef + " and " + ref2
-                        + " on the OncoKB canonical transcript.");
+                        + onCanonicalTranscript());
                 }
                 if (endWrong) {
                     return Optional.of(prefix() + "The reference amino acid at position " + end
-                        + " is " + canonicalEnd + " instead of " + ref2 + " on the OncoKB canonical transcript.");
+                        + " is " + canonicalEnd + " instead of " + ref2 + onCanonicalTranscript());
                 }
             }
             if (startWrong) {
                 return Optional.of(prefix() + "The reference amino acid at position " + start
-                    + " is " + canonicalStart + " instead of " + startRef + " on the OncoKB canonical transcript.");
+                    + " is " + canonicalStart + " instead of " + startRef + onCanonicalTranscript());
             }
             return Optional.empty();
         }

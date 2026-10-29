@@ -11,7 +11,7 @@ public class ValidationError implements java.io.Serializable {
     @ApiModelProperty(value = "Type of validation error")
     private ValidationErrorType type;
 
-    @ApiModelProperty(value = "The same reason in words, naming what was queried and what OncoKB has instead.", example = "BRAF A600E: The reference amino acid at position 600 is V instead of A on the OncoKB canonical transcript.")
+    @ApiModelProperty(value = "The same reason in words, naming what was queried and what OncoKB has instead.", example = "BRAF A600E: The reference amino acid at position 600 is V instead of A on the OncoKB GRCh37 canonical transcript.")
     private String message;
 
     public ValidationError() {

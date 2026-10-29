@@ -46,12 +46,12 @@ public final class ProteinChangeValidationUtils {
         if (isCurated(referenceGenome, gene, proteinChange)) {
             return Collections.emptyList();
         }
-        String canonicalSequence = CacheUtils.getProteinSequence(
-            referenceGenome == null ? DEFAULT_REFERENCE_GENOME : referenceGenome, gene.getEntrezGeneId());
+        ReferenceGenome rg = referenceGenome == null ? DEFAULT_REFERENCE_GENOME : referenceGenome;
+        String canonicalSequence = CacheUtils.getProteinSequence(rg, gene.getEntrezGeneId());
         if (StringUtils.isEmpty(canonicalSequence)) {
             return Collections.emptyList();
         }
-        return ProteinChangeValidator.validate(gene.getHugoSymbol(), proteinChange, canonicalSequence)
+        return ProteinChangeValidator.validate(rg, gene.getHugoSymbol(), proteinChange, canonicalSequence)
             .map(Collections::singletonList)
             .orElse(Collections.emptyList());
     }
@@ -72,6 +72,7 @@ public final class ProteinChangeValidationUtils {
         if (!cacheFetcher.isTranscriptServiceEnabled()) {
             return unchecked(VariantAnnotationMessageType.TRANSCRIPT_SERVICE_DISABLED);
         }
+        ReferenceGenome rg = referenceGenome == null ? DEFAULT_REFERENCE_GENOME : referenceGenome;
         String canonicalSequence;
         try {
             canonicalSequence = cacheFetcher.getCanonicalProteinSequence(referenceGenome, gene);
@@ -83,7 +84,7 @@ public final class ProteinChangeValidationUtils {
         }
 
         Optional<ValidationError> invalid =
-            ProteinChangeValidator.validate(gene.getHugoSymbol(), proteinChange, canonicalSequence);
+            ProteinChangeValidator.validate(rg, gene.getHugoSymbol(), proteinChange, canonicalSequence);
         return invalid
             .map(error -> new VariantValidation(VariantValidationStatus.INVALID,
                 VariantAnnotationMessageType.INVALID_PROTEIN_CHANGE, error.getMessage()))

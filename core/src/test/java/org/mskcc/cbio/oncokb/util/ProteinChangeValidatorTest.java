@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mskcc.cbio.oncokb.apiModels.ValidationError;
+import org.mskcc.cbio.oncokb.model.ReferenceGenome;
 import org.mskcc.cbio.oncokb.model.ValidationErrorType;
 
 public class ProteinChangeValidatorTest {
@@ -15,12 +16,12 @@ public class ProteinChangeValidatorTest {
 
     // Most tests only care about the wording, so they go through these two projections of the issue.
     private static Optional<String> validateMessage(String hugoSymbol, String proteinChange, String sequence) {
-        return ProteinChangeValidator.validate(hugoSymbol, proteinChange, sequence)
+        return ProteinChangeValidator.validate(ReferenceGenome.GRCh37, hugoSymbol, proteinChange, sequence)
             .map(ValidationError::getMessage);
     }
 
     private static ValidationErrorType validateError(String hugoSymbol, String proteinChange, String sequence) {
-        return ProteinChangeValidator.validate(hugoSymbol, proteinChange, sequence)
+        return ProteinChangeValidator.validate(ReferenceGenome.GRCh37, hugoSymbol, proteinChange, sequence)
             .map(ValidationError::getType).orElse(null);
     }
 
@@ -59,7 +60,7 @@ public class ProteinChangeValidatorTest {
     public void reportsSingleReferenceResidueMismatch() {
         Optional<String> message = validateMessage("BRAF", "G7E", SEQUENCE);
         Assert.assertTrue(message.isPresent());
-        Assert.assertEquals("BRAF G7E: The reference amino acid at position 7 is V instead of G on the OncoKB canonical transcript.", message.get());
+        Assert.assertEquals("BRAF G7E: The reference amino acid at position 7 is V instead of G on the OncoKB GRCh37 canonical transcript.", message.get());
     }
 
     @Test
@@ -67,7 +68,7 @@ public class ProteinChangeValidatorTest {
         Optional<String> message = validateMessage("BRAF", "V2_V3del", SEQUENCE);
         Assert.assertTrue(message.isPresent());
         Assert.assertEquals(
-            "BRAF V2_V3del: The reference amino acids at positions 2 and 3 are A and A instead of V and V on the OncoKB canonical transcript.",
+            "BRAF V2_V3del: The reference amino acids at positions 2 and 3 are A and A instead of V and V on the OncoKB GRCh37 canonical transcript.",
             message.get());
     }
 
@@ -75,14 +76,14 @@ public class ProteinChangeValidatorTest {
     public void reportsOnlyTheWrongRangeBoundary() {
         Optional<String> message = validateMessage("BRAF", "A2_V3del", SEQUENCE);
         Assert.assertTrue(message.isPresent());
-        Assert.assertEquals("BRAF A2_V3del: The reference amino acid at position 3 is A instead of V on the OncoKB canonical transcript.", message.get());
+        Assert.assertEquals("BRAF A2_V3del: The reference amino acid at position 3 is A instead of V on the OncoKB GRCh37 canonical transcript.", message.get());
     }
 
     @Test
     public void positionOutOfRangeOutranksResidueMismatch() {
         Optional<String> message = validateMessage("BRAF", "Z99E", SEQUENCE);
         Assert.assertTrue(message.isPresent());
-        Assert.assertEquals("BRAF Z99E: position 99 exceeds the BRAF canonical protein length of 7.", message.get());
+        Assert.assertEquals("BRAF Z99E: position 99 exceeds the BRAF GRCh37 canonical protein length of 7.", message.get());
     }
 
     @Test
@@ -141,7 +142,7 @@ public class ProteinChangeValidatorTest {
     public void acceptsThreeLetterPointMutation() {
         Optional<String> message = validateMessage("BRAF", "Gly7Glu", SEQUENCE);
         Assert.assertTrue(message.isPresent());
-        Assert.assertEquals("BRAF G7E: The reference amino acid at position 7 is V instead of G on the OncoKB canonical transcript.", message.get());
+        Assert.assertEquals("BRAF G7E: The reference amino acid at position 7 is V instead of G on the OncoKB GRCh37 canonical transcript.", message.get());
     }
 
     @Test
@@ -149,7 +150,7 @@ public class ProteinChangeValidatorTest {
         Optional<String> message = validateMessage("BRAF", "Val2_Val3del", SEQUENCE);
         Assert.assertTrue(message.isPresent());
         Assert.assertEquals(
-            "BRAF V2_V3del: The reference amino acids at positions 2 and 3 are A and A instead of V and V on the OncoKB canonical transcript.",
+            "BRAF V2_V3del: The reference amino acids at positions 2 and 3 are A and A instead of V and V on the OncoKB GRCh37 canonical transcript.",
             message.get());
     }
 
@@ -195,14 +196,14 @@ public class ProteinChangeValidatorTest {
     public void reportsFrameshiftReferenceResidueMismatch() {
         Optional<String> message = validateMessage("BRAF", "G7fs", SEQUENCE);
         Assert.assertTrue(message.isPresent());
-        Assert.assertEquals("BRAF G7fs: The reference amino acid at position 7 is V instead of G on the OncoKB canonical transcript.", message.get());
+        Assert.assertEquals("BRAF G7fs: The reference amino acid at position 7 is V instead of G on the OncoKB GRCh37 canonical transcript.", message.get());
     }
 
     @Test
     public void reportsFrameshiftReferenceResidueMismatchWithExtension() {
         Optional<String> message = validateMessage("BRAF", "G7Efs*12", SEQUENCE);
         Assert.assertTrue(message.isPresent());
-        Assert.assertEquals("BRAF G7Efs*12: The reference amino acid at position 7 is V instead of G on the OncoKB canonical transcript.", message.get());
+        Assert.assertEquals("BRAF G7Efs*12: The reference amino acid at position 7 is V instead of G on the OncoKB GRCh37 canonical transcript.", message.get());
 
         Assert.assertTrue(validateMessage("BRAF", "G7Efs*", SEQUENCE).isPresent());
         Assert.assertTrue(validateMessage("BRAF", "G7Efs*?", SEQUENCE).isPresent());
@@ -212,14 +213,14 @@ public class ProteinChangeValidatorTest {
     public void acceptsThreeLetterFrameshift() {
         Optional<String> message = validateMessage("BRAF", "Gly7GlufsTer12", SEQUENCE);
         Assert.assertTrue(message.isPresent());
-        Assert.assertEquals("BRAF G7Efs*12: The reference amino acid at position 7 is V instead of G on the OncoKB canonical transcript.", message.get());
+        Assert.assertEquals("BRAF G7Efs*12: The reference amino acid at position 7 is V instead of G on the OncoKB GRCh37 canonical transcript.", message.get());
     }
 
     @Test
     public void reportsFrameshiftPositionOutOfRange() {
         Optional<String> message = validateMessage("BRAF", "G99fs", SEQUENCE);
         Assert.assertTrue(message.isPresent());
-        Assert.assertEquals("BRAF G99fs: position 99 exceeds the BRAF canonical protein length of 7.", message.get());
+        Assert.assertEquals("BRAF G99fs: position 99 exceeds the BRAF GRCh37 canonical protein length of 7.", message.get());
     }
 
     @Test
@@ -244,7 +245,7 @@ public class ProteinChangeValidatorTest {
         Optional<String> message = validateMessage("BRAF", "A7_A6del", SEQUENCE);
         Assert.assertTrue(message.isPresent());
         Assert.assertEquals(
-            "BRAF A7_A6del: The reference amino acids at positions 7 and 6 are V and G instead of A and A on the OncoKB canonical transcript.",
+            "BRAF A7_A6del: The reference amino acids at positions 7 and 6 are V and G instead of A and A on the OncoKB GRCh37 canonical transcript.",
             message.get());
     }
 }
