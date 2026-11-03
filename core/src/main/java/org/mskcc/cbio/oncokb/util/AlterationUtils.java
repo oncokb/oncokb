@@ -341,13 +341,11 @@ public final class AlterationUtils {
         // we need to deal with the exclusion format so the protein change can properly be interpreted.
         String fullExcludedStr = "";    // Uses braces/semicolons for normalized alteration format.
         String fullExcludedNameStr = ""; // Uses parentheses/commas for normalized name format.
-        String excludedAltStr = "";     // Only includes the alterations ie. "A, B, C"
         // Extract exclusion info from protein change
         Matcher exclusionMatch = getExclusionCriteriaMatcher(proteinChange);
         if (exclusionMatch.matches()) {
             proteinChange = exclusionMatch.group(1);
             fullExcludedStr = exclusionMatch.group(2);
-            excludedAltStr = exclusionMatch.group(4).trim();
         }
         
         // Extract exclusion format from alteration name if it differs from protein change
@@ -436,16 +434,7 @@ public final class AlterationUtils {
         }
 
         if (StringUtils.isEmpty(alteration.getName()) && alteration.getAlteration() != null) {
-            // Change the positional name
-            if (isPositionedAlteration(alteration)) {
-                if (StringUtils.isEmpty(excludedAltStr)) {
-                    alteration.setName(alteration.getAlteration() + " Missense Mutations");
-                } else {
-                    alteration.setName(proteinChange + " Missense Mutations, excluding " + excludedAltStr);
-                }
-            } else {
-                alteration.setName(alteration.getAlteration());
-            }
+            alteration.setName(alteration.getAlteration());
         }
 
         String normalizedBase = parsedAlteration.getNormalizedProteinChange();
