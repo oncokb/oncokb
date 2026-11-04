@@ -10,11 +10,13 @@ import org.mskcc.cbio.oncokb.model.CancerGene;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.util.GeneUtils;
 import org.mskcc.cbio.oncokb.util.MainUtils;
+import org.oncokb.oncokb_transcript.ApiException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +34,7 @@ public class CancerGeneService {
     @Autowired
     CacheFetcher cacheFetcher;
 
-    public ResponseEntity<List<CancerGene>> getCancerGeneList(String version) {
+    public ResponseEntity<List<CancerGene>> getCancerGeneList(String version) throws ApiException, IOException {
         if (version != null) {
             return getDataDownloadResponseEntity(version, FileName.CANCER_GENE_LIST, FileExtension.JSON);
         }
