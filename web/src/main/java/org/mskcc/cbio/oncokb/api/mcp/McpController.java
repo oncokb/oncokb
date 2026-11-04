@@ -47,7 +47,8 @@ public class McpController {
         + "Use the annotate_* tools to get the oncogenicity, mutation effect, levels of evidence, and treatments for a somatic or germline alteration in a tumor type. "
         + "Tumor types use OncoTree codes or names. "
         + "Use the levels* tools to learn what each level of evidence means, and info for the data version. "
-        + "Answer only from what OncoKB returns, and cite the dataVersion.";
+        + "Answer only from what OncoKB returns, and cite the dataVersion. "
+        + "Annotation results include an oncokbLinks object with oncokb.org page links for the gene, alteration, and cancer type; include them in your answer.";
 
     // Built the same way as Spring MVC's Jackson converter, so tool output matches REST responses.
     private final ObjectMapper mapper = Jackson2ObjectMapperBuilder.json().build();

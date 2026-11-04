@@ -1,10 +1,15 @@
 package org.mskcc.cbio.oncokb.api.mcp;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.mskcc.cbio.oncokb.apiModels.GeneticType;
 import org.mskcc.cbio.oncokb.cache.CacheFetcher;
 import org.mskcc.cbio.oncokb.model.CopyNumberAlterationType;
 import org.mskcc.cbio.oncokb.model.InheritanceMechanism;
+import org.mskcc.cbio.oncokb.model.GermlineIndicatorQueryResp;
 import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
+import org.mskcc.cbio.oncokb.model.Query;
+import org.mskcc.cbio.oncokb.model.SomaticIndicatorQueryResp;
 import org.mskcc.cbio.oncokb.model.StructuralVariantType;
 import org.mskcc.cbio.oncokb.service.CancerGeneService;
 import org.mskcc.cbio.oncokb.service.GermlineAnnotationService;
@@ -12,6 +17,7 @@ import org.mskcc.cbio.oncokb.service.SomaticAnnotationService;
 import org.mskcc.cbio.oncokb.util.LevelUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -42,6 +48,12 @@ public class McpToolRegistry {
     private static final String HGVSC = "HGVS cDNA format following HGVS nomenclature. Example: EGFR:c.2369C>T";
     private static final String VERSION = "The data version";
     private static final String DEFAULT_REFERENCE_GENOME = "GRCh37";
+    // Name of the field added to annotation results. It is not a REST response field.
+    static final String LINKS_FIELD = "oncokbLinks";
+    private static final String LINKS_NOTE = " The result adds an " + LINKS_FIELD + " object with links to the oncokb.org gene, alteration, and cancer type pages; share them with the user so they can read the full curation.";
+
+    // Built the same way as Spring MVC's Jackson converter, so results match REST responses.
+    private final ObjectMapper mapper = Jackson2ObjectMapperBuilder.json().build();
 
     @Autowired
     CacheFetcher cacheFetcher;
@@ -63,7 +75,7 @@ public class McpToolRegistry {
         Map<String, McpTool> registered = new LinkedHashMap<>();
 
         // GET /annotate/mutations/byProteinChange
-        add(registered, "annotate_mutations_byProteinChange", "Annotate mutation by protein change.",
+        add(registered, "annotate_mutations_byProteinChange", "Annotate mutation by protein change." + LINKS_NOTE,
             McpSchema.object()
                 .string("hugoSymbol", HUGO_SYMBOL)
                 .integer("entrezGeneId", ENTREZ_GENE_ID)
@@ -76,7 +88,7 @@ public class McpToolRegistry {
                 .integer("proteinEnd", "Protein End. Example: 600")
                 .string("tumorType", TUMOR_TYPE)
                 .string("evidenceType", EVIDENCE_TYPE),
-            args -> somaticAnnotationService.annotateMutationByProteinChange(
+            args -> withLinks(somaticAnnotationService.annotateMutationByProteinChange(
                 args.string("hugoSymbol"),
                 args.integer("entrezGeneId"),
                 args.string("alteration"),
@@ -85,50 +97,50 @@ public class McpToolRegistry {
                 args.integer("proteinStart"),
                 args.integer("proteinEnd"),
                 args.string("tumorType"),
-                args.string("evidenceType")));
+                args.string("evidenceType")), GeneticType.SOMATIC));
 
         // GET /annotate/mutations/byGenomicChange
-        add(registered, "annotate_mutations_byGenomicChange", "Annotate mutation by genomic change.",
+        add(registered, "annotate_mutations_byGenomicChange", "Annotate mutation by genomic change." + LINKS_NOTE,
             McpSchema.object()
                 .string("genomicLocation", GENOMIC_LOCATION)
                 .string("referenceGenome", REFERENCE_GENOME, DEFAULT_REFERENCE_GENOME)
                 .string("tumorType", TUMOR_TYPE)
                 .string("evidenceType", EVIDENCE_TYPE)
                 .required("genomicLocation"),
-            args -> somaticAnnotationService.annotateMutationByGenomicChange(
+            args -> withLinks(somaticAnnotationService.annotateMutationByGenomicChange(
                 args.requiredString("genomicLocation"),
                 args.string("referenceGenome", DEFAULT_REFERENCE_GENOME),
                 args.string("tumorType"),
-                args.string("evidenceType")));
+                args.string("evidenceType")), GeneticType.SOMATIC));
 
         // GET /annotate/mutations/byHGVSg
-        add(registered, "annotate_mutations_byHGVSg", "Annotate mutation by HGVSg.",
+        add(registered, "annotate_mutations_byHGVSg", "Annotate mutation by HGVSg." + LINKS_NOTE,
             McpSchema.object()
                 .string("hgvsg", HGVSG)
                 .string("referenceGenome", REFERENCE_GENOME, DEFAULT_REFERENCE_GENOME)
                 .string("tumorType", TUMOR_TYPE)
                 .string("evidenceType", EVIDENCE_TYPE)
                 .required("hgvsg"),
-            args -> somaticAnnotationService.annotateMutationByHGVSg(
+            args -> withLinks(somaticAnnotationService.annotateMutationByHGVSg(
                 args.requiredString("hgvsg"),
                 args.string("referenceGenome", DEFAULT_REFERENCE_GENOME),
                 args.string("tumorType"),
-                args.string("evidenceType")));
+                args.string("evidenceType")), GeneticType.SOMATIC));
 
         // GET /annotate/mutations/byHGVSc
-        add(registered, "annotate_mutations_byHGVSc", "Annotate mutation by HGVSc.",
+        add(registered, "annotate_mutations_byHGVSc", "Annotate mutation by HGVSc." + LINKS_NOTE,
             McpSchema.object()
                 .string("hgvsc", HGVSC)
                 .string("referenceGenome", REFERENCE_GENOME, DEFAULT_REFERENCE_GENOME)
                 .string("tumorType", TUMOR_TYPE)
                 .required("hgvsc"),
-            args -> somaticAnnotationService.annotateMutationByHGVSc(
+            args -> withLinks(somaticAnnotationService.annotateMutationByHGVSc(
                 args.requiredString("hgvsc"),
                 args.string("referenceGenome", DEFAULT_REFERENCE_GENOME),
-                args.string("tumorType")));
+                args.string("tumorType")), GeneticType.SOMATIC));
 
         // GET /annotate/copyNumberAlterations
-        add(registered, "annotate_copyNumberAlterations", "Annotate copy number alteration.",
+        add(registered, "annotate_copyNumberAlterations", "Annotate copy number alteration." + LINKS_NOTE,
             McpSchema.object()
                 .string("hugoSymbol", HUGO_SYMBOL)
                 .integer("entrezGeneId", ENTREZ_GENE_ID)
@@ -138,16 +150,16 @@ public class McpToolRegistry {
                 .string("tumorType", TUMOR_TYPE)
                 .string("evidenceType", EVIDENCE_TYPE)
                 .required("copyNameAlterationType"),
-            args -> somaticAnnotationService.annotateCopyNumberAlteration(
+            args -> withLinks(somaticAnnotationService.annotateCopyNumberAlteration(
                 args.string("hugoSymbol"),
                 args.integer("entrezGeneId"),
                 args.requiredEnum("copyNameAlterationType", CopyNumberAlterationType.class),
                 args.string("referenceGenome", DEFAULT_REFERENCE_GENOME),
                 args.string("tumorType"),
-                args.string("evidenceType")));
+                args.string("evidenceType")), GeneticType.SOMATIC));
 
         // GET /annotate/structuralVariants
-        add(registered, "annotate_structuralVariants", "Annotate structural variant.",
+        add(registered, "annotate_structuralVariants", "Annotate structural variant." + LINKS_NOTE,
             McpSchema.object()
                 .string("hugoSymbolA", "The gene symbol A used in Human Genome Organisation. Example: ABL1")
                 .integer("entrezGeneIdA", "The entrez gene ID A. (Higher priority than hugoSymbolA) Example: 25")
@@ -159,7 +171,7 @@ public class McpToolRegistry {
                 .string("tumorType", TUMOR_TYPE)
                 .string("evidenceType", EVIDENCE_TYPE)
                 .required("structuralVariantType"),
-            args -> somaticAnnotationService.annotateStructuralVariant(
+            args -> withLinks(somaticAnnotationService.annotateStructuralVariant(
                 args.string("hugoSymbolA"),
                 args.integer("entrezGeneIdA"),
                 args.string("hugoSymbolB"),
@@ -168,45 +180,45 @@ public class McpToolRegistry {
                 args.bool("isFunctionalFusion", false),
                 args.string("referenceGenome", DEFAULT_REFERENCE_GENOME),
                 args.string("tumorType"),
-                args.string("evidenceType")));
+                args.string("evidenceType")), GeneticType.SOMATIC));
 
         // GET /annotate/germline/mutations/byGenomicChange
-        add(registered, "annotate_germline_mutations_byGenomicChange", "Annotate germline mutation by genomic change.",
+        add(registered, "annotate_germline_mutations_byGenomicChange", "Annotate germline mutation by genomic change." + LINKS_NOTE,
             McpSchema.object()
                 .string("genomicLocation", GENOMIC_LOCATION)
                 .string("referenceGenome", REFERENCE_GENOME, DEFAULT_REFERENCE_GENOME)
                 .string("tumorType", TUMOR_TYPE)
                 .required("genomicLocation"),
-            args -> germlineAnnotationService.annotateMutationByGenomicChange(
+            args -> withLinks(germlineAnnotationService.annotateMutationByGenomicChange(
                 args.requiredString("genomicLocation"),
                 args.string("referenceGenome", DEFAULT_REFERENCE_GENOME),
-                args.string("tumorType")));
+                args.string("tumorType")), GeneticType.GERMLINE));
 
         // GET /annotate/germline/mutations/byHGVSg
-        add(registered, "annotate_germline_mutations_byHGVSg", "Annotate germline mutation by HGVSg.",
+        add(registered, "annotate_germline_mutations_byHGVSg", "Annotate germline mutation by HGVSg." + LINKS_NOTE,
             McpSchema.object()
                 .string("hgvsg", HGVSG)
                 .string("referenceGenome", REFERENCE_GENOME, DEFAULT_REFERENCE_GENOME)
                 .string("tumorType", TUMOR_TYPE)
                 .required("hgvsg"),
-            args -> germlineAnnotationService.annotateMutationByHGVSg(
+            args -> withLinks(germlineAnnotationService.annotateMutationByHGVSg(
                 args.requiredString("hgvsg"),
                 args.string("referenceGenome", DEFAULT_REFERENCE_GENOME),
-                args.string("tumorType")));
+                args.string("tumorType")), GeneticType.GERMLINE));
 
         // GET /annotate/germline/mutations/byHGVSc
-        add(registered, "annotate_germline_mutations_byHGVSc", "Annotate germline mutation by HGVSc.",
+        add(registered, "annotate_germline_mutations_byHGVSc", "Annotate germline mutation by HGVSc." + LINKS_NOTE,
             McpSchema.object()
                 .string("hgvsc", HGVSC)
                 .string("referenceGenome", REFERENCE_GENOME, DEFAULT_REFERENCE_GENOME)
                 .string("tumorType", TUMOR_TYPE)
                 .stringEnumArray("inheritanceMechanisms", "List of inheritance mechanisms used to filter the returned genomic indicators. The special value CARRIER is matched against the genomic indicator name rather than the inheritance mechanism. Example: [\"AUTOSOMAL_DOMINANT\", \"CARRIER\"]", InheritanceMechanism.class)
                 .required("hgvsc"),
-            args -> germlineAnnotationService.annotateMutationByHGVSc(
+            args -> withLinks(germlineAnnotationService.annotateMutationByHGVSc(
                 args.requiredString("hgvsc"),
                 args.string("referenceGenome", DEFAULT_REFERENCE_GENOME),
                 args.string("tumorType"),
-                args.enumList("inheritanceMechanisms", InheritanceMechanism.class)));
+                args.enumList("inheritanceMechanisms", InheritanceMechanism.class)), GeneticType.GERMLINE));
 
         // GET /info
         add(registered, "info", "Get OncoKB information: data version, app version, OncoTree version, and levels.",
@@ -251,6 +263,27 @@ public class McpToolRegistry {
 
     McpTool getTool(String name) {
         return name == null ? null : tools.get(name);
+    }
+
+    private ObjectNode withLinks(SomaticIndicatorQueryResp response, GeneticType geneticType) {
+        return withLinks(response, response.getQuery(), response.getGeneExist(), geneticType);
+    }
+
+    private ObjectNode withLinks(GermlineIndicatorQueryResp response, GeneticType geneticType) {
+        return withLinks(response, response.getQuery(), response.getGeneExist(), geneticType);
+    }
+
+    /**
+     * Returns the REST response body with an added {@link #LINKS_FIELD} object of oncokb.org page
+     * links (see {@link OncoKBPageLinks}).
+     */
+    private ObjectNode withLinks(Object response, Query query, Boolean geneExist, GeneticType geneticType) {
+        ObjectNode body = mapper.valueToTree(response);
+        ObjectNode links = body.putObject(LINKS_FIELD);
+        for (Map.Entry<String, String> link : OncoKBPageLinks.forAnnotation(query, geneExist, geneticType).entrySet()) {
+            links.put(link.getKey(), link.getValue());
+        }
+        return body;
     }
 
     /**
