@@ -1,416 +1,284 @@
 package org.mskcc.cbio.oncokb.api.mcp;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import org.apache.commons.lang3.StringUtils;
-import org.mskcc.cbio.oncokb.config.annotation.PublicApi;
-import org.mskcc.cbio.oncokb.controller.advice.ApiHttpErrorException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.core.MethodParameter;
-import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.core.convert.ConversionException;
-import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.support.DefaultConversionService;
+import org.mskcc.cbio.oncokb.cache.CacheFetcher;
+import org.mskcc.cbio.oncokb.model.CopyNumberAlterationType;
+import org.mskcc.cbio.oncokb.model.InheritanceMechanism;
+import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
+import org.mskcc.cbio.oncokb.model.StructuralVariantType;
+import org.mskcc.cbio.oncokb.service.CancerGeneService;
+import org.mskcc.cbio.oncokb.service.GermlineAnnotationService;
+import org.mskcc.cbio.oncokb.service.SomaticAnnotationService;
+import org.mskcc.cbio.oncokb.util.LevelUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Controller;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.ReflectionUtils;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ValueConstants;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
+import javax.annotation.PostConstruct;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 
 /**
- * Builds MCP tools from the public REST API rather than hand-copying them, so the MCP endpoint
- * stays in sync with REST as endpoints change.
+ * The MCP tools. There is one tool for each {@code @PublicApi} GET endpoint of the REST API
+ * (plain-text .txt variants excluded), and each tool calls the same service the REST controller
+ * uses, so results match REST.
  * <p>
- * A tool is created for each handler method in {@link #SOURCE_PACKAGE} that is annotated
- * {@link PublicApi} and mapped to GET. Plain-text (.txt) variants are skipped because they duplicate
- * the JSON endpoints. POST batch variants are skipped because a client can call the single-query
- * tool repeatedly.
- * <p>
- * Tools are built lazily on first use rather than at startup. Scanning all {@code @Controller} beans
- * also reaches {@link McpController}, which depends on this registry, so scanning during bean
- * creation would cause a circular reference.
+ * When a {@code @PublicApi} endpoint is added or changed, update the matching tool here.
  */
 @Component
-public class McpToolRegistry implements ApplicationContextAware {
-    static final String SOURCE_PACKAGE = "org.mskcc.cbio.oncokb.api.pub.v1";
-    static final String REST_PATH_PREFIX = "/api/v1";
+public class McpToolRegistry {
+    // Parameter descriptions, copied from the @ApiParam text of the REST endpoints.
+    private static final String HUGO_SYMBOL = "The gene symbol used in Human Genome Organisation. Example: BRAF";
+    private static final String ENTREZ_GENE_ID = "The entrez gene ID. (Higher priority than hugoSymbol). Example: 673";
+    private static final String REFERENCE_GENOME = "Reference genome, either GRCh37 or GRCh38. The default is GRCh37";
+    private static final String TUMOR_TYPE = "OncoTree(http://oncotree.info) tumor type name. The field supports OncoTree Code, OncoTree Name and OncoTree Main type. Example: Melanoma";
+    private static final String EVIDENCE_TYPE = "DEPRECATED. We do not recommend using this parameter and it will eventually be removed.";
+    private static final String GENOMIC_LOCATION = "Genomic location following TCGA MAF format. Example: 7,140453136,140453136,A,T";
+    private static final String HGVSG = "HGVS genomic format following HGVS nomenclature. Example: 7:g.140453136A>T";
+    private static final String HGVSC = "HGVS cDNA format following HGVS nomenclature. Example: EGFR:c.2369C>T";
+    private static final String VERSION = "The data version";
+    private static final String DEFAULT_REFERENCE_GENOME = "GRCh37";
 
-    private static final Logger LOG = LoggerFactory.getLogger(McpToolRegistry.class);
+    @Autowired
+    CacheFetcher cacheFetcher;
 
-    private final ObjectMapper mapper = new ObjectMapper();
-    private final DefaultConversionService conversionService = new DefaultConversionService();
-    private ApplicationContext applicationContext;
-    // Keyed by tool name. Sorted so tools/list output is stable.
-    private volatile Map<String, McpTool> tools;
+    @Autowired
+    SomaticAnnotationService somaticAnnotationService;
 
-    /**
-     * A tool call failed in a way the caller can act on, such as a bad argument or a 4xx from the
-     * underlying endpoint. The message is returned to the client as a tool error.
-     */
-    static class McpToolException extends Exception {
-        McpToolException(String message) {
-            super(message);
-        }
-    }
+    @Autowired
+    GermlineAnnotationService germlineAnnotationService;
 
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
+    @Autowired
+    CancerGeneService cancerGeneService;
+
+    // Keyed by tool name, in the order tools/list returns them.
+    private Map<String, McpTool> tools;
+
+    @PostConstruct
+    void registerTools() {
+        Map<String, McpTool> registered = new LinkedHashMap<>();
+
+        // GET /annotate/mutations/byProteinChange
+        add(registered, "annotate_mutations_byProteinChange", "Annotate mutation by protein change.",
+            McpSchema.object()
+                .string("hugoSymbol", HUGO_SYMBOL)
+                .integer("entrezGeneId", ENTREZ_GENE_ID)
+                .string("alteration", "Protein Change. Example: V600E")
+                .string("referenceGenome", REFERENCE_GENOME, DEFAULT_REFERENCE_GENOME)
+                .stringEnum("consequence", "Consequence. Example: missense_variant",
+                    "feature_truncation", "frameshift_variant", "inframe_deletion", "inframe_insertion", "start_lost",
+                    "missense_variant", "splice_region_variant", "stop_gained", "synonymous_variant", "intron_variant")
+                .integer("proteinStart", "Protein Start. Example: 600")
+                .integer("proteinEnd", "Protein End. Example: 600")
+                .string("tumorType", TUMOR_TYPE)
+                .string("evidenceType", EVIDENCE_TYPE),
+            args -> somaticAnnotationService.annotateMutationByProteinChange(
+                args.string("hugoSymbol"),
+                args.integer("entrezGeneId"),
+                args.string("alteration"),
+                args.string("referenceGenome", DEFAULT_REFERENCE_GENOME),
+                args.string("consequence"),
+                args.integer("proteinStart"),
+                args.integer("proteinEnd"),
+                args.string("tumorType"),
+                args.string("evidenceType")));
+
+        // GET /annotate/mutations/byGenomicChange
+        add(registered, "annotate_mutations_byGenomicChange", "Annotate mutation by genomic change.",
+            McpSchema.object()
+                .string("genomicLocation", GENOMIC_LOCATION)
+                .string("referenceGenome", REFERENCE_GENOME, DEFAULT_REFERENCE_GENOME)
+                .string("tumorType", TUMOR_TYPE)
+                .string("evidenceType", EVIDENCE_TYPE)
+                .required("genomicLocation"),
+            args -> somaticAnnotationService.annotateMutationByGenomicChange(
+                args.requiredString("genomicLocation"),
+                args.string("referenceGenome", DEFAULT_REFERENCE_GENOME),
+                args.string("tumorType"),
+                args.string("evidenceType")));
+
+        // GET /annotate/mutations/byHGVSg
+        add(registered, "annotate_mutations_byHGVSg", "Annotate mutation by HGVSg.",
+            McpSchema.object()
+                .string("hgvsg", HGVSG)
+                .string("referenceGenome", REFERENCE_GENOME, DEFAULT_REFERENCE_GENOME)
+                .string("tumorType", TUMOR_TYPE)
+                .string("evidenceType", EVIDENCE_TYPE)
+                .required("hgvsg"),
+            args -> somaticAnnotationService.annotateMutationByHGVSg(
+                args.requiredString("hgvsg"),
+                args.string("referenceGenome", DEFAULT_REFERENCE_GENOME),
+                args.string("tumorType"),
+                args.string("evidenceType")));
+
+        // GET /annotate/mutations/byHGVSc
+        add(registered, "annotate_mutations_byHGVSc", "Annotate mutation by HGVSc.",
+            McpSchema.object()
+                .string("hgvsc", HGVSC)
+                .string("referenceGenome", REFERENCE_GENOME, DEFAULT_REFERENCE_GENOME)
+                .string("tumorType", TUMOR_TYPE)
+                .required("hgvsc"),
+            args -> somaticAnnotationService.annotateMutationByHGVSc(
+                args.requiredString("hgvsc"),
+                args.string("referenceGenome", DEFAULT_REFERENCE_GENOME),
+                args.string("tumorType")));
+
+        // GET /annotate/copyNumberAlterations
+        add(registered, "annotate_copyNumberAlterations", "Annotate copy number alteration.",
+            McpSchema.object()
+                .string("hugoSymbol", HUGO_SYMBOL)
+                .integer("entrezGeneId", ENTREZ_GENE_ID)
+                // The misspelled name matches the REST query parameter.
+                .stringEnum("copyNameAlterationType", "Copy number alteration type", CopyNumberAlterationType.class)
+                .string("referenceGenome", REFERENCE_GENOME, DEFAULT_REFERENCE_GENOME)
+                .string("tumorType", TUMOR_TYPE)
+                .string("evidenceType", EVIDENCE_TYPE)
+                .required("copyNameAlterationType"),
+            args -> somaticAnnotationService.annotateCopyNumberAlteration(
+                args.string("hugoSymbol"),
+                args.integer("entrezGeneId"),
+                args.requiredEnum("copyNameAlterationType", CopyNumberAlterationType.class),
+                args.string("referenceGenome", DEFAULT_REFERENCE_GENOME),
+                args.string("tumorType"),
+                args.string("evidenceType")));
+
+        // GET /annotate/structuralVariants
+        add(registered, "annotate_structuralVariants", "Annotate structural variant.",
+            McpSchema.object()
+                .string("hugoSymbolA", "The gene symbol A used in Human Genome Organisation. Example: ABL1")
+                .integer("entrezGeneIdA", "The entrez gene ID A. (Higher priority than hugoSymbolA) Example: 25")
+                .string("hugoSymbolB", "The gene symbol B used in Human Genome Organisation.Example: BCR ")
+                .integer("entrezGeneIdB", "The entrez gene ID B. (Higher priority than hugoSymbolB) Example: 613")
+                .stringEnum("structuralVariantType", "Structural variant type", StructuralVariantType.class)
+                .bool("isFunctionalFusion", "Whether is functional fusion", false)
+                .string("referenceGenome", REFERENCE_GENOME, DEFAULT_REFERENCE_GENOME)
+                .string("tumorType", TUMOR_TYPE)
+                .string("evidenceType", EVIDENCE_TYPE)
+                .required("structuralVariantType"),
+            args -> somaticAnnotationService.annotateStructuralVariant(
+                args.string("hugoSymbolA"),
+                args.integer("entrezGeneIdA"),
+                args.string("hugoSymbolB"),
+                args.integer("entrezGeneIdB"),
+                args.requiredEnum("structuralVariantType", StructuralVariantType.class),
+                args.bool("isFunctionalFusion", false),
+                args.string("referenceGenome", DEFAULT_REFERENCE_GENOME),
+                args.string("tumorType"),
+                args.string("evidenceType")));
+
+        // GET /annotate/germline/mutations/byGenomicChange
+        add(registered, "annotate_germline_mutations_byGenomicChange", "Annotate germline mutation by genomic change.",
+            McpSchema.object()
+                .string("genomicLocation", GENOMIC_LOCATION)
+                .string("referenceGenome", REFERENCE_GENOME, DEFAULT_REFERENCE_GENOME)
+                .string("tumorType", TUMOR_TYPE)
+                .required("genomicLocation"),
+            args -> germlineAnnotationService.annotateMutationByGenomicChange(
+                args.requiredString("genomicLocation"),
+                args.string("referenceGenome", DEFAULT_REFERENCE_GENOME),
+                args.string("tumorType")));
+
+        // GET /annotate/germline/mutations/byHGVSg
+        add(registered, "annotate_germline_mutations_byHGVSg", "Annotate germline mutation by HGVSg.",
+            McpSchema.object()
+                .string("hgvsg", HGVSG)
+                .string("referenceGenome", REFERENCE_GENOME, DEFAULT_REFERENCE_GENOME)
+                .string("tumorType", TUMOR_TYPE)
+                .required("hgvsg"),
+            args -> germlineAnnotationService.annotateMutationByHGVSg(
+                args.requiredString("hgvsg"),
+                args.string("referenceGenome", DEFAULT_REFERENCE_GENOME),
+                args.string("tumorType")));
+
+        // GET /annotate/germline/mutations/byHGVSc
+        add(registered, "annotate_germline_mutations_byHGVSc", "Annotate germline mutation by HGVSc.",
+            McpSchema.object()
+                .string("hgvsc", HGVSC)
+                .string("referenceGenome", REFERENCE_GENOME, DEFAULT_REFERENCE_GENOME)
+                .string("tumorType", TUMOR_TYPE)
+                .stringEnumArray("inheritanceMechanisms", "List of inheritance mechanisms used to filter the returned genomic indicators. The special value CARRIER is matched against the genomic indicator name rather than the inheritance mechanism. Example: [\"AUTOSOMAL_DOMINANT\", \"CARRIER\"]", InheritanceMechanism.class)
+                .required("hgvsc"),
+            args -> germlineAnnotationService.annotateMutationByHGVSc(
+                args.requiredString("hgvsc"),
+                args.string("referenceGenome", DEFAULT_REFERENCE_GENOME),
+                args.string("tumorType"),
+                args.enumList("inheritanceMechanisms", InheritanceMechanism.class)));
+
+        // GET /info
+        add(registered, "info", "Get OncoKB information: data version, app version, OncoTree version, and levels.",
+            McpSchema.object(),
+            args -> cacheFetcher.getOncoKBInfo());
+
+        // GET /levels, /levels/sensitive, /levels/resistance, /levels/prognostic, /levels/diagnostic
+        add(registered, "levels", "Get all levels.", McpSchema.object(),
+            args -> levelDescriptions(LevelUtils.getPublicLevels()));
+        add(registered, "levels_sensitive", "Get all sensitive levels.", McpSchema.object(),
+            args -> levelDescriptions(LevelUtils.getSensitiveLevels()));
+        add(registered, "levels_resistance", "Get all resistance levels.", McpSchema.object(),
+            args -> levelDescriptions(LevelUtils.getResistanceLevels()));
+        add(registered, "levels_prognostic", "Get all prognostic levels.", McpSchema.object(),
+            args -> levelDescriptions(LevelUtils.getPrognosticLevels()));
+        add(registered, "levels_diagnostic", "Get all diagnostic levels.", McpSchema.object(),
+            args -> levelDescriptions(LevelUtils.getDiagnosticLevels()));
+
+        // GET /utils/cancerGeneList
+        add(registered, "utils_cancerGeneList", "Get cancer gene list.",
+            McpSchema.object()
+                .string("version", VERSION),
+            args -> body(cancerGeneService.getCancerGeneList(args.string("version"))));
+
+        // GET /utils/allCuratedGenes
+        add(registered, "utils_allCuratedGenes", "Get list of genes OncoKB curated.",
+            McpSchema.object()
+                .string("version", VERSION)
+                .bool("includeEvidence", "Include gene summary and background", true)
+                .string("hugoSymbol", "The gene symbol used in Human Genome Organisation. Gene aliases are accepted. The symbol is case-sensitive. When specified, only the curated gene matching this symbol is returned. Only supported for the latest data version, so it may be combined with version only when that version is the latest. Example: BRAF"),
+            args -> body(cancerGeneService.getAllCuratedGenes(
+                args.string("version"),
+                args.bool("includeEvidence", true),
+                args.string("hugoSymbol"))));
+
+        tools = Collections.unmodifiableMap(registered);
     }
 
     Collection<McpTool> getTools() {
-        return toolMap().values();
+        return tools.values();
     }
 
     McpTool getTool(String name) {
-        return name == null ? null : toolMap().get(name);
+        return name == null ? null : tools.get(name);
     }
 
     /**
-     * Binds the tool call arguments to the handler method parameters, invokes the handler, and
-     * returns the response body.
+     * Same map the /levels REST endpoints return: each level mapped to its description.
      */
-    Object invoke(McpTool tool, JsonNode arguments) throws Exception {
-        if (arguments != null && !arguments.isNull() && !arguments.isObject()) {
-            throw new McpToolException("Tool arguments must be a JSON object.");
+    static Map<LevelOfEvidence, String> levelDescriptions(Set<LevelOfEvidence> levels) {
+        Map<LevelOfEvidence, String> map = new HashMap<>();
+        for (LevelOfEvidence levelOfEvidence : levels) {
+            map.put(levelOfEvidence, levelOfEvidence.getDescription());
         }
-        rejectUnknownArguments(tool, arguments);
-
-        Object[] args = new Object[tool.params.size()];
-        for (int i = 0; i < tool.params.size(); i++) {
-            args[i] = bindArgument(tool.params.get(i), arguments == null ? null : arguments.get(tool.params.get(i).name));
-        }
-
-        Object result;
-        try {
-            result = tool.method.invoke(tool.bean, args);
-        } catch (InvocationTargetException e) {
-            Throwable cause = e.getCause();
-            if (cause instanceof ApiHttpErrorException || cause instanceof IllegalArgumentException) {
-                throw new McpToolException(cause.getMessage());
-            }
-            if (cause instanceof Exception) {
-                throw (Exception) cause;
-            }
-            throw e;
-        }
-
-        if (result instanceof ResponseEntity) {
-            ResponseEntity<?> response = (ResponseEntity<?>) result;
-            if (!response.getStatusCode().is2xxSuccessful()) {
-                throw new McpToolException("Request failed with HTTP status " + response.getStatusCode().value() + " " + response.getStatusCode().getReasonPhrase() + ".");
-            }
-            return response.getBody();
-        }
-        return result;
-    }
-
-    private void rejectUnknownArguments(McpTool tool, JsonNode arguments) throws McpToolException {
-        if (arguments == null || arguments.isNull()) {
-            return;
-        }
-        Set<String> known = new LinkedHashSet<>();
-        for (McpTool.Param param : tool.params) {
-            known.add(param.name);
-        }
-        Iterator<String> names = arguments.fieldNames();
-        while (names.hasNext()) {
-            String name = names.next();
-            if (!known.contains(name)) {
-                throw new McpToolException("Unknown argument '" + name + "'. Valid arguments: " + (known.isEmpty() ? "none" : StringUtils.join(known, ", ")) + ".");
-            }
-        }
-    }
-
-    private Object bindArgument(McpTool.Param param, JsonNode value) throws McpToolException {
-        String raw;
-        if (value == null || value.isNull()) {
-            raw = param.defaultValue;
-        } else if (value.isValueNode()) {
-            raw = value.asText();
-        } else if (value.isArray() && isMultiValued(param.type)) {
-            // REST takes multi-valued params as a comma-separated string; join so both forms work.
-            List<String> items = new ArrayList<>();
-            for (JsonNode item : value) {
-                if (!item.isValueNode()) {
-                    throw new McpToolException("Argument '" + param.name + "' must be an array of strings.");
-                }
-                items.add(item.asText());
-            }
-            raw = StringUtils.join(items, ",");
-        } else {
-            throw new McpToolException("Argument '" + param.name + "' must be a single value, not an object or array.");
-        }
-
-        if (raw == null) {
-            if (param.required) {
-                throw new McpToolException("Missing required argument '" + param.name + "'.");
-            }
-            return null;
-        }
-        try {
-            return conversionService.convert(raw, TypeDescriptor.valueOf(String.class), param.type);
-        } catch (ConversionException e) {
-            throw new McpToolException("Invalid value '" + raw + "' for argument '" + param.name + "'.");
-        }
-    }
-
-    private Map<String, McpTool> toolMap() {
-        Map<String, McpTool> result = tools;
-        if (result == null) {
-            synchronized (this) {
-                result = tools;
-                if (result == null) {
-                    result = Collections.unmodifiableMap(buildTools());
-                    tools = result;
-                    LOG.info("Registered {} MCP tools: {}", result.size(), result.keySet());
-                }
-            }
-        }
-        return result;
-    }
-
-    private Map<String, McpTool> buildTools() {
-        Map<String, McpTool> result = new TreeMap<>();
-        for (Object bean : applicationContext.getBeansWithAnnotation(Controller.class).values()) {
-            Class<?> beanClass = AopUtils.getTargetClass(bean);
-            if (beanClass.getPackage() == null || !SOURCE_PACKAGE.equals(beanClass.getPackage().getName())) {
-                continue;
-            }
-            for (Method method : ReflectionUtils.getUniqueDeclaredMethods(beanClass)) {
-                McpTool tool = buildTool(bean, beanClass, method);
-                if (tool == null) {
-                    continue;
-                }
-                if (result.containsKey(tool.name)) {
-                    throw new IllegalStateException("Duplicate MCP tool name '" + tool.name + "' for " + tool.path);
-                }
-                result.put(tool.name, tool);
-            }
-        }
-        return result;
+        return map;
     }
 
     /**
-     * Returns null when the method should not be exposed as a tool.
+     * Unwraps a service response, reporting a non-2xx status (for example an unknown data version)
+     * as a tool error.
      */
-    private McpTool buildTool(Object bean, Class<?> beanClass, Method method) {
-        if (method.isBridge() || method.isSynthetic() || !Modifier.isPublic(method.getModifiers())) {
-            return null;
+    static <T> T body(ResponseEntity<T> response) throws McpToolException {
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            throw new McpToolException("Request failed with HTTP status " + response.getStatusCode().value() + " " + response.getStatusCode().getReasonPhrase() + ".");
         }
-        // findAnnotation also searches interfaces, where the swagger-codegen style *Api
-        // interfaces declare the mapping and markers for their *ApiController implementations.
-        if (AnnotationUtils.findAnnotation(method, PublicApi.class) == null) {
-            return null;
-        }
-        RequestMapping mapping = AnnotatedElementUtils.findMergedAnnotation(method, RequestMapping.class);
-        if (mapping == null || !Arrays.asList(mapping.method()).contains(RequestMethod.GET) || mapping.path().length == 0) {
-            return null;
-        }
-        String path = mapping.path()[0];
-        if (path.endsWith(".txt") || producesPlainText(mapping)) {
-            return null;
-        }
-
-        List<McpTool.Param> params = new ArrayList<>();
-        ObjectNode properties = mapper.createObjectNode();
-        ArrayNode required = mapper.createArrayNode();
-        for (int i = 0; i < method.getParameterTypes().length; i++) {
-            Annotation[] annotations = parameterAnnotations(method, i);
-            McpTool.Param param = toParam(annotations, new TypeDescriptor(new MethodParameter(method, i)));
-            if (param == null) {
-                LOG.warn("Skipping MCP tool for GET {} because parameter {} of {}.{} is not a @RequestParam or @PathVariable with an explicit name", path, i, beanClass.getSimpleName(), method.getName());
-                return null;
-            }
-            params.add(param);
-            properties.set(param.name, propertySchema(param, findAnnotation(annotations, ApiParam.class)));
-            if (param.required) {
-                required.add(param.name);
-            }
-        }
-
-        ObjectNode inputSchema = mapper.createObjectNode();
-        inputSchema.put("type", "object");
-        inputSchema.set("properties", properties);
-        if (required.size() > 0) {
-            inputSchema.set("required", required);
-        }
-        inputSchema.put("additionalProperties", false);
-
-        Method invocable = AopUtils.selectInvocableMethod(method, bean.getClass());
-        return new McpTool(toolName(path), toolDescription(method, path), path, inputSchema, bean, invocable, params);
+        return response.getBody();
     }
 
-    static String toolName(String path) {
-        return StringUtils.strip(path.replaceAll("[^A-Za-z0-9]+", "_"), "_");
-    }
-
-    private static String toolDescription(Method method, String path) {
-        ApiOperation operation = AnnotationUtils.findAnnotation(method, ApiOperation.class);
-        String summary = operation == null ? "" : StringUtils.defaultIfBlank(operation.notes(), operation.value());
-        String rest = "Same as GET " + REST_PATH_PREFIX + path + " in the OncoKB REST API.";
-        return StringUtils.isBlank(summary) ? rest : summary.trim() + " " + rest;
-    }
-
-    private static boolean producesPlainText(RequestMapping mapping) {
-        for (String produces : mapping.produces()) {
-            if (produces.startsWith("text/plain")) {
-                return true;
-            }
+    private static void add(Map<String, McpTool> registered, String name, String description, McpSchema schema, McpTool.Handler handler) {
+        ObjectNode inputSchema = schema.build();
+        if (registered.put(name, new McpTool(name, description, inputSchema, handler)) != null) {
+            throw new IllegalStateException("Duplicate MCP tool name '" + name + "'");
         }
-        return false;
-    }
-
-    private McpTool.Param toParam(Annotation[] annotations, TypeDescriptor type) {
-        RequestParam requestParam = findAnnotation(annotations, RequestParam.class);
-        if (requestParam != null) {
-            String name = StringUtils.defaultIfEmpty(requestParam.value(), requestParam.name());
-            if (name.isEmpty()) {
-                return null;
-            }
-            String defaultValue = ValueConstants.DEFAULT_NONE.equals(requestParam.defaultValue()) ? null : requestParam.defaultValue();
-            // Spring MVC treats a param with a default as optional even if required=true.
-            return new McpTool.Param(name, type, requestParam.required() && defaultValue == null, defaultValue);
-        }
-        PathVariable pathVariable = findAnnotation(annotations, PathVariable.class);
-        if (pathVariable != null) {
-            String name = StringUtils.defaultIfEmpty(pathVariable.value(), pathVariable.name());
-            return name.isEmpty() ? null : new McpTool.Param(name, type, true, null);
-        }
-        return null;
-    }
-
-    private ObjectNode propertySchema(McpTool.Param param, ApiParam apiParam) {
-        ObjectNode schema = mapper.createObjectNode();
-        // For multi-valued params the type and enum constraints apply to each array item.
-        boolean multiValued = isMultiValued(param.type);
-        TypeDescriptor valueType = multiValued ? param.type.getElementTypeDescriptor() : param.type;
-        Class<?> valueClass = valueType == null ? String.class : valueType.getType();
-        ObjectNode valueSchema = multiValued ? mapper.createObjectNode() : schema;
-        if (multiValued) {
-            schema.put("type", "array");
-        }
-        String jsonType = jsonType(valueClass);
-        valueSchema.put("type", jsonType);
-        if (apiParam != null && StringUtils.isNotBlank(apiParam.value())) {
-            schema.put("description", apiParam.value());
-        }
-        if (multiValued) {
-            schema.set("items", valueSchema);
-        }
-
-        List<String> allowed = new ArrayList<>();
-        if (valueClass.isEnum()) {
-            for (Object constant : valueClass.getEnumConstants()) {
-                allowed.add(((Enum<?>) constant).name());
-            }
-        } else if (apiParam != null && StringUtils.isNotBlank(apiParam.allowableValues()) && !apiParam.allowableValues().startsWith("range")) {
-            for (String value : apiParam.allowableValues().split(",")) {
-                if (StringUtils.isNotBlank(value)) {
-                    allowed.add(value.trim());
-                }
-            }
-        }
-        if (!allowed.isEmpty()) {
-            ArrayNode values = valueSchema.putArray("enum");
-            for (String value : allowed) {
-                values.add(value);
-            }
-        }
-
-        if (param.defaultValue != null && !multiValued) {
-            if ("boolean".equals(jsonType)) {
-                schema.put("default", Boolean.parseBoolean(param.defaultValue));
-            } else if ("integer".equals(jsonType) && StringUtils.isNumeric(param.defaultValue)) {
-                schema.put("default", Long.parseLong(param.defaultValue));
-            } else {
-                schema.put("default", param.defaultValue);
-            }
-        }
-        return schema;
-    }
-
-    private static boolean isMultiValued(TypeDescriptor type) {
-        return type.isCollection() || type.isArray();
-    }
-
-    private static String jsonType(Class<?> type) {
-        Class<?> boxed = ClassUtils.resolvePrimitiveIfNecessary(type);
-        if (boxed == Boolean.class) {
-            return "boolean";
-        }
-        if (boxed == Integer.class || boxed == Long.class || boxed == Short.class) {
-            return "integer";
-        }
-        if (Number.class.isAssignableFrom(boxed)) {
-            return "number";
-        }
-        return "string";
-    }
-
-    /**
-     * Returns the annotations of parameter {@code index}. If the implementation does not carry
-     * {@code @RequestParam}/{@code @PathVariable}, falls back to the interface method, mirroring
-     * where swagger-codegen interfaces place them. Spring 4.3 does not do this lookup itself.
-     */
-    private static Annotation[] parameterAnnotations(Method method, int index) {
-        Annotation[] own = method.getParameterAnnotations()[index];
-        if (isBindable(own)) {
-            return own;
-        }
-        for (Class<?> iface : ClassUtils.getAllInterfacesForClassAsSet(method.getDeclaringClass())) {
-            try {
-                Annotation[] inherited = iface.getMethod(method.getName(), method.getParameterTypes()).getParameterAnnotations()[index];
-                if (isBindable(inherited)) {
-                    return inherited;
-                }
-            } catch (NoSuchMethodException ignored) {
-                // This interface does not declare the method; try the next one.
-            }
-        }
-        return own;
-    }
-
-    private static boolean isBindable(Annotation[] annotations) {
-        return findAnnotation(annotations, RequestParam.class) != null || findAnnotation(annotations, PathVariable.class) != null;
-    }
-
-    private static <A extends Annotation> A findAnnotation(Annotation[] annotations, Class<A> type) {
-        for (Annotation annotation : annotations) {
-            if (type.isInstance(annotation)) {
-                return type.cast(annotation);
-            }
-        }
-        return null;
     }
 }

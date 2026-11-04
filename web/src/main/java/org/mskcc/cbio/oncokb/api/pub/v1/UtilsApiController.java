@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.mskcc.cbio.oncokb.apiModels.ActionableGene;
 import org.mskcc.cbio.oncokb.apiModels.AllGenomicIndicator;
 import org.mskcc.cbio.oncokb.serializer.EntrezGeneIdConverter;
+import org.mskcc.cbio.oncokb.service.CancerGeneService;
 import org.mskcc.cbio.oncokb.apiModels.AnnotatedVariant;
 import org.mskcc.cbio.oncokb.apiModels.CuratedGene;
 import org.mskcc.cbio.oncokb.apiModels.VariantOfUnknownSignificance;
@@ -39,6 +40,9 @@ public class UtilsApiController implements UtilsApi {
     
     @Autowired
     CacheFetcher cacheFetcher;
+
+    @Autowired
+    CancerGeneService cancerGeneService;
 
     @Override
     public ResponseEntity<List<AnnotatedVariant>> utilsAllAnnotatedVariantsGet(
@@ -367,11 +371,7 @@ public class UtilsApiController implements UtilsApi {
     public ResponseEntity<List<CancerGene>> utilsCancerGeneListGet(
         @ApiParam(value = VERSION) @RequestParam(value = "version", required = false) String version
     ) throws ApiException, IOException {
-        if (version != null) {
-            return getDataDownloadResponseEntity(version, FileName.CANCER_GENE_LIST, FileExtension.JSON);
-        }
-        List<CancerGene> result = this.cacheFetcher.getCancerGenes();
-        return new ResponseEntity<>(result, HttpStatus.OK);
+        return cancerGeneService.getCancerGeneList(version);
     }
 
     @Override
@@ -391,63 +391,7 @@ public class UtilsApiController implements UtilsApi {
         , @ApiParam(value = INCLUDE_EVIDENCE, defaultValue = "TRUE") @RequestParam(value = "includeEvidence", required = false, defaultValue = "TRUE") Boolean includeEvidence
         , @ApiParam(value = "The gene symbol used in Human Genome Organisation. Gene aliases are accepted. The symbol is case-sensitive. When specified, only the curated gene matching this symbol is returned. Only supported for the latest data version, so it may be combined with version only when that version is the latest. Example: BRAF") @RequestParam(value = "hugoSymbol", required = false) String hugoSymbol
     ) throws ApiHttpErrorException {
-        if (version != null) {
-            // The symbol is resolved against current gene curation, so an archived version that
-            // stored a since-renamed symbol would report a gene it actually contains as missing.
-            if (StringUtils.isNotBlank(hugoSymbol) && !isLatestDataVersion(version)) {
-                throw new ApiHttpErrorException("The hugoSymbol parameter is only supported for the latest data version (" + MainUtils.getDataVersion() + ").", HttpStatus.BAD_REQUEST);
-            }
-            ResponseEntity<List<CuratedGene>> archived = getDataDownloadResponseEntity(version, FileName.ALL_CURATED_GENES, FileExtension.JSON);
-            if (StringUtils.isBlank(hugoSymbol) || !archived.getStatusCode().is2xxSuccessful() || archived.getBody() == null) {
-                return archived;
-            }
-            return new ResponseEntity<>(filterCuratedGenesByHugoSymbol(archived.getBody(), hugoSymbol), archived.getStatusCode());
-        }
-        return new ResponseEntity<>(filterCuratedGenesByHugoSymbol(this.cacheFetcher.getCuratedGenesAll(includeEvidence), hugoSymbol), HttpStatus.OK);
-    }
-
-    private static boolean isLatestDataVersion(String version) {
-        String latest = MainUtils.getDataVersion();
-        return StringUtils.isNotBlank(latest) && normalizeDataVersion(latest).equals(normalizeDataVersion(version));
-    }
-
-    private static String normalizeDataVersion(String version) {
-        return StringUtils.removeStartIgnoreCase(StringUtils.trimToEmpty(version), "v");
-    }
-
-    private List<CuratedGene> filterCuratedGenesByHugoSymbol(List<CuratedGene> genes, String hugoSymbol) throws ApiHttpErrorException {
-        if (StringUtils.isBlank(hugoSymbol)) {
-            return genes;
-        }
-        String trimmed = hugoSymbol.trim();
-        Gene gene = GeneUtils.getGeneByHugoSymbol(trimmed);
-        String queried = gene == null ? trimmed : gene.getHugoSymbol();
-        List<Object> matches = new ArrayList<>();
-        for (Object curatedGene : (List<?>) genes) {
-            if (queried.equals(getCuratedGeneHugoSymbol(curatedGene))) {
-                matches.add(curatedGene);
-            }
-        }
-        if (matches.isEmpty()) {
-            throw new ApiHttpErrorException("No curated gene found for hugoSymbol \"" + trimmed + "\".", HttpStatus.NOT_FOUND);
-        }
-        return asCuratedGenes(matches);
-    }
-
-    @SuppressWarnings("unchecked")
-    private static List<CuratedGene> asCuratedGenes(List<?> genes) {
-        return (List<CuratedGene>) genes;
-    }
-
-    private String getCuratedGeneHugoSymbol(Object curatedGene) {
-        if (curatedGene instanceof CuratedGene) {
-            return ((CuratedGene) curatedGene).getHugoSymbol();
-        }
-        if (curatedGene instanceof Map) {
-            Object hugoSymbol = ((Map<?, ?>) curatedGene).get("hugoSymbol");
-            return hugoSymbol == null ? null : hugoSymbol.toString();
-        }
-        return null;
+        return cancerGeneService.getAllCuratedGenes(version, includeEvidence, hugoSymbol);
     }
 
     @Override

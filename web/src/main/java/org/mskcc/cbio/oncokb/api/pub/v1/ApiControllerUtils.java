@@ -6,11 +6,11 @@ import org.mskcc.cbio.oncokb.model.ReferenceGenome;
 import org.mskcc.cbio.oncokb.util.MainUtils;
 import org.springframework.http.HttpStatus;
 
-final class ApiControllerUtils {
+public final class ApiControllerUtils {
     private ApiControllerUtils() {
     }
 
-    static ReferenceGenome resolveMatchedRG(String referenceGenome) throws ApiHttpErrorException {
+    public static ReferenceGenome resolveMatchedRG(String referenceGenome) throws ApiHttpErrorException {
         ReferenceGenome matchedRG = null;
         if (!StringUtils.isEmpty(referenceGenome)) {
             matchedRG = MainUtils.searchEnum(ReferenceGenome.class, referenceGenome);

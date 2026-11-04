@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.mskcc.cbio.oncokb.Constants;
+import org.mskcc.cbio.oncokb.controller.advice.ApiHttpErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,7 @@ import java.util.List;
  * Java 17+, while this app targets Java 8.
  * <p>
  * Tools come from {@link McpToolRegistry} and resources from {@link McpResourceRegistry}. Both call
- * the existing REST handler methods, so results match the REST API.
+ * the same services as the REST controllers, so results match the REST API.
  */
 @Controller
 public class McpController {
@@ -166,14 +167,16 @@ public class McpController {
         ObjectNode result = mapper.createObjectNode();
         ArrayNode content = result.putArray("content");
         try {
-            JsonNode body = mapper.valueToTree(toolRegistry.invoke(tool, params.get("arguments")));
+            McpArguments arguments = new McpArguments(params.get("arguments"), McpSchema.propertyNames(tool.inputSchema));
+            JsonNode body = mapper.valueToTree(tool.handler.call(arguments));
             content.addObject().put("type", "text").put("text", mapper.writeValueAsString(body));
             if (body != null && body.isObject()) {
                 result.set("structuredContent", body);
             }
             result.put("isError", false);
             LOG.info("MCP tools/call {} succeeded in {} ms", tool.name, System.currentTimeMillis() - start);
-        } catch (McpToolRegistry.McpToolException e) {
+        } catch (McpToolException | ApiHttpErrorException e) {
+            // Bad arguments, or a 4xx-style validation error from the shared REST service code.
             content.addObject().put("type", "text").put("text", e.getMessage());
             result.put("isError", true);
             LOG.warn("MCP tools/call {} returned a tool error in {} ms: {}", tool.name, System.currentTimeMillis() - start, e.getMessage());
@@ -201,14 +204,13 @@ public class McpController {
     private ObjectNode readResource(JsonNode id, JsonNode params) {
         String uri = params.path("uri").asText(null);
         McpResourceRegistry.Resource resource = resourceRegistry.getResource(uri);
-        McpTool tool = resource == null ? null : toolRegistry.getTool(resource.toolName);
-        if (tool == null) {
+        if (resource == null) {
             ObjectNode error = JsonRpc.error(mapper, id, JsonRpc.RESOURCE_NOT_FOUND, "Resource not found");
             ((ObjectNode) error.get("error")).putObject("data").put("uri", uri);
             return error;
         }
         try {
-            String text = mapper.writeValueAsString(toolRegistry.invoke(tool, null));
+            String text = mapper.writeValueAsString(resource.reader.read());
             ObjectNode result = mapper.createObjectNode();
             ObjectNode contents = result.putArray("contents").addObject();
             contents.put("uri", resource.uri);
