@@ -1,52 +1,29 @@
 package org.mskcc.cbio.oncokb.api.mcp;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.springframework.core.convert.TypeDescriptor;
-
-import java.lang.reflect.Method;
-import java.util.List;
 
 /**
- * An MCP tool backed by a public REST handler method. Calling the tool invokes {@link #method}
- * on {@link #bean} directly, so the tool shares validation and behavior with the REST endpoint.
+ * An MCP tool: its advertised definition plus the handler that runs it.
  */
 final class McpTool {
     /**
-     * One handler method argument, bound from a tool argument with the same name as the
-     * {@code @RequestParam}.
+     * Runs the tool and returns the value to serialize as the result. An
+     * {@link org.mskcc.cbio.oncokb.controller.advice.ApiHttpErrorException} or
+     * {@link McpToolException} is reported to the client as a tool error.
      */
-    static final class Param {
-        final String name;
-        // Full generic type, so List<SomeEnum> parameters convert element-wise like Spring MVC.
-        final TypeDescriptor type;
-        final boolean required;
-        // Raw @RequestParam defaultValue, or null when the annotation declares none.
-        final String defaultValue;
-
-        Param(String name, TypeDescriptor type, boolean required, String defaultValue) {
-            this.name = name;
-            this.type = type;
-            this.required = required;
-            this.defaultValue = defaultValue;
-        }
+    interface Handler {
+        Object call(McpArguments arguments) throws Exception;
     }
 
     final String name;
     final String description;
-    final String path;
     final ObjectNode inputSchema;
-    final Object bean;
-    final Method method;
-    // Ordered to match the handler method's parameter list.
-    final List<Param> params;
+    final Handler handler;
 
-    McpTool(String name, String description, String path, ObjectNode inputSchema, Object bean, Method method, List<Param> params) {
+    McpTool(String name, String description, ObjectNode inputSchema, Handler handler) {
         this.name = name;
         this.description = description;
-        this.path = path;
         this.inputSchema = inputSchema;
-        this.bean = bean;
-        this.method = method;
-        this.params = params;
+        this.handler = handler;
     }
 }
