@@ -16,16 +16,18 @@ The core of OncoKB Annotation service.
 
 Please confirm your running environment is:
 
--   **Java version: 8**
--   **MySQL version: 8.0.36**
+- **Java version: 8**
+- **MySQL version: 8.0.36**
 
 ### MySQL Setup
 
 Run:
+
 ```sql
 ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'your_password';
 FLUSH PRIVILEGES;
 ```
+
 Replace `your_password` with your MySQL password. Otherwise, you may see MySQL authentication or `NullPointerException` errors during `mvn test`.
 
 ## Prepare properties files
@@ -80,23 +82,23 @@ OncoKB™ is a precision oncology knowledge base developed at Memorial Sloan Ket
 
 OncoKB docker compose file consists of the following services:
 
--   OncoKB: provides variant annotations
--   OncoKB Transcript: serves OncoKB metadata including gene, transcript, sequence, etc.
--   Genome Nexus: provides annotation and interpretation of genetic variants in cancer
-    -   GRCh37 (optional):
-        -   gn-spring-boot: the backend service responsible for aggregating variant annotations from various sources
-        -   gn-mongo: variants fetched from external resources and small static data are cached in the MongoDB database
-        -   gn-vep: is a spring boot REST wrapper service for [VEP](https://github.com/Ensembl/ensembl-vep) using GRCh37 data
-    -   GRCh38 (optional):
-        -   gn-spring-boot-grch38: same as `gn-spring-boot` service, however the VEP URL points to `gn-vep-grch38`
-        -   gn-mongo-grch38: contains static data relevant to GRCh38
-        -   gn-vep-grch38: a spring boot REST wrapper service for VEP using GRCh38 data
+- OncoKB: provides variant annotations
+- OncoKB Transcript: serves OncoKB metadata including gene, transcript, sequence, etc.
+- Genome Nexus: provides annotation and interpretation of genetic variants in cancer
+    - GRCh37 (optional):
+        - gn-spring-boot: the backend service responsible for aggregating variant annotations from various sources
+        - gn-mongo: variants fetched from external resources and small static data are cached in the MongoDB database
+        - gn-vep: is a spring boot REST wrapper service for [VEP](https://github.com/Ensembl/ensembl-vep) using GRCh37 data
+    - GRCh38 (optional):
+        - gn-spring-boot-grch38: same as `gn-spring-boot` service, however the VEP URL points to `gn-vep-grch38`
+        - gn-mongo-grch38: contains static data relevant to GRCh38
+        - gn-vep-grch38: a spring boot REST wrapper service for VEP using GRCh38 data
 
 ### Option A: With Local installation of Genome Nexus
 
 For this option, you need to download the VEP cache, which is used in the `gn-vep` and `gn-vep-grch38` services. We have pre-downloaded the VEP data and saved them to our AWS S3 Bucket. If interested, here are the instructions we followed to [download the Genome Nexus VEP Cache](https://github.com/genome-nexus/genome-nexus-vep/blob/master/README.md#create-vep-cache).
 
-1. OncoKB requires a MySQL server and the `oncokb` and `oncokb-transcript` databases imported. This step must be completed before continuing the installation process. Reach out to contact@oncokb.org to get access to the data dump. [How to setup MySQL Server](#how-to-setup-mysql-server)
+1. OncoKB requires a MySQL server with the `oncokb` and `oncokb-transcript` data dumps imported into two separate schemas. This step must be completed before continuing the installation process. Reach out to contact@oncokb.org to get access to the data dump. See [How to setup MySQL Server](#how-to-setup-mysql-server) and [Importing the OncoKB data dumps](#importing-the-oncokb-data-dumps).
 
 2. Follow the [Genome Nexus VEP instructions](https://github.com/genome-nexus/genome-nexus-vep) for downloading and setting up the VEP MySQL server.
 
@@ -108,7 +110,7 @@ For this option, you need to download the VEP cache, which is used in the `gn-ve
 
 ### Option B: Without local installation of Genome Nexus
 
-1. OncoKB requires a MySQL server and the `oncokb` and `oncokb-transcript` databases imported. This step must be completed before continuing the installation process. Reach out to contact@oncokb.org to get access to the data dump.
+1. OncoKB requires a MySQL server with the `oncokb` and `oncokb-transcript` data dumps imported into two separate schemas. This step must be completed before continuing the installation process. Reach out to contact@oncokb.org to get access to the data dump. See [How to setup MySQL Server](#how-to-setup-mysql-server) and [Importing the OncoKB data dumps](#importing-the-oncokb-data-dumps).
 2. Remove `-Dgenome_nexus.grch37.url` and `-Dgenome_nexus.grch38.url` properties from the `oncokb` service.
 3. Run docker-compose to spin up oncokb and oncokb-transcript services
     ```
@@ -122,22 +124,22 @@ For this option, you need to download the VEP cache, which is used in the `gn-ve
 > will be hosted under the MSKCC Docker Hub organization. You can find their
 > new locations here:
 >
-> -   [mskcc/oncokb](https://hub.docker.com/repository/docker/mskcc/oncokb/general)
-> -   [mskcc/oncokb-transcript](https://hub.docker.com/repository/docker/mskcc/oncokb-transcript/general)
+> - [mskcc/oncokb](https://hub.docker.com/repository/docker/mskcc/oncokb/general)
+> - [mskcc/oncokb-transcript](https://hub.docker.com/repository/docker/mskcc/oncokb-transcript/general)
 
 > [!WARNING]
 > OncoKB uses a native password for MySQL. If you use MySQL 8.1
 > or above you must configure native passwords enabled as they no longer are
 > enabled by default.
 
-| oncokb    | oncokb-transcript | gn-spring-boot | gn-mongo | genome-nexus-vep | MySQL  | Redis  | Oncokb Data |
-| --------- | ----------------- | -------------- | -------- | ---------------- | ------ | ------ | ----------- |
-| v3.x.x    | v0.9.4            | >=v1.x.x       | v0.x     | >=v0.0.1         | v8.0.x | v7.x.x | v4.x.x      |
-| v4.x.x    | v0.9.4            | >=v1.x.x       | v0.x     | >=v0.0.1         | v8.0.x | v7.x.x | v5.x.x      |
-| v5.0.x-rc | v0.9.4            | >=v1.x.x       | v0.x     | >=v0.0.1         | v8.0.x | v7.x.x | v6.x.x      |
-| v5.x.x    | v0.9.4            | >=v1.x.x       | v0.x     | >=v0.0.1         | v8.0.x | v7.x.x | v6.x.x      |
-| v6.0.x - v6.11.x | v0.9.4     | >=v1.x.x       | v0.x     | >=v0.0.1         | v8.0.x | v7.x.x | v7.0 - v7.6 |
-| >=v6.12.0 | v0.9.4            | >=v1.x.x       | v0.x     | >=v0.0.1         | v8.0.x | v7.x.x | >=v7.7      |
+| oncokb           | oncokb-transcript | gn-spring-boot | gn-mongo | genome-nexus-vep | MySQL  | Redis  | Oncokb Data |
+| ---------------- | ----------------- | -------------- | -------- | ---------------- | ------ | ------ | ----------- |
+| v3.x.x           | v0.9.4            | >=v1.x.x       | v0.x     | >=v0.0.1         | v8.0.x | v7.x.x | v4.x.x      |
+| v4.x.x           | v0.9.4            | >=v1.x.x       | v0.x     | >=v0.0.1         | v8.0.x | v7.x.x | v5.x.x      |
+| v5.0.x-rc        | v0.9.4            | >=v1.x.x       | v0.x     | >=v0.0.1         | v8.0.x | v7.x.x | v6.x.x      |
+| v5.x.x           | v0.9.4            | >=v1.x.x       | v0.x     | >=v0.0.1         | v8.0.x | v7.x.x | v6.x.x      |
+| v6.0.x - v6.11.x | v0.9.4            | >=v1.x.x       | v0.x     | >=v0.0.1         | v8.0.x | v7.x.x | v7.0 - v7.6 |
+| >=v6.12.0        | v0.9.4            | >=v1.x.x       | v0.x     | >=v0.0.1         | v8.0.x | v7.x.x | >=v7.7      |
 
 > [!WARNING]
 > `v5.0.x-rc` is a pre-release with known bugs. Do not deploy this version; stay on a stable release until a stable v5.x.x build is available.
@@ -154,18 +156,18 @@ For this option, you need to download the VEP cache, which is used in the `gn-ve
 
 Examples:
 
--   `.version-level` = `major` → next major release (e.g., 6.0.0).
--   `.version-level` = `minor` → next minor release (e.g., 5.1.0).
--   `.version-level` = `patch` → next patch release (e.g., 5.0.1).
+- `.version-level` = `major` → next major release (e.g., 6.0.0).
+- `.version-level` = `minor` → next minor release (e.g., 5.1.0).
+- `.version-level` = `patch` → next patch release (e.g., 5.0.1).
 
 Caveat for prereleases:
 If you use a prerelease value (e.g., `(major|minor|patch)-rc.1`), the workflows will append the suffix to `pom.xml` but the Release Drafter draft tag/name will not include the `-rc` suffix. You must manually adjust the draft tag/name when publishing the release.
 
 Examples with prerelease:
 
--   `.version-level` = `major-rc.1` → pom bumps to next major with `-rc.1`; adjust the draft release tag/name manually to include `-rc.1`.
--   `.version-level` = `minor-rc.1` → pom bumps to next minor with `-rc.1`; adjust the draft release tag/name manually to include `-rc.1`.
--   `.version-level` = `patch-rc` → pom bumps to next patch with `-rc`; adjust the draft release tag/name manually.
+- `.version-level` = `major-rc.1` → pom bumps to next major with `-rc.1`; adjust the draft release tag/name manually to include `-rc.1`.
+- `.version-level` = `minor-rc.1` → pom bumps to next minor with `-rc.1`; adjust the draft release tag/name manually to include `-rc.1`.
+- `.version-level` = `patch-rc` → pom bumps to next patch with `-rc`; adjust the draft release tag/name manually.
 
 #### Running unit tests
 
@@ -303,6 +305,18 @@ jdbc:mysql://my-mysql:3306/oncokb_core?useUnicode=yes&characterEncoding=UTF-8&us
 #JDBC URL
 jdbc:mysql://host.docker.internal:3306/oncokb_core?useUnicode=yes&characterEncoding=UTF-8&useSSL=false
 ```
+
+### Importing the OncoKB data dumps
+
+The OncoKB data download contains two SQL files. Each one belongs to a different Docker image and must be imported into its own schema:
+
+| SQL file                     | Docker image        |
+| ---------------------------- | ------------------- |
+| `oncokb_vX_X.sql`            | `oncokb`            |
+| `oncokb-transcript_vX_X.sql` | `oncokb-transcript` |
+
+> [!IMPORTANT]
+> The SQL files do not create or select a schema. You must create a schema for each file yourself and import the file into it. If you import a file without selecting a schema, MySQL fails with `ERROR 1046 (3D000): No database selected`.
 
 ## Questions?
 
