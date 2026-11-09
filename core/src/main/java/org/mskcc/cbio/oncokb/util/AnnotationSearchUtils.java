@@ -38,6 +38,7 @@ import org.mskcc.cbio.oncokb.model.Evidence;
 import org.mskcc.cbio.oncokb.model.Gene;
 import org.mskcc.cbio.oncokb.model.GermlineIndicatorQueryResp;
 import org.mskcc.cbio.oncokb.model.SomaticIndicatorQueryResp;
+import org.mskcc.cbio.oncokb.model.SpecialStrings;
 import org.mskcc.cbio.oncokb.model.LevelOfEvidence;
 import org.mskcc.cbio.oncokb.model.Oncogenicity;
 import org.mskcc.cbio.oncokb.model.Pathogenicity;
@@ -107,8 +108,16 @@ public class AnnotationSearchUtils {
         } else if (keywords.size() == 2 && keywords.get(1).startsWith("(")) { // could be CDKN2A (p14)
             String keyword = String.join(" ", keywords);
             result.addAll(convertGene(GeneUtils.searchGene(keyword, false), keyword));
-        } 
-        
+        } else if (StringUtils.startsWithIgnoreCase(SpecialStrings.OTHERBIOMARKERS, String.join(" ", keywords))) {
+            String keyword = String.join(" ", keywords);
+            result.addAll(convertGene(GeneUtils.searchGene(keyword, false), keyword));
+        } else if (StringUtils.startsWithIgnoreCase(String.join(" ", keywords), SpecialStrings.OTHERBIOMARKERS + " ")) {
+            String variantKeyword = String.join(" ", keywords).substring(SpecialStrings.OTHERBIOMARKERS.length() + 1);
+            Gene gene = GeneUtils.getGeneByHugoSymbol(SpecialStrings.OTHERBIOMARKERS);
+            result.addAll(convertVariant(AlterationUtils.lookupVariant(variantKeyword, false, false, AlterationUtils.getAllAlterations(null, gene)), variantKeyword));
+            return result;
+        }
+
         if (result.size() == 0) {
             // Assume one of the keyword is gene
             Map<String, Set<Gene>> map = new HashedMap();
