@@ -410,10 +410,6 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         , @ApiParam(value = "HGVS genomic format. Example: 7:g.140453136A>T") @RequestParam(value = "hgvsg", required = false) String hgvsg
         , @ApiParam(value = "Genomic change format. Example: 7,140453136,140453136,A,T") @RequestParam(value = "genomicChange", required = false) String genomicChange
         , @ApiParam(value = "OncoTree tumor type name/main type/code") @RequestParam(value = "tumorType", required = false) String tumorType) throws ApiException, org.genome_nexus.ApiException {
-        if (org.apache.commons.lang3.StringUtils.isBlank(hugoSymbol) || GeneUtils.getGeneByHugoSymbol(hugoSymbol) == null) {
-            hugoSymbol = null;
-        }
-
         List<TumorType> relevantTumorTypes = TumorTypeUtils.findRelevantTumorTypes(tumorType);
         TumorType matchedTumorType = ApplicationContextSingleton.getTumorTypeBo().getByName(tumorType);
 
@@ -439,6 +435,8 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             }
             query = QueryUtils.getQueryFromAlteration(matchedRG, tumorType, transcriptSummaryAlterationResult, hgvsg, false);
             gene = GeneUtils.getGeneByEntrezId(query.getEntrezGeneId());
+        } else if (org.apache.commons.lang3.StringUtils.isBlank(hugoSymbol) || GeneUtils.getGeneByHugoSymbol(hugoSymbol) == null) {
+            return new ResponseEntity<>(new SomaticVariantAnnotation(), HttpStatus.OK);
         } else {
             // Rewrite a fusion queried with the legacy hyphen separator onto the HGVS one, which is
             // what the alteration table is curated under, so the lookups below find it. Query.enrich()
@@ -651,10 +649,6 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         , @ApiParam(value = "Genomic change format. Example: 7,140453136,140453136,A,T") @RequestParam(value = "genomicChange", required = false) String genomicChange
         , @ApiParam(value = "OncoTree tumor type name/main type/code") @RequestParam(value = "tumorType", required = false) String tumorType
     ) throws ApiException, org.genome_nexus.ApiException {
-        if (org.apache.commons.lang3.StringUtils.isBlank(hugoSymbol) || GeneUtils.getGeneByHugoSymbol(hugoSymbol) == null) {
-            hugoSymbol = null;
-        }
-
         List<TumorType> relevantTumorTypes = TumorTypeUtils.findRelevantTumorTypes(tumorType);
 
         Query query;
@@ -676,6 +670,8 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
             }
             query = QueryUtils.getQueryFromAlteration(matchedRG, tumorType, transcriptSummaryAlterationResult, hgvsg, true);
             gene = GeneUtils.getGeneByEntrezId(query.getEntrezGeneId());
+        } else if (org.apache.commons.lang3.StringUtils.isBlank(hugoSymbol) || GeneUtils.getGeneByHugoSymbol(hugoSymbol) == null) {
+            return new ResponseEntity<>(new GermlineVariantAnnotation(), HttpStatus.OK);
         } else {
             gene = GeneUtils.getGene(entrezGeneId, hugoSymbol);
             alterationModel = AlterationUtils.findAlteration(gene, matchedRG, alteration, true);
