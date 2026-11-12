@@ -410,7 +410,9 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         , @ApiParam(value = "HGVS genomic format. Example: 7:g.140453136A>T") @RequestParam(value = "hgvsg", required = false) String hgvsg
         , @ApiParam(value = "Genomic change format. Example: 7,140453136,140453136,A,T") @RequestParam(value = "genomicChange", required = false) String genomicChange
         , @ApiParam(value = "OncoTree tumor type name/main type/code") @RequestParam(value = "tumorType", required = false) String tumorType) throws ApiException, org.genome_nexus.ApiException {
-
+        if (org.apache.commons.lang3.StringUtils.isBlank(hugoSymbol) || GeneUtils.getGeneByHugoSymbol(hugoSymbol) == null) {
+            hugoSymbol = null;
+        }
 
         List<TumorType> relevantTumorTypes = TumorTypeUtils.findRelevantTumorTypes(tumorType);
         TumorType matchedTumorType = ApplicationContextSingleton.getTumorTypeBo().getByName(tumorType);
@@ -649,6 +651,9 @@ public class PrivateUtilsApiController implements PrivateUtilsApi {
         , @ApiParam(value = "Genomic change format. Example: 7,140453136,140453136,A,T") @RequestParam(value = "genomicChange", required = false) String genomicChange
         , @ApiParam(value = "OncoTree tumor type name/main type/code") @RequestParam(value = "tumorType", required = false) String tumorType
     ) throws ApiException, org.genome_nexus.ApiException {
+        if (org.apache.commons.lang3.StringUtils.isBlank(hugoSymbol) || GeneUtils.getGeneByHugoSymbol(hugoSymbol) == null) {
+            hugoSymbol = null;
+        }
 
         List<TumorType> relevantTumorTypes = TumorTypeUtils.findRelevantTumorTypes(tumorType);
 
