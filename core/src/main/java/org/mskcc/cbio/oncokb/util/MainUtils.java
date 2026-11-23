@@ -484,10 +484,16 @@ public class MainUtils {
     }
 
     public static Set<BiologicalVariant> getBiologicalVariants(Gene gene, boolean germline) {
+        if (gene == null) {
+            return new HashSet<>();
+        }
+        return getBiologicalVariants(gene, AlterationUtils.getAllAlterations(null, gene), germline);
+    }
+
+    // Alterations without a mutation effect, oncogenicity or pathogenicity are left out
+    public static Set<BiologicalVariant> getBiologicalVariants(Gene gene, Collection<Alteration> alterations, boolean germline) {
         Set<BiologicalVariant> variants = new HashSet<>();
         if (gene != null) {
-            List<Alteration> alterations = AlterationUtils.getAllAlterations(null, gene);
-
             Set<EvidenceType> evidenceTypes = new HashSet<EvidenceType>() {{
                 add(EvidenceType.MUTATION_EFFECT);
             }};
@@ -532,6 +538,15 @@ public class MainUtils {
 
                 BiologicalVariant variant = new BiologicalVariant();
                 variant.setVariant(alteration);
+                CancerHotspot matchedHotspot = HotspotUtils.getMatchedHotspot(alteration);
+                VariantHotspot variantHotspot = new VariantHotspot();
+                variantHotspot.setIsHotspot(matchedHotspot != null);
+                if (matchedHotspot != null) {
+                    variantHotspot.setType(matchedHotspot.getType());
+                    variantHotspot.setResidue(matchedHotspot.getResidue());
+                    variantHotspot.setName(matchedHotspot.getName());
+                }
+                variant.setHotspot(variantHotspot);
                 Oncogenicity oncogenicity = EvidenceUtils.getOncogenicityFromEvidence(map.get(EvidenceType.ONCOGENIC));
                 Pathogenicity pathogenicity = EvidenceUtils.getPathogenicityFromEvidence(map.get(EvidenceType.PATHOGENIC));
                 Set<Evidence> mutationEffectEvidences = map.get(EvidenceType.MUTATION_EFFECT);
