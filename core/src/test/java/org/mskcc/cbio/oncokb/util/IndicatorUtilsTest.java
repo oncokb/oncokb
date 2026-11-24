@@ -610,9 +610,9 @@ public class IndicatorUtilsTest {
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "PIK3CA", "C378Y", null, null, null, null, null, null, null, false, null, null);
         indicatorQueryResp = IndicatorUtils.processQuerySomatic(query, null, true, null, false);
         assertEquals("The alteration should exist.", true, indicatorQueryResp.getVariantExist());
-        assertEquals("The Oncogenicity is not inconclusive, but it should be.", Oncogenicity.INCONCLUSIVE.getOncogenic(), indicatorQueryResp.getOncogenic());
-        assertEquals("The mutation summary does not match.", "There is conflicting and/or weak data describing the biological significance of the PIK3CA C378Y mutation.", indicatorQueryResp.getVariantSummary());
-        assertEquals("There should not be any sensitive therapeutic associated.", null, indicatorQueryResp.getHighestSensitiveLevel());
+        assertEquals("The Oncogenicity is not likely oncogenic, but it should be.", Oncogenicity.LIKELY.getOncogenic(), indicatorQueryResp.getOncogenic());
+        assertEquals("The mutation summary does not match.", "The PIK3CA C378Y mutation is likely oncogenic.", indicatorQueryResp.getVariantSummary());
+        assertEquals("The highest sensitive level should be level 1.", LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
         assertEquals("There should not be any resistance therapeutic associated.", null, indicatorQueryResp.getHighestResistanceLevel());
 
         // Check the predefined TERT Promoter summary
@@ -904,7 +904,7 @@ public class IndicatorUtilsTest {
         assertEquals("The highest sensitive level is not 1, but it should be.", LevelOfEvidence.LEVEL_1, indicatorQueryResp.getHighestSensitiveLevel());
         assertEquals("The gene summary is not empty, but it should be.", "", indicatorQueryResp.getGeneSummary());
         assertEquals("The variant summary is not expected.", "An association between high Tumor Mutational Burden (TMB), defined as the number of somatic mutations per megabase (mut/Mb) of genome sequenced, and response to immune checkpoint inhibitors has been reported in several solid tumor types.", indicatorQueryResp.getVariantSummary());
-        assertEquals("The tumor type summary is not expected.", "The TMB for this sample is ≥10 mut/Mb. The anti-PD-1 antibody pembrolizumab is FDA-approved for the treatment of adult and pediatric patients with unresectable or metastatic solid tumors with a mutation burden of ≥10 mut/Mb.", indicatorQueryResp.getTumorTypeSummary());
+        assertEquals("The tumor type summary is not expected.", "The anti-PD-1 antibody pembrolizumab is FDA-approved for the treatment of adult and pediatric patients with unresectable or metastatic TMB-High (TMB-H) solid tumors defined as ≥13 mut/Mb. From 2017 to 2026, TMB-H was defined as solid tumors with a mutation burden of ≥10 mut/Mb.", indicatorQueryResp.getTumorTypeSummary());
 
         // Alternative allele should not get the diagnostic from curated alterations
         query = new Query(null, DEFAULT_REFERENCE_GENOME, null, "BRAF", "V600L", null, null, "hairy cell leukemia", null, null, null, null, false, null, null);
