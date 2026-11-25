@@ -160,6 +160,20 @@
 
 
         <!-- Servlet Spec -->
+        <!-- Tests only: spring-test's MockMvc needs the Servlet 3 API. Declared before servlet-api 2.4 so
+             it comes first on the test classpath; the deployed runtime (webapp-runner/Tomcat 8.5) is Servlet 3.1. -->
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>3.1.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13.1</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>

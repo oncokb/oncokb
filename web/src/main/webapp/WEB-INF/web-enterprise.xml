@@ -40,6 +40,16 @@
     <session-config>
         <session-timeout>1</session-timeout>
     </session-config>
+    <!-- MCP endpoint (/api/v1/mcp): Origin allowlist and origin-specific CORS instead of the wildcard
+         CorsFilter below. Must stay mapped before CorsFilter. No-op unless mcp.enabled=true. -->
+    <filter>
+        <filter-name>McpOriginFilter</filter-name>
+        <filter-class>org.mskcc.cbio.oncokb.api.mcp.McpOriginFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>McpOriginFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
     <filter>
         <filter-name>CorsFilter</filter-name>
         <filter-class>org.apache.catalina.filters.CorsFilter</filter-class>

@@ -63,6 +63,20 @@ cp core/src/main/resources/properties-EXAMPLE/log4j.properties core/src/main/res
 
 The WAR file is under `/web/target/`
 
+### MCP endpoint
+
+The enterprise build contains a [Model Context Protocol](https://modelcontextprotocol.io) endpoint at `POST /api/v1/mcp`
+(protocol version `2025-11-25`, Streamable HTTP, one JSON response per request, no SSE or sessions). It is **off by default**:
+
+| Property | Default | Meaning |
+| --- | --- | --- |
+| `mcp.enabled` | `false` | Set to `true` to register the endpoint. Only enable it on the gateway-fronted deployment; authentication, rate limiting and usage counting are done by the gateway. |
+| `mcp.allowed_origins` | _(empty)_ | Comma-separated browser origins allowed to call the endpoint. Requests without an `Origin` header are allowed; any other `Origin` gets 403. |
+| `mcp.max_request_bytes` | `65536` | Largest accepted request body; larger requests get 413. |
+
+Properties can be set in `config.properties` or as JVM system properties (e.g. `-Dmcp.enabled=true`).
+The `public-api` build never includes the MCP endpoint, regardless of these properties.
+
 ## Run locally on VSCode
 
 1. Download VSCode extension `Community Server Connector`
