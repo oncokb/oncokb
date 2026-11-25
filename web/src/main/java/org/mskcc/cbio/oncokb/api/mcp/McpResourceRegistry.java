@@ -4,6 +4,7 @@ import org.mskcc.cbio.oncokb.cache.CacheFetcher;
 import org.mskcc.cbio.oncokb.service.CancerGeneService;
 import org.mskcc.cbio.oncokb.util.LevelUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -19,6 +20,7 @@ import static org.mskcc.cbio.oncokb.api.mcp.McpToolRegistry.levelDescriptions;
  * because client support for resources varies.
  */
 @Component
+@Conditional(McpEnabledCondition.class)
 public class McpResourceRegistry {
     static final String MIME_TYPE = "application/json";
 

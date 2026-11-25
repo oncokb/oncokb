@@ -18,6 +18,7 @@ import org.mskcc.cbio.oncokb.util.LevelUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -36,6 +37,7 @@ import java.util.Set;
  * When a {@code @PublicApi} endpoint is added or changed, update the matching tool here.
  */
 @Component
+@Conditional(McpEnabledCondition.class)
 public class McpToolRegistry {
     // Parameter descriptions, copied from the @ApiParam text of the REST endpoints.
     private static final String HUGO_SYMBOL = "The gene symbol used in Human Genome Organisation. Example: BRAF";
