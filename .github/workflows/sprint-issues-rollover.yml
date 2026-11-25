@@ -14,13 +14,10 @@ on:
         default: "2024 Week"
         type: string
       from_iteration:
-        description: "Move issues currently in this iteration"
+        description: "Move issues from this iteration: 'current', 'last', or an exact iteration title (e.g. '2024 Week 99')"
         required: true
         default: "current"
-        type: choice
-        options:
-          - current
-          - last
+        type: string
       to_iteration:
         description: "Move issues to this iteration"
         required: true
@@ -40,7 +37,11 @@ jobs:
     name: Move to chosen iteration
     runs-on: ubuntu-latest
     steps:
-      - uses: blombard/move-to-next-iteration@master
+      # The upstream action only understands 'current' and 'last', so it handles
+      # scheduled runs and those two keywords. Any other value is treated as an
+      # exact iteration title and handled by the github-script step below.
+      - if: ${{ !inputs.from_iteration || inputs.from_iteration == 'current' || inputs.from_iteration == 'last' }}
+        uses: blombard/move-to-next-iteration@master
         with:
           owner: oncokb
           number: 3 # The project number as you see it in the URL
@@ -55,3 +56,115 @@ jobs:
           iteration: ${{ inputs.from_iteration || 'current' }}
           new-iteration: ${{ inputs.to_iteration || 'next' }}
           excluded-statuses: ${{ inputs.excluded_statuses || '✅ Done' }}
+
+      - if: ${{ inputs.from_iteration && inputs.from_iteration != 'current' && inputs.from_iteration != 'last' }}
+        uses: actions/github-script@v7
+        env:
+          OWNER: oncokb
+          PROJECT_NUMBER: "3"
+          ITERATION_FIELD: ${{ inputs.iteration_field }}
+          FROM_ITERATION: ${{ inputs.from_iteration }}
+          TO_ITERATION: ${{ inputs.to_iteration }}
+          EXCLUDED_STATUSES: ${{ inputs.excluded_statuses }}
+        with:
+          github-token: ${{ secrets.PROJECT_PAT }}
+          script: |
+            const { OWNER, PROJECT_NUMBER, ITERATION_FIELD, FROM_ITERATION, TO_ITERATION, EXCLUDED_STATUSES } = process.env;
+            const fromTitle = FROM_ITERATION.trim();
+            const excluded = EXCLUDED_STATUSES.split(",").map((s) => s.trim()).filter(Boolean);
+
+            const { organization } = await github.graphql(
+              `query($owner: String!, $number: Int!, $field: String!) {
+                organization(login: $owner) {
+                  projectV2(number: $number) {
+                    id
+                    field(name: $field) {
+                      ... on ProjectV2IterationField {
+                        id
+                        configuration {
+                          iterations { id title }
+                          completedIterations { id title }
+                        }
+                      }
+                    }
+                  }
+                }
+              }`,
+              { owner: OWNER, number: Number(PROJECT_NUMBER), field: ITERATION_FIELD }
+            );
+            const project = organization.projectV2;
+            const field = project.field;
+            if (!field?.configuration) {
+              core.setFailed(`No iteration field named "${ITERATION_FIELD}" found`);
+              return;
+            }
+
+            const { iterations, completedIterations } = field.configuration;
+            const fromIteration = [...iterations, ...completedIterations].find((i) => i.title === fromTitle);
+            if (!fromIteration) {
+              core.setFailed(`No iteration titled "${fromTitle}" found in field "${ITERATION_FIELD}"`);
+              return;
+            }
+            const toIteration = TO_ITERATION === "current" ? iterations[0] : iterations[1];
+            if (!toIteration) {
+              core.setFailed(`No ${TO_ITERATION} iteration found`);
+              return;
+            }
+            if (toIteration.id === fromIteration.id) {
+              core.setFailed(`Source and target iteration are both "${fromIteration.title}"`);
+              return;
+            }
+            core.info(`Moving items from "${fromIteration.title}" to "${toIteration.title}"`);
+
+            // Page through every project item, keeping the ones in the source iteration
+            // whose status is not excluded.
+            const toMove = [];
+            let cursor = null;
+            do {
+              const { node } = await github.graphql(
+                `query($projectId: ID!, $field: String!, $cursor: String) {
+                  node(id: $projectId) {
+                    ... on ProjectV2 {
+                      items(first: 100, after: $cursor) {
+                        pageInfo { hasNextPage endCursor }
+                        nodes {
+                          id
+                          content {
+                            ... on Issue { title url }
+                            ... on PullRequest { title url }
+                            ... on DraftIssue { title }
+                          }
+                          iteration: fieldValueByName(name: $field) {
+                            ... on ProjectV2ItemFieldIterationValue { iterationId }
+                          }
+                          status: fieldValueByName(name: "Status") {
+                            ... on ProjectV2ItemFieldSingleSelectValue { name }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }`,
+                { projectId: project.id, field: ITERATION_FIELD, cursor }
+              );
+              for (const item of node.items.nodes) {
+                if (item.iteration?.iterationId !== fromIteration.id) continue;
+                if (excluded.includes(item.status?.name)) continue;
+                toMove.push(item);
+              }
+              cursor = node.items.pageInfo.hasNextPage ? node.items.pageInfo.endCursor : null;
+            } while (cursor);
+
+            for (const item of toMove) {
+              await github.graphql(
+                `mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $iterationId: String!) {
+                  updateProjectV2ItemFieldValue(input: {
+                    projectId: $projectId, itemId: $itemId, fieldId: $fieldId,
+                    value: { iterationId: $iterationId }
+                  }) { projectV2Item { id } }
+                }`,
+                { projectId: project.id, itemId: item.id, fieldId: field.id, iterationId: toIteration.id }
+              );
+              core.info(`Moved: ${item.content?.title ?? item.id} ${item.content?.url ?? ""}`);
+            }
+            core.info(`Moved ${toMove.length} item(s)`);
